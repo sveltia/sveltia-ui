@@ -1,0 +1,113 @@
+:root {
+  // Base HSL
+  --hue: 210;
+  // Foreground
+  --highlight-foreground-color: hsl(var(--foreground-color-1-hsl));
+  --primary-foreground-color: hsl(var(--foreground-color-2-hsl));
+  --secondary-foreground-color: hsl(var(--foreground-color-3-hsl));
+  --ternary-foreground-color: hsl(var(--foreground-color-3-hsl));
+  --disabled-foreground-color: hsl(var(--foreground-color-4-hsl));
+  --danger-foreground-color: hsl(var(--danger-color));
+  // Background
+  --highlight-background-color: hsl(var(--background-color-5-hsl));
+  --content-background-color: hsl(var(--background-color-1-hsl));
+  --primary-background-color: hsl(var(--background-color-2-hsl));
+  --secondary-background-color: hsl(var(--background-color-3-hsl));
+  --ternary-background-color: hsl(var(--background-color-4-hsl));
+  --control-background-color: hsl(var(--background-color-1-hsl));
+  --disabled-background-color: hsl(var(--background-color-4-hsl));
+  --danger-background-color: hsl(var(--danger-color));
+  // Borders
+  --primary-border-color: hsl(var(--border-color-1-hsl));
+  --secondary-border-color: hsl(var(--border-color-2-hsl));
+  --control-border-color: hsl(var(--border-color-2-hsl));
+  // Shadows
+  --popup-shadow-color: hsl(var(--shadow-color) / 20%);
+  --popup-backdrop-color: hsl(var(--shadow-color) / 10%);
+  // Fonts
+  --default-font-family: "Merriweather Sans", sans-serif;
+  --default-font-size: 13px;
+  --default-font-weight-regular: 300;
+  --default-font-weight-bold: 600;
+  --monospace-font-family: "Noto Sans Mono", monospace;
+  --monospace-font-size: 13px;
+  // Controls
+  --control--small--border-width: 1px;
+  --control--small--border-radius: 2px;
+  --control--small--height: 24px;
+  --control--medium--border-width: 1px;
+  --control--medium--border-radius: 4px;
+  --control--medium--height: 32px;
+  --control--large--border-width: 1px;
+  --control--large--border-radius: 8px;
+  --control--large--height: 40px;
+  // Buttons
+  --button--small--border-radius: var(--control--small--border-radius);
+  --button--small--height: var(--control--small--height);
+  --button--medium--border-radius: var(--control--medium--border-radius);
+  --button--medium--height: var(--control--medium--height);
+  --button--large--border-radius: var(--control--large--border-radius);
+  --button--large--height: var(--control--large--height);
+  // Options & menu items
+  --option--small--border-radius: var(--control--small--border-radius);
+  --option--small--height: var(--control--small--height);
+  --option--medium--border-radius: var(--control--medium--border-radius);
+  --option--medium--height: var(--control--medium--height);
+  --option--large--border-radius: var(--control--large--border-radius);
+  --option--large--height: var(--control--large--height);
+  // Input
+  --input--small--border-radius: var(--control--small--border-radius);
+  --input--small--height: var(--control--small--height);
+  --input--medium--border-radius: var(--control--medium--border-radius);
+  --input--medium--height: var(--control--medium--height);
+  --input--large--border-radius: var(--control--large--border-radius);
+  --input--large--height: var(--control--large--height);
+  // Tab
+  --tab--small--height: var(--control--small--height);
+  --tab--medium--height: var(--control--medium--height);
+  --tab--large--height: var(--control--large--height);
+}
+
+:root[data-theme="light"] {
+  --foreground-color-1-hsl: var(--hue) 5% 0%; // highlight
+  --foreground-color-2-hsl: var(--hue) 5% 20%; // primary
+  --foreground-color-3-hsl: var(--hue) 5% 40%; // secondary
+  --foreground-color-4-hsl: var(--hue) 5% 60%; // ternary
+  --border-color-1-hsl: var(--hue) 5% 75%; // primary
+  --border-color-2-hsl: var(--hue) 5% 80%; // secondary/input
+  --background-color-1-hsl: var(--hue) 5% 100%; // content
+  --background-color-2-hsl: var(--hue) 5% 98%; // primary
+  --background-color-3-hsl: var(--hue) 5% 96%; // secondary/ternary
+  --background-color-4-hsl: var(--hue) 5% 94%; // disabled
+  --background-color-5-hsl: var(--hue) 5% 90%; // highlight
+  --shadow-color: var(--hue) 10% 0%;
+  // Accents
+  --primary-accent-color: hsl(var(--hue) 80% 45%);
+  --primary-accent-color-lighter: hsl(var(--hue) 80% 40%);
+  --primary-accent-color-darker: hsl(var(--hue) 80% 50%);
+  --primary-accent-color-foreground: hsl(var(--hue) 10% 100%); // white/inverted
+  // States
+  --danger-color: 0 68% 42%; // firebrick
+}
+
+:root[data-theme="dark"] {
+  --foreground-color-1-hsl: var(--hue) 10% 100%; // highlight
+  --foreground-color-2-hsl: var(--hue) 10% 80%; // primary
+  --foreground-color-3-hsl: var(--hue) 10% 60%; // secondary
+  --foreground-color-4-hsl: var(--hue) 10% 40%; // ternary
+  --border-color-1-hsl: var(--hue) 10% 25%; // primary
+  --border-color-2-hsl: var(--hue) 10% 20%; // secondary/input
+  --background-color-1-hsl: var(--hue) 10% 8%; // content
+  --background-color-2-hsl: var(--hue) 10% 10%; // primary
+  --background-color-3-hsl: var(--hue) 10% 12%; // secondary/ternary
+  --background-color-4-hsl: var(--hue) 10% 14%; // disabled
+  --background-color-5-hsl: var(--hue) 10% 18%; // highlight
+  --shadow-color: var(--hue) 10% 0%;
+  // Accents
+  --primary-accent-color: hsl(var(--hue) 100% 45%); // 4.57 AA w/ #FFF foreground color
+  --primary-accent-color-lighter: hsl(var(--hue) 100% 50%);
+  --primary-accent-color-darker: hsl(var(--hue) 100% 40%);
+  --primary-accent-color-foreground: hsl(var(--hue) 10% 100%); // white
+  // States
+  --danger-color: 0 68% 42%; // firebrick
+}

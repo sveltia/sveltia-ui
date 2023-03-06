@@ -1,0 +1,28 @@
+version: "0.2"
+language: en
+dictionaries:
+  - css
+  - html
+  - typescript
+enableFiletypes:
+  - ignore
+  - properties
+  - svelte
+  - xml
+files:
+  - "**/.*"
+  - "**/*.{css,js,json,jsonc,html,md,scss,svelte,svg,yaml,yml,xml}"
+useGitignore: true
+ignorePaths:
+  - pnpm-lock.yaml
+  - data/**/*.json
+words:
+  - opsz
+  - plusplus
+  - pnpm
+  - postcss
+  - singleline
+  - stylelint
+  - Sveltia
+  - Vite
+  - wght
