@@ -56,6 +56,7 @@
     -webkit-user-select: none;
     user-select: none;
     touch-action: none;
+    overflow-anchor: none;
     cursor: default;
   }
 </style>
