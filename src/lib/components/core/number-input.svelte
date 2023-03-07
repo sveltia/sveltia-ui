@@ -18,6 +18,7 @@
   /** @type {(String|undefined)} */
   export let value = undefined;
 
+  export let disabled = false;
   export let min = undefined;
   export let max = undefined;
   export let step = 1;
@@ -45,6 +46,7 @@
   <TextInput
     bind:this={component}
     bind:value
+    {disabled}
     role="spinbutton"
     aria-valuenow={Number(value || 0)}
     aria-invalid={Number.isNaN(Number(value))}
@@ -67,7 +69,7 @@
   />
   <Button
     class="iconic"
-    disabled={Number.isNaN(Number(value))}
+    disabled={disabled || Number.isNaN(Number(value))}
     iconLabel={$_('sui.number_input.decrease')}
     iconName={'arrow_downward'}
     on:click={() => {
@@ -76,7 +78,7 @@
   />
   <Button
     class="iconic"
-    disabled={Number.isNaN(Number(value))}
+    disabled={disabled || Number.isNaN(Number(value))}
     iconLabel={$_('sui.number_input.increase')}
     iconName={'arrow_upward'}
     on:click={() => {
