@@ -26,8 +26,9 @@
 
   export let open = writable(false);
 
+  let showDialog = false;
   let showContent = false;
-  let showContentTimer = 0;
+  let closeDialogTimer = 0;
 
   let style = writable({
     inset: undefined,
@@ -45,27 +46,38 @@
   $: {
     if (dialog) {
       if ($open) {
-        window.clearTimeout(showContentTimer);
+        window.clearTimeout(closeDialogTimer);
+        (document.querySelector('.sui.app-shell') || document.body).appendChild(dialog);
         showContent = true;
-
         dialog.showModal();
-      } else {
-        showContentTimer = window.setTimeout(() => {
-          showContent = false;
-        }, 500);
 
-        dialog.close();
+        window.requestAnimationFrame(() => {
+          showDialog = true;
+        });
+      } else {
+        showDialog = false;
+
+        closeDialogTimer = window.setTimeout(() => {
+          showContent = false;
+          dialog?.close();
+          dialog?.remove();
+        }, 500);
       }
     }
   }
 
   onMount(() => {
-    // Avoid nested dialogs
-    (document.querySelector('.sui.app-shell') || document.body).appendChild(dialog);
+    dialog.remove();
+
+    // onUnmount
+    return () => {
+      dialog?.close();
+      dialog?.remove();
+    };
   });
 </script>
 
-<dialog class="sui popup" bind:this={dialog} class:open={$open}>
+<dialog class="sui popup" bind:this={dialog} class:open={showDialog}>
   <!-- Prevent the first item in the slot, e.g. a menu item, from being focused by adding `tabindex`
     to the container -->
   <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
@@ -85,8 +97,12 @@
 
 <style lang="scss">
   .popup {
-    .content {
-      outline-width: 0 !important;
+    &.open {
+      .content {
+        opacity: 1;
+        transform: translateY(2px);
+        transition-duration: 100ms;
+      }
     }
 
     &:not(.open) {
@@ -96,6 +112,7 @@
         opacity: 0;
         transform: translateY(-8px);
         pointer-events: none;
+        transition-duration: 200ms;
       }
     }
   }
@@ -103,15 +120,12 @@
   .content {
     position: fixed;
     overflow-y: auto;
+    outline-width: 0 !important;
     color: var(--primary-foreground-color);
-    background-color: var(--secondary-background-color);
+    background-color: var(--secondary-background-color-translucent);
     backdrop-filter: blur(16px);
     box-shadow: 0 8px 16px var(--popup-shadow-color);
     will-change: opacity, transform;
-    transform: translateY(2px);
     transition-property: opacity, transform;
-    transition-duration: 200ms;
-    // Add .1s delay before the position can be determined
-    transition-delay: 100ms;
   }
 </style>

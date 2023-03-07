@@ -41,10 +41,10 @@
     bind:this={buttonComponent}
     on:click
     on:mouseenter={() => {
-      isPopupOpen.set(true);
+      $isPopupOpen = true;
     }}
     on:mouseleave={() => {
-      isPopupOpen.set(false);
+      $isPopupOpen = false;
     }}
   >
     {#if iconName}

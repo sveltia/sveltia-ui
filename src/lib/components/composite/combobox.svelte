@@ -47,7 +47,7 @@
   let inputComponent;
   /** @type {(Popup| undefined)} */
   let popupComponent;
-  let open = writable(false);
+  let isPopupOpen = writable(false);
 
   $: {
     dispatch('change', { target: inputComponent?.element, value });
@@ -92,12 +92,12 @@
     {disabled}
     class="ternary iconic"
     iconName="expand_more"
-    iconLabel={$open ? $_('sui._.collapse') : $_('sui._.expand')}
+    iconLabel={$isPopupOpen ? $_('sui._.collapse') : $_('sui._.expand')}
     on:click={(event) => {
       event.stopPropagation();
 
       if (!disabled) {
-        open.set(!$open);
+        $isPopupOpen = !$isPopupOpen;
       }
     }}
   />
@@ -105,7 +105,7 @@
 <Popup
   anchor={comboboxElement || inputComponent?.element}
   {position}
-  bind:open
+  bind:open={isPopupOpen}
   bind:this={popupComponent}
 >
   <Listbox

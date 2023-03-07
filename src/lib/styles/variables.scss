@@ -13,6 +13,7 @@
   --content-background-color: hsl(var(--background-color-1-hsl));
   --primary-background-color: hsl(var(--background-color-2-hsl));
   --secondary-background-color: hsl(var(--background-color-3-hsl));
+  --secondary-background-color-translucent: hsl(var(--background-color-3-hsl) / 88%);
   --ternary-background-color: hsl(var(--background-color-4-hsl));
   --control-background-color: hsl(var(--background-color-1-hsl));
   --disabled-background-color: hsl(var(--background-color-4-hsl));
@@ -22,8 +23,8 @@
   --secondary-border-color: hsl(var(--border-color-2-hsl));
   --control-border-color: hsl(var(--border-color-2-hsl));
   // Shadows
-  --popup-shadow-color: hsl(var(--shadow-color) / 20%);
-  --popup-backdrop-color: hsl(var(--shadow-color) / 10%);
+  --popup-shadow-color: hsl(var(--shadow-color) / 40%);
+  --popup-backdrop-color: hsl(var(--shadow-color) / 40%);
   // Fonts
   --default-font-family: "Merriweather Sans", sans-serif;
   --default-font-size: 13px;

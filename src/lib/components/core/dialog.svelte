@@ -48,13 +48,15 @@
   const dispatch = createEventDispatcher();
   /** @type {?HTMLDialogElement} */
   let dialog;
+  let showDialog = false;
   let showContent = false;
-  let showContentTimer = 0;
+  let closeDialogTimer = 0;
 
   $: {
     if (dialog) {
       if (open) {
-        window.clearTimeout(showContentTimer);
+        window.clearTimeout(closeDialogTimer);
+        (document.querySelector('.sui.app-shell') || document.body).appendChild(dialog);
         showContent = true;
 
         if (modal) {
@@ -62,11 +64,17 @@
         } else {
           dialog.show();
         }
-      } else {
-        dialog.close();
 
-        showContentTimer = window.setTimeout(() => {
+        window.requestAnimationFrame(() => {
+          showDialog = true;
+        });
+      } else {
+        showDialog = false;
+
+        closeDialogTimer = window.setTimeout(() => {
           showContent = false;
+          dialog?.close();
+          dialog?.remove();
         }, 500);
 
         if (dialog.returnValue === 'ok') {
@@ -83,8 +91,13 @@
   }
 
   onMount(() => {
-    // Avoid nested dialogs
-    (document.querySelector('.sui.app-shell') || document.body).appendChild(dialog);
+    dialog.remove();
+
+    // onUnmount
+    return () => {
+      dialog?.close();
+      dialog?.remove();
+    };
   });
 </script>
 
@@ -92,6 +105,7 @@
 <dialog
   bind:this={dialog}
   class="sui dialog {className} {size}"
+  class:open={showDialog}
   on:click={({ target }) => {
     if (closeOnBackdropClick && target?.matches('dialog')) {
       dialog.returnValue = 'cancel';
@@ -178,27 +192,27 @@
     justify-content: center;
     align-items: center;
     background-color: var(--popup-backdrop-color);
-    backdrop-filter: blur(8px);
-    transition: all 200ms;
 
-    &:not([open]) {
-      opacity: 0;
+    &.open {
+      form {
+        opacity: 1;
+        transform: scale(100%);
+        transition-duration: 100ms;
+      }
+    }
+
+    &:not(.open) {
       pointer-events: none !important;
 
       form {
+        opacity: 0;
         transform: scale(90%);
+        pointer-events: none;
+        transition-duration: 200ms;
       }
 
       :global(*) {
         pointer-events: none !important;
-      }
-    }
-
-    &[open] {
-      opacity: 1;
-
-      form {
-        transform: scale(100%);
       }
     }
 
@@ -214,9 +228,11 @@
       display: flex;
       flex-direction: column;
       border-radius: 4px;
-      background-color: var(--secondary-background-color);
+      background-color: var(--secondary-background-color-translucent);
+      backdrop-filter: blur(16px);
       box-shadow: 0 8px 16px var(--popup-shadow-color);
-      transition: all 200ms;
+      will-change: opacity, transform;
+      transition-property: opacity, transform;
     }
 
     &.small form {
