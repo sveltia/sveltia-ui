@@ -140,11 +140,11 @@
       z-index: 1;
     }
 
-    &:global([hidden]) {
+    &[hidden] {
       display: none !important;
     }
 
-    &:global([disabled]) {
+    &[disabled] {
       opacity: 0.4;
       cursor: default;
       pointer-events: none;
@@ -184,7 +184,7 @@
       color: var(--highlight-foreground-color);
       background-color: var(--ternary-background-color);
 
-      &:global([aria-pressed='true']) {
+      &[aria-pressed='true'] {
         background-color: var(--primary-accent-color);
       }
     }
@@ -193,7 +193,7 @@
       color: var(--primary-foreground-color);
       padding: 0 8px;
 
-      &:global([aria-pressed='true']) {
+      &[aria-pressed='true'] {
         background-color: var(--highlight-background-color);
       }
     }

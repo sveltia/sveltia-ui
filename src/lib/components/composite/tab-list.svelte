@@ -44,7 +44,7 @@
     align-items: center;
     border-color: var(--control-border-color);
 
-    &:global([aria-orientation='horizontal']) {
+    &[aria-orientation='horizontal'] {
       gap: 16px;
       margin: 0 0 32px;
       border-width: 0 0 1px;
@@ -55,7 +55,7 @@
       }
     }
 
-    &:global([aria-orientation='vertical']) {
+    &[aria-orientation='vertical'] {
       gap: 8px;
       flex-direction: column;
       margin: 0 32px 0 0;
