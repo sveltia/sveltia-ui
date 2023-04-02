@@ -46,6 +46,7 @@
     <MenuButton
       class="ternary"
       label={firstDay.toLocaleDateString('en', { year: 'numeric', month: 'short' })}
+      aria-haspopup="dialog"
       iconName="arrow_drop_down"
     >
       <!-- svelte-ignore a11y-click-events-have-key-events -->

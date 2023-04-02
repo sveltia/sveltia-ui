@@ -77,7 +77,7 @@
   });
 </script>
 
-<dialog class="sui popup" bind:this={dialog} class:open={showDialog}>
+<dialog class="sui popup" bind:this={dialog} class:open={showDialog} {...$$restProps}>
   <!-- Prevent the first item in the slot, e.g. a menu item, from being focused by adding `tabindex`
     to the container -->
   <!-- svelte-ignore a11y-no-noninteractive-tabindex -->

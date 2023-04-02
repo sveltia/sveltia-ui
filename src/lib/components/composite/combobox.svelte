@@ -9,6 +9,7 @@
   import { writable } from 'svelte/store';
   import Button from '../core/button.svelte';
   import TextInput from '../core/text-input.svelte';
+  import { getRandomId } from '../helpers/util';
   import Popup from '../util/popup.svelte';
   import Listbox from './listbox.svelte';
 
@@ -42,6 +43,7 @@
   export let value = undefined;
 
   const dispatch = createEventDispatcher();
+  const id = getRandomId('combobox');
   let comboboxElement;
   /** @type {(TextInput| undefined)} */
   let inputComponent;
@@ -65,10 +67,13 @@
 
 <div class="sui combobox {className}">
   {#if readOnly}
-    <!-- svelte-ignore a11y-role-has-required-aria-props -->
     <div
       class:selected={value !== undefined}
       role="combobox"
+      {id}
+      tabindex="0"
+      aria-controls="{id}-popup"
+      aria-expanded={$isPopupOpen}
       aria-disabled={disabled ? true : undefined}
       aria-haspopup="listbox"
       aria-activedescendant="selected-option"
@@ -80,8 +85,12 @@
   {:else}
     <TextInput
       role="combobox"
+      {id}
       {value}
       {disabled}
+      aria-controls="{id}-popup"
+      aria-expanded={$isPopupOpen}
+      aria-disabled={disabled ? true : undefined}
       aria-haspopup="listbox"
       aria-activedescendant="selected-option"
       {...$$restProps}
@@ -90,6 +99,9 @@
   {/if}
   <Button
     {disabled}
+    aria-controls="{id}-popup"
+    aria-expanded={$isPopupOpen}
+    aria-disabled={disabled ? true : undefined}
     class="ternary iconic"
     iconName="expand_more"
     iconLabel={$isPopupOpen ? $_('sui._.collapse') : $_('sui._.expand')}
@@ -103,6 +115,7 @@
   />
 </div>
 <Popup
+  id="{id}-popup"
   anchor={comboboxElement || inputComponent?.element}
   {position}
   bind:open={isPopupOpen}
