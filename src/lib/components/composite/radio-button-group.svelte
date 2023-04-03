@@ -25,6 +25,7 @@
 <div
   class="sui radio-button-group {className} {orientation}"
   role="radiogroup"
+  tabindex="0"
   bind:this={element}
   use:activateGroup
 >

@@ -43,25 +43,33 @@
     }
   }
 
+  const openDialog = () => {
+    window.clearTimeout(closeDialogTimer);
+    (document.querySelector('.sui.app-shell') || document.body).appendChild(dialog);
+    showContent = true;
+    dialog.showModal();
+
+    window.requestAnimationFrame(() => {
+      showDialog = true;
+    });
+  };
+
+  const closeDialog = () => {
+    showDialog = false;
+
+    closeDialogTimer = window.setTimeout(() => {
+      showContent = false;
+      dialog?.close();
+      dialog?.remove();
+    }, 500);
+  };
+
   $: {
     if (dialog) {
       if ($open) {
-        window.clearTimeout(closeDialogTimer);
-        (document.querySelector('.sui.app-shell') || document.body).appendChild(dialog);
-        showContent = true;
-        dialog.showModal();
-
-        window.requestAnimationFrame(() => {
-          showDialog = true;
-        });
+        openDialog();
       } else {
-        showDialog = false;
-
-        closeDialogTimer = window.setTimeout(() => {
-          showContent = false;
-          dialog?.close();
-          dialog?.remove();
-        }, 500);
+        closeDialog();
       }
     }
   }

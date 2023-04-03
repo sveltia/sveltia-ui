@@ -104,7 +104,7 @@ class Popup {
     this.open.subscribe((open) => {
       if (open) {
         this.checkPosition();
-      } else {
+      } else if (this.anchorElement.getAttribute('aria-expanded') === 'true') {
         this.anchorElement.focus();
       }
 

@@ -34,6 +34,7 @@
 <div
   class="sui select-button-group {className}"
   role="radiogroup"
+  tabindex="0"
   aria-label={ariaLabel || undefined}
   aria-disabled={disabled ? true : undefined}
   bind:this={element}

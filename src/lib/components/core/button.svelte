@@ -155,7 +155,7 @@
     &:global(.ternary) {
       justify-content: center;
       border-radius: var(--button--medium--border-radius);
-      padding: 0 8px;
+      padding: var(--button--medium--padding, 0 8px);
       height: var(--button--medium--height);
 
       :global(.label:only-child) {
@@ -191,7 +191,7 @@
 
     &:global(.ternary) {
       color: var(--primary-foreground-color);
-      padding: 0 8px;
+      padding: var(--button--medium--padding, 0 8px);
 
       &[aria-pressed='true'] {
         background-color: var(--highlight-background-color);
@@ -207,7 +207,7 @@
     }
 
     &:global(.small) {
-      padding: 0 4px;
+      padding: var(--button--small--padding, 0 8px);
       height: var(--button--small--height);
       font-size: 12px;
 
