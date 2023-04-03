@@ -22,6 +22,7 @@
     SelectButton,
     SelectButtonGroup,
     Separator,
+    Slider,
     Switch,
     Tab,
     TabList,
@@ -106,6 +107,22 @@
         <section aria-label="Switch">
           <div>
             <Switch>Option 3</Switch>
+          </div>
+        </section>
+      </div>
+    </section>
+    <section>
+      <h3>Sliders</h3>
+      <div class="row">
+        <section aria-label="Slider">
+          <div>
+            <Slider />
+          </div>
+          <div>
+            <Slider values={[1, 5]} min={1} max={5} step={0.5} optionLabels={[1, 2, 3, 4, 5]} />
+          </div>
+          <div>
+            <Slider values={[0, 24]} min={0} max={24} step={3} optionLabels={[0, 6, 12, 18, 24]} />
           </div>
         </section>
       </div>

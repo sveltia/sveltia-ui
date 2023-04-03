@@ -210,6 +210,11 @@
       "svelte": "./package/components/core/separator.svelte",
       "default": "./package/components/core/separator.svelte"
     },
+    "./components/core/slider.svelte": {
+      "types": "./package/components/core/slider.svelte.d.ts",
+      "svelte": "./package/components/core/slider.svelte",
+      "default": "./package/components/core/slider.svelte"
+    },
     "./components/core/spacer.svelte": {
       "types": "./package/components/core/spacer.svelte.d.ts",
       "svelte": "./package/components/core/spacer.svelte",

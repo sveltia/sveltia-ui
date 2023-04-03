@@ -54,6 +54,7 @@ export { default as Row } from './components/core/row.svelte';
 export { default as SearchBar } from './components/core/search-bar.svelte';
 export { default as SelectButton } from './components/core/select-button.svelte';
 export { default as Separator } from './components/core/separator.svelte';
+export { default as Slider } from './components/core/slider.svelte';
 export { default as Spacer } from './components/core/spacer.svelte';
 export { default as Switch } from './components/core/switch.svelte';
 export { default as TabPanel } from './components/core/tab-panel.svelte';
