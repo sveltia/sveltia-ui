@@ -19,41 +19,53 @@ class Popup {
         return;
       }
 
-      const top = this.position.startsWith('bottom-')
+      const contentHeight = this.popupElement.querySelector('.content').scrollHeight;
+      const bottomMargin = rootBounds.height - intersectionRect.bottom - 8;
+      let { position } = this;
+
+      // @todo Handle more overflow cases
+      if (contentHeight > bottomMargin) {
+        if (position.startsWith('bottom-')) {
+          position = position.replace('bottom-', 'top-');
+        }
+      }
+
+      const top = position.startsWith('bottom-')
         ? `${Math.round(intersectionRect.bottom)}px`
-        : this.position.endsWith('-top')
+        : position.endsWith('-top')
         ? `${Math.round(intersectionRect.top)}px`
         : 'auto';
 
-      const right = this.position.startsWith('left-')
+      const right = position.startsWith('left-')
         ? `${Math.round(rootBounds.width - intersectionRect.left)}px`
-        : this.position.endsWith('-right')
+        : position.endsWith('-right')
         ? `${Math.round(rootBounds.width - intersectionRect.right)}px`
         : 'auto';
 
-      const bottom = this.position.startsWith('top-')
+      const bottom = position.startsWith('top-')
         ? `${Math.round(rootBounds.height - intersectionRect.top)}px`
-        : this.position.endsWith('-bottom')
+        : position.endsWith('-bottom')
         ? `${Math.round(rootBounds.height - intersectionRect.bottom)}px`
         : 'auto';
 
-      const left = this.position.startsWith('right-')
+      const left = position.startsWith('right-')
         ? `${Math.round(intersectionRect.right)}px`
-        : this.position.endsWith('-left')
+        : position.endsWith('-left')
         ? `${Math.round(intersectionRect.left)}px`
         : 'auto';
 
-      const width = `${Math.round(intersectionRect.width)}px`;
-      const height = `${Math.round(rootBounds.height - intersectionRect.bottom - 8)}px`;
       const anchorPopup = this.anchorElement.closest('.popup');
 
-      // @todo fix the final position
-      this.style.set({
+      const style = {
         inset: [top, right, bottom, left].join(' '),
         zIndex: anchorPopup ? Number(anchorPopup.style.zIndex) + 1 : 1000,
-        width,
-        height,
-      });
+        width: `${Math.round(intersectionRect.width)}px`,
+        height: `${Math.round(Math.max(bottomMargin, contentHeight))}px`,
+      };
+
+      if (JSON.stringify(style) !== JSON.stringify(get(this.style))) {
+        this.style.set(style);
+      }
     });
   });
 
