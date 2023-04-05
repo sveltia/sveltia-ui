@@ -6,6 +6,7 @@
 <script>
   import { getRandomId } from '../helpers/util';
   import Button from './button.svelte';
+  import Icon from './icon.svelte';
 
   /**
    * CSS class name on the button.
@@ -44,7 +45,6 @@
 >
   <Button
     {id}
-    iconName="circle"
     role="radio"
     aria-checked={selected}
     aria-labelledby="{id}-label"
@@ -53,7 +53,9 @@
       event.preventDefault();
       selected = !selected;
     }}
-  />
+  >
+    <Icon slot="start-icon" name="circle" />
+  </Button>
   <label id="{id}-label">
     <slot />
   </label>

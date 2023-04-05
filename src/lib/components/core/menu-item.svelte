@@ -48,7 +48,7 @@
     }}
   >
     {#if iconName}
-      <Icon name={iconName} label={iconLabel} />
+      <Icon slot="start-icon" name={iconName} label={iconLabel} />
     {/if}
     {#if label}
       <span class="label">{label}</span>

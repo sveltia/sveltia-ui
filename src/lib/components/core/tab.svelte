@@ -16,5 +16,7 @@
 </script>
 
 <Button role="tab" class="sui tab {className}" {...$$restProps}>
+  <slot name="start-icon" slot="start-icon" />
   <slot />
+  <slot name="end-icon" slot="end-icon" />
 </Button>

@@ -47,8 +47,6 @@
   {#if value}
     <Button
       class="ternary iconic"
-      iconName="close"
-      iconLabel={$_('sui._.clear')}
       on:click={() => {
         value = '';
         input.element.focus();
@@ -58,7 +56,9 @@
           input.element.dispatchEvent(new KeyboardEvent('change'));
         });
       }}
-    />
+    >
+      <Icon slot="start-icon" name="close" label={$_('sui._.clear')} />
+    </Button>
   {/if}
 </div>
 

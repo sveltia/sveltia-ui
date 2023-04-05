@@ -6,8 +6,10 @@
     CheckboxGroup,
     Combobox,
     Disclosure,
+    Icon,
     Listbox,
     MarkdownEditor,
+    Menu,
     MenuButton,
     MenuItem,
     MenuItemCheckbox,
@@ -75,6 +77,20 @@
             <Button class="primary" label="Primary" />
             <Button class="secondary" label="Secondary" />
             <Button class="trinary" label="Ternary" />
+          </div>
+        </section>
+        <section>
+          <h4>Icon Buttons</h4>
+          <div>
+            <Button class="secondary" label="Tag">
+              <Icon slot="start-icon" name="sell" />
+            </Button>
+            <Button class="primary" label="Add">
+              <Icon slot="end-icon" name="add" />
+            </Button>
+            <Button class="secondary">
+              <Icon slot="end-icon" name="delete" label="Delete" />
+            </Button>
           </div>
         </section>
         <section aria-label="Select Buttons">
@@ -245,21 +261,24 @@
           <h4>Menu Button</h4>
           <div>
             <MenuButton class="secondary" label="Open Menu">
-              <MenuItem label="Item" />
-              <MenuItem label="Item">
-                <MenuItem label="Child Item 1" />
-                <MenuItem label="Child Item 2" />
-                <MenuItem label="Child Item 3" />
+              <Icon slot="end-icon" name="arrow_drop_down" />
+              <Menu slot="popup">
+                <MenuItem label="Item" />
+                <MenuItem label="Item">
+                  <MenuItem label="Child Item 1" />
+                  <MenuItem label="Child Item 2" />
+                  <MenuItem label="Child Item 3" />
+                  <Separator />
+                  <MenuItemCheckbox label="Child Item 4" checked={true} />
+                </MenuItem>
+                <MenuItem label="Item" disabled={true} />
                 <Separator />
-                <MenuItemCheckbox label="Child Item 4" checked={true} />
-              </MenuItem>
-              <MenuItem label="Item" disabled={true} />
-              <Separator />
-              <MenuItemCheckbox label="Item" checked={true} />
-              <MenuItemCheckbox label="Item" checked={false} />
-              <Separator />
-              <MenuItemRadio label="Item" checked={true} />
-              <MenuItemRadio label="Item" checked={false} />
+                <MenuItemCheckbox label="Item" checked={true} />
+                <MenuItemCheckbox label="Item" checked={false} />
+                <Separator />
+                <MenuItemRadio label="Item" checked={true} />
+                <MenuItemRadio label="Item" checked={false} />
+              </Menu>
             </MenuButton>
           </div>
         </section>

@@ -28,10 +28,12 @@
     on:dragend
     on:drop
   >
-    <slot />
     {#if selected}
       <Icon class="check" name="check" />
     {/if}
+    <slot name="start-icon" slot="start-icon" />
+    <slot />
+    <slot name="end-icon" slot="end-icon" />
   </Button>
 </div>
 

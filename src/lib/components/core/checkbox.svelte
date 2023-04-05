@@ -7,6 +7,7 @@
   import { createEventDispatcher } from 'svelte';
   import { getRandomId } from '../helpers/util';
   import Button from './button.svelte';
+  import Icon from './icon.svelte';
 
   /**
    * CSS class name on the button.
@@ -53,7 +54,6 @@
 >
   <Button
     {id}
-    iconName={indeterminate ? 'remove' : 'check'}
     role="checkbox"
     aria-checked={indeterminate ? 'mixed' : checked}
     aria-labelledby="{id}-label"
@@ -64,7 +64,9 @@
       checked = indeterminate ? true : !checked;
       indeterminate = false;
     }}
-  />
+  >
+    <Icon slot="start-icon" name={indeterminate ? 'remove' : 'check'} />
+  </Button>
   {#if $$slots.default}
     <label id="{id}-label">
       <slot />

@@ -6,12 +6,13 @@
 <svelte:options accessors={true} />
 
 <script>
-  import Icon from './icon.svelte';
+  import Popup from '../util/popup.svelte';
 
   /**
    * CSS class name on the button.
    * @type {String}
    */
+  // eslint-disable-next-line padding-line-between-statements
   let className = '';
 
   export { className as class };
@@ -65,20 +66,13 @@
   export let label = '';
 
   /**
-   * The name of the Material Symbols icon on the button.
+   * Where to show the dropdown menu.
+   * @type {PopupPosition}
    */
-  export let iconName = '';
+  export let popupPosition = 'bottom-left';
 
-  /**
-   * The accessible label on the icon. It can be omitted of a visible `label` is defined.
-   */
-  export let iconLabel = '';
-
-  /**
-   * Where the icon is displayed.
-   * @type {('start'|'end')}
-   */
-  export let iconPosition = 'start';
+  /** @type {?Popup} */
+  let popupComponent;
 </script>
 
 <button
@@ -103,17 +97,19 @@
   on:keypress
   bind:this={element}
 >
-  {#if iconName && iconPosition === 'start'}
-    <Icon name={iconName} label={iconLabel} />
-  {/if}
+  <slot name="start-icon" />
   {#if label}
     <span class="label">{label}</span>
   {/if}
   <slot />
-  {#if iconName && iconPosition === 'end'}
-    <Icon name={iconName} label={iconLabel} />
-  {/if}
+  <slot name="end-icon" />
 </button>
+
+{#if $$slots.popup}
+  <Popup anchor={element} position={popupPosition} bind:this={popupComponent}>
+    <slot name="popup" />
+  </Popup>
+{/if}
 
 <style lang="scss">
   button {

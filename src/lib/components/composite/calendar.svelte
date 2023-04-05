@@ -2,7 +2,6 @@
   import { _ } from 'svelte-i18n';
   import Button from '../core/button.svelte';
   import Icon from '../core/icon.svelte';
-  import MenuButton from '../core/menu-button.svelte';
   import Separator from '../core/separator.svelte';
   import Spacer from '../core/spacer.svelte';
 
@@ -43,14 +42,14 @@
 <div role="group">
   <input type="hidden" bind:value />
   <div class="header">
-    <MenuButton
+    <Button
       class="ternary"
       label={firstDay.toLocaleDateString('en', { year: 'numeric', month: 'short' })}
       aria-haspopup="dialog"
-      iconName="arrow_drop_down"
     >
+      <Icon slot="end-icon" name="arrow_drop_down" />
       <!-- svelte-ignore a11y-click-events-have-key-events -->
-      <div class="popup-inner" on:click|stopPropagation>
+      <div slot="popup" class="popup-inner" on:click|stopPropagation>
         <div role="group" aria-label={$_('sui.calendar.year')}>
           <div class="header">
             <Button
@@ -91,7 +90,7 @@
           </div>
         </div>
       </div>
-    </MenuButton>
+    </Button>
     <Button
       on:click={() => {
         firstDay.setUTCMonth(firstDay.getUTCMonth() - 1);

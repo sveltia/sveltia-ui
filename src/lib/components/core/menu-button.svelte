@@ -3,7 +3,6 @@
   @see https://w3c.github.io/aria-practices/#menubutton
 -->
 <script>
-  import Menu from '../composite/menu.svelte';
   import Popup from '../util/popup.svelte';
   import Button from './button.svelte';
 
@@ -19,25 +18,17 @@
    * Where to show the dropdown menu.
    * @type {PopupPosition}
    */
-  export let position = 'bottom-left';
-
-  /**
-   * Whether to show an arrow icon next to the label, if `iconName` is not given. The default is
-   * `true`.
-   */
-  export let showArrow = true;
+  export let popupPosition = 'bottom-left';
 
   /** @type {?Button} */
   let buttonComponent;
-  /** @type {?Menu} */
-  let menuComponent;
+  /** @type {?Popup} */
+  let popupComponent;
 </script>
 
 <Button
   class="sui menu-button {className}"
   aria-haspopup="menu"
-  iconName={$$props.iconName || (showArrow ? 'arrow_drop_down' : undefined)}
-  iconPosition="end"
   {...$$restProps}
   bind:this={buttonComponent}
   on:keydown={(event) => {
@@ -47,7 +38,7 @@
       event.preventDefault();
 
       const members = [
-        ...menuComponent.element.querySelectorAll('[role^="menuitem"]:not([aria-disabled="true"])'),
+        ...popupComponent.dialog.querySelectorAll('[role^="menuitem"]:not([aria-disabled="true"])'),
       ];
 
       if (members.length) {
@@ -56,10 +47,11 @@
     }
   }}
 >
-  <slot name="button" />
+  <slot name="start-icon" slot="start-icon" />
+  <slot />
+  <slot name="end-icon" slot="end-icon" />
 </Button>
-<Popup anchor={buttonComponent?.element} {position}>
-  <Menu bind:this={menuComponent}>
-    <slot />
-  </Menu>
+
+<Popup anchor={buttonComponent?.element} position={popupPosition} bind:this={popupComponent}>
+  <slot name="popup" />
 </Popup>

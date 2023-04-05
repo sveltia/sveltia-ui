@@ -8,6 +8,7 @@
   import { _ } from 'svelte-i18n';
   import { writable } from 'svelte/store';
   import Button from '../core/button.svelte';
+  import Icon from '../core/icon.svelte';
   import TextInput from '../core/text-input.svelte';
   import { getRandomId } from '../helpers/util';
   import Popup from '../util/popup.svelte';
@@ -103,8 +104,6 @@
     aria-expanded={$isPopupOpen}
     aria-disabled={disabled ? true : undefined}
     class="ternary iconic"
-    iconName="expand_more"
-    iconLabel={$isPopupOpen ? $_('sui._.collapse') : $_('sui._.expand')}
     on:click={(event) => {
       event.stopPropagation();
 
@@ -112,7 +111,13 @@
         $isPopupOpen = !$isPopupOpen;
       }
     }}
-  />
+  >
+    <Icon
+      slot="start-icon"
+      name="expand_more"
+      label={$isPopupOpen ? $_('sui._.collapse') : $_('sui._.expand')}
+    />
+  </Button>
 </div>
 <Popup
   id="{id}-popup"

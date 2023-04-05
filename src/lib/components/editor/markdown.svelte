@@ -1,6 +1,7 @@
 <script>
   import { _ } from 'svelte-i18n';
   import Button from '../core/button.svelte';
+  import Icon from '../core/icon.svelte';
   import Separator from '../core/separator.svelte';
   import TextArea from '../core/text-area.svelte';
   import Toolbar from '../core/toolbar.svelte';
@@ -47,7 +48,9 @@
       {#if separator}
         <Separator />
       {:else}
-        <Button {disabled} iconName={icon} iconLabel={label} />
+        <Button {disabled}>
+          <Icon slot="start-icon" name={icon} {label} />
+        </Button>
       {/if}
     {/each}
   </Toolbar>

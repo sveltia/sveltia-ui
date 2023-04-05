@@ -7,6 +7,7 @@
   import { createEventDispatcher, onMount } from 'svelte';
   import { _ } from 'svelte-i18n';
   import Button from './button.svelte';
+  import Icon from './icon.svelte';
   import Spacer from './spacer.svelte';
 
   /**
@@ -134,13 +135,13 @@
             {#if showClose}
               <Button
                 class="ternary iconic"
-                iconName="close"
-                iconLabel={$_('sui._.close')}
                 on:click={() => {
                   dialog.returnValue = 'close';
                   open = false;
                 }}
-              />
+              >
+                <Icon slot="start-icon" name="close" label={$_('sui._.close')} />
+              </Button>
             {/if}
           {/if}
         </div>

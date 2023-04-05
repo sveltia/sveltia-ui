@@ -5,6 +5,7 @@
 <script>
   import { _ } from 'svelte-i18n';
   import Button from './button.svelte';
+  import Icon from './icon.svelte';
   import TextInput from './text-input.svelte';
 
   /**
@@ -70,21 +71,21 @@
   <Button
     class="iconic"
     disabled={disabled || Number.isNaN(Number(value))}
-    iconLabel={$_('sui.number_input.decrease')}
-    iconName={'arrow_downward'}
     on:click={() => {
       decrease();
     }}
-  />
+  >
+    <Icon slot="start-icon" name="arrow_downward" label={$_('sui.number_input.decrease')} />
+  </Button>
   <Button
     class="iconic"
     disabled={disabled || Number.isNaN(Number(value))}
-    iconLabel={$_('sui.number_input.increase')}
-    iconName={'arrow_upward'}
     on:click={() => {
       increase();
     }}
-  />
+  >
+    <Icon slot="start-icon" name={'arrow_upward'} label={$_('sui.number_input.increase')} />
+  </Button>
 </div>
 
 <style lang="scss">

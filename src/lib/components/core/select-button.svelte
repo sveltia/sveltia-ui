@@ -25,5 +25,7 @@
   {...$$restProps}
   on:click
 >
+  <slot name="start-icon" slot="start-icon" />
   <slot />
+  <slot name="end-icon" slot="end-icon" />
 </Button>

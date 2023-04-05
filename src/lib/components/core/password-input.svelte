@@ -5,6 +5,7 @@
 <script>
   import { _ } from 'svelte-i18n';
   import Button from './button.svelte';
+  import Icon from './icon.svelte';
   import TextInput from './text-input.svelte';
 
   /**
@@ -44,12 +45,16 @@
   <Button
     class="iconic"
     pressed={passwordVisible}
-    iconLabel={$_('sui.password_input.show_password')}
-    iconName={passwordVisible ? 'visibility_off' : 'visibility'}
     on:click={() => {
       passwordVisible = !passwordVisible;
     }}
-  />
+  >
+    <Icon
+      slot="start-icon"
+      name={passwordVisible ? 'visibility_off' : 'visibility'}
+      label={$_('sui.password_input.show_password')}
+    />
+  </Button>
 </div>
 
 <style lang="scss">
