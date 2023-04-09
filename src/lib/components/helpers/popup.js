@@ -20,13 +20,21 @@ class Popup {
       }
 
       const contentHeight = this.popupElement.querySelector('.content').scrollHeight;
+      const topMargin = intersectionRect.top - 8;
       const bottomMargin = rootBounds.height - intersectionRect.bottom - 8;
       let { position } = this;
+      let height;
 
+      // Alter the position if the space is limited
       // @todo Handle more overflow cases
-      if (contentHeight > bottomMargin) {
-        if (position.startsWith('bottom-')) {
-          position = position.replace('bottom-', 'top-');
+      if (position.startsWith('bottom-')) {
+        if (contentHeight > bottomMargin) {
+          if (topMargin > bottomMargin) {
+            position = position.replace('bottom-', 'top-');
+            height = topMargin;
+          } else {
+            height = bottomMargin;
+          }
         }
       }
 
@@ -60,7 +68,7 @@ class Popup {
         inset: [top, right, bottom, left].join(' '),
         zIndex: anchorPopup ? Number(anchorPopup.style.zIndex) + 1 : 1000,
         width: `${Math.round(intersectionRect.width)}px`,
-        height: `${Math.round(Math.max(bottomMargin, contentHeight))}px`,
+        height: height ? `${Math.round(height)}px` : 'auto',
       };
 
       if (JSON.stringify(style) !== JSON.stringify(get(this.style))) {
