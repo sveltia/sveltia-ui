@@ -81,7 +81,9 @@
       {...$$restProps}
       bind:this={comboboxElement}
     >
-      {value !== undefined ? label || value : $_('sui.combobox.select_an_option')}
+      <div class="label">
+        {value !== undefined ? label || value : $_('sui.combobox.select_an_option')}
+      </div>
     </div>
   {:else}
     <TextInput
@@ -181,6 +183,14 @@
         background-color: var(--disabled-background-color);
         opacity: 0.4;
         cursor: default;
+      }
+
+      .label {
+        display: block;
+        overflow: hidden;
+        width: 100%;
+        white-space: nowrap;
+        text-overflow: ellipsis;
       }
     }
 
