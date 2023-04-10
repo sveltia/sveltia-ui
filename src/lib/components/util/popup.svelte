@@ -28,6 +28,7 @@
 
   let showDialog = false;
   let showContent = false;
+  let contentType;
   let closeDialogTimer = 0;
 
   let style = writable({
@@ -40,6 +41,7 @@
   $: {
     if (anchor && dialog) {
       ({ open, style } = activatePopup(anchor, dialog, position));
+      contentType = anchor.getAttribute('aria-haspopup');
     }
   }
 
@@ -91,7 +93,7 @@
   <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
   <div
     tabindex="0"
-    class="content"
+    class="content {contentType}"
     style:inset={$style.inset}
     style:z-index={$style.zIndex}
     style:min-width={$style.width}
@@ -135,5 +137,19 @@
     box-shadow: 0 8px 16px var(--popup-shadow-color);
     will-change: opacity, transform;
     transition-property: opacity, transform;
+
+    &.listbox,
+    &.menu {
+      border-width: 1px;
+      border-style: solid;
+      border-color: var(--secondary-border-color);
+      border-radius: 4px;
+
+      :global(.sui.listbox),
+      :global(.sui.menu) {
+        border-width: 0;
+        border-radius: 0;
+      }
+    }
   }
 </style>

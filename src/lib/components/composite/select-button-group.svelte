@@ -55,6 +55,7 @@
 
     :global(button) {
       border-radius: 0;
+      color: var(--secondary-foreground-color);
 
       &:first-child {
         border-radius: 4px 0 0 4px;
