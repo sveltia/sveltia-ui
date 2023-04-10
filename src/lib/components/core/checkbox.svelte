@@ -33,10 +33,6 @@
   const id = getRandomId('checkbox');
   /** @type {Button} */
   let button;
-
-  $: {
-    dispatch('change', { checked });
-  }
 </script>
 
 {#if name && value && checked && !indeterminate}
@@ -63,6 +59,7 @@
       event.stopPropagation();
       checked = indeterminate ? true : !checked;
       indeterminate = false;
+      dispatch('change', { checked });
     }}
   >
     <Icon slot="start-icon" name={indeterminate ? 'remove' : 'check'} />
