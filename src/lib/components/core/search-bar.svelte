@@ -46,7 +46,7 @@
   />
   {#if value}
     <Button
-      class="tertiary iconic"
+      class="iconic"
       on:click={() => {
         value = '';
         input.element.focus();
@@ -83,6 +83,7 @@
       position: absolute;
       inset: 0 0 auto auto;
       z-index: 2;
+      height: var(--button--medium--height);
     }
 
     :global(.label) {
