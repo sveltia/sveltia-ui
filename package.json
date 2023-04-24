@@ -1,6 +1,6 @@
 {
   "name": "@sveltia/ui",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "license": "MIT",
   "type": "module",
   "publishConfig": {
@@ -11,7 +11,7 @@
     "build": "svelte-kit sync && svelte-package -o package",
     "build:watch": "svelte-kit sync && svelte-package -o package --watch",
     "preview": "vite preview",
-    "prepublishOnly": "vite build",
+    "prepublishOnly": "npm run build",
     "check": "svelte-kit sync && svelte-check --tsconfig ./jsconfig.json",
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./jsconfig.json --watch",
     "format": "prettier --plugin-search-dir . --write .",
@@ -317,7 +317,6 @@
   "files": [
     "package"
   ],
-  "svelte": "./package/index.js",
   "typesVersions": {
     ">4.0": {
       "components/composite/calendar.svelte": [
