@@ -46,7 +46,7 @@
   />
   {#if value}
     <Button
-      class="ternary iconic"
+      class="tertiary iconic"
       on:click={() => {
         value = '';
         input.element.focus();
@@ -69,7 +69,7 @@
     position: relative;
 
     :global(.icon) {
-      font-size: 20px;
+      font-size: var(--font-size--xx-large);
       opacity: 0.5;
     }
 

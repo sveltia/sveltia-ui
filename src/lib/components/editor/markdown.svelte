@@ -66,7 +66,7 @@
       gap: 8px;
       border-radius: 4px 4px 0 0;
       padding: 8px;
-      background-color: var(--ternary-background-color);
+      background-color: var(--tertiary-background-color);
 
       :global(button) {
         flex: none;

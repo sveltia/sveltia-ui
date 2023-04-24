@@ -148,8 +148,9 @@
 
     &:global(.primary),
     &:global(.secondary),
-    &:global(.ternary) {
+    &:global(.tertiary) {
       justify-content: center;
+      border-width: 1px;
       border-radius: var(--button--medium--border-radius);
       padding: var(--button--medium--padding, 0 8px);
       height: var(--button--medium--height);
@@ -160,7 +161,6 @@
     }
 
     &:global(.primary) {
-      border-width: 1px;
       border-color: var(--control-border-color);
       color: var(--primary-accent-color-foreground);
       background-color: var(--primary-accent-color);
@@ -175,19 +175,19 @@
     }
 
     &:global(.secondary) {
-      border-width: 1px;
-      border-color: var(--control-border-color);
-      color: var(--highlight-foreground-color);
-      background-color: var(--ternary-background-color);
+      border-color: var(--primary-accent-color);
+      color: var(--primary-accent-color-lighter);
+      background-color: var(--tertiary-background-color);
 
       &[aria-pressed='true'] {
         background-color: var(--primary-accent-color);
       }
     }
 
-    &:global(.ternary) {
-      color: var(--primary-foreground-color);
-      padding: var(--button--medium--padding, 0 8px);
+    &:global(.tertiary) {
+      border-color: var(--control-border-color);
+      color: var(--highlight-foreground-color);
+      background-color: var(--tertiary-background-color);
 
       &[aria-pressed='true'] {
         background-color: var(--highlight-background-color);
@@ -205,10 +205,10 @@
     &:global(.small) {
       padding: var(--button--small--padding, 0 8px);
       height: var(--button--small--height);
-      font-size: 12px;
+      font-size: var(--font-size--small);
 
       :global(.icon) {
-        font-size: 16px;
+        font-size: var(--font-size--large);
       }
     }
 
@@ -223,6 +223,7 @@
 
     &:global(.iconic) {
       justify-content: center;
+      padding: 0;
       border-radius: 4px;
       aspect-ratio: 1 / 1;
     }

@@ -93,7 +93,7 @@
     aria-controls="{id}-popup"
     aria-expanded={$isPopupOpen}
     aria-disabled={disabled ? true : undefined}
-    class="ternary iconic"
+    class="tertiary iconic"
     on:click={(event) => {
       event.stopPropagation();
 
@@ -138,7 +138,7 @@
     min-width: var(--combobox-min-width, 160px);
 
     :global(.icon) {
-      font-size: 20px;
+      font-size: var(--font-size--xx-large);
       opacity: 0.5;
     }
 
@@ -152,6 +152,10 @@
       position: absolute;
       inset: 0 0 auto auto;
       z-index: 1;
+      border-top-left-radius: 0;
+      border-bottom-left-radius: 0;
+      border-width: 0;
+      background-color: transparent;
     }
 
     div[role='combobox'] {
@@ -163,7 +167,7 @@
       padding: 0 32px 0 8px;
       width: 100%;
       height: var(--input--medium--height);
-      background-color: var(--control-background-color);
+      background-color: var(--disabled-background-color);
       -webkit-user-select: none;
       user-select: none;
       cursor: pointer;

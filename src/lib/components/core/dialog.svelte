@@ -134,7 +134,7 @@
             {/if}
             {#if showClose}
               <Button
-                class="ternary iconic"
+                class="tertiary iconic"
                 on:click={() => {
                   dialog.returnValue = 'close';
                   open = false;
@@ -273,7 +273,7 @@
     height: 32px;
 
     .title {
-      font-size: 16px;
+      font-size: var(--font-size--large);
     }
   }
 

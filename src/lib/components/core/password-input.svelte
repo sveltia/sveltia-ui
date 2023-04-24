@@ -80,7 +80,7 @@
       }
 
       :global(.icon) {
-        font-size: 20px;
+        font-size: var(--font-size--xx-large);
       }
     }
   }

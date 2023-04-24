@@ -255,6 +255,7 @@
   [role='slider'] {
     position: absolute;
     top: 0;
+    border: 2px solid var(--primary-accent-color-lighter);
     border-radius: 8px;
     width: 16px;
     height: 16px;
@@ -267,6 +268,6 @@
     position: absolute;
     top: 12px;
     transform: translateX(-50%);
-    font-size: 10px;
+    font-size: var(--font-size--x-small);
   }
 </style>

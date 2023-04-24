@@ -63,7 +63,7 @@
       :global(.title) {
         margin: 0 8px 8px;
         color: var(--secondary-foreground-color);
-        font-size: 11px;
+        font-size: var(--font-size--x-small);
         text-transform: uppercase;
       }
     }

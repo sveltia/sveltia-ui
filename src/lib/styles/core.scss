@@ -36,11 +36,11 @@ h4,
 h5,
 h6 {
   margin: 0;
-  font-weight: var(--default-font-weight-bold);
+  font-weight: var(--font-weight--bold);
 }
 
 strong {
-  font-weight: var(--default-font-weight-bold);
+  font-weight: var(--font-weight--bold);
 }
 
 a {
@@ -84,7 +84,7 @@ li {
 
 code,
 pre {
-  font-family: var(--monospace-font-family);
+  font-family: var(--font-family--monospace);
 }
 
 pre {

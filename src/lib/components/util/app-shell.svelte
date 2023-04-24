@@ -50,9 +50,9 @@
     height: 100%;
     color: var(--primary-foreground-color);
     background-color: var(--primary-background-color);
-    font-family: var(--default-font-family);
-    font-size: var(--default-font-size);
-    font-weight: var(--default-font-weight-regular);
+    font-family: var(--font-family--default);
+    font-size: var(--font-size--default);
+    font-weight: var(--font-weight--normal);
     -webkit-user-select: none;
     user-select: none;
     touch-action: none;

@@ -102,7 +102,7 @@
     }
 
     &:read-only {
-      color: var(--ternary-foreground-color);
+      color: var(--tertiary-foreground-color);
       border-color: var(--control-border-color) !important;
     }
 
@@ -129,7 +129,7 @@
       }
 
       :global(.icon) {
-        font-size: 20px;
+        font-size: var(--font-size--xx-large);
       }
     }
   }

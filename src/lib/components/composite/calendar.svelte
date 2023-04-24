@@ -43,7 +43,7 @@
   <input type="hidden" bind:value />
   <div class="header">
     <Button
-      class="ternary"
+      class="tertiary"
       label={firstDay.toLocaleDateString('en', { year: 'numeric', month: 'short' })}
       aria-haspopup="dialog"
     >
@@ -139,7 +139,7 @@
         value = '';
       }}
     >
-      {$_('sui.calendar.clear')}
+      {$_('sui._.clear')}
     </Button>
     <Spacer flex={true} />
     <Button
@@ -160,7 +160,6 @@
     -webkit-user-select: none;
     user-select: none;
     cursor: default;
-    font-size: 14px;
 
     & > * {
       flex: none;
@@ -192,14 +191,14 @@
       align-items: center;
       width: 24px;
       height: 24px;
-      font-size: 12px;
+      font-size: var(--font-size--small);
 
       &.weekday {
         color: var(--secondary-foreground-color);
       }
 
       &.other-month {
-        color: var(--ternary-foreground-color);
+        color: var(--tertiary-foreground-color);
       }
 
       &.today :global(button) {
@@ -227,7 +226,7 @@
 
   .footer {
     :global(button) {
-      font-size: 12px;
+      font-size: var(--font-size--small);
     }
   }
 

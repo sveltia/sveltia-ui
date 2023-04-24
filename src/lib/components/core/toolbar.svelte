@@ -44,7 +44,7 @@
     }
 
     &.secondary {
-      background-color: var(--ternary-background-color);
+      background-color: var(--tertiary-background-color);
     }
 
     &[aria-orientation='horizontal'] {
@@ -72,10 +72,10 @@
       gap: 8px;
       margin: 0;
       padding: 0 8px;
-      font-size: 16px;
+      font-size: var(--font-size--large);
 
       :global(span) {
-        font-size: 12px;
+        font-size: var(--font-size--small);
         font-weight: normal;
         opacity: 0.8;
       }

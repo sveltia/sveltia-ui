@@ -83,7 +83,7 @@
       transition: all 200ms;
 
       :global(.icon) {
-        font-size: 16px;
+        font-size: var(--font-size--large);
         font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 48;
       }
     }

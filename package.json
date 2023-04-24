@@ -408,6 +408,9 @@
       "components/core/separator.svelte": [
         "./package/components/core/separator.svelte.d.ts"
       ],
+      "components/core/slider.svelte": [
+        "./package/components/core/slider.svelte.d.ts"
+      ],
       "components/core/spacer.svelte": [
         "./package/components/core/spacer.svelte.d.ts"
       ],

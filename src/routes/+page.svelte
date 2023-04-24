@@ -51,19 +51,64 @@
     <section>
       <h3>Background</h3>
       <div class="color-samples">
-        <span class="sample" style="background-color: hsl(var(--background-color-1-hsl));" />
-        <span class="sample" style="background-color: hsl(var(--background-color-2-hsl));" />
-        <span class="sample" style="background-color: hsl(var(--background-color-3-hsl));" />
-        <span class="sample" style="background-color: hsl(var(--background-color-4-hsl));" />
+        <span class="sample" style:background-color="var(--primary-background-color)">
+          Primary
+        </span>
+        <span class="sample" style:background-color="var(--secondary-background-color)">
+          Secondary
+        </span>
+        <span class="sample" style:background-color="var(--tertiary-background-color)">
+          tertiary
+        </span>
+        <span class="sample" style:background-color="var(--disabled-background-color)">
+          Disabled
+        </span>
       </div>
     </section>
     <section>
       <h3>Foreground</h3>
       <div class="color-samples">
-        <span class="sample" style="color: hsl( var(--foreground-color-1-hsl));">Text</span>
-        <span class="sample" style="color: hsl(var(--foreground-color-2-hsl));">Text</span>
-        <span class="sample" style="color: hsl( var(--foreground-color-3-hsl));">Text</span>
-        <span class="sample" style="color: hsl(var(--foreground-color-4-hsl));">Text</span>
+        <span class="sample" style:color="var(--primary-foreground-color)"> Primary </span>
+        <span class="sample" style:color="var(--secondary-foreground-color)"> Secondary </span>
+        <span class="sample" style:color="var(--tertiary-foreground-color)"> tertiary </span>
+        <span class="sample" style:color="var(--disabled-foreground-color)"> Disabled </span>
+      </div>
+    </section>
+    <section>
+      <h3>Alerts</h3>
+      <div class="color-samples">
+        <span
+          class="sample"
+          style:border-color="var(--danger-border-color)"
+          style:color="var(--danger-foreground-color)"
+          style:background-color="var(--danger-background-color)"
+        >
+          Danger
+        </span>
+        <span
+          class="sample"
+          style:border-color="var(--warning-border-color)"
+          style:color="var(--warning-foreground-color)"
+          style:background-color="var(--warning-background-color)"
+        >
+          Warning
+        </span>
+        <span
+          class="sample"
+          style:border-color="var(--success-border-color)"
+          style:color="var(--success-foreground-color)"
+          style:background-color="var(--success-background-color)"
+        >
+          Success
+        </span>
+        <span
+          class="sample"
+          style:border-color="var(--info-border-color)"
+          style:color="var(--info-foreground-color)"
+          style:background-color="var(--info-background-color)"
+        >
+          Info
+        </span>
       </div>
     </section>
   </section>
@@ -76,7 +121,7 @@
           <div>
             <Button class="primary" label="Primary" />
             <Button class="secondary" label="Secondary" />
-            <Button class="trinary" label="Ternary" />
+            <Button class="tertiary" label="tertiary" />
           </div>
         </section>
         <section>
@@ -96,9 +141,9 @@
         <section aria-label="Select Buttons">
           <div>
             <SelectButtonGroup>
-              <SelectButton class="secondary" selected={true}>Strawberry</SelectButton>
-              <SelectButton class="secondary">Grape</SelectButton>
-              <SelectButton class="secondary">Lemon</SelectButton>
+              <SelectButton class="tertiary" selected={true}>Strawberry</SelectButton>
+              <SelectButton class="tertiary">Grape</SelectButton>
+              <SelectButton class="tertiary">Lemon</SelectButton>
             </SelectButtonGroup>
           </div>
         </section>
@@ -260,7 +305,7 @@
         <section>
           <h4>Menu Button</h4>
           <div>
-            <MenuButton class="secondary" label="Open Menu">
+            <MenuButton class="tertiary" label="Open Menu">
               <Icon slot="end-icon" name="arrow_drop_down" />
               <Menu slot="popup">
                 <MenuItem label="Item" />
@@ -379,8 +424,8 @@
 
 <style lang="scss">
   :global(body) {
-    font-family: var(--default-font-family);
-    font-size: var(--default-font-size);
+    font-family: var(--font-family--default);
+    font-size: var(--font-size--default);
     color: var(--primary-foreground-color);
     background-color: var(--primary-background-color);
   }
@@ -453,7 +498,7 @@
       border-width: 1px;
       border-color: var(--secondary-border-color);
       border-radius: 8px;
-      min-width: 48px;
+      min-width: 160px;
       min-height: 48px;
     }
   }
