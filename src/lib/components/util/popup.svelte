@@ -53,6 +53,10 @@
 
     window.requestAnimationFrame(() => {
       showDialog = true;
+
+      window.requestAnimationFrame(() => {
+        (dialog.querySelector('[tabindex]') || dialog).focus();
+      });
     });
   };
 
@@ -63,7 +67,7 @@
       showContent = false;
       dialog?.close();
       dialog?.remove();
-    }, 500);
+    }, 250);
   };
 
   $: {
@@ -88,11 +92,7 @@
 </script>
 
 <dialog class="sui popup" bind:this={dialog} class:open={showDialog} {...$$restProps}>
-  <!-- Prevent the first item in the slot, e.g. a menu item, from being focused by adding `tabindex`
-    to the container -->
-  <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
   <div
-    tabindex="0"
     class="content {contentType}"
     style:inset={$style.inset}
     style:z-index={$style.zIndex}

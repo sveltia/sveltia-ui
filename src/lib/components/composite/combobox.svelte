@@ -51,19 +51,6 @@
   /** @type {(Popup| undefined)} */
   let popupComponent;
   let isPopupOpen = writable(false);
-
-  $: {
-    dispatch('change', { target: inputComponent?.element, value });
-  }
-
-  $: {
-    if (readOnly && value && popupComponent?.element) {
-      window.requestAnimationFrame(() => {
-        label =
-          popupComponent?.element.querySelector('[aria-selected="true"] .label')?.textContent || '';
-      });
-    }
-  }
 </script>
 
 <div class="sui combobox {className}">
@@ -72,7 +59,7 @@
       class:selected={value !== undefined}
       role="combobox"
       {id}
-      tabindex="0"
+      tabindex={disabled ? -1 : 0}
       aria-controls="{id}-popup"
       aria-expanded={$isPopupOpen}
       aria-disabled={disabled ? true : undefined}
@@ -102,6 +89,7 @@
   {/if}
   <Button
     {disabled}
+    tabindex={readOnly || disabled ? -1 : 0}
     aria-controls="{id}-popup"
     aria-expanded={$isPopupOpen}
     aria-disabled={disabled ? true : undefined}
@@ -131,7 +119,10 @@
   <Listbox
     on:click={({ target }) => {
       if (target.matches('[role="option"]')) {
-        value = target.value;
+        // @todo support more types
+        value = target.dataset.type === 'number' ? Number(target.value) : target.value;
+        label = target.querySelector('.label')?.textContent || target.value;
+        dispatch('change', { target: inputComponent?.element, value });
       }
     }}
   >
@@ -144,6 +135,7 @@
     display: flex;
     align-items: center;
     position: relative;
+    min-width: var(--combobox-min-width, 160px);
 
     :global(.icon) {
       font-size: 20px;
@@ -171,6 +163,7 @@
       padding: 0 32px 0 8px;
       width: 100%;
       height: var(--input--medium--height);
+      background-color: var(--control-background-color);
       -webkit-user-select: none;
       user-select: none;
       cursor: pointer;

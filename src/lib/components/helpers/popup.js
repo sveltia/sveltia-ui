@@ -98,6 +98,17 @@ class Popup {
       }
     });
 
+    this.anchorElement.addEventListener('keydown', (event) => {
+      const { key, ctrlKey, metaKey, shiftKey, altKey } = event;
+
+      if (!ctrlKey && !metaKey && !shiftKey && !altKey) {
+        if (key === ' ' || key === 'Enter') {
+          event.stopPropagation();
+          this.open.set(!get(this.open));
+        }
+      }
+    });
+
     this.popupElement.addEventListener('click', (event) => {
       if (get(this.open) && event.target !== this.anchorElement) {
         this.open.set(false);

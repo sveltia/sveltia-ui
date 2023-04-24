@@ -212,6 +212,11 @@
       }
     }
 
+    &:global(.pill) {
+      border-radius: var(--button--medium--pill--height, 16px);
+      padding: var(--button--medium--pill--padding, 0 16px);
+    }
+
     &:global(.link) {
       color: var(--primary-accent-color-lighter);
     }

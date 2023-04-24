@@ -14,6 +14,8 @@
 
   export { className as class };
 
+  export let label = '';
+  export let value = undefined;
   export let selected = false;
 </script>
 
@@ -21,6 +23,9 @@
   <Button
     role="option"
     aria-selected={selected}
+    {label}
+    {value}
+    data-type={typeof value}
     {...$$restProps}
     on:click
     on:dragover
@@ -50,6 +55,7 @@
       padding: 0 8px 0 16px;
       width: 100%;
       height: var(--option--medium--height);
+      white-space: nowrap;
     }
 
     :global([role='option']:hover) {

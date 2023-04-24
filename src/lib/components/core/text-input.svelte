@@ -51,6 +51,7 @@
     type="text"
     {role}
     name={name || undefined}
+    tabindex={disabled ? -1 : 0}
     {readOnly}
     aria-readonly={readOnly ? true : undefined}
     {disabled}

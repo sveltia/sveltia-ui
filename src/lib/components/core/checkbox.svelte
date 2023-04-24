@@ -29,6 +29,9 @@
   /** @type {Boolean} */
   export let indeterminate = false;
 
+  /** @type {Boolean} */
+  export let disabled = false;
+
   const dispatch = createEventDispatcher();
   const id = getRandomId('checkbox');
   /** @type {Button} */
@@ -42,6 +45,9 @@
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <label
   class="sui checkbox {className}"
+  class:checked
+  class:indeterminate
+  class:disabled
   on:click|preventDefault|stopPropagation={(event) => {
     if (!event.target.matches('button')) {
       button.element.click();
@@ -50,6 +56,7 @@
 >
   <Button
     {id}
+    {disabled}
     role="checkbox"
     aria-checked={indeterminate ? 'mixed' : checked}
     aria-labelledby="{id}-label"
@@ -80,6 +87,10 @@
     cursor: pointer;
     -webkit-user-select: none;
     user-select: none;
+
+    &.disabled {
+      cursor: default;
+    }
 
     :global(button) {
       align-items: center;
