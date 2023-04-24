@@ -19,6 +19,12 @@
   export let dialog = undefined;
 
   /**
+   * Reference to the content element.
+   * @type {(HTMLElement|undefined)}
+   */
+  export let content = undefined;
+
+  /**
    * Where to show the dropdown menu.
    * @type {PopupPosition}
    */
@@ -60,17 +66,19 @@
     });
   };
 
-  const closeDialog = () => {
+  const closeDialog = async () => {
     showDialog = false;
 
-    closeDialogTimer = window.setTimeout(() => {
-      showContent = false;
-      dialog?.close();
-      dialog?.remove();
-    }, 250);
+    await new Promise((resolve) => {
+      content.addEventListener('transitionend', () => resolve(), { once: true });
+    });
+
+    showContent = false;
+    dialog?.close();
+    dialog?.remove();
   };
 
-  $: {
+  const toggleDialog = () => {
     if (dialog) {
       if ($open) {
         openDialog();
@@ -78,7 +86,10 @@
         closeDialog();
       }
     }
-  }
+  };
+
+  // Call the function only when the `$open` prop is changed
+  $: toggleDialog($open);
 
   onMount(() => {
     dialog.remove();
@@ -93,6 +104,7 @@
 
 <dialog class="sui popup" bind:this={dialog} class:open={showDialog} {...$$restProps}>
   <div
+    bind:this={content}
     class="content {contentType}"
     style:inset={$style.inset}
     style:z-index={$style.zIndex}

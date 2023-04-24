@@ -49,47 +49,62 @@
   const dispatch = createEventDispatcher();
   /** @type {?HTMLDialogElement} */
   let dialog;
+  /** @type {?HTMLFormElement} */
+  let form;
   let showDialog = false;
   let showContent = false;
   let closeDialogTimer = 0;
 
-  $: {
+  const openDialog = async () => {
+    window.clearTimeout(closeDialogTimer);
+    (document.querySelector('.sui.app-shell') || document.body).appendChild(dialog);
+    showContent = true;
+
+    if (modal) {
+      dialog.showModal();
+    } else {
+      dialog.show();
+    }
+
+    window.requestAnimationFrame(() => {
+      showDialog = true;
+    });
+  };
+
+  const closeDialog = async () => {
+    showDialog = false;
+
+    if (dialog.returnValue === 'ok') {
+      dispatch('ok');
+    }
+
+    if (dialog.returnValue === 'cancel') {
+      dispatch('cancel');
+    }
+
+    dispatch('close', dialog.returnValue);
+
+    await new Promise((resolve) => {
+      form.addEventListener('transitionend', () => resolve(), { once: true });
+    });
+
+    showContent = false;
+    dialog?.close();
+    dialog?.remove();
+  };
+
+  const toggleDialog = () => {
     if (dialog) {
       if (open) {
-        window.clearTimeout(closeDialogTimer);
-        (document.querySelector('.sui.app-shell') || document.body).appendChild(dialog);
-        showContent = true;
-
-        if (modal) {
-          dialog.showModal();
-        } else {
-          dialog.show();
-        }
-
-        window.requestAnimationFrame(() => {
-          showDialog = true;
-        });
+        openDialog();
       } else {
-        showDialog = false;
-
-        closeDialogTimer = window.setTimeout(() => {
-          showContent = false;
-          dialog?.close();
-          dialog?.remove();
-        }, 500);
-
-        if (dialog.returnValue === 'ok') {
-          dispatch('ok');
-        }
-
-        if (dialog.returnValue === 'cancel') {
-          dispatch('cancel');
-        }
-
-        dispatch('close', dialog.returnValue);
+        closeDialog();
       }
     }
-  }
+  };
+
+  // Call the function only when the `open` prop is changed
+  $: toggleDialog(open);
 
   onMount(() => {
     dialog.remove();
@@ -113,12 +128,12 @@
       open = false;
     }
   }}
-  on:cancel={() => {
+  on:cancel|preventDefault={() => {
     // Cancelled with the Escape key
     open = false;
   }}
 >
-  <form method="dialog" on:submit|preventDefault>
+  <form method="dialog" bind:this={form} on:submit|preventDefault>
     {#if showContent}
       {#if title || showClose || $$slots.header || $$slots['header-extra']}
         <div class="header">
@@ -192,6 +207,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
+    outline: 0;
     background-color: var(--popup-backdrop-color);
 
     &.open {
