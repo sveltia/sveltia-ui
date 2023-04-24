@@ -133,6 +133,11 @@
       "svelte": "./package/components/core/dialog.svelte",
       "default": "./package/components/core/dialog.svelte"
     },
+    "./components/core/drawer.svelte": {
+      "types": "./package/components/core/drawer.svelte.d.ts",
+      "svelte": "./package/components/core/drawer.svelte",
+      "default": "./package/components/core/drawer.svelte"
+    },
     "./components/core/grid-cell.svelte": {
       "types": "./package/components/core/grid-cell.svelte.d.ts",
       "svelte": "./package/components/core/grid-cell.svelte",
@@ -359,6 +364,9 @@
       ],
       "components/core/dialog.svelte": [
         "./package/components/core/dialog.svelte.d.ts"
+      ],
+      "components/core/drawer.svelte": [
+        "./package/components/core/drawer.svelte.d.ts"
       ],
       "components/core/grid-cell.svelte": [
         "./package/components/core/grid-cell.svelte.d.ts"

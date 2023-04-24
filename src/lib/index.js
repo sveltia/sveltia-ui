@@ -37,6 +37,7 @@ export { default as TabList } from './components/composite/tab-list.svelte';
 export { default as Button } from './components/core/button.svelte';
 export { default as Checkbox } from './components/core/checkbox.svelte';
 export { default as Dialog } from './components/core/dialog.svelte';
+export { default as Drawer } from './components/core/drawer.svelte';
 export { default as GridCell } from './components/core/grid-cell.svelte';
 export { default as Group } from './components/core/group.svelte';
 export { default as Icon } from './components/core/icon.svelte';

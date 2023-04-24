@@ -5,7 +5,9 @@
     Checkbox,
     CheckboxGroup,
     Combobox,
+    Dialog,
     Disclosure,
+    Drawer,
     Icon,
     Listbox,
     MarkdownEditor,
@@ -32,6 +34,9 @@
     TextArea,
     TextInput,
   } from '$lib';
+
+  let openStandardDialog = false;
+  const openStandardDrawer = { top: false, right: false, bottom: false, left: false };
 </script>
 
 <svelte:head>
@@ -397,7 +402,72 @@
       <div class="row">
         <section>
           <h4>Standard</h4>
-          <div><Button class="secondary" label="Show Dialog" /></div>
+          <div>
+            <Button
+              class="secondary"
+              label="Show Dialog"
+              on:click={() => {
+                openStandardDialog = true;
+              }}
+            />
+            <Dialog bind:open={openStandardDialog} title="Standard Dialog">Hello</Dialog>
+          </div>
+        </section>
+      </div>
+    </section>
+    <section>
+      <h3>Drawer</h3>
+      <div class="row">
+        <section>
+          <h4>Standard</h4>
+          <div>
+            <Button
+              class="secondary"
+              label="Show Drawer: right"
+              on:click={() => {
+                openStandardDrawer.right = true;
+              }}
+            />
+            <Drawer bind:open={openStandardDrawer.right} title="Drawer" position="right">
+              Hello World!
+            </Drawer>
+          </div>
+          <div>
+            <Button
+              class="secondary"
+              label="Show Drawer: left"
+              on:click={() => {
+                openStandardDrawer.left = true;
+              }}
+            />
+            <Drawer bind:open={openStandardDrawer.left} title="Drawer" position="left">
+              Hello World!
+            </Drawer>
+          </div>
+          <div>
+            <Button
+              class="secondary"
+              label="Show Drawer: top"
+              on:click={() => {
+                openStandardDrawer.top = true;
+              }}
+            />
+            <Drawer bind:open={openStandardDrawer.top} title="Drawer" position="top">
+              Hello World!
+            </Drawer>
+          </div>
+          <div>
+            <Button
+              class="secondary"
+              label="Show Drawer: bottom"
+              on:click={() => {
+                openStandardDrawer.bottom = true;
+              }}
+            />
+            <Drawer bind:open={openStandardDrawer.bottom} title="Drawer" position="bottom">
+              Hello World!
+            </Drawer>
+          </div>
         </section>
       </div>
     </section>
