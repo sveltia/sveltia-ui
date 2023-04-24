@@ -58,12 +58,10 @@
   let form;
   let showDialog = false;
   let showContent = false;
-  let closeDialogTimer = 0;
 
   $: orientation = position === 'right' || position === 'left' ? 'vertical' : 'horizontal';
 
   const openDialog = async () => {
-    window.clearTimeout(closeDialogTimer);
     (document.querySelector('.sui.app-shell') || document.body).appendChild(dialog);
     showContent = true;
     dialog.showModal();

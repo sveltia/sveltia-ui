@@ -53,10 +53,8 @@
   let form;
   let showDialog = false;
   let showContent = false;
-  let closeDialogTimer = 0;
 
   const openDialog = async () => {
-    window.clearTimeout(closeDialogTimer);
     (document.querySelector('.sui.app-shell') || document.body).appendChild(dialog);
     showContent = true;
 

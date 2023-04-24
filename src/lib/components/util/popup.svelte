@@ -35,7 +35,6 @@
   let showDialog = false;
   let showContent = false;
   let contentType;
-  let closeDialogTimer = 0;
 
   let style = writable({
     inset: undefined,
@@ -52,7 +51,6 @@
   }
 
   const openDialog = () => {
-    window.clearTimeout(closeDialogTimer);
     (document.querySelector('.sui.app-shell') || document.body).appendChild(dialog);
     showContent = true;
     dialog.showModal();
