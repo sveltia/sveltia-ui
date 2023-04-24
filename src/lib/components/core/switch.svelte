@@ -46,6 +46,10 @@
   input {
     position: absolute;
     left: -99999px;
+
+    &:focus + span {
+      background-color: var(--highlight-background-color);
+    }
   }
 
   input:checked + span {
@@ -71,6 +75,10 @@
     border-radius: 16px;
     background-color: var(--control-border-color);
     transition: all 200ms;
+
+    &:hover {
+      background-color: var(--highlight-background-color);
+    }
 
     &::before {
       display: inline-block;

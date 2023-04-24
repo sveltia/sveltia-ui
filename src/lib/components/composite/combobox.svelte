@@ -158,6 +158,10 @@
       background-color: transparent;
     }
 
+    & > :global(button[tabindex='-1']) {
+      pointer-events: none;
+    }
+
     div[role='combobox'] {
       display: flex;
       align-items: center;
@@ -171,9 +175,15 @@
       -webkit-user-select: none;
       user-select: none;
       cursor: pointer;
+      transition: all 200ms;
 
       &:not(.selected) {
         font-style: italic;
+      }
+
+      &:hover,
+      &:focus {
+        background-color: var(--highlight-background-color);
       }
 
       &[aria-disabled='true'] {

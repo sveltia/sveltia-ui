@@ -165,7 +165,8 @@
       color: var(--primary-accent-color-foreground);
       background-color: var(--primary-accent-color);
 
-      &:hover {
+      &:hover,
+      &:focus {
         background-color: var(--primary-accent-color-lighter);
       }
 
@@ -179,6 +180,11 @@
       color: var(--primary-accent-color-lighter);
       background-color: var(--tertiary-background-color);
 
+      &:hover,
+      &:focus {
+        background-color: var(--highlight-background-color);
+      }
+
       &[aria-pressed='true'] {
         background-color: var(--primary-accent-color);
       }
@@ -188,6 +194,11 @@
       border-color: var(--control-border-color);
       color: var(--highlight-foreground-color);
       background-color: var(--tertiary-background-color);
+
+      &:hover,
+      &:focus {
+        background-color: var(--highlight-background-color);
+      }
 
       &[aria-pressed='true'] {
         background-color: var(--highlight-background-color);
