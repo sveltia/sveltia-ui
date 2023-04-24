@@ -2,10 +2,11 @@ import { addMessages, init } from 'svelte-i18n';
 
 /**
  * Load strings and initialize the locales.
+ * @param {object} [init] Initialize options.
  * @see https://github.com/kaisermann/svelte-i18n/blob/main/docs/Getting%20Started.md
  * @see https://vitejs.dev/guide/features.html#glob-import
  */
-const initLocales = () => {
+export const initLocales = ({ fallbackLocale = 'en', initialLocale = 'en' } = {}) => {
   const modules = import.meta.glob('./locales/*.js', { eager: true });
 
   Object.entries(modules).forEach(([path, { strings }]) => {
@@ -16,12 +17,10 @@ const initLocales = () => {
   });
 
   init({
-    fallbackLocale: 'en',
-    initialLocale: 'en',
+    fallbackLocale,
+    initialLocale,
   });
 };
-
-initLocales();
 
 export { default as Calendar } from './components/composite/calendar.svelte';
 export { default as CheckboxGroup } from './components/composite/checkbox-group.svelte';

@@ -1,6 +1,8 @@
 <script>
   import { isLoading } from 'svelte-i18n';
-  import { AppShell } from '$lib';
+  import { AppShell, initLocales } from '$lib';
+
+  initLocales();
 </script>
 
 {#if !$isLoading}
