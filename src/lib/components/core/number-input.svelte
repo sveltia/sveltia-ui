@@ -50,7 +50,7 @@
     {disabled}
     role="spinbutton"
     aria-valuenow={Number(value || 0)}
-    aria-invalid={Number.isNaN(Number(value))}
+    aria-invalid={value !== undefined && Number.isNaN(Number(value))}
     {...$$restProps}
     on:keydown={(event) => {
       const { key, ctrlKey, metaKey, altKey, shiftKey } = event;
