@@ -22,6 +22,8 @@ export const initLocales = ({ fallbackLocale = 'en', initialLocale = 'en' } = {}
   });
 };
 
+initLocales();
+
 export { default as Calendar } from './components/composite/calendar.svelte';
 export { default as CheckboxGroup } from './components/composite/checkbox-group.svelte';
 export { default as Combobox } from './components/composite/combobox.svelte';
