@@ -12,38 +12,38 @@
   export let disabled = false;
 
   const defaultButtons = [
-    { name: 'bold', label: $_('sui.markdown_editor.bold'), icon: 'format_bold' },
-    { name: 'italic', label: $_('sui.markdown_editor.italic'), icon: 'format_italic' },
-    { name: 'code', label: $_('sui.markdown_editor.code'), icon: 'code' },
-    { name: 'link', label: $_('sui.markdown_editor.link'), icon: 'link' },
+    { name: 'bold', label: $_('_sui.markdown_editor.bold'), icon: 'format_bold' },
+    { name: 'italic', label: $_('_sui.markdown_editor.italic'), icon: 'format_italic' },
+    { name: 'code', label: $_('_sui.markdown_editor.code'), icon: 'code' },
+    { name: 'link', label: $_('_sui.markdown_editor.link'), icon: 'link' },
     { separator: true },
     {
       name: 'heading-one',
-      label: $_('sui.markdown_editor.heading_x', { values: { level: 1 } }),
+      label: $_('_sui.markdown_editor.heading_x', { values: { level: 1 } }),
       icon: 'format_h1',
     },
     {
       name: 'heading-two',
-      label: $_('sui.markdown_editor.heading_x', { values: { level: 2 } }),
+      label: $_('_sui.markdown_editor.heading_x', { values: { level: 2 } }),
       icon: 'format_h2',
     },
-    { name: 'quote', label: $_('sui.markdown_editor.quote'), icon: 'format_quote' },
+    { name: 'quote', label: $_('_sui.markdown_editor.quote'), icon: 'format_quote' },
     { separator: true },
     {
       name: 'bulleted-list',
-      label: $_('sui.markdown_editor.bulleted_list'),
+      label: $_('_sui.markdown_editor.bulleted_list'),
       icon: 'format_list_bulleted',
     },
     {
       name: 'numbered-list',
-      label: $_('sui.markdown_editor.numbered_list'),
+      label: $_('_sui.markdown_editor.numbered_list'),
       icon: 'format_list_numbered',
     },
   ];
 </script>
 
 <div>
-  <Toolbar aria-label={$_('sui.markdown_editor.markdown_editor')}>
+  <Toolbar aria-label={$_('_sui.markdown_editor.markdown_editor')}>
     {#each defaultButtons as { label, icon, separator }}
       {#if separator}
         <Separator />

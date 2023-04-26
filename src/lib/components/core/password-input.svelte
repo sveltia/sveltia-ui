@@ -52,7 +52,7 @@
     <Icon
       slot="start-icon"
       name={passwordVisible ? 'visibility_off' : 'visibility'}
-      label={$_('sui.password_input.show_password')}
+      label={$_('_sui.password_input.show_password')}
     />
   </Button>
 </div>

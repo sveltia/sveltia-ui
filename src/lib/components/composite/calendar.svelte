@@ -50,21 +50,21 @@
       <Icon slot="end-icon" name="arrow_drop_down" />
       <!-- svelte-ignore a11y-click-events-have-key-events -->
       <div slot="popup" class="popup-inner" on:click|stopPropagation>
-        <div role="group" aria-label={$_('sui.calendar.year')}>
+        <div role="group" aria-label={$_('_sui.calendar.year')}>
           <div class="header">
             <Button
               on:click={() => {
                 //
               }}
             >
-              <Icon name="chevron_left" label={$_('sui.calendar.previous_decade')} />
+              <Icon name="chevron_left" label={$_('_sui.calendar.previous_decade')} />
             </Button>
             <Button
               on:click={() => {
                 //
               }}
             >
-              <Icon name="chevron_right" label={$_('sui.calendar.next_decade')} />
+              <Icon name="chevron_right" label={$_('_sui.calendar.next_decade')} />
             </Button>
           </div>
           <div class="grid">
@@ -76,7 +76,7 @@
           </div>
         </div>
         <Separator orientation="vertical" />
-        <div role="group" aria-label={$_('sui.calendar.month')}>
+        <div role="group" aria-label={$_('_sui.calendar.month')}>
           <div class="grid">
             {#each [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] as month}
               <div>
@@ -97,7 +97,7 @@
         firstDay = firstDay;
       }}
     >
-      <Icon name="chevron_left" label={$_('sui.calendar.previous_month')} />
+      <Icon name="chevron_left" label={$_('_sui.calendar.previous_month')} />
     </Button>
     <Button
       on:click={() => {
@@ -105,7 +105,7 @@
         firstDay = firstDay;
       }}
     >
-      <Icon name="chevron_right" label={$_('sui.calendar.next_month')} />
+      <Icon name="chevron_right" label={$_('_sui.calendar.next_month')} />
     </Button>
   </div>
   <div class="grid" role="listbox">
@@ -139,7 +139,7 @@
         value = '';
       }}
     >
-      {$_('sui._.clear')}
+      {$_('_sui._.clear')}
     </Button>
     <Spacer flex={true} />
     <Button
@@ -147,7 +147,7 @@
         [value] = now.toJSON().split('T');
       }}
     >
-      {$_('sui.calendar.today')}
+      {$_('_sui.calendar.today')}
     </Button>
   </div>
 </div>

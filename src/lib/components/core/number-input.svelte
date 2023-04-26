@@ -75,7 +75,7 @@
       decrease();
     }}
   >
-    <Icon slot="start-icon" name="arrow_downward" label={$_('sui.number_input.decrease')} />
+    <Icon slot="start-icon" name="arrow_downward" label={$_('_sui.number_input.decrease')} />
   </Button>
   <Button
     class="iconic"
@@ -84,7 +84,7 @@
       increase();
     }}
   >
-    <Icon slot="start-icon" name={'arrow_upward'} label={$_('sui.number_input.increase')} />
+    <Icon slot="start-icon" name={'arrow_upward'} label={$_('_sui.number_input.increase')} />
   </Button>
 </div>
 

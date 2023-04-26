@@ -57,7 +57,7 @@
         });
       }}
     >
-      <Icon slot="start-icon" name="close" label={$_('sui._.clear')} />
+      <Icon slot="start-icon" name="close" label={$_('_sui._.clear')} />
     </Button>
   {/if}
 </div>

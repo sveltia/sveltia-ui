@@ -12,8 +12,8 @@ export const initLocales = ({ fallbackLocale = 'en', initialLocale = 'en' } = {}
   Object.entries(modules).forEach(([path, { strings }]) => {
     const [, locale] = path.match(/([a-zA-Z-]+)\.js/);
 
-    // Add `sui` suffix to avoid collision with app localization
-    addMessages(locale, { sui: strings });
+    // Add `_sui` suffix to avoid collision with app localization
+    addMessages(locale, { _sui: strings });
   });
 
   init({

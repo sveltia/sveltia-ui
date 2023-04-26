@@ -69,7 +69,7 @@
       bind:this={comboboxElement}
     >
       <div class="label">
-        {value !== undefined ? label || value : $_('sui.combobox.select_an_option')}
+        {value !== undefined ? label || value : $_('_sui.combobox.select_an_option')}
       </div>
     </div>
   {:else}
@@ -105,7 +105,7 @@
     <Icon
       slot="start-icon"
       name="expand_more"
-      label={$isPopupOpen ? $_('sui._.collapse') : $_('sui._.expand')}
+      label={$isPopupOpen ? $_('_sui._.collapse') : $_('_sui._.expand')}
     />
   </Button>
 </div>

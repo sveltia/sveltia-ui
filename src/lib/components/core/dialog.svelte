@@ -153,7 +153,7 @@
                   open = false;
                 }}
               >
-                <Icon slot="start-icon" name="close" label={$_('sui._.close')} />
+                <Icon slot="start-icon" name="close" label={$_('_sui._.close')} />
               </Button>
             {/if}
           {/if}
@@ -174,7 +174,7 @@
             {#if showOk}
               <Button
                 class="primary"
-                label={okLabel || $_('sui._.ok')}
+                label={okLabel || $_('_sui._.ok')}
                 disabled={okDisabled}
                 on:click={() => {
                   dialog.returnValue = 'ok';
@@ -185,7 +185,7 @@
             {#if showCancel}
               <Button
                 class="secondary"
-                label={cancelLabel || $_('sui._.cancel')}
+                label={cancelLabel || $_('_sui._.cancel')}
                 disabled={cancelDisabled}
                 on:click={() => {
                   dialog.returnValue = 'cancel';

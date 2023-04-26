@@ -143,7 +143,7 @@
             open = false;
           }}
         >
-          <Icon slot="start-icon" name="close" label={$_('sui._.close')} />
+          <Icon slot="start-icon" name="close" label={$_('_sui._.close')} />
         </Button>
       {/if}
     </div>
@@ -168,7 +168,7 @@
                   open = false;
                 }}
               >
-                <Icon slot="start-icon" name="close" label={$_('sui._.close')} />
+                <Icon slot="start-icon" name="close" label={$_('_sui._.close')} />
               </Button>
             {/if}
           {/if}
