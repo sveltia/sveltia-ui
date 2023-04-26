@@ -147,7 +147,7 @@
             {/if}
             {#if showClose}
               <Button
-                class="tertiary iconic"
+                class="ghost iconic"
                 on:click={() => {
                   dialog.returnValue = 'close';
                   open = false;

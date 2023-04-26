@@ -137,7 +137,7 @@
     <div class="extra-control">
       {#if showClose === 'outside'}
         <Button
-          class="iconic close"
+          class="ghost iconic close"
           on:click={() => {
             dialog.returnValue = 'close';
             open = false;
@@ -162,7 +162,7 @@
             {/if}
             {#if showClose === 'inside'}
               <Button
-                class="tertiary iconic close"
+                class="ghost iconic close"
                 on:click={() => {
                   dialog.returnValue = 'close';
                   open = false;

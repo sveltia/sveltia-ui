@@ -43,7 +43,7 @@
   <input type="hidden" bind:value />
   <div class="header">
     <Button
-      class="tertiary"
+      class="ghost"
       label={firstDay.toLocaleDateString('en', { year: 'numeric', month: 'short' })}
       aria-haspopup="dialog"
     >

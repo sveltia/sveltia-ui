@@ -93,7 +93,7 @@
     aria-controls="{id}-popup"
     aria-expanded={$isPopupOpen}
     aria-disabled={disabled ? true : undefined}
-    class="tertiary iconic"
+    class="ghost iconic"
     on:click={(event) => {
       event.stopPropagation();
 
@@ -154,8 +154,6 @@
       z-index: 1;
       border-top-left-radius: 0;
       border-bottom-left-radius: 0;
-      border-width: 0;
-      background-color: transparent;
     }
 
     & > :global(button[tabindex='-1']) {

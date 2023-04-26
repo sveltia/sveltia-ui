@@ -148,7 +148,8 @@
 
     &:global(.primary),
     &:global(.secondary),
-    &:global(.tertiary) {
+    &:global(.tertiary),
+    &:global(.ghost) {
       justify-content: center;
       border-width: 1px;
       border-radius: var(--button--medium--border-radius);
@@ -166,7 +167,7 @@
       background-color: var(--primary-accent-color);
 
       &:hover,
-      &:focus {
+      &:focus-visible {
         background-color: var(--primary-accent-color-lighter);
       }
 
@@ -181,7 +182,7 @@
       background-color: var(--tertiary-background-color);
 
       &:hover,
-      &:focus {
+      &:focus-visible {
         background-color: var(--highlight-background-color);
       }
 
@@ -196,7 +197,18 @@
       background-color: var(--tertiary-background-color);
 
       &:hover,
-      &:focus {
+      &:focus-visible {
+        background-color: var(--highlight-background-color);
+      }
+
+      &[aria-pressed='true'] {
+        background-color: var(--highlight-background-color);
+      }
+    }
+
+    &:global(.ghost) {
+      &:hover,
+      &:focus-visible {
         background-color: var(--highlight-background-color);
       }
 

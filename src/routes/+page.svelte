@@ -126,7 +126,8 @@
           <div>
             <Button class="primary" label="Primary" />
             <Button class="secondary" label="Secondary" />
-            <Button class="tertiary" label="tertiary" />
+            <Button class="tertiary" label="Tertiary" />
+            <Button class="ghost" label="Ghost" />
           </div>
         </section>
         <section>
@@ -138,7 +139,7 @@
             <Button class="primary" label="Add">
               <Icon slot="end-icon" name="add" />
             </Button>
-            <Button class="secondary">
+            <Button class="secondary iconic">
               <Icon slot="end-icon" name="delete" label="Delete" />
             </Button>
           </div>
