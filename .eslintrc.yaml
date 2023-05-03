@@ -1,24 +1,18 @@
 root: true
-parser: "@babel/eslint-parser"
 parserOptions:
   requireConfigFile: false
   sourceType: module
-  ecmaVersion: 2020
-  ecmaFeatures:
-    modules: true
+  ecmaVersion: latest
 extends:
-  - eslint:recommended
-  - plugin:import/recommended
-  - eslint-config-airbnb-base
+  - airbnb-base
   - prettier
+  - plugin:jsdoc/recommended
+  - plugin:svelte/recommended
+  - plugin:svelte/prettier
 plugins:
-  - svelte3
+  - jsdoc
 ignorePatterns:
   - "*.cjs"
-overrides:
-  - files:
-      - "*.svelte"
-    processor: svelte3/svelte3
 env:
   browser: true
   es2017: true
@@ -26,16 +20,32 @@ env:
 rules:
   class-methods-use-this: off
   import/extensions: off
-  import/first: off
   import/no-extraneous-dependencies: off
   import/no-mutable-exports: off
   import/no-unresolved: off
   import/prefer-default-export: off
+  jsdoc/no-undefined-types: off
+  jsdoc/require-jsdoc:
+    - warn
+    - require:
+        ArrowFunctionExpression: true
+        ClassDeclaration: true
+        ClassExpression: true
+        FunctionDeclaration: true
+        FunctionExpression: true
+        MethodDefinition: true
+  jsdoc/valid-types: off
   max-len:
     - error
     - code: 100
       tabWidth: 2
       ignoreUrls: true
+      ignoreStrings: true
+  no-param-reassign: off
+  # https://github.com/sveltejs/eslint-plugin-svelte#white_check_mark-rules
+  svelte/no-at-html-tags: off
+  # https://svelte.dev/docs#component-format-script
+  no-undef-init: off
   no-underscore-dangle: off
   # https://github.com/airbnb/javascript/issues/1660#issuecomment-353018874 + small tweaks
   padding-line-between-statements:
@@ -80,5 +90,3 @@ rules:
       next:
         - export
         - import
-  # https://svelte.dev/docs#component-format-script
-  no-undef-init: off

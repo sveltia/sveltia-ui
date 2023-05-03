@@ -8,6 +8,9 @@ import { getRandomId } from './util';
  * @typedef {('top-left'|'top-right'|'right-top'|'right-bottom'|'bottom-left'|'bottom-right'|'left-top'|'left-bottom')} PopupPosition
  */
 
+/**
+ *
+ */
 class Popup {
   open = writable(false);
 
@@ -160,6 +163,8 @@ class Popup {
 }
 
 /**
- *
+ * Activate a new popup.
+ * @param {...any} args Arguments.
+ * @returns {Popup} New popup.
  */
 export const activatePopup = (...args) => new Popup(...args);

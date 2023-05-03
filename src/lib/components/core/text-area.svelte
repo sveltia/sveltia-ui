@@ -9,9 +9,8 @@
 
   /**
    * CSS class name on the button.
-   * @type {String}
+   * @type {string}
    */
-  // eslint-disable-next-line padding-line-between-statements
   let className = '';
 
   export { className as class };
@@ -21,12 +20,12 @@
 
   export let name = '';
 
-  /** @type {(String|undefined)} */
+  /** @type {(string | undefined)} */
   export let value = undefined;
 
   export let autoResize = false;
 
-  /** @type {(String|undefined)} */
+  /** @type {(string | undefined)} */
   let height;
   /** @type {(HTMLTextAreaElement|undefined)} */
   let outer = undefined;

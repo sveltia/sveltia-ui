@@ -2,6 +2,8 @@ useTabs: false
 singleQuote: true
 trailingComma: all
 printWidth: 100
+plugins:
+  - prettier-plugin-svelte
 overrides:
   - files:
       - "*.css"
@@ -10,6 +12,6 @@ overrides:
     options:
       singleQuote: false
   - files:
-      - "*.svelte"
+      - "*.md"
     options:
-      parser: svelte
+      proseWrap: never

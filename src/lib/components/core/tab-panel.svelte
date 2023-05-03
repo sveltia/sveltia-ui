@@ -6,9 +6,8 @@
 <script>
   /**
    * CSS class name on the button.
-   * @type {String}
+   * @type {string}
    */
-  // eslint-disable-next-line padding-line-between-statements
   let className = '';
 
   export { className as class };

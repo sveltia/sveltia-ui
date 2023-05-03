@@ -11,25 +11,25 @@
 
   /**
    * CSS class name on the button.
-   * @type {String}
+   * @type {string}
    */
   let className = '';
 
   export { className as class };
 
-  /** @type {String} */
+  /** @type {string} */
   export let name = '';
 
-  /** @type {(String|undefined)} */
+  /** @type {(string | undefined)} */
   export let value = undefined;
 
-  /** @type {(Boolean|String|undefined)} */
+  /** @type {(boolean | string | undefined)} */
   export let checked = false;
 
-  /** @type {Boolean} */
+  /** @type {boolean} */
   export let indeterminate = false;
 
-  /** @type {Boolean} */
+  /** @type {boolean} */
   export let disabled = false;
 
   const dispatch = createEventDispatcher();

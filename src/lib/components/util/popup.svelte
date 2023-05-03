@@ -50,6 +50,9 @@
     }
   }
 
+  /**
+   *
+   */
   const openDialog = () => {
     (document.querySelector('.sui.app-shell') || document.body).appendChild(dialog);
     showContent = true;
@@ -64,6 +67,9 @@
     });
   };
 
+  /**
+   *
+   */
   const closeDialog = async () => {
     showDialog = false;
 
@@ -76,6 +82,9 @@
     dialog?.remove();
   };
 
+  /**
+   *
+   */
   const toggleDialog = () => {
     if (dialog) {
       if ($open) {

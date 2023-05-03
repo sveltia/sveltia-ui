@@ -12,7 +12,7 @@
 
   /**
    * CSS class name on the button.
-   * @type {String}
+   * @type {string}
    */
   let className = '';
 
@@ -61,6 +61,9 @@
 
   $: orientation = position === 'right' || position === 'left' ? 'vertical' : 'horizontal';
 
+  /**
+   *
+   */
   const openDialog = async () => {
     (document.querySelector('.sui.app-shell') || document.body).appendChild(dialog);
     showContent = true;
@@ -71,6 +74,9 @@
     });
   };
 
+  /**
+   *
+   */
   const closeDialog = async () => {
     showDialog = false;
 
@@ -93,6 +99,9 @@
     dialog?.remove();
   };
 
+  /**
+   *
+   */
   const toggleDialog = () => {
     if (dialog) {
       if (open) {

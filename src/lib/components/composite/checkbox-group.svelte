@@ -5,16 +5,15 @@
 <script>
   /**
    * CSS class name on the button.
-   * @type {String}
+   * @type {string}
    */
-  // eslint-disable-next-line padding-line-between-statements
   let className = '';
 
   export { className as class };
 
   /**
    * The `aria-label` attribute on the button element.
-   * @type {String}
+   * @type {string}
    */
   export let ariaLabel = '';
 

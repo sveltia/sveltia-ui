@@ -12,7 +12,7 @@
 
   /**
    * CSS class name on the button.
-   * @type {String}
+   * @type {string}
    */
   let className = '';
 

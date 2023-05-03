@@ -10,7 +10,7 @@
 
   /**
    * CSS class name on the button.
-   * @type {String}
+   * @type {string}
    */
   let className = '';
 
@@ -39,6 +39,10 @@
   let dragging = false;
   let targetValueIndex = 0;
 
+  /**
+   *
+   * @param {number} diff
+   */
   const dragSlider = (diff) => {
     if (diff >= 0 && diff <= barWidth) {
       const fromIndex = positionList.findLastIndex((s) => s <= diff);
@@ -70,6 +74,11 @@
     }
   };
 
+  /**
+   *
+   * @param {MouseEvent} event `keydown` event.
+   * @param {number} [valueIndex]
+   */
   const onKeyDown = (event, valueIndex = 0) => {
     const { key, shiftKey, altKey, ctrlKey, metaKey } = event;
 
@@ -118,6 +127,11 @@
     }
   };
 
+  /**
+   *
+   * @param {MouseEvent} event `mousedown` event.
+   * @param {number} [valueIndex]
+   */
   const onMouseDown = (event, valueIndex = 0) => {
     const { clientX, screenX } = event;
 
@@ -127,12 +141,20 @@
     targetValueIndex = valueIndex;
   };
 
+  /**
+   *
+   * @param {MouseEvent} event `mousemove` event.
+   */
   const onMouseMove = (event) => {
     if (dragging) {
       dragSlider(startX + (event.screenX - startScreenX));
     }
   };
 
+  /**
+   *
+   * @param {MouseEvent} event `click` event.
+   */
   const onClick = (event) => {
     if (!multiThumb && !dragging) {
       dragSlider(event.layerX);

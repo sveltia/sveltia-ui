@@ -1,13 +1,13 @@
 <script>
   /**
    * CSS class name on the button.
-   * @type {String}
+   * @type {string}
    */
   let className = '';
 
   export { className as class };
 
-  /** @type {Boolean} */
+  /** @type {boolean} */
   export let flex = false;
 </script>
 

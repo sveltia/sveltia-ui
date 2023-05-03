@@ -7,7 +7,7 @@
 
   /**
    * CSS class name on the button.
-   * @type {String}
+   * @type {string}
    */
   let className = '';
 
@@ -17,7 +17,7 @@
 
   /**
    * Selected option’s value.
-   * @type {(String|undefined)}
+   * @type {(string | undefined)}
    */
   export let value = undefined;
 </script>

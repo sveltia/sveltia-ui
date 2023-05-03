@@ -6,7 +6,7 @@
   import TextArea from '../core/text-area.svelte';
   import Toolbar from '../core/toolbar.svelte';
 
-  /** @type {(String|undefined)} */
+  /** @type {(string | undefined)} */
   export let value = undefined;
 
   export let disabled = false;

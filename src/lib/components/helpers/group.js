@@ -43,7 +43,7 @@ const config = {
 class Group {
   /**
    *
-   * @param {HTMLElement} parent
+   * @param {HTMLElement} parent Parent element.
    * @todo Check for added elements probably with `MutationObserver`.
    */
   constructor(parent) {
@@ -106,7 +106,7 @@ class Group {
 
   /**
    *
-   * @param {KeyboardEvent}
+   * @param {MouseEvent} event `click` event.
    */
   onClick(event) {
     const { target } = event;
@@ -151,7 +151,7 @@ class Group {
 
   /**
    *
-   * @param {KeyboardEvent}
+   * @param {KeyboardEvent} event `keydown` event.
    */
   onKeyDown(event) {
     const { target, key, ctrlKey, metaKey, shiftKey, altKey } = event;
@@ -236,7 +236,9 @@ class Group {
 }
 
 /**
- *
+ * Activate a new group.
+ * @param {...any} args Arguments.
+ * @returns {Group} Created group.
  */
 export const activateGroup = async (...args) => {
   // Wait a bit before the relevant components, including the `aria-controls` target are mounted

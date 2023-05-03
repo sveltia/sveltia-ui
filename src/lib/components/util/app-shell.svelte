@@ -11,6 +11,9 @@
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
     const { dataset } = document.documentElement;
 
+    /**
+     *
+     */
     const applyTheme = () => {
       if (dataset.autoTheming !== 'false') {
         dataset.theme = mediaQuery.matches ? 'dark' : 'light';
@@ -19,6 +22,9 @@
 
     applyTheme();
 
+    /**
+     *
+     */
     mediaQuery.onchange = () => {
       applyTheme();
     };

@@ -5,7 +5,7 @@
   import Separator from '../core/separator.svelte';
   import Spacer from '../core/spacer.svelte';
 
-  /** @type {(String|undefined)} */
+  /** @type {(string|undefined)} */
   export let value = undefined;
 
   const dayList = [];
@@ -16,6 +16,9 @@
   $: firstDayOfMonth = new Date(date.getUTCFullYear(), date.getUTCMonth(), 1);
   $: firstDay = new Date(firstDayOfMonth);
 
+  /**
+   *
+   */
   const getWeeks = () => {
     const cursor = new Date(firstDay);
 

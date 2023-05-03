@@ -10,13 +10,13 @@
 
   /**
    * CSS class name on the button.
-   * @type {String}
+   * @type {string}
    */
   let className = '';
 
   export { className as class };
 
-  /** @type {(String|undefined)} */
+  /** @type {(string | undefined)} */
   export let value = undefined;
 
   export let disabled = false;
@@ -26,6 +26,9 @@
 
   let component;
 
+  /**
+   *
+   */
   const decrease = () => {
     if (typeof min === 'number' && Number(value || 0) === min) {
       return;
@@ -34,6 +37,9 @@
     value = String(Number(value || 0) - step);
   };
 
+  /**
+   *
+   */
   const increase = () => {
     if (typeof min === 'number' && Number(value || 0) === max) {
       return;

@@ -10,9 +10,8 @@
 
   /**
    * CSS class name on the button.
-   * @type {String}
+   * @type {string}
    */
-  // eslint-disable-next-line padding-line-between-statements
   let className = '';
 
   export { className as class };
@@ -31,7 +30,7 @@
 
   /**
    * The `role` attribute on the button element.
-   * @type {String}
+   * @type {string}
    */
   export let role = 'button';
 
@@ -43,25 +42,25 @@
 
   /**
    * Whether the button is hidden.
-   * @type {Boolean}
+   * @type {boolean}
    */
   export let hidden = false;
 
   /**
    * Whether the button is disabled.
-   * @type {Boolean}
+   * @type {boolean}
    */
   export let disabled = false;
 
   /**
    * The `aria-pressed` attribute on the button element.
-   * @type {(Boolean|String|undefined)}
+   * @type {(boolean | string | undefined)}
    */
   export let pressed = undefined;
 
   /**
    * Text label displayed on the button.
-   * @type {String}
+   * @type {string}
    */
   export let label = '';
 

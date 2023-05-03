@@ -9,7 +9,7 @@
 
   /**
    * CSS class name on the button.
-   * @type {String}
+   * @type {string}
    */
   let className = '';
 
@@ -30,7 +30,7 @@
 
   export let name = '';
 
-  /** @type {(String|undefined)} */
+  /** @type {(string | undefined)} */
   export let value = undefined;
 
   const id = getRandomId('input');
