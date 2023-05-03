@@ -5,6 +5,8 @@
 <svelte:options accessors={true} />
 
 <script>
+  import { onMount, tick } from 'svelte';
+
   /**
    * CSS class name on the button.
    * @type {String}
@@ -26,35 +28,67 @@
 
   /** @type {(String|undefined)} */
   let height;
+  /** @type {(HTMLTextAreaElement|undefined)} */
+  let outer = undefined;
+  let resizing = false;
+  let lastWidth = 0;
 
-  const resizeTextarea = () => {
+  /**
+   * Resize the `<textarea>` based on the filled text content.
+   */
+  const resizeTextarea = async () => {
+    resizing = true;
     height = 'auto';
 
-    window.requestAnimationFrame(() => {
-      height = value && element?.scrollHeight ? `${element.scrollHeight + 4}px` : undefined;
-    });
+    await tick();
+
+    height = value && element?.scrollHeight ? `${element.scrollHeight + 4}px` : undefined;
+    resizing = false;
   };
 
+  /**
+   * Call {@link resizeTextarea} whenever the text content is updated.
+   */
   $: {
-    if (value && autoResize) {
-      resizeTextarea();
+    if (autoResize) {
+      resizeTextarea(value);
     }
   }
+
+  /**
+   * Call {@link resizeTextarea} whenever it’s horizontally resized.
+   */
+  onMount(() => {
+    const observer = new ResizeObserver(([{ contentRect }]) => {
+      const { width } = contentRect;
+
+      if (autoResize && lastWidth !== width) {
+        lastWidth = width;
+        resizeTextarea();
+      }
+    });
+
+    observer.observe(outer);
+
+    // onUnmount
+    return () => {
+      observer.disconnect();
+    };
+  });
 </script>
 
-<div class="sui text-area {className}">
+<div class="sui text-area {className}" bind:this={outer}>
   <textarea
     name={name || undefined}
     {...$$restProps}
     style:height
+    class:resizing
     bind:this={element}
+    bind:value
     on:click
     on:input
     on:keypress
-    on:input={() => {
-      value = element.value;
-    }}>{value}</textarea
-  >
+  />
 </div>
 
 <style lang="scss">
@@ -80,6 +114,10 @@
     line-height: 1.75;
     resize: vertical;
     transition: all 200ms;
+
+    &.resizing {
+      transition-duration: 0ms;
+    }
 
     &:focus {
       border-color: var(--primary-accent-color);
