@@ -20,7 +20,7 @@
   /** @type {string} */
   export let name = '';
 
-  /** @type {(string | undefined)} */
+  /** @type {string?} */
   export let value = undefined;
 
   /** @type {(boolean | string | undefined)} */
@@ -49,7 +49,7 @@
   class:indeterminate
   class:disabled
   on:click|preventDefault|stopPropagation={(event) => {
-    if (!event.target.matches('button')) {
+    if (!(/** @type {HTMLElement} */ (event.target).matches('button'))) {
       button.element.click();
     }
   }}

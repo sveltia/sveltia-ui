@@ -15,7 +15,7 @@
 
   export { className as class };
 
-  /** @type {(HTMLInputElement|undefined)} */
+  /** @type {HTMLInputElement?} */
   export let element = undefined;
 
   /** @type {('textbox'|'searchbox'|'combobox'|'spinbutton')} */
@@ -30,7 +30,7 @@
 
   export let name = '';
 
-  /** @type {(string | undefined)} */
+  /** @type {(string | number | undefined)} */
   export let value = undefined;
 
   const id = getRandomId('input');
@@ -52,7 +52,7 @@
     {role}
     name={name || undefined}
     tabindex={disabled ? -1 : 0}
-    {readOnly}
+    readOnly={readOnly ? true : undefined}
     aria-readonly={readOnly ? true : undefined}
     {disabled}
     aria-disabled={disabled ? true : undefined}

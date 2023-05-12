@@ -9,18 +9,18 @@
   import { writable } from 'svelte/store';
   import { activatePopup } from '../helpers/popup';
 
-  /** @type {(HTMLElement|undefined)} */
+  /** @type {HTMLElement?} */
   export let anchor = undefined;
 
   /**
    * Reference to the popup element.
-   * @type {(HTMLElement|undefined)}
+   * @type {HTMLDialogElement?}
    */
   export let dialog = undefined;
 
   /**
    * Reference to the content element.
-   * @type {(HTMLElement|undefined)}
+   * @type {HTMLElement?}
    */
   export let content = undefined;
 
@@ -62,7 +62,7 @@
       showDialog = true;
 
       window.requestAnimationFrame(() => {
-        (dialog.querySelector('[tabindex]') || dialog).focus();
+        /** @type {HTMLElement} */ (dialog.querySelector('[tabindex]') || dialog).focus();
       });
     });
   };
@@ -96,6 +96,7 @@
   };
 
   // Call the function only when the `$open` prop is changed
+  // @ts-ignore
   $: toggleDialog($open);
 
   onMount(() => {

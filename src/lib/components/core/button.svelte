@@ -18,7 +18,7 @@
 
   /**
    * Reference to the button element.
-   * @type {(HTMLButtonElement|undefined)}
+   * @type {HTMLButtonElement?}
    */
   export let element = undefined;
 
@@ -54,7 +54,7 @@
 
   /**
    * The `aria-pressed` attribute on the button element.
-   * @type {(boolean | string | undefined)}
+   * @type {(boolean | 'false' | 'mixed' | 'true' | undefined)}
    */
   export let pressed = undefined;
 
@@ -77,8 +77,8 @@
 <button
   {type}
   {role}
-  hidden={hidden ? 'hidden' : undefined}
-  disabled={disabled ? 'disabled' : undefined}
+  hidden={hidden ? true : undefined}
+  disabled={disabled ? true : undefined}
   class="sui button {size} {className}"
   aria-hidden={hidden ? true : undefined}
   aria-disabled={disabled ? true : undefined}

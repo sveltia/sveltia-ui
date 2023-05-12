@@ -39,16 +39,16 @@
 
   /**
    * Selected option’s value.
-   * @type {(string | undefined)}
+   * @type {(string | number | undefined)}
    */
   export let value = undefined;
 
   const dispatch = createEventDispatcher();
   const id = getRandomId('combobox');
   let comboboxElement;
-  /** @type {(TextInput| undefined)} */
+  /** @type {TextInput?} */
   let inputComponent;
-  /** @type {(Popup| undefined)} */
+  /** @type {Popup?} */
   let popupComponent;
   let isPopupOpen = writable(false);
 </script>
@@ -117,8 +117,11 @@
   bind:this={popupComponent}
 >
   <Listbox
-    on:click={({ target }) => {
-      if (target.matches('[role="option"]')) {
+    on:click={(event) => {
+      if (/** @type {HTMLElement} */ (event.target).matches('[role="option"]')) {
+        // eslint-disable-next-line prefer-destructuring
+        const target = /** @type {HTMLButtonElement?} */ (event.target);
+
         // @todo support more types
         value = target.dataset.type === 'number' ? Number(target.value) : target.value;
         label = target.querySelector('.label')?.textContent || target.value;

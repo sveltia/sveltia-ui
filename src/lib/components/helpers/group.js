@@ -1,6 +1,3 @@
-/* eslint-disable no-plusplus */
-/* eslint-disable no-param-reassign */
-
 import { sleep } from '../util/misc';
 import { getRandomId } from './util';
 
@@ -73,9 +70,9 @@ class Group {
 
       element.id ||= `${this.id}-item-${index}`;
       element.tabIndex ||= isSelected || (!hasSelected && index === 0) ? 0 : -1;
-      element.setAttribute(this.childSelectedAttr, isSelected);
+      element.setAttribute(this.childSelectedAttr, String(isSelected));
       controls?.setAttribute('aria-labelledby', element.id);
-      controls?.setAttribute('aria-hidden', !isSelected);
+      controls?.setAttribute('aria-hidden', String(!isSelected));
     });
 
     parent.addEventListener('click', (event) => {
@@ -96,6 +93,7 @@ class Group {
 
   /** @type {HTMLElement[]} */
   get allMembers() {
+    // @ts-ignore
     return [...this.parent.querySelectorAll(this.selector)];
   }
 
@@ -109,7 +107,8 @@ class Group {
    * @param {MouseEvent} event `click` event.
    */
   onClick(event) {
-    const { target } = event;
+    // eslint-disable-next-line prefer-destructuring
+    const target = /** @type {HTMLButtonElement} */ (event.target);
 
     if (!target.matches(this.selector)) {
       return;
@@ -129,13 +128,13 @@ class Group {
           (element.matches('[role="row"], [role="option"], [role="tab"]') && !this.multi)) &&
         element.closest(this.parentGroupSelector) === targetParentGroup
       ) {
-        element.setAttribute(this.childSelectedAttr, isTarget);
+        element.setAttribute(this.childSelectedAttr, String(isTarget));
       }
 
       const controls = element.getAttribute('aria-controls');
 
       if (controls) {
-        document.getElementById(controls)?.setAttribute('aria-hidden', !isTarget);
+        document.getElementById(controls)?.setAttribute('aria-hidden', String(!isTarget));
       }
     });
 
@@ -154,7 +153,9 @@ class Group {
    * @param {KeyboardEvent} event `keydown` event.
    */
   onKeyDown(event) {
-    const { target, key, ctrlKey, metaKey, shiftKey, altKey } = event;
+    // eslint-disable-next-line prefer-destructuring
+    const target = /** @type {HTMLElement} */ (event.target);
+    const { key, ctrlKey, metaKey, shiftKey, altKey } = event;
 
     if (target.matches(this.selector) && !ctrlKey && !metaKey && !shiftKey && !altKey) {
       if ([' ', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(key)) {
@@ -238,11 +239,13 @@ class Group {
 /**
  * Activate a new group.
  * @param {...any} args Arguments.
- * @returns {Group} Created group.
  */
-export const activateGroup = async (...args) => {
-  // Wait a bit before the relevant components, including the `aria-controls` target are mounted
-  await sleep(100);
+export const activateGroup = (...args) => {
+  (async () => {
+    // Wait a bit before the relevant components, including the `aria-controls` target are mounted
+    await sleep(100);
 
-  return new Group(...args);
+    // @ts-ignore
+    return new Group(...args);
+  })();
 };

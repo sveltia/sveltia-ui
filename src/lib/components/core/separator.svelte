@@ -3,6 +3,7 @@
   @see https://w3c.github.io/aria/#separator
 -->
 <script>
+  /** @type {('horizontal' | 'vertical')} */
   export let orientation = 'horizontal';
 
   /**

@@ -36,7 +36,7 @@
     <Icon name="expand_more" />
     {label}
   </Button>
-  <div class="content" id="{id}-content" hidden={!expanded ? 'hidden' : undefined}>
+  <div class="content" id="{id}-content" hidden={!expanded ? true : undefined}>
     <slot />
   </div>
 </div>

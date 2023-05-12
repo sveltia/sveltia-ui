@@ -22,7 +22,7 @@
 
   const dispatch = createEventDispatcher();
 
-  /** @type {(HTMLElement|undefined)} */
+  /** @type {HTMLElement?} */
   export let element = undefined;
 
   $: {

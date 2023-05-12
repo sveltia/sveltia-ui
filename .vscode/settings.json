@@ -2,6 +2,8 @@
   "editor.codeActionsOnSave": ["source.formatDocument", "source.organizeImports", "source.fixAll"],
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.formatOnSave": true,
+  "javascript.preferences.importModuleSpecifier": "shortest",
+  "javascript.validate.enable": true,
   "eslint.validate": ["javascript", "svelte"],
   "[html]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"

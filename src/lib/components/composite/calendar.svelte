@@ -5,7 +5,7 @@
   import Separator from '../core/separator.svelte';
   import Spacer from '../core/spacer.svelte';
 
-  /** @type {(string|undefined)} */
+  /** @type {string?} */
   export let value = undefined;
 
   const dayList = [];

@@ -17,7 +17,7 @@
 
   /**
    * Selected option’s value.
-   * @type {(string | undefined)}
+   * @type {string?}
    */
   export let value = undefined;
 </script>

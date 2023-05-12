@@ -42,7 +42,7 @@
       ];
 
       if (members.length) {
-        (key === 'ArrowUp' ? members.pop() : members.shift()).focus();
+        /** @type {HTMLElement} */ (key === 'ArrowUp' ? members.pop() : members.shift()).focus();
       }
     }
   }}

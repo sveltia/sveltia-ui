@@ -18,7 +18,7 @@
   /** @type {('horizontal'|'vertical')} */
   export let orientation = 'horizontal';
 
-  /** @type {(HTMLElement|undefined)} */
+  /** @type {HTMLElement?} */
   export let element = undefined;
 </script>
 

@@ -24,7 +24,7 @@
 
   /**
    * Width of the dialog.
-   * @type {('small'|'medium'|'large')}
+   * @type {('small' | 'medium' | 'large' | 'x-large')}
    */
   export let size = 'medium';
 
@@ -111,6 +111,7 @@
   };
 
   // Call the function only when the `open` prop is changed
+  // @ts-ignore
   $: toggleDialog(open);
 
   onMount(() => {
@@ -130,7 +131,7 @@
   class="sui dialog {className} {size}"
   class:open={showDialog}
   on:click={({ target }) => {
-    if (closeOnBackdropClick && target?.matches('dialog')) {
+    if (closeOnBackdropClick && /** @type {HTMLElement?} */ (target)?.matches('dialog')) {
       dialog.returnValue = 'cancel';
       open = false;
     }

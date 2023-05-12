@@ -28,7 +28,7 @@
   $: multiThumb = !!values;
 
   const dispatch = createEventDispatcher();
-  /** @type {(HTMLElement|undefined)} */
+  /** @type {HTMLElement?} */
   let base = undefined;
   let barWidth = 0;
   let positionList = [];
@@ -76,7 +76,7 @@
 
   /**
    *
-   * @param {MouseEvent} event `keydown` event.
+   * @param {KeyboardEvent} event `keydown` event.
    * @param {number} [valueIndex]
    */
   const onKeyDown = (event, valueIndex = 0) => {
@@ -157,7 +157,7 @@
    */
   const onClick = (event) => {
     if (!multiThumb && !dragging) {
-      dragSlider(event.layerX);
+      dragSlider(/** @type {any} */ (event).layerX);
     }
 
     if (dragging) {

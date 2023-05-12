@@ -37,7 +37,7 @@
   on:drop|preventDefault
   on:contextmenu={(event) => {
     // Disable the native context menu
-    if (!event.target?.matches('input[type="text"], textarea')) {
+    if (!(/** @type {HTMLElement} */ (event.target)?.matches('input[type="text"], textarea'))) {
       event.preventDefault();
     }
   }}

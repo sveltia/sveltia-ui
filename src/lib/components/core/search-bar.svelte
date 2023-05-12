@@ -18,7 +18,7 @@
 
   export { className as class };
 
-  /** @type {_SvelteComponent} */
+  /** @type {import('svelte').SvelteComponent} */
   let input;
 
   export let value = '';

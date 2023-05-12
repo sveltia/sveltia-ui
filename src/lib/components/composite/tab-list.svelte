@@ -16,7 +16,7 @@
 
   export { className as class };
 
-  /** @type {(HTMLElement|undefined)} */
+  /** @type {HTMLElement?} */
   export let element = undefined;
 
   /** @type {('horizontal'|'vertical')} */

@@ -16,7 +16,7 @@
 
   export { className as class };
 
-  /** @type {(string | undefined)} */
+  /** @type {string?} */
   export let value = undefined;
 
   /**

@@ -1,12 +1,7 @@
-/* eslint-disable max-len */
 /* eslint-disable no-nested-ternary */
 
 import { get, writable } from 'svelte/store';
 import { getRandomId } from './util';
-
-/**
- * @typedef {('top-left'|'top-right'|'right-top'|'right-bottom'|'bottom-left'|'bottom-right'|'left-top'|'left-bottom')} PopupPosition
- */
 
 /**
  *
@@ -33,7 +28,7 @@ class Popup {
       if (position.startsWith('bottom-')) {
         if (contentHeight > bottomMargin) {
           if (topMargin > bottomMargin) {
-            position = position.replace('bottom-', 'top-');
+            position = /** @type {PopupPosition} */ (position.replace('bottom-', 'top-'));
             height = topMargin;
           } else {
             height = bottomMargin;
@@ -65,7 +60,7 @@ class Popup {
         ? `${Math.round(intersectionRect.left)}px`
         : 'auto';
 
-      const anchorPopup = this.anchorElement.closest('.popup');
+      const anchorPopup = /** @type {HTMLElement} */ (this.anchorElement.closest('.popup'));
 
       const style = {
         inset: [top, right, bottom, left].join(' '),
@@ -142,7 +137,7 @@ class Popup {
         this.anchorElement.focus();
       }
 
-      this.anchorElement.setAttribute('aria-expanded', open);
+      this.anchorElement.setAttribute('aria-expanded', String(open));
     });
   }
 
@@ -167,4 +162,5 @@ class Popup {
  * @param {...any} args Arguments.
  * @returns {Popup} New popup.
  */
+// @ts-ignore
 export const activatePopup = (...args) => new Popup(...args);

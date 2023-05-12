@@ -19,7 +19,7 @@
   /** @type {string} */
   export let name = '';
 
-  /** @type {(string | undefined)} */
+  /** @type {string?} */
   export let value = undefined;
 
   /** @type {boolean} */
@@ -38,7 +38,7 @@
 <span
   class="sui radio-button {className}"
   on:click={(event) => {
-    if (!event.target.matches('button')) {
+    if (!(/** @type {HTMLElement} */ (event.target).matches('button'))) {
       buttonComponent.element.click();
     }
   }}

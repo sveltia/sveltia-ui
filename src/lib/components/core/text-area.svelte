@@ -15,19 +15,19 @@
 
   export { className as class };
 
-  /** @type {(HTMLTextAreaElement|undefined)} */
+  /** @type {HTMLTextAreaElement?} */
   export let element = undefined;
 
   export let name = '';
 
-  /** @type {(string | undefined)} */
+  /** @type {string?} */
   export let value = undefined;
 
   export let autoResize = false;
 
-  /** @type {(string | undefined)} */
+  /** @type {string?} */
   let height;
-  /** @type {(HTMLTextAreaElement|undefined)} */
+  /** @type {HTMLElement?} */
   let outer = undefined;
   let resizing = false;
   let lastWidth = 0;
@@ -50,6 +50,7 @@
    */
   $: {
     if (autoResize) {
+      // @ts-ignore
       resizeTextarea(value);
     }
   }
