@@ -1,6 +1,6 @@
 <!--
   @component
-  @see https://w3c.github.io/aria-practices/#menubutton
+  @see https://www.w3.org/WAI/ARIA/apg/patterns/menu-button/
 -->
 <script>
   import Popup from '../util/popup.svelte';

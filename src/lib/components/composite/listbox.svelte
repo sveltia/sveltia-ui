@@ -1,7 +1,7 @@
 <!--
   @component
   @see https://w3c.github.io/aria/#listbox
-  @see https://w3c.github.io/aria-practices/#Listbox
+  @see https://www.w3.org/WAI/ARIA/apg/patterns/listbox/
 -->
 <svelte:options accessors={true} />
 

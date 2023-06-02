@@ -1,6 +1,6 @@
 <!--
   @component
-  @see https://w3c.github.io/aria-practices/#disclosure
+  @see https://www.w3.org/WAI/ARIA/apg/patterns/disclosure/
   @see https://developer.mozilla.org/en-US/docs/Web/HTML/Element/details
 -->
 <script>

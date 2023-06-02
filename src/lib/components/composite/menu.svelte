@@ -1,7 +1,7 @@
 <!--
   @component
   @see https://w3c.github.io/aria/#menu
-  @see https://w3c.github.io/aria-practices/#menu
+  @see https://www.w3.org/WAI/ARIA/apg/patterns/menubar/
 -->
 <svelte:options accessors={true} />
 

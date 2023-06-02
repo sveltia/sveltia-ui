@@ -1,7 +1,7 @@
 <!--
   @component
   @see https://w3c.github.io/aria/#tab
-  @see https://w3c.github.io/aria-practices/#tabpanel
+  @see https://www.w3.org/WAI/ARIA/apg/patterns/tabs/
 -->
 <script>
   import Button from './button.svelte';

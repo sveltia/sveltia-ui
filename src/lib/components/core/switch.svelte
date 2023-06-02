@@ -1,7 +1,7 @@
 <!--
   @component
   @see https://w3c.github.io/aria/#switch
-  @see https://w3c.github.io/aria-practices/#switch
+  @see https://www.w3.org/WAI/ARIA/apg/patterns/switch/
 -->
 <script>
   /**

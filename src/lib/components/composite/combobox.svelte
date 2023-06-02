@@ -1,7 +1,7 @@
 <!--
   @component
   @see https://w3c.github.io/aria/#combobox
-  @see https://w3c.github.io/aria-practices/#combobox
+  @see https://www.w3.org/WAI/ARIA/apg/patterns/combobox/
 -->
 <script>
   import { createEventDispatcher } from 'svelte';

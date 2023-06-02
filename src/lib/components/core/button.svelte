@@ -1,7 +1,7 @@
 <!--
   @component
   @see https://w3c.github.io/aria/#button
-  @see https://w3c.github.io/aria-practices/#button
+  @see https://www.w3.org/WAI/ARIA/apg/patterns/button/
 -->
 <svelte:options accessors={true} />
 

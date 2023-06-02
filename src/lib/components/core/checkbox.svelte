@@ -1,7 +1,7 @@
 <!--
   @component
   @see https://w3c.github.io/aria/#checkbox
-  @see https://w3c.github.io/aria-practices/#checkbox
+  @see https://www.w3.org/WAI/ARIA/apg/patterns/checkbox/
 -->
 <script>
   import { createEventDispatcher } from 'svelte';

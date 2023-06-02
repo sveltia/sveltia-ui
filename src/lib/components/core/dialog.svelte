@@ -1,7 +1,7 @@
 <!--
   @component
   @see https://w3c.github.io/aria/#dialog
-  @see https://w3c.github.io/aria-practices/#dialog_modal
+  @see https://www.w3.org/WAI/ARIA/apg/patterns/dialog-modal/
 -->
 <script>
   import { createEventDispatcher, onMount } from 'svelte';
