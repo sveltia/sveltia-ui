@@ -24,28 +24,32 @@
   export let max = undefined;
   export let step = 1;
 
+  $: maximumFractionDigits = String(step).split('.')[1]?.length || 0;
+  $: isMin = typeof min === 'number' && Number(value || 0) <= min;
+  $: isMax = typeof max === 'number' && Number(value || 0) >= max;
+
   let component;
 
   /**
    *
    */
   const decrease = () => {
-    if (typeof min === 'number' && Number(value || 0) === min) {
+    if (isMin) {
       return;
     }
 
-    value = String(Number(value || 0) - step);
+    value = Number(Number(value || 0) - step).toFixed(maximumFractionDigits);
   };
 
   /**
    *
    */
   const increase = () => {
-    if (typeof min === 'number' && Number(value || 0) === max) {
+    if (isMax) {
       return;
     }
 
-    value = String(Number(value || 0) + step);
+    value = Number(Number(value || 0) + step).toFixed(maximumFractionDigits);
   };
 </script>
 
@@ -76,7 +80,7 @@
   />
   <Button
     class="iconic"
-    disabled={disabled || Number.isNaN(Number(value))}
+    disabled={disabled || Number.isNaN(Number(value)) || isMin}
     on:click={() => {
       decrease();
     }}
@@ -85,7 +89,7 @@
   </Button>
   <Button
     class="iconic"
-    disabled={disabled || Number.isNaN(Number(value))}
+    disabled={disabled || Number.isNaN(Number(value)) || isMax}
     on:click={() => {
       increase();
     }}

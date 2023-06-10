@@ -62,14 +62,10 @@
         return;
       }
 
-      sliderPositions[targetValueIndex] = positionList[index];
-
       if (multiThumb) {
         values[targetValueIndex] = valueList[index];
-        dispatch('change', { values });
       } else {
         value = valueList[index];
-        dispatch('change', { value });
       }
     }
   };
@@ -115,14 +111,10 @@
         return;
       }
 
-      sliderPositions[valueIndex] = positionList[index];
-
       if (multiThumb) {
         values[valueIndex] = valueList[index];
-        dispatch('change', { values });
       } else {
         value = valueList[index];
-        dispatch('change', { value });
       }
     }
   };
@@ -165,6 +157,20 @@
     }
   };
 
+  /**
+   *
+   */
+  const onValueChange = () => {
+    if (multiThumb) {
+      sliderPositions[0] = positionList[valueList.indexOf(values[0])];
+      sliderPositions[1] = positionList[valueList.indexOf(values[1])];
+      dispatch('change', { values });
+    } else {
+      sliderPositions[0] = positionList[valueList.indexOf(value)];
+      dispatch('change', { value });
+    }
+  };
+
   onMount(() => {
     barWidth = base.clientWidth;
 
@@ -174,13 +180,11 @@
     valueList = new Array(stepCount).fill(0).map((_, index) => index * step + min, 10);
     positionList = new Array(stepCount).fill(0).map((_, index) => index * stepWidth);
 
-    if (multiThumb) {
-      sliderPositions[0] = positionList[valueList.indexOf(values[0])];
-      sliderPositions[1] = positionList[valueList.indexOf(values[1])];
-    } else {
-      sliderPositions[0] = positionList[valueList.indexOf(value)];
-    }
+    onValueChange();
   });
+
+  // @ts-ignore Arguments are triggers
+  $: onValueChange(value, values);
 </script>
 
 <svelte:body
