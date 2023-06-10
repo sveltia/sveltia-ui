@@ -107,10 +107,17 @@ class Popup {
       }
     });
 
+    // Close the popup when the backdrop, a menu item or an option is clicked
     this.popupElement.addEventListener('click', (event) => {
       event.stopPropagation();
 
-      if (get(this.open) && event.target === this.popupElement) {
+      // eslint-disable-next-line prefer-destructuring
+      const target = /** @type {HTMLElement} */ (event.target);
+
+      if (
+        get(this.open) &&
+        (target === this.popupElement || target.matches('[role^="menuitem"], [role="option"]'))
+      ) {
         this.open.set(false);
       }
     });
