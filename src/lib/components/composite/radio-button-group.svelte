@@ -27,6 +27,7 @@
   role="radiogroup"
   tabindex="0"
   bind:this={element}
+  on:select
   use:activateGroup
 >
   <slot />
@@ -35,14 +36,14 @@
 <style lang="scss">
   .radio-button-group {
     display: inline-flex;
-    align-items: center;
-    gap: 16px;
 
     &.horizontal {
+      gap: 16px;
       align-items: center;
     }
 
     &.vertical {
+      gap: 8px;
       flex-direction: column;
     }
   }

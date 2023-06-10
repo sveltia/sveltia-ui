@@ -33,13 +33,14 @@
 <style lang="scss">
   .checkbox-group {
     display: inline-flex;
-    gap: 16px;
 
     &.horizontal {
+      gap: 16px;
       align-items: center;
     }
 
     &.vertical {
+      gap: 8px;
       flex-direction: column;
     }
   }

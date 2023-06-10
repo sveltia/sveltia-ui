@@ -21,6 +21,9 @@
   export let name = '';
 
   /** @type {string?} */
+  export let label = undefined;
+
+  /** @type {string?} */
   export let value = undefined;
 
   /** @type {(boolean | string | undefined)} */
@@ -35,7 +38,7 @@
   const dispatch = createEventDispatcher();
   const id = getRandomId('checkbox');
   /** @type {Button} */
-  let button;
+  let buttonComponent;
 </script>
 
 {#if name && value && checked && !indeterminate}
@@ -43,24 +46,26 @@
 {/if}
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
-<label
+<span
   class="sui checkbox {className}"
   class:checked
   class:indeterminate
   class:disabled
   on:click|preventDefault|stopPropagation={(event) => {
     if (!(/** @type {HTMLElement} */ (event.target).matches('button'))) {
-      button.element.click();
+      buttonComponent.element.click();
     }
   }}
 >
   <Button
     {id}
     {disabled}
+    {name}
+    {value}
     role="checkbox"
     aria-checked={indeterminate ? 'mixed' : checked}
     aria-labelledby="{id}-label"
-    bind:this={button}
+    bind:this={buttonComponent}
     on:click={(event) => {
       event.preventDefault();
       event.stopPropagation();
@@ -71,12 +76,16 @@
   >
     <Icon slot="start-icon" name={indeterminate ? 'remove' : 'check'} />
   </Button>
-  {#if $$slots.default}
+  {#if $$slots.default || label}
     <label id="{id}-label">
-      <slot />
+      {#if $$slots.default}
+        <slot />
+      {:else}
+        {label}
+      {/if}
     </label>
   {/if}
-</label>
+</span>
 
 <style lang="scss">
   .checkbox {
@@ -116,6 +125,10 @@
 
     :global(button[aria-checked='false']) {
       color: transparent;
+    }
+
+    label {
+      cursor: inherit;
     }
   }
 </style>

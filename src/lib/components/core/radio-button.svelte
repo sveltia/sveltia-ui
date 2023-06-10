@@ -20,10 +20,16 @@
   export let name = '';
 
   /** @type {string?} */
+  export let label = undefined;
+
+  /** @type {string?} */
   export let value = undefined;
 
   /** @type {boolean} */
   export let selected = false;
+
+  /** @type {boolean} */
+  export let disabled = false;
 
   const id = getRandomId('checkbox');
   /** @type {Button} */
@@ -45,20 +51,29 @@
 >
   <Button
     {id}
+    {disabled}
+    {name}
+    {value}
     role="radio"
     aria-checked={selected}
     aria-labelledby="{id}-label"
     bind:this={buttonComponent}
     on:click={(event) => {
       event.preventDefault();
-      selected = !selected;
+      selected = true;
     }}
   >
     <Icon slot="start-icon" name="circle" />
   </Button>
-  <label id="{id}-label">
-    <slot />
-  </label>
+  {#if $$slots.default || label}
+    <label id="{id}-label">
+      {#if $$slots.default}
+        <slot />
+      {:else}
+        {label}
+      {/if}
+    </label>
+  {/if}
 </span>
 
 <style lang="scss">
@@ -94,6 +109,10 @@
 
     :global(button[aria-checked='false']) {
       color: transparent;
+    }
+
+    label {
+      cursor: inherit;
     }
   }
 </style>

@@ -76,7 +76,9 @@ class Group {
     });
 
     parent.addEventListener('click', (event) => {
-      this.onClick(event);
+      if (/** @type {HTMLElement} */ (event.target).matches(this.selector)) {
+        this.onClick(event);
+      }
     });
 
     parent.addEventListener('keydown', (event) => {
