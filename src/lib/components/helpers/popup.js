@@ -108,7 +108,9 @@ class Popup {
     });
 
     this.popupElement.addEventListener('click', (event) => {
-      if (get(this.open) && event.target !== this.anchorElement) {
+      event.stopPropagation();
+
+      if (get(this.open) && event.target === this.popupElement) {
         this.open.set(false);
       }
     });
