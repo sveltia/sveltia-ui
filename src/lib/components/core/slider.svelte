@@ -145,6 +145,15 @@
 
   /**
    *
+   */
+  const onMouseUp = () => {
+    if (dragging) {
+      dragging = false;
+    }
+  };
+
+  /**
+   *
    * @param {MouseEvent} event `click` event.
    */
   const onClick = (event) => {
@@ -189,6 +198,7 @@
 
 <svelte:body
   on:mousemove={onMouseMove}
+  on:mouseup={onMouseUp}
   on:click={() => {
     dragging = false;
   }}
