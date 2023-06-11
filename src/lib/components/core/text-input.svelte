@@ -85,7 +85,7 @@
     display: inline-block;
     flex: auto;
     border-width: 1px;
-    border-color: var(--control-border-color);
+    border-color: var(--secondary-control-border-color);
     border-radius: var(--input--medium--border-radius);
     padding: 0 8px;
     min-width: 0;
@@ -103,7 +103,7 @@
 
     &:read-only {
       color: var(--tertiary-foreground-color);
-      border-color: var(--control-border-color) !important;
+      border-color: var(--secondary-control-border-color) !important;
     }
 
     &:disabled {
@@ -120,7 +120,7 @@
       flex: none;
       margin-left: -1px;
       border-width: 1px;
-      border-color: var(--control-border-color);
+      border-color: var(--secondary-control-border-color);
       height: var(--input--medium--height);
       aspect-ratio: 1 / 1;
 

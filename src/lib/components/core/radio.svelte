@@ -86,24 +86,33 @@
     -webkit-user-select: none;
     user-select: none;
 
+    &.disabled {
+      cursor: default;
+
+      label {
+        color: var(--disabled-foreground-color);
+      }
+    }
+
     :global(button) {
       justify-content: center;
       overflow: hidden;
       border-width: 2px;
-      border-color: var(--control-border-color);
+      border-color: var(--primary-control-border-color);
       border-radius: 24px;
-      width: 24px;
-      height: 24px;
+      width: 20px;
+      height: 20px;
       color: var(--primary-accent-color-lighter);
       transition: all 200ms;
 
       :global(.icon) {
-        font-size: var(--font-size--large);
+        font-size: 14px;
         font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 48;
       }
     }
 
     :global(button[aria-checked='true']) {
+      border-color: var(--primary-accent-color-lighter);
       color: var(--primary-accent-color-lighter);
     }
 

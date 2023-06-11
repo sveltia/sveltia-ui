@@ -112,7 +112,7 @@
       flex: none;
       margin-left: -1px;
       border-width: 1px;
-      border-color: var(--control-border-color);
+      border-color: var(--secondary-control-border-color);
       width: 32px;
       height: var(--input--medium--height);
 

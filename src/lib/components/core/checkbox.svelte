@@ -99,6 +99,10 @@
 
     &.disabled {
       cursor: default;
+
+      label {
+        color: var(--disabled-foreground-color);
+      }
     }
 
     :global(button) {
@@ -106,21 +110,26 @@
       justify-content: center;
       overflow: hidden;
       border-width: 2px;
-      border-color: var(--control-border-color);
+      border-color: var(--primary-control-border-color);
       border-radius: 4px;
-      width: 24px;
-      height: 24px;
+      width: 20px;
+      height: 20px;
       color: var(--primary-accent-color-lighter);
       transition: all 200ms;
 
       :global(.icon) {
-        font-size: var(--font-size--xx-large);
+        font-size: 20px;
       }
     }
 
-    :global(button[aria-checked='true']),
+    :global(button[aria-checked='true']) {
+      border-color: var(--primary-accent-color-lighter);
+      color: var(--control-background-color);
+      background-color: var(--primary-accent-color-lighter);
+    }
+
     :global(button[aria-checked='mixed']) {
-      color: var(--primary-accent-color-lighter);
+      color: var(--primary-control-border-color);
     }
 
     :global(button[aria-checked='false']) {

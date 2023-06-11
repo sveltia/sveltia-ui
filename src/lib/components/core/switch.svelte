@@ -73,7 +73,7 @@
     padding: 2px;
     display: inline-block;
     border-radius: 16px;
-    background-color: var(--control-border-color);
+    background-color: var(--secondary-control-border-color);
     transition: all 200ms;
 
     &:hover {

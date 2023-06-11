@@ -267,7 +267,7 @@
     width: var(--slider-base-width, 200px);
     height: 8px;
     border-radius: 8px;
-    background-color: var(--control-border-color);
+    background-color: var(--secondary-control-border-color);
   }
 
   .bar {

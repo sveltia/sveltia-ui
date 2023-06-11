@@ -42,7 +42,7 @@
   .tab-list {
     display: flex;
     align-items: center;
-    border-color: var(--control-border-color);
+    border-color: var(--secondary-control-border-color);
 
     &[aria-orientation='horizontal'] {
       gap: 16px;

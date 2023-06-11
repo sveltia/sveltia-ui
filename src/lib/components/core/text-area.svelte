@@ -102,7 +102,7 @@
     display: block;
     margin: 0;
     border-width: 1px;
-    border-color: var(--control-border-color);
+    border-color: var(--secondary-control-border-color);
     border-radius: var(--input--medium--border-radius);
     background-color: var(--control-background-color);
     padding: 8px;

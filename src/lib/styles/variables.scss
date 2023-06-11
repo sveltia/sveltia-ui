@@ -3,8 +3,9 @@
   --foreground-color-2-hsl: var(--base-hue) 5% 20%; // primary
   --foreground-color-3-hsl: var(--base-hue) 5% 40%; // secondary
   --foreground-color-4-hsl: var(--base-hue) 5% 60%; // tertiary
-  --border-color-1-hsl: var(--base-hue) 5% 50%; // primary
-  --border-color-2-hsl: var(--base-hue) 5% 70%; // secondary/input
+  --border-color-1-hsl: var(--base-hue) 5% 30%; // primary
+  --border-color-2-hsl: var(--base-hue) 5% 50%; // secondary/input
+  --border-color-3-hsl: var(--base-hue) 5% 70%; // tertiary
   --background-color-1-hsl: var(--base-hue) 5% 100%; // content/input
   --background-color-2-hsl: var(--base-hue) 5% 98%; // primary
   --background-color-3-hsl: var(--base-hue) 5% 94%; // secondary
@@ -34,8 +35,9 @@
   --foreground-color-2-hsl: var(--base-hue) 10% 80%; // primary
   --foreground-color-3-hsl: var(--base-hue) 10% 60%; // secondary
   --foreground-color-4-hsl: var(--base-hue) 10% 40%; // tertiary
-  --border-color-1-hsl: var(--base-hue) 10% 50%; // primary
-  --border-color-2-hsl: var(--base-hue) 10% 30%; // secondary/input
+  --border-color-1-hsl: var(--base-hue) 10% 70%; // primary
+  --border-color-2-hsl: var(--base-hue) 10% 50%; // secondary/input
+  --border-color-3-hsl: var(--base-hue) 10% 30%; // tertiary
   --background-color-1-hsl: var(--base-hue) 10% 10%; // content/input
   --background-color-2-hsl: var(--base-hue) 10% 12%; // primary
   --background-color-3-hsl: var(--base-hue) 10% 16%; // secondary
@@ -115,7 +117,8 @@
   // Borders
   --primary-border-color: hsl(var(--border-color-1-hsl));
   --secondary-border-color: hsl(var(--border-color-2-hsl));
-  --control-border-color: hsl(var(--border-color-2-hsl));
+  --primary-control-border-color: hsl(var(--border-color-2-hsl));
+  --secondary-control-border-color: hsl(var(--border-color-3-hsl));
   --danger-border-color: hsl(
     var(--danger-color-hue) var(--alert-border-color-saturation) var(--alert-border-color-lightness)
   );

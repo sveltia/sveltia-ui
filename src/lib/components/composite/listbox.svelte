@@ -43,7 +43,7 @@
     color: inherit;
     margin: 0;
     border-width: 1px;
-    border-color: var(--control-border-color);
+    border-color: var(--secondary-control-border-color);
     border-radius: 4px;
     padding: 4px;
 
