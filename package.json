@@ -96,10 +96,10 @@
       "svelte": "./package/components/composite/menu.svelte",
       "default": "./package/components/composite/menu.svelte"
     },
-    "./components/composite/radio-button-group.svelte": {
-      "types": "./package/components/composite/radio-button-group.svelte.d.ts",
-      "svelte": "./package/components/composite/radio-button-group.svelte",
-      "default": "./package/components/composite/radio-button-group.svelte"
+    "./components/composite/radio-group.svelte": {
+      "types": "./package/components/composite/radio-group.svelte.d.ts",
+      "svelte": "./package/components/composite/radio-group.svelte",
+      "default": "./package/components/composite/radio-group.svelte"
     },
     "./components/composite/select-button-group.svelte": {
       "types": "./package/components/composite/select-button-group.svelte.d.ts",
@@ -186,10 +186,10 @@
       "svelte": "./package/components/core/password-input.svelte",
       "default": "./package/components/core/password-input.svelte"
     },
-    "./components/core/radio-button.svelte": {
-      "types": "./package/components/core/radio-button.svelte.d.ts",
-      "svelte": "./package/components/core/radio-button.svelte",
-      "default": "./package/components/core/radio-button.svelte"
+    "./components/core/radio.svelte": {
+      "types": "./package/components/core/radio.svelte.d.ts",
+      "svelte": "./package/components/core/radio.svelte",
+      "default": "./package/components/core/radio.svelte"
     },
     "./components/core/row-group.svelte": {
       "types": "./package/components/core/row-group.svelte.d.ts",
@@ -341,8 +341,8 @@
       "components/composite/menu.svelte": [
         "./package/components/composite/menu.svelte.d.ts"
       ],
-      "components/composite/radio-button-group.svelte": [
-        "./package/components/composite/radio-button-group.svelte.d.ts"
+      "components/composite/radio-group.svelte": [
+        "./package/components/composite/radio-group.svelte.d.ts"
       ],
       "components/composite/select-button-group.svelte": [
         "./package/components/composite/select-button-group.svelte.d.ts"
@@ -395,8 +395,8 @@
       "components/core/password-input.svelte": [
         "./package/components/core/password-input.svelte.d.ts"
       ],
-      "components/core/radio-button.svelte": [
-        "./package/components/core/radio-button.svelte.d.ts"
+      "components/core/radio.svelte": [
+        "./package/components/core/radio.svelte.d.ts"
       ],
       "components/core/row-group.svelte": [
         "./package/components/core/row-group.svelte.d.ts"

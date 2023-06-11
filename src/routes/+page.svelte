@@ -19,8 +19,8 @@
     NumberInput,
     Option,
     PasswordInput,
-    RadioButton,
-    RadioButtonGroup,
+    Radio,
+    RadioGroup,
     SearchBar,
     Select,
     SelectButton,
@@ -155,11 +155,11 @@
         </section>
         <section aria-label="Radio Buttons">
           <div>
-            <RadioButtonGroup>
-              <RadioButton selected={true}>Strawberry</RadioButton>
-              <RadioButton>Grape</RadioButton>
-              <RadioButton>Lemon</RadioButton>
-            </RadioButtonGroup>
+            <RadioGroup>
+              <Radio selected={true}>Strawberry</Radio>
+              <Radio>Grape</Radio>
+              <Radio>Lemon</Radio>
+            </RadioGroup>
           </div>
         </section>
         <section aria-label="Checkboxes">

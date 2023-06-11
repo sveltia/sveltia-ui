@@ -1,6 +1,6 @@
 <!--
   @component
-  The container of `<RadioButton>`s.
+  The container of `<Radio>`s.
   @see https://w3c.github.io/aria/#radiogroup
   @see https://www.w3.org/WAI/ARIA/apg/patterns/radio/
 -->
@@ -23,7 +23,7 @@
 </script>
 
 <div
-  class="sui radio-button-group {className} {orientation}"
+  class="sui radio-group {className} {orientation}"
   role="radiogroup"
   tabindex="0"
   bind:this={element}
@@ -34,7 +34,7 @@
 </div>
 
 <style lang="scss">
-  .radio-button-group {
+  .radio-group {
     display: inline-flex;
 
     &.horizontal {

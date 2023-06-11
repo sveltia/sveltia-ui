@@ -1,6 +1,6 @@
 <!--
   @component
-  A variant of `<RadioButtonGroup>`, looking like normal buttons.
+  A variant of `<RadioGroup>`, looking like normal buttons.
   @see https://w3c.github.io/aria/#radiogroup
   @see https://www.w3.org/WAI/ARIA/apg/patterns/radio/
 -->

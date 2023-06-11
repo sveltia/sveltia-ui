@@ -44,7 +44,7 @@ export { default as MenuItemGroup } from './components/composite/menu-item-group
 // @ts-ignore
 export { default as Menu } from './components/composite/menu.svelte';
 // @ts-ignore
-export { default as RadioButtonGroup } from './components/composite/radio-button-group.svelte';
+export { default as RadioGroup } from './components/composite/radio-group.svelte';
 // @ts-ignore
 export { default as SelectButtonGroup } from './components/composite/select-button-group.svelte';
 // @ts-ignore
@@ -80,7 +80,7 @@ export { default as Option } from './components/core/option.svelte';
 // @ts-ignore
 export { default as PasswordInput } from './components/core/password-input.svelte';
 // @ts-ignore
-export { default as RadioButton } from './components/core/radio-button.svelte';
+export { default as Radio } from './components/core/radio.svelte';
 // @ts-ignore
 export { default as RowGroup } from './components/core/row-group.svelte';
 // @ts-ignore

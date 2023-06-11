@@ -42,7 +42,7 @@
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <span
-  class="sui radio-button {className}"
+  class="sui radio {className}"
   on:click={(event) => {
     if (!(/** @type {HTMLElement} */ (event.target).matches('button'))) {
       buttonComponent.element.click();
@@ -77,7 +77,7 @@
 </span>
 
 <style lang="scss">
-  .radio-button {
+  .radio {
     display: inline-flex;
     align-items: center;
     gap: 8px;
