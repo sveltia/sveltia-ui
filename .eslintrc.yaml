@@ -17,6 +17,10 @@ env:
   browser: true
   es2017: true
   node: true
+settings:
+  import/parsers:
+    espree:
+      - ".js"
 rules:
   class-methods-use-this: off
   import/extensions: off

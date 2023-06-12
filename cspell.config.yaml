@@ -17,6 +17,7 @@ ignorePaths:
   - pnpm-lock.yaml
   - data/**/*.json
 words:
+  - espree
   - jsdoc
   - opsz
   - plusplus
