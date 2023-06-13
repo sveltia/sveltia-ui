@@ -44,6 +44,8 @@ export { default as MenuItemGroup } from './components/composite/menu-item-group
 // @ts-ignore
 export { default as Menu } from './components/composite/menu.svelte';
 // @ts-ignore
+export { default as OptionGroup } from './components/composite/option-group.svelte';
+// @ts-ignore
 export { default as RadioGroup } from './components/composite/radio-group.svelte';
 // @ts-ignore
 export { default as SelectButtonGroup } from './components/composite/select-button-group.svelte';

@@ -96,6 +96,11 @@
       "svelte": "./package/components/composite/menu.svelte",
       "default": "./package/components/composite/menu.svelte"
     },
+    "./components/composite/option-group.svelte": {
+      "types": "./package/components/composite/option-group.svelte.d.ts",
+      "svelte": "./package/components/composite/option-group.svelte",
+      "default": "./package/components/composite/option-group.svelte"
+    },
     "./components/composite/radio-group.svelte": {
       "types": "./package/components/composite/radio-group.svelte.d.ts",
       "svelte": "./package/components/composite/radio-group.svelte",
@@ -340,6 +345,9 @@
       ],
       "components/composite/menu.svelte": [
         "./package/components/composite/menu.svelte.d.ts"
+      ],
+      "components/composite/option-group.svelte": [
+        "./package/components/composite/option-group.svelte.d.ts"
       ],
       "components/composite/radio-group.svelte": [
         "./package/components/composite/radio-group.svelte.d.ts"

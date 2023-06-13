@@ -18,6 +18,7 @@
     MenuItemRadio,
     NumberInput,
     Option,
+    OptionGroup,
     PasswordInput,
     Radio,
     RadioGroup,
@@ -223,7 +224,35 @@
         </section>
         <section>
           <h4>With Groups</h4>
-          <div />
+          <div>
+            <Listbox>
+              <OptionGroup label="Group 1">
+                <Option label="Option 1" selected={true} />
+                <Option label="Option 2" />
+              </OptionGroup>
+              <OptionGroup label="Group 2">
+                <Option label="Option 3" />
+                <Option label="Option 4" />
+                <Option label="Option 5" />
+              </OptionGroup>
+            </Listbox>
+          </div>
+        </section>
+        <section>
+          <h4>With Groups (vertical tab style)</h4>
+          <div>
+            <Listbox class="tabs">
+              <OptionGroup label="Group 1">
+                <Option label="Option 1" selected={true} />
+                <Option label="Option 2" />
+              </OptionGroup>
+              <OptionGroup label="Group 2">
+                <Option label="Option 3" />
+                <Option label="Option 4" />
+                <Option label="Option 5" />
+              </OptionGroup>
+            </Listbox>
+          </div>
         </section>
       </div>
     </section>

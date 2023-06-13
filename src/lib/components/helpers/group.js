@@ -116,24 +116,12 @@ class Group {
       return;
     }
 
-    const targetParentGroup = target.closest(this.parentGroupSelector);
-
     this.allMembers.forEach((element) => {
       const isTarget = element === target;
+      const controls = element.getAttribute('aria-controls');
 
       element.tabIndex = element === target ? 0 : -1;
-
-      // Groups can be nested, e.g. `menu` > `group` > `menuitem`, so check if the parent is the
-      // same as the target’s parent
-      if (
-        (element.matches('[role="radio"], [role="menuitemradio"]') ||
-          (element.matches('[role="row"], [role="option"], [role="tab"]') && !this.multi)) &&
-        element.closest(this.parentGroupSelector) === targetParentGroup
-      ) {
-        element.setAttribute(this.childSelectedAttr, String(isTarget));
-      }
-
-      const controls = element.getAttribute('aria-controls');
+      element.setAttribute(this.childSelectedAttr, String(isTarget));
 
       if (controls) {
         document.getElementById(controls)?.setAttribute('aria-hidden', String(!isTarget));
