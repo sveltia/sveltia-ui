@@ -19,6 +19,7 @@ ignorePaths:
 words:
   - espree
   - jsdoc
+  - nocheck
   - opsz
   - plusplus
   - pnpm

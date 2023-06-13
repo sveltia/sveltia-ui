@@ -7,6 +7,7 @@
     Combobox,
     Dialog,
     Disclosure,
+    Divider,
     Drawer,
     Icon,
     Listbox,
@@ -26,7 +27,6 @@
     Select,
     SelectButton,
     SelectButtonGroup,
-    Separator,
     Slider,
     Switch,
     Tab,
@@ -266,7 +266,7 @@
               <Option label="Option 1" selected={true} />
               <Option label="Option 2" />
               <Option label="Option 3" />
-              <Separator />
+              <Divider />
               <Option label="Option 4" />
               <Option label="Option 5" />
             </Select>
@@ -283,7 +283,7 @@
               <Option label="Option 1" selected={true} />
               <Option label="Option 2" />
               <Option label="Option 3" />
-              <Separator />
+              <Divider />
               <Option label="Option 4" />
               <Option label="Option 5" />
             </Combobox>
@@ -348,14 +348,14 @@
                   <MenuItem label="Child Item 1" />
                   <MenuItem label="Child Item 2" />
                   <MenuItem label="Child Item 3" />
-                  <Separator />
+                  <Divider />
                   <MenuItemCheckbox label="Child Item 4" checked={true} />
                 </MenuItem>
                 <MenuItem label="Item" disabled={true} />
-                <Separator />
+                <Divider />
                 <MenuItemCheckbox label="Item" checked={true} />
                 <MenuItemCheckbox label="Item" checked={false} />
-                <Separator />
+                <Divider />
                 <MenuItemRadio label="Item" checked={true} />
                 <MenuItemRadio label="Item" checked={false} />
               </Menu>

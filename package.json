@@ -56,236 +56,233 @@
   },
   "exports": {
     "./package.json": "./package.json",
-    "./components/composite/calendar.svelte": {
-      "types": "./package/components/composite/calendar.svelte.d.ts",
-      "svelte": "./package/components/composite/calendar.svelte",
-      "default": "./package/components/composite/calendar.svelte"
+    "./components/button/button.svelte": {
+      "types": "./package/components/button/button.svelte.d.ts",
+      "svelte": "./package/components/button/button.svelte",
+      "default": "./package/components/button/button.svelte"
     },
-    "./components/composite/checkbox-group.svelte": {
-      "types": "./package/components/composite/checkbox-group.svelte.d.ts",
-      "svelte": "./package/components/composite/checkbox-group.svelte",
-      "default": "./package/components/composite/checkbox-group.svelte"
+    "./components/button/select-button-group.svelte": {
+      "types": "./package/components/button/select-button-group.svelte.d.ts",
+      "svelte": "./package/components/button/select-button-group.svelte",
+      "default": "./package/components/button/select-button-group.svelte"
     },
-    "./components/composite/combobox.svelte": {
-      "types": "./package/components/composite/combobox.svelte.d.ts",
-      "svelte": "./package/components/composite/combobox.svelte",
-      "default": "./package/components/composite/combobox.svelte"
+    "./components/button/select-button.svelte": {
+      "types": "./package/components/button/select-button.svelte.d.ts",
+      "svelte": "./package/components/button/select-button.svelte",
+      "default": "./package/components/button/select-button.svelte"
     },
-    "./components/composite/disclosure.svelte": {
-      "types": "./package/components/composite/disclosure.svelte.d.ts",
-      "svelte": "./package/components/composite/disclosure.svelte",
-      "default": "./package/components/composite/disclosure.svelte"
+    "./components/calendar/calendar.svelte": {
+      "types": "./package/components/calendar/calendar.svelte.d.ts",
+      "svelte": "./package/components/calendar/calendar.svelte",
+      "default": "./package/components/calendar/calendar.svelte"
     },
-    "./components/composite/grid.svelte": {
-      "types": "./package/components/composite/grid.svelte.d.ts",
-      "svelte": "./package/components/composite/grid.svelte",
-      "default": "./package/components/composite/grid.svelte"
+    "./components/checkbox/checkbox-group.svelte": {
+      "types": "./package/components/checkbox/checkbox-group.svelte.d.ts",
+      "svelte": "./package/components/checkbox/checkbox-group.svelte",
+      "default": "./package/components/checkbox/checkbox-group.svelte"
     },
-    "./components/composite/listbox.svelte": {
-      "types": "./package/components/composite/listbox.svelte.d.ts",
-      "svelte": "./package/components/composite/listbox.svelte",
-      "default": "./package/components/composite/listbox.svelte"
+    "./components/checkbox/checkbox.svelte": {
+      "types": "./package/components/checkbox/checkbox.svelte.d.ts",
+      "svelte": "./package/components/checkbox/checkbox.svelte",
+      "default": "./package/components/checkbox/checkbox.svelte"
     },
-    "./components/composite/menu-item-group.svelte": {
-      "types": "./package/components/composite/menu-item-group.svelte.d.ts",
-      "svelte": "./package/components/composite/menu-item-group.svelte",
-      "default": "./package/components/composite/menu-item-group.svelte"
+    "./components/dialog/dialog.svelte": {
+      "types": "./package/components/dialog/dialog.svelte.d.ts",
+      "svelte": "./package/components/dialog/dialog.svelte",
+      "default": "./package/components/dialog/dialog.svelte"
     },
-    "./components/composite/menu.svelte": {
-      "types": "./package/components/composite/menu.svelte.d.ts",
-      "svelte": "./package/components/composite/menu.svelte",
-      "default": "./package/components/composite/menu.svelte"
+    "./components/disclosure/disclosure.svelte": {
+      "types": "./package/components/disclosure/disclosure.svelte.d.ts",
+      "svelte": "./package/components/disclosure/disclosure.svelte",
+      "default": "./package/components/disclosure/disclosure.svelte"
     },
-    "./components/composite/option-group.svelte": {
-      "types": "./package/components/composite/option-group.svelte.d.ts",
-      "svelte": "./package/components/composite/option-group.svelte",
-      "default": "./package/components/composite/option-group.svelte"
+    "./components/divider/divider.svelte": {
+      "types": "./package/components/divider/divider.svelte.d.ts",
+      "svelte": "./package/components/divider/divider.svelte",
+      "default": "./package/components/divider/divider.svelte"
     },
-    "./components/composite/radio-group.svelte": {
-      "types": "./package/components/composite/radio-group.svelte.d.ts",
-      "svelte": "./package/components/composite/radio-group.svelte",
-      "default": "./package/components/composite/radio-group.svelte"
+    "./components/divider/spacer.svelte": {
+      "types": "./package/components/divider/spacer.svelte.d.ts",
+      "svelte": "./package/components/divider/spacer.svelte",
+      "default": "./package/components/divider/spacer.svelte"
     },
-    "./components/composite/select-button-group.svelte": {
-      "types": "./package/components/composite/select-button-group.svelte.d.ts",
-      "svelte": "./package/components/composite/select-button-group.svelte",
-      "default": "./package/components/composite/select-button-group.svelte"
+    "./components/drawer/drawer.svelte": {
+      "types": "./package/components/drawer/drawer.svelte.d.ts",
+      "svelte": "./package/components/drawer/drawer.svelte",
+      "default": "./package/components/drawer/drawer.svelte"
     },
-    "./components/composite/select.svelte": {
-      "types": "./package/components/composite/select.svelte.d.ts",
-      "svelte": "./package/components/composite/select.svelte",
-      "default": "./package/components/composite/select.svelte"
+    "./components/icon/icon.svelte": {
+      "types": "./package/components/icon/icon.svelte.d.ts",
+      "svelte": "./package/components/icon/icon.svelte",
+      "default": "./package/components/icon/icon.svelte"
     },
-    "./components/composite/tab-list.svelte": {
-      "types": "./package/components/composite/tab-list.svelte.d.ts",
-      "svelte": "./package/components/composite/tab-list.svelte",
-      "default": "./package/components/composite/tab-list.svelte"
+    "./components/listbox/listbox.svelte": {
+      "types": "./package/components/listbox/listbox.svelte.d.ts",
+      "svelte": "./package/components/listbox/listbox.svelte",
+      "default": "./package/components/listbox/listbox.svelte"
     },
-    "./components/core/button.svelte": {
-      "types": "./package/components/core/button.svelte.d.ts",
-      "svelte": "./package/components/core/button.svelte",
-      "default": "./package/components/core/button.svelte"
+    "./components/listbox/option-group.svelte": {
+      "types": "./package/components/listbox/option-group.svelte.d.ts",
+      "svelte": "./package/components/listbox/option-group.svelte",
+      "default": "./package/components/listbox/option-group.svelte"
     },
-    "./components/core/checkbox.svelte": {
-      "types": "./package/components/core/checkbox.svelte.d.ts",
-      "svelte": "./package/components/core/checkbox.svelte",
-      "default": "./package/components/core/checkbox.svelte"
+    "./components/listbox/option.svelte": {
+      "types": "./package/components/listbox/option.svelte.d.ts",
+      "svelte": "./package/components/listbox/option.svelte",
+      "default": "./package/components/listbox/option.svelte"
     },
-    "./components/core/dialog.svelte": {
-      "types": "./package/components/core/dialog.svelte.d.ts",
-      "svelte": "./package/components/core/dialog.svelte",
-      "default": "./package/components/core/dialog.svelte"
+    "./components/menu/menu-button.svelte": {
+      "types": "./package/components/menu/menu-button.svelte.d.ts",
+      "svelte": "./package/components/menu/menu-button.svelte",
+      "default": "./package/components/menu/menu-button.svelte"
     },
-    "./components/core/drawer.svelte": {
-      "types": "./package/components/core/drawer.svelte.d.ts",
-      "svelte": "./package/components/core/drawer.svelte",
-      "default": "./package/components/core/drawer.svelte"
+    "./components/menu/menu-item-checkbox.svelte": {
+      "types": "./package/components/menu/menu-item-checkbox.svelte.d.ts",
+      "svelte": "./package/components/menu/menu-item-checkbox.svelte",
+      "default": "./package/components/menu/menu-item-checkbox.svelte"
     },
-    "./components/core/grid-cell.svelte": {
-      "types": "./package/components/core/grid-cell.svelte.d.ts",
-      "svelte": "./package/components/core/grid-cell.svelte",
-      "default": "./package/components/core/grid-cell.svelte"
+    "./components/menu/menu-item-group.svelte": {
+      "types": "./package/components/menu/menu-item-group.svelte.d.ts",
+      "svelte": "./package/components/menu/menu-item-group.svelte",
+      "default": "./package/components/menu/menu-item-group.svelte"
     },
-    "./components/core/group.svelte": {
-      "types": "./package/components/core/group.svelte.d.ts",
-      "svelte": "./package/components/core/group.svelte",
-      "default": "./package/components/core/group.svelte"
+    "./components/menu/menu-item-radio.svelte": {
+      "types": "./package/components/menu/menu-item-radio.svelte.d.ts",
+      "svelte": "./package/components/menu/menu-item-radio.svelte",
+      "default": "./package/components/menu/menu-item-radio.svelte"
     },
-    "./components/core/icon.svelte": {
-      "types": "./package/components/core/icon.svelte.d.ts",
-      "svelte": "./package/components/core/icon.svelte",
-      "default": "./package/components/core/icon.svelte"
+    "./components/menu/menu-item.svelte": {
+      "types": "./package/components/menu/menu-item.svelte.d.ts",
+      "svelte": "./package/components/menu/menu-item.svelte",
+      "default": "./package/components/menu/menu-item.svelte"
     },
-    "./components/core/menu-button.svelte": {
-      "types": "./package/components/core/menu-button.svelte.d.ts",
-      "svelte": "./package/components/core/menu-button.svelte",
-      "default": "./package/components/core/menu-button.svelte"
+    "./components/menu/menu.svelte": {
+      "types": "./package/components/menu/menu.svelte.d.ts",
+      "svelte": "./package/components/menu/menu.svelte",
+      "default": "./package/components/menu/menu.svelte"
     },
-    "./components/core/menu-item-checkbox.svelte": {
-      "types": "./package/components/core/menu-item-checkbox.svelte.d.ts",
-      "svelte": "./package/components/core/menu-item-checkbox.svelte",
-      "default": "./package/components/core/menu-item-checkbox.svelte"
+    "./components/radio/radio-group.svelte": {
+      "types": "./package/components/radio/radio-group.svelte.d.ts",
+      "svelte": "./package/components/radio/radio-group.svelte",
+      "default": "./package/components/radio/radio-group.svelte"
     },
-    "./components/core/menu-item-radio.svelte": {
-      "types": "./package/components/core/menu-item-radio.svelte.d.ts",
-      "svelte": "./package/components/core/menu-item-radio.svelte",
-      "default": "./package/components/core/menu-item-radio.svelte"
+    "./components/radio/radio.svelte": {
+      "types": "./package/components/radio/radio.svelte.d.ts",
+      "svelte": "./package/components/radio/radio.svelte",
+      "default": "./package/components/radio/radio.svelte"
     },
-    "./components/core/menu-item.svelte": {
-      "types": "./package/components/core/menu-item.svelte.d.ts",
-      "svelte": "./package/components/core/menu-item.svelte",
-      "default": "./package/components/core/menu-item.svelte"
+    "./components/select/combobox.svelte": {
+      "types": "./package/components/select/combobox.svelte.d.ts",
+      "svelte": "./package/components/select/combobox.svelte",
+      "default": "./package/components/select/combobox.svelte"
     },
-    "./components/core/number-input.svelte": {
-      "types": "./package/components/core/number-input.svelte.d.ts",
-      "svelte": "./package/components/core/number-input.svelte",
-      "default": "./package/components/core/number-input.svelte"
+    "./components/select/select.svelte": {
+      "types": "./package/components/select/select.svelte.d.ts",
+      "svelte": "./package/components/select/select.svelte",
+      "default": "./package/components/select/select.svelte"
     },
-    "./components/core/option.svelte": {
-      "types": "./package/components/core/option.svelte.d.ts",
-      "svelte": "./package/components/core/option.svelte",
-      "default": "./package/components/core/option.svelte"
+    "./components/slider/slider.svelte": {
+      "types": "./package/components/slider/slider.svelte.d.ts",
+      "svelte": "./package/components/slider/slider.svelte",
+      "default": "./package/components/slider/slider.svelte"
     },
-    "./components/core/password-input.svelte": {
-      "types": "./package/components/core/password-input.svelte.d.ts",
-      "svelte": "./package/components/core/password-input.svelte",
-      "default": "./package/components/core/password-input.svelte"
+    "./components/switch/switch.svelte": {
+      "types": "./package/components/switch/switch.svelte.d.ts",
+      "svelte": "./package/components/switch/switch.svelte",
+      "default": "./package/components/switch/switch.svelte"
     },
-    "./components/core/radio.svelte": {
-      "types": "./package/components/core/radio.svelte.d.ts",
-      "svelte": "./package/components/core/radio.svelte",
-      "default": "./package/components/core/radio.svelte"
+    "./components/table/table-body.svelte": {
+      "types": "./package/components/table/table-body.svelte.d.ts",
+      "svelte": "./package/components/table/table-body.svelte",
+      "default": "./package/components/table/table-body.svelte"
     },
-    "./components/core/row-group.svelte": {
-      "types": "./package/components/core/row-group.svelte.d.ts",
-      "svelte": "./package/components/core/row-group.svelte",
-      "default": "./package/components/core/row-group.svelte"
+    "./components/table/table-cell.svelte": {
+      "types": "./package/components/table/table-cell.svelte.d.ts",
+      "svelte": "./package/components/table/table-cell.svelte",
+      "default": "./package/components/table/table-cell.svelte"
     },
-    "./components/core/row.svelte": {
-      "types": "./package/components/core/row.svelte.d.ts",
-      "svelte": "./package/components/core/row.svelte",
-      "default": "./package/components/core/row.svelte"
+    "./components/table/table-head.svelte": {
+      "types": "./package/components/table/table-head.svelte.d.ts",
+      "svelte": "./package/components/table/table-head.svelte",
+      "default": "./package/components/table/table-head.svelte"
     },
-    "./components/core/search-bar.svelte": {
-      "types": "./package/components/core/search-bar.svelte.d.ts",
-      "svelte": "./package/components/core/search-bar.svelte",
-      "default": "./package/components/core/search-bar.svelte"
+    "./components/table/table-row.svelte": {
+      "types": "./package/components/table/table-row.svelte.d.ts",
+      "svelte": "./package/components/table/table-row.svelte",
+      "default": "./package/components/table/table-row.svelte"
     },
-    "./components/core/select-button.svelte": {
-      "types": "./package/components/core/select-button.svelte.d.ts",
-      "svelte": "./package/components/core/select-button.svelte",
-      "default": "./package/components/core/select-button.svelte"
+    "./components/table/table.svelte": {
+      "types": "./package/components/table/table.svelte.d.ts",
+      "svelte": "./package/components/table/table.svelte",
+      "default": "./package/components/table/table.svelte"
     },
-    "./components/core/separator.svelte": {
-      "types": "./package/components/core/separator.svelte.d.ts",
-      "svelte": "./package/components/core/separator.svelte",
-      "default": "./package/components/core/separator.svelte"
+    "./components/tabs/tab-list.svelte": {
+      "types": "./package/components/tabs/tab-list.svelte.d.ts",
+      "svelte": "./package/components/tabs/tab-list.svelte",
+      "default": "./package/components/tabs/tab-list.svelte"
     },
-    "./components/core/slider.svelte": {
-      "types": "./package/components/core/slider.svelte.d.ts",
-      "svelte": "./package/components/core/slider.svelte",
-      "default": "./package/components/core/slider.svelte"
+    "./components/tabs/tab-panel.svelte": {
+      "types": "./package/components/tabs/tab-panel.svelte.d.ts",
+      "svelte": "./package/components/tabs/tab-panel.svelte",
+      "default": "./package/components/tabs/tab-panel.svelte"
     },
-    "./components/core/spacer.svelte": {
-      "types": "./package/components/core/spacer.svelte.d.ts",
-      "svelte": "./package/components/core/spacer.svelte",
-      "default": "./package/components/core/spacer.svelte"
+    "./components/tabs/tab.svelte": {
+      "types": "./package/components/tabs/tab.svelte.d.ts",
+      "svelte": "./package/components/tabs/tab.svelte",
+      "default": "./package/components/tabs/tab.svelte"
     },
-    "./components/core/switch.svelte": {
-      "types": "./package/components/core/switch.svelte.d.ts",
-      "svelte": "./package/components/core/switch.svelte",
-      "default": "./package/components/core/switch.svelte"
+    "./components/text-field/markdown-editor.svelte": {
+      "types": "./package/components/text-field/markdown-editor.svelte.d.ts",
+      "svelte": "./package/components/text-field/markdown-editor.svelte",
+      "default": "./package/components/text-field/markdown-editor.svelte"
     },
-    "./components/core/tab-panel.svelte": {
-      "types": "./package/components/core/tab-panel.svelte.d.ts",
-      "svelte": "./package/components/core/tab-panel.svelte",
-      "default": "./package/components/core/tab-panel.svelte"
+    "./components/text-field/number-input.svelte": {
+      "types": "./package/components/text-field/number-input.svelte.d.ts",
+      "svelte": "./package/components/text-field/number-input.svelte",
+      "default": "./package/components/text-field/number-input.svelte"
     },
-    "./components/core/tab.svelte": {
-      "types": "./package/components/core/tab.svelte.d.ts",
-      "svelte": "./package/components/core/tab.svelte",
-      "default": "./package/components/core/tab.svelte"
+    "./components/text-field/password-input.svelte": {
+      "types": "./package/components/text-field/password-input.svelte.d.ts",
+      "svelte": "./package/components/text-field/password-input.svelte",
+      "default": "./package/components/text-field/password-input.svelte"
     },
-    "./components/core/text-area.svelte": {
-      "types": "./package/components/core/text-area.svelte.d.ts",
-      "svelte": "./package/components/core/text-area.svelte",
-      "default": "./package/components/core/text-area.svelte"
+    "./components/text-field/search-bar.svelte": {
+      "types": "./package/components/text-field/search-bar.svelte.d.ts",
+      "svelte": "./package/components/text-field/search-bar.svelte",
+      "default": "./package/components/text-field/search-bar.svelte"
     },
-    "./components/core/text-input.svelte": {
-      "types": "./package/components/core/text-input.svelte.d.ts",
-      "svelte": "./package/components/core/text-input.svelte",
-      "default": "./package/components/core/text-input.svelte"
+    "./components/text-field/text-area.svelte": {
+      "types": "./package/components/text-field/text-area.svelte.d.ts",
+      "svelte": "./package/components/text-field/text-area.svelte",
+      "default": "./package/components/text-field/text-area.svelte"
     },
-    "./components/core/toolbar.svelte": {
-      "types": "./package/components/core/toolbar.svelte.d.ts",
-      "svelte": "./package/components/core/toolbar.svelte",
-      "default": "./package/components/core/toolbar.svelte"
+    "./components/text-field/text-input.svelte": {
+      "types": "./package/components/text-field/text-input.svelte.d.ts",
+      "svelte": "./package/components/text-field/text-input.svelte",
+      "default": "./package/components/text-field/text-input.svelte"
     },
-    "./components/editor/markdown.svelte": {
-      "types": "./package/components/editor/markdown.svelte.d.ts",
-      "svelte": "./package/components/editor/markdown.svelte",
-      "default": "./package/components/editor/markdown.svelte"
-    },
-    "./components/helpers/group": {
-      "types": "./package/components/helpers/group.d.ts",
-      "default": "./package/components/helpers/group.js"
-    },
-    "./components/helpers/popup": {
-      "types": "./package/components/helpers/popup.d.ts",
-      "default": "./package/components/helpers/popup.js"
-    },
-    "./components/helpers/util": {
-      "types": "./package/components/helpers/util.d.ts",
-      "default": "./package/components/helpers/util.js"
+    "./components/toolbar/toolbar.svelte": {
+      "types": "./package/components/toolbar/toolbar.svelte.d.ts",
+      "svelte": "./package/components/toolbar/toolbar.svelte",
+      "default": "./package/components/toolbar/toolbar.svelte"
     },
     "./components/util/app-shell.svelte": {
       "types": "./package/components/util/app-shell.svelte.d.ts",
       "svelte": "./package/components/util/app-shell.svelte",
       "default": "./package/components/util/app-shell.svelte"
     },
-    "./components/util/misc": {
-      "types": "./package/components/util/misc.d.ts",
-      "default": "./package/components/util/misc.js"
+    "./components/util/group": {
+      "types": "./package/components/util/group.d.ts",
+      "default": "./package/components/util/group.js"
+    },
+    "./components/util/group.svelte": {
+      "types": "./package/components/util/group.svelte.d.ts",
+      "svelte": "./package/components/util/group.svelte",
+      "default": "./package/components/util/group.svelte"
+    },
+    "./components/util/popup": {
+      "types": "./package/components/util/popup.d.ts",
+      "default": "./package/components/util/popup.js"
     },
     "./components/util/popup.svelte": {
       "types": "./package/components/util/popup.svelte.d.ts",
@@ -296,6 +293,10 @@
       "types": "./package/components/util/portal.svelte.d.ts",
       "svelte": "./package/components/util/portal.svelte",
       "default": "./package/components/util/portal.svelte"
+    },
+    "./components/util/util": {
+      "types": "./package/components/util/util.d.ts",
+      "default": "./package/components/util/util.js"
     },
     ".": {
       "types": "./package/index.d.ts",
@@ -320,154 +321,155 @@
   "files": [
     "package"
   ],
+  "svelte": "./package/index.js",
   "typesVersions": {
     ">4.0": {
-      "components/composite/calendar.svelte": [
-        "./package/components/composite/calendar.svelte.d.ts"
+      "components/button/button.svelte": [
+        "./package/components/button/button.svelte.d.ts"
       ],
-      "components/composite/checkbox-group.svelte": [
-        "./package/components/composite/checkbox-group.svelte.d.ts"
+      "components/button/select-button-group.svelte": [
+        "./package/components/button/select-button-group.svelte.d.ts"
       ],
-      "components/composite/combobox.svelte": [
-        "./package/components/composite/combobox.svelte.d.ts"
+      "components/button/select-button.svelte": [
+        "./package/components/button/select-button.svelte.d.ts"
       ],
-      "components/composite/disclosure.svelte": [
-        "./package/components/composite/disclosure.svelte.d.ts"
+      "components/calendar/calendar.svelte": [
+        "./package/components/calendar/calendar.svelte.d.ts"
       ],
-      "components/composite/grid.svelte": [
-        "./package/components/composite/grid.svelte.d.ts"
+      "components/checkbox/checkbox-group.svelte": [
+        "./package/components/checkbox/checkbox-group.svelte.d.ts"
       ],
-      "components/composite/listbox.svelte": [
-        "./package/components/composite/listbox.svelte.d.ts"
+      "components/checkbox/checkbox.svelte": [
+        "./package/components/checkbox/checkbox.svelte.d.ts"
       ],
-      "components/composite/menu-item-group.svelte": [
-        "./package/components/composite/menu-item-group.svelte.d.ts"
+      "components/dialog/dialog.svelte": [
+        "./package/components/dialog/dialog.svelte.d.ts"
       ],
-      "components/composite/menu.svelte": [
-        "./package/components/composite/menu.svelte.d.ts"
+      "components/disclosure/disclosure.svelte": [
+        "./package/components/disclosure/disclosure.svelte.d.ts"
       ],
-      "components/composite/option-group.svelte": [
-        "./package/components/composite/option-group.svelte.d.ts"
+      "components/divider/divider.svelte": [
+        "./package/components/divider/divider.svelte.d.ts"
       ],
-      "components/composite/radio-group.svelte": [
-        "./package/components/composite/radio-group.svelte.d.ts"
+      "components/divider/spacer.svelte": [
+        "./package/components/divider/spacer.svelte.d.ts"
       ],
-      "components/composite/select-button-group.svelte": [
-        "./package/components/composite/select-button-group.svelte.d.ts"
+      "components/drawer/drawer.svelte": [
+        "./package/components/drawer/drawer.svelte.d.ts"
       ],
-      "components/composite/select.svelte": [
-        "./package/components/composite/select.svelte.d.ts"
+      "components/icon/icon.svelte": [
+        "./package/components/icon/icon.svelte.d.ts"
       ],
-      "components/composite/tab-list.svelte": [
-        "./package/components/composite/tab-list.svelte.d.ts"
+      "components/listbox/listbox.svelte": [
+        "./package/components/listbox/listbox.svelte.d.ts"
       ],
-      "components/core/button.svelte": [
-        "./package/components/core/button.svelte.d.ts"
+      "components/listbox/option-group.svelte": [
+        "./package/components/listbox/option-group.svelte.d.ts"
       ],
-      "components/core/checkbox.svelte": [
-        "./package/components/core/checkbox.svelte.d.ts"
+      "components/listbox/option.svelte": [
+        "./package/components/listbox/option.svelte.d.ts"
       ],
-      "components/core/dialog.svelte": [
-        "./package/components/core/dialog.svelte.d.ts"
+      "components/menu/menu-button.svelte": [
+        "./package/components/menu/menu-button.svelte.d.ts"
       ],
-      "components/core/drawer.svelte": [
-        "./package/components/core/drawer.svelte.d.ts"
+      "components/menu/menu-item-checkbox.svelte": [
+        "./package/components/menu/menu-item-checkbox.svelte.d.ts"
       ],
-      "components/core/grid-cell.svelte": [
-        "./package/components/core/grid-cell.svelte.d.ts"
+      "components/menu/menu-item-group.svelte": [
+        "./package/components/menu/menu-item-group.svelte.d.ts"
       ],
-      "components/core/group.svelte": [
-        "./package/components/core/group.svelte.d.ts"
+      "components/menu/menu-item-radio.svelte": [
+        "./package/components/menu/menu-item-radio.svelte.d.ts"
       ],
-      "components/core/icon.svelte": [
-        "./package/components/core/icon.svelte.d.ts"
+      "components/menu/menu-item.svelte": [
+        "./package/components/menu/menu-item.svelte.d.ts"
       ],
-      "components/core/menu-button.svelte": [
-        "./package/components/core/menu-button.svelte.d.ts"
+      "components/menu/menu.svelte": [
+        "./package/components/menu/menu.svelte.d.ts"
       ],
-      "components/core/menu-item-checkbox.svelte": [
-        "./package/components/core/menu-item-checkbox.svelte.d.ts"
+      "components/radio/radio-group.svelte": [
+        "./package/components/radio/radio-group.svelte.d.ts"
       ],
-      "components/core/menu-item-radio.svelte": [
-        "./package/components/core/menu-item-radio.svelte.d.ts"
+      "components/radio/radio.svelte": [
+        "./package/components/radio/radio.svelte.d.ts"
       ],
-      "components/core/menu-item.svelte": [
-        "./package/components/core/menu-item.svelte.d.ts"
+      "components/select/combobox.svelte": [
+        "./package/components/select/combobox.svelte.d.ts"
       ],
-      "components/core/number-input.svelte": [
-        "./package/components/core/number-input.svelte.d.ts"
+      "components/select/select.svelte": [
+        "./package/components/select/select.svelte.d.ts"
       ],
-      "components/core/option.svelte": [
-        "./package/components/core/option.svelte.d.ts"
+      "components/slider/slider.svelte": [
+        "./package/components/slider/slider.svelte.d.ts"
       ],
-      "components/core/password-input.svelte": [
-        "./package/components/core/password-input.svelte.d.ts"
+      "components/switch/switch.svelte": [
+        "./package/components/switch/switch.svelte.d.ts"
       ],
-      "components/core/radio.svelte": [
-        "./package/components/core/radio.svelte.d.ts"
+      "components/table/table-body.svelte": [
+        "./package/components/table/table-body.svelte.d.ts"
       ],
-      "components/core/row-group.svelte": [
-        "./package/components/core/row-group.svelte.d.ts"
+      "components/table/table-cell.svelte": [
+        "./package/components/table/table-cell.svelte.d.ts"
       ],
-      "components/core/row.svelte": [
-        "./package/components/core/row.svelte.d.ts"
+      "components/table/table-head.svelte": [
+        "./package/components/table/table-head.svelte.d.ts"
       ],
-      "components/core/search-bar.svelte": [
-        "./package/components/core/search-bar.svelte.d.ts"
+      "components/table/table-row.svelte": [
+        "./package/components/table/table-row.svelte.d.ts"
       ],
-      "components/core/select-button.svelte": [
-        "./package/components/core/select-button.svelte.d.ts"
+      "components/table/table.svelte": [
+        "./package/components/table/table.svelte.d.ts"
       ],
-      "components/core/separator.svelte": [
-        "./package/components/core/separator.svelte.d.ts"
+      "components/tabs/tab-list.svelte": [
+        "./package/components/tabs/tab-list.svelte.d.ts"
       ],
-      "components/core/slider.svelte": [
-        "./package/components/core/slider.svelte.d.ts"
+      "components/tabs/tab-panel.svelte": [
+        "./package/components/tabs/tab-panel.svelte.d.ts"
       ],
-      "components/core/spacer.svelte": [
-        "./package/components/core/spacer.svelte.d.ts"
+      "components/tabs/tab.svelte": [
+        "./package/components/tabs/tab.svelte.d.ts"
       ],
-      "components/core/switch.svelte": [
-        "./package/components/core/switch.svelte.d.ts"
+      "components/text-field/markdown-editor.svelte": [
+        "./package/components/text-field/markdown-editor.svelte.d.ts"
       ],
-      "components/core/tab-panel.svelte": [
-        "./package/components/core/tab-panel.svelte.d.ts"
+      "components/text-field/number-input.svelte": [
+        "./package/components/text-field/number-input.svelte.d.ts"
       ],
-      "components/core/tab.svelte": [
-        "./package/components/core/tab.svelte.d.ts"
+      "components/text-field/password-input.svelte": [
+        "./package/components/text-field/password-input.svelte.d.ts"
       ],
-      "components/core/text-area.svelte": [
-        "./package/components/core/text-area.svelte.d.ts"
+      "components/text-field/search-bar.svelte": [
+        "./package/components/text-field/search-bar.svelte.d.ts"
       ],
-      "components/core/text-input.svelte": [
-        "./package/components/core/text-input.svelte.d.ts"
+      "components/text-field/text-area.svelte": [
+        "./package/components/text-field/text-area.svelte.d.ts"
       ],
-      "components/core/toolbar.svelte": [
-        "./package/components/core/toolbar.svelte.d.ts"
+      "components/text-field/text-input.svelte": [
+        "./package/components/text-field/text-input.svelte.d.ts"
       ],
-      "components/editor/markdown.svelte": [
-        "./package/components/editor/markdown.svelte.d.ts"
-      ],
-      "components/helpers/group": [
-        "./package/components/helpers/group.d.ts"
-      ],
-      "components/helpers/popup": [
-        "./package/components/helpers/popup.d.ts"
-      ],
-      "components/helpers/util": [
-        "./package/components/helpers/util.d.ts"
+      "components/toolbar/toolbar.svelte": [
+        "./package/components/toolbar/toolbar.svelte.d.ts"
       ],
       "components/util/app-shell.svelte": [
         "./package/components/util/app-shell.svelte.d.ts"
       ],
-      "components/util/misc": [
-        "./package/components/util/misc.d.ts"
+      "components/util/group": [
+        "./package/components/util/group.d.ts"
+      ],
+      "components/util/group.svelte": [
+        "./package/components/util/group.svelte.d.ts"
+      ],
+      "components/util/popup": [
+        "./package/components/util/popup.d.ts"
       ],
       "components/util/popup.svelte": [
         "./package/components/util/popup.svelte.d.ts"
       ],
       "components/util/portal.svelte": [
         "./package/components/util/portal.svelte.d.ts"
+      ],
+      "components/util/util": [
+        "./package/components/util/util.d.ts"
       ],
       "index": [
         "./package/index.d.ts"

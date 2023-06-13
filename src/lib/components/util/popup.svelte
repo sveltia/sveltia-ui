@@ -7,7 +7,7 @@
 <script>
   import { onMount } from 'svelte';
   import { writable } from 'svelte/store';
-  import { activatePopup } from '../helpers/popup';
+  import { activatePopup } from './popup';
 
   /** @type {HTMLElement?} */
   export let anchor = undefined;
