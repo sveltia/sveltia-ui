@@ -128,6 +128,7 @@ class Group {
     this.activeMembers.forEach((element) => {
       const isTarget = element === newTarget;
       const isSelected = element.matches('[aria-selected="true"]');
+      const isMenuItemRadio = element.matches('[role="menuitemradio"]');
       const controls = element.getAttribute('aria-controls');
 
       if (this.multi && isTarget && event.type === 'click') {
@@ -136,9 +137,8 @@ class Group {
       }
 
       if (
-        (element.matches('[role="menuitemradio"]') &&
-          element.closest(this.parentGroupSelector) === targetParentGroup) ||
-        !this.multi
+        (isMenuItemRadio && element.closest(this.parentGroupSelector) === targetParentGroup) ||
+        (!isMenuItemRadio && !this.multi)
       ) {
         element.setAttribute(this.childSelectedAttr, String(isTarget));
         element.dispatchEvent(new CustomEvent(isTarget ? 'select' : 'unselect'));

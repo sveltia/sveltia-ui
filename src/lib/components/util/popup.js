@@ -82,8 +82,6 @@ class Popup {
    * @param {PopupPosition} position Where to show the popup content.
    */
   constructor(anchorElement, popupElement, position) {
-    console.info({ anchorElement, popupElement, position });
-
     this.anchorElement = anchorElement;
     this.popupElement = popupElement; // = backdrop
     this.position = position;
@@ -99,8 +97,6 @@ class Popup {
     });
 
     this.anchorElement.addEventListener('keydown', (event) => {
-      console.info(event);
-
       const { key, ctrlKey, metaKey, shiftKey, altKey } = event;
       const hasModifier = shiftKey || altKey || ctrlKey || metaKey;
 
@@ -127,8 +123,6 @@ class Popup {
     });
 
     this.popupElement.addEventListener('keydown', (event) => {
-      console.info(event);
-
       const { key, ctrlKey, metaKey, shiftKey, altKey } = event;
       const hasModifier = shiftKey || altKey || ctrlKey || metaKey;
 
