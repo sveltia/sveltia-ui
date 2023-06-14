@@ -33,5 +33,16 @@
   .table {
     display: table;
     width: 100%;
+
+    &:global(.data) {
+      border-collapse: collapse;
+
+      :global(.table-col-header),
+      :global(.table-row-header),
+      :global(.table-cell) {
+        border: 1px solid var(--secondary-border-color);
+        padding: 8px 8px;
+      }
+    }
   }
 </style>

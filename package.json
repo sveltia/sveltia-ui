@@ -201,10 +201,25 @@
       "svelte": "./package/components/table/table-cell.svelte",
       "default": "./package/components/table/table-cell.svelte"
     },
+    "./components/table/table-col-header.svelte": {
+      "types": "./package/components/table/table-col-header.svelte.d.ts",
+      "svelte": "./package/components/table/table-col-header.svelte",
+      "default": "./package/components/table/table-col-header.svelte"
+    },
+    "./components/table/table-foot.svelte": {
+      "types": "./package/components/table/table-foot.svelte.d.ts",
+      "svelte": "./package/components/table/table-foot.svelte",
+      "default": "./package/components/table/table-foot.svelte"
+    },
     "./components/table/table-head.svelte": {
       "types": "./package/components/table/table-head.svelte.d.ts",
       "svelte": "./package/components/table/table-head.svelte",
       "default": "./package/components/table/table-head.svelte"
+    },
+    "./components/table/table-row-header.svelte": {
+      "types": "./package/components/table/table-row-header.svelte.d.ts",
+      "svelte": "./package/components/table/table-row-header.svelte",
+      "default": "./package/components/table/table-row-header.svelte"
     },
     "./components/table/table-row.svelte": {
       "types": "./package/components/table/table-row.svelte.d.ts",
@@ -411,8 +426,17 @@
       "components/table/table-cell.svelte": [
         "./package/components/table/table-cell.svelte.d.ts"
       ],
+      "components/table/table-col-header.svelte": [
+        "./package/components/table/table-col-header.svelte.d.ts"
+      ],
+      "components/table/table-foot.svelte": [
+        "./package/components/table/table-foot.svelte.d.ts"
+      ],
       "components/table/table-head.svelte": [
         "./package/components/table/table-head.svelte.d.ts"
+      ],
+      "components/table/table-row-header.svelte": [
+        "./package/components/table/table-row-header.svelte.d.ts"
       ],
       "components/table/table-row.svelte": [
         "./package/components/table/table-row.svelte.d.ts"
