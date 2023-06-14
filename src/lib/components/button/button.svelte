@@ -162,7 +162,7 @@
     }
 
     &:global(.primary) {
-      border-color: var(--secondary-control-border-color);
+      border-color: var(--control-border-color);
       color: var(--primary-accent-color-foreground);
       background-color: var(--primary-accent-color);
 
@@ -192,7 +192,7 @@
     }
 
     &:global(.tertiary) {
-      border-color: var(--secondary-control-border-color);
+      border-color: var(--control-border-color);
       color: var(--highlight-foreground-color);
       background-color: var(--tertiary-background-color);
 

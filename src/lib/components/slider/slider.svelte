@@ -20,11 +20,14 @@
 
   export let value = 0;
   export let sliderLabel = '';
+  /** @type {[number, number]} */
   export let values = undefined;
-  export let sliderLabels = [];
+  /** @type {[string, string]} */
+  export let sliderLabels = undefined;
   export let min = 0;
   export let max = 100;
   export let step = 1;
+  /** @type {(string[] | number[])} */
   export let optionLabels = [];
 
   $: multiThumb = !!values;
@@ -42,53 +45,59 @@
   let targetValueIndex = 0;
 
   /**
-   *
-   * @param {number} diff
+   * Move a thumb with mouse.
+   * @param {number} diff Distance from the original X position in pixels.
    */
-  const dragSlider = (diff) => {
-    if (diff >= 0 && diff <= barWidth) {
-      const fromIndex = positionList.findLastIndex((s) => s <= diff);
-      const toIndex = positionList.findIndex((s) => diff <= s);
+  const moveThumb = (diff) => {
+    if (diff < 0) {
+      diff = 0;
+    } else if (diff > barWidth) {
+      diff = barWidth;
+    }
 
-      const index =
-        Math.abs(positionList[fromIndex] - diff) < Math.abs(positionList[toIndex] - diff)
-          ? fromIndex
-          : toIndex;
+    const fromIndex = positionList.findLastIndex((s) => s <= diff);
+    const toIndex = positionList.findIndex((s) => diff <= s);
 
-      if (
-        sliderPositions[targetValueIndex] === positionList[index] ||
-        (multiThumb &&
-          ((targetValueIndex === 0 && sliderPositions[1] <= positionList[index]) ||
-            (targetValueIndex === 1 && sliderPositions[0] >= positionList[index])))
-      ) {
-        return;
-      }
+    const index =
+      Math.abs(positionList[fromIndex] - diff) < Math.abs(positionList[toIndex] - diff)
+        ? fromIndex
+        : toIndex;
 
-      if (multiThumb) {
-        values[targetValueIndex] = valueList[index];
-      } else {
-        value = valueList[index];
-      }
+    if (
+      sliderPositions[targetValueIndex] === positionList[index] ||
+      (multiThumb &&
+        ((targetValueIndex === 0 && sliderPositions[1] <= positionList[index]) ||
+          (targetValueIndex === 1 && sliderPositions[0] >= positionList[index])))
+    ) {
+      return;
+    }
+
+    if (multiThumb) {
+      values[targetValueIndex] = valueList[index];
+    } else {
+      value = valueList[index];
     }
   };
 
   /**
-   *
+   * Handle the `keydown` event fired on the slider.
    * @param {KeyboardEvent} event `keydown` event.
-   * @param {number} [valueIndex]
+   * @param {number} [valueIndex] Index in the {@link values} array to be used to get/set the value.
    */
   const onKeyDown = (event, valueIndex = 0) => {
-    const { key, shiftKey, altKey, ctrlKey, metaKey } = event;
+    const { key, ctrlKey, metaKey, shiftKey, altKey } = event;
+    const hasModifier = shiftKey || altKey || ctrlKey || metaKey;
 
-    if (shiftKey || altKey || ctrlKey || metaKey) {
+    if (hasModifier) {
       return;
     }
 
+    const _value = multiThumb ? values[valueIndex] : value;
     let index = -1;
 
     if (['ArrowDown', 'ArrowLeft'].includes(key)) {
-      if (value > min) {
-        index = valueList.indexOf(value) - 1;
+      if (_value > min) {
+        index = valueList.indexOf(_value) - 1;
       }
 
       event.preventDefault();
@@ -96,8 +105,8 @@
     }
 
     if (['ArrowUp', 'ArrowRight'].includes(key)) {
-      if (value < max) {
-        index = valueList.indexOf(value) + 1;
+      if (_value < max) {
+        index = valueList.indexOf(_value) + 1;
       }
 
       event.preventDefault();
@@ -122,9 +131,9 @@
   };
 
   /**
-   *
+   * Handle the `mousedown` event fired on the slider.
    * @param {MouseEvent} event `mousedown` event.
-   * @param {number} [valueIndex]
+   * @param {number} [valueIndex] Index in the {@link values} array to be used to get/set the value.
    */
   const onMouseDown = (event, valueIndex = 0) => {
     const { clientX, screenX } = event;
@@ -136,17 +145,17 @@
   };
 
   /**
-   *
+   * Handle the `mousemove` event fired anywhere on the page.
    * @param {MouseEvent} event `mousemove` event.
    */
   const onMouseMove = (event) => {
     if (dragging) {
-      dragSlider(startX + (event.screenX - startScreenX));
+      moveThumb(startX + (event.screenX - startScreenX));
     }
   };
 
   /**
-   *
+   * Handle the `mouseup` event fired anywhere on the page.
    */
   const onMouseUp = () => {
     if (dragging) {
@@ -155,12 +164,12 @@
   };
 
   /**
-   *
+   * Handle the `click` event fired on the slider.
    * @param {MouseEvent} event `click` event.
    */
   const onClick = (event) => {
     if (!multiThumb && !dragging) {
-      dragSlider(/** @type {any} */ (event).layerX);
+      moveThumb(/** @type {any} */ (event).layerX);
     }
 
     if (dragging) {
@@ -169,7 +178,7 @@
   };
 
   /**
-   *
+   * Update the thumb position and fire the `change` event when the value is changed.
    */
   const onValueChange = () => {
     if (multiThumb) {
@@ -222,12 +231,12 @@
       style:width="{multiThumb ? sliderPositions[1] - sliderPositions[0] : sliderPositions[0]}px"
     />
     <div
-      role="slider"
       tabindex="0"
-      aria-label={multiThumb ? sliderLabels[0] || '' : sliderLabel}
+      role="slider"
+      aria-label={multiThumb ? sliderLabels?.[0] || '' : sliderLabel}
       aria-valuemin={min}
       aria-valuemax={max}
-      aria-valuenow={value}
+      aria-valuenow={multiThumb ? values[0] : value}
       style:left="{sliderPositions[0]}px"
       on:mousedown={(event) => {
         onMouseDown(event, 0);
@@ -238,12 +247,12 @@
     />
     {#if multiThumb}
       <div
-        role="slider"
         tabindex="0"
-        aria-label={sliderLabels[1] || ''}
+        role="slider"
+        aria-label={sliderLabels?.[1] || ''}
         aria-valuemin={min}
         aria-valuemax={max}
-        aria-valuenow={value}
+        aria-valuenow={values[1]}
         style:left="{sliderPositions[1]}px"
         on:mousedown={(event) => {
           onMouseDown(event, 1);
@@ -279,7 +288,7 @@
     width: var(--slider-base-width, 200px);
     height: 8px;
     border-radius: 8px;
-    background-color: var(--secondary-control-border-color);
+    background-color: var(--control-border-color);
   }
 
   .bar {

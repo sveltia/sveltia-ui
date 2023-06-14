@@ -26,8 +26,8 @@
 
 <div
   class="sui listbox {className}"
-  role="listbox"
   tabindex="0"
+  role="listbox"
   aria-multiselectable={multiple}
   {...$$restProps}
   bind:this={element}
@@ -45,9 +45,10 @@
     color: inherit;
     margin: 0;
     border-width: 1px;
-    border-color: var(--secondary-control-border-color);
+    border-color: var(--control-border-color);
     border-radius: 4px;
     padding: 4px;
+    min-width: 160px;
 
     :global([role='separator']) {
       margin: 4px;
@@ -56,8 +57,7 @@
     &:global(.tabs) {
       padding: 0;
       border-width: 0 1px 0 0;
-      border-color: var(--secondary-control-border-color);
-      min-width: 160px;
+      border-color: var(--control-border-color);
 
       :global(.option button) {
         justify-content: flex-start;

@@ -13,6 +13,10 @@
 * {
   scroll-behavior: smooth;
   box-sizing: border-box;
+  outline-offset: 1px;
+  outline-width: 2px !important;
+  outline-style: solid;
+  outline-color: transparent;
   border-width: 0;
   border-style: solid;
 }
@@ -23,10 +27,7 @@
 }
 
 :focus-visible {
-  outline-offset: -2px;
-  outline-width: 2px !important;
-  outline-style: solid;
-  outline-color: hsl(var(--hue) 100% 50% / 25%);
+  outline-color: var(--primary-accent-color-lighter);
 }
 
 h1,
@@ -69,19 +70,6 @@ li {
   line-height: 1.75;
 }
 
-[role="grid"] {
-  display: table;
-  width: 100%;
-
-  .colgroup {
-    display: table-column-group;
-
-    .col {
-      display: table-column;
-    }
-  }
-}
-
 code,
 pre {
   font-family: var(--font-family--monospace);
@@ -114,21 +102,4 @@ dialog {
   &::backdrop {
     background: transparent;
   }
-}
-
-.thead[role="rowgroup"] {
-  display: table-header-group;
-}
-
-.tbody[role="rowgroup"] {
-  display: table-row-group;
-}
-
-[role="row"] {
-  display: table-row;
-}
-
-[role="columnheader"],
-[role="gridcell"] {
-  display: table-cell;
 }

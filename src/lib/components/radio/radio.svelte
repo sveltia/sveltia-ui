@@ -100,7 +100,7 @@
       justify-content: center;
       overflow: hidden;
       border-width: 2px;
-      border-color: var(--primary-control-border-color);
+      border-color: var(--checkbox-border-color);
       border-radius: 24px;
       width: 20px;
       height: 20px;

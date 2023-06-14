@@ -66,13 +66,14 @@
     {...$$restProps}
     on:keydown={(event) => {
       const { key, ctrlKey, metaKey, altKey, shiftKey } = event;
+      const hasModifier = shiftKey || altKey || ctrlKey || metaKey;
 
-      if (key === 'ArrowDown' && !ctrlKey && !metaKey && !altKey && !shiftKey) {
+      if (key === 'ArrowDown' && !hasModifier) {
         event.preventDefault();
         decrease();
       }
 
-      if (key === 'ArrowUp' && !ctrlKey && !metaKey && !altKey && !shiftKey) {
+      if (key === 'ArrowUp' && !hasModifier) {
         event.preventDefault();
         increase();
       }
@@ -112,13 +113,17 @@
 
     :global(button) {
       flex: none;
-      margin-left: -1px;
       border-width: 1px;
-      border-color: var(--secondary-control-border-color);
+      border-color: var(--control-border-color);
       width: 32px;
       height: var(--input--medium--height);
 
-      &:last-child {
+      &:first-of-type {
+        border-radius: 0;
+        border-width: 1px 0;
+      }
+
+      &:last-of-type {
         border-radius: 0 4px 4px 0;
       }
 

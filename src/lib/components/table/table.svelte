@@ -28,3 +28,10 @@
 >
   <slot />
 </div>
+
+<style lang="scss">
+  .table {
+    display: table;
+    width: 100%;
+  }
+</style>

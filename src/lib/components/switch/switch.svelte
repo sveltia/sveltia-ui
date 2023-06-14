@@ -20,51 +20,72 @@
   export let disabled = false;
 </script>
 
-<label class="sui switch {className}" class:disabled>
-  <input type="checkbox" role="switch" bind:checked {disabled} />
+<button
+  class="sui switch {className}"
+  {disabled}
+  role="switch"
+  aria-disabled={disabled}
+  aria-checked={checked}
+  on:click={() => {
+    checked = !checked;
+  }}
+>
   <span />
   {#if label}
     {label}
   {:else}
     <slot />
   {/if}
-</label>
+</button>
 
 <style lang="scss">
-  label {
+  button {
     display: inline-flex;
     align-items: center;
     gap: 8px;
+    border-width: 0;
+    border-style: solid;
+    border-color: transparent;
+    padding: 0;
+    color: inherit;
+    background-color: transparent;
+    box-shadow: none;
+    font: inherit;
+    text-align: left;
     cursor: pointer;
     -webkit-user-select: none;
     user-select: none;
 
-    &.disabled {
+    &:disabled {
       cursor: default;
+
+      span {
+        opacity: 0.4;
+      }
     }
-  }
 
-  input {
-    position: absolute;
-    left: -99999px;
+    &:focus-visible {
+      outline: 0;
 
-    &:focus + span {
-      background-color: var(--highlight-background-color);
+      span::before {
+        outline-offset: 1px;
+        outline-width: 2px;
+        outline-style: solid;
+        outline-color: var(--primary-accent-color-lighter);
+      }
     }
-  }
 
-  input:checked + span {
-    background-color: var(--primary-accent-color);
-    border-color: transparent;
+    &[aria-checked='true'] {
+      span {
+        background-color: var(--primary-accent-color);
+        border-color: transparent;
 
-    &::before {
-      transform: translateX(22px);
-      background-color: var(--primary-accent-color-foreground);
+        &::before {
+          transform: translateX(22px);
+          background-color: var(--primary-accent-color-foreground);
+        }
+      }
     }
-  }
-
-  input:disabled + span {
-    opacity: 0.4;
   }
 
   span {
@@ -74,7 +95,7 @@
     padding: 2px;
     display: inline-block;
     border-radius: 16px;
-    background-color: var(--secondary-control-border-color);
+    background-color: var(--control-border-color);
     transition: all 200ms;
 
     &:hover {

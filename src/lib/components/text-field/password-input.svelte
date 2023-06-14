@@ -74,7 +74,7 @@
       flex: none;
       margin-left: -1px;
       border-width: 1px;
-      border-color: var(--secondary-control-border-color);
+      border-color: var(--control-border-color);
       height: var(--input--medium--height);
       aspect-ratio: 1 / 1;
 

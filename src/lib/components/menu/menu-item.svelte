@@ -37,7 +37,7 @@
     {role}
     aria-checked={checked}
     aria-haspopup={hasChildren ? 'menu' : undefined}
-    aria-expanded={$isPopupOpen ? true : undefined}
+    aria-expanded={hasChildren && $isPopupOpen ? true : undefined}
     {...$$restProps}
     bind:this={buttonComponent}
     on:click
@@ -96,8 +96,7 @@
       }
     }
 
-    :global(button:hover),
-    :global(button:focus) {
+    :global(button:hover) {
       color: var(--highlight-foreground-color);
       background-color: var(--highlight-background-color);
     }

@@ -24,8 +24,9 @@
 
 <div
   class="sui radio-group {className} {orientation}"
+  tabindex="-1"
   role="radiogroup"
-  tabindex="0"
+  aria-orientation={orientation}
   bind:this={element}
   on:select
   use:activateGroup
@@ -36,6 +37,10 @@
 <style lang="scss">
   .radio-group {
     display: inline-flex;
+
+    &:focus-visible {
+      outline-width: 0 !important;
+    }
 
     &.horizontal {
       gap: 16px;

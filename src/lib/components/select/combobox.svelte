@@ -168,7 +168,7 @@
       display: flex;
       align-items: center;
       border-width: 1px;
-      border-color: var(--secondary-control-border-color);
+      border-color: var(--control-border-color);
       border-radius: 4px;
       padding: 0 32px 0 8px;
       width: 100%;

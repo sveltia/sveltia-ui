@@ -32,21 +32,6 @@
   aria-haspopup="menu"
   {...$$restProps}
   bind:this={buttonComponent}
-  on:keydown={(event) => {
-    const { key, ctrlKey, metaKey, shiftKey, altKey } = event;
-
-    if (['ArrowUp', 'ArrowDown'].includes(key) && !ctrlKey && !metaKey && !shiftKey && !altKey) {
-      event.preventDefault();
-
-      const members = [
-        ...popupComponent.dialog.querySelectorAll('[role^="menuitem"]:not([aria-disabled="true"])'),
-      ];
-
-      if (members.length) {
-        /** @type {HTMLElement} */ (key === 'ArrowUp' ? members.pop() : members.shift()).focus();
-      }
-    }
-  }}
 >
   <slot name="start-icon" slot="start-icon" />
   <slot />

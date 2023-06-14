@@ -1,35 +1,49 @@
 import { getRandomId, sleep } from './util';
 
+/**
+ * @type {{ [role: string]: {
+ *   orientation: string,
+ *   childRoles: string[],
+ *   childSelectedAttr: string,
+ *   focusChild: boolean
+ * } }}
+ */
 const config = {
   grid: {
     orientation: 'vertical',
     childRoles: ['row'],
     childSelectedAttr: 'aria-selected',
+    focusChild: true,
   },
   listbox: {
     orientation: 'vertical',
     childRoles: ['option'],
     childSelectedAttr: 'aria-selected',
+    focusChild: false,
   },
   menu: {
     orientation: 'vertical',
     childRoles: ['menuitem', 'menuitemcheckbox', 'menuitemradio'],
     childSelectedAttr: 'aria-checked',
+    focusChild: true,
   },
   menubar: {
     orientation: 'horizontal',
     childRoles: ['menuitem', 'menuitemcheckbox', 'menuitemradio'],
     childSelectedAttr: 'aria-checked',
+    focusChild: true,
   },
   radiogroup: {
     orientation: 'horizontal',
     childRoles: ['radio'],
     childSelectedAttr: 'aria-checked',
+    focusChild: true,
   },
   tablist: {
     orientation: 'horizontal',
     childRoles: ['tab'],
     childSelectedAttr: 'aria-selected',
+    focusChild: true,
   },
 };
 
@@ -38,7 +52,7 @@ const config = {
  */
 class Group {
   /**
-   *
+   * Initialize a new `Group` instance.
    * @param {HTMLElement} parent Parent element.
    * @todo Check for added elements probably with `MutationObserver`.
    */
@@ -50,12 +64,14 @@ class Group {
     this.id = getRandomId(this.role);
     this.parentGroupSelector = `[role="group"], [role="${this.role}"]`;
 
-    const { orientation, childSelectedAttr } = config[this.role];
+    const { orientation, childRoles, childSelectedAttr, focusChild } = config[this.role];
 
     this.orientation = this.grid
       ? 'horizontal'
       : this.parent.getAttribute('aria-orientation') || orientation;
+    this.childRoles = childRoles;
     this.childSelectedAttr = childSelectedAttr;
+    this.focusChild = focusChild;
 
     const { allMembers } = this;
 
@@ -87,9 +103,7 @@ class Group {
 
   /** @type {string} */
   get selector() {
-    const roles = config[this.role].childRoles;
-
-    return roles ? roles.map((role) => `[role="${role}"]`).join(',') : '';
+    return this.childRoles.map((role) => `[role="${role}"]`).join(',');
   }
 
   /** @type {HTMLElement[]} */
@@ -104,23 +118,41 @@ class Group {
   }
 
   /**
-   *
-   * @param {MouseEvent} event `click` event.
+   * Select (and move focus to) the given target.
+   * @param {(MouseEvent | KeyboardEvent)} event Triggered event.
+   * @param {HTMLElement} newTarget Target element.
    */
-  onClick(event) {
-    // eslint-disable-next-line prefer-destructuring
-    const target = /** @type {HTMLButtonElement} */ (event.target);
+  selectTarget(event, newTarget) {
+    const targetParentGroup = newTarget.closest(this.parentGroupSelector);
 
-    if (!target.matches(this.selector)) {
-      return;
-    }
-
-    this.allMembers.forEach((element) => {
-      const isTarget = element === target;
+    this.activeMembers.forEach((element) => {
+      const isTarget = element === newTarget;
+      const isSelected = element.matches('[aria-selected="true"]');
       const controls = element.getAttribute('aria-controls');
 
-      element.tabIndex = element === target ? 0 : -1;
-      element.setAttribute(this.childSelectedAttr, String(isTarget));
+      if (this.multi && isTarget && event.type === 'click') {
+        element.setAttribute(this.childSelectedAttr, String(!isSelected));
+        element.dispatchEvent(new CustomEvent(isSelected ? 'unselect' : 'select'));
+      }
+
+      if (
+        (element.matches('[role="menuitemradio"]') &&
+          element.closest(this.parentGroupSelector) === targetParentGroup) ||
+        !this.multi
+      ) {
+        element.setAttribute(this.childSelectedAttr, String(isTarget));
+        element.dispatchEvent(new CustomEvent(isTarget ? 'select' : 'unselect'));
+      }
+
+      if (this.focusChild) {
+        element.tabIndex = isTarget ? 0 : -1;
+
+        if (isTarget) {
+          element.focus();
+        }
+      } else {
+        element.classList.toggle('focused', isTarget);
+      }
 
       if (controls) {
         document.getElementById(controls)?.setAttribute('aria-hidden', String(!isTarget));
@@ -130,97 +162,130 @@ class Group {
     this.parent.dispatchEvent(
       new CustomEvent('select', {
         detail: {
-          value: target.value,
-          name: target.name,
+          // @ts-ignore
+          value: newTarget.value,
+          // @ts-ignore
+          name: newTarget.name,
         },
       }),
     );
   }
 
   /**
-   *
+   * Handle the `click` event on the widget.
+   * @param {MouseEvent} event `click` event.
+   */
+  onClick(event) {
+    // eslint-disable-next-line prefer-destructuring
+    const target = /** @type {HTMLElement} */ (event.target);
+    const newTarget = target.matches(this.selector) ? target : undefined;
+
+    if (!newTarget || event.button !== 0) {
+      return;
+    }
+
+    this.selectTarget(event, newTarget);
+  }
+
+  /**
+   * Handle the `keydown` event on the widget.
    * @param {KeyboardEvent} event `keydown` event.
    */
   onKeyDown(event) {
+    const { key, ctrlKey, metaKey, shiftKey, altKey } = event;
+    const hasModifier = shiftKey || altKey || ctrlKey || metaKey;
+
+    if (hasModifier) {
+      return;
+    }
+
     // eslint-disable-next-line prefer-destructuring
     const target = /** @type {HTMLElement} */ (event.target);
-    const { key, ctrlKey, metaKey, shiftKey, altKey } = event;
+    const { allMembers, activeMembers } = this;
 
-    if (target.matches(this.selector) && !ctrlKey && !metaKey && !shiftKey && !altKey) {
-      if ([' ', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(key)) {
-        event.preventDefault();
+    const currentTarget = (() => {
+      if (!this.focusChild) {
+        return activeMembers.find((member) => member.matches('.focused')) || activeMembers[0];
       }
 
-      if (key === ' ' || (key === 'Enter' && !target.matches('button'))) {
-        event.preventDefault();
-        target.click();
-
-        return;
+      if (target.matches(this.selector)) {
+        return target;
       }
 
-      const { allMembers, activeMembers } = this;
-      let index;
-      let newTarget;
+      return undefined;
+    })();
 
-      if (this.grid) {
-        const colCount = Math.floor(this.parent.clientWidth / target.clientWidth);
+    if (!currentTarget) {
+      return;
+    }
 
-        index = allMembers.indexOf(target);
+    if (['Enter', ' ', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(key)) {
+      event.preventDefault();
+    }
 
-        if (key === 'ArrowUp' && index > 0) {
-          newTarget = allMembers[index - colCount];
+    if (['Enter', ' '].includes(key)) {
+      currentTarget.click();
+
+      return;
+    }
+
+    let index;
+    let newTarget;
+
+    if (this.grid) {
+      const colCount = Math.floor(this.parent.clientWidth / currentTarget.clientWidth);
+
+      index = allMembers.indexOf(currentTarget);
+
+      if (key === 'ArrowUp' && index > 0) {
+        newTarget = allMembers[index - colCount];
+      }
+
+      if (key === 'ArrowDown' && index < allMembers.length - 1) {
+        newTarget = allMembers[index + colCount];
+      }
+
+      if (key === 'ArrowLeft' && index > 0) {
+        newTarget = allMembers[index - 1];
+      }
+
+      if (key === 'ArrowRight' && index < allMembers.length - 1) {
+        newTarget = allMembers[index + 1];
+      }
+
+      if (newTarget?.getAttribute('aria-disabled') === 'true') {
+        newTarget = undefined;
+      }
+    } else {
+      index = activeMembers.indexOf(currentTarget);
+
+      if (key === (this.orientation === 'horizontal' ? 'ArrowLeft' : 'ArrowUp')) {
+        if (index > 0) {
+          // Previous member
+          newTarget = activeMembers[index - 1];
         }
 
-        if (key === 'ArrowDown' && index < allMembers.length - 1) {
-          newTarget = allMembers[index + colCount];
-        }
-
-        if (key === 'ArrowLeft' && index > 0) {
-          newTarget = allMembers[index - 1];
-        }
-
-        if (key === 'ArrowRight' && index < allMembers.length - 1) {
-          newTarget = allMembers[index + 1];
-        }
-
-        if (newTarget?.getAttribute('aria-disabled') === 'true') {
-          newTarget = undefined;
-        }
-      } else {
-        index = activeMembers.indexOf(target);
-
-        if (key === (this.orientation === 'horizontal' ? 'ArrowLeft' : 'ArrowUp')) {
-          if (index > 0) {
-            // Previous member
-            newTarget = activeMembers[index - 1];
-          }
-
-          if (index === 0) {
-            // Last member
-            newTarget = activeMembers[activeMembers.length - 1];
-          }
-        }
-
-        if (key === (this.orientation === 'horizontal' ? 'ArrowRight' : 'ArrowDown')) {
-          if (index < activeMembers.length - 1) {
-            // Next member
-            newTarget = activeMembers[index + 1];
-          }
-
-          if (index === activeMembers.length - 1) {
-            // First member
-            [newTarget] = activeMembers;
-          }
+        if (index === 0) {
+          // Last member
+          newTarget = activeMembers[activeMembers.length - 1];
         }
       }
 
-      if (newTarget && newTarget !== target) {
-        activeMembers.forEach((element) => {
-          element.tabIndex = element === newTarget ? 0 : -1;
-        });
+      if (key === (this.orientation === 'horizontal' ? 'ArrowRight' : 'ArrowDown')) {
+        if (index < activeMembers.length - 1) {
+          // Next member
+          newTarget = activeMembers[index + 1];
+        }
 
-        newTarget.focus();
+        if (index === activeMembers.length - 1) {
+          // First member
+          [newTarget] = activeMembers;
+        }
       }
+    }
+
+    if (newTarget && newTarget !== currentTarget) {
+      this.selectTarget(event, newTarget);
     }
   }
 }

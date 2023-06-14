@@ -17,3 +17,9 @@
 <div role="row" tabindex="0" class="sui table-row {className}" {...$$restProps} on:click>
   <slot />
 </div>
+
+<style lang="scss">
+  .table-row {
+    display: table-row;
+  }
+</style>

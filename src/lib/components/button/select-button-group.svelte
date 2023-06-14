@@ -33,8 +33,8 @@
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <div
   class="sui select-button-group {className}"
+  tabindex="-1"
   role="radiogroup"
-  tabindex="0"
   aria-label={ariaLabel || undefined}
   aria-disabled={disabled ? true : undefined}
   bind:this={element}
@@ -53,6 +53,10 @@
     display: inline-flex;
     align-items: center;
 
+    &:focus-visible {
+      outline-width: 0 !important;
+    }
+
     :global(button) {
       border-radius: 0;
       color: var(--secondary-foreground-color);
@@ -62,7 +66,7 @@
       }
 
       &:not(:first-child) {
-        margin-left: -1px;
+        border-left-width: 0;
       }
 
       &:last-child {

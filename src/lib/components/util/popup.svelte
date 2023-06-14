@@ -8,6 +8,7 @@
   import { onMount } from 'svelte';
   import { writable } from 'svelte/store';
   import { activatePopup } from './popup';
+  import { sleep } from './util';
 
   /** @type {HTMLElement?} */
   export let anchor = undefined;
@@ -58,12 +59,20 @@
     showContent = true;
     dialog.showModal();
 
-    window.requestAnimationFrame(() => {
+    window.requestAnimationFrame(async () => {
       showDialog = true;
+      await sleep(100);
 
-      window.requestAnimationFrame(() => {
-        /** @type {HTMLElement} */ (dialog.querySelector('[tabindex]') || dialog).focus();
-      });
+      const target = /** @type {HTMLElement} */ (
+        content.querySelector('[tabindex]:not([aria-disabled="true"])')
+      );
+
+      if (target) {
+        target.focus();
+      } else {
+        content.tabIndex = -1;
+        content.focus();
+      }
     });
   };
 

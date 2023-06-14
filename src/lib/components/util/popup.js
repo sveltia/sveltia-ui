@@ -4,7 +4,7 @@ import { get, writable } from 'svelte/store';
 import { getRandomId } from './util';
 
 /**
- *
+ * Implement the popup handler.
  */
 class Popup {
   open = writable(false);
@@ -76,12 +76,14 @@ class Popup {
   });
 
   /**
-   *
-   * @param {HTMLElement} anchorElement
-   * @param {HTMLElement} popupElement
-   * @param {PopupPosition} position
+   * Initialize a new `Popup` instance.
+   * @param {HTMLButtonElement} anchorElement `<button>` element that triggers the popup.
+   * @param {HTMLDialogElement} popupElement `<dialog>` element to be used for the popup.
+   * @param {PopupPosition} position Where to show the popup content.
    */
   constructor(anchorElement, popupElement, position) {
+    console.info({ anchorElement, popupElement, position });
+
     this.anchorElement = anchorElement;
     this.popupElement = popupElement; // = backdrop
     this.position = position;
@@ -97,13 +99,15 @@ class Popup {
     });
 
     this.anchorElement.addEventListener('keydown', (event) => {
-      const { key, ctrlKey, metaKey, shiftKey, altKey } = event;
+      console.info(event);
 
-      if (!ctrlKey && !metaKey && !shiftKey && !altKey) {
-        if (key === ' ' || key === 'Enter') {
-          event.stopPropagation();
-          this.open.set(!get(this.open));
-        }
+      const { key, ctrlKey, metaKey, shiftKey, altKey } = event;
+      const hasModifier = shiftKey || altKey || ctrlKey || metaKey;
+
+      if (['Enter', ' '].includes(key) && !hasModifier) {
+        event.preventDefault();
+        event.stopPropagation();
+        this.open.set(!get(this.open));
       }
     });
 
@@ -122,21 +126,17 @@ class Popup {
       }
     });
 
-    [this.anchorElement, this.popupElement].forEach((element) => {
-      element.addEventListener('keydown', (event) => {
-        const { key, ctrlKey, metaKey, shiftKey, altKey } = event;
+    this.popupElement.addEventListener('keydown', (event) => {
+      console.info(event);
 
-        if (
-          get(this.open) &&
-          ['Escape'].includes(key) &&
-          !ctrlKey &&
-          !metaKey &&
-          !shiftKey &&
-          !altKey
-        ) {
-          this.open.set(false);
-        }
-      });
+      const { key, ctrlKey, metaKey, shiftKey, altKey } = event;
+      const hasModifier = shiftKey || altKey || ctrlKey || metaKey;
+
+      if (key === 'Escape' && !hasModifier) {
+        event.preventDefault();
+        event.stopPropagation();
+        this.open.set(false);
+      }
     });
 
     this.open.subscribe((open) => {
@@ -144,6 +144,7 @@ class Popup {
         this.checkPosition();
       } else if (this.anchorElement.getAttribute('aria-expanded') === 'true') {
         this.anchorElement.focus();
+        this.anchorElement.removeAttribute('aria-controls');
       }
 
       this.anchorElement.setAttribute('aria-expanded', String(open));

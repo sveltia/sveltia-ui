@@ -17,3 +17,9 @@
 <div role="rowgroup" class="sui table-head {className}" {...$$restProps}>
   <slot />
 </div>
+
+<style lang="scss">
+  .table-head {
+    display: table-header-group;
+  }
+</style>

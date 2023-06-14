@@ -17,3 +17,9 @@
 <div role="gridcell" class="sui table-cell {className}" {...$$restProps}>
   <slot />
 </div>
+
+<style lang="scss">
+  .table-cell {
+    display: table-cell;
+  }
+</style>

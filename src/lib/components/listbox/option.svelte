@@ -5,6 +5,7 @@
   @see https://w3c.github.io/aria/#option
 -->
 <script>
+  import { onMount } from 'svelte';
   import Button from '../button/button.svelte';
   import Icon from '../icon/icon.svelte';
 
@@ -19,10 +20,35 @@
   export let label = '';
   export let value = undefined;
   export let selected = false;
+
+  /**
+   * @type {Button}
+   */
+  let buttonComponent;
+
+  /**
+   * Event listener for the `select` event fired in `group.js`.
+   * @param {CustomEvent} event `select` event.
+   */
+  const listener = ({ type }) => {
+    selected = type === 'select';
+  };
+
+  onMount(() => {
+    buttonComponent.element.addEventListener('select', listener);
+    buttonComponent.element.addEventListener('unselect', listener);
+
+    return () => {
+      buttonComponent.element.removeEventListener('select', listener);
+      buttonComponent.element.removeEventListener('unselect', listener);
+    };
+  });
 </script>
 
 <div class="sui option {className}">
   <Button
+    bind:this={buttonComponent}
+    tabindex="-1"
     role="option"
     aria-selected={selected}
     {label}
@@ -48,6 +74,10 @@
   .option {
     display: contents;
 
+    &:focus-visible {
+      outline-width: 0 !important;
+    }
+
     :global([role='option']) {
       flex: none;
       display: flex;
@@ -60,6 +90,7 @@
       white-space: nowrap;
     }
 
+    :global(.focused),
     :global([role='option']:hover) {
       color: var(--highlight-foreground-color);
       background-color: var(--highlight-background-color);

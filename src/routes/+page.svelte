@@ -187,7 +187,7 @@
             <Slider />
           </div>
           <div>
-            <Slider values={[1, 5]} min={1} max={5} step={0.5} optionLabels={[1, 2, 3, 4, 5]} />
+            <Slider values={[1, 5]} min={1} max={5} step={0.1} optionLabels={[1, 2, 3, 4, 5]} />
           </div>
           <div>
             <Slider values={[0, 24]} min={0} max={24} step={3} optionLabels={[0, 6, 12, 18, 24]} />
@@ -339,6 +339,24 @@
       <div class="row">
         <section>
           <h4>Menu Button</h4>
+          <div>
+            <MenuButton class="tertiary" label="Open Menu">
+              <Icon slot="end-icon" name="arrow_drop_down" />
+              <Menu slot="popup">
+                <MenuItem label="Item" />
+                <MenuItem label="Item" disabled={true} />
+                <Divider />
+                <MenuItemCheckbox label="Item" checked={true} />
+                <MenuItemCheckbox label="Item" checked={false} />
+                <Divider />
+                <MenuItemRadio label="Item" checked={true} />
+                <MenuItemRadio label="Item" checked={false} />
+              </Menu>
+            </MenuButton>
+          </div>
+        </section>
+        <section>
+          <h4>Menu Button with Nested Menu</h4>
           <div>
             <MenuButton class="tertiary" label="Open Menu">
               <Icon slot="end-icon" name="arrow_drop_down" />
