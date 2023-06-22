@@ -36,8 +36,11 @@
   on:dragover|preventDefault
   on:drop|preventDefault
   on:contextmenu={(event) => {
-    // Disable the native context menu
-    if (!(/** @type {HTMLElement} */ (event.target)?.matches('input[type="text"], textarea'))) {
+    // Enable the native context menu only in the developer mode or on text fields
+    if (
+      !document.documentElement.matches('[data-env="dev"]') &&
+      !(/** @type {HTMLElement} */ (event.target)?.matches('input[type="text"], textarea'))
+    ) {
       event.preventDefault();
     }
   }}
