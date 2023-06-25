@@ -42,9 +42,9 @@
   <input type="hidden" {name} {value} />
 {/if}
 
-<!-- svelte-ignore a11y-click-events-have-key-events -->
 <span
   class="sui radio {className}"
+  role="none"
   on:click={(event) => {
     if (!(/** @type {HTMLElement} */ (event.target).matches('button'))) {
       buttonComponent.element.click();

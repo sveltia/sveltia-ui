@@ -47,12 +47,12 @@
   <input type="hidden" {name} {value} />
 {/if}
 
-<!-- svelte-ignore a11y-click-events-have-key-events -->
 <span
   class="sui checkbox {className}"
   class:checked
   class:indeterminate
   class:disabled
+  role="none"
   on:click|preventDefault|stopPropagation={(event) => {
     if (!(/** @type {HTMLElement} */ (event.target).matches('button'))) {
       buttonComponent.element.click();

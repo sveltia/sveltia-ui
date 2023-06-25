@@ -55,8 +55,7 @@
       aria-haspopup="dialog"
     >
       <Icon slot="end-icon" name="arrow_drop_down" />
-      <!-- svelte-ignore a11y-click-events-have-key-events -->
-      <div slot="popup" class="popup-inner" on:click|stopPropagation>
+      <div slot="popup" class="popup-inner" role="none" on:click|stopPropagation>
         <div role="group" aria-label={$_('_sui.calendar.year')}>
           <div class="header">
             <Button

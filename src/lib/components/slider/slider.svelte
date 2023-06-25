@@ -215,11 +215,10 @@
   }}
 />
 
-<!-- svelte-ignore a11y-click-events-have-key-events -->
-<div class="sui slider {className}" on:click|preventDefault|stopPropagation>
-  <!-- svelte-ignore a11y-click-events-have-key-events -->
+<div class="sui slider {className}" role="none" on:click|preventDefault|stopPropagation>
   <div
     class="base"
+    role="none"
     bind:this={base}
     on:click|preventDefault|stopPropagation={(event) => {
       onClick(event);
