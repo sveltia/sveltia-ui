@@ -21,6 +21,7 @@
   class="sui icon material-symbols-outlined {className}"
   aria-label={label || undefined}
   aria-hidden={label ? undefined : true}
+  {...$$restProps}
 >
   {name}
 </span>

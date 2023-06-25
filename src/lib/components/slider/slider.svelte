@@ -215,7 +215,12 @@
   }}
 />
 
-<div class="sui slider {className}" role="none" on:click|preventDefault|stopPropagation>
+<div
+  class="sui slider {className}"
+  role="none"
+  {...$$restProps}
+  on:click|preventDefault|stopPropagation
+>
   <div
     class="base"
     role="none"

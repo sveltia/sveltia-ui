@@ -34,6 +34,7 @@
 <div
   class="sui app-shell"
   role="none"
+  {...$$restProps}
   on:dragover|preventDefault
   on:drop|preventDefault
   on:contextmenu={(event) => {

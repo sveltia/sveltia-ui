@@ -128,12 +128,12 @@
   });
 </script>
 
-<!-- svelte-ignore a11y-click-events-have-key-events -->
 <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
 <dialog
   bind:this={dialog}
   class="sui dialog {className} {size} {position} {orientation}"
   class:open={showDialog}
+  {...$$restProps}
   on:click={({ target }) => {
     if (closeOnBackdropClick && /** @type {HTMLElement?} */ (target)?.matches('dialog')) {
       dialog.returnValue = 'cancel';

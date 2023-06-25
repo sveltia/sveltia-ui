@@ -15,7 +15,7 @@
   export let flex = false;
 </script>
 
-<div class="sui spacer {className}" class:flex />
+<div class="sui spacer {className}" class:flex {...$$restProps} />
 
 <style lang="scss">
   .spacer {

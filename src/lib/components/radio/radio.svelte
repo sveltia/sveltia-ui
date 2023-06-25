@@ -45,6 +45,7 @@
 <span
   class="sui radio {className}"
   role="none"
+  {...$$restProps}
   on:click={(event) => {
     if (!(/** @type {HTMLElement} */ (event.target).matches('button'))) {
       buttonComponent.element.click();

@@ -54,7 +54,7 @@
   let isPopupOpen = writable(false);
 </script>
 
-<div class="sui combobox {className}">
+<div class="sui combobox {className}" {...$$restProps}>
   {#if readOnly}
     <div
       class:selected={value !== undefined}

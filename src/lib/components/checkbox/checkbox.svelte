@@ -53,6 +53,7 @@
   class:indeterminate
   class:disabled
   role="none"
+  {...$$restProps}
   on:click|preventDefault|stopPropagation={(event) => {
     if (!(/** @type {HTMLElement} */ (event.target).matches('button'))) {
       buttonComponent.element.click();

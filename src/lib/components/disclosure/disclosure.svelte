@@ -24,7 +24,13 @@
   const id = getRandomId('disclosure');
 </script>
 
-<div class="sui disclosure {className}" {id} role="group" aria-labelledby="{id}-header">
+<div
+  class="sui disclosure {className}"
+  {id}
+  role="group"
+  aria-labelledby="{id}-header"
+  {...$$restProps}
+>
   <Button
     class="header"
     id="{id}-header"

@@ -26,6 +26,7 @@
   role="switch"
   aria-disabled={disabled}
   aria-checked={checked}
+  {...$$restProps}
   on:click={() => {
     checked = !checked;
   }}

@@ -27,6 +27,7 @@
   tabindex="-1"
   role="radiogroup"
   aria-orientation={orientation}
+  {...$$restProps}
   bind:this={element}
   on:select
   use:activateGroup

@@ -16,7 +16,12 @@
   export { className as class };
 </script>
 
-<div role="separator" class="sui divider {className}" aria-orientation={orientation} />
+<div
+  role="separator"
+  class="sui divider {className}"
+  aria-orientation={orientation}
+  {...$$restProps}
+/>
 
 <style lang="scss">
   .divider {
