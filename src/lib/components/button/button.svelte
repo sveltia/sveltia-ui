@@ -218,7 +218,7 @@
     }
 
     &:global(.danger) {
-      background-color: var(--danger-background-color);
+      background-color: var(--error-background-color);
     }
 
     &:global(.large) {

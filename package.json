@@ -56,6 +56,11 @@
   },
   "exports": {
     "./package.json": "./package.json",
+    "./components/alert/alert.svelte": {
+      "types": "./package/components/alert/alert.svelte.d.ts",
+      "svelte": "./package/components/alert/alert.svelte",
+      "default": "./package/components/alert/alert.svelte"
+    },
     "./components/button/button.svelte": {
       "types": "./package/components/button/button.svelte.d.ts",
       "svelte": "./package/components/button/button.svelte",
@@ -339,6 +344,9 @@
   "svelte": "./package/index.js",
   "typesVersions": {
     ">4.0": {
+      "components/alert/alert.svelte": [
+        "./package/components/alert/alert.svelte.d.ts"
+      ],
       "components/button/button.svelte": [
         "./package/components/button/button.svelte.d.ts"
       ],

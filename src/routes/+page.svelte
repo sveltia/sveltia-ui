@@ -1,5 +1,6 @@
 <script>
   import {
+    Alert,
     Button,
     Calendar,
     Checkbox,
@@ -92,11 +93,11 @@
       <div class="color-samples">
         <span
           class="sample"
-          style:border-color="var(--danger-border-color)"
-          style:color="var(--danger-foreground-color)"
-          style:background-color="var(--danger-background-color)"
+          style:border-color="var(--error-border-color)"
+          style:color="var(--error-foreground-color)"
+          style:background-color="var(--error-background-color)"
         >
-          Danger
+          Error / Danger
         </span>
         <span
           class="sample"
@@ -108,19 +109,19 @@
         </span>
         <span
           class="sample"
-          style:border-color="var(--success-border-color)"
-          style:color="var(--success-foreground-color)"
-          style:background-color="var(--success-background-color)"
-        >
-          Success
-        </span>
-        <span
-          class="sample"
           style:border-color="var(--info-border-color)"
           style:color="var(--info-foreground-color)"
           style:background-color="var(--info-background-color)"
         >
           Info
+        </span>
+        <span
+          class="sample"
+          style:border-color="var(--success-border-color)"
+          style:color="var(--success-foreground-color)"
+          style:background-color="var(--success-background-color)"
+        >
+          Success
         </span>
       </div>
     </section>
@@ -453,24 +454,6 @@
       </div>
     </section>
     <section>
-      <h3>Dialog</h3>
-      <div class="row">
-        <section>
-          <h4>Standard</h4>
-          <div>
-            <Button
-              class="secondary"
-              label="Show Dialog"
-              on:click={() => {
-                openStandardDialog = true;
-              }}
-            />
-            <Dialog bind:open={openStandardDialog} title="Standard Dialog">Hello</Dialog>
-          </div>
-        </section>
-      </div>
-    </section>
-    <section>
       <h3>Drawer</h3>
       <div class="row">
         <section>
@@ -522,6 +505,101 @@
             <Drawer bind:open={openStandardDrawer.bottom} title="Drawer" position="bottom">
               Hello World!
             </Drawer>
+          </div>
+        </section>
+      </div>
+    </section>
+  </section>
+  <section>
+    <h2>Feedback</h2>
+    <section>
+      <h3>Alert</h3>
+      <div class="row">
+        <section>
+          <h4>Standard</h4>
+          <div style="display:block">
+            <div>
+              <Alert type="error">Error</Alert>
+            </div>
+            <div>
+              <Alert type="warning">Warning</Alert>
+            </div>
+            <div>
+              <Alert type="info">Info</Alert>
+            </div>
+            <div>
+              <Alert type="success">Success</Alert>
+            </div>
+          </div>
+        </section>
+        <section>
+          <h4>Small, aria-live="off"</h4>
+          <div style="display:block">
+            <div>
+              <Alert type="error" aria-live="off" --font-size="var(--font-size--small)">
+                Error
+              </Alert>
+            </div>
+            <div>
+              <Alert type="warning" aria-live="off" --font-size="var(--font-size--small)">
+                Warning
+              </Alert>
+            </div>
+            <div>
+              <Alert type="info" aria-live="off" --font-size="var(--font-size--small)">Info</Alert>
+            </div>
+            <div>
+              <Alert type="success" aria-live="off" --font-size="var(--font-size--small)">
+                Success
+              </Alert>
+            </div>
+          </div>
+        </section>
+        <section>
+          <h4>Custom icons</h4>
+          <div style="display:block">
+            <div>
+              <Alert type="error">
+                <Icon name="dangerous" slot="icon" />
+                Error
+              </Alert>
+            </div>
+            <div>
+              <Alert type="warning">
+                <Icon name="emergency_home" slot="icon" />
+                Warning
+              </Alert>
+            </div>
+            <div>
+              <Alert type="info">
+                <Icon name="help" slot="icon" />
+                Info
+              </Alert>
+            </div>
+            <div>
+              <Alert type="success">
+                <Icon name="verified" slot="icon" />
+                Success
+              </Alert>
+            </div>
+          </div>
+        </section>
+      </div>
+    </section>
+    <section>
+      <h3>Dialog</h3>
+      <div class="row">
+        <section>
+          <h4>Standard</h4>
+          <div>
+            <Button
+              class="secondary"
+              label="Show Dialog"
+              on:click={() => {
+                openStandardDialog = true;
+              }}
+            />
+            <Dialog bind:open={openStandardDialog} title="Standard Dialog">Hello</Dialog>
           </div>
         </section>
       </div>

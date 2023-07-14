@@ -17,10 +17,10 @@
   --primary-accent-color-darker: hsl(var(--base-hue) 80% 50%);
   --primary-accent-color-foreground: hsl(var(--base-hue) 10% 100%); // white/inverted
   // Alerts
-  --danger-color-hue: 0;
+  --error-color-hue: 0;
   --warning-color-hue: 40;
+  --info-color-hue: 210;
   --success-color-hue: 100;
-  --info-color-hue: 220;
   --alert-foreground-color-saturation: 88%;
   --alert-foreground-color-lightness: 28%;
   --alert-background-color-saturation: 68%;
@@ -48,10 +48,10 @@
   --primary-accent-color-darker: hsl(var(--base-hue) 100% 35%);
   --primary-accent-color-foreground: hsl(var(--base-hue) 10% 100%); // white
   // Alerts
-  --danger-color-hue: 0;
+  --error-color-hue: 0;
   --warning-color-hue: 40;
+  --info-color-hue: 210;
   --success-color-hue: 100;
-  --info-color-hue: 220;
   --alert-foreground-color-saturation: 48%;
   --alert-foreground-color-lightness: 68%;
   --alert-background-color-saturation: 88%;
@@ -69,20 +69,20 @@
   --secondary-foreground-color: hsl(var(--foreground-color-3-hsl));
   --tertiary-foreground-color: hsl(var(--foreground-color-3-hsl));
   --disabled-foreground-color: hsl(var(--foreground-color-4-hsl));
-  --danger-foreground-color: hsl(
-    var(--danger-color-hue) var(--alert-foreground-color-saturation)
+  --error-foreground-color: hsl(
+    var(--error-color-hue) var(--alert-foreground-color-saturation)
       var(--alert-foreground-color-lightness)
   );
   --warning-foreground-color: hsl(
     var(--warning-color-hue) var(--alert-foreground-color-saturation)
       var(--alert-foreground-color-lightness)
   );
-  --success-foreground-color: hsl(
-    var(--success-color-hue) var(--alert-foreground-color-saturation)
-      var(--alert-foreground-color-lightness)
-  );
   --info-foreground-color: hsl(
     var(--info-color-hue) var(--alert-foreground-color-saturation)
+      var(--alert-foreground-color-lightness)
+  );
+  --success-foreground-color: hsl(
+    var(--success-color-hue) var(--alert-foreground-color-saturation)
       var(--alert-foreground-color-lightness)
   );
   // Background
@@ -96,20 +96,20 @@
   --tertiary-background-color-translucent: hsl(var(--background-color-4-hsl) / 80%);
   --control-background-color: hsl(var(--background-color-1-hsl));
   --disabled-background-color: hsl(var(--background-color-4-hsl));
-  --danger-background-color: hsl(
-    var(--danger-color-hue) var(--alert-background-color-saturation)
+  --error-background-color: hsl(
+    var(--error-color-hue) var(--alert-background-color-saturation)
       var(--alert-background-color-lightness)
   );
   --warning-background-color: hsl(
     var(--warning-color-hue) var(--alert-background-color-saturation)
       var(--alert-background-color-lightness)
   );
-  --success-background-color: hsl(
-    var(--success-color-hue) var(--alert-background-color-saturation)
-      var(--alert-background-color-lightness)
-  );
   --info-background-color: hsl(
     var(--info-color-hue) var(--alert-background-color-saturation)
+      var(--alert-background-color-lightness)
+  );
+  --success-background-color: hsl(
+    var(--success-color-hue) var(--alert-background-color-saturation)
       var(--alert-background-color-lightness)
   );
   // Borders
@@ -117,19 +117,19 @@
   --secondary-border-color: hsl(var(--border-color-2-hsl));
   --control-border-color: hsl(var(--border-color-2-hsl));
   --checkbox-border-color: hsl(var(--foreground-color-3-hsl));
-  --danger-border-color: hsl(
-    var(--danger-color-hue) var(--alert-border-color-saturation) var(--alert-border-color-lightness)
+  --error-border-color: hsl(
+    var(--error-color-hue) var(--alert-border-color-saturation) var(--alert-border-color-lightness)
   );
   --warning-border-color: hsl(
     var(--warning-color-hue) var(--alert-border-color-saturation)
       var(--alert-border-color-lightness)
   );
+  --info-border-color: hsl(
+    var(--info-color-hue) var(--alert-border-color-saturation) var(--alert-border-color-lightness)
+  );
   --success-border-color: hsl(
     var(--success-color-hue) var(--alert-border-color-saturation)
       var(--alert-border-color-lightness)
-  );
-  --info-border-color: hsl(
-    var(--info-color-hue) var(--alert-border-color-saturation) var(--alert-border-color-lightness)
   );
   // Shadows
   --popup-shadow-color: hsl(var(--shadow-color) / 40%);
