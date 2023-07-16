@@ -104,9 +104,9 @@
     display: block;
     margin: 0;
     border-width: 1px;
-    border-color: var(--control-border-color);
-    border-radius: var(--input--medium--border-radius);
-    background-color: var(--control-background-color);
+    border-color: var(--sui-control-border-color);
+    border-radius: var(--sui-input-medium-border-radius);
+    background-color: var(--sui-control-background-color);
     padding: 8px;
     width: 100%;
     min-height: 8em;
@@ -122,11 +122,11 @@
     }
 
     &:focus {
-      border-color: var(--primary-accent-color);
+      border-color: var(--sui-primary-accent-color);
     }
 
     &:disabled {
-      background-color: var(--disabled-background-color);
+      background-color: var(--sui-disabled-background-color);
       opacity: 0.4;
       cursor: default;
     }

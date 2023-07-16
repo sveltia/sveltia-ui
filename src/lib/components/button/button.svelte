@@ -152,9 +152,9 @@
     &:global(.ghost) {
       justify-content: center;
       border-width: 1px;
-      border-radius: var(--button--medium--border-radius);
-      padding: var(--button--medium--padding, 0 8px);
-      height: var(--button--medium--height);
+      border-radius: var(--sui-button-medium-border-radius);
+      padding: var(--sui-button-medium-padding, 0 8px);
+      height: var(--sui-button-medium-height);
 
       :global(.label:only-child) {
         padding: 0 4px;
@@ -162,86 +162,86 @@
     }
 
     &:global(.primary) {
-      border-color: var(--control-border-color);
-      color: var(--primary-accent-color-foreground);
-      background-color: var(--primary-accent-color);
+      border-color: var(--sui-control-border-color);
+      color: var(--sui-primary-accent-color-foreground);
+      background-color: var(--sui-primary-accent-color);
 
       &:hover,
       &:focus-visible {
-        background-color: var(--primary-accent-color-lighter);
+        background-color: var(--sui-primary-accent-color-lighter);
       }
 
       &:active {
-        background-color: var(--primary-accent-color-darker);
+        background-color: var(--sui-primary-accent-color-darker);
       }
     }
 
     &:global(.secondary) {
-      border-color: var(--primary-accent-color);
-      color: var(--primary-accent-color-lighter);
-      background-color: var(--tertiary-background-color);
+      border-color: var(--sui-primary-accent-color);
+      color: var(--sui-primary-accent-color-lighter);
+      background-color: var(--sui-tertiary-background-color);
 
       &:hover,
       &:focus-visible {
-        background-color: var(--highlight-background-color);
+        background-color: var(--sui-highlight-background-color);
       }
 
       &[aria-pressed='true'] {
-        background-color: var(--primary-accent-color);
+        background-color: var(--sui-primary-accent-color);
       }
     }
 
     &:global(.tertiary) {
-      border-color: var(--control-border-color);
-      color: var(--highlight-foreground-color);
-      background-color: var(--tertiary-background-color);
+      border-color: var(--sui-control-border-color);
+      color: var(--sui-highlight-foreground-color);
+      background-color: var(--sui-tertiary-background-color);
 
       &:hover,
       &:focus-visible {
-        background-color: var(--highlight-background-color);
+        background-color: var(--sui-highlight-background-color);
       }
 
       &[aria-pressed='true'] {
-        background-color: var(--highlight-background-color);
+        background-color: var(--sui-highlight-background-color);
       }
     }
 
     &:global(.ghost) {
       &:hover,
       &:focus-visible {
-        background-color: var(--highlight-background-color);
+        background-color: var(--sui-highlight-background-color);
       }
 
       &[aria-pressed='true'] {
-        background-color: var(--highlight-background-color);
+        background-color: var(--sui-highlight-background-color);
       }
     }
 
     &:global(.danger) {
-      background-color: var(--error-background-color);
+      background-color: var(--sui-error-background-color);
     }
 
     &:global(.large) {
-      height: var(--button--large--height);
+      height: var(--sui-button-large-height);
     }
 
     &:global(.small) {
-      padding: var(--button--small--padding, 0 8px);
-      height: var(--button--small--height);
-      font-size: var(--font-size--small);
+      padding: var(--sui-button-small-padding, 0 8px);
+      height: var(--sui-button-small-height);
+      font-size: var(--sui-font-size-small);
 
       :global(.icon) {
-        font-size: var(--font-size--large);
+        font-size: var(--sui-font-size-large);
       }
     }
 
     &:global(.pill) {
-      border-radius: var(--button--medium--pill--height, 16px);
-      padding: var(--button--medium--pill--padding, 0 16px);
+      border-radius: var(--sui-button-medium-pill-height, 16px);
+      padding: var(--sui-button-medium-pill-padding, 0 16px);
     }
 
     &:global(.link) {
-      color: var(--primary-accent-color-lighter);
+      color: var(--sui-primary-accent-color-lighter);
     }
 
     &:global(.iconic) {

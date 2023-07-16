@@ -197,19 +197,19 @@
       align-items: center;
       width: 24px;
       height: 24px;
-      font-size: var(--font-size--small);
+      font-size: var(--sui-font-size-small);
 
       &.weekday {
-        color: var(--secondary-foreground-color);
+        color: var(--sui-secondary-foreground-color);
       }
 
       &.other-month {
-        color: var(--tertiary-foreground-color);
+        color: var(--sui-tertiary-foreground-color);
       }
 
       &.today :global(button) {
-        color: var(--highlight-foreground-color);
-        background-color: var(--primary-accent-color);
+        color: var(--sui-highlight-foreground-color);
+        background-color: var(--sui-primary-accent-color);
       }
 
       :global(button) {
@@ -219,12 +219,12 @@
         border-radius: 50%;
 
         &:hover {
-          background-color: var(--highlight-background-color);
+          background-color: var(--sui-highlight-background-color);
         }
 
         &:focus {
           border-width: 1px;
-          border-color: var(--primary-accent-color-lighter);
+          border-color: var(--sui-primary-accent-color-lighter);
         }
       }
     }
@@ -232,7 +232,7 @@
 
   .footer {
     :global(button) {
-      font-size: var(--font-size--small);
+      font-size: var(--sui-font-size-small);
     }
   }
 

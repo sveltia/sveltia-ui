@@ -65,16 +65,16 @@
     <section>
       <h3>Background</h3>
       <div class="color-samples">
-        <span class="sample" style:background-color="var(--primary-background-color)">
+        <span class="sample" style:background-color="var(--sui-primary-background-color)">
           Primary
         </span>
-        <span class="sample" style:background-color="var(--secondary-background-color)">
+        <span class="sample" style:background-color="var(--sui-secondary-background-color)">
           Secondary
         </span>
-        <span class="sample" style:background-color="var(--tertiary-background-color)">
+        <span class="sample" style:background-color="var(--sui-tertiary-background-color)">
           tertiary
         </span>
-        <span class="sample" style:background-color="var(--disabled-background-color)">
+        <span class="sample" style:background-color="var(--sui-disabled-background-color)">
           Disabled
         </span>
       </div>
@@ -82,10 +82,10 @@
     <section>
       <h3>Foreground</h3>
       <div class="color-samples">
-        <span class="sample" style:color="var(--primary-foreground-color)"> Primary </span>
-        <span class="sample" style:color="var(--secondary-foreground-color)"> Secondary </span>
-        <span class="sample" style:color="var(--tertiary-foreground-color)"> tertiary </span>
-        <span class="sample" style:color="var(--disabled-foreground-color)"> Disabled </span>
+        <span class="sample" style:color="var(--sui-primary-foreground-color)"> Primary </span>
+        <span class="sample" style:color="var(--sui-secondary-foreground-color)"> Secondary </span>
+        <span class="sample" style:color="var(--sui-tertiary-foreground-color)"> tertiary </span>
+        <span class="sample" style:color="var(--sui-disabled-foreground-color)"> Disabled </span>
       </div>
     </section>
     <section>
@@ -93,33 +93,33 @@
       <div class="color-samples">
         <span
           class="sample"
-          style:border-color="var(--error-border-color)"
-          style:color="var(--error-foreground-color)"
-          style:background-color="var(--error-background-color)"
+          style:border-color="var(--sui-error-border-color)"
+          style:color="var(--sui-error-foreground-color)"
+          style:background-color="var(--sui-error-background-color)"
         >
           Error / Danger
         </span>
         <span
           class="sample"
-          style:border-color="var(--warning-border-color)"
-          style:color="var(--warning-foreground-color)"
-          style:background-color="var(--warning-background-color)"
+          style:border-color="var(--sui-warning-border-color)"
+          style:color="var(--sui-warning-foreground-color)"
+          style:background-color="var(--sui-warning-background-color)"
         >
           Warning
         </span>
         <span
           class="sample"
-          style:border-color="var(--info-border-color)"
-          style:color="var(--info-foreground-color)"
-          style:background-color="var(--info-background-color)"
+          style:border-color="var(--sui-info-border-color)"
+          style:color="var(--sui-info-foreground-color)"
+          style:background-color="var(--sui-info-background-color)"
         >
           Info
         </span>
         <span
           class="sample"
-          style:border-color="var(--success-border-color)"
-          style:color="var(--success-foreground-color)"
-          style:background-color="var(--success-background-color)"
+          style:border-color="var(--sui-success-border-color)"
+          style:color="var(--sui-success-foreground-color)"
+          style:background-color="var(--sui-success-background-color)"
         >
           Success
         </span>
@@ -536,20 +536,22 @@
           <h4>Small, aria-live="off"</h4>
           <div style="display:block">
             <div>
-              <Alert type="error" aria-live="off" --font-size="var(--font-size--small)">
+              <Alert type="error" aria-live="off" --font-size="var(--sui-font-size-small)">
                 Error
               </Alert>
             </div>
             <div>
-              <Alert type="warning" aria-live="off" --font-size="var(--font-size--small)">
+              <Alert type="warning" aria-live="off" --font-size="var(--sui-font-size-small)">
                 Warning
               </Alert>
             </div>
             <div>
-              <Alert type="info" aria-live="off" --font-size="var(--font-size--small)">Info</Alert>
+              <Alert type="info" aria-live="off" --font-size="var(--sui-font-size-small)">
+                Info
+              </Alert>
             </div>
             <div>
-              <Alert type="success" aria-live="off" --font-size="var(--font-size--small)">
+              <Alert type="success" aria-live="off" --font-size="var(--sui-font-size-small)">
                 Success
               </Alert>
             </div>
@@ -663,10 +665,10 @@
 
 <style lang="scss">
   :global(body) {
-    font-family: var(--font-family--default);
-    font-size: var(--font-size--default);
-    color: var(--primary-foreground-color);
-    background-color: var(--primary-background-color);
+    font-family: var(--sui-font-family-default);
+    font-size: var(--sui-font-size-default);
+    color: var(--sui-primary-foreground-color);
+    background-color: var(--sui-primary-background-color);
   }
 
   :global(*) {
@@ -683,7 +685,7 @@
     margin: 16px 0;
     padding: 16px;
     border-width: 1px;
-    border-color: var(--primary-border-color);
+    border-color: var(--sui-primary-border-color);
 
     h2 {
       margin: 0;
@@ -696,7 +698,7 @@
       h3 {
         margin: -16px -16px 16px;
         padding: 8px 16px;
-        background-color: var(--secondary-background-color);
+        background-color: var(--sui-secondary-background-color);
       }
 
       section {
@@ -727,7 +729,7 @@
   .color-samples {
     display: flex;
     gap: 8px;
-    background-color: var(--content-background-color);
+    background-color: var(--sui-content-background-color);
     padding: 8px;
 
     .sample {
@@ -735,7 +737,7 @@
       justify-content: center;
       align-items: center;
       border-width: 1px;
-      border-color: var(--secondary-border-color);
+      border-color: var(--sui-secondary-border-color);
       border-radius: 8px;
       min-width: 160px;
       min-height: 48px;

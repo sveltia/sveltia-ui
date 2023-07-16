@@ -45,7 +45,7 @@
     color: inherit;
     margin: 0;
     border-width: 1px;
-    border-color: var(--control-border-color);
+    border-color: var(--sui-control-border-color);
     border-radius: 4px;
     padding: 4px;
     min-width: 160px;
@@ -57,7 +57,7 @@
     &:global(.tabs) {
       padding: 0;
       border-width: 0 1px 0 0;
-      border-color: var(--control-border-color);
+      border-color: var(--sui-control-border-color);
 
       :global(.option button) {
         justify-content: flex-start;
@@ -66,7 +66,7 @@
         padding: 0 12px;
         border-top-right-radius: 0;
         border-bottom-right-radius: 0;
-        height: var(--tab--medium--height);
+        height: var(--sui-tab-medium-height);
 
         :global(.icon) {
           display: none;
@@ -74,7 +74,7 @@
       }
 
       :global(.option button[aria-selected='true']) {
-        border-color: var(--primary-accent-color-lighter);
+        border-color: var(--sui-primary-accent-color-lighter);
       }
     }
   }

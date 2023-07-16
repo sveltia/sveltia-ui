@@ -43,7 +43,7 @@
   .tab-list {
     display: flex;
     align-items: center;
-    border-color: var(--control-border-color);
+    border-color: var(--sui-control-border-color);
 
     &[aria-orientation='horizontal'] {
       gap: 16px;
@@ -75,11 +75,11 @@
       border-color: transparent;
       padding: 0;
       border-radius: 0;
-      height: var(--tab--medium--height);
+      height: var(--sui-tab-medium-height);
     }
 
     :global(button[aria-selected='true']) {
-      border-color: var(--primary-accent-color-lighter);
+      border-color: var(--sui-primary-accent-color-lighter);
     }
   }
 </style>

@@ -289,10 +289,10 @@
 
   .base {
     position: relative;
-    width: var(--slider-base-width, 200px);
+    width: var(--sui-slider-base-width, 200px);
     height: 8px;
     border-radius: 8px;
-    background-color: var(--control-border-color);
+    background-color: var(--sui-control-border-color);
   }
 
   .bar {
@@ -300,17 +300,17 @@
     top: 0;
     height: 8px;
     border-radius: 8px;
-    background-color: var(--primary-accent-color-lighter);
+    background-color: var(--sui-primary-accent-color-lighter);
   }
 
   [role='slider'] {
     position: absolute;
     top: 0;
-    border: 2px solid var(--primary-accent-color-lighter);
+    border: 2px solid var(--sui-primary-accent-color-lighter);
     border-radius: 8px;
     width: 16px;
     height: 16px;
-    background-color: var(--primary-accent-color-foreground);
+    background-color: var(--sui-primary-accent-color-foreground);
     cursor: pointer;
     transform: translate(-8px, -4px);
   }
@@ -319,6 +319,6 @@
     position: absolute;
     top: 12px;
     transform: translateX(-50%);
-    font-size: var(--font-size--x-small);
+    font-size: var(--sui-font-size-x-small);
   }
 </style>

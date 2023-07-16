@@ -86,19 +86,19 @@
       border-radius: 4px;
       padding: 0 8px 0 16px;
       width: 100%;
-      height: var(--option--medium--height);
+      height: var(--sui-option-medium-height);
       white-space: nowrap;
     }
 
     :global(.focused),
     :global([role='option']:hover) {
-      color: var(--highlight-foreground-color);
-      background-color: var(--highlight-background-color);
+      color: var(--sui-highlight-foreground-color);
+      background-color: var(--sui-highlight-background-color);
     }
 
     :global([role='option'][aria-selected='true']) {
       :global(.icon) {
-        color: var(--primary-accent-color-lighter);
+        color: var(--sui-primary-accent-color-lighter);
       }
     }
   }

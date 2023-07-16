@@ -139,10 +139,10 @@
     display: flex;
     align-items: center;
     position: relative;
-    min-width: var(--combobox-min-width, 160px);
+    min-width: var(--sui-combobox-min-width, 160px);
 
     :global(.icon) {
-      font-size: var(--font-size--xx-large);
+      font-size: var(--sui-font-size-xx-large);
       opacity: 0.5;
     }
 
@@ -168,12 +168,12 @@
       display: flex;
       align-items: center;
       border-width: 1px;
-      border-color: var(--control-border-color);
+      border-color: var(--sui-control-border-color);
       border-radius: 4px;
       padding: 0 32px 0 8px;
       width: 100%;
-      height: var(--input--medium--height);
-      background-color: var(--disabled-background-color);
+      height: var(--sui-input-medium-height);
+      background-color: var(--sui-disabled-background-color);
       -webkit-user-select: none;
       user-select: none;
       cursor: pointer;
@@ -185,11 +185,11 @@
 
       &:hover,
       &:focus {
-        background-color: var(--highlight-background-color);
+        background-color: var(--sui-highlight-background-color);
       }
 
       &[aria-disabled='true'] {
-        background-color: var(--disabled-background-color);
+        background-color: var(--sui-disabled-background-color);
         opacity: 0.4;
         cursor: default;
       }
@@ -213,9 +213,9 @@
       position: fixed;
       z-index: 100;
       border-radius: 4px;
-      box-shadow: 0 8px 16px var(--popup-shadow-color);
+      box-shadow: 0 8px 16px var(--sui-popup-shadow-color);
       overflow: auto;
-      background-color: var(--secondary-background-color);
+      background-color: var(--sui-secondary-background-color);
       backdrop-filter: blur(16px);
       // Add .1s delay before the position can be determined
       transition: opacity 100ms 100ms;

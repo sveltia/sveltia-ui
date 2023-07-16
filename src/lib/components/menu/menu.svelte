@@ -37,7 +37,7 @@
     flex-direction: column;
     margin: 0;
     border-width: 1px;
-    border-color: var(--secondary-border-color);
+    border-color: var(--sui-secondary-border-color);
     border-radius: 4px;
     padding: 4px;
 

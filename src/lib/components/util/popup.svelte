@@ -160,10 +160,10 @@
     position: fixed;
     overflow-y: auto;
     outline-width: 0 !important;
-    color: var(--primary-foreground-color);
-    background-color: var(--secondary-background-color-translucent);
+    color: var(--sui-primary-foreground-color);
+    background-color: var(--sui-secondary-background-color-translucent);
     backdrop-filter: blur(16px);
-    box-shadow: 0 8px 16px var(--popup-shadow-color);
+    box-shadow: 0 8px 16px var(--sui-popup-shadow-color);
     will-change: opacity, transform;
     transition-property: opacity, transform;
 
@@ -171,7 +171,7 @@
     &.menu {
       border-width: 1px;
       border-style: solid;
-      border-color: var(--secondary-border-color);
+      border-color: var(--sui-secondary-border-color);
       border-radius: 4px;
 
       :global(.sui.listbox),

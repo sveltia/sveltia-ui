@@ -40,11 +40,11 @@
 
     &.primary {
       --toolbar-size: 48px;
-      background-color: var(--secondary-background-color);
+      background-color: var(--sui-secondary-background-color);
     }
 
     &.secondary {
-      background-color: var(--tertiary-background-color);
+      background-color: var(--sui-tertiary-background-color);
     }
 
     &[aria-orientation='horizontal'] {
@@ -58,12 +58,12 @@
 
     &:not(:last-child) {
       border-width: 0 0 1px;
-      border-color: var(--primary-border-color);
+      border-color: var(--sui-primary-border-color);
     }
 
     :global(button[role='button'][aria-pressed='true']),
     :global(button[role='button'][aria-checked='true']) {
-      background-color: var(--highlight-background-color);
+      background-color: var(--sui-highlight-background-color);
     }
 
     :global(h2) {
@@ -72,10 +72,10 @@
       gap: 8px;
       margin: 0;
       padding: 0 8px;
-      font-size: var(--font-size--large);
+      font-size: var(--sui-font-size-large);
 
       :global(span) {
-        font-size: var(--font-size--small);
+        font-size: var(--sui-font-size-small);
         font-weight: normal;
         opacity: 0.8;
       }

@@ -27,7 +27,7 @@
 }
 
 :focus-visible {
-  outline-color: var(--primary-accent-color-lighter);
+  outline-color: var(--sui-primary-accent-color-lighter);
 }
 
 h1,
@@ -37,15 +37,15 @@ h4,
 h5,
 h6 {
   margin: 0;
-  font-weight: var(--font-weight--bold);
+  font-weight: var(--sui-font-weight-bold);
 }
 
 strong {
-  font-weight: var(--font-weight--bold);
+  font-weight: var(--sui-font-weight-bold);
 }
 
 a {
-  color: var(--primary-accent-color-lighter);
+  color: var(--sui-primary-accent-color-lighter);
   text-decoration: none;
 }
 
@@ -72,7 +72,7 @@ li {
 
 code,
 pre {
-  font-family: var(--font-family--monospace);
+  font-family: var(--sui-font-family-monospace);
 }
 
 pre {

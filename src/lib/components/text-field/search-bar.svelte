@@ -72,7 +72,7 @@
     position: relative;
 
     :global(.icon) {
-      font-size: var(--font-size--xx-large);
+      font-size: var(--sui-font-size-xx-large);
       opacity: 0.5;
     }
 
@@ -86,7 +86,7 @@
       position: absolute;
       inset: 0 0 auto auto;
       z-index: 2;
-      height: var(--button--medium--height);
+      height: var(--sui-button-medium-height);
     }
 
     :global(.label) {

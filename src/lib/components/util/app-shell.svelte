@@ -59,11 +59,11 @@
     overflow: hidden;
     width: 100%;
     height: 100%;
-    color: var(--primary-foreground-color);
-    background-color: var(--primary-background-color);
-    font-family: var(--font-family--default);
-    font-size: var(--font-size--default);
-    font-weight: var(--font-weight--normal);
+    color: var(--sui-primary-foreground-color);
+    background-color: var(--sui-primary-background-color);
+    font-family: var(--sui-font-family-default);
+    font-size: var(--sui-font-size-default);
+    font-weight: var(--sui-font-weight-normal);
     -webkit-user-select: none;
     user-select: none;
     touch-action: none;

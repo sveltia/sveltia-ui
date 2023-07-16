@@ -45,7 +45,7 @@
 
   .label {
     margin: 8px;
-    color: var(--secondary-foreground-color);
-    font-size: var(--font-size--small);
+    color: var(--sui-secondary-foreground-color);
+    font-size: var(--sui-font-size-small);
   }
 </style>

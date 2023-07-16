@@ -72,18 +72,18 @@
         outline-offset: 1px;
         outline-width: 2px;
         outline-style: solid;
-        outline-color: var(--primary-accent-color-lighter);
+        outline-color: var(--sui-primary-accent-color-lighter);
       }
     }
 
     &[aria-checked='true'] {
       span {
-        background-color: var(--primary-accent-color);
+        background-color: var(--sui-primary-accent-color);
         border-color: transparent;
 
         &::before {
           transform: translateX(22px);
-          background-color: var(--primary-accent-color-foreground);
+          background-color: var(--sui-primary-accent-color-foreground);
         }
       }
     }
@@ -96,11 +96,11 @@
     padding: 2px;
     display: inline-block;
     border-radius: 16px;
-    background-color: var(--control-border-color);
+    background-color: var(--sui-control-border-color);
     transition: all 200ms;
 
     &:hover {
-      background-color: var(--highlight-background-color);
+      background-color: var(--sui-highlight-background-color);
     }
 
     &::before {
@@ -108,7 +108,7 @@
       width: 16px;
       height: 16px;
       border-radius: 16px;
-      background-color: var(--primary-accent-color-foreground);
+      background-color: var(--sui-primary-accent-color-foreground);
       transition: all 200ms;
       content: '';
     }

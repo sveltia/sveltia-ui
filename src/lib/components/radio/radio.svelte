@@ -93,7 +93,7 @@
       cursor: default;
 
       label {
-        color: var(--disabled-foreground-color);
+        color: var(--sui-disabled-foreground-color);
       }
     }
 
@@ -101,11 +101,11 @@
       justify-content: center;
       overflow: hidden;
       border-width: 2px;
-      border-color: var(--checkbox-border-color);
+      border-color: var(--sui-checkbox-border-color);
       border-radius: 24px;
       width: 20px;
       height: 20px;
-      color: var(--primary-accent-color-lighter);
+      color: var(--sui-primary-accent-color-lighter);
       transition: all 200ms;
 
       :global(.icon) {
@@ -115,8 +115,8 @@
     }
 
     :global(button[aria-checked='true']) {
-      border-color: var(--primary-accent-color-lighter);
-      color: var(--primary-accent-color-lighter);
+      border-color: var(--sui-primary-accent-color-lighter);
+      color: var(--sui-primary-accent-color-lighter);
     }
 
     :global(button[aria-checked='false']) {

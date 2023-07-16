@@ -114,9 +114,9 @@
     :global(button) {
       flex: none;
       border-width: 1px;
-      border-color: var(--control-border-color);
+      border-color: var(--sui-control-border-color);
       width: 32px;
-      height: var(--input--medium--height);
+      height: var(--sui-input-medium-height);
 
       &:first-of-type {
         border-radius: 0;
@@ -128,7 +128,7 @@
       }
 
       :global(.icon) {
-        font-size: var(--font-size--xx-large);
+        font-size: var(--sui-font-size-xx-large);
       }
     }
   }

@@ -87,12 +87,12 @@
     display: inline-block;
     flex: auto;
     border-width: 1px;
-    border-color: var(--control-border-color);
-    border-radius: var(--input--medium--border-radius);
+    border-color: var(--sui-control-border-color);
+    border-radius: var(--sui-input-medium-border-radius);
     padding: 0 8px;
     min-width: 0;
-    height: var(--input--medium--height);
-    background-color: var(--control-background-color);
+    height: var(--sui-input-medium-height);
+    background-color: var(--sui-control-background-color);
     color: inherit;
     font-family: inherit;
     font-size: inherit;
@@ -100,16 +100,16 @@
     transition: all 200ms;
 
     &:focus {
-      border-color: var(--primary-accent-color);
+      border-color: var(--sui-primary-accent-color);
     }
 
     &:read-only {
-      color: var(--tertiary-foreground-color);
-      border-color: var(--control-border-color) !important;
+      color: var(--sui-tertiary-foreground-color);
+      border-color: var(--sui-control-border-color) !important;
     }
 
     &:disabled {
-      background-color: var(--disabled-background-color);
+      background-color: var(--sui-disabled-background-color);
       opacity: 0.4;
       cursor: default;
     }
@@ -122,8 +122,8 @@
       flex: none;
       margin-left: -1px;
       border-width: 1px;
-      border-color: var(--control-border-color);
-      height: var(--input--medium--height);
+      border-color: var(--sui-control-border-color);
+      height: var(--sui-input-medium-height);
       aspect-ratio: 1 / 1;
 
       &:last-child {
@@ -131,7 +131,7 @@
       }
 
       :global(.icon) {
-        font-size: var(--font-size--xx-large);
+        font-size: var(--sui-font-size-xx-large);
       }
     }
   }
@@ -141,9 +141,9 @@
     inset: 0 8px;
     z-index: 2;
     display: flex;
-    justify-content: var(--input-label-align, flex-start);
+    justify-content: var(--sui-input-label-align, flex-start);
     align-items: center;
-    color: var(--primary-foreground-color);
+    color: var(--sui-primary-foreground-color);
     opacity: 0.5;
     pointer-events: none;
 

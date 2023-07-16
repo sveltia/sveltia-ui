@@ -26,7 +26,7 @@
 <style lang="scss">
   .divider {
     flex: none;
-    background-color: var(--secondary-border-color);
+    background-color: var(--sui-secondary-border-color);
 
     &[aria-orientation='horizontal'] {
       height: 1px;

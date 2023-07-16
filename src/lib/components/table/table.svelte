@@ -40,7 +40,7 @@
       :global(.table-col-header),
       :global(.table-row-header),
       :global(.table-cell) {
-        border: 1px solid var(--secondary-border-color);
+        border: 1px solid var(--sui-secondary-border-color);
         padding: 8px 8px;
       }
     }

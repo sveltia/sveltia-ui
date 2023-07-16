@@ -202,7 +202,7 @@
   dialog {
     overflow: hidden;
     outline: 0;
-    background-color: var(--popup-backdrop-color);
+    background-color: var(--sui-popup-backdrop-color);
 
     &.open {
       form {
@@ -240,9 +240,9 @@
       display: flex;
       flex-direction: column;
       border-radius: 4px;
-      background-color: var(--secondary-background-color-translucent);
+      background-color: var(--sui-secondary-background-color-translucent);
       backdrop-filter: blur(16px);
-      box-shadow: 0 8px 16px var(--popup-shadow-color);
+      box-shadow: 0 8px 16px var(--sui-popup-shadow-color);
       will-change: opacity, transform;
       transition-property: opacity, transform;
 
@@ -373,12 +373,12 @@
     box-sizing: content-box;
     margin: 0 16px;
     border-width: 0 0 1px;
-    border-color: var(--secondary-border-color);
+    border-color: var(--sui-secondary-border-color);
     padding: 16px 8px;
     height: 32px;
 
     .title {
-      font-size: var(--font-size--large);
+      font-size: var(--sui-font-size-large);
     }
   }
 

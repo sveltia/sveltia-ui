@@ -59,7 +59,7 @@
 
     :global(button) {
       border-radius: 0;
-      color: var(--secondary-foreground-color);
+      color: var(--sui-secondary-foreground-color);
 
       &:first-child {
         border-radius: 4px 0 0 4px;
@@ -75,8 +75,8 @@
     }
 
     :global(button[aria-checked='true']) {
-      color: var(--highlight-foreground-color);
-      background-color: var(--highlight-background-color);
+      color: var(--sui-highlight-foreground-color);
+      background-color: var(--sui-highlight-background-color);
     }
   }
 </style>
