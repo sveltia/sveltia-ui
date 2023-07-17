@@ -1,4 +1,5 @@
-:root[data-theme="light"] {
+:root[data-theme="light"],
+:host[data-theme="light"] {
   --sui-foreground-color-1-hsl: var(--sui-base-hue) 5% 0%; // highlight
   --sui-foreground-color-2-hsl: var(--sui-base-hue) 5% 20%; // primary
   --sui-foreground-color-3-hsl: var(--sui-base-hue) 5% 40%; // secondary
@@ -29,7 +30,8 @@
   --sui-alert-border-color-lightness: 68%;
 }
 
-:root[data-theme="dark"] {
+:root[data-theme="dark"],
+:host[data-theme="dark"] {
   --sui-foreground-color-1-hsl: var(--sui-base-hue) 10% 100%; // highlight
   --sui-foreground-color-2-hsl: var(--sui-base-hue) 10% 80%; // primary
   --sui-foreground-color-3-hsl: var(--sui-base-hue) 10% 60%; // secondary
@@ -60,7 +62,8 @@
   --sui-alert-border-color-lightness: 18%;
 }
 
-:root {
+:root,
+:host {
   // Base HSL values
   --sui-base-hue: 210;
   // Foreground
