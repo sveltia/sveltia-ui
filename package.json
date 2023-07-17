@@ -26,16 +26,16 @@
     "svelte": "^4.0.5"
   },
   "devDependencies": {
-    "@playwright/test": "^1.36.0",
+    "@playwright/test": "^1.36.1",
     "@sveltejs/adapter-auto": "2.1.0",
     "@sveltejs/kit": "^1.22.3",
     "@sveltejs/package": "^2.2.0",
-    "cspell": "^6.31.1",
-    "eslint": "^8.44.0",
+    "cspell": "^6.31.2",
+    "eslint": "^8.45.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-config-prettier": "^8.8.0",
     "eslint-plugin-import": "^2.27.5",
-    "eslint-plugin-jsdoc": "^46.4.3",
+    "eslint-plugin-jsdoc": "^46.4.4",
     "eslint-plugin-svelte": "^2.32.2",
     "npm-run-all": "^4.1.5",
     "postcss": "^8.4.26",
@@ -51,7 +51,7 @@
     "svelte-migrate": "^1.2.6",
     "svelte-preprocess": "^5.0.4",
     "tslib": "^2.6.0",
-    "vite": "^4.4.3",
+    "vite": "^4.4.4",
     "vitest": "^0.33.0"
   },
   "exports": {
