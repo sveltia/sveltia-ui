@@ -209,7 +209,6 @@
     }
 
     & + :global([role='listbox']) {
-      // display: contents;
       position: fixed;
       z-index: 100;
       border-radius: 4px;
@@ -217,7 +216,7 @@
       overflow: auto;
       background-color: var(--sui-secondary-background-color);
       backdrop-filter: blur(16px);
-      // Add .1s delay before the position can be determined
+      /* Add .1s delay before the position can be determined */
       transition: opacity 100ms 100ms;
     }
 

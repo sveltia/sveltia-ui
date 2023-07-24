@@ -110,7 +110,11 @@
 
       :global(.icon) {
         font-size: 14px;
-        font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 48;
+        font-variation-settings:
+          'FILL' 1,
+          'wght' 400,
+          'GRAD' 0,
+          'opsz' 48;
       }
     }
 
