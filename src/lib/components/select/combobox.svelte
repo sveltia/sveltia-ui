@@ -172,8 +172,12 @@
       border-radius: 4px;
       padding: 0 32px 0 8px;
       width: 100%;
-      height: var(--sui-input-medium-height);
+      height: var(--sui-textbox-medium-height);
+      color: var(--sui-control-foreground-color);
       background-color: var(--sui-disabled-background-color);
+      font-family: var(--sui-control-font-family);
+      font-size: var(--sui-control-font-size);
+      line-height: var(--sui-control-line-height);
       -webkit-user-select: none;
       user-select: none;
       cursor: pointer;

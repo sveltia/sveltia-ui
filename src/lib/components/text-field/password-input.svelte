@@ -75,7 +75,7 @@
       margin-left: -1px;
       border-width: 1px;
       border-color: var(--sui-control-border-color);
-      height: var(--sui-input-medium-height);
+      height: var(--sui-textbox-medium-height);
       aspect-ratio: 1 / 1;
 
       &:last-child {

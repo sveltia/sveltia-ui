@@ -84,7 +84,10 @@
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    color: inherit;
+    color: var(--sui-control-foreground-color);
+    font-family: var(--sui-control-font-family);
+    font-size: var(--sui-control-font-size);
+    line-height: var(--sui-control-line-height);
     cursor: pointer;
     -webkit-user-select: none;
     user-select: none;

@@ -97,7 +97,6 @@
   --sui-secondary-background-color-translucent: hsl(var(--sui-background-color-3-hsl) / 80%);
   --sui-tertiary-background-color: hsl(var(--sui-background-color-4-hsl));
   --sui-tertiary-background-color-translucent: hsl(var(--sui-background-color-4-hsl) / 80%);
-  --sui-control-background-color: hsl(var(--sui-background-color-1-hsl));
   --sui-disabled-background-color: hsl(var(--sui-background-color-4-hsl));
   --sui-error-background-color: hsl(
     var(--sui-error-color-hue) var(--sui-alert-background-color-saturation)
@@ -118,7 +117,6 @@
   // Borders
   --sui-primary-border-color: hsl(var(--sui-border-color-1-hsl));
   --sui-secondary-border-color: hsl(var(--sui-border-color-2-hsl));
-  --sui-control-border-color: hsl(var(--sui-border-color-2-hsl));
   --sui-checkbox-border-color: hsl(var(--sui-foreground-color-3-hsl));
   --sui-error-border-color: hsl(
     var(--sui-error-color-hue) var(--sui-alert-border-color-saturation)
@@ -152,6 +150,9 @@
   --sui-font-weight-bold: 600;
   --sui-font-family-monospace: "Noto Sans Mono", monospace;
   --sui-font-size-monospace: 13px;
+  --sui-line-height-default: 1.25;
+  --sui-line-height-compact: 1.5;
+  --sui-line-height-comfortable: 1.75;
   // Controls
   --sui-control-small-border-width: 1px;
   --sui-control-small-border-radius: 2px;
@@ -162,6 +163,12 @@
   --sui-control-large-border-width: 1px;
   --sui-control-large-border-radius: 8px;
   --sui-control-large-height: 40px;
+  --sui-control-border-color: hsl(var(--sui-border-color-2-hsl));
+  --sui-control-foreground-color: var(--sui-primary-foreground-color);
+  --sui-control-background-color: hsl(var(--sui-background-color-1-hsl));
+  --sui-control-font-family: var(--sui-font-family-default);
+  --sui-control-font-size: var(--sui-font-size-default);
+  --sui-control-line-height: var(--sui-line-height-default);
   // Buttons
   --sui-button-small-border-radius: var(--sui-control-small-border-radius);
   --sui-button-small-height: var(--sui-control-small-height);
@@ -176,13 +183,19 @@
   --sui-option-medium-height: var(--sui-control-medium-height);
   --sui-option-large-border-radius: var(--sui-control-large-border-radius);
   --sui-option-large-height: var(--sui-control-large-height);
-  // Input
-  --sui-input-small-border-radius: var(--sui-control-small-border-radius);
-  --sui-input-small-height: var(--sui-control-small-height);
-  --sui-input-medium-border-radius: var(--sui-control-medium-border-radius);
-  --sui-input-medium-height: var(--sui-control-medium-height);
-  --sui-input-large-border-radius: var(--sui-control-large-border-radius);
-  --sui-input-large-height: var(--sui-control-large-height);
+  // Textbox: singleline & multiline text fields
+  --sui-textbox-small-border-radius: var(--sui-control-small-border-radius);
+  --sui-textbox-small-height: var(--sui-control-small-height);
+  --sui-textbox-medium-border-radius: var(--sui-control-medium-border-radius);
+  --sui-textbox-medium-height: var(--sui-control-medium-height);
+  --sui-textbox-large-border-radius: var(--sui-control-large-border-radius);
+  --sui-textbox-large-height: var(--sui-control-large-height);
+  --sui-textbox-foreground-color: var(--sui-control-foreground-color);
+  --sui-textbox-background-color: var(--sui-control-background-color);
+  --sui-textbox-font-family: var(--sui-font-family-default);
+  --sui-textbox-font-size: var(--sui-font-size-default);
+  --sui-textbox-singleline-line-height: var(--sui-line-height-compact);
+  --sui-textbox-multiline-line-height: var(--sui-line-height-comfortable);
   // Tab
   --sui-tab-small-height: var(--sui-control-small-height);
   --sui-tab-medium-height: var(--sui-control-medium-height);

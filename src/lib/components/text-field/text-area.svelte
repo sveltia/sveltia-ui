@@ -105,15 +105,15 @@
     margin: 0;
     border-width: 1px;
     border-color: var(--sui-control-border-color);
-    border-radius: var(--sui-input-medium-border-radius);
-    background-color: var(--sui-control-background-color);
+    border-radius: var(--sui-textbox-medium-border-radius);
     padding: 8px;
     width: 100%;
     min-height: 8em;
-    color: inherit;
-    font-family: inherit;
-    font-size: inherit;
-    line-height: 1.75;
+    color: var(--sui-textbox-foreground-color);
+    background-color: var(--sui-textbox-background-color);
+    font-family: var(--sui-textbox-font-family);
+    font-size: var(--sui-textbox-font-size);
+    line-height: var(--sui-textbox-multiline-line-height);
     resize: vertical;
     transition: all 200ms;
 

@@ -15,6 +15,7 @@
 }
 
 * {
+  overflow-anchor: none;
   scroll-behavior: smooth;
   box-sizing: border-box;
   outline-offset: 1px;
@@ -59,19 +60,9 @@ iframe {
   vertical-align: top;
 }
 
-button,
-input,
-textarea,
-select,
-option {
-  font-family: inherit;
-  font-size: inherit;
-  color: inherit;
-}
-
 p,
 li {
-  line-height: 1.75;
+  line-height: var(--sui-line-height-comfortable);
 }
 
 code,
@@ -80,7 +71,7 @@ pre {
 }
 
 pre {
-  line-height: 1.5;
+  line-height: var(--sui-line-height-compact);
   -webkit-user-select: text;
   user-select: text;
 }
@@ -96,7 +87,7 @@ dialog {
   max-width: 100%;
   height: 100%;
   max-height: 100%;
-  color: inherit;
+  color: var(--sui-primary-foreground-color);
   background: transparent;
   -webkit-user-select: none;
   user-select: none;

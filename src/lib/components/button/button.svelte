@@ -120,10 +120,13 @@
     border-style: solid;
     border-color: transparent;
     padding: 0;
-    color: inherit;
+    color: var(--sui-control-foreground-color);
     background-color: transparent;
     box-shadow: none;
-    font: inherit;
+    font-family: var(--sui-control-font-family);
+    font-size: var(--sui-control-font-size);
+    line-height: var(--sui-control-line-height);
+    font-weight: normal;
     text-align: left;
     cursor: pointer;
     transition: all 200ms;

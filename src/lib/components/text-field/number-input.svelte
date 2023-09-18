@@ -116,7 +116,7 @@
       border-width: 1px;
       border-color: var(--sui-control-border-color);
       width: 32px;
-      height: var(--sui-input-medium-height);
+      height: var(--sui-textbox-medium-height);
 
       &:first-of-type {
         border-radius: 0;

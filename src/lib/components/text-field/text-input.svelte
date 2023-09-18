@@ -88,15 +88,15 @@
     flex: auto;
     border-width: 1px;
     border-color: var(--sui-control-border-color);
-    border-radius: var(--sui-input-medium-border-radius);
+    border-radius: var(--sui-textbox-medium-border-radius);
     padding: 0 8px;
     min-width: 0;
-    height: var(--sui-input-medium-height);
-    background-color: var(--sui-control-background-color);
-    color: inherit;
-    font-family: inherit;
-    font-size: inherit;
-    line-height: 30px;
+    height: var(--sui-textbox-medium-height);
+    color: var(--sui-textbox-foreground-color);
+    background-color: var(--sui-textbox-background-color);
+    font-family: var(--sui-textbox-font-family);
+    font-size: var(--sui-textbox-font-size);
+    line-height: var(--sui-textbox-singleline-line-height);
     transition: all 200ms;
 
     &:focus {
@@ -123,7 +123,7 @@
       margin-left: -1px;
       border-width: 1px;
       border-color: var(--sui-control-border-color);
-      height: var(--sui-input-medium-height);
+      height: var(--sui-textbox-medium-height);
       aspect-ratio: 1 / 1;
 
       &:last-child {
@@ -141,7 +141,7 @@
     inset: 0 8px;
     z-index: 2;
     display: flex;
-    justify-content: var(--sui-input-label-align, flex-start);
+    justify-content: var(--sui-textbox-label-align, flex-start);
     align-items: center;
     color: var(--sui-primary-foreground-color);
     opacity: 0.5;
