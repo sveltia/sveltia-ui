@@ -291,6 +291,10 @@
       "svelte": "./package/components/util/app-shell.svelte",
       "default": "./package/components/util/app-shell.svelte"
     },
+    "./components/util/events": {
+      "types": "./package/components/util/events.d.ts",
+      "default": "./package/components/util/events.js"
+    },
     "./components/util/group": {
       "types": "./package/components/util/group.d.ts",
       "default": "./package/components/util/group.js"
@@ -484,6 +488,9 @@
       ],
       "components/util/app-shell.svelte": [
         "./package/components/util/app-shell.svelte.d.ts"
+      ],
+      "components/util/events": [
+        "./package/components/util/events.d.ts"
       ],
       "components/util/group": [
         "./package/components/util/group.d.ts"

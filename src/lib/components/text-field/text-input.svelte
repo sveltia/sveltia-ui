@@ -7,6 +7,7 @@
 <svelte:options accessors={true} />
 
 <script>
+  import { activateKeyShortcuts } from '../util/events';
   import { getRandomId } from '../util/util';
 
   /**
@@ -34,6 +35,12 @@
 
   /** @type {(string | number | undefined)} */
   export let value = undefined;
+
+  /**
+   * Keyboard shortcuts.
+   * @type {string}
+   */
+  export let keyShortcuts = '';
 
   const id = getRandomId('input');
   let ariaLabel = '';
@@ -66,6 +73,7 @@
     on:keyup
     on:keypress
     on:change
+    use:activateKeyShortcuts={keyShortcuts}
   />
   {#if ariaLabel}
     <span id="{id}-label" class="label" class:hidden={!!value}>

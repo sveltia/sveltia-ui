@@ -7,6 +7,7 @@
 <svelte:options accessors={true} />
 
 <script>
+  import { activateKeyShortcuts } from '../util/events';
   import Popup from '../util/popup.svelte';
 
   /**
@@ -71,6 +72,12 @@
    */
   export let popupPosition = 'bottom-left';
 
+  /**
+   * Keyboard shortcuts.
+   * @type {string}
+   */
+  export let keyShortcuts = '';
+
   /** @type {?Popup} */
   let popupComponent;
 </script>
@@ -95,6 +102,7 @@
   on:keydown
   on:keyup
   on:keypress
+  use:activateKeyShortcuts={keyShortcuts}
   bind:this={element}
 >
   <slot name="start-icon" />
