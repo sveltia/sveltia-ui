@@ -127,6 +127,7 @@
     style:z-index={$style.zIndex}
     style:min-width={$style.width}
     style:max-height={$style.height}
+    style:visibility={$style.inset ? undefined : 'hidden'}
   >
     {#if showContent}
       <slot />
