@@ -24,6 +24,7 @@
   outline-color: transparent;
   border-width: 0;
   border-style: solid;
+  vertical-align: top;
 }
 
 :focus {
@@ -52,12 +53,6 @@ strong {
 a {
   color: var(--sui-primary-accent-color-lighter);
   text-decoration: none;
-}
-
-img,
-svg,
-iframe {
-  vertical-align: top;
 }
 
 p,

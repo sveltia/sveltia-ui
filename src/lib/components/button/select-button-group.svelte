@@ -59,7 +59,7 @@
 
     :global(button) {
       border-radius: 0;
-      color: var(--sui-secondary-foreground-color);
+      color: var(--sui-primary-foreground-color);
 
       &:first-child {
         border-radius: 4px 0 0 4px;
