@@ -7,6 +7,17 @@
 <script>
   import { onMount } from 'svelte';
 
+  const stylesheets = [
+    // https://fonts.google.com/share?selection.family=Merriweather%20Sans:ital,wght@0,300;0,600;1,300%7CNoto%20Sans%20Mono
+    'https://fonts.googleapis.com/css2?family=Merriweather+Sans:ital,wght@0,300;0,600;1,300&family=Noto+Sans+Mono&display=swap',
+    // https://fonts.google.com/icons?icon.set=Material+Symbols
+    // Use `font-display: block;` @see https://stackoverflow.com/q/41710834
+    'https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=block',
+  ];
+
+  /** @type {HTMLElement} */
+  let fontLoader;
+
   onMount(() => {
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
     const { dataset } = document.documentElement;
@@ -28,8 +39,28 @@
     mediaQuery.onchange = () => {
       applyTheme();
     };
+
+    window.setTimeout(() => {
+      fontLoader.remove();
+    }, 1000);
   });
 </script>
+
+<svelte:head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="google" content="notranslate" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
+  {#each stylesheets as href}
+    <link rel="preload" {href} as="style" />
+    <link rel="stylesheet" {href} />
+  {/each}
+</svelte:head>
+
+<!-- Preload fonts, including the icons -->
+<div class="font-loader" aria-hidden="true" bind:this={fontLoader}>
+  Sveltia UI <span class="material-symbols-outlined">favorite</span>
+</div>
 
 <div
   class="sui app-shell"
@@ -52,6 +83,11 @@
 
 <style lang="scss" global>
   @use '../../styles/core.scss';
+
+  .font-loader {
+    position: absolute;
+    left: -99999px;
+  }
 
   .app-shell {
     position: fixed;
