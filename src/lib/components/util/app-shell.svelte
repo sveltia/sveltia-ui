@@ -58,8 +58,8 @@
 </svelte:head>
 
 <!-- Preload fonts, including the icons -->
-<div class="font-loader" aria-hidden="true" bind:this={fontLoader}>
-  Sveltia UI <span class="material-symbols-outlined">favorite</span>
+<div class="font-loader" aria-hidden="true" bind:this={fontLoader} style:opacity="0">
+  <strong>Sveltia</strong> <em>UI</em> <span class="material-symbols-outlined">favorite</span>
 </div>
 
 <div
@@ -87,6 +87,7 @@
   .font-loader {
     position: absolute;
     left: -99999px;
+    font-family: var(--sui-font-family-default);
   }
 
   .app-shell {
