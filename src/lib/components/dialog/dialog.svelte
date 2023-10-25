@@ -256,6 +256,7 @@
       flex-direction: column;
       border-radius: 4px;
       background-color: var(--sui-secondary-background-color-translucent);
+      -webkit-backdrop-filter: blur(16px);
       backdrop-filter: blur(16px);
       box-shadow: 0 8px 16px var(--sui-popup-shadow-color);
       will-change: opacity, transform;
