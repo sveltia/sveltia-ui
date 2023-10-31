@@ -136,6 +136,7 @@
     line-height: var(--sui-control-line-height);
     font-weight: normal;
     text-align: left;
+    white-space: nowrap;
     cursor: pointer;
     transition: all 200ms;
 

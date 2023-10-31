@@ -17,7 +17,9 @@ class Popup {
         return;
       }
 
-      const contentHeight = this.popupElement.querySelector('.content').scrollHeight;
+      const { scrollHeight: contentHeight, scrollWidth: contentWidth } =
+        this.popupElement.querySelector('.content');
+
       const topMargin = intersectionRect.top - 8;
       const bottomMargin = rootBounds.height - intersectionRect.bottom - 8;
       let { position } = this;
@@ -33,6 +35,13 @@ class Popup {
           } else {
             height = bottomMargin;
           }
+        }
+      }
+
+      // If the popup overflows the viewport, change the position
+      if (position.endsWith('-left')) {
+        if (intersectionRect.left + contentWidth > rootBounds.width - 8) {
+          position = /** @type {PopupPosition} */ (position.replace('-left', '-right'));
         }
       }
 
