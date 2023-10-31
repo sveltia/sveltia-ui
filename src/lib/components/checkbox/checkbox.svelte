@@ -121,6 +121,7 @@
       width: 20px;
       height: 20px;
       color: var(--sui-primary-accent-color-lighter);
+      background-color: var(--sui-checkbox-background-color);
       transition: all 200ms;
 
       :global(.icon) {
@@ -130,7 +131,7 @@
 
     :global(button[aria-checked='true']) {
       border-color: var(--sui-primary-accent-color-lighter);
-      color: var(--sui-control-background-color);
+      color: var(--sui-primary-accent-color-foreground);
       background-color: var(--sui-primary-accent-color-lighter);
     }
 

@@ -179,7 +179,8 @@
       background-color: var(--sui-primary-accent-color);
 
       &:hover,
-      &:focus-visible {
+      &:focus-visible,
+      &[aria-expanded='true'] {
         background-color: var(--sui-primary-accent-color-lighter);
       }
 
@@ -194,7 +195,8 @@
       background-color: var(--sui-tertiary-background-color);
 
       &:hover,
-      &:focus-visible {
+      &:focus-visible,
+      &[aria-expanded='true'] {
         background-color: var(--sui-highlight-background-color);
       }
 
@@ -209,7 +211,8 @@
       background-color: var(--sui-tertiary-background-color);
 
       &:hover,
-      &:focus-visible {
+      &:focus-visible,
+      &[aria-expanded='true'] {
         background-color: var(--sui-highlight-background-color);
       }
 
@@ -220,7 +223,8 @@
 
     &:global(.ghost) {
       &:hover,
-      &:focus-visible {
+      &:focus-visible,
+      &[aria-expanded='true'] {
         background-color: var(--sui-highlight-background-color);
       }
 
