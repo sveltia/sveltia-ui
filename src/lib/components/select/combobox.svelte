@@ -106,7 +106,7 @@
     <Icon
       slot="start-icon"
       name="expand_more"
-      label={$isPopupOpen ? $_('_sui._.collapse') : $_('_sui._.expand')}
+      label={$isPopupOpen ? $_('_sui.collapse') : $_('_sui.expand')}
     />
   </Button>
 </div>

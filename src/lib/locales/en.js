@@ -1,13 +1,11 @@
 export const strings = {
-  _: {
-    ok: 'OK',
-    cancel: 'Cancel',
-    close: 'Close',
-    clear: 'Clear',
-    remove: 'Remove',
-    collapse: 'Collapse',
-    expand: 'Expand',
-  },
+  ok: 'OK',
+  cancel: 'Cancel',
+  close: 'Close',
+  clear: 'Clear',
+  remove: 'Remove',
+  collapse: 'Collapse',
+  expand: 'Expand',
   calendar: {
     year: 'Year',
     previous_decade: 'Previous Decade',

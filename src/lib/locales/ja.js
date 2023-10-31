@@ -1,13 +1,11 @@
 export const strings = {
-  _: {
-    ok: 'OK',
-    cancel: 'キャンセル',
-    close: '閉じる',
-    clear: 'クリア',
-    remove: '削除',
-    collapse: '折り畳む',
-    expand: '広げる',
-  },
+  ok: 'OK',
+  cancel: 'キャンセル',
+  close: '閉じる',
+  clear: 'クリア',
+  remove: '削除',
+  collapse: '折り畳む',
+  expand: '広げる',
   calendar: {
     year: '年',
     previous_decade: '前の 10 年',

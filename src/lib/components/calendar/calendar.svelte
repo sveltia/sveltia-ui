@@ -145,7 +145,7 @@
         value = '';
       }}
     >
-      {$_('_sui._.clear')}
+      {$_('_sui.clear')}
     </Button>
     <Spacer flex={true} />
     <Button
