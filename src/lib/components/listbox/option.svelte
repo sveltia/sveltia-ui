@@ -10,19 +10,40 @@
   import Icon from '../icon/icon.svelte';
 
   /**
-   * CSS class name on the button.
+   * The `class` attribute on the wrapper element.
    * @type {string}
    */
   let className = '';
-
   export { className as class };
-
-  export let label = '';
-  export let value = undefined;
+  /**
+   * Whether to select the widget. An alias of the `aria-selected` attribute.
+   * @type {boolean}
+   */
   export let selected = false;
+  /**
+   * Whether to hide the widget. An alias of the `aria-hidden` attribute.
+   * @type {boolean | undefined}
+   */
+  export let hidden = undefined;
+  /**
+   * Whether to disable the widget. An alias of the `aria-disabled` attribute.
+   * @type {boolean}
+   */
+  export let disabled = false;
+  /**
+   * Text label displayed on the item.
+   * @type {string | undefined}
+   */
+  export let label = '';
+  /**
+   * The `value` attribute on the `<button>` element.
+   * @type {string | undefined}
+   */
+  export let value = undefined;
 
   /**
-   * @type {Button}
+   * Reference to the `Button` component.
+   * @type {Button | undefined}
    */
   let buttonComponent;
 
@@ -45,7 +66,7 @@
   });
 </script>
 
-<div class="sui option {className}">
+<div class="sui option {className}" {hidden}>
   <Button
     bind:this={buttonComponent}
     tabindex="-1"
@@ -53,6 +74,8 @@
     aria-selected={selected}
     {label}
     {value}
+    {hidden}
+    {disabled}
     data-type={typeof value}
     {...$$restProps}
     on:click
@@ -60,6 +83,7 @@
     on:dragleave
     on:dragend
     on:drop
+    on:select
   >
     {#if selected}
       <Icon class="check" name="check" />

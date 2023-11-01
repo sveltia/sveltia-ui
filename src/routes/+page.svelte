@@ -165,7 +165,7 @@
         <section aria-label="Radio Buttons">
           <div>
             <RadioGroup>
-              <Radio selected={true}>Strawberry</Radio>
+              <Radio checked={true}>Strawberry</Radio>
               <Radio>Grape</Radio>
               <Radio>Lemon</Radio>
             </RadioGroup>
@@ -173,10 +173,10 @@
         </section>
         <section aria-label="Checkboxes">
           <div>
-            <CheckboxGroup ariaLabel="Ingredients">
+            <CheckboxGroup aria-label="Ingredients">
               <Checkbox name="ingredients" value="rice" checked={true}>Rice</Checkbox>
               <Checkbox name="ingredients" value="beans" checked={false}>Beans</Checkbox>
-              <Checkbox name="ingredients" value="cheese" indeterminate={true}>Cheese</Checkbox>
+              <Checkbox name="ingredients" value="cheese" checked="mixed">Cheese</Checkbox>
             </CheckboxGroup>
           </div>
         </section>

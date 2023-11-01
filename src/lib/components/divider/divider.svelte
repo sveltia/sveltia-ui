@@ -4,21 +4,29 @@
   @see https://w3c.github.io/aria/#separator
 -->
 <script>
-  /** @type {('horizontal' | 'vertical')} */
-  export let orientation = 'horizontal';
-
   /**
-   * CSS class name on the button.
+   * CSS class name on the wrapper element.
    * @type {string}
    */
   let className = '';
-
   export { className as class };
+  /**
+   * Whether to hide the widget. An alias of the `aria-hidden` attribute.
+   * @type {boolean | undefined}
+   */
+  export let hidden = undefined;
+  /**
+   * Orientation of the widget. An alias of the `aria-orientation` attribute.
+   * @type {'horizontal' | 'vertical'}
+   */
+  export let orientation = 'horizontal';
 </script>
 
 <div
-  role="separator"
   class="sui divider {className}"
+  role="separator"
+  {hidden}
+  aria-hidden={hidden}
   aria-orientation={orientation}
   {...$$restProps}
 />

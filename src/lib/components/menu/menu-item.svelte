@@ -10,20 +10,40 @@
   import Popup from '../util/popup.svelte';
   import Menu from './menu.svelte';
 
+  /**
+   * The `class` attribute on the wrapper element.
+   * @type {string}
+   */
   let className = '';
-
   export { className as class };
-
-  /** @type {('menuitem'|'menuitemcheckbox'|'menuitemradio')} */
+  /**
+   * The `role` attribute on the `<button>` element.
+   * @type {'menuitem' | 'menuitemcheckbox' | 'menuitemradio'}
+   */
   export let role = 'menuitem';
-
+  /**
+   * Whether to hide the widget. An alias of the `aria-hidden` attribute.
+   * @type {boolean | undefined}
+   */
+  export let hidden = undefined;
+  /**
+   * Whether to disable the widget. An alias of the `aria-disabled` attribute.
+   * @type {boolean}
+   */
+  export let disabled = false;
+  /**
+   * Text label displayed on the item.
+   * @type {string | undefined}
+   */
   export let label = '';
-
+  /**
+   * Name of `<Icon>` displayed before the label.
+   */
   export let iconName = '';
-
+  /**
+   * ARIA label of `<Icon>` displayed before the label.
+   */
   export let iconLabel = '';
-
-  export let checked = false;
 
   /** @type {Button} */
   let buttonComponent;
@@ -32,21 +52,27 @@
   $: hasChildren = role === 'menuitem' && $$slots.default;
 </script>
 
-<div class="sui menuitem {className}">
+<div class="sui menuitem {className}" {hidden}>
   <Button
     {role}
-    aria-checked={checked}
+    {hidden}
+    {disabled}
     aria-haspopup={hasChildren ? 'menu' : undefined}
-    aria-expanded={hasChildren && $isPopupOpen ? true : undefined}
+    aria-expanded={hasChildren ? $isPopupOpen : undefined}
     {...$$restProps}
     bind:this={buttonComponent}
     on:click
     on:mouseenter={() => {
-      $isPopupOpen = true;
+      if (hasChildren) {
+        $isPopupOpen = true;
+      }
     }}
     on:mouseleave={() => {
-      $isPopupOpen = false;
+      if (hasChildren) {
+        $isPopupOpen = false;
+      }
     }}
+    on:select
   >
     {#if iconName}
       <Icon slot="start-icon" name={iconName} label={iconLabel} />
@@ -54,11 +80,9 @@
     {#if label}
       <span class="label">{label}</span>
     {/if}
-    {#if role === 'menuitemradio' || role === 'menuitemcheckbox'}
+    {#if $$slots['end-icon']}
       <span class="icon-outer">
-        {#if checked}
-          <Icon name="check" />
-        {/if}
+        <slot name="end-icon" />
       </span>
     {/if}
     {#if hasChildren}

@@ -14,33 +14,70 @@
   import TextInput from './text-input.svelte';
 
   /**
-   * CSS class name on the button.
+   * The `class` attribute on the wrapper element.
    * @type {string}
    */
   let className = '';
-
   export { className as class };
+  /**
+   * Whether to hide the widget. An alias of the `aria-hidden` attribute.
+   * @type {boolean | undefined}
+   */
+  export let hidden = undefined;
+  /**
+   * Whether to disable the widget. An alias of the `aria-disabled` attribute.
+   * @type {boolean}
+   */
+  export let disabled = false;
+  /**
+   * Whether to disable the widget. An alias of `aria-readonly` attribute.
+   * @type {boolean}
+   */
+  export let readonly = false;
+  /**
+   * Whether to disable the widget. An alias of the `aria-required` attribute.
+   * @type {boolean}
+   */
+  export let required = false;
+  /**
+   * Whether to disable the widget. An alias of the `aria-invalid` attribute.
+   * @type {boolean}
+   */
+  export let invalid = false;
+  /**
+   * Input value.
+   * @type {string | undefined}
+   */
+  export let value = undefined;
 
-  /** @type {import('svelte').SvelteComponent} */
-  let input;
+  /**
+   * Reference to the `TextInput` component.
+   * @type {TextInput | undefined}
+   */
+  let inputComponent;
 
-  export let value = '';
+  $: input = inputComponent?.element;
 
   /**
    * Move focus to the `<input>` element.
    */
   export const focus = () => {
-    input?.element?.focus();
+    input?.focus();
   };
 </script>
 
-<div class="sui search-bar {className}" role="search">
+<div class="sui search-bar {className}" role="search" {hidden}>
   <Icon name="search" />
   <TextInput
-    bind:this={input}
     bind:value
     role="searchbox"
+    {hidden}
+    {disabled}
+    {readonly}
+    {required}
+    {invalid}
     {...$$restProps}
+    bind:this={inputComponent}
     on:input
     on:keydown
     on:keyup
@@ -52,11 +89,11 @@
       class="iconic"
       on:click={() => {
         value = '';
-        input.element.focus();
+        input?.focus();
         window.requestIdleCallback(() => {
-          input.element.dispatchEvent(new KeyboardEvent('input'));
-          input.element.dispatchEvent(new KeyboardEvent('keypress'));
-          input.element.dispatchEvent(new KeyboardEvent('change'));
+          input?.dispatchEvent(new KeyboardEvent('input'));
+          input?.dispatchEvent(new KeyboardEvent('keypress'));
+          input?.dispatchEvent(new KeyboardEvent('change'));
         });
       }}
     >

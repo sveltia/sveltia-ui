@@ -11,12 +11,41 @@
   import { createEventDispatcher, onMount } from 'svelte';
 
   /**
-   * CSS class name on the button.
+   * The `class` attribute on the wrapper element.
    * @type {string}
    */
   let className = '';
-
   export { className as class };
+  /**
+   * Whether to hide the widget. An alias of the `aria-hidden` attribute.
+   * @type {boolean | undefined}
+   */
+  export let hidden = undefined;
+  /**
+   * Whether to disable the widget. An alias of the `aria-disabled` attribute.
+   * @type {boolean}
+   */
+  export let disabled = false;
+  /**
+   * Whether to disable the widget. An alias of the `aria-readonly` attribute.
+   * @type {boolean}
+   */
+  export let readonly = false;
+  /**
+   * Whether to disable the widget. An alias of the `aria-invalid` attribute.
+   * @type {boolean}
+   */
+  export let invalid = false;
+  /**
+   * Minimum allowed value. An alias of the `aria-valuemin` attribute.
+   * @type {number | undefined}
+   */
+  export let min = 0;
+  /**
+   * Maximum allowed value. An alias of the `aria-valuemax` attribute.
+   * @type {number | undefined}
+   */
+  export let max = 100;
 
   export let value = 0;
   export let sliderLabel = '';
@@ -24,8 +53,6 @@
   export let values = undefined;
   /** @type {[string, string]} */
   export let sliderLabels = undefined;
-  export let min = 0;
-  export let max = 100;
   export let step = 1;
   /** @type {(string[] | number[])} */
   export let optionLabels = [];
@@ -33,7 +60,7 @@
   $: multiThumb = !!values;
 
   const dispatch = createEventDispatcher();
-  /** @type {HTMLElement?} */
+  /** @type {HTMLElement | undefined} */
   let base = undefined;
   let barWidth = 0;
   let positionList = [];
@@ -218,6 +245,7 @@
 <div
   class="sui slider {className}"
   role="none"
+  {hidden}
   {...$$restProps}
   on:click|preventDefault|stopPropagation
 >
@@ -226,7 +254,9 @@
     role="none"
     bind:this={base}
     on:click|preventDefault|stopPropagation={(event) => {
-      onClick(event);
+      if (!disabled) {
+        onClick(event);
+      }
     }}
   >
     <div
@@ -235,34 +265,50 @@
       style:width="{multiThumb ? sliderPositions[1] - sliderPositions[0] : sliderPositions[0]}px"
     />
     <div
-      tabindex="0"
       role="slider"
+      tabindex="0"
       aria-label={multiThumb ? sliderLabels?.[0] || '' : sliderLabel}
+      aria-hidden={hidden}
+      aria-disabled={disabled}
+      aria-readonly={readonly}
+      aria-invalid={invalid}
       aria-valuemin={min}
       aria-valuemax={max}
       aria-valuenow={multiThumb ? values[0] : value}
       style:left="{sliderPositions[0]}px"
       on:mousedown={(event) => {
-        onMouseDown(event, 0);
+        if (!disabled) {
+          onMouseDown(event, 0);
+        }
       }}
       on:keydown={(event) => {
-        onKeyDown(event, 0);
+        if (!disabled) {
+          onKeyDown(event, 0);
+        }
       }}
     />
     {#if multiThumb}
       <div
-        tabindex="0"
         role="slider"
+        tabindex="0"
         aria-label={sliderLabels?.[1] || ''}
+        aria-hidden={hidden}
+        aria-disabled={disabled}
+        aria-readonly={readonly}
+        aria-invalid={invalid}
         aria-valuemin={min}
         aria-valuemax={max}
         aria-valuenow={values[1]}
         style:left="{sliderPositions[1]}px"
         on:mousedown={(event) => {
-          onMouseDown(event, 1);
+          if (!disabled) {
+            onMouseDown(event, 1);
+          }
         }}
         on:keydown={(event) => {
-          onKeyDown(event, 1);
+          if (!disabled) {
+            onKeyDown(event, 1);
+          }
         }}
       />
     {/if}

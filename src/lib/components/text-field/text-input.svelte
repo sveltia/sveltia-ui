@@ -11,60 +11,87 @@
   import { getRandomId } from '../util/util';
 
   /**
-   * CSS class name on the button.
+   * Reference to the `<input>` element.
+   * @type {HTMLInputElement | undefined}
+   */
+  export let element = undefined;
+  /**
+   * The `class` attribute on the wrapper element.
    * @type {string}
    */
   let className = '';
-
   export { className as class };
-
-  /** @type {HTMLInputElement?} */
-  export let element = undefined;
-
-  /** @type {('textbox'|'searchbox'|'combobox'|'spinbutton')} */
+  /**
+   * The `role` attribute on the `<input>` element.
+   * @type {'textbox' | 'searchbox' | 'combobox' | 'spinbutton'}
+   */
   export let role = 'textbox';
-
   /**
-   * Whether the textbox is editable.
+   * Whether to hide the widget. An alias of the `aria-hidden` attribute.
+   * @type {boolean | undefined}
    */
-  export let readOnly = false;
-
+  export let hidden = undefined;
+  /**
+   * Whether to disable the widget. An alias of the `aria-disabled` attribute.
+   * @type {boolean}
+   */
   export let disabled = false;
-
-  export let name = '';
-
-  /** @type {(string | number | undefined)} */
-  export let value = undefined;
-
   /**
-   * Keyboard shortcuts.
-   * @type {string}
+   * Whether to disable the widget. An alias of `aria-readonly` attribute.
+   * @type {boolean}
    */
-  export let keyShortcuts = '';
+  export let readonly = false;
+  /**
+   * Whether to disable the widget. An alias of the `aria-required` attribute.
+   * @type {boolean}
+   */
+  export let required = false;
+  /**
+   * Whether to disable the widget. An alias of the `aria-invalid` attribute.
+   * @type {boolean}
+   */
+  export let invalid = false;
+  /**
+   * Keyboard shortcuts. An alias of the `aria-keyshortcuts` attribute. Accepts the special `Accel`
+   * key, which will be replaced with `Control` or `Meta` depending on the user’s operating system.
+   * @type {string | undefined}
+   */
+  export let keyShortcuts = undefined;
+  /**
+   * The `name` attribute on the `<input>` element.
+   * @type {string | undefined}
+   */
+  export let name = undefined;
+  /**
+   * Input value.
+   * @type {string | number | undefined}
+   */
+  export let value = undefined;
+  /**
+   * Whether to display `aria-label` over the `<input>` element if it’s empty, just like how the
+   * HTML `placeholder` attribute works.
+   * @type {boolean}
+   */
+  export let showInlineLabel = false;
 
   const id = getRandomId('input');
-  let ariaLabel = '';
 
-  $: {
-    // Replace `aria-label` with a visible label if `<input placeholder>` is not defined
-    if ('aria-label' in $$restProps && !('placeholder' in $$restProps)) {
-      ariaLabel = $$restProps['aria-label'];
-      delete $$restProps['aria-label'];
-      $$restProps['aria-labelledby'] = `${id}-label`;
-    }
-  }
+  $: ariaLabel = $$restProps['aria-label'];
 </script>
 
-<div class="sui text-input {className}">
+<div class="sui text-input {className}" {hidden}>
   <input
     type="text"
     {role}
     name={name || undefined}
     tabindex={disabled ? -1 : 0}
-    readOnly={readOnly ? true : undefined}
-    aria-readonly={readOnly ? true : undefined}
     {disabled}
-    aria-disabled={disabled ? true : undefined}
+    {readonly}
+    aria-hidden={hidden}
+    aria-disabled={disabled}
+    aria-readonly={readonly}
+    aria-required={required}
+    aria-invalid={invalid}
     {...$$restProps}
     bind:this={element}
     bind:value
@@ -75,8 +102,8 @@
     on:change
     use:activateKeyShortcuts={keyShortcuts}
   />
-  {#if ariaLabel}
-    <span id="{id}-label" class="label" class:hidden={!!value}>
+  {#if ariaLabel && showInlineLabel}
+    <span id="{id}-label" class="label" class:hidden={!!value} aria-hidden="true">
       {ariaLabel}
     </span>
   {/if}

@@ -25,7 +25,7 @@
   });
 </script>
 
-<div class="sui portal {className}" bind:this={ref}>
+<div class="sui portal {className}" {...$$restProps} bind:this={ref}>
   <slot />
 </div>
 

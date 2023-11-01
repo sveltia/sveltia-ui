@@ -11,40 +11,55 @@
   import { getRandomId } from '../util/util';
 
   /**
-   * CSS class name on the button.
+   * The `class` attribute on the wrapper element.
    * @type {string}
    */
   let className = '';
-
   export { className as class };
-
-  /** @type {string} */
-  export let name = '';
-
-  /** @type {string?} */
+  /**
+   * Whether to hide the widget. An alias of the `aria-hidden` attribute.
+   * @type {boolean | undefined}
+   */
+  export let hidden = undefined;
+  /**
+   * Whether to disable the widget. An alias of the `aria-disabled` attribute.
+   * @type {boolean}
+   */
+  export let disabled = false;
+  /**
+   * Whether to check the widget. An alias of the `aria-checked` attribute.
+   * @type {boolean}
+   */
+  export let checked = false;
+  /**
+   * The `name` attribute on the `<button>` element.
+   * @type {string | undefined}
+   */
+  export let name = undefined;
+  /**
+   * The `value` attribute on the `<button>` element.
+   * @type {string | undefined}
+   */
+  export let value = undefined;
+  /**
+   * Text label displayed next to the checkbox.
+   * @type {string | undefined}
+   */
   export let label = undefined;
 
-  /** @type {string?} */
-  export let value = undefined;
-
-  /** @type {boolean} */
-  export let selected = false;
-
-  /** @type {boolean} */
-  export let disabled = false;
-
   const id = getRandomId('checkbox');
-  /** @type {Button} */
+
+  /**
+   * Reference to the `Button` component.
+   * @type {Button | undefined}
+   */
   let buttonComponent;
 </script>
-
-{#if name && value && selected}
-  <input type="hidden" {name} {value} />
-{/if}
 
 <span
   class="sui radio {className}"
   role="none"
+  {hidden}
   {...$$restProps}
   on:click={(event) => {
     if (!(/** @type {HTMLElement} */ (event.target).matches('button'))) {
@@ -54,17 +69,19 @@
 >
   <Button
     {id}
+    role="radio"
+    {hidden}
     {disabled}
     {name}
     {value}
-    role="radio"
-    aria-checked={selected}
+    aria-checked={checked}
     aria-labelledby="{id}-label"
     bind:this={buttonComponent}
     on:click={(event) => {
       event.preventDefault();
-      selected = true;
+      checked = true;
     }}
+    on:select
   >
     <Icon slot="start-icon" name="circle" />
   </Button>

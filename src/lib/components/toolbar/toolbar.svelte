@@ -6,16 +6,24 @@
 -->
 <script>
   /**
-   * CSS class name on the button.
+   * The `class` attribute on the wrapper element.
    * @type {string}
    */
   let className = '';
-
   export { className as class };
-
   /**
-   * Define the `aria-orientation` property on the toolbar element.
-   * @type {('horizontal'|'vertical')}
+   * Whether to hide the widget. An alias of the `aria-hidden` attribute.
+   * @type {boolean | undefined}
+   */
+  export let hidden = undefined;
+  /**
+   * Whether to disable the widget. An alias of the `aria-disabled` attribute.
+   * @type {boolean}
+   */
+  export let disabled = false;
+  /**
+   * Orientation of the widget. An alias of the `aria-orientation` attribute.
+   * @type {'horizontal' | 'vertical'}
    */
   export let orientation = 'horizontal';
 </script>
@@ -23,10 +31,15 @@
 <div
   class="sui toolbar {orientation} {className}"
   role="toolbar"
+  {hidden}
+  aria-hidden={hidden}
+  aria-disabled={disabled}
   aria-orientation={orientation}
   {...$$restProps}
 >
-  <slot />
+  <div class="inner" inert={disabled}>
+    <slot />
+  </div>
 </div>
 
 <style lang="scss">
@@ -80,5 +93,9 @@
         opacity: 0.8;
       }
     }
+  }
+
+  .inner {
+    display: contents;
   }
 </style>

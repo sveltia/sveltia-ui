@@ -77,3 +77,5 @@ export { default as TextInput } from './components/text-field/text-input.svelte'
 export { default as Toolbar } from './components/toolbar/toolbar.svelte';
 export { default as AppShell } from './components/util/app-shell.svelte';
 export { default as Group } from './components/util/group.svelte';
+
+export * from './components/util/util';

@@ -10,18 +10,18 @@
   import { activatePopup } from './popup';
   import { sleep } from './util';
 
-  /** @type {HTMLElement?} */
+  /** @type {HTMLElement | undefined} */
   export let anchor = undefined;
 
   /**
    * Reference to the popup element.
-   * @type {HTMLDialogElement?}
+   * @type {HTMLDialogElement | undefined}
    */
   export let dialog = undefined;
 
   /**
    * Reference to the content element.
-   * @type {HTMLElement?}
+   * @type {HTMLElement | undefined}
    */
   export let content = undefined;
 
@@ -119,7 +119,7 @@
   });
 </script>
 
-<dialog class="sui popup" bind:this={dialog} class:open={showDialog} {...$$restProps}>
+<dialog class="sui popup" role="none" bind:this={dialog} class:open={showDialog} {...$$restProps}>
   <div
     bind:this={content}
     class="content {contentType}"

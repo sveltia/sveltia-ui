@@ -48,12 +48,12 @@ export const matchShortcuts = (event, shortcuts) => {
 /**
  * Activate keyboard shortcuts.
  * @param {(HTMLInputElement | HTMLButtonElement)} element Element.
- * @param {string} shortcuts Keyboard shortcuts like `A` or `Accel+S` to focus and click the text
+ * @param {string} [shortcuts] Keyboard shortcuts like `A` or `Accel+S` to focus and click the text
  * field or button. Multiple shortcuts can be defined space-separated. The `Accel` modifier will be
  * replaced with `Ctrl` on Windows/Linux and `Command` on macOS.
  * @returns {import('svelte/action').ActionReturn} Actions.
  */
-export const activateKeyShortcuts = (element, shortcuts) => {
+export const activateKeyShortcuts = (element, shortcuts = '') => {
   let platformKeyShortcuts;
 
   /**

@@ -114,7 +114,9 @@ class Group {
 
   /** @type {HTMLElement[]} */
   get activeMembers() {
-    return this.allMembers.filter((element) => !element.matches('[aria-disabled="true"]'));
+    return this.allMembers.filter(
+      (element) => !element.matches('[aria-disabled="true"], [aria-hidden="true"]'),
+    );
   }
 
   /**
@@ -253,7 +255,7 @@ class Group {
         newTarget = allMembers[index + 1];
       }
 
-      if (newTarget?.getAttribute('aria-disabled') === 'true') {
+      if (newTarget?.matches('[aria-disabled="true"], [aria-hidden="true"]')) {
         newTarget = undefined;
       }
     } else {

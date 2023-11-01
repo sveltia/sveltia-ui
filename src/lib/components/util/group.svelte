@@ -5,21 +5,38 @@
 -->
 <script>
   /**
-   * CSS class name on the button.
+   * The `class` attribute on the wrapper element.
    * @type {string}
    */
   let className = '';
-
   export { className as class };
-
-  export let ariaLabel = '';
+  /**
+   * Whether to hide the widget. An alias of the `aria-hidden` attribute.
+   * @type {boolean | undefined}
+   */
+  export let hidden = undefined;
+  /**
+   * Whether to disable the widget. An alias of the `aria-disabled` attribute.
+   * @type {boolean}
+   */
+  export let disabled = false;
 </script>
 
 <div
   class="sui group {className}"
   role="group"
-  aria-label={ariaLabel || undefined}
+  {hidden}
+  aria-hidden={hidden}
+  aria-disabled={disabled}
   {...$$restProps}
 >
-  <slot />
+  <div class="inner" inert={disabled}>
+    <slot />
+  </div>
 </div>
+
+<style lang="scss">
+  .inner {
+    display: contents;
+  }
+</style>

@@ -16,33 +16,51 @@
   import { getRandomId } from '../util/util';
 
   /**
-   * CSS class name on the button.
+   * The `class` attribute on the wrapper element.
    * @type {string}
    */
   let className = '';
-
   export { className as class };
-
   /**
-   * Where to show the dropdown menu.
-   * @type {PopupPosition}
+   * Whether to hide the widget. An alias of the `aria-hidden` attribute.
+   * @type {boolean | undefined}
    */
-  export let position = 'bottom-left';
-
+  export let hidden = undefined;
   /**
-   * Whether the textbox is editable.
+   * Whether to disable the widget. An alias of the `aria-disabled` attribute.
+   * @type {boolean}
    */
-  export let readOnly = false;
-
   export let disabled = false;
-
+  /**
+   * Whether to disable the widget. An alias of the `aria-readonly` attribute.
+   * @type {boolean}
+   */
+  export let readonly = false;
+  /**
+   * Whether to disable the widget. An alias of the `aria-required` attribute.
+   * @type {boolean}
+   */
+  export let required = false;
+  /**
+   * Whether to disable the widget. An alias of the `aria-invalid` attribute.
+   * @type {boolean}
+   */
+  export let invalid = false;
+  /**
+   * Text label displayed on the readonly item.
+   * @type {string}
+   */
   export let label = '';
-
   /**
    * Selected option’s value.
    * @type {(string | number | undefined)}
    */
   export let value = undefined;
+  /**
+   * Where to show the dropdown menu.
+   * @type {PopupPosition}
+   */
+  export let position = 'bottom-left';
 
   const dispatch = createEventDispatcher();
   const id = getRandomId('combobox');
@@ -54,16 +72,18 @@
   let isPopupOpen = writable(false);
 </script>
 
-<div class="sui combobox {className}" {...$$restProps}>
-  {#if readOnly}
+<div class="sui combobox {className}" {hidden} {...$$restProps}>
+  {#if readonly}
     <div
-      class:selected={value !== undefined}
-      role="combobox"
       {id}
+      class:selected={value !== undefined}
       tabindex={disabled ? -1 : 0}
+      role="combobox"
       aria-controls="{id}-popup"
       aria-expanded={$isPopupOpen}
-      aria-disabled={disabled ? true : undefined}
+      aria-hidden={hidden}
+      aria-disabled={disabled}
+      aria-readonly="true"
       aria-haspopup="listbox"
       aria-activedescendant="selected-option"
       {...$$restProps}
@@ -78,10 +98,13 @@
       role="combobox"
       {id}
       {value}
+      {hidden}
       {disabled}
+      {readonly}
+      {required}
+      {invalid}
       aria-controls="{id}-popup"
       aria-expanded={$isPopupOpen}
-      aria-disabled={disabled ? true : undefined}
       aria-haspopup="listbox"
       aria-activedescendant="selected-option"
       {...$$restProps}
@@ -89,12 +112,12 @@
     />
   {/if}
   <Button
+    class="ghost iconic"
+    {hidden}
     {disabled}
-    tabindex={readOnly || disabled ? -1 : 0}
+    tabindex={readonly || disabled ? -1 : 0}
     aria-controls="{id}-popup"
     aria-expanded={$isPopupOpen}
-    aria-disabled={disabled ? true : undefined}
-    class="ghost iconic"
     on:click={(event) => {
       event.stopPropagation();
 

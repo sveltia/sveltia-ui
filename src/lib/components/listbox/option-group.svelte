@@ -10,13 +10,21 @@
   import { getRandomId } from '../util/util';
 
   /**
-   * CSS class name on the group.
+   * The `class` attribute on the wrapper element.
    * @type {string}
    */
   let className = '';
-
   export { className as class };
-
+  /**
+   * Whether to hide the widget. An alias of the `aria-hidden` attribute.
+   * @type {boolean | undefined}
+   */
+  export let hidden = undefined;
+  /**
+   * Whether to disable the widget. An alias of the `aria-disabled` attribute.
+   * @type {boolean}
+   */
+  export let disabled = false;
   /**
    * The group’s label to be displayed above the child `<Option>`s.
    */
@@ -29,11 +37,16 @@
   {id}
   class="sui optgroup {className}"
   role="group"
+  {hidden}
+  aria-hidden={hidden}
+  aria-disabled={disabled}
   aria-labelledby="{id}-label"
   {...$$restProps}
 >
   <div id="{id}-label" class="label" role="none">{label}</div>
-  <slot />
+  <div class="inner" inert={disabled}>
+    <slot />
+  </div>
 </div>
 
 <style lang="scss">
@@ -47,5 +60,9 @@
     margin: 8px;
     color: var(--sui-secondary-foreground-color);
     font-size: var(--sui-font-size-small);
+  }
+
+  .inner {
+    display: contents;
   }
 </style>

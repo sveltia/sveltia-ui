@@ -11,61 +11,67 @@
   import Popup from '../util/popup.svelte';
 
   /**
-   * CSS class name on the button.
+   * Reference to the `<button>` element.
+   * @type {HTMLButtonElement | undefined}
+   */
+  export let element = undefined;
+  /**
+   * The `class` attribute on the `<button>` element.
    * @type {string}
    */
   let className = '';
-
   export { className as class };
-
   /**
-   * Reference to the button element.
-   * @type {HTMLButtonElement?}
-   */
-  export let element = undefined;
-
-  /**
-   * The `type` attribute on the button element.
+   * The `type` attribute on the `<button>` element.
    * @type {('button'|'submit'|'reset')}
    */
   export let type = 'button';
-
   /**
-   * The `role` attribute on the button element.
+   * The `role` attribute on the `<button>` element.
    * @type {string}
    */
   export let role = 'button';
-
   /**
-   * The height of the button.
-   * @type {('small'|'medium'|'large')}
+   * The `name` attribute on the `<button>` element.
+   * @type {string | undefined}
    */
-  export let size = 'medium';
-
+  export let name = undefined;
   /**
-   * Whether the button is hidden.
-   * @type {boolean}
+   * The `value` attribute on the `<button>` element.
+   * @type {string | undefined}
    */
-  export let hidden = false;
-
+  export let value = undefined;
   /**
-   * Whether the button is disabled.
+   * Whether to hide the widget. An alias of the `aria-hidden` attribute.
+   * @type {boolean | undefined}
+   */
+  export let hidden = undefined;
+  /**
+   * Whether to disable the widget. An alias of the `aria-disabled` attribute.
    * @type {boolean}
    */
   export let disabled = false;
-
   /**
-   * The `aria-pressed` attribute on the button element.
-   * @type {(boolean | 'false' | 'mixed' | 'true' | undefined)}
+   * Whether to mark the widget pressed. An alias of the `aria-pressed` attribute.
+   * @type {boolean | 'mixed' | undefined}
    */
   export let pressed = undefined;
-
+  /**
+   * Keyboard shortcuts. An alias of the `aria-keyshortcuts` attribute. Accepts the special `Accel`
+   * key, which will be replaced with `Control` or `Meta` depending on the user’s operating system.
+   * @type {string | undefined}
+   */
+  export let keyShortcuts = undefined;
   /**
    * Text label displayed on the button.
    * @type {string}
    */
   export let label = '';
-
+  /**
+   * The height of the button.
+   * @type {('small'|'medium'|'large')}
+   */
+  export let size = 'medium';
   /**
    * Where to show the dropdown menu.
    * @type {PopupPosition}
@@ -73,25 +79,26 @@
   export let popupPosition = 'bottom-left';
 
   /**
-   * Keyboard shortcuts.
-   * @type {string}
+   * Reference to the `Popup` component.
+   * @type {Popup | undefined}
    */
-  export let keyShortcuts = '';
-
-  /** @type {?Popup} */
-  let popupComponent;
+  let popupComponent = undefined;
 </script>
 
 <button
-  {type}
-  {role}
-  hidden={hidden ? true : undefined}
-  disabled={disabled ? true : undefined}
   class="sui button {size} {className}"
-  aria-hidden={hidden ? true : undefined}
-  aria-disabled={disabled ? true : undefined}
+  {type}
+  {name}
+  {value}
+  {hidden}
+  {disabled}
+  {role}
+  aria-hidden={hidden}
+  aria-disabled={disabled}
   aria-pressed={pressed}
   {...$$restProps}
+  bind:this={element}
+  use:activateKeyShortcuts={keyShortcuts}
   on:mouseenter
   on:mouseleave
   on:click
@@ -102,8 +109,7 @@
   on:keydown
   on:keyup
   on:keypress
-  use:activateKeyShortcuts={keyShortcuts}
-  bind:this={element}
+  on:select
 >
   <slot name="start-icon" />
   {#if label}

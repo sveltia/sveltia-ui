@@ -4,7 +4,7 @@
  * @param {number} [length] Number of characters to be used in the ID.
  * @returns {string} Generated ID.
  */
-export const getRandomId = (prefix = '', length = 7) =>
+export const getRandomId = (prefix = 'e', length = 7) =>
   [
     prefix,
     new Array(length)

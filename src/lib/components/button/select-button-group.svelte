@@ -9,43 +9,61 @@
   import { activateGroup } from '../util/group';
 
   /**
-   * CSS class name on the button.
+   * The `class` attribute on the wrapper element.
    * @type {string}
    */
   let className = '';
-
   export { className as class };
-
-  export let value = '';
-  export let ariaLabel = '';
+  /**
+   * Whether to hide the widget.
+   * @type {boolean | undefined}
+   */
+  export let hidden = undefined;
+  /**
+   * Whether to disable the widget. An alias of the `aria-disabled` attribute.
+   * @type {boolean}
+   */
   export let disabled = false;
+  /**
+   * Whether to disable the widget. An alias of the `aria-readonly` attribute.
+   * @type {boolean}
+   */
+  export let readonly = false;
+  /**
+   * Whether to disable the widget. An alias of the `aria-required` attribute.
+   * @type {boolean}
+   */
+  export let required = false;
+  /**
+   * Whether to disable the widget. An alias of the `aria-invalid` attribute.
+   * @type {boolean}
+   */
+  export let invalid = false;
 
   const dispatch = createEventDispatcher();
-
-  /** @type {HTMLElement?} */
-  export let element = undefined;
-
-  $: {
-    dispatch('change', { value });
-  }
 </script>
 
-<!-- svelte-ignore a11y-click-events-have-key-events -->
 <div
   class="sui select-button-group {className}"
+  {hidden}
   tabindex="-1"
   role="radiogroup"
-  aria-label={ariaLabel || undefined}
-  aria-disabled={disabled ? true : undefined}
-  bind:this={element}
+  aria-hidden={hidden}
+  aria-disabled={disabled}
+  aria-readonly={readonly}
+  aria-required={required}
+  aria-invalid={invalid}
+  {...$$restProps}
+  use:activateGroup
   on:click={({ target }) => {
     if (target.matches('[role="radio"]')) {
-      value = target.value;
+      dispatch('change', { value: target.value });
     }
   }}
-  use:activateGroup
 >
-  <slot />
+  <div class="inner" inert={disabled}>
+    <slot />
+  </div>
 </div>
 
 <style lang="scss">
@@ -78,5 +96,9 @@
       color: var(--sui-highlight-foreground-color);
       background-color: var(--sui-highlight-background-color);
     }
+  }
+
+  .inner {
+    display: contents;
   }
 </style>

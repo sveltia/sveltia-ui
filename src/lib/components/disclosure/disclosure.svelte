@@ -4,47 +4,70 @@
   @see https://developer.mozilla.org/en-US/docs/Web/HTML/Element/details
   @see https://www.w3.org/WAI/ARIA/apg/patterns/disclosure/
 -->
+<svelte:options accessors={true} />
+
 <script>
   import Button from '../button/button.svelte';
   import Icon from '../icon/icon.svelte';
   import { getRandomId } from '../util/util';
 
   /**
-   * CSS class name on the button.
+   * The `class` attribute on the wrapper element.
    * @type {string}
    */
   let className = '';
-
   export { className as class };
-
-  export let label = '';
-
+  /**
+   * Whether to hide the widget. An alias of the `aria-hidden` attribute.
+   * @type {boolean | undefined}
+   */
+  export let hidden = undefined;
+  /**
+   * Whether to disable the widget. An alias of the `aria-disabled` attribute.
+   * @type {boolean}
+   */
+  export let disabled = false;
+  /**
+   * Whether to show the content. An alias of the `aria-expanded` attribute.
+   * @type {boolean}
+   */
   export let expanded = false;
+  /**
+   * Text label displayed next to the expander.
+   * @type {string}
+   */
+  export let label = '';
 
   const id = getRandomId('disclosure');
 </script>
 
 <div
-  class="sui disclosure {className}"
   {id}
+  class="sui disclosure {className}"
   role="group"
+  {hidden}
+  aria-hidden={hidden}
+  aria-disabled={disabled}
   aria-labelledby="{id}-header"
   {...$$restProps}
 >
-  <Button
-    class="header"
-    id="{id}-header"
-    aria-controls="{id}-content"
-    aria-expanded={expanded}
-    on:click={() => {
-      expanded = !expanded;
-    }}
-  >
-    <Icon name="expand_more" />
-    {label}
-  </Button>
-  <div class="content" id="{id}-content" hidden={!expanded ? true : undefined}>
-    <slot />
+  <div class="inner" inert={disabled}>
+    <Button
+      class="header"
+      id="{id}-header"
+      {disabled}
+      aria-controls="{id}-content"
+      aria-expanded={expanded}
+      on:click={() => {
+        expanded = !expanded;
+      }}
+    >
+      <Icon name="expand_more" />
+      {label}
+    </Button>
+    <div class="content" id="{id}-content" hidden={!expanded}>
+      <slot />
+    </div>
   </div>
 </div>
 
@@ -63,6 +86,10 @@
     :global(button[aria-expanded='false'] .icon) {
       transform: rotate(-90deg);
     }
+  }
+
+  .inner {
+    display: contents;
   }
 
   .content {

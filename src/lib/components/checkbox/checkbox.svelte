@@ -12,46 +12,75 @@
   import { getRandomId } from '../util/util';
 
   /**
-   * CSS class name on the button.
+   * The `class` attribute on the wrapper element.
    * @type {string}
    */
   let className = '';
-
   export { className as class };
-
-  /** @type {string} */
-  export let name = '';
-
-  /** @type {string?} */
-  export let label = undefined;
-
-  /** @type {string?} */
+  /**
+   * The `name` attribute on the `<button>` element.
+   * @type {string | undefined}
+   */
+  export let name = undefined;
+  /**
+   * The `value` attribute on the `<button>` element.
+   * @type {string | undefined}
+   */
   export let value = undefined;
-
-  /** @type {(boolean | string | undefined)} */
-  export let checked = false;
-
-  /** @type {boolean} */
-  export let indeterminate = false;
-
-  /** @type {boolean} */
+  /**
+   * Whether to hide the widget. An alias of the `aria-hidden` attribute.
+   * @type {boolean | undefined}
+   */
+  export let hidden = undefined;
+  /**
+   * Whether to disable the widget. An alias of the `aria-disabled` attribute.
+   * @type {boolean}
+   */
   export let disabled = false;
+  /**
+   * Whether to disable the widget. An alias of the `aria-readonly` attribute.
+   * @type {boolean}
+   */
+  export let readonly = false;
+  /**
+   * Whether to disable the widget. An alias of the `aria-required` attribute.
+   * @type {boolean}
+   */
+  export let required = false;
+  /**
+   * Whether to disable the widget. An alias of the `aria-invalid` attribute.
+   * @type {boolean}
+   */
+  export let invalid = false;
+  /**
+   * Whether to check the widget. An alias of the `aria-checked` attribute.
+   * @type {boolean | 'mixed'}
+   */
+  export let checked = false;
+  /**
+   * Text label displayed next to the checkbox.
+   * @type {string | undefined}
+   */
+  export let label = undefined;
 
   const dispatch = createEventDispatcher();
   const id = getRandomId('checkbox');
-  /** @type {Button} */
-  let buttonComponent;
+
+  /**
+   * Reference to the `Button` component.
+   * @type {Button | undefined}
+   */
+  let buttonComponent = undefined;
+
+  $: indeterminate = checked === 'mixed';
 </script>
 
-{#if name && value && checked && !indeterminate}
-  <input type="hidden" {name} {value} />
-{/if}
-
-<span
+<div
   class="sui checkbox {className}"
   class:checked
   class:indeterminate
   class:disabled
+  {hidden}
   role="none"
   {...$$restProps}
   on:click|preventDefault|stopPropagation={(event) => {
@@ -60,35 +89,39 @@
     }
   }}
 >
-  <Button
-    {id}
-    {disabled}
-    {name}
-    {value}
-    role="checkbox"
-    aria-checked={indeterminate ? 'mixed' : checked}
-    aria-labelledby="{id}-label"
-    bind:this={buttonComponent}
-    on:click={(event) => {
-      event.preventDefault();
-      event.stopPropagation();
-      checked = indeterminate ? true : !checked;
-      indeterminate = false;
-      dispatch('change', { checked });
-    }}
-  >
-    <Icon slot="start-icon" name={indeterminate ? 'remove' : 'check'} />
-  </Button>
-  {#if $$slots.default || label}
-    <label id="{id}-label">
-      {#if $$slots.default}
-        <slot />
-      {:else}
-        {label}
-      {/if}
-    </label>
-  {/if}
-</span>
+  <div class="inner" inert={disabled}>
+    <Button
+      {id}
+      {name}
+      {value}
+      role="checkbox"
+      {hidden}
+      {disabled}
+      {readonly}
+      {required}
+      {invalid}
+      aria-checked={checked}
+      aria-labelledby="{id}-label"
+      bind:this={buttonComponent}
+      on:click={(event) => {
+        event.stopPropagation();
+        checked = indeterminate ? true : !checked;
+        dispatch('change', { checked });
+      }}
+    >
+      <Icon slot="start-icon" name={indeterminate ? 'remove' : 'check'} />
+    </Button>
+    {#if $$slots.default || label}
+      <label id="{id}-label">
+        {#if $$slots.default}
+          <slot />
+        {:else}
+          {label}
+        {/if}
+      </label>
+    {/if}
+  </div>
+</div>
 
 <style lang="scss">
   .checkbox {
@@ -135,10 +168,6 @@
       background-color: var(--sui-primary-accent-color-lighter);
     }
 
-    :global(button[aria-checked='mixed']) {
-      color: var(--sui-checkbox-border-color);
-    }
-
     :global(button[aria-checked='false']) {
       color: transparent;
     }
@@ -146,5 +175,9 @@
     label {
       cursor: inherit;
     }
+  }
+
+  .inner {
+    display: contents;
   }
 </style>

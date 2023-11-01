@@ -6,15 +6,27 @@
 -->
 <script>
   /**
-   * CSS class name on the button.
+   * The `class` attribute on the wrapper element.
    * @type {string}
    */
   let className = '';
-
   export { className as class };
+  /**
+   * Whether to select the widget. An alias of the `aria-selected` attribute.
+   * @type {boolean}
+   */
+  export let selected = false;
 </script>
 
-<div role="row" tabindex="0" class="sui table-row {className}" {...$$restProps} on:click>
+<div
+  class="sui table-row {className}"
+  role="row"
+  tabindex="0"
+  aria-selected={selected}
+  {...$$restProps}
+  on:click
+  on:select
+>
   <slot />
 </div>
 

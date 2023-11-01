@@ -11,24 +11,64 @@
   import TextInput from './text-input.svelte';
 
   /**
-   * CSS class name on the button.
+   * The `class` attribute on the wrapper element.
    * @type {string}
    */
   let className = '';
-
   export { className as class };
-
-  /** @type {string?} */
-  export let value = undefined;
-
+  /**
+   * Whether to hide the widget. An alias of the `aria-hidden` attribute.
+   * @type {boolean | undefined}
+   */
+  export let hidden = undefined;
+  /**
+   * Whether to disable the widget. An alias of the `aria-disabled` attribute.
+   * @type {boolean}
+   */
   export let disabled = false;
+  /**
+   * Whether to disable the widget. An alias of `aria-readonly` attribute.
+   * @type {boolean}
+   */
+  export let readonly = false;
+  /**
+   * Whether to disable the widget. An alias of the `aria-required` attribute.
+   * @type {boolean}
+   */
+  export let required = false;
+  /**
+   * Whether to disable the widget. An alias of the `aria-invalid` attribute.
+   * @type {boolean}
+   */
+  export let invalid = false;
+  /**
+   * Input value.
+   * @type {string | undefined}
+   */
+  export let value = undefined;
+  /**
+   * Minimum allowed value.
+   * @type {number | undefined}
+   */
   export let min = undefined;
+  /**
+   * Maximum allowed value.
+   * @type {number | undefined}
+   */
   export let max = undefined;
+  /**
+   * Value to be added or removed when using the up/down arrow key or button.
+   */
   export let step = 1;
 
   $: maximumFractionDigits = String(step).split('.')[1]?.length || 0;
   $: isMin = typeof min === 'number' && Number(value || 0) <= min;
   $: isMax = typeof max === 'number' && Number(value || 0) >= max;
+
+  $: invalid =
+    (value !== undefined && Number.isNaN(Number(value))) ||
+    (typeof min === 'number' && Number(value || 0) < min) ||
+    (typeof max === 'number' && Number(value || 0) > max);
 
   let component;
 
@@ -55,14 +95,19 @@
   };
 </script>
 
-<div class="sui number-input {className}">
+<div class="sui number-input {className}" {hidden}>
   <TextInput
     bind:this={component}
     bind:value
-    {disabled}
     role="spinbutton"
+    {hidden}
+    {disabled}
+    {readonly}
+    {required}
+    {invalid}
     aria-valuenow={Number(value || 0)}
-    aria-invalid={value !== undefined && Number.isNaN(Number(value))}
+    aria-valuemin={min}
+    aria-valuemax={max}
     {...$$restProps}
     on:keydown={(event) => {
       const { key, ctrlKey, metaKey, altKey, shiftKey } = event;

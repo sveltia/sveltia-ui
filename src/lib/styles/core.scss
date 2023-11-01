@@ -93,3 +93,13 @@ dialog {
     background: transparent;
   }
 }
+
+[disabled],
+[inert],
+[inert] * {
+  cursor: default;
+  pointer-events: none;
+  -webkit-user-select: none;
+  user-select: none;
+  filter: grayscale(1) opacity(0.4);
+}

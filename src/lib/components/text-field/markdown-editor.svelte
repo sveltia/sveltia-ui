@@ -10,10 +10,36 @@
   import Toolbar from '../toolbar/toolbar.svelte';
   import TextArea from './text-area.svelte';
 
-  /** @type {string?} */
-  export let value = undefined;
-
+  /**
+   * Whether to hide the widget. An alias of the `aria-hidden` attribute.
+   * @type {boolean | undefined}
+   */
+  export let hidden = undefined;
+  /**
+   * Whether to disable the widget. An alias of the `aria-disabled` attribute.
+   * @type {boolean}
+   */
   export let disabled = false;
+  /**
+   * Whether to disable the widget. An alias of `aria-readonly` attribute.
+   * @type {boolean}
+   */
+  export let readonly = false;
+  /**
+   * Whether to disable the widget. An alias of the `aria-required` attribute.
+   * @type {boolean}
+   */
+  export let required = false;
+  /**
+   * Whether to disable the widget. An alias of the `aria-invalid` attribute.
+   * @type {boolean}
+   */
+  export let invalid = false;
+  /**
+   * Input value.
+   * @type {string | undefined}
+   */
+  export let value = undefined;
 
   const defaultButtons = [
     { name: 'bold', label: $_('_sui.markdown_editor.bold'), icon: 'format_bold' },
@@ -46,23 +72,25 @@
   ];
 </script>
 
-<div>
-  <Toolbar aria-label={$_('_sui.markdown_editor.markdown_editor')}>
-    {#each defaultButtons as { label, icon, separator }}
-      {#if separator}
-        <Divider />
-      {:else}
-        <Button {disabled}>
-          <Icon slot="start-icon" name={icon} {label} />
-        </Button>
-      {/if}
-    {/each}
-  </Toolbar>
-  <TextArea autoResize={true} {disabled} bind:value />
+<div class="wrapper" {hidden} {...$$restProps}>
+  <div class="inner" inert={disabled}>
+    <Toolbar aria-label={$_('_sui.markdown_editor.markdown_editor')}>
+      {#each defaultButtons as { label, icon, separator }}
+        {#if separator}
+          <Divider />
+        {:else}
+          <Button {disabled}>
+            <Icon slot="start-icon" name={icon} {label} />
+          </Button>
+        {/if}
+      {/each}
+    </Toolbar>
+    <TextArea autoResize={true} bind:value {hidden} {disabled} {readonly} {required} {invalid} />
+  </div>
 </div>
 
 <style lang="scss">
-  div {
+  .wrapper {
     display: contents;
 
     :global([role='toolbar']) {
@@ -84,5 +112,9 @@
         }
       }
     }
+  }
+
+  .inner {
+    display: contents;
   }
 </style>

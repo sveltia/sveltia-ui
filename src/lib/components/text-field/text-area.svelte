@@ -5,41 +5,74 @@
   @see https://w3c.github.io/aria/#textbox
   @see https://css-tricks.com/the-cleanest-trick-for-autogrowing-textareas/
 -->
-<svelte:options accessors={true} />
-
 <script>
   /**
-   * CSS class name on the button.
+   * The `class` attribute on the wrapper element.
    * @type {string}
    */
   let className = '';
-
   export { className as class };
-
-  /** @type {HTMLTextAreaElement?} */
-  export let element = undefined;
-
-  export let name = '';
-
-  /** @type {string?} */
+  /**
+   * Whether to hide the widget. An alias of the `aria-hidden` attribute.
+   * @type {boolean | undefined}
+   */
+  export let hidden = undefined;
+  /**
+   * Whether to disable the widget. An alias of the `aria-disabled` attribute.
+   * @type {boolean}
+   */
+  export let disabled = false;
+  /**
+   * Whether to disable the widget. An alias of `aria-readonly` attribute.
+   * @type {boolean}
+   */
+  export let readonly = false;
+  /**
+   * Whether to disable the widget. An alias of the `aria-required` attribute.
+   * @type {boolean}
+   */
+  export let required = false;
+  /**
+   * Whether to disable the widget. An alias of the `aria-invalid` attribute.
+   * @type {boolean}
+   */
+  export let invalid = false;
+  /**
+   * The `name` attribute on the `<textarea>` element.
+   * @type {string | undefined}
+   */
+  export let name = undefined;
+  /**
+   * Input value.
+   * @type {string | undefined}
+   */
   export let value = undefined;
-
+  /**
+   * Whether to automatically resize the `<textarea>` based on the content.
+   * @type {boolean}
+   */
   export let autoResize = false;
 </script>
 
-<div class="sui text-area {className}">
+<div class="sui text-area {className}" {hidden}>
   <textarea
-    name={name || undefined}
+    {name}
+    bind:value
+    {disabled}
+    {readonly}
+    aria-hidden={hidden}
+    aria-disabled={disabled}
+    aria-readonly={readonly}
+    aria-required={required}
+    aria-invalid={invalid}
     {...$$restProps}
     class:auto-resize={autoResize}
-    bind:this={element}
-    bind:value
     on:click
     on:input
     on:keypress
   />
   {#if autoResize}
-    <div class="clone" aria-hidden="true">{value}</div>
+    <div class="clone" aria-hidden="true">{value ?? ''}</div>
   {/if}
 </div>
 
