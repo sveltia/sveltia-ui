@@ -74,7 +74,7 @@
     aria-selected={selected}
     {label}
     {value}
-    hidden={hidden || undefined}
+    {hidden}
     {disabled}
     data-type={typeof value}
     {...$$restProps}
