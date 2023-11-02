@@ -170,6 +170,10 @@ class Group {
       if (controls) {
         document.getElementById(controls)?.setAttribute('aria-hidden', String(!isTarget));
       }
+
+      if (isTarget) {
+        element.scrollIntoView({ block: 'center', inline: 'center', behavior: 'smooth' });
+      }
     });
 
     this.parent.dispatchEvent(
