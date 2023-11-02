@@ -131,6 +131,7 @@
   bind:this={dialog}
   class="sui dialog {className} {size}"
   class:open={showDialog}
+  aria-label={title}
   {...$$restProps}
   on:click={({ target }) => {
     if (closeOnBackdropClick && /** @type {HTMLElement?} */ (target)?.matches('dialog')) {

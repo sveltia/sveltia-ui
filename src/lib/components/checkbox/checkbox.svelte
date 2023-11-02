@@ -72,6 +72,7 @@
    */
   let buttonComponent = undefined;
 
+  $: ariaLabel = $$restProps['aria-label'];
   $: indeterminate = checked === 'mixed';
 </script>
 
@@ -101,7 +102,8 @@
       {required}
       {invalid}
       aria-checked={checked}
-      aria-labelledby="{id}-label"
+      aria-label={ariaLabel || undefined}
+      aria-labelledby={ariaLabel ? undefined : '{id}-label'}
       bind:this={buttonComponent}
       on:click={(event) => {
         event.stopPropagation();
