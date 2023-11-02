@@ -54,14 +54,12 @@
    * @type {Button | undefined}
    */
   let buttonComponent;
-
-  // Work around a Svelte issue with assigning boolean attributes
-  $: $$restProps.hidden = hidden ? 'hidden' : undefined;
 </script>
 
 <span
   class="sui radio {className}"
   role="none"
+  hidden={hidden || undefined}
   {...$$restProps}
   on:click={(event) => {
     if (!(/** @type {HTMLElement} */ (event.target).matches('button'))) {

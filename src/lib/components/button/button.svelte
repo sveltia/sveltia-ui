@@ -83,10 +83,6 @@
    * @type {Popup | undefined}
    */
   let popupComponent = undefined;
-
-  // Work around a Svelte issue with assigning boolean attributes
-  $: $$restProps.hidden = hidden ? 'hidden' : undefined;
-  $: $$restProps.disabled = disabled ? 'disabled' : undefined;
 </script>
 
 <button
@@ -94,6 +90,8 @@
   {type}
   {name}
   {value}
+  hidden={hidden || undefined}
+  disabled={disabled || undefined}
   {role}
   aria-hidden={hidden}
   aria-disabled={disabled}

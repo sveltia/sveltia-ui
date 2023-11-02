@@ -39,15 +39,13 @@
   export let label = '';
 
   const id = getRandomId('disclosure');
-
-  // Work around a Svelte issue with assigning boolean attributes
-  $: $$restProps.hidden = hidden ? 'hidden' : undefined;
 </script>
 
 <div
   {id}
   class="sui disclosure {className}"
   role="group"
+  hidden={hidden || undefined}
   aria-hidden={hidden}
   aria-disabled={disabled}
   aria-labelledby="{id}-header"

@@ -64,15 +64,9 @@
   export const focus = () => {
     input?.focus();
   };
-
-  /** @type {{ [key: string]: any }} */
-  const wrapperProps = {};
-
-  // Work around a Svelte issue with assigning boolean attributes
-  $: wrapperProps.hidden = hidden ? 'hidden' : undefined;
 </script>
 
-<div class="sui search-bar {className}" role="search" {...wrapperProps}>
+<div class="sui search-bar {className}" role="search" hidden={hidden || undefined}>
   <Icon name="search" />
   <TextInput
     bind:value

@@ -237,9 +237,6 @@
     void values;
     onValueChange();
   }
-
-  // Work around a Svelte issue with assigning boolean attributes
-  $: $$restProps.hidden = hidden ? 'hidden' : undefined;
 </script>
 
 <svelte:body
@@ -253,6 +250,7 @@
 <div
   class="sui slider {className}"
   role="none"
+  hidden={hidden || undefined}
   {...$$restProps}
   on:click|preventDefault|stopPropagation
 >

@@ -26,14 +26,12 @@
    * @type {'horizontal' | 'vertical'}
    */
   export let orientation = 'horizontal';
-
-  // Work around a Svelte issue with assigning boolean attributes
-  $: $$restProps.hidden = hidden ? 'hidden' : undefined;
 </script>
 
 <div
   class="sui toolbar {orientation} {className}"
   role="toolbar"
+  hidden={hidden || undefined}
   aria-hidden={hidden}
   aria-disabled={disabled}
   aria-orientation={orientation}

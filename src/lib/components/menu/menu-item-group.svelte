@@ -27,14 +27,12 @@
   export let title = '';
 
   const id = getRandomId('group');
-
-  // Work around a Svelte issue with assigning boolean attributes
-  $: $$restProps.hidden = hidden ? 'hidden' : undefined;
 </script>
 
 <div
   {id}
   class="sui menu-item-group {className}"
+  hidden={hidden || undefined}
   role="group"
   aria-hidden={hidden}
   aria-disabled={disabled}

@@ -64,15 +64,9 @@
       buttonComponent.element.removeEventListener('unselect', listener);
     };
   });
-
-  /** @type {{ [key: string]: any }} */
-  const wrapperProps = {};
-
-  // Work around a Svelte issue with assigning boolean attributes
-  $: wrapperProps.hidden = hidden ? 'hidden' : undefined;
 </script>
 
-<div class="sui option {className}" {...wrapperProps}>
+<div class="sui option {className}" hidden={hidden || undefined}>
   <Button
     bind:this={buttonComponent}
     tabindex="-1"
@@ -80,7 +74,7 @@
     aria-selected={selected}
     {label}
     {value}
-    {hidden}
+    hidden={hidden || undefined}
     {disabled}
     data-type={typeof value}
     {...$$restProps}

@@ -23,14 +23,12 @@
    * @type {boolean}
    */
   export let disabled = false;
-
-  // Work around a Svelte issue with assigning boolean attributes
-  $: $$restProps.hidden = hidden ? 'hidden' : undefined;
 </script>
 
 <div
   class="sui menu {className}"
   role="menu"
+  hidden={hidden || undefined}
   aria-hidden={hidden}
   aria-disabled={disabled}
   {...$$restProps}

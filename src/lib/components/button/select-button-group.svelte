@@ -38,13 +38,11 @@
    * @type {boolean}
    */
   export let invalid = false;
-
-  // Work around a Svelte issue with assigning boolean attributes
-  $: $$restProps.hidden = hidden ? 'hidden' : undefined;
 </script>
 
 <div
   class="sui select-button-group {className}"
+  hidden={hidden || undefined}
   tabindex="-1"
   role="radiogroup"
   aria-hidden={hidden}

@@ -33,14 +33,12 @@
    * @type {string | undefined}
    */
   export let name = undefined;
-
-  // Work around a Svelte issue with assigning boolean attributes
-  $: $$restProps.hidden = hidden ? 'hidden' : undefined;
 </script>
 
 <div
   class="sui tab-list {className}"
   role="tablist"
+  hidden={hidden || undefined}
   aria-hidden={hidden}
   aria-disabled={disabled}
   aria-orientation={orientation}

@@ -74,9 +74,6 @@
 
   $: ariaLabel = $$restProps['aria-label'];
   $: indeterminate = checked === 'mixed';
-
-  // Work around a Svelte issue with assigning boolean attributes
-  $: $$restProps.hidden = hidden ? 'hidden' : undefined;
 </script>
 
 <div
@@ -84,6 +81,7 @@
   class:checked
   class:indeterminate
   class:disabled
+  hidden={hidden || undefined}
   role="none"
   {...$$restProps}
   on:click|preventDefault|stopPropagation={(event) => {

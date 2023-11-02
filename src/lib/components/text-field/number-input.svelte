@@ -93,15 +93,9 @@
 
     value = Number(Number(value || 0) + step).toFixed(maximumFractionDigits);
   };
-
-  /** @type {{ [key: string]: any }} */
-  const wrapperProps = {};
-
-  // Work around a Svelte issue with assigning boolean attributes
-  $: wrapperProps.hidden = hidden ? 'hidden' : undefined;
 </script>
 
-<div class="sui number-input {className}" {...wrapperProps}>
+<div class="sui number-input {className}" hidden={hidden || undefined}>
   <TextInput
     bind:this={component}
     bind:value

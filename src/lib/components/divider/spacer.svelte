@@ -19,12 +19,15 @@
    * @type {boolean}
    */
   export let flex = false;
-
-  // Work around a Svelte issue with assigning boolean attributes
-  $: $$restProps.hidden = hidden ? 'hidden' : undefined;
 </script>
 
-<div class="sui spacer {className}" class:flex aria-hidden={hidden} {...$$restProps} />
+<div
+  class="sui spacer {className}"
+  class:flex
+  hidden={hidden || undefined}
+  aria-hidden={hidden}
+  {...$$restProps}
+/>
 
 <style lang="scss">
   .spacer {

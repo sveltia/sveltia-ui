@@ -70,12 +70,9 @@
       icon: 'format_list_numbered',
     },
   ];
-
-  // Work around a Svelte issue with assigning boolean attributes
-  $: $$restProps.hidden = hidden ? 'hidden' : undefined;
 </script>
 
-<div class="wrapper" {...$$restProps}>
+<div class="wrapper" hidden={hidden || undefined} {...$$restProps}>
   <div class="inner" inert={disabled}>
     <Toolbar aria-label={$_('_sui.markdown_editor.markdown_editor')}>
       {#each defaultButtons as { label, icon, separator }}

@@ -50,15 +50,9 @@
   let isPopupOpen = writable(false);
 
   $: hasChildren = role === 'menuitem' && $$slots.default;
-
-  /** @type {{ [key: string]: any }} */
-  const wrapperProps = {};
-
-  // Work around a Svelte issue with assigning boolean attributes
-  $: wrapperProps.hidden = hidden ? 'hidden' : undefined;
 </script>
 
-<div class="sui menuitem {className}" {...wrapperProps}>
+<div class="sui menuitem {className}" hidden={hidden || undefined}>
   <Button
     {role}
     {hidden}
