@@ -281,6 +281,11 @@
       "svelte": "./package/components/text-field/text-input.svelte",
       "default": "./package/components/text-field/text-input.svelte"
     },
+    "./components/toast/toast.svelte": {
+      "types": "./package/components/toast/toast.svelte.d.ts",
+      "svelte": "./package/components/toast/toast.svelte",
+      "default": "./package/components/toast/toast.svelte"
+    },
     "./components/toolbar/toolbar.svelte": {
       "types": "./package/components/toolbar/toolbar.svelte.d.ts",
       "svelte": "./package/components/toolbar/toolbar.svelte",
@@ -482,6 +487,9 @@
       ],
       "components/text-field/text-input.svelte": [
         "./package/components/text-field/text-input.svelte.d.ts"
+      ],
+      "components/toast/toast.svelte": [
+        "./package/components/toast/toast.svelte.d.ts"
       ],
       "components/toolbar/toolbar.svelte": [
         "./package/components/toolbar/toolbar.svelte.d.ts"

@@ -74,6 +74,7 @@ export { default as PasswordInput } from './components/text-field/password-input
 export { default as SearchBar } from './components/text-field/search-bar.svelte';
 export { default as TextArea } from './components/text-field/text-area.svelte';
 export { default as TextInput } from './components/text-field/text-input.svelte';
+export { default as Toast } from './components/toast/toast.svelte';
 export { default as Toolbar } from './components/toolbar/toolbar.svelte';
 export { default as AppShell } from './components/util/app-shell.svelte';
 export { default as Group } from './components/util/group.svelte';

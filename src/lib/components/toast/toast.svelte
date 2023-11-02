@@ -1,0 +1,119 @@
+<!--
+  @component
+  Toast notification. Use the Popover API if possible to acquire a non-modal top layer.
+  @see https://w3c.github.io/aria/#alert
+  @see https://developer.chrome.com/blog/introducing-popover-api/
+-->
+<script>
+  import { onMount } from 'svelte';
+  import Alert from '../alert/alert.svelte';
+
+  /**
+   * @type {boolean}
+   */
+  export let show = false;
+  /**
+   * @type {number}
+   */
+  export let duration = 5000;
+  /**
+   * Alert type.
+   * @type {'error' | 'warning' | 'info' | 'success'}
+   */
+  export let type = 'info';
+
+  /**
+   * @type {HTMLElement}
+   */
+  let popoverBase;
+  /**
+   * @type {HTMLElement}
+   */
+  let popover;
+  /**
+   * @type {HTMLElement}
+   */
+  let toast;
+
+  onMount(() => {
+    popover = document.querySelector('.sui.toast-base.enabled');
+
+    if (popover) {
+      popoverBase.remove();
+    } else {
+      popover = popoverBase;
+      popover.classList.add('enabled');
+      document.body.appendChild(popover);
+
+      // Move the element to top layer
+      if (popover.showPopover) {
+        popover.popover = 'manual';
+        popover.showPopover();
+      }
+    }
+
+    return () => {
+      toast?.remove();
+    };
+  });
+
+  $: {
+    if (popover && toast) {
+      popover.appendChild(toast);
+    }
+  }
+
+  $: {
+    if (show) {
+      window.setTimeout(() => {
+        show = false;
+      }, duration);
+    }
+  }
+</script>
+
+<div class="sui toast-base" bind:this={popoverBase} />
+
+<div class="sui toast" hidden={!show || undefined} bind:this={toast}>
+  <Alert {type}>
+    {#if show}
+      <slot />
+    {/if}
+  </Alert>
+</div>
+
+<style>
+  .toast-base {
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: flex-end;
+    gap: 8px;
+    margin: 0;
+    border: 0;
+    padding: 16px;
+    width: 100vw;
+    height: 100vh;
+    background-color: transparent;
+    pointer-events: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  .toast {
+    position: absolute;
+    inset: auto 16px 16px auto;
+    box-shadow: 0 8px 16px var(--sui-popup-shadow-color);
+    opacity: 1;
+    transition-duration: 250ms;
+    will-change: opacity;
+
+    &[hidden] {
+      display: block;
+      opacity: 0;
+    }
+  }
+</style>
