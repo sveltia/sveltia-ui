@@ -88,17 +88,29 @@ class Group {
       element.setAttribute(this.childSelectedAttr, String(isSelected));
       controls?.setAttribute('aria-labelledby', element.id);
       controls?.setAttribute('aria-hidden', String(!isSelected));
-    });
 
-    parent.addEventListener('click', (event) => {
-      if (/** @type {HTMLElement} */ (event.target).matches(this.selector)) {
-        this.onClick(event);
+      if (focusChild) {
+        element.addEventListener('click', (event) => {
+          this.onClick(event);
+        });
+
+        element.addEventListener('keydown', (event) => {
+          this.onKeyDown(event);
+        });
       }
     });
 
-    parent.addEventListener('keydown', (event) => {
-      this.onKeyDown(event);
-    });
+    if (!focusChild) {
+      parent.addEventListener('click', (event) => {
+        if (/** @type {HTMLElement} */ (event.target).matches(this.selector)) {
+          this.onClick(event);
+        }
+      });
+
+      parent.addEventListener('keydown', (event) => {
+        this.onKeyDown(event);
+      });
+    }
   }
 
   /** @type {string} */
@@ -162,7 +174,7 @@ class Group {
     });
 
     this.parent.dispatchEvent(
-      new CustomEvent('select', {
+      new CustomEvent('change', {
         detail: {
           // @ts-ignore
           value: newTarget.value,

@@ -61,7 +61,7 @@
   {...$$restProps}
   use:activateGroup
   on:click
-  on:select
+  on:change
 >
   <div class="inner" inert={disabled}>
     <slot />

@@ -33,6 +33,7 @@
   aria-disabled={disabled}
   {...$$restProps}
   use:activateGroup
+  on:change
 >
   <slot />
 </div>

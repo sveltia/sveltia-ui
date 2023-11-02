@@ -150,7 +150,7 @@
     }
 
     &[aria-invalid='true'] {
-      border-color: deeppink;
+      border-color: var(--sui-error-foreground-color);
     }
 
     ~ :global(button) {

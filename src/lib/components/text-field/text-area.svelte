@@ -122,6 +122,10 @@
       overflow: hidden;
       resize: none;
     }
+
+    &[aria-invalid='true'] {
+      border-color: var(--sui-error-foreground-color);
+    }
   }
 
   .clone {

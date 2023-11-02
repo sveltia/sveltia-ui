@@ -58,7 +58,7 @@
   aria-orientation={orientation}
   {...$$restProps}
   use:activateGroup
-  on:select
+  on:change
 >
   <div class="inner" inert={disabled}>
     <slot />

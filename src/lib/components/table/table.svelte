@@ -25,6 +25,7 @@
   {...$$restProps}
   bind:this={element}
   use:activateGroup
+  on:change
 >
   <slot />
 </div>

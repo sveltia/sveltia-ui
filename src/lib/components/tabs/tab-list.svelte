@@ -45,7 +45,7 @@
   data-name={name || undefined}
   {...$$restProps}
   use:activateGroup
-  on:select
+  on:change
 >
   <div class="inner" inert={disabled}>
     <slot />
