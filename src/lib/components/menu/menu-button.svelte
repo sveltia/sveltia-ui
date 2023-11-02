@@ -44,6 +44,13 @@
    * @type {Popup | undefined}
    */
   let popupComponent;
+
+  /**
+   * Move focus to the `<button>` element.
+   */
+  export const focus = () => {
+    buttonComponent?.element.focus();
+  };
 </script>
 
 <Button

@@ -46,14 +46,16 @@
    * @type {string | undefined}
    */
   export let label = undefined;
+
+  // Work around a Svelte issue with assigning boolean attributes
+  $: $$restProps.hidden = hidden ? 'hidden' : undefined;
+  $: $$restProps.disabled = disabled ? 'disabled' : undefined;
 </script>
 
 <button
   class="sui switch {className}"
   type="button"
   role="switch"
-  {hidden}
-  {disabled}
   aria-checked={checked}
   aria-hidden={hidden}
   aria-disabled={disabled}

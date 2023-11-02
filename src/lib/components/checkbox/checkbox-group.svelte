@@ -24,11 +24,13 @@
    * @type {('horizontal'|'vertical')}
    */
   export let orientation = 'horizontal';
+
+  // Work around a Svelte issue with assigning boolean attributes
+  $: $$restProps.hidden = hidden ? 'hidden' : undefined;
 </script>
 
 <div
   class="sui checkbox-group {className} {orientation}"
-  {hidden}
   role="group"
   aria-hidden={hidden}
   aria-disabled={disabled}

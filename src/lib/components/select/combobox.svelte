@@ -70,9 +70,12 @@
   /** @type {Popup?} */
   let popupComponent;
   let isPopupOpen = writable(false);
+
+  // Work around a Svelte issue with assigning boolean attributes
+  $: $$restProps.hidden = hidden ? 'hidden' : undefined;
 </script>
 
-<div class="sui combobox {className}" {hidden} {...$$restProps}>
+<div class="sui combobox {className}" {...$$restProps}>
   {#if readonly}
     <div
       {id}

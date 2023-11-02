@@ -43,13 +43,15 @@
    * @type {'horizontal' | 'vertical'}
    */
   export let orientation = 'horizontal';
+
+  // Work around a Svelte issue with assigning boolean attributes
+  $: $$restProps.hidden = hidden ? 'hidden' : undefined;
 </script>
 
 <div
   class="sui radio-group {className} {orientation}"
   tabindex="-1"
   role="radiogroup"
-  {hidden}
   aria-hidden={hidden}
   aria-disabled={disabled}
   aria-readonly={readonly}

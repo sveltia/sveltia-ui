@@ -20,12 +20,14 @@
    * @type {'horizontal' | 'vertical'}
    */
   export let orientation = 'horizontal';
+
+  // Work around a Svelte issue with assigning boolean attributes
+  $: $$restProps.hidden = hidden ? 'hidden' : undefined;
 </script>
 
 <div
   class="sui divider {className}"
   role="separator"
-  {hidden}
   aria-hidden={hidden}
   aria-orientation={orientation}
   {...$$restProps}

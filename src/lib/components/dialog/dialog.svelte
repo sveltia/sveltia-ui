@@ -79,16 +79,6 @@
   const closeDialog = async () => {
     showDialog = false;
 
-    if (dialog.returnValue === 'ok') {
-      dispatch('ok');
-    }
-
-    if (dialog.returnValue === 'cancel') {
-      dispatch('cancel');
-    }
-
-    dispatch('close', dialog.returnValue);
-
     await new Promise((resolve) => {
       form.addEventListener('transitionend', () => resolve(), { once: true });
     });
@@ -96,6 +86,12 @@
     showContent = false;
     dialog?.close();
     dialog?.remove();
+
+    if (['ok', 'cancel'].includes(dialog?.returnValue)) {
+      dispatch(dialog?.returnValue);
+    }
+
+    dispatch('close', dialog?.returnValue);
   };
 
   /**

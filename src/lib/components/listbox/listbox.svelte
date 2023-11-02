@@ -45,13 +45,15 @@
    * @type {boolean}
    */
   export let multiple = false;
+
+  // Work around a Svelte issue with assigning boolean attributes
+  $: $$restProps.hidden = hidden ? 'hidden' : undefined;
 </script>
 
 <div
   class="sui listbox {className}"
   tabindex="0"
   role="listbox"
-  {hidden}
   aria-hidden={hidden}
   aria-disabled={disabled}
   aria-readonly={readonly}

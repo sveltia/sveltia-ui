@@ -77,16 +77,21 @@
   const id = getRandomId('input');
 
   $: ariaLabel = $$restProps['aria-label'];
+
+  const wrapperProps = {};
+
+  // Work around a Svelte issue with assigning boolean attributes
+  $: wrapperProps.hidden = hidden ? 'hidden' : undefined;
+  $: $$restProps.disabled = disabled ? 'disabled' : undefined;
+  $: $$restProps.readonly = readonly ? 'readonly' : undefined;
 </script>
 
-<div class="sui text-input {className}" {hidden}>
+<div class="sui text-input {className}" {...wrapperProps}>
   <input
     type="text"
     {role}
     name={name || undefined}
     tabindex={disabled ? -1 : 0}
-    {disabled}
-    {readonly}
     aria-hidden={hidden}
     aria-disabled={disabled}
     aria-readonly={readonly}

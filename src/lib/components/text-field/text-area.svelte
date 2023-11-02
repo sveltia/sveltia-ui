@@ -52,14 +52,19 @@
    * @type {boolean}
    */
   export let autoResize = false;
+
+  const wrapperProps = {};
+
+  // Work around a Svelte issue with assigning boolean attributes
+  $: wrapperProps.hidden = hidden ? 'hidden' : undefined;
+  $: $$restProps.disabled = disabled ? 'disabled' : undefined;
+  $: $$restProps.readonly = readonly ? 'readonly' : undefined;
 </script>
 
-<div class="sui text-area {className}" {hidden}>
+<div class="sui text-area {className}" {...wrapperProps}>
   <textarea
     {name}
     bind:value
-    {disabled}
-    {readonly}
     aria-hidden={hidden}
     aria-disabled={disabled}
     aria-readonly={readonly}

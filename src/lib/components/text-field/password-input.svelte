@@ -59,9 +59,14 @@
       inputComponent.element.setAttribute('type', passwordVisible ? 'text' : 'password');
     }
   }
+
+  const wrapperProps = {};
+
+  // Work around a Svelte issue with assigning boolean attributes
+  $: wrapperProps.hidden = hidden ? 'hidden' : undefined;
 </script>
 
-<div class="sui password-input {className}" {hidden}>
+<div class="sui password-input {className}" {...wrapperProps}>
   <TextInput
     bind:this={inputComponent}
     bind:value
