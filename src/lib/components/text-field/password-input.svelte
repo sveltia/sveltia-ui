@@ -60,6 +60,7 @@
     }
   }
 
+  /** @type {{ [key: string]: any }} */
   const wrapperProps = {};
 
   // Work around a Svelte issue with assigning boolean attributes

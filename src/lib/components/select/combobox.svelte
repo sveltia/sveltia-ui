@@ -64,6 +64,7 @@
 
   const dispatch = createEventDispatcher();
   const id = getRandomId('combobox');
+  /** @type {HTMLElement} */
   let comboboxElement;
   /** @type {TextInput?} */
   let inputComponent;

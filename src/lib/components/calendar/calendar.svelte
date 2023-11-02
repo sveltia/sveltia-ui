@@ -12,7 +12,9 @@
   /** @type {string?} */
   export let value = undefined;
 
+  /** @type {{ day: Date }[]} */
   const dayList = [];
+  /** @type {{ day: Date }[][]} */
   const weeks = [];
   const now = new Date();
 

@@ -35,6 +35,7 @@
 
   let showDialog = false;
   let showContent = false;
+  /** @type {string | undefined} */
   let contentType;
 
   let style = writable({
@@ -104,9 +105,10 @@
     }
   };
 
-  // Call the function only when the `$open` prop is changed
-  // @ts-ignore
-  $: toggleDialog($open);
+  $: {
+    void $open;
+    toggleDialog();
+  }
 
   onMount(() => {
     dialog.remove();

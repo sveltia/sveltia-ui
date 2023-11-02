@@ -120,8 +120,7 @@ class Group {
 
   /** @type {HTMLElement[]} */
   get allMembers() {
-    // @ts-ignore
-    return [...this.parent.querySelectorAll(this.selector)];
+    return /** @type {HTMLElement[]} */ ([...this.parent.querySelectorAll(this.selector)]);
   }
 
   /** @type {HTMLElement[]} */
@@ -176,10 +175,8 @@ class Group {
     this.parent.dispatchEvent(
       new CustomEvent('change', {
         detail: {
-          // @ts-ignore
-          value: newTarget.value,
-          // @ts-ignore
-          name: newTarget.name,
+          value: /** @type {any} */ (newTarget).value,
+          name: /** @type {any} */ (newTarget).name,
         },
       }),
     );
@@ -306,14 +303,13 @@ class Group {
 
 /**
  * Activate a new group.
- * @param {...any} args Arguments.
+ * @param {HTMLElement} parent Parent element.
  */
-export const activateGroup = (...args) => {
+export const activateGroup = (parent) => {
   (async () => {
     // Wait a bit before the relevant components, including the `aria-controls` target are mounted
     await sleep(100);
 
-    // @ts-ignore
-    return new Group(...args);
+    return new Group(parent);
   })();
 };

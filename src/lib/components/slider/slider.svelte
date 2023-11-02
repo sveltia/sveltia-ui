@@ -63,7 +63,9 @@
   /** @type {HTMLElement | undefined} */
   let base = undefined;
   let barWidth = 0;
+  /** @type {number[]} */
   let positionList = [];
+  /** @type {number[]} */
   let valueList = [];
   let startX = 0;
   let startScreenX = 0;
@@ -230,8 +232,11 @@
     onValueChange();
   });
 
-  // @ts-ignore Arguments are triggers
-  $: onValueChange(value, values);
+  $: {
+    void value;
+    void values;
+    onValueChange();
+  }
 
   // Work around a Svelte issue with assigning boolean attributes
   $: $$restProps.hidden = hidden ? 'hidden' : undefined;

@@ -113,9 +113,10 @@
     }
   };
 
-  // Call the function only when the `open` prop is changed
-  // @ts-ignore
-  $: toggleDialog(open);
+  $: {
+    void open;
+    toggleDialog();
+  }
 
   onMount(() => {
     dialog.remove();

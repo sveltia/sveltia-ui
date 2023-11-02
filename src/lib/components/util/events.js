@@ -54,6 +54,7 @@ export const matchShortcuts = (event, shortcuts) => {
  * @returns {import('svelte/action').ActionReturn} Actions.
  */
 export const activateKeyShortcuts = (element, shortcuts = '') => {
+  /** @type {string | undefined} */
   let platformKeyShortcuts;
 
   /**

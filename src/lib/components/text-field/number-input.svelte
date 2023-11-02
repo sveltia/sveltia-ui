@@ -94,6 +94,7 @@
     value = Number(Number(value || 0) + step).toFixed(maximumFractionDigits);
   };
 
+  /** @type {{ [key: string]: any }} */
   const wrapperProps = {};
 
   // Work around a Svelte issue with assigning boolean attributes
