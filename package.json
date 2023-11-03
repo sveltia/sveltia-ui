@@ -506,7 +506,7 @@
       "components/util/portal.svelte": [
         "./package/components/util/portal.svelte.d.ts"
       ],
-      "index.d.ts": [
+      "index": [
         "./package/index.d.ts"
       ],
       "locales/en": [
