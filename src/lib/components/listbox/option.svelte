@@ -102,7 +102,7 @@
       outline-width: 0 !important;
     }
 
-    :global([role='option']) {
+    :global(button) {
       flex: none;
       display: flex;
       justify-content: space-between;
@@ -115,12 +115,16 @@
     }
 
     :global(.focused),
-    :global([role='option']:hover) {
+    :global(button:hover) {
       color: var(--sui-highlight-foreground-color);
       background-color: var(--sui-highlight-background-color);
     }
 
-    :global([role='option'][aria-selected='true']) {
+    :global(button:active) {
+      background-color: var(--sui-active-background-color);
+    }
+
+    :global(button[aria-selected='true']) {
       :global(.icon) {
         color: var(--sui-primary-accent-color-lighter);
       }

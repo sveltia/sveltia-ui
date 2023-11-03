@@ -1,21 +1,22 @@
 :root[data-theme="light"],
 :host[data-theme="light"] {
-  --sui-foreground-color-1-hsl: var(--sui-base-hue) 5% 0%; // highlight
-  --sui-foreground-color-2-hsl: var(--sui-base-hue) 5% 20%; // primary
-  --sui-foreground-color-3-hsl: var(--sui-base-hue) 5% 40%; // secondary
-  --sui-foreground-color-4-hsl: var(--sui-base-hue) 5% 60%; // tertiary
+  --sui-foreground-color-1-hsl: var(--sui-base-hue) 5% 5%; // highlight
+  --sui-foreground-color-2-hsl: var(--sui-base-hue) 5% 25%; // primary
+  --sui-foreground-color-3-hsl: var(--sui-base-hue) 5% 35%; // secondary
+  --sui-foreground-color-4-hsl: var(--sui-base-hue) 5% 45%; // tertiary
+  --sui-foreground-color-5-hsl: var(--sui-base-hue) 5% 65%; // disabled
   --sui-background-color-1-hsl: var(--sui-base-hue) 5% 100%; // content/input
   --sui-background-color-2-hsl: var(--sui-base-hue) 5% 98%; // primary
-  --sui-background-color-3-hsl: var(--sui-base-hue) 5% 94%; // secondary
-  --sui-background-color-4-hsl: var(--sui-base-hue) 5% 90%; // tertiary/disabled
-  --sui-background-color-5-hsl: var(--sui-base-hue) 5% 86%; // highlight
-  --sui-border-color-1-hsl: var(--sui-base-hue) 5% 78%; // primary
-  --sui-border-color-2-hsl: var(--sui-base-hue) 5% 82%; // secondary/input
+  --sui-background-color-3-hsl: var(--sui-base-hue) 5% 96%; // secondary
+  --sui-background-color-4-hsl: var(--sui-base-hue) 5% 94%; // tertiary/disabled
+  --sui-background-color-5-hsl: var(--sui-base-hue) 5% 90%; // highlight
+  --sui-border-color-1-hsl: var(--sui-base-hue) 5% 84%; // primary
+  --sui-border-color-2-hsl: var(--sui-base-hue) 5% 88%; // secondary/input
   --sui-shadow-color: var(--sui-base-hue) 10% 0%;
   // Accents
   --sui-primary-accent-color: hsl(var(--sui-base-hue) 80% 45%);
   --sui-primary-accent-color-lighter: hsl(var(--sui-base-hue) 80% 40%);
-  --sui-primary-accent-color-darker: hsl(var(--sui-base-hue) 80% 50%);
+  --sui-primary-accent-color-darker: hsl(var(--sui-base-hue) 80% 40%);
   --sui-primary-accent-color-foreground: hsl(var(--sui-base-hue) 10% 100%); // white/inverted
   // Alerts
   --sui-error-color-hue: 0;
@@ -32,23 +33,22 @@
 
 :root[data-theme="dark"],
 :host[data-theme="dark"] {
-  --sui-foreground-color-1-hsl: var(--sui-base-hue) 10% 100%; // highlight
-  --sui-foreground-color-2-hsl: var(--sui-base-hue) 10% 80%; // primary
-  --sui-foreground-color-3-hsl: var(--sui-base-hue) 10% 60%; // secondary
-  --sui-foreground-color-4-hsl: var(--sui-base-hue) 10% 40%; // tertiary
+  --sui-foreground-color-1-hsl: var(--sui-base-hue) 10% 95%; // highlight
+  --sui-foreground-color-2-hsl: var(--sui-base-hue) 10% 75%; // primary
+  --sui-foreground-color-3-hsl: var(--sui-base-hue) 10% 65%; // secondary
+  --sui-foreground-color-4-hsl: var(--sui-base-hue) 10% 55%; // tertiary
+  --sui-foreground-color-5-hsl: var(--sui-base-hue) 10% 35%; // disabled
   --sui-background-color-1-hsl: var(--sui-base-hue) 10% 10%; // content/input
   --sui-background-color-2-hsl: var(--sui-base-hue) 10% 12%; // primary
-  --sui-background-color-3-hsl: var(--sui-base-hue) 10% 16%; // secondary
-  --sui-background-color-4-hsl: var(--sui-base-hue) 10% 18%; // tertiary/disabled
-  --sui-background-color-5-hsl: var(--sui-base-hue) 10% 22%; // highlight
-  --sui-border-color-1-hsl: var(--sui-base-hue) 10% 32%; // primary
-  --sui-border-color-2-hsl: var(--sui-base-hue) 10% 28%; // secondary/input
+  --sui-background-color-3-hsl: var(--sui-base-hue) 10% 14%; // secondary
+  --sui-background-color-4-hsl: var(--sui-base-hue) 10% 16%; // tertiary/disabled
+  --sui-background-color-5-hsl: var(--sui-base-hue) 10% 20%; // highlight
+  --sui-border-color-1-hsl: var(--sui-base-hue) 10% 26%; // primary
+  --sui-border-color-2-hsl: var(--sui-base-hue) 10% 22%; // secondary/input
   --sui-shadow-color: var(--sui-base-hue) 10% 0%;
   // Accents
-  --sui-primary-accent-color: hsl(var(--sui-base-hue) 100% 45%); // 4.57 AA w/ #FFF foreground color
-  --sui-primary-accent-color-lighter: hsl(
-    var(--sui-base-hue) 100% 62%
-  ); // 4.57 AA on `--sui-tertiary-background-color`
+  --sui-primary-accent-color: hsl(var(--sui-base-hue) 100% 40%);
+  --sui-primary-accent-color-lighter: hsl(var(--sui-base-hue) 100% 45%);
   --sui-primary-accent-color-darker: hsl(var(--sui-base-hue) 100% 35%);
   --sui-primary-accent-color-foreground: hsl(var(--sui-base-hue) 10% 100%); // white
   // Alerts
@@ -72,8 +72,8 @@
   --sui-highlight-foreground-color: hsl(var(--sui-foreground-color-1-hsl));
   --sui-primary-foreground-color: hsl(var(--sui-foreground-color-2-hsl));
   --sui-secondary-foreground-color: hsl(var(--sui-foreground-color-3-hsl));
-  --sui-tertiary-foreground-color: hsl(var(--sui-foreground-color-3-hsl));
-  --sui-disabled-foreground-color: hsl(var(--sui-foreground-color-4-hsl));
+  --sui-tertiary-foreground-color: hsl(var(--sui-foreground-color-4-hsl));
+  --sui-disabled-foreground-color: hsl(var(--sui-foreground-color-5-hsl));
   --sui-error-foreground-color: hsl(
     var(--sui-error-color-hue) var(--sui-alert-foreground-color-saturation)
       var(--sui-alert-foreground-color-lightness)
@@ -91,7 +91,8 @@
       var(--sui-alert-foreground-color-lightness)
   );
   // Background
-  --sui-highlight-background-color: hsl(var(--sui-background-color-5-hsl));
+  --sui-highlight-background-color: hsl(var(--sui-background-color-5-hsl) / 80%);
+  --sui-active-background-color: hsl(var(--sui-background-color-5-hsl) / 60%);
   --sui-content-background-color: hsl(var(--sui-background-color-1-hsl));
   --sui-primary-background-color: hsl(var(--sui-background-color-2-hsl));
   --sui-primary-background-color-translucent: hsl(var(--sui-background-color-2-hsl) / 80%);
@@ -119,8 +120,6 @@
   // Borders
   --sui-primary-border-color: hsl(var(--sui-border-color-1-hsl));
   --sui-secondary-border-color: hsl(var(--sui-border-color-2-hsl));
-  --sui-checkbox-border-color: hsl(var(--sui-foreground-color-4-hsl));
-  --sui-checkbox-background-color: hsl(var(--sui-background-color-5-hsl));
   --sui-error-border-color: hsl(
     var(--sui-error-color-hue) var(--sui-alert-border-color-saturation)
       var(--sui-alert-border-color-lightness)
@@ -166,26 +165,35 @@
   --sui-control-large-border-width: 1px;
   --sui-control-large-border-radius: 8px;
   --sui-control-large-height: 40px;
-  --sui-control-border-color: hsl(var(--sui-border-color-2-hsl));
+  --sui-control-border-color: hsl(var(--sui-border-color-1-hsl));
   --sui-control-foreground-color: var(--sui-primary-foreground-color);
-  --sui-control-background-color: hsl(var(--sui-background-color-1-hsl));
+  --sui-control-background-color: hsl(var(--sui-background-color-4-hsl));
   --sui-control-font-family: var(--sui-font-family-default);
   --sui-control-font-size: var(--sui-font-size-default);
   --sui-control-line-height: var(--sui-line-height-default);
-  // Buttons
+  // Button
   --sui-button-small-border-radius: var(--sui-control-small-border-radius);
   --sui-button-small-height: var(--sui-control-small-height);
   --sui-button-medium-border-radius: var(--sui-control-medium-border-radius);
   --sui-button-medium-height: var(--sui-control-medium-height);
   --sui-button-large-border-radius: var(--sui-control-large-border-radius);
   --sui-button-large-height: var(--sui-control-large-height);
-  // Options & menu items
+  --sui-button-border-color: var(--sui-control-border-color);
+  --sui-button-background-color: var(--sui-control-background-color);
+  // Checkbox
+  --sui-checkbox-border-color: var(--sui-control-border-color);
+  --sui-checkbox-background-color: var(--sui-control-background-color);
+  // Option & menu item
   --sui-option-small-border-radius: var(--sui-control-small-border-radius);
   --sui-option-small-height: var(--sui-control-small-height);
   --sui-option-medium-border-radius: var(--sui-control-medium-border-radius);
   --sui-option-medium-height: var(--sui-control-medium-height);
   --sui-option-large-border-radius: var(--sui-control-large-border-radius);
   --sui-option-large-height: var(--sui-control-large-height);
+  // Listbox
+  --sui-listbox-border-color: var(--sui-control-border-color);
+  --sui-listbox-foreground-color: var(--sui-control-foreground-color);
+  --sui-listbox-background-color: hsl(var(--sui-background-color-1-hsl));
   // Textbox: singleline & multiline text fields
   --sui-textbox-small-border-radius: var(--sui-control-small-border-radius);
   --sui-textbox-small-height: var(--sui-control-small-height);
@@ -194,7 +202,7 @@
   --sui-textbox-large-border-radius: var(--sui-control-large-border-radius);
   --sui-textbox-large-height: var(--sui-control-large-height);
   --sui-textbox-foreground-color: var(--sui-control-foreground-color);
-  --sui-textbox-background-color: var(--sui-control-background-color);
+  --sui-textbox-background-color: hsl(var(--sui-background-color-1-hsl));
   --sui-textbox-font-family: var(--sui-font-family-default);
   --sui-textbox-font-size: var(--sui-font-size-default);
   --sui-textbox-singleline-line-height: var(--sui-line-height-compact);

@@ -146,11 +146,31 @@
       }
     }
 
+    &:hover {
+      :global(button) {
+        background-color: var(--sui-highlight-background-color);
+      }
+
+      :global(button[aria-checked='true']) {
+        background-color: var(--sui-primary-accent-color-lighter);
+      }
+    }
+
+    &:active {
+      :global(button) {
+        background-color: var(--sui-active-background-color);
+      }
+
+      :global(button[aria-checked='true']) {
+        background-color: var(--sui-primary-accent-color-darker);
+      }
+    }
+
     :global(button) {
       align-items: center;
       justify-content: center;
       overflow: hidden;
-      border-width: 2px;
+      border-width: 1px;
       border-color: var(--sui-checkbox-border-color);
       border-radius: 4px;
       width: 20px;
@@ -165,9 +185,9 @@
     }
 
     :global(button[aria-checked='true']) {
-      border-color: var(--sui-primary-accent-color-lighter);
+      border-color: var(--sui-primary-accent-color);
       color: var(--sui-primary-accent-color-foreground);
-      background-color: var(--sui-primary-accent-color-lighter);
+      background-color: var(--sui-primary-accent-color);
     }
 
     :global(button[aria-checked='false']) {

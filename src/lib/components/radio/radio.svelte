@@ -117,15 +117,37 @@
       }
     }
 
+    &:hover {
+      :global(button) {
+        background-color: var(--sui-highlight-background-color);
+      }
+
+      :global(button[aria-checked='true']) {
+        border-color: var(--sui-primary-accent-color-lighter);
+        color: var(--sui-primary-accent-color-lighter);
+      }
+    }
+
+    &:active {
+      :global(button) {
+        background-color: var(--sui-active-background-color);
+      }
+
+      :global(button[aria-checked='true']) {
+        border-color: var(--sui-primary-accent-color-darker);
+        color: var(--sui-primary-accent-color-darker);
+      }
+    }
+
     :global(button) {
       justify-content: center;
       overflow: hidden;
-      border-width: 2px;
+      border-width: 1px;
       border-color: var(--sui-checkbox-border-color);
       border-radius: 24px;
       width: 20px;
       height: 20px;
-      color: var(--sui-primary-accent-color-lighter);
+      background-color: var(--sui-checkbox-background-color);
       transition: all 200ms;
 
       :global(.icon) {
@@ -139,8 +161,8 @@
     }
 
     :global(button[aria-checked='true']) {
-      border-color: var(--sui-primary-accent-color-lighter);
-      color: var(--sui-primary-accent-color-lighter);
+      border-color: var(--sui-primary-accent-color);
+      color: var(--sui-primary-accent-color);
     }
 
     :global(button[aria-checked='false']) {

@@ -182,6 +182,7 @@
       :global(.sui.menu) {
         border-width: 0;
         border-radius: 0;
+        background-color: transparent;
       }
     }
   }

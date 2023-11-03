@@ -69,11 +69,11 @@
     }
 
     :global(button) {
-      border-radius: 0;
+      border-radius: 0 !important;
       color: var(--sui-primary-foreground-color);
 
       &:first-child {
-        border-radius: 4px 0 0 4px;
+        border-radius: 4px 0 0 4px !important;
       }
 
       &:not(:first-child) {
@@ -81,7 +81,7 @@
       }
 
       &:last-child {
-        border-radius: 0 4px 4px 0;
+        border-radius: 0 4px 4px 0 !important;
       }
     }
 

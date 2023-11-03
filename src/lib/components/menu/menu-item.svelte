@@ -125,6 +125,10 @@
       background-color: var(--sui-highlight-background-color);
     }
 
+    :global(button:active) {
+      background-color: var(--sui-active-background-color);
+    }
+
     &:hover > :global([role='menu']) {
       opacity: 1;
     }

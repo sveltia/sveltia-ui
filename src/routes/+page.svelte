@@ -65,6 +65,9 @@
     <section>
       <h3>Background</h3>
       <div class="color-samples">
+        <span class="sample" style:background-color="var(--sui-highlight-background-color)">
+          Highlight
+        </span>
         <span class="sample" style:background-color="var(--sui-primary-background-color)">
           Primary
         </span>
@@ -82,6 +85,7 @@
     <section>
       <h3>Foreground</h3>
       <div class="color-samples">
+        <span class="sample" style:color="var(--sui-highlight-foreground-color)"> Highlight </span>
         <span class="sample" style:color="var(--sui-primary-foreground-color)"> Primary </span>
         <span class="sample" style:color="var(--sui-secondary-foreground-color)"> Secondary </span>
         <span class="sample" style:color="var(--sui-tertiary-foreground-color)"> tertiary </span>

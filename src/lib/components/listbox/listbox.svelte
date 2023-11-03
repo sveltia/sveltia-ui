@@ -74,12 +74,12 @@
     flex-direction: column;
     margin: 0;
     border-width: 1px;
-    border-color: var(--sui-control-border-color);
+    border-color: var(--sui-listbox-border-color);
     border-radius: 4px;
     padding: 4px;
     min-width: 160px;
-    color: var(--sui-control-foreground-color);
-    background-color: var(--sui-control-background-color);
+    color: var(--sui-listbox-foreground-color);
+    background-color: var(--sui-listbox-background-color);
     font-family: var(--sui-control-font-family);
     font-size: var(--sui-control-font-size);
     line-height: var(--sui-control-line-height);

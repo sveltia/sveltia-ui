@@ -180,7 +180,7 @@
     }
 
     &:global(.primary) {
-      border-color: var(--sui-control-border-color);
+      border-color: var(--sui-primary-accent-color);
       color: var(--sui-primary-accent-color-foreground);
       background-color: var(--sui-primary-accent-color);
 
@@ -198,12 +198,16 @@
     &:global(.secondary) {
       border-color: var(--sui-primary-accent-color);
       color: var(--sui-primary-accent-color-lighter);
-      background-color: var(--sui-tertiary-background-color);
+      background-color: var(--sui-button-background-color);
 
       &:hover,
       &:focus-visible,
       &[aria-expanded='true'] {
         background-color: var(--sui-highlight-background-color);
+      }
+
+      &:active {
+        background-color: var(--sui-active-background-color);
       }
 
       &[aria-pressed='true'] {
@@ -212,14 +216,18 @@
     }
 
     &:global(.tertiary) {
-      border-color: var(--sui-control-border-color);
+      border-color: var(--sui-button-border-color);
       color: var(--sui-highlight-foreground-color);
-      background-color: var(--sui-tertiary-background-color);
+      background-color: var(--sui-button-background-color);
 
       &:hover,
       &:focus-visible,
       &[aria-expanded='true'] {
         background-color: var(--sui-highlight-background-color);
+      }
+
+      &:active {
+        background-color: var(--sui-active-background-color);
       }
 
       &[aria-pressed='true'] {
@@ -232,6 +240,10 @@
       &:focus-visible,
       &[aria-expanded='true'] {
         background-color: var(--sui-highlight-background-color);
+      }
+
+      &:active {
+        background-color: var(--sui-active-background-color);
       }
 
       &[aria-pressed='true'] {
