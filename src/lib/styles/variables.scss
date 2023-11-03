@@ -22,10 +22,10 @@
   --sui-warning-color-hue: 40;
   --sui-info-color-hue: 210;
   --sui-success-color-hue: 100;
-  --sui-alert-foreground-color-saturation: 88%;
-  --sui-alert-foreground-color-lightness: 28%;
-  --sui-alert-background-color-saturation: 68%;
-  --sui-alert-background-color-lightness: 88%;
+  --sui-alert-foreground-color-saturation: 85%;
+  --sui-alert-foreground-color-lightness: 25%;
+  --sui-alert-background-color-saturation: 65%;
+  --sui-alert-background-color-lightness: 90%;
   --sui-alert-border-color-saturation: 48%;
   --sui-alert-border-color-lightness: 68%;
 }
@@ -39,14 +39,16 @@
   --sui-background-color-1-hsl: var(--sui-base-hue) 10% 10%; // content/input
   --sui-background-color-2-hsl: var(--sui-base-hue) 10% 12%; // primary
   --sui-background-color-3-hsl: var(--sui-base-hue) 10% 16%; // secondary
-  --sui-background-color-4-hsl: var(--sui-base-hue) 10% 20%; // tertiary/disabled
-  --sui-background-color-5-hsl: var(--sui-base-hue) 10% 24%; // highlight
+  --sui-background-color-4-hsl: var(--sui-base-hue) 10% 18%; // tertiary/disabled
+  --sui-background-color-5-hsl: var(--sui-base-hue) 10% 22%; // highlight
   --sui-border-color-1-hsl: var(--sui-base-hue) 10% 32%; // primary
   --sui-border-color-2-hsl: var(--sui-base-hue) 10% 28%; // secondary/input
   --sui-shadow-color: var(--sui-base-hue) 10% 0%;
   // Accents
   --sui-primary-accent-color: hsl(var(--sui-base-hue) 100% 45%); // 4.57 AA w/ #FFF foreground color
-  --sui-primary-accent-color-lighter: hsl(var(--sui-base-hue) 100% 55%);
+  --sui-primary-accent-color-lighter: hsl(
+    var(--sui-base-hue) 100% 62%
+  ); // 4.57 AA on `--sui-tertiary-background-color`
   --sui-primary-accent-color-darker: hsl(var(--sui-base-hue) 100% 35%);
   --sui-primary-accent-color-foreground: hsl(var(--sui-base-hue) 10% 100%); // white
   // Alerts
@@ -54,10 +56,10 @@
   --sui-warning-color-hue: 40;
   --sui-info-color-hue: 210;
   --sui-success-color-hue: 100;
-  --sui-alert-foreground-color-saturation: 48%;
-  --sui-alert-foreground-color-lightness: 68%;
-  --sui-alert-background-color-saturation: 88%;
-  --sui-alert-background-color-lightness: 8%;
+  --sui-alert-foreground-color-saturation: 85%;
+  --sui-alert-foreground-color-lightness: 75%;
+  --sui-alert-background-color-saturation: 40%;
+  --sui-alert-background-color-lightness: 10%;
   --sui-alert-border-color-saturation: 38%;
   --sui-alert-border-color-lightness: 18%;
 }
