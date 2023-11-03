@@ -1,5 +1,3 @@
-// @ts-nocheck
-
 import { addMessages, init } from 'svelte-i18n';
 
 /**
@@ -18,7 +16,7 @@ export const initLocales = ({ fallbackLocale = 'en', initialLocale = 'en' } = {}
     const [, locale] = path.match(/([a-zA-Z-]+)\.js/);
 
     // Add `_sui` suffix to avoid collision with app localization
-    addMessages(locale, { _sui: strings });
+    addMessages(locale, /** @type {any} */ ({ _sui: strings }));
   });
 
   init({
