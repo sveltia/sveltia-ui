@@ -160,7 +160,7 @@ class Group {
       }
 
       if (isTarget) {
-        element.scrollIntoView({ block: 'center', inline: 'center', behavior: 'smooth' });
+        element.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'smooth' });
       }
     });
 
