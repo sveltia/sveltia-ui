@@ -41,7 +41,7 @@
     };
 
     window.setTimeout(() => {
-      fontLoader.remove();
+      fontLoader?.remove();
     }, 1000);
   });
 </script>
@@ -59,7 +59,8 @@
 
 <!-- Preload fonts, including the icons -->
 <div class="font-loader" aria-hidden="true" bind:this={fontLoader} style:opacity="0">
-  <strong>Sveltia</strong> <em>UI</em> <span class="material-symbols-outlined">favorite</span>
+  Loading <strong>Sveltia</strong> <em>UI</em>
+  <span class="material-symbols-outlined">favorite</span>
 </div>
 
 <div
