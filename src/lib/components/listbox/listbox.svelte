@@ -6,7 +6,7 @@
   @see https://www.w3.org/WAI/ARIA/apg/patterns/listbox/
 -->
 <script>
-  import { activateGroup } from '../util/group';
+  import { activateGroup } from '../../services/group';
 
   /**
    * The `class` attribute on the wrapper element.

@@ -7,7 +7,7 @@
 <svelte:options accessors={true} />
 
 <script>
-  import { activateKeyShortcuts } from '../util/events';
+  import { activateKeyShortcuts } from '../../services/events';
   import Popup from '../util/popup.svelte';
 
   /**

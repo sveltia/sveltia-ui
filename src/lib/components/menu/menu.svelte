@@ -5,7 +5,7 @@
   @see https://www.w3.org/WAI/ARIA/apg/patterns/menubar/
 -->
 <script>
-  import { activateGroup } from '../util/group';
+  import { activateGroup } from '../../services/group';
 
   /**
    * The `class` attribute on the wrapper element.

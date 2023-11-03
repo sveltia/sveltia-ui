@@ -7,8 +7,8 @@
 <script>
   import { onMount } from 'svelte';
   import { writable } from 'svelte/store';
-  import { activatePopup } from './popup';
-  import { sleep } from './util';
+  import { activatePopup } from '../../services/popup';
+  import { sleep } from '../../services/util';
 
   /** @type {HTMLElement | undefined} */
   export let anchor = undefined;

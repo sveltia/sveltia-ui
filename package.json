@@ -296,22 +296,10 @@
       "svelte": "./package/components/util/app-shell.svelte",
       "default": "./package/components/util/app-shell.svelte"
     },
-    "./components/util/events": {
-      "types": "./package/components/util/events.d.ts",
-      "default": "./package/components/util/events.js"
-    },
-    "./components/util/group": {
-      "types": "./package/components/util/group.d.ts",
-      "default": "./package/components/util/group.js"
-    },
     "./components/util/group.svelte": {
       "types": "./package/components/util/group.svelte.d.ts",
       "svelte": "./package/components/util/group.svelte",
       "default": "./package/components/util/group.svelte"
-    },
-    "./components/util/popup": {
-      "types": "./package/components/util/popup.d.ts",
-      "default": "./package/components/util/popup.js"
     },
     "./components/util/popup.svelte": {
       "types": "./package/components/util/popup.svelte.d.ts",
@@ -322,10 +310,6 @@
       "types": "./package/components/util/portal.svelte.d.ts",
       "svelte": "./package/components/util/portal.svelte",
       "default": "./package/components/util/portal.svelte"
-    },
-    "./components/util/util": {
-      "types": "./package/components/util/util.d.ts",
-      "default": "./package/components/util/util.js"
     },
     ".": {
       "types": "./package/index.d.ts",
@@ -339,6 +323,22 @@
     "./locales/ja": {
       "types": "./package/locales/ja.d.ts",
       "default": "./package/locales/ja.js"
+    },
+    "./services/events": {
+      "types": "./package/services/events.d.ts",
+      "default": "./package/services/events.js"
+    },
+    "./services/group": {
+      "types": "./package/services/group.d.ts",
+      "default": "./package/services/group.js"
+    },
+    "./services/popup": {
+      "types": "./package/services/popup.d.ts",
+      "default": "./package/services/popup.js"
+    },
+    "./services/util": {
+      "types": "./package/services/util.d.ts",
+      "default": "./package/services/util.js"
     },
     "./styles/core.scss": "./package/styles/core.scss",
     "./styles/variables.scss": "./package/styles/variables.scss",
@@ -497,17 +497,8 @@
       "components/util/app-shell.svelte": [
         "./package/components/util/app-shell.svelte.d.ts"
       ],
-      "components/util/events": [
-        "./package/components/util/events.d.ts"
-      ],
-      "components/util/group": [
-        "./package/components/util/group.d.ts"
-      ],
       "components/util/group.svelte": [
         "./package/components/util/group.svelte.d.ts"
-      ],
-      "components/util/popup": [
-        "./package/components/util/popup.d.ts"
       ],
       "components/util/popup.svelte": [
         "./package/components/util/popup.svelte.d.ts"
@@ -515,10 +506,7 @@
       "components/util/portal.svelte": [
         "./package/components/util/portal.svelte.d.ts"
       ],
-      "components/util/util": [
-        "./package/components/util/util.d.ts"
-      ],
-      "index": [
+      "index.d.ts": [
         "./package/index.d.ts"
       ],
       "locales/en": [
@@ -526,6 +514,18 @@
       ],
       "locales/ja": [
         "./package/locales/ja.d.ts"
+      ],
+      "services/events": [
+        "./package/services/events.d.ts"
+      ],
+      "services/group": [
+        "./package/services/group.d.ts"
+      ],
+      "services/popup": [
+        "./package/services/popup.d.ts"
+      ],
+      "services/util": [
+        "./package/services/util.d.ts"
       ],
       "typedef": [
         "./package/typedef.d.ts"

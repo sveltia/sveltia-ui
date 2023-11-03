@@ -7,8 +7,8 @@
 <svelte:options accessors={true} />
 
 <script>
-  import { activateKeyShortcuts } from '../util/events';
-  import { getRandomId } from '../util/util';
+  import { activateKeyShortcuts } from '../../services/events';
+  import { getRandomId } from '../../services/util';
 
   /**
    * Reference to the `<input>` element.

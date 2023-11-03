@@ -8,12 +8,12 @@
   import { createEventDispatcher } from 'svelte';
   import { _ } from 'svelte-i18n';
   import { writable } from 'svelte/store';
+  import { getRandomId } from '../../services/util';
   import Button from '../button/button.svelte';
   import Icon from '../icon/icon.svelte';
   import Listbox from '../listbox/listbox.svelte';
   import TextInput from '../text-field/text-input.svelte';
   import Popup from '../util/popup.svelte';
-  import { getRandomId } from '../util/util';
 
   /**
    * The `class` attribute on the wrapper element.

@@ -5,7 +5,7 @@
   @see https://w3c.github.io/aria/#grid
 -->
 <script>
-  import { activateGroup } from '../util/group';
+  import { activateGroup } from '../../services/group';
 
   /**
    * CSS class name on the button.
