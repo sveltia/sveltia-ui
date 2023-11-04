@@ -88,8 +88,8 @@
     display: block;
     margin: 0;
     border-width: 1px;
-    border-color: var(--sui-control-border-color);
-    border-radius: var(--sui-textbox-medium-border-radius);
+    border-color: var(--sui-textbox-border-color);
+    border-radius: var(--sui-textbox-border-radius);
     padding: 8px;
     width: 100%;
     min-height: 8em;

@@ -79,7 +79,7 @@
         {#if separator}
           <Divider />
         {:else}
-          <Button {disabled}>
+          <Button class="iconic" {disabled}>
             <Icon slot="start-icon" name={icon} {label} />
           </Button>
         {/if}
@@ -95,7 +95,7 @@
 
     :global([role='toolbar']) {
       display: flex;
-      gap: 8px;
+      gap: 0;
       border-radius: 4px 4px 0 0;
       padding: 8px;
       background-color: var(--sui-tertiary-background-color);

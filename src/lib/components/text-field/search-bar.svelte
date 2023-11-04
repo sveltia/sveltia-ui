@@ -67,7 +67,9 @@
 </script>
 
 <div class="sui search-bar {className}" role="search" hidden={hidden || undefined}>
-  <Icon name="search" />
+  <span>
+    <Icon name="search" />
+  </span>
   <TextInput
     bind:value
     role="searchbox"
@@ -113,10 +115,15 @@
       opacity: 0.5;
     }
 
-    & > :global(.icon) {
+    & > span {
       position: absolute;
-      inset: 8px auto auto 8px;
+      inset: 0 auto 0 0;
       z-index: 2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: var(--sui-button-medium-height);
+      height: var(--sui-button-medium-height);
     }
 
     & > :global(button) {
@@ -131,7 +138,7 @@
     }
 
     :global(input) {
-      padding: 0 36px !important;
+      padding: 0 var(--sui-button-medium-height) !important;
       width: 100%;
     }
   }

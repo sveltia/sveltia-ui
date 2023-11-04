@@ -33,5 +33,6 @@
 <style lang="scss">
   .table-row {
     display: table-row;
+    height: var(--sui-primary-row-height);
   }
 </style>

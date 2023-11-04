@@ -143,6 +143,22 @@
             <Button class="ghost" label="Ghost" />
           </div>
         </section>
+        <section aria-label="Small Buttons">
+          <div>
+            <Button size="small" class="primary" label="Primary" />
+            <Button size="small" class="secondary" label="Secondary" />
+            <Button size="small" class="tertiary" label="Tertiary" />
+            <Button size="small" class="ghost" label="Ghost" />
+          </div>
+        </section>
+        <section aria-label="Large Buttons">
+          <div>
+            <Button size="large" class="primary" label="Primary" />
+            <Button size="large" class="secondary" label="Secondary" />
+            <Button size="large" class="tertiary" label="Tertiary" />
+            <Button size="large" class="ghost" label="Ghost" />
+          </div>
+        </section>
         <section>
           <h4>Icon Buttons</h4>
           <div>
@@ -160,9 +176,9 @@
         <section aria-label="Select Buttons">
           <div>
             <SelectButtonGroup>
-              <SelectButton class="tertiary" selected={true}>Strawberry</SelectButton>
-              <SelectButton class="tertiary">Grape</SelectButton>
-              <SelectButton class="tertiary">Lemon</SelectButton>
+              <SelectButton class="tertiary" selected={true} label="Strawberry" />
+              <SelectButton class="tertiary" label="Grape" />
+              <SelectButton class="tertiary" label="Lemon" />
             </SelectButtonGroup>
           </div>
         </section>
@@ -681,8 +697,12 @@
 
   main {
     height: 100%;
-    padding: 80px 80px 240px;
+    padding: 8vmin;
     overflow-y: scroll;
+
+    @media (max-width: 767px) {
+      padding: 4vmin;
+    }
   }
 
   section {
@@ -690,6 +710,11 @@
     padding: 16px;
     border-width: 1px;
     border-color: var(--sui-primary-border-color);
+
+    @media (max-width: 767px) {
+      margin: 8px 0;
+      padding: 8px;
+    }
 
     h2 {
       margin: 0;
@@ -703,6 +728,15 @@
         margin: -16px -16px 16px;
         padding: 8px 16px;
         background-color: var(--sui-secondary-background-color);
+      }
+
+      @media (max-width: 767px) {
+        padding: 0;
+
+        h3 {
+          margin: 0 0 8px;
+          background-color: var(--sui-secondary-background-color);
+        }
       }
 
       section {

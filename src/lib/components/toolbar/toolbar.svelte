@@ -44,7 +44,7 @@
 
 <style lang="scss">
   [role='toolbar'] {
-    --toolbar-size: 40px;
+    --toolbar-size: var(--sui-secondary-toolbar-size);
     flex: none !important;
     display: flex;
     align-items: center;
@@ -52,7 +52,8 @@
     padding: 8px;
 
     &.primary {
-      --toolbar-size: 48px;
+      --toolbar-size: var(--sui-primary-toolbar-size);
+      border-color: var(--sui-primary-border-color);
       background-color: var(--sui-secondary-background-color);
     }
 

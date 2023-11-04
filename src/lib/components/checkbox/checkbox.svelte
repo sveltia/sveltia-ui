@@ -170,17 +170,18 @@
       align-items: center;
       justify-content: center;
       overflow: hidden;
-      border-width: 1px;
+      border-width: 1.5px;
       border-color: var(--sui-checkbox-border-color);
-      border-radius: 4px;
-      width: 20px;
-      height: 20px;
+      border-radius: var(--sui-checkbox-border-radius);
+      padding: 0;
+      width: var(--sui-checkbox-height);
+      height: var(--sui-checkbox-height);
       color: var(--sui-primary-accent-color-lighter);
       background-color: var(--sui-checkbox-background-color);
       transition: all 200ms;
 
       :global(.icon) {
-        font-size: 20px;
+        font-size: calc(var(--sui-checkbox-height) - 4px);
       }
     }
 

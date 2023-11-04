@@ -107,11 +107,11 @@
     :global(button) {
       display: flex;
       justify-content: space-between !important;
-      border-radius: 4px;
+      border-radius: var(--sui-option-border-radius);
       padding: 0 16px;
       width: 100%;
       min-width: 160px;
-      height: var(--sui-option-medium-height);
+      height: var(--sui-option-height);
     }
 
     :global(button[aria-checked='true']) {

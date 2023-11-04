@@ -99,15 +99,16 @@
     align-items: center;
 
     :global(input) {
-      border-radius: 4px 0 0 4px;
+      border-top-right-radius: 0;
+      border-bottom-right-radius: 0;
     }
 
     :global(button) {
       flex: none;
       margin-left: -1px;
       border-width: 1px;
-      border-color: var(--sui-control-border-color);
-      height: var(--sui-textbox-medium-height);
+      border-color: var(--sui-textbox-border-color);
+      width: var(--sui-textbox-height);
       aspect-ratio: 1 / 1;
 
       &:last-child {

@@ -107,10 +107,10 @@
       display: flex;
       justify-content: space-between;
       gap: 4px;
-      border-radius: 4px;
-      padding: 0 8px 0 16px;
+      border-radius: var(--sui-option-border-radius);
+      padding: var(--sui-option-padding);
       width: 100%;
-      height: var(--sui-option-medium-height);
+      height: var(--sui-option-height);
       white-space: nowrap;
     }
 

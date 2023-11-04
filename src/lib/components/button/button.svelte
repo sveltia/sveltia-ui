@@ -170,9 +170,6 @@
     &:global(.ghost) {
       justify-content: center;
       border-width: 1px;
-      border-radius: var(--sui-button-medium-border-radius);
-      padding: var(--sui-button-medium-padding, 0 8px);
-      height: var(--sui-button-medium-height);
 
       :global(.label:only-child) {
         padding: 0 4px;
@@ -255,18 +252,28 @@
       background-color: var(--sui-error-background-color);
     }
 
-    &:global(.large) {
-      height: var(--sui-button-large-height);
-    }
-
     &:global(.small) {
-      padding: var(--sui-button-small-padding, 0 8px);
+      border-radius: var(--sui-button-small-border-radius);
+      padding: var(--sui-button-small-padding);
       height: var(--sui-button-small-height);
       font-size: var(--sui-font-size-small);
 
       :global(.icon) {
         font-size: var(--sui-font-size-large);
       }
+    }
+
+    &:global(.medium) {
+      border-radius: var(--sui-button-medium-border-radius);
+      padding: var(--sui-button-medium-padding);
+      height: var(--sui-button-medium-height);
+    }
+
+    &:global(.large) {
+      border-radius: var(--sui-button-large-border-radius);
+      padding: var(--sui-button-large-padding);
+      height: var(--sui-button-large-height);
+      font-size: var(--sui-font-size-large);
     }
 
     &:global(.pill) {
@@ -281,7 +288,6 @@
     &:global(.iconic) {
       justify-content: center;
       padding: 0;
-      border-radius: 4px;
       aspect-ratio: 1 / 1;
     }
 

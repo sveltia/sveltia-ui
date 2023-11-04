@@ -21,5 +21,6 @@
 <style lang="scss">
   .table-row-header {
     display: table-cell;
+    height: var(--sui-secondary-row-height);
   }
 </style>

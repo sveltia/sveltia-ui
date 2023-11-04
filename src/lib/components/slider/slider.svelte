@@ -117,7 +117,7 @@
     const { key, ctrlKey, metaKey, shiftKey, altKey } = event;
     const hasModifier = shiftKey || altKey || ctrlKey || metaKey;
 
-    if (hasModifier) {
+    if (disabled || hasModifier) {
       return;
     }
 
@@ -160,36 +160,57 @@
   };
 
   /**
-   * Handle the `mousedown` event fired on the slider.
-   * @param {MouseEvent} event `mousedown` event.
+   * Handle the `pointermove` event fired anywhere on the page.
+   * @param {PointerEvent} event `pointermove` event.
+   */
+  const onPointerMove = (event) => {
+    const { screenX, pointerId } = event;
+
+    if (disabled || !dragging || pointerId > 0) {
+      return;
+    }
+
+    moveThumb(startX + (screenX - startScreenX));
+  };
+
+  /**
+   * Handle the `pointerup` and `pointercancel` events fired anywhere on the page.
+   * @param {PointerEvent} event `pointerup` or `pointercancel` event.
+   */
+  const onPointerUp = (event) => {
+    const { pointerId } = event;
+
+    if (disabled || !dragging || pointerId > 0) {
+      return;
+    }
+
+    dragging = false;
+
+    document.removeEventListener('pointermove', onPointerMove);
+    document.removeEventListener('pointerup', onPointerUp);
+    document.removeEventListener('pointercancel', onPointerUp);
+  };
+
+  /**
+   * Handle the `pointerdown` event fired on the slider.
+   * @param {PointerEvent} event `pointerdown` event.
    * @param {number} [valueIndex] Index in the {@link values} array to be used to get/set the value.
    */
-  const onMouseDown = (event, valueIndex = 0) => {
-    const { clientX, screenX } = event;
+  const onPointerDown = (event, valueIndex = 0) => {
+    const { clientX, screenX, pointerId } = event;
+
+    if (disabled || pointerId > 0) {
+      return;
+    }
 
     dragging = true;
     startX = clientX - base.getBoundingClientRect().x;
     startScreenX = screenX;
     targetValueIndex = valueIndex;
-  };
 
-  /**
-   * Handle the `mousemove` event fired anywhere on the page.
-   * @param {MouseEvent} event `mousemove` event.
-   */
-  const onMouseMove = (event) => {
-    if (dragging) {
-      moveThumb(startX + (event.screenX - startScreenX));
-    }
-  };
-
-  /**
-   * Handle the `mouseup` event fired anywhere on the page.
-   */
-  const onMouseUp = () => {
-    if (dragging) {
-      dragging = false;
-    }
+    document.addEventListener('pointermove', onPointerMove);
+    document.addEventListener('pointerup', onPointerUp);
+    document.addEventListener('pointercancel', onPointerUp);
   };
 
   /**
@@ -197,13 +218,11 @@
    * @param {MouseEvent} event `click` event.
    */
   const onClick = (event) => {
-    if (!multiThumb && !dragging) {
-      moveThumb(/** @type {any} */ (event).layerX);
+    if (disabled || multiThumb || dragging) {
+      return;
     }
 
-    if (dragging) {
-      dragging = false;
-    }
+    moveThumb(/** @type {any} */ (event).layerX);
   };
 
   /**
@@ -220,7 +239,10 @@
     }
   };
 
-  onMount(() => {
+  /**
+   * Initialize the variables.
+   */
+  const init = () => {
     barWidth = base.clientWidth;
 
     const stepCount = (max - min) / step + 1;
@@ -230,6 +252,17 @@
     positionList = new Array(stepCount).fill(0).map((_, index) => index * stepWidth);
 
     onValueChange();
+  };
+
+  onMount(() => {
+    const query = window.matchMedia('(pointer: coarse)');
+
+    query.addEventListener('change', init);
+    init();
+
+    return () => {
+      query.removeEventListener('change', init);
+    };
   });
 
   $: {
@@ -240,8 +273,6 @@
 </script>
 
 <svelte:body
-  on:mousemove={onMouseMove}
-  on:mouseup={onMouseUp}
   on:click={() => {
     dragging = false;
   }}
@@ -258,11 +289,7 @@
     class="base"
     role="none"
     bind:this={base}
-    on:click|preventDefault|stopPropagation={(event) => {
-      if (!disabled) {
-        onClick(event);
-      }
-    }}
+    on:click|preventDefault|stopPropagation={(event) => onClick(event)}
   >
     <div
       class="bar"
@@ -281,16 +308,8 @@
       aria-valuemax={max}
       aria-valuenow={multiThumb ? values[0] : value}
       style:left="{sliderPositions[0]}px"
-      on:mousedown={(event) => {
-        if (!disabled) {
-          onMouseDown(event, 0);
-        }
-      }}
-      on:keydown={(event) => {
-        if (!disabled) {
-          onKeyDown(event, 0);
-        }
-      }}
+      on:pointerdown={(event) => onPointerDown(event, 0)}
+      on:keydown={(event) => onKeyDown(event, 0)}
     />
     {#if multiThumb}
       <div
@@ -305,16 +324,8 @@
         aria-valuemax={max}
         aria-valuenow={values[1]}
         style:left="{sliderPositions[1]}px"
-        on:mousedown={(event) => {
-          if (!disabled) {
-            onMouseDown(event, 1);
-          }
-        }}
-        on:keydown={(event) => {
-          if (!disabled) {
-            onKeyDown(event, 1);
-          }
-        }}
+        on:pointerdown={(event) => onPointerDown(event, 1)}
+        on:keydown={(event) => onKeyDown(event, 1)}
       />
     {/if}
     {#if optionLabels.length}
@@ -335,40 +346,44 @@
   .slider {
     position: relative;
     display: inline-block;
-    padding: 16px;
+    padding: var(--sui-checkbox-height) calc(var(--sui-checkbox-height) / 2);
+    touch-action: none;
   }
 
   .base {
     position: relative;
-    width: var(--sui-slider-base-width, 200px);
-    height: 8px;
-    border-radius: 8px;
+    width: var(--sui-slider-base-width, calc(var(--sui-checkbox-height) * 10));
+    height: calc(var(--sui-checkbox-height) / 2);
+    border-radius: var(--sui-checkbox-height);
     background-color: var(--sui-control-border-color);
   }
 
   .bar {
     position: absolute;
     top: 0;
-    height: 8px;
-    border-radius: 8px;
+    height: calc(var(--sui-checkbox-height) / 2);
+    border-radius: var(--sui-checkbox-height);
     background-color: var(--sui-primary-accent-color-lighter);
   }
 
   [role='slider'] {
     position: absolute;
     top: 0;
-    border: 2px solid var(--sui-primary-accent-color-lighter);
-    border-radius: 8px;
-    width: 16px;
-    height: 16px;
+    border: 3px solid var(--sui-primary-accent-color-lighter);
+    border-radius: var(--sui-checkbox-height);
+    width: calc(var(--sui-checkbox-height) - 2px);
+    height: calc(var(--sui-checkbox-height) - 2px);
     background-color: var(--sui-primary-accent-color-foreground);
     cursor: pointer;
-    transform: translate(-8px, -4px);
+    transform: translate(
+      calc((var(--sui-checkbox-height) / 2 - 1px) * -1),
+      calc((var(--sui-checkbox-height) / 4 - 1px) * -1)
+    );
   }
 
   .label {
     position: absolute;
-    top: 12px;
+    top: calc(var(--sui-checkbox-height) / 2 + 8px);
     transform: translateX(-50%);
     font-size: var(--sui-font-size-x-small);
   }

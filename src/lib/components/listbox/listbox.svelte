@@ -75,9 +75,9 @@
     margin: 0;
     border-width: 1px;
     border-color: var(--sui-listbox-border-color);
-    border-radius: 4px;
+    border-radius: var(--sui-listbox-border-radius);
     padding: 4px;
-    min-width: 160px;
+    min-width: var(--sui-listbox-min-width, calc(var(--sui-option-height) * 5));
     color: var(--sui-listbox-foreground-color);
     background-color: var(--sui-listbox-background-color);
     font-family: var(--sui-control-font-family);

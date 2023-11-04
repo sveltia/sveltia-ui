@@ -157,14 +157,17 @@
   --sui-line-height-comfortable: 1.75;
   // Controls
   --sui-control-small-border-width: 1px;
-  --sui-control-small-border-radius: 2px;
+  --sui-control-small-border-radius: calc(var(--sui-control-small-height) / 8);
+  --sui-control-small-padding: 0 calc((var(--sui-control-small-height) / 5));
   --sui-control-small-height: 24px;
   --sui-control-medium-border-width: 1px;
-  --sui-control-medium-border-radius: 4px;
+  --sui-control-medium-border-radius: calc(var(--sui-control-medium-height) / 8);
+  --sui-control-medium-padding: 0 calc((var(--sui-control-medium-height) / 4));
   --sui-control-medium-height: 32px;
   --sui-control-large-border-width: 1px;
-  --sui-control-large-border-radius: 8px;
-  --sui-control-large-height: 40px;
+  --sui-control-large-border-radius: calc(var(--sui-control-large-height) / 8);
+  --sui-control-large-padding: 0 calc((var(--sui-control-large-height) / 3));
+  --sui-control-large-height: 48px;
   --sui-control-border-color: hsl(var(--sui-border-color-1-hsl));
   --sui-control-foreground-color: var(--sui-primary-foreground-color);
   --sui-control-background-color: hsl(var(--sui-background-color-4-hsl));
@@ -173,34 +176,34 @@
   --sui-control-line-height: var(--sui-line-height-default);
   // Button
   --sui-button-small-border-radius: var(--sui-control-small-border-radius);
+  --sui-button-small-padding: var(--sui-control-small-padding);
   --sui-button-small-height: var(--sui-control-small-height);
   --sui-button-medium-border-radius: var(--sui-control-medium-border-radius);
+  --sui-button-medium-padding: var(--sui-control-medium-padding);
   --sui-button-medium-height: var(--sui-control-medium-height);
   --sui-button-large-border-radius: var(--sui-control-large-border-radius);
+  --sui-button-large-padding: var(--sui-control-large-padding);
   --sui-button-large-height: var(--sui-control-large-height);
   --sui-button-border-color: var(--sui-control-border-color);
   --sui-button-background-color: var(--sui-control-background-color);
   // Checkbox
+  --sui-checkbox-border-radius: var(--sui-control-medium-border-radius);
+  --sui-checkbox-height: 20px;
   --sui-checkbox-border-color: var(--sui-control-border-color);
   --sui-checkbox-background-color: var(--sui-control-background-color);
   // Option & menu item
-  --sui-option-small-border-radius: var(--sui-control-small-border-radius);
-  --sui-option-small-height: var(--sui-control-small-height);
-  --sui-option-medium-border-radius: var(--sui-control-medium-border-radius);
-  --sui-option-medium-height: var(--sui-control-medium-height);
-  --sui-option-large-border-radius: var(--sui-control-large-border-radius);
-  --sui-option-large-height: var(--sui-control-large-height);
+  --sui-option-border-radius: var(--sui-control-medium-border-radius);
+  --sui-option-padding: var(--sui-control-medium-padding);
+  --sui-option-height: var(--sui-control-medium-height);
   // Listbox
+  --sui-listbox-border-radius: var(--sui-control-medium-border-radius);
   --sui-listbox-border-color: var(--sui-control-border-color);
   --sui-listbox-foreground-color: var(--sui-control-foreground-color);
   --sui-listbox-background-color: hsl(var(--sui-background-color-1-hsl));
   // Textbox: singleline & multiline text fields
-  --sui-textbox-small-border-radius: var(--sui-control-small-border-radius);
-  --sui-textbox-small-height: var(--sui-control-small-height);
-  --sui-textbox-medium-border-radius: var(--sui-control-medium-border-radius);
-  --sui-textbox-medium-height: var(--sui-control-medium-height);
-  --sui-textbox-large-border-radius: var(--sui-control-large-border-radius);
-  --sui-textbox-large-height: var(--sui-control-large-height);
+  --sui-textbox-border-radius: var(--sui-control-medium-border-radius);
+  --sui-textbox-height: var(--sui-control-medium-height);
+  --sui-textbox-border-color: var(--sui-control-border-color);
   --sui-textbox-foreground-color: var(--sui-control-foreground-color);
   --sui-textbox-background-color: hsl(var(--sui-background-color-1-hsl));
   --sui-textbox-font-family: var(--sui-font-family-default);
@@ -211,4 +214,22 @@
   --sui-tab-small-height: var(--sui-control-small-height);
   --sui-tab-medium-height: var(--sui-control-medium-height);
   --sui-tab-large-height: var(--sui-control-large-height);
+  // Toolbar
+  --sui-primary-toolbar-size: 48px;
+  --sui-secondary-toolbar-size: 40px;
+  // table
+  --sui-primary-row-height: 48px;
+  --sui-secondary-row-height: 40px;
+
+  // Make controls larger on touch devices, e.g. mobile & tablet
+  @media (pointer: coarse) {
+    --sui-control-small-height: 30px;
+    --sui-control-medium-height: 40px;
+    --sui-control-large-height: 60px;
+    --sui-checkbox-height: 24px;
+    --sui-primary-toolbar-size: 56px;
+    --sui-secondary-toolbar-size: 48px;
+    --sui-primary-row-height: 56px;
+    --sui-secondary-row-height: 48px;
+  }
 }

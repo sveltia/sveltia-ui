@@ -163,7 +163,7 @@
     display: flex;
     align-items: center;
     position: relative;
-    min-width: var(--sui-combobox-min-width, 160px);
+    min-width: var(--sui-combobox-min-width, calc(var(--sui-option-height) * 5));
 
     :global(.icon) {
       font-size: var(--sui-font-size-xx-large);
@@ -193,10 +193,10 @@
       align-items: center;
       border-width: 1px;
       border-color: var(--sui-control-border-color);
-      border-radius: 4px;
-      padding: 0 32px 0 8px;
+      border-radius: var(--sui-textbox-border-radius);
+      padding: 0 var(--sui-textbox-height) 0 calc(var(--sui-textbox-height) / 4);
       width: 100%;
-      height: var(--sui-textbox-medium-height);
+      height: var(--sui-textbox-height);
       color: var(--sui-control-foreground-color);
       background-color: var(--sui-disabled-background-color);
       font-family: var(--sui-control-font-family);
@@ -239,7 +239,7 @@
     & + :global([role='listbox']) {
       position: fixed;
       z-index: 100;
-      border-radius: 4px;
+      border-radius: var(--sui-control-medium-border-radius);
       box-shadow: 0 8px 16px var(--sui-popup-shadow-color);
       overflow: auto;
       background-color: var(--sui-secondary-background-color);

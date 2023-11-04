@@ -142,16 +142,17 @@
     :global(button) {
       justify-content: center;
       overflow: hidden;
-      border-width: 1px;
+      border-width: 1.5px;
       border-color: var(--sui-checkbox-border-color);
-      border-radius: 24px;
-      width: 20px;
-      height: 20px;
+      border-radius: var(--sui-checkbox-height);
+      padding: 0;
+      width: var(--sui-checkbox-height);
+      height: var(--sui-checkbox-height);
       background-color: var(--sui-checkbox-background-color);
       transition: all 200ms;
 
       :global(.icon) {
-        font-size: 14px;
+        font-size: calc(var(--sui-checkbox-height) - 6px);
         font-variation-settings:
           'FILL' 1,
           'wght' 400,
@@ -162,7 +163,7 @@
 
     :global(button[aria-checked='true']) {
       border-color: var(--sui-primary-accent-color);
-      color: var(--sui-primary-accent-color);
+      color: var(--sui-primary-accent-color-lighter);
     }
 
     :global(button[aria-checked='false']) {
