@@ -113,7 +113,8 @@
     />
   {/if}
   <Button
-    class="ghost iconic"
+    variant="ghost"
+    iconic={true}
     {hidden}
     {disabled}
     tabindex={readonly || disabled ? -1 : 0}

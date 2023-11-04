@@ -157,7 +157,8 @@
             {/if}
             {#if showClose}
               <Button
-                class="ghost iconic"
+                variant="ghost"
+                iconic={true}
                 on:click={() => {
                   dialog.returnValue = 'close';
                   open = false;
@@ -183,7 +184,7 @@
             <Spacer flex={true} />
             {#if showOk}
               <Button
-                class="primary"
+                variant="primary"
                 label={okLabel || $_('_sui.ok')}
                 disabled={okDisabled}
                 on:click={() => {
@@ -194,7 +195,7 @@
             {/if}
             {#if showCancel}
               <Button
-                class="secondary"
+                variant="secondary"
                 label={cancelLabel || $_('_sui.cancel')}
                 disabled={cancelDisabled}
                 on:click={() => {

@@ -88,7 +88,7 @@
         <span class="sample" style:color="var(--sui-highlight-foreground-color)"> Highlight </span>
         <span class="sample" style:color="var(--sui-primary-foreground-color)"> Primary </span>
         <span class="sample" style:color="var(--sui-secondary-foreground-color)"> Secondary </span>
-        <span class="sample" style:color="var(--sui-tertiary-foreground-color)"> tertiary </span>
+        <span class="sample" style:color="var(--sui-tertiary-foreground-color)"> Tertiary </span>
         <span class="sample" style:color="var(--sui-disabled-foreground-color)"> Disabled </span>
       </div>
     </section>
@@ -137,48 +137,59 @@
       <div class="row">
         <section aria-label="Buttons">
           <div>
-            <Button class="primary" label="Primary" />
-            <Button class="secondary" label="Secondary" />
-            <Button class="tertiary" label="Tertiary" />
-            <Button class="ghost" label="Ghost" />
+            <Button variant="primary" label="Primary" />
+            <Button variant="secondary" label="Secondary" />
+            <Button variant="tertiary" label="Tertiary" />
+            <Button variant="ghost" label="Ghost" />
+            <Button variant="link" label="Link" />
           </div>
         </section>
         <section aria-label="Small Buttons">
           <div>
-            <Button size="small" class="primary" label="Primary" />
-            <Button size="small" class="secondary" label="Secondary" />
-            <Button size="small" class="tertiary" label="Tertiary" />
-            <Button size="small" class="ghost" label="Ghost" />
+            <Button variant="primary" size="small" label="Primary" />
+            <Button variant="secondary" size="small" label="Secondary" />
+            <Button variant="tertiary" size="small" label="Tertiary" />
+            <Button variant="ghost" size="small" label="Ghost" />
+            <Button variant="link" size="small" label="Link" />
           </div>
         </section>
         <section aria-label="Large Buttons">
           <div>
-            <Button size="large" class="primary" label="Primary" />
-            <Button size="large" class="secondary" label="Secondary" />
-            <Button size="large" class="tertiary" label="Tertiary" />
-            <Button size="large" class="ghost" label="Ghost" />
+            <Button variant="primary" size="large" label="Primary" />
+            <Button variant="secondary" size="large" label="Secondary" />
+            <Button variant="tertiary" size="large" label="Tertiary" />
+            <Button variant="ghost" size="large" label="Ghost" />
+            <Button variant="link" size="large" label="Link" />
+          </div>
+        </section>
+        <section aria-label="Pill">
+          <div>
+            <Button variant="primary" pill={true} label="Primary" />
+            <Button variant="secondary" pill={true} label="Secondary" />
+            <Button variant="tertiary" pill={true} label="Tertiary" />
           </div>
         </section>
         <section>
           <h4>Icon Buttons</h4>
           <div>
-            <Button class="secondary" label="Tag">
+            <Button variant="secondary" label="Tag">
               <Icon slot="start-icon" name="sell" />
             </Button>
-            <Button class="primary" label="Add">
+            <Button variant="primary" label="Add">
               <Icon slot="end-icon" name="add" />
             </Button>
-            <Button class="secondary iconic">
+            <Button variant="secondary" iconic={true}>
               <Icon slot="end-icon" name="delete" label="Delete" />
             </Button>
           </div>
         </section>
-        <section aria-label="Select Buttons">
+        <section>
+          <h4>Select Buttons</h4>
           <div>
             <SelectButtonGroup>
-              <SelectButton class="tertiary" selected={true} label="Strawberry" />
-              <SelectButton class="tertiary" label="Grape" />
-              <SelectButton class="tertiary" label="Lemon" />
+              <SelectButton variant="tertiary" selected={true} label="Strawberry" />
+              <SelectButton variant="tertiary" label="Grape" />
+              <SelectButton variant="tertiary" label="Lemon" />
             </SelectButtonGroup>
           </div>
         </section>
@@ -368,7 +379,7 @@
         <section>
           <h4>Menu Button</h4>
           <div>
-            <MenuButton class="tertiary" label="Open Menu">
+            <MenuButton variant="tertiary" label="Open Menu">
               <Icon slot="end-icon" name="arrow_drop_down" />
               <Menu slot="popup">
                 <MenuItem label="Item" />
@@ -386,7 +397,7 @@
         <section>
           <h4>Menu Button with Nested Menu</h4>
           <div>
-            <MenuButton class="tertiary" label="Open Menu">
+            <MenuButton variant="tertiary" label="Open Menu">
               <Icon slot="end-icon" name="arrow_drop_down" />
               <Menu slot="popup">
                 <MenuItem label="Item" />
@@ -480,7 +491,7 @@
           <h4>Standard</h4>
           <div>
             <Button
-              class="secondary"
+              variant="secondary"
               label="Show Drawer: right"
               on:click={() => {
                 openStandardDrawer.right = true;
@@ -492,7 +503,7 @@
           </div>
           <div>
             <Button
-              class="secondary"
+              variant="secondary"
               label="Show Drawer: left"
               on:click={() => {
                 openStandardDrawer.left = true;
@@ -504,7 +515,7 @@
           </div>
           <div>
             <Button
-              class="secondary"
+              variant="secondary"
               label="Show Drawer: top"
               on:click={() => {
                 openStandardDrawer.top = true;
@@ -516,7 +527,7 @@
           </div>
           <div>
             <Button
-              class="secondary"
+              variant="secondary"
               label="Show Drawer: bottom"
               on:click={() => {
                 openStandardDrawer.bottom = true;
@@ -615,7 +626,7 @@
           <h4>Standard</h4>
           <div>
             <Button
-              class="secondary"
+              variant="secondary"
               label="Show Dialog"
               on:click={() => {
                 openStandardDialog = true;
@@ -748,6 +759,7 @@
           display: flex;
           align-items: center;
           gap: 8px;
+          margin-top: 4px;
         }
       }
     }

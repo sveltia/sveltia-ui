@@ -23,7 +23,7 @@
   export { className as class };
   /**
    * The `type` attribute on the `<button>` element.
-   * @type {('button'|'submit'|'reset')}
+   * @type {'button' | 'submit' | 'reset'}
    */
   export let type = 'button';
   /**
@@ -68,10 +68,23 @@
    */
   export let label = '';
   /**
-   * The height of the button.
-   * @type {('small'|'medium'|'large')}
+   * The style variant of the button.
+   * @type {'primary' | 'secondary' | 'tertiary' | 'ghost' | 'link' | undefined}
+   */
+  export let variant = undefined;
+  /**
+   * The size of the button.
+   * @type {'small' | 'medium' | 'large'}
    */
   export let size = 'medium';
+  /**
+   * Whether to only show an icon on the button and trim the padding.
+   */
+  export let iconic = false;
+  /**
+   * Whether to make the button rounded.
+   */
+  export let pill = false;
   /**
    * Where to show the dropdown menu.
    * @type {PopupPosition}
@@ -86,7 +99,9 @@
 </script>
 
 <button
-  class="sui button {size} {className}"
+  class="sui button {variant ?? ''} {size} {className}"
+  class:iconic
+  class:pill
   {type}
   {name}
   {value}
@@ -248,8 +263,15 @@
       }
     }
 
-    &:global(.danger) {
-      background-color: var(--sui-error-background-color);
+    &:global(.link) {
+      outline: 0;
+      color: var(--sui-primary-accent-color-lighter);
+
+      &:hover,
+      &:focus,
+      &:active {
+        text-decoration: underline;
+      }
     }
 
     &:global(.small) {
@@ -277,18 +299,18 @@
     }
 
     &:global(.pill) {
-      border-radius: var(--sui-button-medium-pill-height, 16px);
-      padding: var(--sui-button-medium-pill-padding, 0 16px);
-    }
-
-    &:global(.link) {
-      color: var(--sui-primary-accent-color-lighter);
+      border-radius: 80px;
+      padding: var(--sui-button-medium-pill-padding, 0 12px);
     }
 
     &:global(.iconic) {
       justify-content: center;
       padding: 0;
       aspect-ratio: 1 / 1;
+    }
+
+    &:global(.danger) {
+      background-color: var(--sui-error-background-color);
     }
 
     :global(.label) {
