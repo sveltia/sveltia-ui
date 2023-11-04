@@ -34,6 +34,25 @@
    * @type {boolean}
    */
   export let disabled = false;
+  /**
+   * Text label displayed on the button.
+   * @type {string}
+   */
+  export let label = '';
+  /**
+   * The style variant of the button.
+   * @type {'primary' | 'secondary' | 'tertiary' | 'ghost' | 'link' | undefined}
+   */
+  export let variant = undefined;
+  /**
+   * The size of the button.
+   * @type {'small' | 'medium' | 'large'}
+   */
+  export let size = 'medium';
+  /**
+   * Whether to only show an icon on the button and trim the padding.
+   */
+  export let iconic = false;
 </script>
 
 <Button
@@ -41,6 +60,10 @@
   {value}
   {hidden}
   {disabled}
+  {label}
+  {variant}
+  {size}
+  {iconic}
   role="radio"
   aria-checked={selected}
   {...$$restProps}

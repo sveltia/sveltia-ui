@@ -29,10 +29,24 @@
    */
   export let popupPosition = 'bottom-left';
   /**
-   * Text label displayed on the item.
-   * @type {string | undefined}
+   * Text label displayed on the button.
+   * @type {string}
    */
   export let label = '';
+  /**
+   * The style variant of the button.
+   * @type {'primary' | 'secondary' | 'tertiary' | 'ghost' | 'link' | undefined}
+   */
+  export let variant = undefined;
+  /**
+   * The size of the button.
+   * @type {'small' | 'medium' | 'large'}
+   */
+  export let size = 'medium';
+  /**
+   * Whether to only show an icon on the button and trim the padding.
+   */
+  export let iconic = false;
 
   /**
    * Reference to the `Button` component.
@@ -55,9 +69,12 @@
 
 <Button
   class="sui menu-button {className}"
-  {label}
   {hidden}
   {disabled}
+  {label}
+  {variant}
+  {size}
+  {iconic}
   aria-haspopup="menu"
   {...$$restProps}
   bind:this={buttonComponent}

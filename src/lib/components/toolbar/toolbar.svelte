@@ -26,10 +26,15 @@
    * @type {'horizontal' | 'vertical'}
    */
   export let orientation = 'horizontal';
+  /**
+   * The style variant of the toolbar.
+   * @type {'primary' | 'secondary' | undefined}
+   */
+  export let variant = undefined;
 </script>
 
 <div
-  class="sui toolbar {orientation} {className}"
+  class="sui toolbar {orientation} {variant ?? ''} {className}"
   role="toolbar"
   hidden={hidden || undefined}
   aria-hidden={hidden}
