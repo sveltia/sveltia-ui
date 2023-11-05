@@ -151,7 +151,7 @@
       {#if showClose === 'outside'}
         <Button
           variant="ghost"
-          iconic={true}
+          iconic
           class="close"
           on:click={() => {
             dialog.returnValue = 'close';
@@ -178,7 +178,7 @@
             {#if showClose === 'inside'}
               <Button
                 variant="ghost"
-                iconic={true}
+                iconic
                 class="close"
                 on:click={() => {
                   dialog.returnValue = 'close';

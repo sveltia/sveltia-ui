@@ -66,7 +66,13 @@
   };
 </script>
 
-<div class="sui search-bar {className}" role="search" hidden={hidden || undefined}>
+<div
+  class="sui search-bar {className}"
+  class:disabled
+  role="search"
+  hidden={hidden || undefined}
+  aria-hidden={hidden}
+>
   <span>
     <Icon name="search" />
   </span>
@@ -88,7 +94,7 @@
   />
   {#if value}
     <Button
-      class="iconic"
+      iconic
       on:click={() => {
         value = '';
         input?.focus();

@@ -158,7 +158,7 @@
             {#if showClose}
               <Button
                 variant="ghost"
-                iconic={true}
+                iconic
                 on:click={() => {
                   dialog.returnValue = 'close';
                   open = false;

@@ -50,6 +50,7 @@
 
     :global([role='separator']) {
       margin: 4px;
+      background-color: var(--sui-control-border-color);
     }
   }
 </style>

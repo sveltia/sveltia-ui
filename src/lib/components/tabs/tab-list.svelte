@@ -92,7 +92,7 @@
     }
 
     :global(button[aria-selected='true']) {
-      border-color: var(--sui-primary-accent-color-lighter);
+      border-color: var(--sui-primary-accent-color-light);
     }
   }
 

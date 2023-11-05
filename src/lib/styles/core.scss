@@ -14,7 +14,9 @@
     "opsz" 24;
 }
 
-* {
+*,
+::before,
+::after {
   overflow-anchor: none;
   scroll-behavior: smooth;
   box-sizing: border-box;
@@ -33,7 +35,7 @@
 }
 
 :focus-visible {
-  outline-color: var(--sui-primary-accent-color-lighter);
+  outline-color: var(--sui-primary-accent-color-light);
 }
 
 h1,
@@ -51,7 +53,7 @@ strong {
 }
 
 a {
-  color: var(--sui-primary-accent-color-lighter);
+  color: var(--sui-primary-accent-color-text);
   text-decoration: none;
 }
 
@@ -94,12 +96,25 @@ dialog {
   }
 }
 
-[disabled],
-[inert],
+.disabled,
+[aria-disabled="true"],
+[inert] {
+  cursor: default;
+  pointer-events: none;
+  -webkit-user-select: none;
+  user-select: none;
+  filter: grayscale(1) opacity(0.35);
+
+  :global(*) {
+    filter: grayscale(0) opacity(1); // Maintain the opacity on child nodes
+  }
+}
+
+.disabled *,
+[aria-disabled="true"] *,
 [inert] * {
   cursor: default;
   pointer-events: none;
   -webkit-user-select: none;
   user-select: none;
-  filter: grayscale(1) opacity(0.4);
 }

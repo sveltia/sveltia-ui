@@ -82,7 +82,7 @@
 
     :global(button[role='button'][aria-pressed='true']),
     :global(button[role='button'][aria-checked='true']) {
-      background-color: var(--sui-highlight-background-color);
+      background-color: var(--sui-selected-background-color);
     }
 
     :global(h2) {

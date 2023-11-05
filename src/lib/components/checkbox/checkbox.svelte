@@ -138,21 +138,13 @@
     -webkit-user-select: none;
     user-select: none;
 
-    &.disabled {
-      cursor: default;
-
-      label {
-        color: var(--sui-disabled-foreground-color);
-      }
-    }
-
     &:hover {
       :global(button) {
-        background-color: var(--sui-highlight-background-color);
+        background-color: var(--sui-hover-background-color);
       }
 
       :global(button[aria-checked='true']) {
-        background-color: var(--sui-primary-accent-color-lighter);
+        background-color: var(--sui-primary-accent-color-light);
       }
     }
 
@@ -162,7 +154,7 @@
       }
 
       :global(button[aria-checked='true']) {
-        background-color: var(--sui-primary-accent-color-darker);
+        background-color: var(--sui-primary-accent-color-dark);
       }
     }
 
@@ -176,7 +168,7 @@
       padding: 0;
       width: var(--sui-checkbox-height);
       height: var(--sui-checkbox-height);
-      color: var(--sui-primary-accent-color-lighter);
+      color: var(--sui-primary-accent-text-color);
       background-color: var(--sui-checkbox-background-color);
       transition: all 200ms;
 
@@ -187,7 +179,7 @@
 
     :global(button[aria-checked='true']) {
       border-color: var(--sui-primary-accent-color);
-      color: var(--sui-primary-accent-color-foreground);
+      color: var(--sui-primary-accent-color-inverted);
       background-color: var(--sui-primary-accent-color);
     }
 

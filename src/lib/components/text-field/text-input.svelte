@@ -79,7 +79,7 @@
   $: ariaLabel = $$restProps['aria-label'];
 </script>
 
-<div class="sui text-input {className}" hidden={hidden || undefined}>
+<div class="sui text-input {className}" class:disabled hidden={hidden || undefined}>
   <input
     type="text"
     {role}
@@ -145,8 +145,6 @@
 
     &:disabled {
       background-color: var(--sui-disabled-background-color);
-      opacity: 0.4;
-      cursor: default;
     }
 
     &[aria-invalid='true'] {

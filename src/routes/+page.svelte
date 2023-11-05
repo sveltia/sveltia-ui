@@ -65,9 +65,6 @@
     <section>
       <h3>Background</h3>
       <div class="color-samples">
-        <span class="sample" style:background-color="var(--sui-highlight-background-color)">
-          Highlight
-        </span>
         <span class="sample" style:background-color="var(--sui-primary-background-color)">
           Primary
         </span>
@@ -85,7 +82,6 @@
     <section>
       <h3>Foreground</h3>
       <div class="color-samples">
-        <span class="sample" style:color="var(--sui-highlight-foreground-color)"> Highlight </span>
         <span class="sample" style:color="var(--sui-primary-foreground-color)"> Primary </span>
         <span class="sample" style:color="var(--sui-secondary-foreground-color)"> Secondary </span>
         <span class="sample" style:color="var(--sui-tertiary-foreground-color)"> Tertiary </span>
@@ -135,7 +131,8 @@
     <section>
       <h3>Buttons &amp; Toggles</h3>
       <div class="row">
-        <section aria-label="Buttons">
+        <section>
+          <h4>Medium Buttons</h4>
           <div>
             <Button variant="primary" label="Primary" />
             <Button variant="secondary" label="Secondary" />
@@ -144,7 +141,18 @@
             <Button variant="link" label="Link" />
           </div>
         </section>
-        <section aria-label="Small Buttons">
+        <section>
+          <h4>Disabled Buttons</h4>
+          <div>
+            <Button variant="primary" label="Primary" disabled />
+            <Button variant="secondary" label="Secondary" disabled />
+            <Button variant="tertiary" label="Tertiary" disabled />
+            <Button variant="ghost" label="Ghost" disabled />
+            <Button variant="link" label="Link" disabled />
+          </div>
+        </section>
+        <section>
+          <h4>Small Buttons</h4>
           <div>
             <Button variant="primary" size="small" label="Primary" />
             <Button variant="secondary" size="small" label="Secondary" />
@@ -153,7 +161,8 @@
             <Button variant="link" size="small" label="Link" />
           </div>
         </section>
-        <section aria-label="Large Buttons">
+        <section>
+          <h4>Large Buttons</h4>
           <div>
             <Button variant="primary" size="large" label="Primary" />
             <Button variant="secondary" size="large" label="Secondary" />
@@ -162,7 +171,8 @@
             <Button variant="link" size="large" label="Link" />
           </div>
         </section>
-        <section aria-label="Pill">
+        <section>
+          <h4>Pill</h4>
           <div>
             <Button variant="primary" pill={true} label="Primary" />
             <Button variant="secondary" pill={true} label="Secondary" />
@@ -178,7 +188,18 @@
             <Button variant="primary" label="Add">
               <Icon slot="end-icon" name="add" />
             </Button>
-            <Button variant="secondary" iconic={true}>
+            <Button variant="secondary" iconic>
+              <Icon slot="end-icon" name="delete" label="Delete" />
+            </Button>
+          </div>
+          <div>
+            <Button variant="secondary" label="Tag" disabled>
+              <Icon slot="start-icon" name="sell" />
+            </Button>
+            <Button variant="primary" label="Add" disabled>
+              <Icon slot="end-icon" name="add" />
+            </Button>
+            <Button variant="secondary" iconic disabled>
               <Icon slot="end-icon" name="delete" label="Delete" />
             </Button>
           </div>
@@ -187,33 +208,66 @@
           <h4>Select Buttons</h4>
           <div>
             <SelectButtonGroup>
-              <SelectButton variant="tertiary" selected={true} label="Strawberry" />
+              <SelectButton variant="tertiary" selected label="Strawberry" />
               <SelectButton variant="tertiary" label="Grape" />
               <SelectButton variant="tertiary" label="Lemon" />
+              <SelectButton variant="tertiary" label="Orange" disabled />
+            </SelectButtonGroup>
+          </div>
+          <div>
+            <SelectButtonGroup disabled>
+              <SelectButton variant="tertiary" selected label="Strawberry" />
+              <SelectButton variant="tertiary" label="Grape" />
+              <SelectButton variant="tertiary" label="Lemon" />
+              <SelectButton variant="tertiary" label="Orange" disabled />
             </SelectButtonGroup>
           </div>
         </section>
-        <section aria-label="Radio Buttons">
+        <section>
+          <h4>Radio Buttons</h4>
           <div>
             <RadioGroup>
-              <Radio checked={true}>Strawberry</Radio>
+              <Radio checked>Strawberry</Radio>
               <Radio>Grape</Radio>
               <Radio>Lemon</Radio>
+              <Radio disabled>Orange</Radio>
+            </RadioGroup>
+          </div>
+          <div>
+            <RadioGroup disabled>
+              <Radio checked>Strawberry</Radio>
+              <Radio>Grape</Radio>
+              <Radio>Lemon</Radio>
+              <Radio disabled>Orange</Radio>
             </RadioGroup>
           </div>
         </section>
-        <section aria-label="Checkboxes">
+        <section>
+          <h4>Checkboxes</h4>
           <div>
             <CheckboxGroup aria-label="Ingredients">
-              <Checkbox name="ingredients" value="rice" checked={true}>Rice</Checkbox>
+              <Checkbox name="ingredients" value="rice" checked>Rice</Checkbox>
               <Checkbox name="ingredients" value="beans" checked={false}>Beans</Checkbox>
               <Checkbox name="ingredients" value="cheese" checked="mixed">Cheese</Checkbox>
+              <Checkbox name="ingredients" value="cheese" disabled>Lettuce</Checkbox>
+            </CheckboxGroup>
+          </div>
+          <div>
+            <CheckboxGroup aria-label="Ingredients" disabled>
+              <Checkbox name="ingredients" value="rice" checked>Rice</Checkbox>
+              <Checkbox name="ingredients" value="beans" checked={false}>Beans</Checkbox>
+              <Checkbox name="ingredients" value="cheese" checked="mixed">Cheese</Checkbox>
+              <Checkbox name="ingredients" value="cheese" disabled>Lettuce</Checkbox>
             </CheckboxGroup>
           </div>
         </section>
-        <section aria-label="Switch">
+        <section>
+          <h4>Switches</h4>
           <div>
             <Switch>Option 3</Switch>
+          </div>
+          <div>
+            <Switch disabled>Option 3</Switch>
           </div>
         </section>
       </div>
@@ -226,10 +280,23 @@
             <Slider />
           </div>
           <div>
+            <Slider disabled />
+          </div>
+          <div>
             <Slider values={[1, 5]} min={1} max={5} step={0.1} optionLabels={[1, 2, 3, 4, 5]} />
           </div>
           <div>
             <Slider values={[0, 24]} min={0} max={24} step={3} optionLabels={[0, 6, 12, 18, 24]} />
+          </div>
+          <div>
+            <Slider
+              values={[0, 24]}
+              min={0}
+              max={24}
+              step={3}
+              optionLabels={[0, 6, 12, 18, 24]}
+              disabled
+            />
           </div>
         </section>
       </div>
@@ -241,11 +308,20 @@
           <h4>Single Select</h4>
           <div>
             <Listbox>
-              <Option label="Option 1" selected={true} />
+              <Option label="Option 1" selected />
               <Option label="Option 2" />
               <Option label="Option 3" />
               <Option label="Option 4" />
-              <Option label="Option 5" />
+              <Option label="Option 5" disabled />
+            </Listbox>
+          </div>
+          <div>
+            <Listbox disabled>
+              <Option label="Option 1" selected />
+              <Option label="Option 2" />
+              <Option label="Option 3" />
+              <Option label="Option 4" />
+              <Option label="Option 5" disabled />
             </Listbox>
           </div>
         </section>
@@ -253,11 +329,11 @@
           <h4>Multi Select</h4>
           <div>
             <Listbox multiple={true}>
-              <Option label="Option 1" selected={true} />
+              <Option label="Option 1" selected />
               <Option label="Option 2" />
-              <Option label="Option 3" selected={true} />
+              <Option label="Option 3" selected />
               <Option label="Option 4" />
-              <Option label="Option 5" />
+              <Option label="Option 5" disabled />
             </Listbox>
           </div>
         </section>
@@ -266,13 +342,13 @@
           <div>
             <Listbox>
               <OptionGroup label="Group 1">
-                <Option label="Option 1" selected={true} />
+                <Option label="Option 1" selected />
                 <Option label="Option 2" />
               </OptionGroup>
               <OptionGroup label="Group 2">
                 <Option label="Option 3" />
                 <Option label="Option 4" />
-                <Option label="Option 5" />
+                <Option label="Option 5" disabled />
               </OptionGroup>
             </Listbox>
           </div>
@@ -282,7 +358,7 @@
           <div>
             <Listbox class="tabs">
               <OptionGroup label="Group 1">
-                <Option label="Option 1" selected={true} />
+                <Option label="Option 1" selected />
                 <Option label="Option 2" />
               </OptionGroup>
               <OptionGroup label="Group 2">
@@ -302,12 +378,22 @@
           <h4>Default</h4>
           <div>
             <Select>
-              <Option label="Option 1" selected={true} />
+              <Option label="Option 1" selected />
               <Option label="Option 2" />
               <Option label="Option 3" />
               <Divider />
               <Option label="Option 4" />
-              <Option label="Option 5" />
+              <Option label="Option 5" disabled />
+            </Select>
+          </div>
+          <div>
+            <Select disabled>
+              <Option label="Option 1" selected />
+              <Option label="Option 2" />
+              <Option label="Option 3" />
+              <Divider />
+              <Option label="Option 4" />
+              <Option label="Option 5" disabled />
             </Select>
           </div>
         </section>
@@ -319,12 +405,22 @@
           <h4>Auto-complete</h4>
           <div>
             <Combobox>
-              <Option label="Option 1" selected={true} />
+              <Option label="Option 1" selected />
               <Option label="Option 2" />
               <Option label="Option 3" />
               <Divider />
               <Option label="Option 4" />
-              <Option label="Option 5" />
+              <Option label="Option 5" disabled />
+            </Combobox>
+          </div>
+          <div>
+            <Combobox disabled>
+              <Option label="Option 1" selected />
+              <Option label="Option 2" />
+              <Option label="Option 3" />
+              <Divider />
+              <Option label="Option 4" />
+              <Option label="Option 5" disabled />
             </Combobox>
           </div>
         </section>
@@ -342,17 +438,26 @@
           <div>
             <TextInput />
           </div>
+          <div>
+            <TextInput disabled />
+          </div>
         </section>
         <section>
           <h4>Password</h4>
           <div>
             <PasswordInput />
           </div>
+          <div>
+            <PasswordInput disabled />
+          </div>
         </section>
         <section>
           <h4>Number</h4>
           <div>
-            <NumberInput />
+            <NumberInput min={0} />
+          </div>
+          <div>
+            <NumberInput min={0} disabled />
           </div>
         </section>
         <section>
@@ -364,11 +469,17 @@
           <div>
             <SearchBar />
           </div>
+          <div>
+            <SearchBar disabled />
+          </div>
         </section>
         <section>
           <h4>Multi line</h4>
           <div>
             <TextArea />
+          </div>
+          <div>
+            <TextArea disabled />
           </div>
         </section>
       </div>
@@ -383,12 +494,27 @@
               <Icon slot="end-icon" name="arrow_drop_down" />
               <Menu slot="popup">
                 <MenuItem label="Item" />
-                <MenuItem label="Item" disabled={true} />
+                <MenuItem label="Item" disabled />
                 <Divider />
-                <MenuItemCheckbox label="Item" checked={true} />
+                <MenuItemCheckbox label="Item" checked />
                 <MenuItemCheckbox label="Item" checked={false} />
                 <Divider />
-                <MenuItemRadio label="Item" checked={true} />
+                <MenuItemRadio label="Item" checked />
+                <MenuItemRadio label="Item" checked={false} />
+              </Menu>
+            </MenuButton>
+          </div>
+          <div>
+            <MenuButton variant="tertiary" label="Open Menu" disabled>
+              <Icon slot="end-icon" name="arrow_drop_down" />
+              <Menu slot="popup">
+                <MenuItem label="Item" />
+                <MenuItem label="Item" disabled />
+                <Divider />
+                <MenuItemCheckbox label="Item" checked />
+                <MenuItemCheckbox label="Item" checked={false} />
+                <Divider />
+                <MenuItemRadio label="Item" checked />
                 <MenuItemRadio label="Item" checked={false} />
               </Menu>
             </MenuButton>
@@ -406,14 +532,14 @@
                   <MenuItem label="Child Item 2" />
                   <MenuItem label="Child Item 3" />
                   <Divider />
-                  <MenuItemCheckbox label="Child Item 4" checked={true} />
+                  <MenuItemCheckbox label="Child Item 4" checked />
                 </MenuItem>
-                <MenuItem label="Item" disabled={true} />
+                <MenuItem label="Item" disabled />
                 <Divider />
-                <MenuItemCheckbox label="Item" checked={true} />
+                <MenuItemCheckbox label="Item" checked />
                 <MenuItemCheckbox label="Item" checked={false} />
                 <Divider />
-                <MenuItemRadio label="Item" checked={true} />
+                <MenuItemRadio label="Item" checked />
                 <MenuItemRadio label="Item" checked={false} />
               </Menu>
             </MenuButton>
@@ -438,7 +564,12 @@
       <div class="row">
         <section>
           <h4>Disclosure</h4>
-          <Disclosure label="Event Details">Details?</Disclosure>
+          <div>
+            <Disclosure label="Event Details">Details?</Disclosure>
+          </div>
+          <div>
+            <Disclosure label="Event Details" disabled>Details?</Disclosure>
+          </div>
         </section>
         <section>
           <h4>Accordion</h4>
@@ -462,25 +593,49 @@
       <h3>Tabs</h3>
       <div class="row">
         <section>
-          <TabList>
-            <Tab label="Tab 1" aria-controls="tabpanel-1" />
-            <Tab label="Tab 2" aria-controls="tabpanel-2" />
-            <Tab label="Tab 3" aria-controls="tabpanel-3" />
-          </TabList>
-          <!-- cSpell:disable -->
-          <TabPanel id="tabpanel-1">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam pulvinar scelerisque
-            tincidunt. Curabitur vel vehicula mauris.
-          </TabPanel>
-          <TabPanel id="tabpanel-2">
-            Etiam laoreet elementum quam ac blandit. Present magna massa, interdum sed leo quis,
-            mollis mattis justo. Sed porta suscipit feugiat.
-          </TabPanel>
-          <TabPanel id="tabpanel-3">
-            Morbi scelerisque dui est, non ultricies dui sollicitudin ac. Sed quis ex eu massa
-            sollicitudin malesuada. Ut et vulputate lacus, bibendum viverra quam.
-          </TabPanel>
-          <!-- cSpell:enable -->
+          <h4>Tabs</h4>
+          <div>
+            <TabList>
+              <Tab label="Tab 1" aria-controls="tabpanel-1" />
+              <Tab label="Tab 2" aria-controls="tabpanel-2" />
+              <Tab label="Tab 3" aria-controls="tabpanel-3" />
+            </TabList>
+            <!-- cSpell:disable -->
+            <TabPanel id="tabpanel-1">
+              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam pulvinar scelerisque
+              tincidunt. Curabitur vel vehicula mauris.
+            </TabPanel>
+            <TabPanel id="tabpanel-2">
+              Etiam laoreet elementum quam ac blandit. Present magna massa, interdum sed leo quis,
+              mollis mattis justo. Sed porta suscipit feugiat.
+            </TabPanel>
+            <TabPanel id="tabpanel-3">
+              Morbi scelerisque dui est, non ultricies dui sollicitudin ac. Sed quis ex eu massa
+              sollicitudin malesuada. Ut et vulputate lacus, bibendum viverra quam.
+            </TabPanel>
+            <!-- cSpell:enable -->
+          </div>
+          <div>
+            <TabList disabled>
+              <Tab label="Tab 1" aria-controls="tabpanel-1" />
+              <Tab label="Tab 2" aria-controls="tabpanel-2" />
+              <Tab label="Tab 3" aria-controls="tabpanel-3" />
+            </TabList>
+            <!-- cSpell:disable -->
+            <TabPanel id="tabpanel-1">
+              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam pulvinar scelerisque
+              tincidunt. Curabitur vel vehicula mauris.
+            </TabPanel>
+            <TabPanel id="tabpanel-2">
+              Etiam laoreet elementum quam ac blandit. Present magna massa, interdum sed leo quis,
+              mollis mattis justo. Sed porta suscipit feugiat.
+            </TabPanel>
+            <TabPanel id="tabpanel-3">
+              Morbi scelerisque dui est, non ultricies dui sollicitudin ac. Sed quis ex eu massa
+              sollicitudin malesuada. Ut et vulputate lacus, bibendum viverra quam.
+            </TabPanel>
+            <!-- cSpell:enable -->
+          </div>
         </section>
       </div>
     </section>
@@ -755,11 +910,11 @@
         border: 0;
         padding: 0;
 
-        h4 + div {
+        h4 ~ div {
           display: flex;
           align-items: center;
           gap: 8px;
-          margin-top: 4px;
+          margin-top: 8px;
         }
       }
     }

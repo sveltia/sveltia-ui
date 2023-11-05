@@ -81,6 +81,10 @@
     &.vertical {
       gap: 8px;
       flex-direction: column;
+
+      @media (pointer: coarse) {
+        gap: 16px;
+      }
     }
   }
 

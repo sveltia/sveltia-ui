@@ -221,12 +221,12 @@
         border-radius: 50%;
 
         &:hover {
-          background-color: var(--sui-highlight-background-color);
+          background-color: var(--sui-hover-background-color);
         }
 
         &:focus {
           border-width: 1px;
-          border-color: var(--sui-primary-accent-color-lighter);
+          border-color: var(--sui-primary-accent-color-light);
         }
       }
     }

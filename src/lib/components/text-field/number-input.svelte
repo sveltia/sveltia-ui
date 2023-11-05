@@ -95,7 +95,7 @@
   };
 </script>
 
-<div class="sui number-input {className}" hidden={hidden || undefined}>
+<div class="sui number-input {className}" class:disabled hidden={hidden || undefined}>
   <TextInput
     bind:this={component}
     bind:value
@@ -127,7 +127,7 @@
     on:input
   />
   <Button
-    class="iconic"
+    iconic
     disabled={disabled || Number.isNaN(Number(value)) || isMin}
     on:click={() => {
       decrease();
@@ -136,7 +136,7 @@
     <Icon slot="start-icon" name="arrow_downward" label={$_('_sui.number_input.decrease')} />
   </Button>
   <Button
-    class="iconic"
+    iconic
     disabled={disabled || Number.isNaN(Number(value)) || isMax}
     on:click={() => {
       increase();
@@ -174,6 +174,17 @@
 
       :global(.icon) {
         font-size: var(--sui-font-size-xx-large);
+      }
+    }
+
+    // Maintain the border opacity
+    &:not(.disabled) {
+      :global(button[aria-disabled='true']) {
+        filter: grayscale(0) opacity(1);
+
+        :global(*) {
+          filter: grayscale(1) opacity(0.35);
+        }
       }
     }
   }

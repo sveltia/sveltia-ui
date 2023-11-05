@@ -72,14 +72,14 @@
   ];
 </script>
 
-<div class="wrapper" hidden={hidden || undefined} {...$$restProps}>
+<div class="wrapper" class:disabled hidden={hidden || undefined} {...$$restProps}>
   <div class="inner" inert={disabled}>
     <Toolbar aria-label={$_('_sui.markdown_editor.markdown_editor')}>
       {#each defaultButtons as { label, icon, separator }}
         {#if separator}
           <Divider />
         {:else}
-          <Button class="iconic" {disabled}>
+          <Button iconic {disabled}>
             <Icon slot="start-icon" name={icon} {label} />
           </Button>
         {/if}

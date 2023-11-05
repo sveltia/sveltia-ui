@@ -8,7 +8,6 @@
 <script>
   import { getRandomId } from '../../services/util';
   import Button from '../button/button.svelte';
-  import Icon from '../icon/icon.svelte';
 
   /**
    * The `class` attribute on the wrapper element.
@@ -58,6 +57,7 @@
 
 <span
   class="sui radio {className}"
+  class:disabled
   role="none"
   hidden={hidden || undefined}
   {...$$restProps}
@@ -82,9 +82,7 @@
       checked = true;
     }}
     on:select
-  >
-    <Icon slot="start-icon" name="circle" />
-  </Button>
+  />
   {#if $$slots.default || label}
     <label id="{id}-label">
       {#if $$slots.default}
@@ -109,22 +107,18 @@
     -webkit-user-select: none;
     user-select: none;
 
-    &.disabled {
-      cursor: default;
-
-      label {
-        color: var(--sui-disabled-foreground-color);
-      }
-    }
-
     &:hover {
       :global(button) {
-        background-color: var(--sui-highlight-background-color);
+        background-color: var(--sui-hover-background-color);
       }
 
       :global(button[aria-checked='true']) {
-        border-color: var(--sui-primary-accent-color-lighter);
-        color: var(--sui-primary-accent-color-lighter);
+        border-color: var(--sui-primary-accent-color-light);
+        color: var(--sui-primary-accent-color-text);
+      }
+
+      :global(button[aria-checked='true']::before) {
+        background-color: var(--sui-primary-accent-color-light);
       }
     }
 
@@ -134,8 +128,8 @@
       }
 
       :global(button[aria-checked='true']) {
-        border-color: var(--sui-primary-accent-color-darker);
-        color: var(--sui-primary-accent-color-darker);
+        border-color: var(--sui-primary-accent-color-dark);
+        color: var(--sui-primary-accent-color-dark);
       }
     }
 
@@ -150,24 +144,24 @@
       height: var(--sui-checkbox-height);
       background-color: var(--sui-checkbox-background-color);
       transition: all 200ms;
+    }
 
-      :global(.icon) {
-        font-size: calc(var(--sui-checkbox-height) - 6px);
-        font-variation-settings:
-          'FILL' 1,
-          'wght' 400,
-          'GRAD' 0,
-          'opsz' 48;
-      }
+    :global(button::before) {
+      content: '';
+      border-radius: var(--sui-checkbox-height);
+      width: calc(var(--sui-checkbox-height) - 7px);
+      height: calc(var(--sui-checkbox-height) - 7px);
+      background-color: var(--sui-primary-accent-color);
+      transition: all 200ms;
+      will-change: opacity;
     }
 
     :global(button[aria-checked='true']) {
       border-color: var(--sui-primary-accent-color);
-      color: var(--sui-primary-accent-color-lighter);
     }
 
-    :global(button[aria-checked='false']) {
-      color: transparent;
+    :global(button[aria-checked='false']::before) {
+      opacity: 0;
     }
 
     label {

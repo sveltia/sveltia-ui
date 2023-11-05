@@ -280,6 +280,7 @@
 
 <div
   class="sui slider {className}"
+  class:disabled
   role="none"
   hidden={hidden || undefined}
   {...$$restProps}
@@ -291,8 +292,9 @@
     bind:this={base}
     on:click|preventDefault|stopPropagation={(event) => onClick(event)}
   >
+    <div class="base-bar" />
     <div
-      class="bar"
+      class="slider-bar"
       style:left="{multiThumb ? sliderPositions[0] : 0}px"
       style:width="{multiThumb ? sliderPositions[1] - sliderPositions[0] : sliderPositions[0]}px"
     />
@@ -348,32 +350,54 @@
     display: inline-block;
     padding: var(--sui-checkbox-height) calc(var(--sui-checkbox-height) / 2);
     touch-action: none;
+
+    &:hover {
+      .base-bar {
+        background-color: var(--sui-hover-background-color);
+      }
+    }
+
+    &:active {
+      .base-bar {
+        background-color: var(--sui-active-background-color);
+      }
+    }
   }
 
   .base {
     position: relative;
     width: var(--sui-slider-base-width, calc(var(--sui-checkbox-height) * 10));
     height: calc(var(--sui-checkbox-height) / 2);
-    border-radius: var(--sui-checkbox-height);
-    background-color: var(--sui-control-border-color);
+    cursor: pointer;
   }
 
-  .bar {
+  .base-bar {
+    border-width: 1px;
+    border-style: solid;
+    border-color: var(--sui-control-border-color);
+    border-radius: var(--sui-checkbox-height);
+    background-color: var(--sui-button-background-color);
+    transition: all 200ms;
+    width: 100%;
+    height: 100%;
+  }
+
+  .slider-bar {
     position: absolute;
     top: 0;
     height: calc(var(--sui-checkbox-height) / 2);
     border-radius: var(--sui-checkbox-height);
-    background-color: var(--sui-primary-accent-color-lighter);
+    background-color: var(--sui-primary-accent-color-light);
   }
 
   [role='slider'] {
     position: absolute;
     top: 0;
-    border: 3px solid var(--sui-primary-accent-color-lighter);
+    border: 3px solid var(--sui-primary-accent-color-light);
     border-radius: var(--sui-checkbox-height);
     width: calc(var(--sui-checkbox-height) - 2px);
     height: calc(var(--sui-checkbox-height) - 2px);
-    background-color: var(--sui-primary-accent-color-foreground);
+    background-color: var(--sui-primary-accent-color-inverted);
     cursor: pointer;
     transform: translate(
       calc((var(--sui-checkbox-height) / 2 - 1px) * -1),

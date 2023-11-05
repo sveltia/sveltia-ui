@@ -74,7 +74,7 @@
   export let variant = undefined;
   /**
    * The size of the button.
-   * @type {'small' | 'medium' | 'large'}
+   * @type {'small' | 'medium' | 'large' | undefined}
    */
   export let size = 'medium';
   /**
@@ -173,12 +173,6 @@
       display: none !important;
     }
 
-    &[disabled] {
-      opacity: 0.4;
-      cursor: default;
-      pointer-events: none;
-    }
-
     &:global(.primary),
     &:global(.secondary),
     &:global(.tertiary),
@@ -193,29 +187,29 @@
 
     &:global(.primary) {
       border-color: var(--sui-primary-accent-color);
-      color: var(--sui-primary-accent-color-foreground);
+      color: var(--sui-primary-accent-color-inverted);
       background-color: var(--sui-primary-accent-color);
 
       &:hover,
       &:focus-visible,
       &[aria-expanded='true'] {
-        background-color: var(--sui-primary-accent-color-lighter);
+        background-color: var(--sui-primary-accent-color-light);
       }
 
       &:active {
-        background-color: var(--sui-primary-accent-color-darker);
+        background-color: var(--sui-primary-accent-color-dark);
       }
     }
 
     &:global(.secondary) {
       border-color: var(--sui-primary-accent-color);
-      color: var(--sui-primary-accent-color-lighter);
+      color: var(--sui-primary-accent-color-text);
       background-color: var(--sui-button-background-color);
 
       &:hover,
       &:focus-visible,
       &[aria-expanded='true'] {
-        background-color: var(--sui-highlight-background-color);
+        background-color: var(--sui-hover-background-color);
       }
 
       &:active {
@@ -235,7 +229,7 @@
       &:hover,
       &:focus-visible,
       &[aria-expanded='true'] {
-        background-color: var(--sui-highlight-background-color);
+        background-color: var(--sui-hover-background-color);
       }
 
       &:active {
@@ -243,7 +237,7 @@
       }
 
       &[aria-pressed='true'] {
-        background-color: var(--sui-highlight-background-color);
+        background-color: var(--sui-selected-background-color);
       }
     }
 
@@ -251,7 +245,7 @@
       &:hover,
       &:focus-visible,
       &[aria-expanded='true'] {
-        background-color: var(--sui-highlight-background-color);
+        background-color: var(--sui-hover-background-color);
       }
 
       &:active {
@@ -259,13 +253,13 @@
       }
 
       &[aria-pressed='true'] {
-        background-color: var(--sui-highlight-background-color);
+        background-color: var(--sui-selected-background-color);
       }
     }
 
     &:global(.link) {
       outline: 0;
-      color: var(--sui-primary-accent-color-lighter);
+      color: var(--sui-primary-accent-color-text);
 
       &:hover,
       &:focus,

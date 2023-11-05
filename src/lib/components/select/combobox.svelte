@@ -73,7 +73,7 @@
   let isPopupOpen = writable(false);
 </script>
 
-<div class="sui combobox {className}" hidden={hidden || undefined} {...$$restProps}>
+<div class="sui combobox {className}" class:readonly hidden={hidden || undefined} {...$$restProps}>
   {#if readonly}
     <div
       {id}
@@ -114,7 +114,7 @@
   {/if}
   <Button
     variant="ghost"
-    iconic={true}
+    iconic
     {hidden}
     {disabled}
     tabindex={readonly || disabled ? -1 : 0}
@@ -185,6 +185,10 @@
       border-bottom-left-radius: 0;
     }
 
+    &.readonly > :global(button) {
+      background-color: transparent !important;
+    }
+
     & > :global(button[tabindex='-1']) {
       pointer-events: none;
     }
@@ -214,7 +218,7 @@
 
       &:hover,
       &:focus {
-        background-color: var(--sui-highlight-background-color);
+        background-color: var(--sui-hover-background-color);
       }
 
       &[aria-disabled='true'] {

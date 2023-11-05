@@ -86,6 +86,7 @@
 
     :global([role='separator']) {
       margin: 4px;
+      background-color: var(--sui-control-border-color);
     }
 
     &:global(.tabs) {
@@ -108,7 +109,7 @@
       }
 
       :global(.option button[aria-selected='true']) {
-        border-color: var(--sui-primary-accent-color-lighter);
+        border-color: var(--sui-primary-accent-color-light);
       }
     }
   }

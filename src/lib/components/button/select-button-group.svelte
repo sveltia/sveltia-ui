@@ -87,7 +87,18 @@
 
     :global(button[aria-checked='true']) {
       color: var(--sui-highlight-foreground-color);
-      background-color: var(--sui-highlight-background-color);
+      background-color: var(--sui-selected-background-color);
+    }
+
+    // Maintain the border opacity
+    &[aria-disabled='false'] {
+      :global(button[aria-disabled='true']) {
+        filter: grayscale(0) opacity(1);
+
+        :global(*) {
+          filter: grayscale(1) opacity(0.35);
+        }
+      }
     }
   }
 

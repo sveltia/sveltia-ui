@@ -93,24 +93,16 @@
     -webkit-user-select: none;
     user-select: none;
 
-    &:disabled {
-      cursor: default;
-
-      span {
-        opacity: 0.4;
-      }
-    }
-
     &:hover {
       &[aria-checked='false'] {
         span {
-          background-color: var(--sui-highlight-background-color);
+          background-color: var(--sui-hover-background-color);
         }
       }
 
       &[aria-checked='true'] {
         span {
-          background-color: var(--sui-primary-accent-color-lighter);
+          background-color: var(--sui-primary-accent-color-light);
         }
       }
     }
@@ -124,7 +116,7 @@
 
       &[aria-checked='true'] {
         span {
-          background-color: var(--sui-primary-accent-color-darker);
+          background-color: var(--sui-primary-accent-color-dark);
         }
       }
     }
@@ -136,7 +128,7 @@
         outline-offset: 1px;
         outline-width: 2px;
         outline-style: solid;
-        outline-color: var(--sui-primary-accent-color-lighter);
+        outline-color: var(--sui-primary-accent-color-light);
       }
     }
 
@@ -146,10 +138,9 @@
         border-color: transparent;
 
         &::before {
-          transform: translateX(
-            calc(var(--sui-checkbox-height) * 2 - var(--sui-checkbox-height) - 2px)
-          );
-          background-color: var(--sui-primary-accent-color-foreground);
+          transform: translateX(calc(var(--sui-checkbox-height) * 2 - var(--sui-checkbox-height)));
+          border-color: var(--sui-primary-accent-color);
+          background-color: var(--sui-primary-accent-color-inverted);
         }
       }
     }
@@ -159,7 +150,7 @@
     position: relative;
     width: calc(var(--sui-checkbox-height) * 2);
     height: var(--sui-checkbox-height);
-    padding: 0 4px;
+    padding: 0 2px;
     display: inline-flex;
     align-items: center;
     border-width: 1.5px;
@@ -171,10 +162,10 @@
 
     &::before {
       display: inline-block;
-      width: calc(var(--sui-checkbox-height) - 8px);
-      height: calc(var(--sui-checkbox-height) - 8px);
+      width: calc(var(--sui-checkbox-height) - 6px);
+      height: calc(var(--sui-checkbox-height) - 6px);
       border-radius: var(--sui-checkbox-height);
-      background-color: var(--sui-primary-accent-color-foreground);
+      background-color: var(--sui-control-border-color);
       transition: all 200ms;
       content: '';
     }

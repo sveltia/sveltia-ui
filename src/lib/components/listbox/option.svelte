@@ -117,7 +117,7 @@
     :global(.focused),
     :global(button:hover) {
       color: var(--sui-highlight-foreground-color);
-      background-color: var(--sui-highlight-background-color);
+      background-color: var(--sui-hover-background-color);
     }
 
     :global(button:active) {
@@ -126,7 +126,7 @@
 
     :global(button[aria-selected='true']) {
       :global(.icon) {
-        color: var(--sui-primary-accent-color-lighter);
+        color: var(--sui-primary-accent-color-text);
       }
     }
   }
