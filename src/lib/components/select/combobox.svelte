@@ -137,8 +137,10 @@
 </div>
 <Popup
   id="{id}-popup"
+  class="combobox"
   anchor={comboboxElement || inputComponent?.element}
   {position}
+  touchOptimized={true}
   bind:open={isPopupOpen}
   bind:this={popupComponent}
 >

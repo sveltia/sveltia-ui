@@ -254,6 +254,7 @@
       display: flex;
       flex-direction: column;
       border-radius: 4px;
+      max-width: calc(100vw - 32px);
       background-color: var(--sui-secondary-background-color-translucent);
       -webkit-backdrop-filter: blur(16px);
       backdrop-filter: blur(16px);
@@ -265,21 +266,37 @@
     &.small form {
       width: 400px;
       max-height: 400px;
+
+      @media (max-height: 400px) {
+        max-height: calc(100vh - 32px);
+      }
     }
 
     &.medium form {
       width: 600px;
       max-height: 600px;
+
+      @media (max-height: 600px) {
+        max-height: calc(100vh - 32px);
+      }
     }
 
     &.large form {
       width: 800px;
       max-height: 800px;
+
+      @media (max-height: 800px) {
+        max-height: calc(100vh - 32px);
+      }
     }
 
     &.x-large form {
       width: 1000px;
       max-height: 1000px;
+
+      @media (max-height: 1000px) {
+        max-height: calc(100vh - 32px);
+      }
     }
   }
 

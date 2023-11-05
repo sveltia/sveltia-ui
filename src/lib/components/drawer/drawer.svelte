@@ -245,6 +245,8 @@
       display: flex;
       flex-direction: column;
       border-radius: 4px;
+      max-width: 100vw;
+      max-height: 100vh;
       background-color: var(--sui-secondary-background-color-translucent);
       -webkit-backdrop-filter: blur(16px);
       backdrop-filter: blur(16px);

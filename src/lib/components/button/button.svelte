@@ -135,7 +135,7 @@
 </button>
 
 {#if $$slots.popup}
-  <Popup anchor={element} position={popupPosition} bind:this={popupComponent}>
+  <Popup anchor={element} position={popupPosition} touchOptimized={true} bind:this={popupComponent}>
     <slot name="popup" />
   </Popup>
 {/if}

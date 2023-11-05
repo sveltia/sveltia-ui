@@ -10,6 +10,13 @@
   import { activatePopup } from '../../services/popup';
   import { sleep } from '../../services/util';
 
+  /**
+   * The `class` attribute on the `<button>` element.
+   * @type {string}
+   */
+  let className = '';
+  export { className as class };
+
   /** @type {HTMLElement | undefined} */
   export let anchor = undefined;
 
@@ -31,10 +38,18 @@
    */
   export let position = 'bottom-left';
 
+  /**
+   * Whether to show the popup at the center of the screen on mobile/tablet and ignore the defined
+   * dropdown `position`.
+   * @type {boolean}
+   */
+  export let touchOptimized = false;
+
   export let open = writable(false);
 
   let showDialog = false;
   let showContent = false;
+  let touchEnabled = false;
   /** @type {string | undefined} */
   let contentType;
 
@@ -113,6 +128,8 @@
   onMount(() => {
     dialog.remove();
 
+    touchEnabled = window.matchMedia('(pointer: coarse)').matches;
+
     // onUnmount
     return () => {
       dialog?.close();
@@ -121,7 +138,14 @@
   });
 </script>
 
-<dialog class="sui popup" role="none" bind:this={dialog} class:open={showDialog} {...$$restProps}>
+<dialog
+  class="sui popup {className}"
+  role="none"
+  bind:this={dialog}
+  class:touch={touchOptimized && touchEnabled}
+  class:open={showDialog}
+  {...$$restProps}
+>
   <div
     bind:this={content}
     class="content {contentType}"
@@ -139,6 +163,42 @@
 
 <style lang="scss">
   .popup {
+    &.touch {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: var(--sui-popup-backdrop-color);
+
+      .content {
+        position: static;
+        border-width: 0 !important;
+        border-radius: 4px !important;
+        padding: 8px;
+        min-width: 320px !important;
+        max-width: calc(100vw - 32px) !important;
+        max-height: calc(100vh - 32px) !important;
+      }
+
+      &.open {
+        .content {
+          transform: scale(100%) !important;
+        }
+      }
+
+      &:not(.open) {
+        .content {
+          transform: scale(90%);
+        }
+      }
+
+      &.combobox {
+        :global(.sui.listbox) {
+          gap: 4px;
+          padding: 8px 4px !important;
+        }
+      }
+    }
+
     &.open {
       .content {
         opacity: 1;
