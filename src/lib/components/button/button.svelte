@@ -259,6 +259,9 @@
 
     &:global(.link) {
       outline: 0;
+      border-radius: 0 !important;
+      padding: 0 !important;
+      height: auto !important;
       color: var(--sui-primary-accent-color-text);
 
       &:hover,
