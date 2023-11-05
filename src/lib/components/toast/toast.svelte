@@ -13,6 +13,7 @@
    */
   export let show = false;
   /**
+   * Duration to automatically hide the toast. Use `0` to hide it manually from the consumer.
    * @type {number}
    */
   export let duration = 5000;
@@ -43,7 +44,7 @@
     } else {
       popover = popoverBase;
       popover.classList.add('enabled');
-      document.body.appendChild(popover);
+      (document.querySelector('.sui.app-shell') || document.body).appendChild(popover);
 
       // Move the element to top layer
       if (popover.showPopover) {
@@ -64,7 +65,7 @@
   }
 
   $: {
-    if (show) {
+    if (show && duration) {
       window.setTimeout(() => {
         show = false;
       }, duration);
@@ -82,7 +83,7 @@
   </Alert>
 </div>
 
-<style>
+<style lang="scss">
   .toast-base {
     position: fixed;
     inset: 0;
@@ -98,6 +99,9 @@
     width: 100vw;
     height: 100vh;
     background-color: transparent;
+    font-family: var(--sui-font-family-default);
+    font-size: var(--sui-font-size-default);
+    font-weight: var(--sui-font-weight-normal);
     pointer-events: none;
     -webkit-user-select: none;
     user-select: none;
