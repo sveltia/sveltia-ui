@@ -49,7 +49,7 @@
 
 <div
   class="sui listbox {className}"
-  tabindex="0"
+  tabindex={disabled ? -1 : 0}
   role="listbox"
   hidden={hidden || undefined}
   aria-hidden={hidden}

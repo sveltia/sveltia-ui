@@ -71,6 +71,7 @@
   let startScreenX = 0;
   const sliderPositions = [0, 0];
   let dragging = false;
+  let targetPointerId = 0;
   let targetValueIndex = 0;
 
   /**
@@ -117,7 +118,7 @@
     const { key, ctrlKey, metaKey, shiftKey, altKey } = event;
     const hasModifier = shiftKey || altKey || ctrlKey || metaKey;
 
-    if (disabled || hasModifier) {
+    if (disabled || readonly || hasModifier) {
       return;
     }
 
@@ -145,8 +146,8 @@
     if (index > -1) {
       if (
         multiThumb &&
-        ((targetValueIndex === 0 && sliderPositions[1] <= positionList[index]) ||
-          (targetValueIndex === 1 && sliderPositions[0] >= positionList[index]))
+        ((valueIndex === 0 && sliderPositions[1] <= positionList[index]) ||
+          (valueIndex === 1 && sliderPositions[0] >= positionList[index]))
       ) {
         return;
       }
@@ -166,7 +167,7 @@
   const onPointerMove = (event) => {
     const { screenX, pointerId } = event;
 
-    if (disabled || !dragging || pointerId > 0) {
+    if (disabled || readonly || !dragging || pointerId !== targetPointerId) {
       return;
     }
 
@@ -180,11 +181,16 @@
   const onPointerUp = (event) => {
     const { pointerId } = event;
 
-    if (disabled || !dragging || pointerId > 0) {
+    if (disabled || readonly || !dragging || pointerId !== targetPointerId) {
       return;
     }
 
+    // Reset everything
     dragging = false;
+    startX = 0;
+    startScreenX = 0;
+    targetPointerId = 0;
+    targetValueIndex = 0;
 
     document.removeEventListener('pointermove', onPointerMove);
     document.removeEventListener('pointerup', onPointerUp);
@@ -199,13 +205,14 @@
   const onPointerDown = (event, valueIndex = 0) => {
     const { clientX, screenX, pointerId } = event;
 
-    if (disabled || pointerId > 0) {
+    if (disabled || readonly) {
       return;
     }
 
     dragging = true;
     startX = clientX - base.getBoundingClientRect().x;
     startScreenX = screenX;
+    targetPointerId = pointerId;
     targetValueIndex = valueIndex;
 
     document.addEventListener('pointermove', onPointerMove);
@@ -218,7 +225,7 @@
    * @param {MouseEvent} event `click` event.
    */
   const onClick = (event) => {
-    if (disabled || multiThumb || dragging) {
+    if (disabled || readonly || multiThumb || dragging) {
       return;
     }
 
@@ -300,7 +307,7 @@
     />
     <div
       role="slider"
-      tabindex="0"
+      tabindex={disabled ? -1 : 0}
       aria-label={multiThumb ? sliderLabels?.[0] || '' : sliderLabel}
       aria-hidden={hidden}
       aria-disabled={disabled}
@@ -316,7 +323,7 @@
     {#if multiThumb}
       <div
         role="slider"
-        tabindex="0"
+        tabindex={disabled ? -1 : 0}
         aria-label={sliderLabels?.[1] || ''}
         aria-hidden={hidden}
         aria-disabled={disabled}
