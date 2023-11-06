@@ -127,10 +127,24 @@
   on:select
 >
   <slot name="start-icon" />
-  {#if label}
-    <span class="label">{label}</span>
+  {#if variant === 'link'}
+    {#if label}
+      <span class="label">
+        {label}
+      </span>
+    {:else}
+      <span class="label">
+        <slot />
+      </span>
+    {/if}
+  {:else}
+    {#if label}
+      <span class="label">
+        {label}
+      </span>
+    {/if}
+    <slot />
   {/if}
-  <slot />
   <slot name="end-icon" />
 </button>
 
@@ -264,10 +278,17 @@
       height: auto !important;
       color: var(--sui-primary-accent-color-text);
 
+      :global(.label) {
+        line-height: var(--sui-line-height-compact);
+        white-space: normal;
+      }
+
       &:hover,
       &:focus,
       &:active {
-        text-decoration: underline;
+        :global(.label) {
+          text-decoration: underline;
+        }
       }
     }
 

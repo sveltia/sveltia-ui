@@ -173,7 +173,7 @@
       transition: all 200ms;
 
       :global(.icon) {
-        font-size: calc(var(--sui-checkbox-height) - 4px);
+        font-size: calc(var(--sui-checkbox-height) - 2px);
       }
     }
 

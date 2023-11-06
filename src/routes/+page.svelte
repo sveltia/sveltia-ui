@@ -138,7 +138,18 @@
             <Button variant="secondary" label="Secondary" />
             <Button variant="tertiary" label="Tertiary" />
             <Button variant="ghost" label="Ghost" />
-            <Button variant="link" label="Link" />
+          </div>
+          <div>
+            <Button
+              variant="link"
+              label="Link: Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                Nam pulvinar scelerisque tincidunt."
+            />
+          </div>
+          <div>
+            <Button variant="link" label="Link: Lorem ipsum dolor sit amet">
+              <Icon name="help" slot="start-icon" />
+            </Button>
           </div>
         </section>
         <section>
@@ -148,7 +159,19 @@
             <Button variant="secondary" label="Secondary" disabled />
             <Button variant="tertiary" label="Tertiary" disabled />
             <Button variant="ghost" label="Ghost" disabled />
-            <Button variant="link" label="Link" disabled />
+          </div>
+          <div>
+            <Button
+              variant="link"
+              disabled
+              label="Link: Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                Nam pulvinar scelerisque tincidunt."
+            />
+          </div>
+          <div>
+            <Button variant="link" disabled label="Link: Lorem ipsum dolor sit amet">
+              <Icon name="help" slot="start-icon" />
+            </Button>
           </div>
         </section>
         <section>
@@ -158,7 +181,6 @@
             <Button variant="secondary" size="small" label="Secondary" />
             <Button variant="tertiary" size="small" label="Tertiary" />
             <Button variant="ghost" size="small" label="Ghost" />
-            <Button variant="link" size="small" label="Link" />
           </div>
         </section>
         <section>

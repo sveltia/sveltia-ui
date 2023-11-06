@@ -155,7 +155,7 @@
     align-items: center;
     border-width: 1.5px;
     border-style: solid;
-    border-color: var(--sui-control-border-color);
+    border-color: var(--sui-checkbox-border-color);
     border-radius: var(--sui-checkbox-height);
     background-color: var(--sui-control-background-color);
     transition: all 200ms;
@@ -165,7 +165,7 @@
       width: calc(var(--sui-checkbox-height) - 6px);
       height: calc(var(--sui-checkbox-height) - 6px);
       border-radius: var(--sui-checkbox-height);
-      background-color: var(--sui-control-border-color);
+      background-color: var(--sui-checkbox-border-color);
       transition: all 200ms;
       content: '';
     }
