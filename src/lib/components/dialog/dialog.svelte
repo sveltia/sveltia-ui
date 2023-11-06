@@ -59,7 +59,7 @@
    *
    */
   const openDialog = async () => {
-    (document.querySelector('.sui.app-shell') || document.body).appendChild(dialog);
+    (document.querySelector('.sui.app-shell') ?? document.body).appendChild(dialog);
     showContent = true;
 
     if (modal) {

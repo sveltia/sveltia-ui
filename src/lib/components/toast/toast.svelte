@@ -44,7 +44,7 @@
     } else {
       popover = popoverBase;
       popover.classList.add('enabled');
-      (document.querySelector('.sui.app-shell') || document.body).appendChild(popover);
+      (document.querySelector('.sui.app-shell') ?? document.body).appendChild(popover);
 
       // Move the element to top layer
       if (popover.showPopover) {

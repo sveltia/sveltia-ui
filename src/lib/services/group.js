@@ -68,7 +68,7 @@ class Group {
 
     this.orientation = this.grid
       ? 'horizontal'
-      : this.parent.getAttribute('aria-orientation') || orientation;
+      : this.parent.getAttribute('aria-orientation') ?? orientation;
     this.childRoles = childRoles;
     this.childSelectedAttr = childSelectedAttr;
     this.focusChild = focusChild;
@@ -208,7 +208,7 @@ class Group {
 
     const currentTarget = (() => {
       if (!this.focusChild) {
-        return activeMembers.find((member) => member.matches('.focused')) || activeMembers[0];
+        return activeMembers.find((member) => member.matches('.focused')) ?? activeMembers[0];
       }
 
       if (target.matches(this.selector)) {

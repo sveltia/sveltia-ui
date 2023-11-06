@@ -138,7 +138,7 @@
 <Popup
   id="{id}-popup"
   class="combobox"
-  anchor={comboboxElement || inputComponent?.element}
+  anchor={comboboxElement ?? inputComponent?.element}
   {position}
   touchOptimized={true}
   bind:open={isPopupOpen}
