@@ -243,9 +243,9 @@
     }
 
     :global(a),
-    :global(input),
-    :global(textarea),
-    :global(button),
+    :global(input[aria-disabled='false']),
+    :global(textarea[aria-disabled='false']),
+    :global(button[aria-disabled='false']),
     :global([tabindex='0']) {
       pointer-events: all;
     }

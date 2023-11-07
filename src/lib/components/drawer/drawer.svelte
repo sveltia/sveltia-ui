@@ -52,6 +52,11 @@
    */
   export let closeOnBackdropClick = false;
 
+  /**
+   * Whether to keep the content when the dialog is not displayed.
+   */
+  export let keepContent = false;
+
   const dispatch = createEventDispatcher();
   /** @type {?HTMLDialogElement} */
   let dialog;
@@ -162,7 +167,7 @@
         </Button>
       {/if}
     </div>
-    {#if showContent}
+    {#if keepContent || showContent}
       {#if title || showClose === 'inside' || $$slots.header || $$slots['header-extra']}
         <div class="header">
           {#if $$slots.header}
@@ -296,6 +301,7 @@
       max-width: 100vw;
 
       &.open form {
+        max-width: calc(100vw - 48px);
         transform: translateX(0%);
       }
 
@@ -349,6 +355,7 @@
       max-height: 100vh;
 
       &.open form {
+        max-height: calc(100vh - 48px);
         transform: translateY(0%);
       }
 
@@ -397,7 +404,7 @@
   .main {
     flex: auto;
     overflow: auto;
-    margin: 24px 24px;
+    padding: 24px;
     white-space: normal;
   }
 </style>
