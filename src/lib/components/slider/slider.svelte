@@ -264,6 +264,7 @@
   onMount(() => {
     const query = window.matchMedia('(pointer: coarse)');
 
+    new ResizeObserver(() => init()).observe(base);
     query.addEventListener('change', init);
     init();
 

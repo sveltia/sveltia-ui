@@ -301,7 +301,7 @@
       max-width: 100vw;
 
       &.open form {
-        max-width: calc(100vw - 48px);
+        max-width: calc(100vw - 56px);
         transform: translateX(0%);
       }
 
@@ -355,7 +355,7 @@
       max-height: 100vh;
 
       &.open form {
-        max-height: calc(100vh - 48px);
+        max-height: calc(100vh - 56px);
         transform: translateY(0%);
       }
 
