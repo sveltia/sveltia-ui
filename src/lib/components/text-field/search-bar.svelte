@@ -84,6 +84,7 @@
     {readonly}
     {required}
     {invalid}
+    inputmode="search"
     {...$$restProps}
     bind:this={inputComponent}
     on:input

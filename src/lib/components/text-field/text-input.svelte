@@ -73,6 +73,12 @@
    * @type {boolean}
    */
   export let showInlineLabel = false;
+  /**
+   * The `inputmode` attribute on the `<input>`.
+   * @type {'text' | 'decimal' | 'numeric' | 'tel' | 'search' | 'email' | 'url'}
+   * @see https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/inputmode
+   */
+  export let inputmode = 'text';
 
   const id = getRandomId('input');
 
@@ -87,6 +93,7 @@
     tabindex={disabled ? -1 : 0}
     disabled={disabled || undefined}
     readonly={readonly || undefined}
+    {inputmode}
     aria-hidden={hidden}
     aria-disabled={disabled}
     aria-readonly={readonly}

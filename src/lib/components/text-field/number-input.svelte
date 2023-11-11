@@ -96,6 +96,26 @@
 </script>
 
 <div class="sui number-input {className}" class:disabled hidden={hidden || undefined}>
+  <div class="buttons">
+    <Button
+      iconic
+      disabled={disabled || Number.isNaN(Number(value)) || isMax}
+      on:click={() => {
+        increase();
+      }}
+    >
+      <Icon slot="start-icon" name="expand_less" label={$_('_sui.number_input.increase')} />
+    </Button>
+    <Button
+      iconic
+      disabled={disabled || Number.isNaN(Number(value)) || isMin}
+      on:click={() => {
+        decrease();
+      }}
+    >
+      <Icon slot="start-icon" name="expand_more" label={$_('_sui.number_input.decrease')} />
+    </Button>
+  </div>
   <TextInput
     bind:this={component}
     bind:value
@@ -108,6 +128,7 @@
     aria-valuenow={Number(value || 0)}
     aria-valuemin={min}
     aria-valuemax={max}
+    inputmode={maximumFractionDigits > 0 ? 'decimal' : 'numeric'}
     {...$$restProps}
     on:keydown={(event) => {
       const { key, ctrlKey, metaKey, altKey, shiftKey } = event;
@@ -126,24 +147,6 @@
     on:keypress
     on:input
   />
-  <Button
-    iconic
-    disabled={disabled || Number.isNaN(Number(value)) || isMin}
-    on:click={() => {
-      decrease();
-    }}
-  >
-    <Icon slot="start-icon" name="arrow_downward" label={$_('_sui.number_input.decrease')} />
-  </Button>
-  <Button
-    iconic
-    disabled={disabled || Number.isNaN(Number(value)) || isMax}
-    on:click={() => {
-      increase();
-    }}
-  >
-    <Icon slot="start-icon" name={'arrow_upward'} label={$_('_sui.number_input.increase')} />
-  </Button>
 </div>
 
 <style lang="scss">
@@ -152,29 +155,14 @@
     display: inline-flex;
     align-items: center;
 
-    :global(input) {
-      border-top-right-radius: 0;
-      border-bottom-right-radius: 0;
+    :global(:not(:first-child) input) {
+      border-top-left-radius: 0;
+      border-bottom-left-radius: 0;
     }
 
-    :global(button) {
-      flex: none;
-      border-width: 1px;
-      border-color: var(--sui-textbox-border-color);
-      width: var(--sui-textbox-height);
-
-      &:first-of-type {
-        border-radius: 0;
-        border-width: 1px 0;
-      }
-
-      &:last-of-type {
-        border-radius: 0 4px 4px 0;
-      }
-
-      :global(.icon) {
-        font-size: var(--sui-font-size-xx-large);
-      }
+    :global(:not(:last-child) input) {
+      border-top-right-radius: 0;
+      border-bottom-right-radius: 0;
     }
 
     // Maintain the border opacity
@@ -185,6 +173,39 @@
         :global(*) {
           filter: grayscale(1) opacity(0.35);
         }
+      }
+    }
+  }
+
+  .buttons {
+    display: flex;
+    flex-direction: column;
+    width: 24px;
+    height: var(--sui-textbox-height);
+
+    :global(button) {
+      flex: none;
+      border-width: 1px;
+      border-color: var(--sui-textbox-border-color);
+      width: 100%;
+      height: 50%;
+
+      &:first-of-type {
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
+        border-bottom-left-radius: 0;
+        border-width: 1px 0 0 1px;
+      }
+
+      &:last-of-type {
+        border-top-left-radius: 0;
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
+        border-width: 0 0 1px 1px;
+      }
+
+      :global(.icon) {
+        font-size: 20px;
       }
     }
   }
