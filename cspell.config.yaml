@@ -17,6 +17,8 @@ ignorePaths:
   - pnpm-lock.yaml
   - data/**/*.json
 words:
+  - colour
+  - colours
   - espree
   - jsdoc
   - nocheck
