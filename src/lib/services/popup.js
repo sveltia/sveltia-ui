@@ -48,26 +48,26 @@ class Popup {
       const top = position.startsWith('bottom-')
         ? `${Math.round(intersectionRect.bottom)}px`
         : position.endsWith('-top')
-        ? `${Math.round(intersectionRect.top)}px`
-        : 'auto';
+          ? `${Math.round(intersectionRect.top)}px`
+          : 'auto';
 
       const right = position.startsWith('left-')
         ? `${Math.round(rootBounds.width - intersectionRect.left)}px`
         : position.endsWith('-right')
-        ? `${Math.round(rootBounds.width - intersectionRect.right)}px`
-        : 'auto';
+          ? `${Math.round(rootBounds.width - intersectionRect.right)}px`
+          : 'auto';
 
       const bottom = position.startsWith('top-')
         ? `${Math.round(rootBounds.height - intersectionRect.top)}px`
         : position.endsWith('-bottom')
-        ? `${Math.round(rootBounds.height - intersectionRect.bottom)}px`
-        : 'auto';
+          ? `${Math.round(rootBounds.height - intersectionRect.bottom)}px`
+          : 'auto';
 
       const left = position.startsWith('right-')
         ? `${Math.round(intersectionRect.right)}px`
         : position.endsWith('-left')
-        ? `${Math.round(intersectionRect.left)}px`
-        : 'auto';
+          ? `${Math.round(intersectionRect.left)}px`
+          : 'auto';
 
       const anchorPopup = /** @type {HTMLElement} */ (this.anchorElement.closest('.popup'));
 
