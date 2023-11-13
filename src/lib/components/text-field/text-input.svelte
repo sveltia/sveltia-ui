@@ -124,6 +124,14 @@
     align-items: center;
   }
 
+  // https://stackoverflow.com/a/68240841
+  input:-webkit-autofill,
+  input:-webkit-autofill:focus {
+    transition:
+      background-color 0s 600000s,
+      color 0s 600000s;
+  }
+
   input {
     z-index: 1;
     display: inline-block;
