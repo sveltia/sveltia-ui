@@ -10,10 +10,10 @@
   <Example>
     <div>
       <CheckboxGroup aria-label="Ingredients">
-        <Checkbox name="ingredients" value="rice" checked>Rice</Checkbox>
-        <Checkbox name="ingredients" value="beans" checked={false}>Beans</Checkbox>
-        <Checkbox name="ingredients" value="cheese" checked="mixed">Cheese</Checkbox>
-        <Checkbox name="ingredients" value="cheese" disabled>Disabled</Checkbox>
+        <Checkbox name="ingredients" value="rice" checked label="Rice" />
+        <Checkbox name="ingredients" value="beans" checked={false} label="Beans" />
+        <Checkbox name="ingredients" value="cheese" checked="mixed" label="Cheese" />
+        <Checkbox name="ingredients" value="cheese" disabled label="Disabled" />
       </CheckboxGroup>
     </div>
   </Example>
@@ -24,10 +24,10 @@
   <Example>
     <div>
       <CheckboxGroup aria-label="Ingredients" orientation="vertical">
-        <Checkbox name="ingredients" value="rice" checked>Rice</Checkbox>
-        <Checkbox name="ingredients" value="beans" checked={false}>Beans</Checkbox>
-        <Checkbox name="ingredients" value="cheese" checked="mixed">Cheese</Checkbox>
-        <Checkbox name="ingredients" value="cheese" disabled>Lettuce</Checkbox>
+        <Checkbox name="ingredients" value="rice" checked label="Rice" />
+        <Checkbox name="ingredients" value="beans" checked={false} label="Beans" />
+        <Checkbox name="ingredients" value="cheese" checked="mixed" label="Cheese" />
+        <Checkbox name="ingredients" value="cheese" disabled label="Lettuce" />
       </CheckboxGroup>
     </div>
   </Example>
@@ -38,10 +38,10 @@
   <Example>
     <div>
       <CheckboxGroup aria-label="Ingredients" disabled>
-        <Checkbox name="ingredients" value="rice" checked>Rice</Checkbox>
-        <Checkbox name="ingredients" value="beans" checked={false}>Beans</Checkbox>
-        <Checkbox name="ingredients" value="cheese" checked="mixed">Cheese</Checkbox>
-        <Checkbox name="ingredients" value="cheese" disabled>Lettuce</Checkbox>
+        <Checkbox name="ingredients" value="rice" checked label="Rice" />
+        <Checkbox name="ingredients" value="beans" checked={false} label="Beans" />
+        <Checkbox name="ingredients" value="cheese" checked="mixed" label="Cheese" />
+        <Checkbox name="ingredients" value="cheese" disabled label="Lettuce" />
       </CheckboxGroup>
     </div>
   </Example>
@@ -52,10 +52,10 @@
   <Example>
     <div>
       <CheckboxGroup aria-label="Ingredients">
-        <Checkbox name="ingredients" value="rice" checked readonly>Rice</Checkbox>
-        <Checkbox name="ingredients" value="beans" checked={false} readonly>Beans</Checkbox>
-        <Checkbox name="ingredients" value="cheese" checked="mixed" readonly>Cheese</Checkbox>
-        <Checkbox name="ingredients" value="cheese" readonly>Lettuce</Checkbox>
+        <Checkbox name="ingredients" value="rice" checked readonly label="Rice" />
+        <Checkbox name="ingredients" value="beans" checked={false} readonly label="Beans" />
+        <Checkbox name="ingredients" value="cheese" checked="mixed" readonly label="Cheese" />
+        <Checkbox name="ingredients" value="cheese" readonly label="Lettuce" />
       </CheckboxGroup>
     </div>
   </Example>

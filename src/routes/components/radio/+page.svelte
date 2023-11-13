@@ -10,10 +10,10 @@
   <Example>
     <div>
       <RadioGroup>
-        <Radio checked>Strawberry</Radio>
-        <Radio>Grape</Radio>
-        <Radio>Lemon</Radio>
-        <Radio disabled>Orange</Radio>
+        <Radio checked label="Strawberry" />
+        <Radio label="Grape" />
+        <Radio label="Lemon" />
+        <Radio disabled label="Orange" />
       </RadioGroup>
     </div>
   </Example>
@@ -24,10 +24,10 @@
   <Example>
     <div>
       <RadioGroup orientation="vertical">
-        <Radio checked>Strawberry</Radio>
-        <Radio>Grape</Radio>
-        <Radio>Lemon</Radio>
-        <Radio disabled>Orange</Radio>
+        <Radio checked label="Strawberry" />
+        <Radio label="Grape" />
+        <Radio label="Lemon" />
+        <Radio disabled label="Orange" />
       </RadioGroup>
     </div>
   </Example>
@@ -38,10 +38,10 @@
   <Example>
     <div>
       <RadioGroup disabled>
-        <Radio checked>Strawberry</Radio>
-        <Radio>Grape</Radio>
-        <Radio>Lemon</Radio>
-        <Radio disabled>Orange</Radio>
+        <Radio checked label="Strawberry" />
+        <Radio label="Grape" />
+        <Radio label="Lemon" />
+        <Radio disabled label="Orange" />
       </RadioGroup>
     </div>
   </Example>
@@ -52,10 +52,10 @@
   <Example>
     <div>
       <RadioGroup readonly>
-        <Radio checked>Strawberry</Radio>
-        <Radio>Grape</Radio>
-        <Radio>Lemon</Radio>
-        <Radio disabled>Orange</Radio>
+        <Radio checked label="Strawberry" />
+        <Radio label="Grape" />
+        <Radio label="Lemon" />
+        <Radio disabled label="Orange" />
       </RadioGroup>
     </div>
   </Example>
