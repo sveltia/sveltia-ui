@@ -61,7 +61,12 @@
   }
 </script>
 
-<div class="sui password-input {className}" class:disabled hidden={hidden || undefined}>
+<div
+  class="sui password-input {className}"
+  class:disabled
+  class:readonly
+  hidden={hidden || undefined}
+>
   <TextInput
     bind:this={inputComponent}
     bind:value
@@ -78,7 +83,7 @@
   />
   <Button
     iconic
-    {disabled}
+    disabled={disabled || readonly}
     pressed={passwordVisible}
     on:click={() => {
       passwordVisible = !passwordVisible;

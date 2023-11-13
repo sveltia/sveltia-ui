@@ -39,6 +39,11 @@
   export let position = 'bottom-left';
 
   /**
+   * Whether to keep the content when the dialog is not displayed.
+   */
+  export let keepContent = false;
+
+  /**
    * Whether to show the popup at the center of the screen on mobile/tablet and ignore the defined
    * dropdown `position`.
    * @type {boolean}
@@ -155,7 +160,7 @@
     style:max-height={$style.height}
     style:visibility={$style.inset ? undefined : 'hidden'}
   >
-    {#if showContent}
+    {#if keepContent || showContent}
       <slot />
     {/if}
   </div>

@@ -1,8 +1,9 @@
 <!--
   @component
-  A read-only variant of `<Combobox>`. The equivalent of the HTML `<select>` element.
+  A select-only variant of `<Combobox>`. The equivalent of the HTML `<select>` element.
   @see https://developer.mozilla.org/en-US/docs/Web/HTML/Element/select
   @see https://w3c.github.io/aria/#combobox
+  @see https://www.w3.org/WAI/ARIA/apg/patterns/combobox/examples/combobox-select-only/
 -->
 <script>
   import Combobox from './combobox.svelte';
@@ -24,6 +25,11 @@
    */
   export let disabled = false;
   /**
+   * Whether to make the widget read-only. An alias of the `aria-readonly` attribute.
+   * @type {boolean}
+   */
+  export let readonly = false;
+  /**
    * Whether to disable the widget. An alias of the `aria-required` attribute.
    * @type {boolean}
    */
@@ -33,11 +39,6 @@
    * @type {boolean}
    */
   export let invalid = false;
-  /**
-   * Text label displayed on the readonly item.
-   * @type {string}
-   */
-  export let label = '';
   /**
    * Selected option’s value.
    * @type {(string | number | undefined)}
@@ -50,11 +51,11 @@
   class="sui select {className}"
   {hidden}
   {disabled}
-  readonly={true}
+  {readonly}
   {required}
   {invalid}
-  {label}
   {...$$restProps}
+  editable={false}
   on:change
 >
   <slot />

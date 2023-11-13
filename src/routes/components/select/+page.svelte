@@ -10,7 +10,7 @@
   <Example>
     <div>
       <Select>
-        <Option label="Option 1" selected />
+        <Option label="Option 1" />
         <Option label="Option 2" />
         <Option label="Option 3" />
         <Divider />
@@ -25,7 +25,7 @@
   <h3>Selected</h3>
   <Example>
     <div>
-      <Select label="Option 1">
+      <Select>
         <Option label="Option 1" selected />
         <Option label="Option 2" />
         <Option label="Option 3" />
@@ -42,11 +42,11 @@
 </section>
 
 <section>
-  <h3>Auto-complete</h3>
+  <h3>Auto-complete (WIP)</h3>
   <Example>
     <div>
       <Combobox>
-        <Option label="Option 1" selected />
+        <Option label="Option 1" />
         <Option label="Option 2" />
         <Option label="Option 3" />
         <Divider />
@@ -76,7 +76,7 @@
     </div>
     <div>
       <Combobox disabled>
-        <Option label="Option 1" selected />
+        <Option label="Option 1" />
         <Option label="Option 2" />
         <Option label="Option 3" />
         <Divider />
@@ -101,8 +101,8 @@
       </Select>
     </div>
     <div>
-      <Combobox label="Option 1" readonly>
-        <Option label="Option 1" selected />
+      <Combobox readonly>
+        <Option label="Option 1" />
         <Option label="Option 2" />
         <Option label="Option 3" />
         <Divider />

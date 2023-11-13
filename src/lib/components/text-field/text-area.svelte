@@ -54,7 +54,7 @@
   export let autoResize = false;
 </script>
 
-<div class="sui text-area {className}" class:disabled hidden={hidden || undefined}>
+<div class="sui text-area {className}" class:disabled class:readonly hidden={hidden || undefined}>
   <textarea
     {name}
     bind:value
@@ -108,7 +108,8 @@
       border-color: var(--sui-primary-accent-color);
     }
 
-    &:disabled {
+    &:disabled,
+    &:read-only {
       background-color: var(--sui-disabled-background-color);
     }
   }

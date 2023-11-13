@@ -289,6 +289,7 @@
 <div
   class="sui slider {className}"
   class:disabled
+  class:readonly
   role="none"
   hidden={hidden || undefined}
   {...$$restProps}

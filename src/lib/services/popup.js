@@ -100,7 +100,7 @@ class Popup {
     this.popupElement.setAttribute('id', this.id);
 
     this.anchorElement.addEventListener('click', () => {
-      if (!this.anchorElement.matches('[aria-disabled="true"]')) {
+      if (!this.isDisabled && !this.isReadOnly) {
         this.open.set(!get(this.open));
       }
     });
@@ -109,7 +109,7 @@ class Popup {
       const { key, ctrlKey, metaKey, shiftKey, altKey } = event;
       const hasModifier = shiftKey || altKey || ctrlKey || metaKey;
 
-      if (['Enter', ' '].includes(key) && !hasModifier) {
+      if (!this.isDisabled && !this.isReadOnly && ['Enter', ' '].includes(key) && !hasModifier) {
         event.preventDefault();
         event.stopPropagation();
         this.open.set(!get(this.open));
@@ -152,6 +152,16 @@ class Popup {
 
       this.anchorElement.setAttribute('aria-expanded', String(open));
     });
+  }
+
+  /** @type {boolean} */
+  get isDisabled() {
+    return this.anchorElement.matches('[aria-disabled="true"]');
+  }
+
+  /** @type {boolean} */
+  get isReadOnly() {
+    return this.anchorElement.matches('[aria-readonly="true"]');
   }
 
   /**

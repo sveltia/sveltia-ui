@@ -52,6 +52,12 @@
    */
   export let disabled = false;
   /**
+   * Whether to make the widget read-only. An alias of the `aria-readonly` attribute used in certain
+   * roles, including `checkbox`, `listbox`, `slider` and `textbox`.
+   * @type {boolean | undefined}
+   */
+  export let readonly = undefined;
+  /**
    * Whether to mark the widget pressed. An alias of the `aria-pressed` attribute.
    * @type {boolean | 'mixed' | undefined}
    */
@@ -110,6 +116,7 @@
   {role}
   aria-hidden={hidden}
   aria-disabled={disabled}
+  aria-readonly={readonly}
   aria-pressed={pressed}
   {...$$restProps}
   bind:this={element}

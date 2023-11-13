@@ -101,7 +101,9 @@ dialog {
 }
 
 .disabled,
+.readonly,
 [aria-disabled="true"],
+[aria-readonly="true"],
 [inert] {
   cursor: default;
   pointer-events: none;
@@ -115,7 +117,9 @@ dialog {
 }
 
 .disabled *,
+.readonly *,
 [aria-disabled="true"] *,
+[aria-readonly="true"] *,
 [inert] * {
   cursor: default;
   pointer-events: none;

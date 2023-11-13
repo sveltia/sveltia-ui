@@ -3,6 +3,7 @@
   A variant of the `<Select>` widget with an auto-complete text input field.
   @see https://w3c.github.io/aria/#combobox
   @see https://www.w3.org/WAI/ARIA/apg/patterns/combobox/
+  @todo Add DOM API compatibility.
 -->
 <script>
   import { createEventDispatcher } from 'svelte';
@@ -47,15 +48,14 @@
    */
   export let invalid = false;
   /**
-   * Text label displayed on the readonly item.
-   * @type {string}
-   */
-  export let label = '';
-  /**
    * Selected option’s value.
    * @type {(string | number | undefined)}
    */
   export let value = undefined;
+  /**
+   * Whether to make the `combobox` editable.
+   */
+  export let editable = true;
   /**
    * Where to show the dropdown menu.
    * @type {PopupPosition}
@@ -71,10 +71,37 @@
   /** @type {Popup?} */
   let popupComponent;
   let isPopupOpen = writable(false);
+  /** @type {string} */
+  let label = '';
+
+  /**
+   * Update the `value` and `label` whenever an option is selected
+   * @param {HTMLButtonElement} target Selected option.
+   */
+  const onSelect = (target) => {
+    // @todo support more types
+    value = target.dataset.type === 'number' ? Number(target.value) : target.value;
+    label = target.querySelector('.label')?.textContent || target.value;
+    dispatch('change', { target: inputComponent?.element, value });
+  };
+
+  $: {
+    if (popupComponent?.content) {
+      window.requestAnimationFrame(() => {
+        const selected = popupComponent.content.querySelector(
+          '[role="option"][aria-selected="true"]',
+        );
+
+        if (selected) {
+          onSelect(/** @type {HTMLButtonElement?} */ (selected));
+        }
+      });
+    }
+  }
 </script>
 
-<div class="sui combobox {className}" class:readonly hidden={hidden || undefined} {...$$restProps}>
-  {#if readonly}
+<div class="sui combobox {className}" hidden={hidden || undefined} {...$$restProps}>
+  {#if !editable}
     <div
       {id}
       class:selected={value !== undefined}
@@ -84,14 +111,14 @@
       aria-expanded={$isPopupOpen}
       aria-hidden={hidden}
       aria-disabled={disabled}
-      aria-readonly="true"
+      aria-readonly={readonly}
       aria-haspopup="listbox"
       aria-activedescendant="selected-option"
       {...$$restProps}
       bind:this={comboboxElement}
     >
       <div class="label">
-        {value !== undefined ? label || value : $_('_sui.combobox.select_an_option')}
+        {value !== undefined ? label : $_('_sui.combobox.select_an_option')}
       </div>
     </div>
   {:else}
@@ -121,9 +148,10 @@
     aria-controls="{id}-popup"
     aria-expanded={$isPopupOpen}
     on:click={(event) => {
+      event.preventDefault();
       event.stopPropagation();
 
-      if (!disabled) {
+      if (!disabled && !readonly) {
         $isPopupOpen = !$isPopupOpen;
       }
     }}
@@ -140,6 +168,7 @@
   class="combobox"
   anchor={comboboxElement ?? inputComponent?.element}
   {position}
+  keepContent={true}
   touchOptimized={true}
   bind:open={isPopupOpen}
   bind:this={popupComponent}
@@ -147,13 +176,7 @@
   <Listbox
     on:click={(event) => {
       if (/** @type {HTMLElement} */ (event.target).matches('[role="option"]')) {
-        // eslint-disable-next-line prefer-destructuring
-        const target = /** @type {HTMLButtonElement?} */ (event.target);
-
-        // @todo support more types
-        value = target.dataset.type === 'number' ? Number(target.value) : target.value;
-        label = target.querySelector('.label')?.textContent || target.value;
-        dispatch('change', { target: inputComponent?.element, value });
+        onSelect(/** @type {HTMLButtonElement?} */ (event.target));
       }
     }}
   >
@@ -221,12 +244,6 @@
       &:hover,
       &:focus {
         background-color: var(--sui-hover-background-color);
-      }
-
-      &[aria-disabled='true'] {
-        background-color: var(--sui-disabled-background-color);
-        opacity: 0.4;
-        cursor: default;
       }
 
       .label {

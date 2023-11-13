@@ -85,7 +85,7 @@
   $: ariaLabel = $$restProps['aria-label'];
 </script>
 
-<div class="sui text-input {className}" class:disabled hidden={hidden || undefined}>
+<div class="sui text-input {className}" class:disabled class:readonly hidden={hidden || undefined}>
   <input
     type="text"
     {role}
@@ -158,7 +158,8 @@
       border-color: var(--sui-textbox-border-color) !important;
     }
 
-    &:disabled {
+    &:disabled,
+    &:read-only {
       background-color: var(--sui-disabled-background-color);
     }
 

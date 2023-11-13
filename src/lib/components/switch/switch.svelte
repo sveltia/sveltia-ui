@@ -62,7 +62,9 @@
   aria-invalid={invalid}
   {...$$restProps}
   on:click={() => {
-    checked = !checked;
+    if (!disabled && !readonly) {
+      checked = !checked;
+    }
   }}
 >
   <span />

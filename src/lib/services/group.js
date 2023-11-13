@@ -118,12 +118,28 @@ class Group {
     );
   }
 
+  /** @type {boolean} */
+  get isDisabled() {
+    return this.parent.matches('[aria-disabled="true"]');
+  }
+
+  /** @type {boolean} */
+  get isReadOnly() {
+    return this.parent.matches('[aria-readonly="true"]');
+  }
+
   /**
    * Select (and move focus to) the given target.
    * @param {(MouseEvent | KeyboardEvent)} event Triggered event.
    * @param {HTMLElement} newTarget Target element.
    */
   selectTarget(event, newTarget) {
+    if (this.isDisabled || this.isReadOnly) {
+      event.preventDefault();
+
+      return;
+    }
+
     const targetParentGroup = newTarget.closest(this.parentGroupSelector);
 
     this.activeMembers.forEach((element) => {

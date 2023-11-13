@@ -69,6 +69,7 @@
 <div
   class="sui search-bar {className}"
   class:disabled
+  class:readonly
   role="search"
   hidden={hidden || undefined}
   aria-hidden={hidden}

@@ -95,11 +95,16 @@
   };
 </script>
 
-<div class="sui number-input {className}" class:disabled hidden={hidden || undefined}>
+<div
+  class="sui number-input {className}"
+  class:disabled
+  class:readonly
+  hidden={hidden || undefined}
+>
   <div class="buttons">
     <Button
       iconic
-      disabled={disabled || Number.isNaN(Number(value)) || isMax}
+      disabled={disabled || readonly || Number.isNaN(Number(value)) || isMax}
       on:click={() => {
         increase();
       }}
@@ -108,7 +113,7 @@
     </Button>
     <Button
       iconic
-      disabled={disabled || Number.isNaN(Number(value)) || isMin}
+      disabled={disabled || readonly || Number.isNaN(Number(value)) || isMin}
       on:click={() => {
         decrease();
       }}

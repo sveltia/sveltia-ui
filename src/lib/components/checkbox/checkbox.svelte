@@ -81,6 +81,7 @@
   class:checked
   class:indeterminate
   class:disabled
+  class:readonly
   hidden={hidden || undefined}
   role="none"
   {...$$restProps}
@@ -106,9 +107,13 @@
       aria-labelledby={ariaLabel ? undefined : '{id}-label'}
       bind:this={buttonComponent}
       on:click={(event) => {
+        event.preventDefault();
         event.stopPropagation();
-        checked = indeterminate ? true : !checked;
-        dispatch('change', { checked });
+
+        if (!disabled && !readonly) {
+          checked = indeterminate ? true : !checked;
+          dispatch('change', { checked });
+        }
       }}
     >
       <Icon slot="start-icon" name={indeterminate ? 'remove' : 'check'} />
