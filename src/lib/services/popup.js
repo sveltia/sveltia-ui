@@ -165,18 +165,11 @@ class Popup {
   }
 
   /**
-   * Continue checking the position in case the window or parent element resizes.
+   * Check the position of the anchor element.
    */
   checkPosition() {
+    this.observer.unobserve(this.anchorElement);
     this.observer.observe(this.anchorElement);
-
-    window.requestAnimationFrame(() => {
-      this.observer.unobserve(this.anchorElement);
-
-      if (get(this.open)) {
-        this.checkPosition();
-      }
-    });
   }
 }
 
