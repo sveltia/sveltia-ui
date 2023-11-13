@@ -61,14 +61,19 @@
    */
   export let step = 1;
 
+  let edited = false;
+
   $: maximumFractionDigits = String(step).split('.')[1]?.length || 0;
   $: isMin = typeof min === 'number' && Number(value || 0) <= min;
   $: isMax = typeof max === 'number' && Number(value || 0) >= max;
 
   $: invalid =
-    (value !== undefined && Number.isNaN(Number(value))) ||
-    (typeof min === 'number' && Number(value || 0) < min) ||
-    (typeof max === 'number' && Number(value || 0) > max);
+    (required && edited && (value === undefined || value === '')) ||
+    (value !== undefined &&
+      value !== '' &&
+      (Number.isNaN(Number(value)) ||
+        (typeof min === 'number' && Number(value || 0) < min) ||
+        (typeof max === 'number' && Number(value || 0) > max)));
 
   let component;
 
@@ -147,6 +152,10 @@
       if (key === 'ArrowUp' && !hasModifier) {
         event.preventDefault();
         increase();
+      }
+
+      if (!edited) {
+        edited = true;
       }
     }}
     on:keypress
