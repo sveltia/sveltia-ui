@@ -27,12 +27,12 @@
    */
   export let disabled = false;
   /**
-   * Whether to disable the widget. An alias of the `aria-readonly` attribute.
+   * Whether to make the widget read-only. An alias of the `aria-readonly` attribute.
    * @type {boolean}
    */
   export let readonly = false;
   /**
-   * Whether to disable the widget. An alias of the `aria-invalid` attribute.
+   * Whether to mark the widget invalid. An alias of the `aria-invalid` attribute.
    * @type {boolean}
    */
   export let invalid = false;

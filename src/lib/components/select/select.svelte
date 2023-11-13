@@ -29,7 +29,7 @@
    */
   export let required = false;
   /**
-   * Whether to disable the widget. An alias of the `aria-invalid` attribute.
+   * Whether to mark the widget invalid. An alias of the `aria-invalid` attribute.
    * @type {boolean}
    */
   export let invalid = false;
