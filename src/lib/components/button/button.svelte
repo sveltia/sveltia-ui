@@ -286,6 +286,7 @@
       color: var(--sui-primary-accent-color-text);
 
       :global(.label) {
+        padding: 0;
         line-height: var(--sui-line-height-compact);
         white-space: normal;
       }

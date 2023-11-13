@@ -76,7 +76,6 @@
     :global(button) {
       display: flex;
       width: 100%;
-      justify-content: space-between;
     }
 
     :global(button .icon) {

@@ -230,8 +230,8 @@
     outline-width: 0 !important;
     color: var(--sui-primary-foreground-color);
     background-color: var(--sui-secondary-background-color-translucent);
-    -webkit-backdrop-filter: blur(16px);
-    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(32px);
+    backdrop-filter: blur(32px);
     box-shadow: 0 8px 16px var(--sui-popup-shadow-color);
     will-change: opacity, transform;
     transition-property: opacity, transform;
