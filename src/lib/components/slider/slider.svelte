@@ -250,6 +250,10 @@
    * Initialize the variables.
    */
   const init = () => {
+    if (!base) {
+      return;
+    }
+
     barWidth = base.clientWidth;
 
     const stepCount = (max - min) / step + 1;
@@ -262,13 +266,15 @@
   };
 
   onMount(() => {
+    const observer = new ResizeObserver(() => init());
     const query = window.matchMedia('(pointer: coarse)');
 
-    new ResizeObserver(() => init()).observe(base);
+    observer.observe(base);
     query.addEventListener('change', init);
     init();
 
     return () => {
+      observer.disconnect();
       query.removeEventListener('change', init);
     };
   });
