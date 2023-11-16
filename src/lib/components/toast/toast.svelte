@@ -6,7 +6,6 @@
 -->
 <script>
   import { onMount } from 'svelte';
-  import Alert from '../alert/alert.svelte';
 
   /**
    * @type {boolean}
@@ -17,11 +16,6 @@
    * @type {number}
    */
   export let duration = 5000;
-  /**
-   * Alert type.
-   * @type {'error' | 'warning' | 'info' | 'success'}
-   */
-  export let type = 'info';
 
   /**
    * @type {HTMLElement}
@@ -75,12 +69,8 @@
 
 <div class="sui toast-base" bind:this={popoverBase} />
 
-<div class="sui toast" hidden={!show || undefined} bind:this={toast}>
-  <Alert {type}>
-    {#if show}
-      <slot />
-    {/if}
-  </Alert>
+<div class="sui toast" aria-hidden={!show} bind:this={toast} {...$$restProps}>
+  <slot />
 </div>
 
 <style lang="scss">
@@ -115,7 +105,7 @@
     transition-duration: 250ms;
     will-change: opacity;
 
-    &[hidden] {
+    &[aria-hidden='true'] {
       display: block;
       opacity: 0;
     }

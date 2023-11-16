@@ -1,5 +1,6 @@
 <script>
   import { Button, Toast } from '$lib';
+  import Alert from '$lib/components/alert/alert.svelte';
   import Example from '../../_components/example.svelte';
 
   let showStandardToast = false;
@@ -11,7 +12,7 @@
 <h2>Toast</h2>
 
 <section>
-  <h3>Variant</h3>
+  <h3>Showing an Alert</h3>
   <Example>
     <div>
       <Button
@@ -21,8 +22,10 @@
           showErrorToast = true;
         }}
       />
-      <Toast bind:show={showErrorToast} type="error">
-        There was an error while saving the entry. Please try again later.
+      <Toast bind:show={showErrorToast}>
+        <Alert status="error">
+          There was an error while saving the entry. Please try again later.
+        </Alert>
       </Toast>
     </div>
     <div>
@@ -33,8 +36,8 @@
           showWarningToast = true;
         }}
       />
-      <Toast bind:show={showWarningToast} type="warning">
-        This setting may conflict with something else.
+      <Toast bind:show={showWarningToast}>
+        <Alert status="warning">Be careful. These settings are only for advanced users.</Alert>
       </Toast>
     </div>
     <div>
@@ -45,8 +48,9 @@
           showStandardToast = true;
         }}
       />
-      <Toast bind:show={showStandardToast} type="info">Form data will be automatically saved.</Toast
-      >
+      <Toast bind:show={showStandardToast}>
+        <Alert status="info">Form data will be automatically saved.</Alert>
+      </Toast>
     </div>
     <div>
       <Button
@@ -56,7 +60,9 @@
           showSuccessToast = true;
         }}
       />
-      <Toast bind:show={showSuccessToast} type="success">Entry has been saved.</Toast>
+      <Toast bind:show={showSuccessToast}>
+        <Alert status="success">Entry has been saved.</Alert>
+      </Toast>
     </div>
   </Example>
 </section>

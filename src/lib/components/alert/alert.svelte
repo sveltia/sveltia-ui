@@ -8,17 +8,17 @@
   import Icon from '../icon/icon.svelte';
 
   /**
-   * Alert type.
+   * Status of the alert.
    * @type {'error' | 'warning' | 'info' | 'success'}
    */
-  export let type = 'error';
+  export let status = 'error';
 </script>
 
-<div class="sui alert {type}" role="alert" {...$$restProps}>
+<div class="sui alert {status}" role="alert" {...$$restProps}>
   {#if $$slots.icon}
     <slot name="icon" />
   {:else}
-    <Icon name={type === 'success' ? 'check_circle' : type} />
+    <Icon name={status === 'success' ? 'check_circle' : status} />
   {/if}
   <slot />
 </div>

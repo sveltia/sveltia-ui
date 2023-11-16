@@ -9,16 +9,16 @@
   <h3>Standard</h3>
   <Example>
     <div>
-      <Alert type="error">Error</Alert>
+      <Alert status="error">Error</Alert>
     </div>
     <div>
-      <Alert type="warning">Warning</Alert>
+      <Alert status="warning">Warning</Alert>
     </div>
     <div>
-      <Alert type="info">Info</Alert>
+      <Alert status="info">Info</Alert>
     </div>
     <div>
-      <Alert type="success">Success</Alert>
+      <Alert status="success">Success</Alert>
     </div>
   </Example>
 </section>
@@ -27,25 +27,25 @@
   <h3>With Custom Icons</h3>
   <Example>
     <div>
-      <Alert type="error">
+      <Alert status="error">
         <Icon name="dangerous" slot="icon" />
         Error
       </Alert>
     </div>
     <div>
-      <Alert type="warning">
+      <Alert status="warning">
         <Icon name="emergency_home" slot="icon" />
         Warning
       </Alert>
     </div>
     <div>
-      <Alert type="info">
+      <Alert status="info">
         <Icon name="help" slot="icon" />
         Info
       </Alert>
     </div>
     <div>
-      <Alert type="success">
+      <Alert status="success">
         <Icon name="verified" slot="icon" />
         Success
       </Alert>
