@@ -8,7 +8,7 @@
 <section>
   <h3>Default</h3>
   <Example>
-    <div>
+    <div role="none">
       <Disclosure label="Event Details">Details?</Disclosure>
     </div>
   </Example>
@@ -17,7 +17,7 @@
 <section>
   <h3>Default</h3>
   <Example>
-    <div>
+    <div role="none">
       <Disclosure label="Event Details" disabled>Details?</Disclosure>
     </div>
   </Example>

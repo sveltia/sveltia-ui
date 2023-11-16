@@ -85,7 +85,13 @@
   $: ariaLabel = $$restProps['aria-label'];
 </script>
 
-<div class="sui text-input {className}" class:disabled class:readonly hidden={hidden || undefined}>
+<div
+  role="none"
+  class="sui text-input {className}"
+  class:disabled
+  class:readonly
+  hidden={hidden || undefined}
+>
   <input
     type="text"
     {role}

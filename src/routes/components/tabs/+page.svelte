@@ -8,7 +8,7 @@
 <section>
   <h3>Horizontal</h3>
   <Example>
-    <div>
+    <div role="none">
       <TabList>
         <Tab label="Tab 1" aria-controls="tabpanel-1" />
         <Tab label="Tab 2" aria-controls="tabpanel-2" />
@@ -35,7 +35,7 @@
 <section>
   <h3>Vertical</h3>
   <Example>
-    <div>
+    <div role="none">
       <TabList orientation="vertical">
         <Tab label="Tab 4" aria-controls="tabpanel-4" />
         <Tab label="Tab 5" aria-controls="tabpanel-5" />
@@ -66,7 +66,7 @@
 <section>
   <h3>Disabled</h3>
   <Example>
-    <div>
+    <div role="none">
       <TabList disabled>
         <Tab label="Tab 1" aria-controls="tabpanel-1" />
         <Tab label="Tab 2" aria-controls="tabpanel-2" />

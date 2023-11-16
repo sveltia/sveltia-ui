@@ -30,19 +30,20 @@
 </script>
 
 <div
+  role="group"
   {id}
   class="sui menu-item-group {className}"
   hidden={hidden || undefined}
-  role="group"
   aria-hidden={hidden}
   aria-disabled={disabled}
   aria-labelledby={title ? '{id}-title' : undefined}
+  aria-roledescription="menu item group"
   {...$$restProps}
 >
   {#if title}
-    <div class="title" id="{id}-title">{title}</div>
+    <div role="none" class="title" id="{id}-title">{title}</div>
   {/if}
-  <div class="inner" inert={disabled}>
+  <div role="none" class="inner" inert={disabled}>
     <slot />
   </div>
 </div>

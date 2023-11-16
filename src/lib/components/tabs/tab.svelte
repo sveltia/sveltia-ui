@@ -31,13 +31,14 @@
 </script>
 
 <Button
-  class="sui tab {className}"
   role="tab"
+  class="sui tab {className}"
   {hidden}
   {disabled}
   aria-selected={selected}
   {...$$restProps}
   on:select
+  on:change
 >
   <slot name="start-icon" slot="start-icon" />
   <slot />

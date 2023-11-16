@@ -60,12 +60,12 @@
 <!-- Preload fonts, including the icons -->
 <div class="font-loader" aria-hidden="true" bind:this={fontLoader} style:opacity="0">
   Loading <strong>Sveltia</strong> <em>UI</em>
-  <span class="material-symbols-outlined">favorite</span>
+  <span role="none" class="material-symbols-outlined">favorite</span>
 </div>
 
 <div
-  class="sui app-shell"
   role="none"
+  class="sui app-shell"
   {...$$restProps}
   on:dragover|preventDefault
   on:drop|preventDefault

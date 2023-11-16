@@ -10,7 +10,7 @@
 <section>
   <h3>Position</h3>
   <Example>
-    <div>
+    <div role="none">
       <Button
         variant="secondary"
         label="Show Drawer: right"
@@ -22,7 +22,7 @@
         Hello World!
       </Drawer>
     </div>
-    <div>
+    <div role="none">
       <Button
         variant="secondary"
         label="Show Drawer: left"
@@ -34,7 +34,7 @@
         >Hello World!</Drawer
       >
     </div>
-    <div>
+    <div role="none">
       <Button
         variant="secondary"
         label="Show Drawer: top"
@@ -44,7 +44,7 @@
       />
       <Drawer bind:open={openStandardDrawer.top} title="Drawer" position="top">Hello World!</Drawer>
     </div>
-    <div>
+    <div role="none">
       <Button
         variant="secondary"
         label="Show Drawer: bottom"

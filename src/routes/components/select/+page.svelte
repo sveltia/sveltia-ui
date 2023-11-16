@@ -8,7 +8,7 @@
 <section>
   <h3>Default</h3>
   <Example>
-    <div>
+    <div role="none">
       <Select>
         <Option label="Option 1" />
         <Option label="Option 2" />
@@ -24,7 +24,7 @@
 <section>
   <h3>Selected</h3>
   <Example>
-    <div>
+    <div role="none">
       <Select>
         <Option label="Option 1" selected />
         <Option label="Option 2" />
@@ -44,7 +44,7 @@
 <section>
   <h3>Auto-complete (WIP)</h3>
   <Example>
-    <div>
+    <div role="none">
       <Combobox>
         <Option label="Option 1" />
         <Option label="Option 2" />
@@ -64,7 +64,7 @@
 <section>
   <h3>Disabled</h3>
   <Example>
-    <div>
+    <div role="none">
       <Select disabled>
         <Option label="Option 1" selected />
         <Option label="Option 2" />
@@ -74,7 +74,7 @@
         <Option label="Option 5" disabled />
       </Select>
     </div>
-    <div>
+    <div role="none">
       <Combobox disabled>
         <Option label="Option 1" />
         <Option label="Option 2" />
@@ -90,7 +90,7 @@
 <section>
   <h3>Read-only</h3>
   <Example>
-    <div>
+    <div role="none">
       <Select readonly>
         <Option label="Option 1" selected />
         <Option label="Option 2" />
@@ -100,7 +100,7 @@
         <Option label="Option 5" disabled />
       </Select>
     </div>
-    <div>
+    <div role="none">
       <Combobox readonly>
         <Option label="Option 1" />
         <Option label="Option 2" />

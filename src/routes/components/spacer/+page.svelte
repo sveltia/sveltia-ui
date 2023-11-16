@@ -8,7 +8,7 @@
 <section>
   <h3>Standard</h3>
   <Example>
-    <div>
+    <div role="none">
       <Spacer />
     </div>
   </Example>
@@ -17,7 +17,7 @@
 <section>
   <h3>Flex</h3>
   <Example>
-    <div>
+    <div role="none">
       <Spacer flex />
     </div>
   </Example>

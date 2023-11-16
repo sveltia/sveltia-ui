@@ -5,7 +5,6 @@
   @see https://w3c.github.io/aria/#option
 -->
 <script>
-  import { onMount } from 'svelte';
   import Button from '../button/button.svelte';
   import Icon from '../icon/icon.svelte';
 
@@ -40,37 +39,12 @@
    * @type {string | undefined}
    */
   export let value = undefined;
-
-  /**
-   * Reference to the `Button` component.
-   * @type {Button | undefined}
-   */
-  let buttonComponent;
-
-  /**
-   * Event listener for the `select` event fired in `group.js`.
-   * @param {CustomEvent} event `select` event.
-   */
-  const listener = ({ type }) => {
-    selected = type === 'select';
-  };
-
-  onMount(() => {
-    buttonComponent.element.addEventListener('select', listener);
-    buttonComponent.element.addEventListener('unselect', listener);
-
-    return () => {
-      buttonComponent.element.removeEventListener('select', listener);
-      buttonComponent.element.removeEventListener('unselect', listener);
-    };
-  });
 </script>
 
-<div class="sui option {className}" hidden={hidden || undefined}>
+<div role="none" class="sui option {className}" hidden={hidden || undefined}>
   <Button
-    bind:this={buttonComponent}
-    tabindex="-1"
     role="option"
+    tabindex="-1"
     aria-selected={selected}
     {label}
     {value}
@@ -84,6 +58,10 @@
     on:dragend
     on:drop
     on:select
+    on:change
+    on:change={(event) => {
+      selected = /** @type {CustomEvent} */ (event).detail.selected;
+    }}
   >
     {#if selected}
       <Icon class="check" name="check" />

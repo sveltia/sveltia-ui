@@ -46,9 +46,9 @@
 </script>
 
 <div
+  role="radiogroup"
   class="sui radio-group {className} {orientation}"
   tabindex="-1"
-  role="radiogroup"
   hidden={hidden || undefined}
   aria-hidden={hidden}
   aria-disabled={disabled}
@@ -60,7 +60,7 @@
   use:activateGroup
   on:change
 >
-  <div class="inner" inert={disabled}>
+  <div role="none" class="inner" inert={disabled}>
     <slot />
   </div>
 </div>

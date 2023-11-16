@@ -54,7 +54,13 @@
   export let autoResize = false;
 </script>
 
-<div class="sui text-area {className}" class:disabled class:readonly hidden={hidden || undefined}>
+<div
+  role="none"
+  class="sui text-area {className}"
+  class:disabled
+  class:readonly
+  hidden={hidden || undefined}
+>
   <textarea
     {name}
     bind:value

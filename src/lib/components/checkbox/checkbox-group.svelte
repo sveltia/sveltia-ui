@@ -27,14 +27,15 @@
 </script>
 
 <div
+  role="group"
   class="sui checkbox-group {className} {orientation}"
   hidden={hidden || undefined}
-  role="group"
   aria-hidden={hidden}
   aria-disabled={disabled}
+  aria-roledescription="checkbox group"
   {...$$restProps}
 >
-  <div class="inner" inert={disabled}>
+  <div role="none" class="inner" inert={disabled}>
     <slot />
   </div>
 </div>

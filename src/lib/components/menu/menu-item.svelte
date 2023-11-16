@@ -52,7 +52,7 @@
   $: hasChildren = role === 'menuitem' && $$slots.default;
 </script>
 
-<div class="sui menuitem {className}" hidden={hidden || undefined}>
+<div role="none" class="sui menuitem {className}" hidden={hidden || undefined}>
   <Button
     {role}
     {hidden}
@@ -73,20 +73,21 @@
       }
     }}
     on:select
+    on:change
   >
     {#if iconName}
       <Icon slot="start-icon" name={iconName} aria-label={iconLabel} />
     {/if}
     {#if label}
-      <span class="label">{label}</span>
+      <span role="none" class="label">{label}</span>
     {/if}
     {#if $$slots['end-icon']}
-      <span class="icon-outer">
+      <span role="none" class="icon-outer">
         <slot name="end-icon" />
       </span>
     {/if}
     {#if hasChildren}
-      <span class="icon-outer">
+      <span role="none" class="icon-outer">
         <Icon name="chevron_right" />
       </span>
     {/if}

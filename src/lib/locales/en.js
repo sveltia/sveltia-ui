@@ -24,6 +24,7 @@ export const strings = {
   },
   password_input: {
     show_password: 'Show Password',
+    hide_password: 'Hide Password',
   },
   markdown_editor: {
     markdown_editor: 'Markdown Editor',

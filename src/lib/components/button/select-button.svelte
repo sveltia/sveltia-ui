@@ -56,6 +56,7 @@
 </script>
 
 <Button
+  role="radio"
   class="sui select-button {className}"
   {value}
   {hidden}
@@ -64,14 +65,14 @@
   {variant}
   {size}
   {iconic}
-  role="radio"
   aria-checked={selected}
   {...$$restProps}
   on:click
-  on:click={() => {
-    selected = !selected;
-  }}
   on:select
+  on:change
+  on:change={(event) => {
+    selected = /** @type {CustomEvent} */ (event).detail.selected;
+  }}
 >
   <slot name="start-icon" slot="start-icon" />
   <slot />

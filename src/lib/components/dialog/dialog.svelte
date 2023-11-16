@@ -7,6 +7,7 @@
 <script>
   import { createEventDispatcher, onMount } from 'svelte';
   import { _ } from 'svelte-i18n';
+  import { getRandomId } from '$lib/services/util';
   import Button from '../button/button.svelte';
   import Spacer from '../divider/spacer.svelte';
   import Icon from '../icon/icon.svelte';
@@ -22,6 +23,12 @@
   export let open = false;
 
   export let title = '';
+
+  /**
+   * The `role` attribute on the `<dialog>` element.
+   * @type {'dialog' | 'alertdialog'}
+   */
+  export let role = 'dialog';
 
   /**
    * Width of the dialog.
@@ -48,6 +55,7 @@
   export let closeOnBackdropClick = false;
 
   const dispatch = createEventDispatcher();
+  const id = getRandomId('dialog');
   /** @type {?HTMLDialogElement} */
   let dialog;
   /** @type {?HTMLFormElement} */
@@ -123,13 +131,14 @@
   });
 </script>
 
-<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
 <dialog
-  bind:this={dialog}
+  {id}
   class="sui dialog {className} {size}"
   class:open={showDialog}
+  {role}
   aria-label={title}
   {...$$restProps}
+  bind:this={dialog}
   on:click={({ target }) => {
     if (closeOnBackdropClick && /** @type {HTMLElement?} */ (target)?.matches('dialog')) {
       dialog.returnValue = 'cancel';
@@ -141,14 +150,14 @@
     open = false;
   }}
 >
-  <form method="dialog" bind:this={form} on:submit|preventDefault>
+  <form role="none" method="dialog" bind:this={form} on:submit|preventDefault>
     {#if showContent}
       {#if title || showClose || $$slots.header || $$slots['header-extra']}
-        <div class="header">
+        <div role="none" class="header">
           {#if $$slots.header}
             <slot name="header" />
           {:else}
-            <div class="title">
+            <div role="none" class="title">
               {title}
             </div>
             <Spacer flex={true} />
@@ -160,6 +169,7 @@
                 variant="ghost"
                 iconic
                 aria-label={$_('_sui.close')}
+                aria-controls={id}
                 on:click={() => {
                   dialog.returnValue = 'close';
                   open = false;
@@ -171,11 +181,11 @@
           {/if}
         </div>
       {/if}
-      <div class="main">
+      <div role="none" class="main">
         <slot />
       </div>
       {#if showOk || showCancel || $$slots.footer || $$slots['footer-extra']}
-        <div class="footer">
+        <div role="none" class="footer">
           {#if $$slots.footer}
             <slot name="footer" />
           {:else}

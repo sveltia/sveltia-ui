@@ -13,7 +13,12 @@
   export { className as class };
 </script>
 
-<div role="rowgroup" class="sui grid-foot {className}" {...$$restProps}>
+<div
+  role="rowgroup"
+  class="sui grid-foot {className}"
+  aria-roledescription="grid foot"
+  {...$$restProps}
+>
   <slot />
 </div>
 

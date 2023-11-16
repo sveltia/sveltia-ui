@@ -9,6 +9,7 @@
 
 <script>
   import { _ } from 'svelte-i18n';
+  import { getRandomId } from '$lib/services/util';
   import Button from '../button/button.svelte';
   import Icon from '../icon/icon.svelte';
   import TextInput from './text-input.svelte';
@@ -50,6 +51,7 @@
    */
   export let value = undefined;
 
+  const id = getRandomId('searchbox');
   /**
    * Reference to the `TextInput` component.
    * @type {TextInput | undefined}
@@ -67,19 +69,20 @@
 </script>
 
 <div
+  role={hidden ? undefined : 'none'}
   class="sui search-bar {className}"
   class:disabled
   class:readonly
-  role="search"
   hidden={hidden || undefined}
   aria-hidden={hidden}
 >
-  <span>
+  <span role="none">
     <Icon name="search" />
   </span>
   <TextInput
-    bind:value
     role="searchbox"
+    {id}
+    bind:value
     {hidden}
     {disabled}
     {readonly}
@@ -98,6 +101,7 @@
     <Button
       iconic
       aria-label={$_('_sui.clear')}
+      aria-controls={id}
       on:click={() => {
         value = '';
         input?.focus();
@@ -114,7 +118,7 @@
 </div>
 
 <style lang="scss">
-  [role='search'] {
+  .search-bar {
     display: flex;
     align-items: center;
     position: relative;

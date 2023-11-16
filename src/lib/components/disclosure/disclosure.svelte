@@ -42,16 +42,17 @@
 </script>
 
 <div
+  role="group"
   {id}
   class="sui disclosure {className}"
-  role="group"
   hidden={hidden || undefined}
   aria-hidden={hidden}
   aria-disabled={disabled}
   aria-labelledby="{id}-header"
+  aria-roledescription="disclosure"
   {...$$restProps}
 >
-  <div class="inner" inert={disabled}>
+  <div role="none" class="inner" inert={disabled}>
     <Button
       class="header"
       id="{id}-header"

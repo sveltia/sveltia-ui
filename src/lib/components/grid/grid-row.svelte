@@ -26,6 +26,7 @@
   {...$$restProps}
   on:click
   on:select
+  on:change
 >
   <slot />
 </div>

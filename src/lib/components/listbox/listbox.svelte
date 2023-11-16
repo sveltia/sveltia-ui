@@ -48,9 +48,9 @@
 </script>
 
 <div
+  role="listbox"
   class="sui listbox {className}"
   tabindex={disabled ? -1 : 0}
-  role="listbox"
   hidden={hidden || undefined}
   aria-hidden={hidden}
   aria-disabled={disabled}
@@ -63,7 +63,7 @@
   on:click
   on:change
 >
-  <div class="inner" inert={disabled}>
+  <div role="none" class="inner" inert={disabled}>
     <slot />
   </div>
 </div>

@@ -6,6 +6,7 @@
 -->
 <script>
   import { _ } from 'svelte-i18n';
+  import { getRandomId } from '$lib/services/util';
   import Button from '../button/button.svelte';
   import Icon from '../icon/icon.svelte';
   import TextInput from './text-input.svelte';
@@ -61,6 +62,7 @@
    */
   export let step = 1;
 
+  const id = getRandomId('input');
   let edited = false;
 
   $: maximumFractionDigits = String(step).split('.')[1]?.length || 0;
@@ -101,16 +103,18 @@
 </script>
 
 <div
+  role="none"
   class="sui number-input {className}"
   class:disabled
   class:readonly
   hidden={hidden || undefined}
 >
-  <div class="buttons">
+  <div role="none" class="buttons">
     <Button
       iconic
       disabled={disabled || readonly || Number.isNaN(Number(value)) || isMax}
       aria-label={$_('_sui.number_input.increase')}
+      aria-controls={id}
       on:click={() => {
         increase();
       }}
@@ -121,6 +125,7 @@
       iconic
       disabled={disabled || readonly || Number.isNaN(Number(value)) || isMin}
       aria-label={$_('_sui.number_input.decrease')}
+      aria-controls={id}
       on:click={() => {
         decrease();
       }}
@@ -129,9 +134,10 @@
     </Button>
   </div>
   <TextInput
-    bind:this={component}
-    bind:value
     role="spinbutton"
+    {id}
+    bind:value
+    spellcheck="false"
     {hidden}
     {disabled}
     {readonly}
@@ -142,6 +148,7 @@
     aria-valuemax={max}
     inputmode={maximumFractionDigits > 0 ? 'decimal' : 'numeric'}
     {...$$restProps}
+    bind:this={component}
     on:keydown={(event) => {
       const { key, ctrlKey, metaKey, altKey, shiftKey } = event;
       const hasModifier = shiftKey || altKey || ctrlKey || metaKey;

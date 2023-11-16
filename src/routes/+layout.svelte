@@ -11,7 +11,7 @@
     <header>
       <h1><a href="/">Sveltia UI</a></h1>
     </header>
-    <div class="wrapper">
+    <div role="none" class="wrapper">
       <nav class="sidebar">
         <section>
           <h2>Basics</h2>

@@ -26,8 +26,8 @@
 </script>
 
 <div
-  class="sui menu {className}"
   role="menu"
+  class="sui menu {className}"
   hidden={hidden || undefined}
   aria-hidden={hidden}
   aria-disabled={disabled}

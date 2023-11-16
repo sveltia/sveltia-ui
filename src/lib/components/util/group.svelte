@@ -23,14 +23,14 @@
 </script>
 
 <div
-  class="sui group {className}"
   role="group"
+  class="sui group {className}"
   hidden={hidden || undefined}
   aria-hidden={hidden}
   aria-disabled={disabled}
   {...$$restProps}
 >
-  <div class="inner" inert={disabled}>
+  <div role="none" class="inner" inert={disabled}>
     <slot />
   </div>
 </div>

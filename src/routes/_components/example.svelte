@@ -6,7 +6,7 @@
 
 <div role="figure" aria-labelledby="{id}-title">
   <div role="caption" id="{id}-title">Preview</div>
-  <div class="body">
+  <div role="none" class="body">
     <slot />
   </div>
 </div>

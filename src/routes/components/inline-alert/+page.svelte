@@ -8,16 +8,16 @@
 <section>
   <h3>Standard</h3>
   <Example>
-    <div>
+    <div role="none">
       <Alert status="error">Error</Alert>
     </div>
-    <div>
+    <div role="none">
       <Alert status="warning">Warning</Alert>
     </div>
-    <div>
+    <div role="none">
       <Alert status="info">Info</Alert>
     </div>
-    <div>
+    <div role="none">
       <Alert status="success">Success</Alert>
     </div>
   </Example>
@@ -26,25 +26,25 @@
 <section>
   <h3>With Custom Icons</h3>
   <Example>
-    <div>
+    <div role="none">
       <Alert status="error">
         <Icon name="dangerous" slot="icon" />
         Error
       </Alert>
     </div>
-    <div>
+    <div role="none">
       <Alert status="warning">
         <Icon name="emergency_home" slot="icon" />
         Warning
       </Alert>
     </div>
-    <div>
+    <div role="none">
       <Alert status="info">
         <Icon name="help" slot="icon" />
         Info
       </Alert>
     </div>
-    <div>
+    <div role="none">
       <Alert status="success">
         <Icon name="verified" slot="icon" />
         Success

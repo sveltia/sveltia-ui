@@ -7,6 +7,7 @@
 <script>
   import { createEventDispatcher, onMount } from 'svelte';
   import { _ } from 'svelte-i18n';
+  import { getRandomId } from '$lib/services/util';
   import Button from '../button/button.svelte';
   import Spacer from '../divider/spacer.svelte';
   import Icon from '../icon/icon.svelte';
@@ -58,6 +59,7 @@
   export let keepContent = false;
 
   const dispatch = createEventDispatcher();
+  const id = getRandomId('drawer');
   /** @type {?HTMLDialogElement} */
   let dialog;
   /** @type {?HTMLFormElement} */
@@ -136,10 +138,11 @@
 
 <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
 <dialog
-  bind:this={dialog}
+  {id}
   class="sui dialog {className} {size} {position} {orientation}"
   class:open={showDialog}
   {...$$restProps}
+  bind:this={dialog}
   on:click={({ target }) => {
     if (closeOnBackdropClick && /** @type {HTMLElement?} */ (target)?.matches('dialog')) {
       dialog.returnValue = 'cancel';
@@ -151,14 +154,15 @@
     open = false;
   }}
 >
-  <form method="dialog" bind:this={form} on:submit|preventDefault>
-    <div class="extra-control">
+  <form role="none" method="dialog" bind:this={form} on:submit|preventDefault>
+    <div role="none" class="extra-control">
       {#if showClose === 'outside'}
         <Button
           variant="ghost"
           iconic
           class="close"
           aria-label={$_('_sui.close')}
+          aria-controls={id}
           on:click={() => {
             dialog.returnValue = 'close';
             open = false;
@@ -170,11 +174,11 @@
     </div>
     {#if keepContent || showContent}
       {#if title || showClose === 'inside' || $$slots.header || $$slots['header-extra']}
-        <div class="header">
+        <div role="none" class="header">
           {#if $$slots.header}
             <slot name="header" />
           {:else}
-            <div class="title">
+            <div role="none" class="title">
               {title}
             </div>
             <Spacer flex={true} />
@@ -187,6 +191,7 @@
                 iconic
                 class="close"
                 aria-label={$_('_sui.close')}
+                aria-controls={id}
                 on:click={() => {
                   dialog.returnValue = 'close';
                   open = false;
@@ -198,11 +203,11 @@
           {/if}
         </div>
       {/if}
-      <div class="main">
+      <div role="none" class="main">
         <slot />
       </div>
       {#if $$slots.footer}
-        <div class="footer">
+        <div role="none" class="footer">
           <slot name="footer" />
         </div>
       {/if}

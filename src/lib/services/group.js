@@ -2,9 +2,9 @@ import { getRandomId, sleep } from './util';
 
 /**
  * @type {{ [role: string]: {
- *   orientation: string,
+ *   orientation: 'vertical' | 'horizontal',
  *   childRoles: string[],
- *   childSelectedAttr: string,
+ *   childSelectedAttr: 'aria-selected' | 'aria-checked',
  *   focusChild: boolean
  * } }}
  */
@@ -71,6 +71,7 @@ class Group {
       : this.parent.getAttribute('aria-orientation') ?? orientation;
     this.childRoles = childRoles;
     this.childSelectedAttr = childSelectedAttr;
+    this.childSelectedProp = childSelectedAttr.replace('aria-', '');
     this.focusChild = focusChild;
 
     const { allMembers } = this;
@@ -83,7 +84,7 @@ class Group {
       const isSelected = element.matches(`[${childSelectedAttr}="true"]`);
       const controls = document.querySelector(`#${element.getAttribute('aria-controls')}`);
 
-      element.id ||= `${this.id}-item-${index}`;
+      element.id ||= `${this.id}-item-${index + 1}`;
       element.tabIndex ||= isSelected || (!hasSelected && index === 0) ? 0 : -1;
       element.setAttribute(this.childSelectedAttr, String(isSelected));
       controls?.setAttribute('aria-labelledby', element.id);
@@ -140,25 +141,55 @@ class Group {
       return;
     }
 
-    const targetParentGroup = newTarget.closest(this.parentGroupSelector);
+    const targetRole = newTarget.getAttribute('role');
+    const targetParent = newTarget.closest(this.parentGroupSelector);
+    const selectByClick = event.type === 'click';
+
+    const selectByKeydown =
+      event.type === 'keydown' && /** @type {KeyboardEvent} */ (event).key === ' ';
 
     this.activeMembers.forEach((element) => {
-      const isTarget = element === newTarget;
-      const isSelected = element.matches('[aria-selected="true"]');
+      const isMenuItemCheckbox = element.matches('[role="menuitemcheckbox"]');
       const isMenuItemRadio = element.matches('[role="menuitemradio"]');
+
+      if (
+        (isMenuItemCheckbox || isMenuItemRadio) &&
+        (element.getAttribute('role') !== targetRole ||
+          element.closest(this.parentGroupSelector) !== targetParent)
+      ) {
+        return;
+      }
+
+      const multiSelect = isMenuItemCheckbox || this.multi;
+      const singleSelect = isMenuItemRadio || !multiSelect;
+      const isTarget = element === newTarget;
+      const isSelected = element.matches(`[${this.childSelectedAttr}="true"]`);
       const controls = element.getAttribute('aria-controls');
 
-      if (this.multi && isTarget && event.type === 'click') {
+      if (multiSelect && isTarget && (selectByClick || selectByKeydown)) {
         element.setAttribute(this.childSelectedAttr, String(!isSelected));
-        element.dispatchEvent(new CustomEvent(isSelected ? 'unselect' : 'select'));
+        element.dispatchEvent(
+          new CustomEvent('change', { detail: { [this.childSelectedProp]: !isSelected } }),
+        );
+
+        if (!isSelected) {
+          element.dispatchEvent(new CustomEvent('select'));
+        }
       }
 
       if (
-        (isMenuItemRadio && element.closest(this.parentGroupSelector) === targetParentGroup) ||
-        (!isMenuItemRadio && !this.multi)
+        singleSelect &&
+        isSelected !== isTarget &&
+        (isMenuItemRadio ? selectByKeydown || selectByClick : true)
       ) {
         element.setAttribute(this.childSelectedAttr, String(isTarget));
-        element.dispatchEvent(new CustomEvent(isTarget ? 'select' : 'unselect'));
+        element.dispatchEvent(
+          new CustomEvent('change', { detail: { [this.childSelectedProp]: isTarget } }),
+        );
+
+        if (isTarget) {
+          element.dispatchEvent(new CustomEvent('select'));
+        }
       }
 
       if (this.focusChild) {
@@ -176,6 +207,7 @@ class Group {
       }
 
       if (isTarget) {
+        this.parent.setAttribute('aria-activedescendant', element.id);
         element.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'smooth' });
       }
     });
@@ -242,8 +274,14 @@ class Group {
       event.preventDefault();
     }
 
-    if (['Enter', ' '].includes(key)) {
-      currentTarget.click();
+    if (key === 'Enter') {
+      currentTarget.click(); // Also close the popup if needed
+
+      return;
+    }
+
+    if (key === ' ') {
+      this.selectTarget(event, currentTarget);
 
       return;
     }

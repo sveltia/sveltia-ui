@@ -50,16 +50,16 @@
 
 <div role="group">
   <input type="hidden" bind:value />
-  <div class="header">
+  <div role="none" class="header">
     <Button
       variant="ghost"
       label={firstDay.toLocaleDateString('en', { year: 'numeric', month: 'short' })}
       aria-haspopup="dialog"
     >
       <Icon slot="end-icon" name="arrow_drop_down" />
-      <div slot="popup" class="popup-inner" role="none" on:click|stopPropagation>
+      <div slot="popup" role="none" class="popup-inner" on:click|stopPropagation>
         <div role="group" aria-label={$_('_sui.calendar.year')}>
-          <div class="header">
+          <div role="none" class="header">
             <Button
               aria-label={$_('_sui.calendar.previous_decade')}
               on:click={() => {
@@ -77,9 +77,9 @@
               <Icon name="chevron_right" />
             </Button>
           </div>
-          <div class="grid">
+          <div role="none" class="grid">
             {#each [0, 1, 2, 3, 4, 5, 6, 7, 8, 9] as year}
-              <div>
+              <div role="none">
                 <Button>202{year}</Button>
               </div>
             {/each}
@@ -87,9 +87,9 @@
         </div>
         <Divider orientation="vertical" />
         <div role="group" aria-label={$_('_sui.calendar.month')}>
-          <div class="grid">
+          <div role="none" class="grid">
             {#each [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] as month}
-              <div>
+              <div role="none">
                 <Button>
                   {new Date(date.getUTCFullYear(), month, 10).toLocaleDateString('en', {
                     month: 'short',
@@ -120,14 +120,15 @@
       <Icon name="chevron_right" />
     </Button>
   </div>
-  <div class="grid" role="listbox">
+  <div role="listbox" class="grid">
     {#each dayList.slice(0, 7) as { day }}
-      <div class="weekday" role="presentation">
+      <div role="none" class="weekday">
         {day.toLocaleDateString('en', { weekday: 'narrow' })}
       </div>
     {/each}
     {#each dayList as { day }}
       <div
+        role="none"
         class:other-month={day.getUTCMonth() !== firstDay.getUTCMonth()}
         class:today={day.getFullYear() === now.getFullYear() &&
           day.getMonth() === now.getMonth() &&
@@ -145,7 +146,7 @@
       </div>
     {/each}
   </div>
-  <div class="footer">
+  <div role="none" class="footer">
     <Button
       on:click={() => {
         value = '';

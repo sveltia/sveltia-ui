@@ -146,19 +146,20 @@
 <dialog
   class="sui popup {className}"
   role="none"
-  bind:this={dialog}
   class:touch={touchOptimized && touchEnabled}
   class:open={showDialog}
+  bind:this={dialog}
   {...$$restProps}
 >
   <div
-    bind:this={content}
+    role="none"
     class="content {contentType}"
     style:inset={$style.inset}
     style:z-index={$style.zIndex}
     style:min-width={$style.width}
     style:max-height={$style.height}
     style:visibility={$style.inset ? undefined : 'hidden'}
+    bind:this={content}
   >
     {#if keepContent || showContent}
       <slot />

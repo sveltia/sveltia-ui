@@ -45,8 +45,8 @@
 </script>
 
 <MenuItem
-  class="sui menu-item-radio {className}"
   role="menuitemradio"
+  class="sui menu-item-radio {className}"
   {label}
   {hidden}
   {disabled}
@@ -55,10 +55,11 @@
   {iconLabel}
   {...$$restProps}
   on:click
-  on:click={() => {
-    checked = !checked;
-  }}
   on:select
+  on:change
+  on:change={(event) => {
+    checked = /** @type {CustomEvent} */ (event).detail.checked;
+  }}
 >
   <slot />
   <svelte:component this={checked ? Icon : undefined} slot="end-icon" name="check" />

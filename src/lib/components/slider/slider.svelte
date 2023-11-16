@@ -293,21 +293,21 @@
 />
 
 <div
+  role="none"
   class="sui slider {className}"
   class:disabled
   class:readonly
-  role="none"
   hidden={hidden || undefined}
   {...$$restProps}
   on:click|preventDefault|stopPropagation
 >
   <div
-    class="base"
     role="none"
+    class="base"
     bind:this={base}
     on:click|preventDefault|stopPropagation={(event) => onClick(event)}
   >
-    <div class="base-bar" />
+    <div role="none" class="base-bar" />
     <div
       class="slider-bar"
       style:left="{multiThumb ? sliderPositions[0] : 0}px"
@@ -348,8 +348,8 @@
     {#if optionLabels.length}
       {#each optionLabels as label, index}
         <span
+          role="none"
           class="label"
-          role="presentation"
           style:left="{(barWidth / (optionLabels.length - 1)) * index}px"
         >
           {label}

@@ -24,6 +24,7 @@ export const strings = {
   },
   password_input: {
     show_password: 'パスワードを表示',
+    hide_password: 'パスワードを隠す',
   },
   markdown_editor: {
     markdown_editor: 'Markdown エディター',

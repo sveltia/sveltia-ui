@@ -8,7 +8,7 @@
 <section>
   <h3>Single line</h3>
   <Example>
-    <div>
+    <div role="none">
       <TextInput />
     </div>
   </Example>
@@ -17,7 +17,7 @@
 <section>
   <h3>Multi line</h3>
   <Example>
-    <div>
+    <div role="none">
       <TextArea />
     </div>
   </Example>
@@ -26,7 +26,7 @@
 <section>
   <h3>Password</h3>
   <Example>
-    <div>
+    <div role="none">
       <PasswordInput />
     </div>
   </Example>
@@ -35,7 +35,7 @@
 <section>
   <h3>Number</h3>
   <Example>
-    <div>
+    <div role="none">
       <NumberInput min={0} />
     </div>
   </Example>
@@ -44,7 +44,7 @@
 <section>
   <h3>Search</h3>
   <Example>
-    <div>
+    <div role="none">
       <SearchBar />
     </div>
   </Example>
@@ -61,7 +61,7 @@
 <section>
   <h3>Editor (WIP)</h3>
   <Example>
-    <div>
+    <div role="none">
       <MarkdownEditor />
     </div>
   </Example>
@@ -70,22 +70,22 @@
 <section>
   <h3>Disabled</h3>
   <Example>
-    <div>
+    <div role="none">
       <TextInput disabled />
     </div>
-    <div>
+    <div role="none">
       <TextArea disabled />
     </div>
-    <div>
+    <div role="none">
       <PasswordInput disabled />
     </div>
-    <div>
+    <div role="none">
       <NumberInput min={0} disabled />
     </div>
-    <div>
+    <div role="none">
       <SearchBar disabled />
     </div>
-    <div>
+    <div role="none">
       <MarkdownEditor disabled />
     </div>
   </Example>
@@ -94,22 +94,22 @@
 <section>
   <h3>Read-only</h3>
   <Example>
-    <div>
+    <div role="none">
       <TextInput readonly />
     </div>
-    <div>
+    <div role="none">
       <TextArea readonly />
     </div>
-    <div>
+    <div role="none">
       <PasswordInput readonly />
     </div>
-    <div>
+    <div role="none">
       <NumberInput min={0} readonly />
     </div>
-    <div>
+    <div role="none">
       <SearchBar readonly />
     </div>
-    <div>
+    <div role="none">
       <MarkdownEditor readonly />
     </div>
   </Example>

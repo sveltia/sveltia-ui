@@ -8,7 +8,7 @@
 <section>
   <h3>Single Select</h3>
   <Example>
-    <div>
+    <div role="none">
       <Listbox>
         <Option label="Option 1" selected />
         <Option label="Option 2" />
@@ -23,7 +23,7 @@
 <section>
   <h3>Multi Select</h3>
   <Example>
-    <div>
+    <div role="none">
       <Listbox multiple>
         <Option label="Option 1" selected />
         <Option label="Option 2" />
@@ -38,7 +38,7 @@
 <section>
   <h3>With Groups</h3>
   <Example>
-    <div>
+    <div role="none">
       <Listbox>
         <OptionGroup label="Group 1">
           <Option label="Option 1" selected />
@@ -57,7 +57,7 @@
 <section>
   <h3>Disabled</h3>
   <Example>
-    <div>
+    <div role="none">
       <Listbox disabled>
         <Option label="Option 1" selected />
         <Option label="Option 2" />
@@ -72,7 +72,7 @@
 <section>
   <h3>Read-only</h3>
   <Example>
-    <div>
+    <div role="none">
       <Listbox readonly>
         <Option label="Option 1" selected />
         <Option label="Option 2" />

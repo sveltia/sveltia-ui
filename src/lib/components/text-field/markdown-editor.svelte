@@ -4,6 +4,7 @@
 -->
 <script>
   import { _ } from 'svelte-i18n';
+  import { getRandomId } from '$lib/services/util';
   import Button from '../button/button.svelte';
   import Divider from '../divider/divider.svelte';
   import Icon from '../icon/icon.svelte';
@@ -41,6 +42,8 @@
    */
   export let value = undefined;
 
+  const id = getRandomId('editor');
+
   const defaultButtons = [
     { name: 'bold', label: $_('_sui.markdown_editor.bold'), icon: 'format_bold' },
     { name: 'italic', label: $_('_sui.markdown_editor.italic'), icon: 'format_italic' },
@@ -72,8 +75,8 @@
   ];
 </script>
 
-<div class="wrapper" hidden={hidden || undefined} {...$$restProps}>
-  <div class="inner">
+<div role="none" class="wrapper" hidden={hidden || undefined} {...$$restProps}>
+  <div role="none" class="inner">
     <Toolbar
       disabled={disabled || readonly}
       aria-label={$_('_sui.markdown_editor.markdown_editor')}
@@ -82,13 +85,22 @@
         {#if separator}
           <Divider />
         {:else}
-          <Button iconic>
-            <Icon slot="start-icon" name={icon} {label} />
+          <Button iconic aria-label={label} aria-controls={id}>
+            <Icon slot="start-icon" name={icon} />
           </Button>
         {/if}
       {/each}
     </Toolbar>
-    <TextArea autoResize={true} bind:value {hidden} {disabled} {readonly} {required} {invalid} />
+    <TextArea
+      {id}
+      autoResize={true}
+      bind:value
+      {hidden}
+      {disabled}
+      {readonly}
+      {required}
+      {invalid}
+    />
   </div>
 </div>
 

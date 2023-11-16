@@ -132,21 +132,22 @@
   on:keyup
   on:keypress
   on:select
+  on:change
 >
   <slot name="start-icon" />
   {#if variant === 'link'}
     {#if label}
-      <span class="label">
+      <span role="none" class="label">
         {label}
       </span>
     {:else}
-      <span class="label">
+      <span role="none" class="label">
         <slot />
       </span>
     {/if}
   {:else}
     {#if label}
-      <span class="label">
+      <span role="none" class="label">
         {label}
       </span>
     {/if}

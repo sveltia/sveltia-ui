@@ -100,13 +100,13 @@
   }
 </script>
 
-<div class="sui combobox {className}" hidden={hidden || undefined} {...$$restProps}>
+<div role="none" class="sui combobox {className}" hidden={hidden || undefined} {...$$restProps}>
   {#if !editable}
     <div
+      role="combobox"
       {id}
       class:selected={value !== undefined}
       tabindex={disabled ? -1 : 0}
-      role="combobox"
       aria-controls="{id}-popup"
       aria-expanded={$isPopupOpen}
       aria-hidden={hidden}
@@ -117,7 +117,7 @@
       {...$$restProps}
       bind:this={comboboxElement}
     >
-      <div class="label">
+      <div role="none" class="label">
         {value !== undefined ? label : $_('_sui.combobox.select_an_option')}
       </div>
     </div>

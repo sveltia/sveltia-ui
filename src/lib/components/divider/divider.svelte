@@ -23,8 +23,8 @@
 </script>
 
 <div
-  class="sui divider {className}"
   role="separator"
+  class="sui divider {className}"
   hidden={hidden || undefined}
   aria-hidden={hidden}
   aria-orientation={orientation}

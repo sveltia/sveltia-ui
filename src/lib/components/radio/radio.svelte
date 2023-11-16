@@ -56,9 +56,9 @@
 </script>
 
 <span
+  role="none"
   class="sui radio {className}"
   class:disabled
-  role="none"
   hidden={hidden || undefined}
   {...$$restProps}
   on:click={(event) => {
@@ -68,8 +68,8 @@
   }}
 >
   <Button
-    {id}
     role="radio"
+    {id}
     {hidden}
     {disabled}
     {name}
@@ -82,6 +82,7 @@
       checked = true;
     }}
     on:select
+    on:change
   />
   {#if $$slots.default || label}
     <label id="{id}-label">

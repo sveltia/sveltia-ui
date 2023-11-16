@@ -14,7 +14,7 @@
 <section>
   <h3>Showing an Alert</h3>
   <Example>
-    <div>
+    <div role="none">
       <Button
         variant="secondary"
         label="Show Error Toast"
@@ -28,7 +28,7 @@
         </Alert>
       </Toast>
     </div>
-    <div>
+    <div role="none">
       <Button
         variant="secondary"
         label="Show Warning Toast"
@@ -40,7 +40,7 @@
         <Alert status="warning">Be careful. These settings are only for advanced users.</Alert>
       </Toast>
     </div>
-    <div>
+    <div role="none">
       <Button
         variant="secondary"
         label="Show Information Toast"
@@ -52,7 +52,7 @@
         <Alert status="info">Form data will be automatically saved.</Alert>
       </Toast>
     </div>
-    <div>
+    <div role="none">
       <Button
         variant="secondary"
         label="Show Success Toast"

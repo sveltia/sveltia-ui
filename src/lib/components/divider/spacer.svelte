@@ -10,24 +10,13 @@
   let className = '';
   export { className as class };
   /**
-   * Whether to hide the widget. An alias of the `aria-hidden` attribute.
-   * @type {boolean | undefined}
-   */
-  export let hidden = undefined;
-  /**
    * Whether to make the spacer flexible.
    * @type {boolean}
    */
   export let flex = false;
 </script>
 
-<div
-  class="sui spacer {className}"
-  class:flex
-  hidden={hidden || undefined}
-  aria-hidden={hidden}
-  {...$$restProps}
-/>
+<div role="none" class="sui spacer {className}" class:flex {...$$restProps} />
 
 <style lang="scss">
   .spacer {

@@ -49,9 +49,9 @@
 </script>
 
 <button
+  role="switch"
   class="sui switch {className}"
   type="button"
-  role="switch"
   hidden={hidden || undefined}
   disabled={disabled || undefined}
   aria-checked={checked}
@@ -67,7 +67,7 @@
     }
   }}
 >
-  <span />
+  <span role="none" />
   {#if label}
     {label}
   {:else}

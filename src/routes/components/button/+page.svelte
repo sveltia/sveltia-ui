@@ -8,7 +8,7 @@
 <section>
   <h3>Standard</h3>
   <Example>
-    <div>
+    <div role="none">
       <Button variant="primary" label="Primary" />
       <Button variant="secondary" label="Secondary" />
       <Button variant="tertiary" label="Tertiary" />
@@ -20,14 +20,14 @@
   <h3>Link</h3>
   <Example>
     <!-- cSpell:disable -->
-    <div>
+    <div role="none">
       <Button
         variant="link"
         label="Link: Lorem ipsum dolor sit amet, consectetur adipiscing elit.
                 Nam pulvinar scelerisque tincidunt."
       />
     </div>
-    <div>
+    <div role="none">
       <Button variant="link" label="Link: Lorem ipsum dolor sit amet">
         <Icon name="help" slot="start-icon" />
       </Button>
@@ -39,13 +39,13 @@
 <section>
   <h3>Size</h3>
   <Example>
-    <div>
+    <div role="none">
       <Button variant="primary" size="small" label="Small" />
     </div>
-    <div>
+    <div role="none">
       <Button variant="primary" size="medium" label="Medium" />
     </div>
-    <div>
+    <div role="none">
       <Button variant="primary" size="large" label="Large" />
     </div>
   </Example>
@@ -63,7 +63,7 @@
 <section>
   <h3>With Icon</h3>
   <Example>
-    <div>
+    <div role="none">
       <Button variant="secondary" label="Tag">
         <Icon slot="start-icon" name="sell" />
       </Button>
@@ -80,14 +80,14 @@
 <section>
   <h3>Disabled</h3>
   <Example>
-    <div>
+    <div role="none">
       <Button variant="primary" label="Primary" disabled />
       <Button variant="secondary" label="Secondary" disabled />
       <Button variant="tertiary" label="Tertiary" disabled />
       <Button variant="ghost" label="Ghost" disabled />
     </div>
     <!-- cSpell:disable -->
-    <div>
+    <div role="none">
       <Button
         variant="link"
         disabled
@@ -96,7 +96,7 @@
       />
     </div>
     <!-- cSpell:enable -->
-    <div>
+    <div role="none">
       <Button variant="secondary" label="Tag" disabled>
         <Icon slot="start-icon" name="sell" />
       </Button>

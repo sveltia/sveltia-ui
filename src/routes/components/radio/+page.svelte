@@ -8,7 +8,7 @@
 <section>
   <h3>Horizontal</h3>
   <Example>
-    <div>
+    <div role="none">
       <RadioGroup>
         <Radio checked label="Strawberry" />
         <Radio label="Grape" />
@@ -22,7 +22,7 @@
 <section>
   <h3>Vertical</h3>
   <Example>
-    <div>
+    <div role="none">
       <RadioGroup orientation="vertical">
         <Radio checked label="Strawberry" />
         <Radio label="Grape" />
@@ -36,7 +36,7 @@
 <section>
   <h3>Disabled</h3>
   <Example>
-    <div>
+    <div role="none">
       <RadioGroup disabled>
         <Radio checked label="Strawberry" />
         <Radio label="Grape" />
@@ -50,7 +50,7 @@
 <section>
   <h3>Read-only</h3>
   <Example>
-    <div>
+    <div role="none">
       <RadioGroup readonly>
         <Radio checked label="Strawberry" />
         <Radio label="Grape" />

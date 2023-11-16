@@ -14,7 +14,7 @@
   export let status = 'error';
 </script>
 
-<div class="sui alert {status}" role="alert" {...$$restProps}>
+<div role="alert" class="sui alert {status}" {...$$restProps}>
   {#if $$slots.icon}
     <slot name="icon" />
   {:else}

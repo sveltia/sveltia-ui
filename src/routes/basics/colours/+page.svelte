@@ -7,17 +7,29 @@
 <section>
   <h3>Background</h3>
   <Example>
-    <div class="color-samples">
-      <span class="sample" style:background-color="var(--sui-primary-background-color)">
+    <div role="none" class="color-samples">
+      <span role="none" class="sample" style:background-color="var(--sui-primary-background-color)">
         Primary
       </span>
-      <span class="sample" style:background-color="var(--sui-secondary-background-color)">
+      <span
+        role="none"
+        class="sample"
+        style:background-color="var(--sui-secondary-background-color)"
+      >
         Secondary
       </span>
-      <span class="sample" style:background-color="var(--sui-tertiary-background-color)">
+      <span
+        role="none"
+        class="sample"
+        style:background-color="var(--sui-tertiary-background-color)"
+      >
         tertiary
       </span>
-      <span class="sample" style:background-color="var(--sui-disabled-background-color)">
+      <span
+        role="none"
+        class="sample"
+        style:background-color="var(--sui-disabled-background-color)"
+      >
         Disabled
       </span>
     </div>
@@ -26,19 +38,28 @@
 <section>
   <h3>Foreground</h3>
   <Example>
-    <div class="color-samples">
-      <span class="sample" style:color="var(--sui-primary-foreground-color)"> Primary </span>
-      <span class="sample" style:color="var(--sui-secondary-foreground-color)"> Secondary </span>
-      <span class="sample" style:color="var(--sui-tertiary-foreground-color)"> Tertiary </span>
-      <span class="sample" style:color="var(--sui-disabled-foreground-color)"> Disabled </span>
+    <div role="none" class="color-samples">
+      <span role="none" class="sample" style:color="var(--sui-primary-foreground-color)">
+        Primary
+      </span>
+      <span role="none" class="sample" style:color="var(--sui-secondary-foreground-color)">
+        Secondary
+      </span>
+      <span role="none" class="sample" style:color="var(--sui-tertiary-foreground-color)">
+        Tertiary
+      </span>
+      <span role="none" class="sample" style:color="var(--sui-disabled-foreground-color)">
+        Disabled
+      </span>
     </div>
   </Example>
 </section>
 <section>
   <h3>Alerts</h3>
   <Example>
-    <div class="color-samples">
+    <div role="none" class="color-samples">
       <span
+        role="none"
         class="sample"
         style:border-color="var(--sui-error-border-color)"
         style:color="var(--sui-error-foreground-color)"
@@ -47,6 +68,7 @@
         Error / Danger
       </span>
       <span
+        role="none"
         class="sample"
         style:border-color="var(--sui-warning-border-color)"
         style:color="var(--sui-warning-foreground-color)"
@@ -55,6 +77,7 @@
         Warning
       </span>
       <span
+        role="none"
         class="sample"
         style:border-color="var(--sui-info-border-color)"
         style:color="var(--sui-info-foreground-color)"
@@ -63,6 +86,7 @@
         Info
       </span>
       <span
+        role="none"
         class="sample"
         style:border-color="var(--sui-success-border-color)"
         style:color="var(--sui-success-foreground-color)"

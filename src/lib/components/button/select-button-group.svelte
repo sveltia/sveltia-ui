@@ -41,10 +41,10 @@
 </script>
 
 <div
+  role="radiogroup"
   class="sui select-button-group {className}"
   hidden={hidden || undefined}
   tabindex="-1"
-  role="radiogroup"
   aria-hidden={hidden}
   aria-disabled={disabled}
   aria-readonly={readonly}
@@ -54,7 +54,7 @@
   use:activateGroup
   on:change
 >
-  <div class="inner" inert={disabled}>
+  <div role="none" class="inner" inert={disabled}>
     <slot />
   </div>
 </div>

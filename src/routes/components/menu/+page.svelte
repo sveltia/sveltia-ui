@@ -8,18 +8,18 @@
 <section>
   <h3>Menu Button</h3>
   <Example>
-    <div>
+    <div role="none">
       <MenuButton variant="tertiary" label="Open Menu">
         <Icon slot="end-icon" name="arrow_drop_down" />
         <Menu slot="popup">
           <MenuItem label="Item" />
           <MenuItem label="Item" disabled />
           <Divider />
-          <MenuItemCheckbox label="Item" checked />
-          <MenuItemCheckbox label="Item" checked={false} />
+          <MenuItemCheckbox label="Checkbox" checked />
+          <MenuItemCheckbox label="Checkbox" checked={false} />
           <Divider />
-          <MenuItemRadio label="Item" checked />
-          <MenuItemRadio label="Item" checked={false} />
+          <MenuItemRadio label="Radio" checked />
+          <MenuItemRadio label="Radio" checked={false} />
         </Menu>
       </MenuButton>
     </div>
@@ -29,7 +29,7 @@
 <section>
   <h3>Menu Button with Nested Menu</h3>
   <Example>
-    <div>
+    <div role="none">
       <MenuButton variant="tertiary" label="Open Menu">
         <Icon slot="end-icon" name="arrow_drop_down" />
         <Menu slot="popup">
@@ -39,15 +39,15 @@
             <MenuItem label="Child Item 2" />
             <MenuItem label="Child Item 3" />
             <Divider />
-            <MenuItemCheckbox label="Child Item 4" checked />
+            <MenuItemCheckbox label="Checkbox" checked />
           </MenuItem>
           <MenuItem label="Item" disabled />
           <Divider />
-          <MenuItemCheckbox label="Item" checked />
-          <MenuItemCheckbox label="Item" checked={false} />
+          <MenuItemCheckbox label="Checkbox" checked />
+          <MenuItemCheckbox label="Checkbox" checked={false} />
           <Divider />
-          <MenuItemRadio label="Item" checked />
-          <MenuItemRadio label="Item" checked={false} />
+          <MenuItemRadio label="Radio" checked />
+          <MenuItemRadio label="Radio" checked={false} />
         </Menu>
       </MenuButton>
     </div>
@@ -73,7 +73,7 @@
 <section>
   <h3>Disabled</h3>
   <Example>
-    <div>
+    <div role="none">
       <MenuButton variant="tertiary" label="Open Menu" disabled>
         <Icon slot="end-icon" name="arrow_drop_down" />
         <Menu slot="popup">

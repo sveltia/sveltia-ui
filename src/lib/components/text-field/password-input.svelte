@@ -7,6 +7,7 @@
 -->
 <script>
   import { _ } from 'svelte-i18n';
+  import { getRandomId } from '$lib/services/util';
   import Button from '../button/button.svelte';
   import Icon from '../icon/icon.svelte';
   import TextInput from './text-input.svelte';
@@ -48,6 +49,8 @@
    */
   export let value = undefined;
 
+  const id = getRandomId('input');
+
   /**
    * @type {TextInput}
    */
@@ -62,21 +65,24 @@
 </script>
 
 <div
+  role="none"
   class="sui password-input {className}"
   class:disabled
   class:readonly
   hidden={hidden || undefined}
 >
   <TextInput
-    bind:this={inputComponent}
+    {id}
     bind:value
     type="password"
+    spellcheck="false"
     {hidden}
     {disabled}
     {readonly}
     {required}
     {invalid}
     {...$$restProps}
+    bind:this={inputComponent}
     on:input
     on:keypress
     on:change
@@ -85,7 +91,10 @@
     iconic
     disabled={disabled || readonly}
     pressed={passwordVisible}
-    aria-label={$_('_sui.password_input.show_password')}
+    aria-label={$_(
+      passwordVisible ? '_sui.password_input.hide_password' : '_sui.password_input.show_password',
+    )}
+    aria-controls={id}
     on:click={() => {
       passwordVisible = !passwordVisible;
     }}

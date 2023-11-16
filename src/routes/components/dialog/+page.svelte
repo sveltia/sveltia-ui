@@ -10,7 +10,7 @@
 <section>
   <h3>Standard</h3>
   <Example>
-    <div>
+    <div role="none">
       <Button
         variant="secondary"
         label="Show Dialog"

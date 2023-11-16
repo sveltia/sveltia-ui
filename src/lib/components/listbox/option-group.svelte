@@ -34,23 +34,24 @@
 </script>
 
 <div
-  {id}
-  class="sui optgroup {className}"
   role="group"
+  {id}
+  class="sui option-group {className}"
   hidden={hidden || undefined}
   aria-hidden={hidden}
   aria-disabled={disabled}
   aria-labelledby="{id}-label"
+  aria-roledescription="option group"
   {...$$restProps}
 >
-  <div id="{id}-label" class="label" role="none">{label}</div>
-  <div class="inner" inert={disabled}>
+  <div role="none" id="{id}-label" class="label">{label}</div>
+  <div role="none" class="inner" inert={disabled}>
     <slot />
   </div>
 </div>
 
 <style lang="scss">
-  .optgroup {
+  .option-group {
     &:not(:first-child) {
       margin: 12px 0 0;
     }

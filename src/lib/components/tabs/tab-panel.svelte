@@ -13,7 +13,7 @@
   export { className as class };
 </script>
 
-<div class="sui tabpanel {className}" role="tabpanel" {...$$restProps}>
+<div role="tabpanel" class="sui tabpanel {className}" {...$$restProps}>
   <slot />
 </div>
 

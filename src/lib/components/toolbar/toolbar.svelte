@@ -34,15 +34,15 @@
 </script>
 
 <div
-  class="sui toolbar {orientation} {variant ?? ''} {className}"
   role="toolbar"
+  class="sui toolbar {orientation} {variant ?? ''} {className}"
   hidden={hidden || undefined}
   aria-hidden={hidden}
   aria-disabled={disabled}
   aria-orientation={orientation}
   {...$$restProps}
 >
-  <div class="inner" inert={disabled}>
+  <div role="none" class="inner" inert={disabled}>
     <slot />
   </div>
 </div>

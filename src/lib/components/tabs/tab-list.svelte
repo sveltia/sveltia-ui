@@ -36,8 +36,8 @@
 </script>
 
 <div
-  class="sui tab-list {className}"
   role="tablist"
+  class="sui tab-list {className}"
   hidden={hidden || undefined}
   aria-hidden={hidden}
   aria-disabled={disabled}
@@ -47,7 +47,7 @@
   use:activateGroup
   on:change
 >
-  <div class="inner" inert={disabled}>
+  <div role="none" class="inner" inert={disabled}>
     <slot />
   </div>
 </div>

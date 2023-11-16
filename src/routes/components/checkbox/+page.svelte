@@ -8,7 +8,7 @@
 <section>
   <h3>Horizontal</h3>
   <Example>
-    <div>
+    <div role="none">
       <CheckboxGroup aria-label="Ingredients">
         <Checkbox name="ingredients" value="rice" checked label="Rice" />
         <Checkbox name="ingredients" value="beans" checked={false} label="Beans" />
@@ -22,7 +22,7 @@
 <section>
   <h3>Vertical</h3>
   <Example>
-    <div>
+    <div role="none">
       <CheckboxGroup aria-label="Ingredients" orientation="vertical">
         <Checkbox name="ingredients" value="rice" checked label="Rice" />
         <Checkbox name="ingredients" value="beans" checked={false} label="Beans" />
@@ -36,7 +36,7 @@
 <section>
   <h3>Disabled</h3>
   <Example>
-    <div>
+    <div role="none">
       <CheckboxGroup aria-label="Ingredients" disabled>
         <Checkbox name="ingredients" value="rice" checked label="Rice" />
         <Checkbox name="ingredients" value="beans" checked={false} label="Beans" />
@@ -50,7 +50,7 @@
 <section>
   <h3>Read-only</h3>
   <Example>
-    <div>
+    <div role="none">
       <CheckboxGroup aria-label="Ingredients">
         <Checkbox name="ingredients" value="rice" checked readonly label="Rice" />
         <Checkbox name="ingredients" value="beans" checked={false} readonly label="Beans" />

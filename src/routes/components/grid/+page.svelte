@@ -8,7 +8,7 @@
 <section>
   <h3>Standard</h3>
   <Example>
-    <div>
+    <div role="none">
       <Grid class="data">
         <GridHead>
           <GridRow>

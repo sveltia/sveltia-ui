@@ -77,26 +77,25 @@
 </script>
 
 <div
+  role="none"
   class="sui checkbox {className}"
   class:checked
   class:indeterminate
   class:disabled
   class:readonly
   hidden={hidden || undefined}
-  role="none"
-  {...$$restProps}
   on:click|preventDefault|stopPropagation={(event) => {
     if (!(/** @type {HTMLElement} */ (event.target).matches('button'))) {
       buttonComponent.element.click();
     }
   }}
 >
-  <div class="inner" inert={disabled}>
+  <div role="none" class="inner" inert={disabled}>
     <Button
+      role="checkbox"
       {id}
       {name}
       {value}
-      role="checkbox"
       {hidden}
       {disabled}
       {readonly}
@@ -105,6 +104,7 @@
       aria-checked={checked}
       aria-label={ariaLabel || undefined}
       aria-labelledby={ariaLabel ? undefined : '{id}-label'}
+      {...$$restProps}
       bind:this={buttonComponent}
       on:click={(event) => {
         event.preventDefault();
