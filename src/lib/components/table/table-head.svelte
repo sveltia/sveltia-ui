@@ -6,11 +6,10 @@
 -->
 <script>
   /**
-   * CSS class name on the button.
+   * The `class` attribute on the wrapper element.
    * @type {string}
    */
   let className = '';
-
   export { className as class };
 </script>
 

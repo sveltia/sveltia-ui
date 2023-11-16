@@ -1,6 +1,6 @@
 <!--
   @component
-  The equivalent of the HTML `<tfoot>` element.
+  The interactive version of `<TableFoot>`.
   @see https://developer.mozilla.org/en-US/docs/Web/HTML/Element/tfoot
   @see https://w3c.github.io/aria/#rowgroup
 -->
@@ -13,12 +13,12 @@
   export { className as class };
 </script>
 
-<div role="rowgroup" class="sui table-foot {className}" {...$$restProps}>
+<div role="rowgroup" class="sui grid-foot {className}" {...$$restProps}>
   <slot />
 </div>
 
 <style lang="scss">
-  .table-foot {
+  .grid-foot {
     display: table-footer-group;
   }
 </style>

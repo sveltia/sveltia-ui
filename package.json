@@ -116,6 +116,46 @@
       "svelte": "./package/components/drawer/drawer.svelte",
       "default": "./package/components/drawer/drawer.svelte"
     },
+    "./components/grid/grid-body.svelte": {
+      "types": "./package/components/grid/grid-body.svelte.d.ts",
+      "svelte": "./package/components/grid/grid-body.svelte",
+      "default": "./package/components/grid/grid-body.svelte"
+    },
+    "./components/grid/grid-cell.svelte": {
+      "types": "./package/components/grid/grid-cell.svelte.d.ts",
+      "svelte": "./package/components/grid/grid-cell.svelte",
+      "default": "./package/components/grid/grid-cell.svelte"
+    },
+    "./components/grid/grid-col-header.svelte": {
+      "types": "./package/components/grid/grid-col-header.svelte.d.ts",
+      "svelte": "./package/components/grid/grid-col-header.svelte",
+      "default": "./package/components/grid/grid-col-header.svelte"
+    },
+    "./components/grid/grid-foot.svelte": {
+      "types": "./package/components/grid/grid-foot.svelte.d.ts",
+      "svelte": "./package/components/grid/grid-foot.svelte",
+      "default": "./package/components/grid/grid-foot.svelte"
+    },
+    "./components/grid/grid-head.svelte": {
+      "types": "./package/components/grid/grid-head.svelte.d.ts",
+      "svelte": "./package/components/grid/grid-head.svelte",
+      "default": "./package/components/grid/grid-head.svelte"
+    },
+    "./components/grid/grid-row-header.svelte": {
+      "types": "./package/components/grid/grid-row-header.svelte.d.ts",
+      "svelte": "./package/components/grid/grid-row-header.svelte",
+      "default": "./package/components/grid/grid-row-header.svelte"
+    },
+    "./components/grid/grid-row.svelte": {
+      "types": "./package/components/grid/grid-row.svelte.d.ts",
+      "svelte": "./package/components/grid/grid-row.svelte",
+      "default": "./package/components/grid/grid-row.svelte"
+    },
+    "./components/grid/grid.svelte": {
+      "types": "./package/components/grid/grid.svelte.d.ts",
+      "svelte": "./package/components/grid/grid.svelte",
+      "default": "./package/components/grid/grid.svelte"
+    },
     "./components/icon/icon.svelte": {
       "types": "./package/components/icon/icon.svelte.d.ts",
       "svelte": "./package/components/icon/icon.svelte",
@@ -388,6 +428,30 @@
       ],
       "components/drawer/drawer.svelte": [
         "./package/components/drawer/drawer.svelte.d.ts"
+      ],
+      "components/grid/grid-body.svelte": [
+        "./package/components/grid/grid-body.svelte.d.ts"
+      ],
+      "components/grid/grid-cell.svelte": [
+        "./package/components/grid/grid-cell.svelte.d.ts"
+      ],
+      "components/grid/grid-col-header.svelte": [
+        "./package/components/grid/grid-col-header.svelte.d.ts"
+      ],
+      "components/grid/grid-foot.svelte": [
+        "./package/components/grid/grid-foot.svelte.d.ts"
+      ],
+      "components/grid/grid-head.svelte": [
+        "./package/components/grid/grid-head.svelte.d.ts"
+      ],
+      "components/grid/grid-row-header.svelte": [
+        "./package/components/grid/grid-row-header.svelte.d.ts"
+      ],
+      "components/grid/grid-row.svelte": [
+        "./package/components/grid/grid-row.svelte.d.ts"
+      ],
+      "components/grid/grid.svelte": [
+        "./package/components/grid/grid.svelte.d.ts"
       ],
       "components/icon/icon.svelte": [
         "./package/components/icon/icon.svelte.d.ts"

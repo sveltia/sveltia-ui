@@ -1,7 +1,7 @@
 <!--
   @component
-  The equivalent of the HTML `<tfoot>` element.
-  @see https://developer.mozilla.org/en-US/docs/Web/HTML/Element/tfoot
+  The interactive version of `<TableBody>`.
+  @see https://developer.mozilla.org/en-US/docs/Web/HTML/Element/tbody
   @see https://w3c.github.io/aria/#rowgroup
 -->
 <script>
@@ -13,12 +13,12 @@
   export { className as class };
 </script>
 
-<div role="rowgroup" class="sui table-foot {className}" {...$$restProps}>
+<div role="rowgroup" class="sui grid-body {className}" {...$$restProps}>
   <slot />
 </div>
 
 <style lang="scss">
-  .table-foot {
-    display: table-footer-group;
+  .grid-body {
+    display: table-row-group;
   }
 </style>

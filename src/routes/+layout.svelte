@@ -62,7 +62,6 @@
               { key: 'date-time', label: 'Date/Time' },
               { key: 'emoji', label: 'Emoji Picker', disabled: true },
               { key: 'file', label: 'File Picker', disabled: true },
-              { key: 'grid', label: 'Grid', disabled: true },
               { key: 'listbox', label: 'Listbox' },
               { key: 'radio', label: 'Radio' },
               { key: 'rating', label: 'Rating', disabled: true },
@@ -71,7 +70,6 @@
               { key: 'slider', label: 'Slider' },
               { key: 'switch', label: 'Switch' },
               { key: 'text-field', label: 'Text Field' },
-              { key: 'tree-grid', label: 'Tree Grid', disabled: true },
             ]}
           />
           <NavSection
@@ -86,6 +84,7 @@
               { key: 'disclosure', label: 'Disclosure' },
               { key: 'empty-state', label: 'Empty State', disabled: true },
               { key: 'feed', label: 'Feed', disabled: true },
+              { key: 'grid', label: 'Grid' },
               { key: 'list', label: 'List', disabled: true },
               { key: 'map', label: 'Map', disabled: true },
               { key: 'meter', label: 'Meter', disabled: true },
@@ -94,6 +93,7 @@
               { key: 'tag', label: 'Tag', disabled: true },
               { key: 'tooltip', label: 'Tooltip', disabled: true },
               { key: 'tree', label: 'Tree', disabled: true },
+              { key: 'tree-grid', label: 'Tree Grid', disabled: true },
             ]}
           />
           <NavSection

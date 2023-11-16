@@ -33,16 +33,12 @@
             <TableCell>Cell 2</TableCell>
             <TableCell>Cell 3</TableCell>
           </TableRow>
-        </TableBody>
-        <TableBody>
           <TableRow>
             <TableRowHeader>Row 2</TableRowHeader>
             <TableCell>Cell 4</TableCell>
             <TableCell>Cell 5</TableCell>
             <TableCell>Cell 6</TableCell>
           </TableRow>
-        </TableBody>
-        <TableBody>
           <TableRow>
             <TableColHeader />
             <TableColHeader>Column 1</TableColHeader>

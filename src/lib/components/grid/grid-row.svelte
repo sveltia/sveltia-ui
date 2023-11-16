@@ -1,6 +1,6 @@
 <!--
   @component
-  The equivalent of the HTML `<tr>` element.
+  The interactive version of `<TableRow>`.
   @see https://developer.mozilla.org/en-US/docs/Web/HTML/Element/tr
   @see https://w3c.github.io/aria/#row
 -->
@@ -11,14 +11,27 @@
    */
   let className = '';
   export { className as class };
+  /**
+   * Whether to select the widget. An alias of the `aria-selected` attribute.
+   * @type {boolean}
+   */
+  export let selected = false;
 </script>
 
-<div role="row" class="sui table-row {className}" {...$$restProps}>
+<div
+  role="row"
+  class="sui grid-row {className}"
+  tabindex="0"
+  aria-selected={selected}
+  {...$$restProps}
+  on:click
+  on:select
+>
   <slot />
 </div>
 
 <style lang="scss">
-  .table-row {
+  .grid-row {
     display: table-row;
     height: var(--sui-primary-row-height);
   }

@@ -1,6 +1,6 @@
 <!--
   @component
-  The equivalent of the HTML `<th scope="col">` element.
+  The interactive version of `<TableColHeader>`.
   @see https://developer.mozilla.org/en-US/docs/Web/HTML/Element/th
   @see https://w3c.github.io/aria/#columnheader
 -->
@@ -13,12 +13,12 @@
   export { className as class };
 </script>
 
-<div role="columnheader" class="sui table-col-header {className}" {...$$restProps}>
+<div role="columnheader" class="sui grid-col-header {className}" {...$$restProps}>
   <slot />
 </div>
 
 <style lang="scss">
-  .table-col-header {
+  .grid-col-header {
     display: table-cell;
   }
 </style>

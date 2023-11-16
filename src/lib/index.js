@@ -39,6 +39,14 @@ export { default as Disclosure } from './components/disclosure/disclosure.svelte
 export { default as Divider } from './components/divider/divider.svelte';
 export { default as Spacer } from './components/divider/spacer.svelte';
 export { default as Drawer } from './components/drawer/drawer.svelte';
+export { default as GridBody } from './components/grid/grid-body.svelte';
+export { default as GridCell } from './components/grid/grid-cell.svelte';
+export { default as GridColHeader } from './components/grid/grid-col-header.svelte';
+export { default as GridFoot } from './components/grid/grid-foot.svelte';
+export { default as GridHead } from './components/grid/grid-head.svelte';
+export { default as GridRowHeader } from './components/grid/grid-row-header.svelte';
+export { default as GridRow } from './components/grid/grid-row.svelte';
+export { default as Grid } from './components/grid/grid.svelte';
 export { default as Icon } from './components/icon/icon.svelte';
 export { default as Listbox } from './components/listbox/listbox.svelte';
 export { default as OptionGroup } from './components/listbox/option-group.svelte';
