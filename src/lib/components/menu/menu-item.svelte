@@ -75,7 +75,7 @@
     on:select
   >
     {#if iconName}
-      <Icon slot="start-icon" name={iconName} label={iconLabel} />
+      <Icon slot="start-icon" name={iconName} aria-label={iconLabel} />
     {/if}
     {#if label}
       <span class="label">{label}</span>

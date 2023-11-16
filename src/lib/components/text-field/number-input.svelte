@@ -110,20 +110,22 @@
     <Button
       iconic
       disabled={disabled || readonly || Number.isNaN(Number(value)) || isMax}
+      aria-label={$_('_sui.number_input.increase')}
       on:click={() => {
         increase();
       }}
     >
-      <Icon slot="start-icon" name="expand_less" label={$_('_sui.number_input.increase')} />
+      <Icon slot="start-icon" name="expand_less" />
     </Button>
     <Button
       iconic
       disabled={disabled || readonly || Number.isNaN(Number(value)) || isMin}
+      aria-label={$_('_sui.number_input.decrease')}
       on:click={() => {
         decrease();
       }}
     >
-      <Icon slot="start-icon" name="expand_more" label={$_('_sui.number_input.decrease')} />
+      <Icon slot="start-icon" name="expand_more" />
     </Button>
   </div>
   <TextInput

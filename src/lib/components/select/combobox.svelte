@@ -145,6 +145,7 @@
     {hidden}
     {disabled}
     tabindex={readonly || disabled ? -1 : 0}
+    aria-label={$isPopupOpen ? $_('_sui.collapse') : $_('_sui.expand')}
     aria-controls="{id}-popup"
     aria-expanded={$isPopupOpen}
     on:click={(event) => {
@@ -156,11 +157,7 @@
       }
     }}
   >
-    <Icon
-      slot="start-icon"
-      name="expand_more"
-      label={$isPopupOpen ? $_('_sui.collapse') : $_('_sui.expand')}
-    />
+    <Icon slot="start-icon" name="expand_more" />
   </Button>
 </div>
 <Popup

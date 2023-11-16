@@ -159,12 +159,13 @@
               <Button
                 variant="ghost"
                 iconic
+                aria-label={$_('_sui.close')}
                 on:click={() => {
                   dialog.returnValue = 'close';
                   open = false;
                 }}
               >
-                <Icon slot="start-icon" name="close" label={$_('_sui.close')} />
+                <Icon slot="start-icon" name="close" />
               </Button>
             {/if}
           {/if}

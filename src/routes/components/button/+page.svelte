@@ -70,8 +70,8 @@
       <Button variant="primary" label="Add">
         <Icon slot="end-icon" name="add" />
       </Button>
-      <Button variant="secondary" iconic>
-        <Icon slot="end-icon" name="delete" label="Delete" />
+      <Button variant="secondary" iconic aria-label="Delete">
+        <Icon slot="end-icon" name="delete" />
       </Button>
     </div>
   </Example>
@@ -103,8 +103,8 @@
       <Button variant="primary" label="Add" disabled>
         <Icon slot="end-icon" name="add" />
       </Button>
-      <Button variant="secondary" iconic disabled>
-        <Icon slot="end-icon" name="delete" label="Delete" />
+      <Button variant="secondary" iconic disabled aria-label="Delete">
+        <Icon slot="end-icon" name="delete" />
       </Button>
     </div>
   </Example>

@@ -61,18 +61,20 @@
         <div role="group" aria-label={$_('_sui.calendar.year')}>
           <div class="header">
             <Button
+              aria-label={$_('_sui.calendar.previous_decade')}
               on:click={() => {
                 //
               }}
             >
-              <Icon name="chevron_left" label={$_('_sui.calendar.previous_decade')} />
+              <Icon name="chevron_left" />
             </Button>
             <Button
+              aria-label={$_('_sui.calendar.next_decade')}
               on:click={() => {
                 //
               }}
             >
-              <Icon name="chevron_right" label={$_('_sui.calendar.next_decade')} />
+              <Icon name="chevron_right" />
             </Button>
           </div>
           <div class="grid">
@@ -100,20 +102,22 @@
       </div>
     </Button>
     <Button
+      aria-label={$_('_sui.calendar.previous_month')}
       on:click={() => {
         firstDay.setUTCMonth(firstDay.getUTCMonth() - 1);
         firstDay = firstDay;
       }}
     >
-      <Icon name="chevron_left" label={$_('_sui.calendar.previous_month')} />
+      <Icon name="chevron_left" />
     </Button>
     <Button
+      aria-label={$_('_sui.calendar.next_month')}
       on:click={() => {
         firstDay.setUTCMonth(firstDay.getUTCMonth() + 1);
         firstDay = firstDay;
       }}
     >
-      <Icon name="chevron_right" label={$_('_sui.calendar.next_month')} />
+      <Icon name="chevron_right" />
     </Button>
   </div>
   <div class="grid" role="listbox">

@@ -97,6 +97,7 @@
   {#if value}
     <Button
       iconic
+      aria-label={$_('_sui.clear')}
       on:click={() => {
         value = '';
         input?.focus();
@@ -107,7 +108,7 @@
         });
       }}
     >
-      <Icon slot="start-icon" name="close" label={$_('_sui.clear')} />
+      <Icon slot="start-icon" name="close" />
     </Button>
   {/if}
 </div>

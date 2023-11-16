@@ -85,15 +85,12 @@
     iconic
     disabled={disabled || readonly}
     pressed={passwordVisible}
+    aria-label={$_('_sui.password_input.show_password')}
     on:click={() => {
       passwordVisible = !passwordVisible;
     }}
   >
-    <Icon
-      slot="start-icon"
-      name={passwordVisible ? 'visibility_off' : 'visibility'}
-      label={$_('_sui.password_input.show_password')}
-    />
+    <Icon slot="start-icon" name={passwordVisible ? 'visibility_off' : 'visibility'} />
   </Button>
 </div>
 
