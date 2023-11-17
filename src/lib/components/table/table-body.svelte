@@ -25,13 +25,13 @@
 
 <div
   role="rowgroup"
-  class="sui table-body rowgroup {className}"
+  class="sui table-body row-group {className}"
   aria-labelledby={label ? `${id}-label` : undefined}
   aria-roledescription="table body"
   {...$$restProps}
 >
   {#if label}
-    <tr>
+    <tr class="row-group-caption">
       <th id="{id}-label" colspan="9999" scope="rowgroup">{label}</th>
     </tr>
   {/if}
