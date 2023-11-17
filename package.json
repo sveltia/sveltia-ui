@@ -356,6 +356,11 @@
       "svelte": "./package/components/util/group.svelte",
       "default": "./package/components/util/group.svelte"
     },
+    "./components/util/modal.svelte": {
+      "types": "./package/components/util/modal.svelte.d.ts",
+      "svelte": "./package/components/util/modal.svelte",
+      "default": "./package/components/util/modal.svelte"
+    },
     "./components/util/popup.svelte": {
       "types": "./package/components/util/popup.svelte.d.ts",
       "svelte": "./package/components/util/popup.svelte",
@@ -587,6 +592,9 @@
       ],
       "components/util/group.svelte": [
         "./package/components/util/group.svelte.d.ts"
+      ],
+      "components/util/modal.svelte": [
+        "./package/components/util/modal.svelte.d.ts"
       ],
       "components/util/popup.svelte": [
         "./package/components/util/popup.svelte.d.ts"

@@ -5,15 +5,15 @@
   @see https://www.w3.org/WAI/ARIA/apg/patterns/dialog-modal/
 -->
 <script>
-  import { createEventDispatcher, onMount } from 'svelte';
   import { _ } from 'svelte-i18n';
   import { getRandomId } from '$lib/services/util';
   import Button from '../button/button.svelte';
   import Spacer from '../divider/spacer.svelte';
   import Icon from '../icon/icon.svelte';
+  import Modal from '../util/modal.svelte';
 
   /**
-   * The `class` attribute on the `<dialog>` element.
+   * The `class` attribute on the content element.
    * @type {string}
    */
   let className = '';
@@ -33,11 +33,6 @@
    * @type {boolean}
    */
   export let open = false;
-  /**
-   * Whether to make it modal.
-   * @type {boolean}
-   */
-  export let modal = true;
   /**
    * Text label displayed on the header. Required.
    * @type {string}
@@ -84,229 +79,122 @@
    */
   export let lightDismiss = false;
 
-  const dispatch = createEventDispatcher();
+  /**
+   * The ID of the drawer.
+   * @type {string}
+   */
   const id = getRandomId('dialog');
-  /** @type {?HTMLDialogElement} */
-  let dialog;
-  /** @type {?HTMLFormElement} */
-  let form;
-  let showDialog = false;
-  let showContent = false;
-
   /**
-   *
+   * a reference to the modal component.
+   * @type {Modal}
    */
-  const openDialog = async () => {
-    (document.querySelector('.sui.app-shell') ?? document.body).appendChild(dialog);
-    showContent = true;
-
-    if (modal) {
-      dialog.showModal();
-    } else {
-      dialog.show();
-    }
-
-    window.requestAnimationFrame(() => {
-      showDialog = true;
-    });
-  };
-
-  /**
-   *
-   */
-  const closeDialog = async () => {
-    showDialog = false;
-
-    await new Promise((resolve) => {
-      form.addEventListener('transitionend', () => resolve(), { once: true });
-    });
-
-    showContent = false;
-    dialog?.close();
-    dialog?.remove();
-
-    if (['ok', 'cancel'].includes(dialog?.returnValue)) {
-      dispatch(dialog?.returnValue);
-    }
-
-    dispatch('close', dialog?.returnValue);
-  };
-
-  /**
-   *
-   */
-  const toggleDialog = () => {
-    if (dialog) {
-      if (open) {
-        openDialog();
-      } else {
-        closeDialog();
-      }
-    }
-  };
-
-  $: {
-    void open;
-    toggleDialog();
-  }
-
-  onMount(() => {
-    dialog.remove();
-
-    // onUnmount
-    return () => {
-      dialog?.close();
-      dialog?.remove();
-    };
-  });
+  let modal;
 </script>
 
-<dialog
-  {id}
-  class="sui dialog {className} {size}"
-  class:open={showDialog}
+<Modal
   {role}
+  {id}
+  class="dialog"
   aria-label={$$slots.header ? undefined : title}
   aria-labelledby={$$slots.header ? title : `${id}-title`}
   aria-describedby="{id}-body"
+  bind:open
+  showBackdrop
+  {lightDismiss}
   {...$$restProps}
-  bind:this={dialog}
-  on:click={({ target }) => {
-    if (lightDismiss && /** @type {HTMLElement?} */ (target)?.matches('dialog')) {
-      dialog.returnValue = 'cancel';
-      open = false;
-    }
-  }}
-  on:cancel|preventDefault={() => {
-    // Cancelled with the Escape key
-    open = false;
-  }}
+  bind:this={modal}
 >
-  <form role="none" method="dialog" bind:this={form} on:submit|preventDefault>
-    {#if showContent}
-      {#if title || showClose || $$slots.header || $$slots['header-extra']}
-        <div role="none" class="header">
-          {#if $$slots.header}
-            <slot name="header" />
-          {:else}
-            <div role="none" id="{id}-title" class="title">
-              {title}
-            </div>
-            <Spacer flex={true} />
-            {#if $$slots['header-extra']}
-              <slot name="header-extra" />
-            {/if}
-            {#if showClose}
-              <Button
-                variant="ghost"
-                iconic
-                aria-label={$_('_sui.close')}
-                aria-controls={id}
-                on:click={() => {
-                  dialog.returnValue = 'close';
-                  open = false;
-                }}
-              >
-                <Icon slot="start-icon" name="close" />
-              </Button>
-            {/if}
+  <div role="none" class="content {className} {size}">
+    {#if title || showClose || $$slots.header || $$slots['header-extra']}
+      <div role="none" class="header">
+        {#if $$slots.header}
+          <slot name="header" />
+        {:else}
+          <div role="none" id="{id}-title" class="title">
+            {title}
+          </div>
+          <Spacer flex={true} />
+          {#if $$slots['header-extra']}
+            <slot name="header-extra" />
           {/if}
-        </div>
-      {/if}
-      <div role="none" id="{id}-body" class="body">
-        <slot />
+          {#if showClose}
+            <Button
+              variant="ghost"
+              iconic
+              aria-label={$_('_sui.close')}
+              aria-controls={id}
+              on:click={() => {
+                modal.close('close');
+              }}
+            >
+              <Icon slot="start-icon" name="close" />
+            </Button>
+          {/if}
+        {/if}
       </div>
-      {#if showOk || showCancel || $$slots.footer || $$slots['footer-extra']}
-        <div role="none" class="footer">
-          {#if $$slots.footer}
-            <slot name="footer" />
-          {:else}
-            {#if $$slots['footer-extra']}
-              <slot name="footer-extra" />
-            {/if}
-            <Spacer flex={true} />
-            {#if showOk}
-              <Button
-                variant="primary"
-                label={okLabel || $_('_sui.ok')}
-                disabled={okDisabled}
-                on:click={() => {
-                  dialog.returnValue = 'ok';
-                  open = false;
-                }}
-              />
-            {/if}
-            {#if showCancel}
-              <Button
-                variant="secondary"
-                label={cancelLabel || $_('_sui.cancel')}
-                disabled={cancelDisabled}
-                on:click={() => {
-                  dialog.returnValue = 'cancel';
-                  open = false;
-                }}
-              />
-            {/if}
-          {/if}
-        </div>
-      {/if}
     {/if}
-  </form>
-</dialog>
+    <div role="none" id="{id}-body" class="body">
+      <slot />
+    </div>
+    {#if showOk || showCancel || $$slots.footer || $$slots['footer-extra']}
+      <div role="none" class="footer">
+        {#if $$slots.footer}
+          <slot name="footer" />
+        {:else}
+          {#if $$slots['footer-extra']}
+            <slot name="footer-extra" />
+          {/if}
+          <Spacer flex={true} />
+          {#if showOk}
+            <Button
+              variant="primary"
+              label={okLabel || $_('_sui.ok')}
+              disabled={okDisabled}
+              on:click={() => {
+                modal.close('ok');
+              }}
+            />
+          {/if}
+          {#if showCancel}
+            <Button
+              variant="secondary"
+              label={cancelLabel || $_('_sui.cancel')}
+              disabled={cancelDisabled}
+              on:click={() => {
+                modal.close('cancel');
+              }}
+            />
+          {/if}
+        {/if}
+      </div>
+    {/if}
+  </div>
+</Modal>
 
 <style lang="scss">
-  dialog {
+  .content {
+    position: relative;
     display: flex;
-    justify-content: center;
-    align-items: center;
-    outline: 0;
-    background-color: var(--sui-popup-backdrop-color);
+    flex-direction: column;
+    border-radius: 4px;
+    max-width: calc(100vw - 32px);
+    background-color: var(--sui-secondary-background-color-translucent);
+    box-shadow: 0 8px 16px var(--sui-popup-shadow-color);
+    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(16px);
+    transition-property: transform;
 
-    &.open {
-      form {
-        opacity: 1;
-        transform: scale(100%);
-        transition-duration: 100ms;
-      }
+    :global(dialog.open) & {
+      transition-duration: 150ms;
+      transform: scale(100%);
     }
 
-    &:not(.open) {
-      pointer-events: none !important;
-
-      form {
-        opacity: 0;
-        transform: scale(90%);
-        pointer-events: none;
-        transition-duration: 200ms;
-      }
-
-      :global(*) {
-        pointer-events: none !important;
-      }
+    :global(dialog:not(.open)) & {
+      transition-duration: 300ms;
+      transform: scale(90%);
     }
 
-    :global(a),
-    :global(input[aria-disabled='false']),
-    :global(textarea[aria-disabled='false']),
-    :global(button[aria-disabled='false']),
-    :global([tabindex='0']) {
-      pointer-events: all;
-    }
-
-    form {
-      display: flex;
-      flex-direction: column;
-      border-radius: 4px;
-      max-width: calc(100vw - 32px);
-      background-color: var(--sui-secondary-background-color-translucent);
-      -webkit-backdrop-filter: blur(32px);
-      backdrop-filter: blur(32px);
-      box-shadow: 0 8px 16px var(--sui-popup-shadow-color);
-      will-change: opacity, transform;
-      transition-property: opacity, transform;
-    }
-
-    &.small form {
+    &.small {
       width: 400px;
       max-height: 400px;
 
@@ -315,7 +203,7 @@
       }
     }
 
-    &.medium form {
+    &.medium {
       width: 600px;
       max-height: 600px;
 
@@ -324,7 +212,7 @@
       }
     }
 
-    &.large form {
+    &.large {
       width: 800px;
       max-height: 800px;
 
@@ -333,7 +221,7 @@
       }
     }
 
-    &.x-large form {
+    &.x-large {
       width: 1000px;
       max-height: 1000px;
 

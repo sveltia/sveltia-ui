@@ -77,29 +77,6 @@ pre {
   user-select: text;
 }
 
-dialog {
-  position: fixed;
-  inset: 0;
-  outline: 0;
-  margin: 0;
-  border: 0;
-  padding: 0;
-  width: 100vw;
-  max-width: 100vw;
-  height: 100vh;
-  max-height: 100vh;
-  color: var(--sui-primary-foreground-color);
-  background: transparent;
-  -webkit-user-select: none;
-  user-select: none;
-  touch-action: none;
-  cursor: default;
-
-  &::backdrop {
-    background: transparent;
-  }
-}
-
 .disabled,
 .readonly,
 [aria-disabled="true"],

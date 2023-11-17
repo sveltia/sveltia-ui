@@ -5,157 +5,80 @@
   @see https://www.w3.org/WAI/ARIA/apg/patterns/dialog-modal/
 -->
 <script>
-  import { createEventDispatcher, onMount } from 'svelte';
   import { _ } from 'svelte-i18n';
   import { getRandomId } from '$lib/services/util';
   import Button from '../button/button.svelte';
   import Spacer from '../divider/spacer.svelte';
   import Icon from '../icon/icon.svelte';
+  import Modal from '../util/modal.svelte';
 
   /**
-   * CSS class name on the button.
+   * The `class` attribute on the content element.
    * @type {string}
    */
   let className = '';
-
   export { className as class };
-
   /**
    * Whether to open the drawer.
+   * @type {boolean}
    */
   export let open = false;
-
   /**
    * Title text displayed on the header.
+   * @type {string}
    */
   export let title = '';
-
   /**
    * Position of the drawer.
-   * @type {('top'|'right'|'bottom'|'left')}
+   * @type {'top' | 'right' | 'bottom' | 'left'}
    */
   export let position = 'right';
-
   /**
    * Width or height of the drawer.
-   * @type {('small'|'medium'|'large'|'x-large')}
+   * @type {'small' | 'medium' | 'large' | 'x-large'}
    */
   export let size = 'small';
-
   /**
    * Whether to show the Close button.
-   * @type {('inside'|'outside'|false)}
+   * @type {'inside' | 'outside' | false}
    */
   export let showClose = 'outside';
-
   /**
-   * Whether to close the drawer when the backdrop (outside of the drawer) is clicked.
+   * Whether to close the modal when the backdrop (outside of the modal) is clicked.
    * @type {boolean}
    */
   export let lightDismiss = false;
-
   /**
-   * Whether to keep the content when the dialog is not displayed.
+   * Whether to keep the content in the DOM tree when the modal is not displayed.
+   * @type {boolean}
    */
   export let keepContent = false;
 
-  const dispatch = createEventDispatcher();
+  /**
+   * The ID of the drawer.
+   * @type {string}
+   */
   const id = getRandomId('drawer');
-  /** @type {?HTMLDialogElement} */
-  let dialog;
-  /** @type {?HTMLFormElement} */
-  let form;
-  let showDialog = false;
-  let showContent = false;
+  /**
+   * A reference to the modal component.
+   * @type {Modal}
+   */
+  let modal;
 
   $: orientation = position === 'right' || position === 'left' ? 'vertical' : 'horizontal';
-
-  /**
-   *
-   */
-  const openDialog = async () => {
-    (document.querySelector('.sui.app-shell') ?? document.body).appendChild(dialog);
-    showContent = true;
-    dialog.showModal();
-
-    window.requestAnimationFrame(() => {
-      showDialog = true;
-    });
-  };
-
-  /**
-   *
-   */
-  const closeDialog = async () => {
-    showDialog = false;
-
-    if (dialog.returnValue === 'ok') {
-      dispatch('ok');
-    }
-
-    if (dialog.returnValue === 'cancel') {
-      dispatch('cancel');
-    }
-
-    dispatch('close', dialog.returnValue);
-
-    await new Promise((resolve) => {
-      form.addEventListener('transitionend', () => resolve(), { once: true });
-    });
-
-    showContent = false;
-    dialog?.close();
-    dialog?.remove();
-  };
-
-  /**
-   *
-   */
-  const toggleDialog = () => {
-    if (dialog) {
-      if (open) {
-        openDialog();
-      } else {
-        closeDialog();
-      }
-    }
-  };
-
-  $: {
-    void open;
-    toggleDialog();
-  }
-
-  onMount(() => {
-    dialog.remove();
-
-    // onUnmount
-    return () => {
-      dialog?.close();
-      dialog?.remove();
-    };
-  });
 </script>
 
-<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
-<dialog
+<Modal
   {id}
-  class="sui dialog {className} {size} {position} {orientation}"
-  class:open={showDialog}
+  class="drawer"
+  bind:open
+  showBackdrop
+  {lightDismiss}
+  {keepContent}
   {...$$restProps}
-  bind:this={dialog}
-  on:click={({ target }) => {
-    if (lightDismiss && /** @type {HTMLElement?} */ (target)?.matches('dialog')) {
-      dialog.returnValue = 'cancel';
-      open = false;
-    }
-  }}
-  on:cancel|preventDefault={() => {
-    // Cancelled with the Escape key
-    open = false;
-  }}
+  bind:this={modal}
 >
-  <form role="none" method="dialog" bind:this={form} on:submit|preventDefault>
+  <div role="none" class="content {className} {size} {position} {orientation}">
     <div role="none" class="extra-control">
       {#if showClose === 'outside'}
         <Button
@@ -165,141 +88,104 @@
           aria-label={$_('_sui.close')}
           aria-controls={id}
           on:click={() => {
-            dialog.returnValue = 'close';
-            open = false;
+            modal.close('close');
           }}
         >
           <Icon slot="start-icon" name="close" />
         </Button>
       {/if}
     </div>
-    {#if keepContent || showContent}
-      {#if title || showClose === 'inside' || $$slots.header || $$slots['header-extra']}
-        <div role="none" class="header">
-          {#if $$slots.header}
-            <slot name="header" />
-          {:else}
-            <div role="none" class="title">
-              {title}
-            </div>
-            <Spacer flex={true} />
-            {#if $$slots['header-extra']}
-              <slot name="header-extra" />
-            {/if}
-            {#if showClose === 'inside'}
-              <Button
-                variant="ghost"
-                iconic
-                class="close"
-                aria-label={$_('_sui.close')}
-                aria-controls={id}
-                on:click={() => {
-                  dialog.returnValue = 'close';
-                  open = false;
-                }}
-              >
-                <Icon slot="start-icon" name="close" />
-              </Button>
-            {/if}
+    {#if title || showClose === 'inside' || $$slots.header || $$slots['header-extra']}
+      <div role="none" class="header">
+        {#if $$slots.header}
+          <slot name="header" />
+        {:else}
+          <div role="none" class="title">
+            {title}
+          </div>
+          <Spacer flex={true} />
+          {#if $$slots['header-extra']}
+            <slot name="header-extra" />
           {/if}
-        </div>
-      {/if}
-      <div role="none" class="main">
-        <slot />
+          {#if showClose === 'inside'}
+            <Button
+              variant="ghost"
+              iconic
+              class="close"
+              aria-label={$_('_sui.close')}
+              aria-controls={id}
+              on:click={() => {
+                modal.close('close');
+              }}
+            >
+              <Icon slot="start-icon" name="close" />
+            </Button>
+          {/if}
+        {/if}
       </div>
-      {#if $$slots.footer}
-        <div role="none" class="footer">
-          <slot name="footer" />
-        </div>
-      {/if}
     {/if}
-  </form>
-</dialog>
+    <div role="none" class="main">
+      <slot />
+    </div>
+    {#if $$slots.footer}
+      <div role="none" class="footer">
+        <slot name="footer" />
+      </div>
+    {/if}
+  </div>
+</Modal>
 
 <style lang="scss">
-  dialog {
-    overflow: hidden;
-    outline: 0;
-    background-color: var(--sui-popup-backdrop-color);
+  .content {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    border-radius: 4px;
+    max-width: 100vw;
+    max-height: 100vh;
+    background-color: var(--sui-secondary-background-color-translucent);
+    box-shadow: 0 8px 16px var(--sui-popup-shadow-color);
+    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(16px);
+    transition-property: transform;
 
-    &.open {
-      form {
-        opacity: 1;
-        transform: translateX(0%);
-        transition-duration: 100ms;
-      }
-    }
-
-    &:not(.open) {
-      pointer-events: none !important;
-
-      form {
-        opacity: 0;
-        transform: translateX(105%);
-        pointer-events: none;
-        transition-duration: 200ms;
-      }
-
-      :global(*) {
-        pointer-events: none !important;
-      }
-    }
-
-    :global(a),
-    :global(input),
-    :global(textarea),
-    :global(button),
-    :global([tabindex='0']) {
-      pointer-events: all;
-    }
-
-    form {
+    .extra-control {
       position: absolute;
-      display: flex;
-      flex-direction: column;
-      border-radius: 4px;
-      max-width: 100vw;
-      max-height: 100vh;
-      background-color: var(--sui-secondary-background-color-translucent);
-      -webkit-backdrop-filter: blur(32px);
-      backdrop-filter: blur(32px);
-      box-shadow: 0 8px 16px var(--sui-popup-shadow-color);
-      will-change: opacity, transform;
-      transition-property: opacity, transform;
 
-      .extra-control {
-        position: absolute;
-
-        :global(button.close) {
-          margin: 8px;
-        }
+      :global(button.close) {
+        margin: 8px;
       }
+    }
+
+    :global(dialog.open) & {
+      transition-duration: 150ms;
+      transform: translateX(0%);
+    }
+
+    :global(dialog:not(.open)) & {
+      transition-duration: 300ms;
     }
 
     &.right {
-      form {
-        inset: 0 0 0 auto;
+      inset: 0 0 0 auto;
 
-        .extra-control {
-          inset: 0 100% auto auto;
-        }
+      .extra-control {
+        inset: 0 100% auto auto;
       }
 
-      &:not(.open) form {
+      :global(dialog:not(.open)) & {
         transform: translateX(105%);
       }
     }
 
     &.left {
-      form {
-        inset: 0 auto 0 0;
+      inset: 0 auto 0 0;
 
-        .extra-control {
-          inset: 0 auto auto 100%;
-        }
+      .extra-control {
+        inset: 0 auto auto 100%;
       }
 
-      &:not(.open) form {
+      :global(dialog:not(.open)) & {
         transform: translateX(-105%);
       }
     }
@@ -308,52 +194,48 @@
       height: 100%;
       max-width: 100vw;
 
-      &.open form {
+      :global(dialog.open) & {
         max-width: calc(100vw - 56px);
         transform: translateX(0%);
       }
 
-      &.small form {
+      &.small {
         width: 400px;
       }
 
-      &.medium form {
+      &.medium {
         width: 600px;
       }
 
-      &.large form {
+      &.large {
         width: 800px;
       }
 
-      &.x-large form {
+      &.x-large {
         width: 1000px;
       }
     }
 
     &.top {
-      form {
-        inset: 0 0 auto 0;
+      inset: 0 0 auto 0;
 
-        .extra-control {
-          inset: 100% 0 auto auto;
-        }
+      .extra-control {
+        inset: 100% 0 auto auto;
       }
 
-      &:not(.open) form {
+      :global(dialog:not(.open)) & {
         transform: translateY(-105%);
       }
     }
 
     &.bottom {
-      form {
-        inset: auto 0 0 0;
+      inset: auto 0 0 0;
 
-        .extra-control {
-          inset: auto 0 100% auto;
-        }
+      .extra-control {
+        inset: auto 0 100% auto;
       }
 
-      &:not(.open) form {
+      :global(dialog:not(.open)) & {
         transform: translateY(105%);
       }
     }
@@ -362,24 +244,24 @@
       width: 100%;
       max-height: 100vh;
 
-      &.open form {
+      :global(dialog.open) & {
         max-height: calc(100vh - 56px);
         transform: translateY(0%);
       }
 
-      &.small form {
+      &.small {
         height: 400px;
       }
 
-      &.medium form {
+      &.medium {
         height: 600px;
       }
 
-      &.large form {
+      &.large {
         height: 800px;
       }
 
-      &.x-large form {
+      &.x-large {
         height: 1000px;
       }
     }

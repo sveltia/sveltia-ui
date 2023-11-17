@@ -87,5 +87,6 @@ export { default as Toast } from './components/toast/toast.svelte';
 export { default as Toolbar } from './components/toolbar/toolbar.svelte';
 export { default as AppShell } from './components/util/app-shell.svelte';
 export { default as Group } from './components/util/group.svelte';
+export { default as Modal } from './components/util/modal.svelte';
 
 export * from './services/util';

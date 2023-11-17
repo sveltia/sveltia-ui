@@ -165,7 +165,6 @@
   class="combobox"
   anchor={comboboxElement ?? inputComponent?.element}
   {position}
-  keepContent={true}
   touchOptimized={true}
   bind:open={isPopupOpen}
   bind:this={popupComponent}
