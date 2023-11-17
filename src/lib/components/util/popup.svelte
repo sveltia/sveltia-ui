@@ -28,6 +28,11 @@
    */
   export let anchor;
   /**
+   * A reference to the content element.
+   * @type {HTMLElement}
+   */
+  export let content = undefined;
+  /**
    * Where to show the popup.
    * @type {PopupPosition}
    */
@@ -44,11 +49,6 @@
    * @type {Modal}
    */
   let modal;
-  /**
-   * A reference to the content element.
-   * @type {HTMLElement}
-   */
-  let content = undefined;
   /**
    * Whether the touch is enabled on the user device.
    * @type {boolean}
@@ -108,9 +108,6 @@
       content.tabIndex = -1;
       content.focus();
     }
-  }}
-  on:close={() => {
-    $open = false;
   }}
 >
   <div
