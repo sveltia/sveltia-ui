@@ -34,7 +34,10 @@ export { default as SelectButton } from './components/button/select-button.svelt
 export { default as Calendar } from './components/calendar/calendar.svelte';
 export { default as CheckboxGroup } from './components/checkbox/checkbox-group.svelte';
 export { default as Checkbox } from './components/checkbox/checkbox.svelte';
+export { default as AlertDialog } from './components/dialog/alert-dialog.svelte';
+export { default as ConfirmationDialog } from './components/dialog/confirmation-dialog.svelte';
 export { default as Dialog } from './components/dialog/dialog.svelte';
+export { default as PromptDialog } from './components/dialog/prompt-dialog.svelte';
 export { default as Disclosure } from './components/disclosure/disclosure.svelte';
 export { default as Divider } from './components/divider/divider.svelte';
 export { default as Spacer } from './components/divider/spacer.svelte';

@@ -91,10 +91,25 @@
       "svelte": "./package/components/checkbox/checkbox.svelte",
       "default": "./package/components/checkbox/checkbox.svelte"
     },
+    "./components/dialog/alert-dialog.svelte": {
+      "types": "./package/components/dialog/alert-dialog.svelte.d.ts",
+      "svelte": "./package/components/dialog/alert-dialog.svelte",
+      "default": "./package/components/dialog/alert-dialog.svelte"
+    },
+    "./components/dialog/confirmation-dialog.svelte": {
+      "types": "./package/components/dialog/confirmation-dialog.svelte.d.ts",
+      "svelte": "./package/components/dialog/confirmation-dialog.svelte",
+      "default": "./package/components/dialog/confirmation-dialog.svelte"
+    },
     "./components/dialog/dialog.svelte": {
       "types": "./package/components/dialog/dialog.svelte.d.ts",
       "svelte": "./package/components/dialog/dialog.svelte",
       "default": "./package/components/dialog/dialog.svelte"
+    },
+    "./components/dialog/prompt-dialog.svelte": {
+      "types": "./package/components/dialog/prompt-dialog.svelte.d.ts",
+      "svelte": "./package/components/dialog/prompt-dialog.svelte",
+      "default": "./package/components/dialog/prompt-dialog.svelte"
     },
     "./components/disclosure/disclosure.svelte": {
       "types": "./package/components/disclosure/disclosure.svelte.d.ts",
@@ -414,8 +429,17 @@
       "components/checkbox/checkbox.svelte": [
         "./package/components/checkbox/checkbox.svelte.d.ts"
       ],
+      "components/dialog/alert-dialog.svelte": [
+        "./package/components/dialog/alert-dialog.svelte.d.ts"
+      ],
+      "components/dialog/confirmation-dialog.svelte": [
+        "./package/components/dialog/confirmation-dialog.svelte.d.ts"
+      ],
       "components/dialog/dialog.svelte": [
         "./package/components/dialog/dialog.svelte.d.ts"
+      ],
+      "components/dialog/prompt-dialog.svelte": [
+        "./package/components/dialog/prompt-dialog.svelte.d.ts"
       ],
       "components/disclosure/disclosure.svelte": [
         "./package/components/disclosure/disclosure.svelte.d.ts"

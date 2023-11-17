@@ -50,8 +50,9 @@
 
   /**
    * Whether to close the drawer when the backdrop (outside of the drawer) is clicked.
+   * @type {boolean}
    */
-  export let closeOnBackdropClick = false;
+  export let lightDismiss = false;
 
   /**
    * Whether to keep the content when the dialog is not displayed.
@@ -144,7 +145,7 @@
   {...$$restProps}
   bind:this={dialog}
   on:click={({ target }) => {
-    if (closeOnBackdropClick && /** @type {HTMLElement?} */ (target)?.matches('dialog')) {
+    if (lightDismiss && /** @type {HTMLElement?} */ (target)?.matches('dialog')) {
       dialog.returnValue = 'cancel';
       open = false;
     }

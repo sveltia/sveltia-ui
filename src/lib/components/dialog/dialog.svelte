@@ -13,46 +13,76 @@
   import Icon from '../icon/icon.svelte';
 
   /**
-   * CSS class name on the button.
+   * The `class` attribute on the `<dialog>` element.
    * @type {string}
    */
   let className = '';
-
   export { className as class };
-
-  export let open = false;
-
-  export let title = '';
-
   /**
    * The `role` attribute on the `<dialog>` element.
    * @type {'dialog' | 'alertdialog'}
    */
   export let role = 'dialog';
-
   /**
    * Width of the dialog.
    * @type {('small' | 'medium' | 'large' | 'x-large')}
    */
   export let size = 'medium';
-
+  /**
+   * Whether to open the dialog.
+   * @type {boolean}
+   */
+  export let open = false;
+  /**
+   * Whether to make it modal.
+   * @type {boolean}
+   */
   export let modal = true;
-
-  export let showCancel = true;
-
-  export let showOk = true;
-
+  /**
+   * Text label displayed on the header. Required.
+   * @type {string}
+   */
+  export let title;
+  /**
+   * Whether to show the Close button on the header.
+   * @type {boolean}
+   */
   export let showClose = false;
-
+  /**
+   * Whether to show the OK button on the footer.
+   * @type {boolean}
+   */
+  export let showOk = true;
+  /**
+   * Text label displayed on the OK button.
+   * @type {string}
+   */
   export let okLabel = '';
-
+  /**
+   * Whether to disable the OK button.
+   * @type {boolean}
+   */
   export let okDisabled = false;
-
+  /**
+   * Whether to show the Cancel button on the footer.
+   * @type {boolean}
+   */
+  export let showCancel = true;
+  /**
+   * Text label displayed on the Cancel button.
+   * @type {string}
+   */
   export let cancelLabel = '';
-
+  /**
+   * Whether to disable the Cancel button.
+   * @type {boolean}
+   */
   export let cancelDisabled = false;
-
-  export let closeOnBackdropClick = false;
+  /**
+   * Whether to close the modal when the backdrop (outside of the modal) is clicked.
+   * @type {boolean}
+   */
+  export let lightDismiss = false;
 
   const dispatch = createEventDispatcher();
   const id = getRandomId('dialog');
@@ -136,11 +166,13 @@
   class="sui dialog {className} {size}"
   class:open={showDialog}
   {role}
-  aria-label={title}
+  aria-label={$$slots.header ? undefined : title}
+  aria-labelledby={$$slots.header ? title : `${id}-title`}
+  aria-describedby="{id}-body"
   {...$$restProps}
   bind:this={dialog}
   on:click={({ target }) => {
-    if (closeOnBackdropClick && /** @type {HTMLElement?} */ (target)?.matches('dialog')) {
+    if (lightDismiss && /** @type {HTMLElement?} */ (target)?.matches('dialog')) {
       dialog.returnValue = 'cancel';
       open = false;
     }
@@ -157,7 +189,7 @@
           {#if $$slots.header}
             <slot name="header" />
           {:else}
-            <div role="none" class="title">
+            <div role="none" id="{id}-title" class="title">
               {title}
             </div>
             <Spacer flex={true} />
@@ -181,7 +213,7 @@
           {/if}
         </div>
       {/if}
-      <div role="none" class="main">
+      <div role="none" id="{id}-body" class="body">
         <slot />
       </div>
       {#if showOk || showCancel || $$slots.footer || $$slots['footer-extra']}
@@ -335,9 +367,10 @@
     margin: 0 24px 24px;
   }
 
-  .main {
+  .body {
     overflow: auto;
     margin: 24px 24px;
     white-space: normal;
+    line-height: var(--sui-line-height-compact);
   }
 </style>
