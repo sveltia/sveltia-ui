@@ -27,6 +27,11 @@
   border-width: 0;
   border-style: solid;
   vertical-align: top;
+
+  @media (prefers-reduced-motion) {
+    // Disable transition but make sure the `transitionend` event works
+    transition-duration: 1ms !important;
+  }
 }
 
 * {

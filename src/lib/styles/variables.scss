@@ -237,4 +237,10 @@
     --sui-primary-row-height: 56px;
     --sui-secondary-row-height: 48px;
   }
+
+  @media (prefers-reduced-transparency) {
+    --sui-primary-background-color-translucent: hsl(var(--sui-background-color-2-hsl));
+    --sui-secondary-background-color-translucent: hsl(var(--sui-background-color-3-hsl));
+    --sui-tertiary-background-color-translucent: hsl(var(--sui-background-color-4-hsl));
+  }
 }
