@@ -67,23 +67,36 @@
   };
 </script>
 
-<Button
-  class="sui menu-button {className}"
-  {hidden}
-  {disabled}
-  {label}
-  {variant}
-  {size}
-  {iconic}
-  aria-haspopup="menu"
-  {...$$restProps}
-  bind:this={buttonComponent}
->
-  <slot name="start-icon" slot="start-icon" />
-  <slot />
-  <slot name="end-icon" slot="end-icon" />
-</Button>
+<div role="none" class="wrapper">
+  <Button
+    class="sui menu-button {className}"
+    {hidden}
+    {disabled}
+    {label}
+    {variant}
+    {size}
+    {iconic}
+    aria-haspopup="menu"
+    {...$$restProps}
+    bind:this={buttonComponent}
+  >
+    <slot name="start-icon" slot="start-icon" />
+    <slot />
+    <slot name="end-icon" slot="end-icon" />
+  </Button>
+</div>
 
 <Popup anchor={buttonComponent?.element} position={popupPosition} bind:this={popupComponent}>
   <slot name="popup" />
 </Popup>
+
+<style lang="scss">
+  .wrapper {
+    display: contents;
+
+    :global(.icon:last-child) {
+      margin: 0 -2px;
+      font-size: 20px;
+    }
+  }
+</style>
