@@ -13,6 +13,11 @@
   let className = '';
   export { className as class };
   /**
+   * Make the text input container flexible.
+   * @type {boolean}
+   */
+  export let flex = false;
+  /**
    * Whether to hide the widget. An alias of the `aria-hidden` attribute.
    * @type {boolean | undefined}
    */
@@ -57,6 +62,7 @@
 <div
   role="none"
   class="sui text-area {className}"
+  class:flex
   class:disabled
   class:readonly
   hidden={hidden || undefined}
@@ -86,7 +92,14 @@
   .text-area {
     display: inline-grid;
     margin: var(--sui-focus-ring-width);
-    width: calc(100% - var(--sui-focus-ring-width) * 2);
+    min-width: var(--sui-textbox-multiline-min-width);
+
+    &.flex {
+      width: -moz-available;
+      width: -webkit-fill-available;
+      width: stretch;
+      min-width: 0;
+    }
   }
 
   textarea,

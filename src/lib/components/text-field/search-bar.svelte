@@ -21,6 +21,11 @@
   let className = '';
   export { className as class };
   /**
+   * Make the text input container flexible.
+   * @type {boolean}
+   */
+  export let flex = false;
+  /**
    * Whether to hide the widget. An alias of the `aria-hidden` attribute.
    * @type {boolean | undefined}
    */
@@ -71,6 +76,7 @@
 <div
   role={hidden ? undefined : 'none'}
   class="sui search-bar {className}"
+  class:flex
   class:disabled
   class:readonly
   hidden={hidden || undefined}
@@ -83,6 +89,7 @@
     role="searchbox"
     {id}
     bind:value
+    {flex}
     {hidden}
     {disabled}
     {readonly}
@@ -119,11 +126,18 @@
 
 <style lang="scss">
   .search-bar {
-    display: flex;
+    display: inline-flex;
     align-items: center;
     position: relative;
     margin: var(--sui-focus-ring-width);
-    width: calc(100% - var(--sui-focus-ring-width) * 2);
+    min-width: var(--sui-textbox-singleline-min-width);
+
+    &.flex {
+      width: -moz-available;
+      width: -webkit-fill-available;
+      width: stretch;
+      min-width: 0;
+    }
 
     :global(.icon) {
       font-size: var(--sui-font-size-xx-large);
@@ -154,8 +168,10 @@
     }
 
     :global(.text-input) {
+      flex: auto;
       margin: 0 !important;
-      width: 100% !important;
+      width: 0; // = auto
+      min-width: 0 !important;
     }
 
     :global(input) {

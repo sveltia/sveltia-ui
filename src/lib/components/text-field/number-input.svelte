@@ -18,6 +18,11 @@
   let className = '';
   export { className as class };
   /**
+   * Make the text input container flexible.
+   * @type {boolean}
+   */
+  export let flex = false;
+  /**
    * Whether to hide the widget. An alias of the `aria-hidden` attribute.
    * @type {boolean | undefined}
    */
@@ -105,6 +110,7 @@
 <div
   role="none"
   class="sui number-input {className}"
+  class:flex
   class:disabled
   class:readonly
   hidden={hidden || undefined}
@@ -138,6 +144,7 @@
     {id}
     bind:value
     spellcheck="false"
+    {flex}
     {hidden}
     {disabled}
     {readonly}
@@ -174,10 +181,17 @@
 
 <style lang="scss">
   .number-input {
-    margin: var(--sui-focus-ring-width);
-    width: calc(100% - var(--sui-focus-ring-width) * 2);
     display: inline-flex;
     align-items: center;
+    margin: var(--sui-focus-ring-width);
+    min-width: var(--sui-textbox-singleline-min-width);
+
+    &.flex {
+      width: -moz-available;
+      width: -webkit-fill-available;
+      width: stretch;
+      min-width: 0;
+    }
 
     :global(:not(:first-child) input) {
       border-top-left-radius: 0;
@@ -201,8 +215,10 @@
     }
 
     :global(.text-input) {
+      flex: auto;
       margin: 0 !important;
-      width: 100% !important;
+      width: 0; // = auto
+      min-width: 0 !important;
     }
   }
 

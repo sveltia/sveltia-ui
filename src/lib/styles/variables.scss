@@ -217,7 +217,9 @@
   --sui-textbox-background-color: hsl(var(--sui-background-color-1-hsl));
   --sui-textbox-font-family: var(--sui-font-family-default);
   --sui-textbox-font-size: var(--sui-font-size-default);
+  --sui-textbox-singleline-min-width: 240px;
   --sui-textbox-singleline-line-height: var(--sui-line-height-compact);
+  --sui-textbox-multiline-min-width: 480px;
   --sui-textbox-multiline-line-height: var(--sui-line-height-comfortable);
   // Tab
   --sui-tab-small-height: var(--sui-control-small-height);

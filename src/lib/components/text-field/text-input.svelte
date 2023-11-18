@@ -22,6 +22,11 @@
   let className = '';
   export { className as class };
   /**
+   * Make the text input container flexible.
+   * @type {boolean}
+   */
+  export let flex = false;
+  /**
    * The `role` attribute on the `<input>` element.
    * @type {'textbox' | 'searchbox' | 'combobox' | 'spinbutton'}
    */
@@ -88,6 +93,7 @@
 <div
   role="none"
   class="sui text-input {className}"
+  class:flex
   class:disabled
   class:readonly
   hidden={hidden || undefined}
@@ -124,11 +130,18 @@
 
 <style lang="scss">
   .text-input {
-    position: relative;
-    margin: var(--sui-focus-ring-width);
-    width: calc(100% - var(--sui-focus-ring-width) * 2);
     display: inline-flex;
     align-items: center;
+    position: relative;
+    margin: var(--sui-focus-ring-width);
+    min-width: var(--sui-textbox-singleline-min-width);
+
+    &.flex {
+      width: -moz-available;
+      width: -webkit-fill-available;
+      width: stretch;
+      min-width: 0;
+    }
   }
 
   // https://stackoverflow.com/a/68240841

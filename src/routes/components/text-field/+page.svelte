@@ -15,15 +15,6 @@
 </section>
 
 <section>
-  <h3>Multi line</h3>
-  <Example>
-    <div role="none">
-      <TextArea />
-    </div>
-  </Example>
-</section>
-
-<section>
   <h3>Password</h3>
   <Example>
     <div role="none">
@@ -51,6 +42,15 @@
 </section>
 
 <section>
+  <h3>Multi line</h3>
+  <Example>
+    <div role="none">
+      <TextArea />
+    </div>
+  </Example>
+</section>
+
+<section>
   <h3>Credit Card</h3>
 </section>
 
@@ -68,13 +68,31 @@
 </section>
 
 <section>
+  <h3>Flex</h3>
+  <Example>
+    <div role="none">
+      <TextInput flex />
+    </div>
+    <div role="none">
+      <PasswordInput flex />
+    </div>
+    <div role="none">
+      <NumberInput min={0} flex />
+    </div>
+    <div role="none">
+      <SearchBar flex />
+    </div>
+    <div role="none">
+      <TextArea flex />
+    </div>
+  </Example>
+</section>
+
+<section>
   <h3>Disabled</h3>
   <Example>
     <div role="none">
       <TextInput disabled />
-    </div>
-    <div role="none">
-      <TextArea disabled />
     </div>
     <div role="none">
       <PasswordInput disabled />
@@ -84,6 +102,9 @@
     </div>
     <div role="none">
       <SearchBar disabled />
+    </div>
+    <div role="none">
+      <TextArea disabled />
     </div>
     <div role="none">
       <MarkdownEditor disabled />
@@ -98,9 +119,6 @@
       <TextInput readonly />
     </div>
     <div role="none">
-      <TextArea readonly />
-    </div>
-    <div role="none">
       <PasswordInput readonly />
     </div>
     <div role="none">
@@ -108,6 +126,9 @@
     </div>
     <div role="none">
       <SearchBar readonly />
+    </div>
+    <div role="none">
+      <TextArea readonly />
     </div>
     <div role="none">
       <MarkdownEditor readonly />

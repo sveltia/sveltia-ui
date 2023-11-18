@@ -12,6 +12,11 @@
   import TextArea from './text-area.svelte';
 
   /**
+   * Make the text input container flexible.
+   * @type {boolean}
+   */
+  export let flex = false;
+  /**
    * Whether to hide the widget. An alias of the `aria-hidden` attribute.
    * @type {boolean | undefined}
    */
@@ -95,6 +100,7 @@
       {id}
       autoResize={true}
       bind:value
+      {flex}
       {hidden}
       {disabled}
       {readonly}
