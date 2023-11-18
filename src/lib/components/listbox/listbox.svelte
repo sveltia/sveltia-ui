@@ -72,7 +72,7 @@
   [role='listbox'] {
     display: flex;
     flex-direction: column;
-    margin: 0;
+    margin: var(--sui-focus-ring-width);
     border-width: 1px;
     border-color: var(--sui-listbox-border-color);
     border-radius: var(--sui-listbox-border-radius);

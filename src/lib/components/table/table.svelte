@@ -20,7 +20,8 @@
 <style lang="scss">
   .table {
     display: table;
-    width: 100%;
+    margin: var(--sui-focus-ring-width);
+    width: calc(100% - var(--sui-focus-ring-width) * 2);
 
     &:global(.data) {
       border-collapse: collapse;
