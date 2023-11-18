@@ -63,12 +63,14 @@
   .select-button-group {
     display: inline-flex;
     align-items: center;
+    margin: var(--sui-focus-ring-width);
 
     &:focus-visible {
       outline-width: 0 !important;
     }
 
     :global(button) {
+      margin: 0 !important;
       border-radius: 0 !important;
       color: var(--sui-primary-foreground-color);
 

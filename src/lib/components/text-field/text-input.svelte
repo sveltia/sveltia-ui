@@ -125,7 +125,8 @@
 <style lang="scss">
   .text-input {
     position: relative;
-    width: 100%;
+    margin: var(--sui-focus-ring-width);
+    width: calc(100% - var(--sui-focus-ring-width) * 2);
     display: inline-flex;
     align-items: center;
   }
@@ -139,7 +140,6 @@
   }
 
   input {
-    z-index: 1;
     display: inline-block;
     flex: auto;
     border-width: 1px;

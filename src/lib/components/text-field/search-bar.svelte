@@ -122,6 +122,8 @@
     display: flex;
     align-items: center;
     position: relative;
+    margin: var(--sui-focus-ring-width);
+    width: calc(100% - var(--sui-focus-ring-width) * 2);
 
     :global(.icon) {
       font-size: var(--sui-font-size-xx-large);
@@ -143,6 +145,7 @@
       position: absolute;
       inset: 0 0 auto auto;
       z-index: 2;
+      margin: 0 !important;
       height: var(--sui-button-medium-height);
     }
 
@@ -150,7 +153,13 @@
       inset: 0 36px;
     }
 
+    :global(.text-input) {
+      margin: 0 !important;
+      width: 100% !important;
+    }
+
     :global(input) {
+      z-index: 1;
       padding: 0 var(--sui-button-medium-height) !important;
       width: 100%;
     }

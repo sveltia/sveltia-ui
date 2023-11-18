@@ -85,7 +85,8 @@
 <style lang="scss">
   .text-area {
     display: inline-grid;
-    width: 100%;
+    margin: var(--sui-focus-ring-width);
+    width: calc(100% - var(--sui-focus-ring-width) * 2);
   }
 
   textarea,

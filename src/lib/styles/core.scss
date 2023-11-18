@@ -20,8 +20,8 @@
   overflow-anchor: none;
   scroll-behavior: smooth;
   box-sizing: border-box;
-  outline-offset: 1px;
-  outline-width: 2px !important;
+  outline-offset: 0px;
+  outline-width: var(--sui-focus-ring-width) !important;
   outline-style: solid;
   outline-color: transparent;
   border-width: 0;
@@ -44,7 +44,8 @@
 }
 
 :focus-visible {
-  outline-color: var(--sui-primary-accent-color-light);
+  outline-color: var(--sui-primary-accent-color-translucent);
+  z-index: 2;
 }
 
 h1,

@@ -74,16 +74,16 @@
     }
 
     &.horizontal {
-      gap: 16px;
+      gap: 8px;
       align-items: center;
     }
 
     &.vertical {
-      gap: 8px;
+      gap: 4px;
       flex-direction: column;
 
       @media (pointer: coarse) {
-        gap: 16px;
+        gap: 8px;
       }
     }
   }

@@ -174,7 +174,8 @@
 
 <style lang="scss">
   .number-input {
-    width: 100%;
+    margin: var(--sui-focus-ring-width);
+    width: calc(100% - var(--sui-focus-ring-width) * 2);
     display: inline-flex;
     align-items: center;
 
@@ -198,6 +199,11 @@
         }
       }
     }
+
+    :global(.text-input) {
+      margin: 0 !important;
+      width: 100% !important;
+    }
   }
 
   .buttons {
@@ -208,6 +214,7 @@
 
     :global(button) {
       flex: none;
+      margin: 0 !important;
       border-width: 1px;
       border-color: var(--sui-textbox-border-color);
       width: 100%;

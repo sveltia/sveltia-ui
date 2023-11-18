@@ -363,6 +363,7 @@
   .slider {
     position: relative;
     display: inline-block;
+    margin: var(--sui-focus-ring-width);
     padding: var(--sui-checkbox-height) calc(var(--sui-checkbox-height) / 2);
     touch-action: none;
 

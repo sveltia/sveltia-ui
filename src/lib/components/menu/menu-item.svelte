@@ -109,6 +109,7 @@
       display: flex;
       justify-content: space-between !important;
       border-radius: var(--sui-option-border-radius);
+      margin: 0 !important;
       padding: 0 16px;
       width: 100%;
       min-width: 160px;

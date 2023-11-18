@@ -56,11 +56,12 @@
   .tab-list {
     display: flex;
     align-items: center;
+    margin: var(--sui-focus-ring-width);
     border-color: var(--sui-control-border-color);
 
     &[aria-orientation='horizontal'] {
-      gap: 16px;
-      margin: 0 0 32px;
+      gap: 8px;
+      margin-bottom: 32px;
       border-width: 0 0 1px;
       padding: 0 16px;
 
@@ -72,7 +73,7 @@
     &[aria-orientation='vertical'] {
       gap: 8px;
       flex-direction: column;
-      margin: 0 32px 0 0;
+      margin-right: 32px;
       border-width: 0 1px 0 0;
       padding: 8px 0;
       width: 240px;
@@ -86,6 +87,7 @@
     :global(button) {
       justify-content: flex-start;
       border-color: transparent;
+      margin: 0 !important;
       padding: 0;
       border-radius: 0;
       height: var(--sui-tab-medium-height);

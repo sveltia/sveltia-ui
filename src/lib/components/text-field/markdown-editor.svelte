@@ -106,7 +106,8 @@
 
 <style lang="scss">
   .wrapper {
-    display: contents;
+    margin: var(--sui-focus-ring-width);
+    width: calc(100% - var(--sui-focus-ring-width) * 2);
 
     :global([role='toolbar']) {
       display: flex;
@@ -117,6 +118,7 @@
 
       :global(button) {
         flex: none;
+        margin: 0 !important;
       }
 
       & + :global(div) {
@@ -131,5 +133,10 @@
 
   .inner {
     display: contents;
+
+    :global(.text-area) {
+      margin: 0 !important;
+      width: 100% !important;
+    }
   }
 </style>

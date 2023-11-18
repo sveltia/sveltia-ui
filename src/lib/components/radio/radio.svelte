@@ -100,6 +100,7 @@
     display: inline-flex;
     align-items: center;
     gap: 8px;
+    margin: var(--sui-focus-ring-width);
     color: var(--sui-control-foreground-color);
     font-family: var(--sui-control-font-family);
     font-size: var(--sui-control-font-size);
@@ -137,6 +138,7 @@
     :global(button) {
       justify-content: center;
       overflow: hidden;
+      margin: 0 !important;
       border-width: 1.5px;
       border-color: var(--sui-checkbox-border-color);
       border-radius: var(--sui-checkbox-height);

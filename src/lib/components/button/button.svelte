@@ -167,6 +167,7 @@
     display: inline-flex;
     align-items: center;
     gap: 4px;
+    margin: var(--sui-focus-ring-width);
     border-width: 0;
     border-style: solid;
     border-color: transparent;

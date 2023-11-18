@@ -80,6 +80,7 @@
     display: inline-flex;
     align-items: center;
     gap: 8px;
+    margin: var(--sui-focus-ring-width);
     border-width: 0;
     border-style: solid;
     border-color: transparent;

@@ -53,8 +53,7 @@
     flex: none !important;
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 8px;
+    padding: 0 4px;
 
     &.primary {
       --toolbar-size: var(--sui-primary-toolbar-size);

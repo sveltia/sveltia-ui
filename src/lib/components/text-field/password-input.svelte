@@ -105,9 +105,15 @@
 
 <style lang="scss">
   .password-input {
-    width: 100%;
+    margin: var(--sui-focus-ring-width);
+    width: calc(100% - var(--sui-focus-ring-width) * 2);
     display: inline-flex;
     align-items: center;
+
+    :global(.text-input) {
+      margin: 0 !important;
+      width: 100% !important;
+    }
 
     :global(input) {
       border-top-right-radius: 0;
@@ -116,7 +122,7 @@
 
     :global(button) {
       flex: none;
-      margin-left: -1px;
+      margin: 0 0 0 -1px;
       border-width: 1px;
       border-color: var(--sui-textbox-border-color);
       width: var(--sui-textbox-height);

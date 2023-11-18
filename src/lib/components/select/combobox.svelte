@@ -182,6 +182,7 @@
 
 <style lang="scss">
   .combobox {
+    margin: var(--sui-focus-ring-width);
     display: flex;
     align-items: center;
     position: relative;
@@ -202,6 +203,7 @@
       position: absolute;
       inset: 0 0 auto auto;
       z-index: 1;
+      margin: 0 !important;
       border-top-left-radius: 0;
       border-bottom-left-radius: 0;
     }
@@ -249,6 +251,11 @@
         white-space: nowrap;
         text-overflow: ellipsis;
       }
+    }
+
+    :global(.text-input) {
+      margin: 0 !important;
+      width: 100% !important;
     }
 
     :global(input) {

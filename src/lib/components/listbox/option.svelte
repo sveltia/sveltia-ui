@@ -85,6 +85,7 @@
       display: flex;
       justify-content: space-between;
       gap: 4px;
+      margin: 0 !important;
       border-radius: var(--sui-option-border-radius);
       padding: var(--sui-option-padding);
       width: 100%;
