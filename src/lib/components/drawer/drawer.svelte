@@ -141,8 +141,8 @@
     display: flex;
     flex-direction: column;
     border-radius: 4px;
-    max-width: 100vw;
-    max-height: 100vh;
+    max-width: 100dvw;
+    max-height: 100dvh;
     background-color: var(--sui-secondary-background-color-translucent);
     box-shadow: 0 8px 16px var(--sui-popup-shadow-color);
     -webkit-backdrop-filter: blur(16px);
@@ -192,10 +192,10 @@
 
     &.vertical {
       height: 100%;
-      max-width: 100vw;
+      max-width: 100dvw;
 
       :global(dialog.open) & {
-        max-width: calc(100vw - 56px);
+        max-width: calc(100dvw - 56px);
         transform: translateX(0%);
       }
 
@@ -242,10 +242,10 @@
 
     &.horizontal {
       width: 100%;
-      max-height: 100vh;
+      max-height: 100dvh;
 
       :global(dialog.open) & {
-        max-height: calc(100vh - 56px);
+        max-height: calc(100dvh - 56px);
         transform: translateY(0%);
       }
 

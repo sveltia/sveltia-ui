@@ -177,7 +177,7 @@
     display: flex;
     flex-direction: column;
     border-radius: 4px;
-    max-width: calc(100vw - 32px);
+    max-width: calc(100dvw - 32px);
     background-color: var(--sui-secondary-background-color-translucent);
     box-shadow: 0 8px 16px var(--sui-popup-shadow-color);
     -webkit-backdrop-filter: blur(16px);
@@ -199,7 +199,7 @@
       max-height: 400px;
 
       @media (max-height: 400px) {
-        max-height: calc(100vh - 32px);
+        max-height: calc(100dvh - 32px);
       }
     }
 
@@ -208,7 +208,7 @@
       max-height: 600px;
 
       @media (max-height: 600px) {
-        max-height: calc(100vh - 32px);
+        max-height: calc(100dvh - 32px);
       }
     }
 
@@ -217,7 +217,7 @@
       max-height: 800px;
 
       @media (max-height: 800px) {
-        max-height: calc(100vh - 32px);
+        max-height: calc(100dvh - 32px);
       }
     }
 
@@ -226,7 +226,7 @@
       max-height: 1000px;
 
       @media (max-height: 1000px) {
-        max-height: calc(100vh - 32px);
+        max-height: calc(100dvh - 32px);
       }
     }
   }

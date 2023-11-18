@@ -86,8 +86,8 @@
     margin: 0;
     border: 0;
     padding: 16px;
-    width: 100vw;
-    height: 100vh;
+    width: 100dvw;
+    height: 100dvh;
     background-color: transparent;
     font-family: var(--sui-font-family-default);
     font-size: var(--sui-font-size-default);

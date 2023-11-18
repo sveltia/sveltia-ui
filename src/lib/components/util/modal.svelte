@@ -187,10 +187,10 @@
     margin: 0;
     border: 0;
     padding: 0;
-    width: 100vw;
-    max-width: 100vw;
-    height: 100vh;
-    max-height: 100vh;
+    width: 100dvw;
+    max-width: 100dvw;
+    height: 100dvh;
+    max-height: 100dvh;
     color: var(--sui-primary-foreground-color);
     background: transparent;
     -webkit-user-select: none;

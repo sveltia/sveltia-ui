@@ -133,8 +133,8 @@
       border-radius: 4px !important;
       padding: 8px;
       min-width: 320px !important;
-      max-width: calc(100vw - 32px) !important;
-      max-height: calc(100vh - 32px) !important;
+      max-width: calc(100dvw - 32px) !important;
+      max-height: calc(100dvh - 32px) !important;
 
       :global(dialog.open) & {
         transform: scale(100%) !important;
