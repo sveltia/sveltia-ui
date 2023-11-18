@@ -77,6 +77,12 @@
   {keepContent}
   {...$$restProps}
   bind:this={modal}
+  on:opening
+  on:open
+  on:ok
+  on:cancel
+  on:closing
+  on:close
 >
   <div role="none" class="content {className} {size} {position} {orientation}">
     <div role="none" class="extra-control">

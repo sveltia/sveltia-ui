@@ -95,6 +95,12 @@
   keepContent={true}
   bind:this={modal}
   {...$$restProps}
+  on:opening
+  on:open
+  on:ok
+  on:cancel
+  on:closing
+  on:close
   on:open={async () => {
     await sleep(100);
 

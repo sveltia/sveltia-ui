@@ -39,8 +39,11 @@
   {okLabel}
   showCancel={false}
   {...$$restProps}
+  on:opening
+  on:open
   on:ok
   on:cancel
+  on:closing
   on:close
 >
   <slot />
