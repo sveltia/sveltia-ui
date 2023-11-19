@@ -68,7 +68,16 @@
     {#if $$slots.input}
       <slot name="input" />
     {:else}
-      <TextInput bind:value autofocus {...textboxAttrs} on:input on:keydown on:keyup on:keypress />
+      <TextInput
+        bind:value
+        flex
+        autofocus
+        {...textboxAttrs}
+        on:input
+        on:keydown
+        on:keyup
+        on:keypress
+      />
     {/if}
   </div>
 </Dialog>
