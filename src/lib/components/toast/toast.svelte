@@ -1,6 +1,6 @@
 <!--
   @component
-  Toast notification. Use the Popover API if possible to acquire a non-modal top layer.
+  Toast/snackbar notification. Use the Popover API if possible to acquire a non-modal top layer.
   @see https://w3c.github.io/aria/#alert
   @see https://developer.chrome.com/blog/introducing-popover-api/
 -->
@@ -8,6 +8,13 @@
   import { onMount } from 'svelte';
 
   /**
+   * The toast ID. If updated, the timer that hides the toast will be reset, meaning the same toast
+   * can be displayed for a longer period of time.
+   * @type {number}
+   */
+  export let id = undefined;
+  /**
+   * Whether to show the toast.
    * @type {boolean}
    */
   export let show = false;
@@ -16,6 +23,11 @@
    * @type {number}
    */
   export let duration = 5000;
+  /**
+   * Position of the toast.
+   * @type {ToastPosition}
+   */
+  export let position = 'bottom-right';
 
   /**
    * @type {HTMLElement}
@@ -29,6 +41,10 @@
    * @type {HTMLElement}
    */
   let toast;
+  /**
+   * @type {number}
+   */
+  let timerId = 0;
 
   onMount(() => {
     popover = document.querySelector('.sui.toast-base.enabled');
@@ -59,8 +75,13 @@
   }
 
   $: {
+    void id;
+    void show;
+    void duration;
+    window.clearTimeout(timerId);
+
     if (show && duration) {
-      window.setTimeout(() => {
+      timerId = window.setTimeout(() => {
         show = false;
       }, duration);
     }
@@ -69,7 +90,7 @@
 
 <div role="none" class="sui toast-base" bind:this={popoverBase} />
 
-<div class="sui toast" aria-hidden={!show} bind:this={toast} {...$$restProps}>
+<div class="sui toast {position}" aria-hidden={!show} bind:this={toast} {...$$restProps}>
   <slot />
 </div>
 
@@ -99,7 +120,6 @@
 
   .toast {
     position: absolute;
-    inset: auto 16px 16px auto;
     box-shadow: 0 8px 16px var(--sui-popup-shadow-color);
     opacity: 1;
     transition-duration: 250ms;
@@ -108,6 +128,32 @@
     &[aria-hidden='true'] {
       display: block;
       opacity: 0;
+    }
+
+    &.top-left {
+      inset: 16px auto auto 16px;
+    }
+
+    &.top-center {
+      inset: 16px auto auto 50%;
+      transform: translateX(-50%);
+    }
+
+    &.top-right {
+      inset: 16px 16px auto auto;
+    }
+
+    &.bottom-left {
+      inset: auto auto 16px 16px;
+    }
+
+    &.bottom-center {
+      inset: auto auto 16px 50%;
+      transform: translateX(-50%);
+    }
+
+    &.bottom-right {
+      inset: auto 16px 16px auto;
     }
   }
 </style>

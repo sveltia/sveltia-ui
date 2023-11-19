@@ -7,6 +7,10 @@
   let showErrorToast = false;
   let showSuccessToast = false;
   let showWarningToast = false;
+  let showPositionToast = false;
+  /** @type {ToastPosition} */
+  let showPositionToastPosition = undefined;
+  let showManualToast = false;
 </script>
 
 <h2>Toast</h2>
@@ -69,6 +73,61 @@
 
 <section>
   <h3>Position</h3>
+  <Example>
+    <div role="none">
+      <Button
+        variant="secondary"
+        label="Top Left"
+        on:click={() => {
+          showPositionToast = true;
+          showPositionToastPosition = 'top-left';
+        }}
+      />
+      <Button
+        variant="secondary"
+        label="Top Center"
+        on:click={() => {
+          showPositionToast = true;
+          showPositionToastPosition = 'top-center';
+        }}
+      />
+      <Button
+        variant="secondary"
+        label="Top Right"
+        on:click={() => {
+          showPositionToast = true;
+          showPositionToastPosition = 'top-right';
+        }}
+      />
+      <Button
+        variant="secondary"
+        label="Bottom Left"
+        on:click={() => {
+          showPositionToast = true;
+          showPositionToastPosition = 'bottom-left';
+        }}
+      />
+      <Button
+        variant="secondary"
+        label="Bottom Center"
+        on:click={() => {
+          showPositionToast = true;
+          showPositionToastPosition = 'bottom-center';
+        }}
+      />
+      <Button
+        variant="secondary"
+        label="Bottom Right"
+        on:click={() => {
+          showPositionToast = true;
+          showPositionToastPosition = 'bottom-right';
+        }}
+      />
+      <Toast bind:show={showPositionToast} position={showPositionToastPosition}>
+        <Alert status="success">You’ve got a position demo.</Alert>
+      </Toast>
+    </div>
+  </Example>
 </section>
 
 <section>
@@ -77,4 +136,25 @@
 
 <section>
   <h3>Manual Close</h3>
+  <Example>
+    <div role="none">
+      <Button
+        variant="secondary"
+        label="Show Toast"
+        on:click={() => {
+          showManualToast = true;
+        }}
+      />
+      <Button
+        variant="secondary"
+        label="Hide Toast"
+        on:click={() => {
+          showManualToast = false;
+        }}
+      />
+      <Toast bind:show={showManualToast} duration={0}>
+        <Alert status="success">You need to hide the toast manually.</Alert>
+      </Toast>
+    </div>
+  </Example>
 </section>
