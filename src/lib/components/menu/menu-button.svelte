@@ -94,7 +94,7 @@
   .wrapper {
     display: contents;
 
-    :global(.icon:last-child) {
+    :global(.label + .icon:last-child) {
       margin: 0 -2px;
       font-size: 20px;
     }
