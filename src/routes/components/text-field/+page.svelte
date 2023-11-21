@@ -51,6 +51,15 @@
 </section>
 
 <section>
+  <h3>Multi line, auto resize</h3>
+  <Example>
+    <div role="none">
+      <TextArea autoResize />
+    </div>
+  </Example>
+</section>
+
+<section>
   <h3>Credit Card</h3>
 </section>
 

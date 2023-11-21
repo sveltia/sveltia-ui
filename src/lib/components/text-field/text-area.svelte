@@ -148,6 +148,7 @@
   }
 
   .clone {
+    overflow: hidden;
     visibility: hidden;
     white-space: pre-wrap;
   }
