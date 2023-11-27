@@ -133,6 +133,31 @@
 
 <style lang="scss">
   .content {
+    position: absolute;
+    overflow-y: auto;
+    outline-width: 0 !important;
+    color: var(--sui-primary-foreground-color);
+    background-color: var(--sui-secondary-background-color-translucent);
+    box-shadow: 0 8px 16px var(--sui-popup-shadow-color);
+    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(16px);
+    transition-property: opacity, transform;
+
+    &.listbox,
+    &.menu {
+      border-width: 1px;
+      border-style: solid;
+      border-color: var(--sui-secondary-border-color);
+      border-radius: 4px;
+
+      :global(.sui.listbox),
+      :global(.sui.menu) {
+        border-width: 0;
+        border-radius: 0;
+        background-color: transparent;
+      }
+    }
+
     &.touch {
       position: static;
       border-width: 0 !important;
@@ -168,33 +193,6 @@
       transition-duration: 300ms;
       opacity: 0;
       transform: translateY(-8px);
-    }
-  }
-
-  .content {
-    position: absolute;
-    overflow-y: auto;
-    outline-width: 0 !important;
-    color: var(--sui-primary-foreground-color);
-    background-color: var(--sui-secondary-background-color-translucent);
-    box-shadow: 0 8px 16px var(--sui-popup-shadow-color);
-    -webkit-backdrop-filter: blur(16px);
-    backdrop-filter: blur(16px);
-    transition-property: opacity, transform;
-
-    &.listbox,
-    &.menu {
-      border-width: 1px;
-      border-style: solid;
-      border-color: var(--sui-secondary-border-color);
-      border-radius: 4px;
-
-      :global(.sui.listbox),
-      :global(.sui.menu) {
-        border-width: 0;
-        border-radius: 0;
-        background-color: transparent;
-      }
     }
   }
 </style>
