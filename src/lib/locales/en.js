@@ -15,6 +15,10 @@ export const strings = {
     next_month: 'Next Month',
     today: 'Today',
   },
+  split_button: {
+    x_options: '{name} Options',
+    more_options: 'More Options',
+  },
   combobox: {
     select_an_option: 'Select an option…',
   },

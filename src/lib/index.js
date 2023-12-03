@@ -31,6 +31,7 @@ export { default as Alert } from './components/alert/alert.svelte';
 export { default as Button } from './components/button/button.svelte';
 export { default as SelectButtonGroup } from './components/button/select-button-group.svelte';
 export { default as SelectButton } from './components/button/select-button.svelte';
+export { default as SplitButton } from './components/button/split-button.svelte';
 export { default as Calendar } from './components/calendar/calendar.svelte';
 export { default as CheckboxGroup } from './components/checkbox/checkbox-group.svelte';
 export { default as Checkbox } from './components/checkbox/checkbox.svelte';

@@ -76,6 +76,11 @@
       "svelte": "./package/components/button/select-button.svelte",
       "default": "./package/components/button/select-button.svelte"
     },
+    "./components/button/split-button.svelte": {
+      "types": "./package/components/button/split-button.svelte.d.ts",
+      "svelte": "./package/components/button/split-button.svelte",
+      "default": "./package/components/button/split-button.svelte"
+    },
     "./components/calendar/calendar.svelte": {
       "types": "./package/components/calendar/calendar.svelte.d.ts",
       "svelte": "./package/components/calendar/calendar.svelte",
@@ -424,6 +429,9 @@
       ],
       "components/button/select-button.svelte": [
         "./package/components/button/select-button.svelte.d.ts"
+      ],
+      "components/button/split-button.svelte": [
+        "./package/components/button/split-button.svelte.d.ts"
       ],
       "components/calendar/calendar.svelte": [
         "./package/components/calendar/calendar.svelte.d.ts"

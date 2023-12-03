@@ -38,6 +38,11 @@
    */
   export let position = 'bottom-left';
   /**
+   * The base element of {@link position}. If omitted, this will be {@link anchor}.
+   * @type {HTMLElement}
+   */
+  export let positionBaseElement = undefined;
+  /**
    * Whether to show the popup at the center of the screen on mobile/tablet and ignore the defined
    * dropdown `position`.
    * @type {boolean}
@@ -74,7 +79,7 @@
 
   $: {
     if (anchor && modal?.dialog) {
-      ({ open, style } = activatePopup(anchor, modal.dialog, position));
+      ({ open, style } = activatePopup(anchor, modal.dialog, position, positionBaseElement));
       contentType = anchor.getAttribute('aria-haspopup');
     }
   }

@@ -29,6 +29,11 @@
    */
   export let popupPosition = 'bottom-left';
   /**
+   * The base element of {@link popupPosition}. If omitted, this will be {@link buttonComponent}.
+   * @type {HTMLElement}
+   */
+  export let popupPositionBaseElement = undefined;
+  /**
    * Text label displayed on the button.
    * @type {string}
    */
@@ -86,7 +91,12 @@
   </Button>
 </div>
 
-<Popup anchor={buttonComponent?.element} position={popupPosition} bind:this={popupComponent}>
+<Popup
+  anchor={buttonComponent?.element}
+  position={popupPosition}
+  positionBaseElement={popupPositionBaseElement}
+  bind:this={popupComponent}
+>
   <slot name="popup" />
 </Popup>
 

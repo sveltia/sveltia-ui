@@ -50,7 +50,7 @@
               { key: 'button-group', label: 'Button Group' },
               { key: 'copy-button', label: 'Copy Button', disabled: true },
               { key: 'spin-button', label: 'Spin Button', disabled: true },
-              { key: 'split-button', label: 'Split Button', disabled: true },
+              { key: 'split-button', label: 'Split Button' },
             ]}
           />
           <NavSection

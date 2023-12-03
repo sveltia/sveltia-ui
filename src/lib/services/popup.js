@@ -89,11 +89,14 @@ class Popup {
    * @param {HTMLButtonElement} anchorElement `<button>` element that triggers the popup.
    * @param {HTMLDialogElement} popupElement `<dialog>` element to be used for the popup.
    * @param {PopupPosition} position Where to show the popup content.
+   * @param {HTMLElement} [positionBaseElement] The base element of the `position`. If omitted, this
+   * will be the `anchorElement`.
    */
-  constructor(anchorElement, popupElement, position) {
+  constructor(anchorElement, popupElement, position, positionBaseElement) {
     this.anchorElement = anchorElement;
     this.popupElement = popupElement; // = backdrop
     this.position = position;
+    this.positionBaseElement = positionBaseElement ?? anchorElement;
     this.id = getRandomId('popup');
 
     this.anchorElement.setAttribute('aria-controls', this.id);
@@ -168,8 +171,8 @@ class Popup {
    * Check the position of the anchor element.
    */
   checkPosition() {
-    this.observer.unobserve(this.anchorElement);
-    this.observer.observe(this.anchorElement);
+    this.observer.unobserve(this.positionBaseElement);
+    this.observer.observe(this.positionBaseElement);
   }
 }
 
