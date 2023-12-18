@@ -3,7 +3,13 @@
   "compilerOptions": {
     "checkJs": true,
     // Strict checks
+    "alwaysStrict": true,
+    "strictNullChecks": false,
+    "strictBindCallApply": true,
+    "strictFunctionTypes": true,
+    "strictPropertyInitialization": false,
     "noImplicitAny": true,
-    "noImplicitThis": true
+    "noImplicitThis": true,
+    "useUnknownInCatchVariables": true
   }
 }
