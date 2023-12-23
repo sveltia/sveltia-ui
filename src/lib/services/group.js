@@ -2,10 +2,10 @@ import { getRandomId, sleep } from './util';
 
 /**
  * @type {{ [role: string]: {
- *   orientation: 'vertical' | 'horizontal',
- *   childRoles: string[],
- *   childSelectedAttr: 'aria-selected' | 'aria-checked',
- *   focusChild: boolean
+ * orientation: 'vertical' | 'horizontal',
+ * childRoles: string[],
+ * childSelectedAttr: 'aria-selected' | 'aria-checked',
+ * focusChild: boolean
  * } }}
  */
 const config = {
@@ -53,12 +53,12 @@ const config = {
 class Group {
   /**
    * Initialize a new `Group` instance.
-   * @param {HTMLElement} parent Parent element.
+   * @param {HTMLElement} parent - Parent element.
    * @todo Check for added elements probably with `MutationObserver`.
    */
   constructor(parent) {
     this.parent = parent;
-    this.role = parent.getAttribute('role');
+    this.role = /** @type {string} */ (parent.getAttribute('role'));
     this.grid = this.role === 'listbox' && parent.matches('.grid');
     this.multi = this.parent.getAttribute('aria-multiselectable') === 'true';
     this.id = getRandomId(this.role);
@@ -102,37 +102,52 @@ class Group {
     });
   }
 
-  /** @type {string} */
+  /**
+   * CSS selector to retrieve the members.
+   * @type {string}
+   */
   get selector() {
     return this.childRoles.map((role) => `[role="${role}"]`).join(',');
   }
 
-  /** @type {HTMLElement[]} */
+  /**
+   * List of all the members.
+   * @type {HTMLElement[]}
+   */
   get allMembers() {
     return /** @type {HTMLElement[]} */ ([...this.parent.querySelectorAll(this.selector)]);
   }
 
-  /** @type {HTMLElement[]} */
+  /**
+   * List of the enabled and visible members.
+   * @type {HTMLElement[]}
+   */
   get activeMembers() {
     return this.allMembers.filter(
       (element) => !element.matches('[aria-disabled="true"], [aria-hidden="true"]'),
     );
   }
 
-  /** @type {boolean} */
+  /**
+   * Whether the parent is disabled.
+   * @type {boolean}
+   */
   get isDisabled() {
     return this.parent.matches('[aria-disabled="true"]');
   }
 
-  /** @type {boolean} */
+  /**
+   * Whether the parent is read-only.
+   * @type {boolean}
+   */
   get isReadOnly() {
     return this.parent.matches('[aria-readonly="true"]');
   }
 
   /**
    * Select (and move focus to) the given target.
-   * @param {(MouseEvent | KeyboardEvent)} event Triggered event.
-   * @param {HTMLElement} newTarget Target element.
+   * @param {(MouseEvent | KeyboardEvent)} event - Triggered event.
+   * @param {HTMLElement} newTarget - Target element.
    */
   selectTarget(event, newTarget) {
     if (this.isDisabled || this.isReadOnly) {
@@ -224,7 +239,7 @@ class Group {
 
   /**
    * Handle the `click` event on the widget.
-   * @param {MouseEvent} event `click` event.
+   * @param {MouseEvent} event - `click` event.
    */
   onClick(event) {
     // eslint-disable-next-line prefer-destructuring
@@ -240,7 +255,7 @@ class Group {
 
   /**
    * Handle the `keydown` event on the widget.
-   * @param {KeyboardEvent} event `keydown` event.
+   * @param {KeyboardEvent} event - `keydown` event.
    */
   onKeyDown(event) {
     const { key, ctrlKey, metaKey, shiftKey, altKey } = event;
@@ -349,7 +364,7 @@ class Group {
 
 /**
  * Activate a new group.
- * @param {HTMLElement} parent Parent element.
+ * @param {HTMLElement} parent - Parent element.
  */
 export const activateGroup = (parent) => {
   (async () => {

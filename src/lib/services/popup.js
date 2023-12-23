@@ -9,6 +9,14 @@ import { getRandomId } from './util';
 class Popup {
   open = writable(false);
 
+  /**
+   * @type {import('svelte/store').Writable<{
+   * inset: string | undefined,
+   * zIndex: number | undefined,
+   * width: string | undefined,
+   * height: string | undefined,
+   * }>}
+   */
   style = writable({ inset: undefined, zIndex: undefined, width: undefined, height: undefined });
 
   observer = new IntersectionObserver((entries) => {
@@ -18,7 +26,7 @@ class Popup {
       }
 
       const { scrollHeight: contentHeight, scrollWidth: contentWidth } =
-        this.popupElement.querySelector('.content');
+        /** @type {HTMLElement} */ (this.popupElement.querySelector('.content'));
 
       const topMargin = intersectionRect.top - 8;
       const bottomMargin = rootBounds.height - intersectionRect.bottom - 8;
@@ -86,11 +94,11 @@ class Popup {
 
   /**
    * Initialize a new `Popup` instance.
-   * @param {HTMLButtonElement} anchorElement `<button>` element that triggers the popup.
-   * @param {HTMLDialogElement} popupElement `<dialog>` element to be used for the popup.
-   * @param {PopupPosition} position Where to show the popup content.
-   * @param {HTMLElement} [positionBaseElement] The base element of the `position`. If omitted, this
-   * will be the `anchorElement`.
+   * @param {HTMLButtonElement} anchorElement - `<button>` element that triggers the popup.
+   * @param {HTMLDialogElement} popupElement - `<dialog>` element to be used for the popup.
+   * @param {PopupPosition} position - Where to show the popup content.
+   * @param {HTMLElement} [positionBaseElement] - The base element of the `position`. If omitted,
+   * this will be the `anchorElement`.
    */
   constructor(anchorElement, popupElement, position, positionBaseElement) {
     this.anchorElement = anchorElement;
@@ -157,12 +165,18 @@ class Popup {
     });
   }
 
-  /** @type {boolean} */
+  /**
+   * Whether the anchor element is disabled.
+   * @type {boolean}
+   */
   get isDisabled() {
     return this.anchorElement.matches('[aria-disabled="true"]');
   }
 
-  /** @type {boolean} */
+  /**
+   * Whether the anchor element is read-only.
+   * @type {boolean}
+   */
   get isReadOnly() {
     return this.anchorElement.matches('[aria-readonly="true"]');
   }
@@ -178,7 +192,7 @@ class Popup {
 
 /**
  * Activate a new popup.
- * @param {...any} args Arguments.
+ * @param {...any} args - Arguments.
  * @returns {Popup} New popup.
  */
 // @ts-ignore

@@ -86,7 +86,7 @@
   hidden={hidden || undefined}
   on:click|preventDefault|stopPropagation={(event) => {
     if (!(/** @type {HTMLElement} */ (event.target).matches('button'))) {
-      buttonComponent.element.click();
+      buttonComponent?.element?.click();
     }
   }}
 >

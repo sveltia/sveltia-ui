@@ -20,7 +20,7 @@
    */
   export let multiple = false;
 
-  /** @type {HTMLElement?} */
+  /** @type {HTMLElement | undefined} */
   export let element = undefined;
 </script>
 

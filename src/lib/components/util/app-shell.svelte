@@ -15,7 +15,7 @@
     'https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=block',
   ];
 
-  /** @type {HTMLElement} */
+  /** @type {HTMLElement | undefined} */
   let fontLoader;
 
   onMount(() => {
@@ -23,7 +23,7 @@
     const { dataset } = document.documentElement;
 
     /**
-     *
+     * Apply the Dark or Light theme.
      */
     const applyTheme = () => {
       if (dataset.autoTheming !== 'false') {
@@ -33,9 +33,7 @@
 
     applyTheme();
 
-    /**
-     *
-     */
+    // eslint-disable-next-line jsdoc/require-jsdoc
     mediaQuery.onchange = () => {
       applyTheme();
     };

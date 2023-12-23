@@ -49,7 +49,7 @@
   export let popupPosition = 'bottom-left';
 
   /**
-   * @type {HTMLElement}
+   * @type {HTMLElement | undefined}
    */
   let wrapper;
 </script>

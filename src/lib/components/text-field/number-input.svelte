@@ -85,7 +85,7 @@
   let component;
 
   /**
-   *
+   * Decrease the number.
    */
   const decrease = () => {
     if (isMin) {
@@ -96,7 +96,7 @@
   };
 
   /**
-   *
+   * Increase the number.
    */
   const increase = () => {
     if (isMax) {

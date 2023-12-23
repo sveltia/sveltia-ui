@@ -85,7 +85,7 @@
    */
   const id = getRandomId('dialog');
   /**
-   * a reference to the modal component.
+   * A reference to the modal component.
    * @type {Modal}
    */
   let modal;

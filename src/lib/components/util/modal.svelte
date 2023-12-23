@@ -45,14 +45,18 @@
   export let keepContent = false;
   /**
    * A reference to the `<dialog>` element.
-   * @type {HTMLDialogElement}
+   * @type {HTMLDialogElement | undefined}
    */
   export let dialog = undefined;
   /**
    * Close the modal.
-   * @param {string} returnValue Return value to be used for `<dialog>`.
+   * @param {string} returnValue - Return value to be used for `<dialog>`.
    */
   export const close = (returnValue) => {
+    if (!dialog) {
+      return;
+    }
+
     dialog.returnValue = returnValue;
     open = false;
   };
@@ -69,7 +73,8 @@
   const waitForTransition = async () =>
     new Promise((resolve) => {
       /**
-       * @param {TransitionEvent} event `transition` event.
+       * Transition event listener.
+       * @param {TransitionEvent} event - `transition` event.
        */
       const listener = (event) => {
         if (event.target === dialog) {
@@ -78,13 +83,17 @@
         }
       };
 
-      dialog.addEventListener('transitionend', listener);
+      dialog?.addEventListener('transitionend', listener);
     });
 
   /**
    * Show the modal.
    */
   const openDialog = async () => {
+    if (!dialog) {
+      return;
+    }
+
     dispatch('opening');
     (document.querySelector('.sui.app-shell') ?? document.body).appendChild(dialog);
     showContent = true;
@@ -102,6 +111,10 @@
    * Hide the modal.
    */
   const closeDialog = async () => {
+    if (!dialog) {
+      return;
+    }
+
     dispatch('closing');
     setActiveClass = false;
     setOpenClass = false;
@@ -110,12 +123,12 @@
     dialog.close();
     dialog.remove();
 
-    if (['ok', 'cancel'].includes(dialog?.returnValue)) {
+    if (['ok', 'cancel'].includes(dialog.returnValue)) {
       dispatch(dialog?.returnValue);
     }
 
-    dispatch('close', dialog?.returnValue);
-    dialog.returnValue = undefined;
+    dispatch('close', dialog.returnValue);
+    dialog.returnValue = '';
   };
 
   /**
@@ -138,7 +151,7 @@
   }
 
   onMount(() => {
-    dialog.remove();
+    dialog?.remove();
 
     // onUnmount
     return () => {
@@ -157,7 +170,11 @@
   {...$$restProps}
   bind:this={dialog}
   on:click={({ target }) => {
-    if (lightDismiss && /** @type {HTMLElement?} */ (target)?.matches('dialog')) {
+    if (
+      dialog &&
+      lightDismiss &&
+      /** @type {HTMLElement | undefined} */ (target)?.matches('dialog')
+    ) {
       dialog.returnValue = 'cancel';
       open = false;
     }

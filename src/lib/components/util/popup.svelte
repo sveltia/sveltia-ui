@@ -24,12 +24,12 @@
   export let open = writable(false);
   /**
    * A reference to the anchor element that opens the popup. Typically a `<button>`.
-   * @type {HTMLElement}
+   * @type {HTMLElement | undefined}
    */
   export let anchor;
   /**
    * A reference to the content element.
-   * @type {HTMLElement}
+   * @type {HTMLElement | undefined}
    */
   export let content = undefined;
   /**
@@ -39,7 +39,7 @@
   export let position = 'bottom-left';
   /**
    * The base element of {@link position}. If omitted, this will be {@link anchor}.
-   * @type {HTMLElement}
+   * @type {HTMLElement | undefined}
    */
   export let positionBaseElement = undefined;
   /**
@@ -62,7 +62,7 @@
   /**
    * The type of the content displayed in the popup, defined with the `aria-haspopup` attribute on
    * the anchor element.
-   * @type {string}
+   * @type {string | undefined}
    * @see https://w3c.github.io/aria/#aria-haspopup
    */
   let contentType;
@@ -80,7 +80,7 @@
   $: {
     if (anchor && modal?.dialog) {
       ({ open, style } = activatePopup(anchor, modal.dialog, position, positionBaseElement));
-      contentType = anchor.getAttribute('aria-haspopup');
+      contentType = anchor.getAttribute('aria-haspopup') ?? undefined;
     }
   }
 
@@ -108,6 +108,10 @@
   on:close
   on:open={async () => {
     await sleep(100);
+
+    if (!content) {
+      return;
+    }
 
     const target = /** @type {HTMLElement} */ (
       content.querySelector('[tabindex]:not([aria-disabled="true"])')

@@ -42,7 +42,7 @@
    */
   export let value = '';
   /**
-   * Extra attributes for the `<TextInput>`
+   * Extra attributes for the `<TextInput>`.
    * @type {object}
    */
   export let textboxAttrs = {};

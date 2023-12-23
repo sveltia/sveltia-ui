@@ -22,7 +22,7 @@
    */
   export let disabled = false;
   /**
-   *  Text label displayed above the group items.
+   * Text label displayed above the group items.
    */
   export let title = '';
 

@@ -51,6 +51,7 @@
   export let size = 'medium';
   /**
    * Whether to only show an icon on the button and trim the padding.
+   * @type {boolean}
    */
   export let iconic = false;
 </script>

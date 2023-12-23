@@ -38,26 +38,26 @@
   export let invalid = false;
   /**
    * Minimum allowed value. An alias of the `aria-valuemin` attribute.
-   * @type {number | undefined}
+   * @type {number}
    */
   export let min = 0;
   /**
    * Maximum allowed value. An alias of the `aria-valuemax` attribute.
-   * @type {number | undefined}
+   * @type {number}
    */
   export let max = 100;
 
   export let value = 0;
   export let sliderLabel = '';
-  /** @type {[number, number]} */
+  /** @type {[number, number] | undefined} */
   export let values = undefined;
-  /** @type {[string, string]} */
+  /** @type {[string, string] | undefined} */
   export let sliderLabels = undefined;
   export let step = 1;
   /** @type {(string[] | number[])} */
   export let optionLabels = [];
 
-  $: multiThumb = !!values;
+  $: multiThumb = Array.isArray(values);
 
   const dispatch = createEventDispatcher();
   /** @type {HTMLElement | undefined} */
@@ -76,7 +76,7 @@
 
   /**
    * Move a thumb with mouse.
-   * @param {number} diff Distance from the original X position in pixels.
+   * @param {number} diff - Distance from the original X position in pixels.
    */
   const moveThumb = (diff) => {
     if (diff < 0) {
@@ -103,7 +103,7 @@
     }
 
     if (multiThumb) {
-      values[targetValueIndex] = valueList[index];
+      /** @type {[number, number]} */ (values)[targetValueIndex] = valueList[index];
     } else {
       value = valueList[index];
     }
@@ -111,8 +111,9 @@
 
   /**
    * Handle the `keydown` event fired on the slider.
-   * @param {KeyboardEvent} event `keydown` event.
-   * @param {number} [valueIndex] Index in the {@link values} array to be used to get/set the value.
+   * @param {KeyboardEvent} event - `keydown` event.
+   * @param {number} [valueIndex] - Index in the {@link values} array to be used to get/set the
+   * value.
    */
   const onKeyDown = (event, valueIndex = 0) => {
     const { key, ctrlKey, metaKey, shiftKey, altKey } = event;
@@ -122,7 +123,7 @@
       return;
     }
 
-    const _value = multiThumb ? values[valueIndex] : value;
+    const _value = multiThumb ? /** @type {[number, number]} */ (values)[valueIndex] : value;
     let index = -1;
 
     if (['ArrowDown', 'ArrowLeft'].includes(key)) {
@@ -153,7 +154,7 @@
       }
 
       if (multiThumb) {
-        values[valueIndex] = valueList[index];
+        /** @type {[number, number]} */ (values)[valueIndex] = valueList[index];
       } else {
         value = valueList[index];
       }
@@ -162,7 +163,7 @@
 
   /**
    * Handle the `pointermove` event fired anywhere on the page.
-   * @param {PointerEvent} event `pointermove` event.
+   * @param {PointerEvent} event - `pointermove` event.
    */
   const onPointerMove = (event) => {
     const { screenX, pointerId } = event;
@@ -176,7 +177,7 @@
 
   /**
    * Handle the `pointerup` and `pointercancel` events fired anywhere on the page.
-   * @param {PointerEvent} event `pointerup` or `pointercancel` event.
+   * @param {PointerEvent} event - `pointerup` or `pointercancel` event.
    */
   const onPointerUp = (event) => {
     const { pointerId } = event;
@@ -199,8 +200,9 @@
 
   /**
    * Handle the `pointerdown` event fired on the slider.
-   * @param {PointerEvent} event `pointerdown` event.
-   * @param {number} [valueIndex] Index in the {@link values} array to be used to get/set the value.
+   * @param {PointerEvent} event - `pointerdown` event.
+   * @param {number} [valueIndex] - Index in the {@link values} array to be used to get/set the
+   * value.
    */
   const onPointerDown = (event, valueIndex = 0) => {
     const { clientX, screenX, pointerId } = event;
@@ -210,7 +212,7 @@
     }
 
     dragging = true;
-    startX = clientX - base.getBoundingClientRect().x;
+    startX = clientX - /** @type {HTMLElement} */ (base).getBoundingClientRect().x;
     startScreenX = screenX;
     targetPointerId = pointerId;
     targetValueIndex = valueIndex;
@@ -222,7 +224,7 @@
 
   /**
    * Handle the `click` event fired on the slider.
-   * @param {MouseEvent} event `click` event.
+   * @param {MouseEvent} event - `click` event.
    */
   const onClick = (event) => {
     if (disabled || readonly || multiThumb || dragging) {
@@ -237,8 +239,10 @@
    */
   const onValueChange = () => {
     if (multiThumb) {
-      sliderPositions[0] = positionList[valueList.indexOf(values[0])];
-      sliderPositions[1] = positionList[valueList.indexOf(values[1])];
+      const [value0, value1] = /** @type {[number, number]} */ (values);
+
+      sliderPositions[0] = positionList[valueList.indexOf(value0)];
+      sliderPositions[1] = positionList[valueList.indexOf(value1)];
       dispatch('change', { values });
     } else {
       sliderPositions[0] = positionList[valueList.indexOf(value)];
@@ -269,7 +273,7 @@
     const observer = new ResizeObserver(() => init());
     const query = window.matchMedia('(pointer: coarse)');
 
-    observer.observe(base);
+    observer.observe(/** @type {HTMLElement} */ (base));
     query.addEventListener('change', init);
     init();
 
@@ -323,7 +327,7 @@
       aria-invalid={invalid}
       aria-valuemin={min}
       aria-valuemax={max}
-      aria-valuenow={multiThumb ? values[0] : value}
+      aria-valuenow={multiThumb ? values?.[0] : value}
       style:left="{sliderPositions[0]}px"
       on:pointerdown={(event) => onPointerDown(event, 0)}
       on:keydown={(event) => onKeyDown(event, 0)}
@@ -339,7 +343,7 @@
         aria-invalid={invalid}
         aria-valuemin={min}
         aria-valuemax={max}
-        aria-valuenow={values[1]}
+        aria-valuenow={values?.[1]}
         style:left="{sliderPositions[1]}px"
         on:pointerdown={(event) => onPointerDown(event, 1)}
         on:keydown={(event) => onKeyDown(event, 1)}

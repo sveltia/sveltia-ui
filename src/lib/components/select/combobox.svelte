@@ -66,17 +66,17 @@
   const id = getRandomId('combobox');
   /** @type {HTMLElement} */
   let comboboxElement;
-  /** @type {TextInput?} */
+  /** @type {TextInput | undefined} */
   let inputComponent;
-  /** @type {Popup?} */
+  /** @type {Popup | undefined} */
   let popupComponent;
   let isPopupOpen = writable(false);
   /** @type {string} */
   let label = '';
 
   /**
-   * Update the `value` and `label` whenever an option is selected
-   * @param {HTMLButtonElement} target Selected option.
+   * Update the `value` and `label` whenever an option is selected.
+   * @param {HTMLButtonElement} target - Selected option.
    */
   const onSelect = (target) => {
     // @todo support more types
@@ -88,12 +88,12 @@
   $: {
     if (popupComponent?.content) {
       window.requestAnimationFrame(() => {
-        const selected = popupComponent.content.querySelector(
+        const selected = popupComponent?.content?.querySelector(
           '[role="option"][aria-selected="true"]',
         );
 
         if (selected) {
-          onSelect(/** @type {HTMLButtonElement?} */ (selected));
+          onSelect(/** @type {HTMLButtonElement} */ (selected));
         }
       });
     }
@@ -172,7 +172,7 @@
   <Listbox
     on:click={(event) => {
       if (/** @type {HTMLElement} */ (event.target).matches('[role="option"]')) {
-        onSelect(/** @type {HTMLButtonElement?} */ (event.target));
+        onSelect(/** @type {HTMLButtonElement} */ (event.target));
       }
     }}
   >

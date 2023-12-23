@@ -30,7 +30,7 @@
   export let popupPosition = 'bottom-left';
   /**
    * The base element of {@link popupPosition}. If omitted, this will be {@link buttonComponent}.
-   * @type {HTMLElement}
+   * @type {HTMLElement | undefined}
    */
   export let popupPositionBaseElement = undefined;
   /**
@@ -68,7 +68,7 @@
    * Move focus to the `<button>` element.
    */
   export const focus = () => {
-    buttonComponent?.element.focus();
+    buttonComponent?.element?.focus();
   };
 </script>
 

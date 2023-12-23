@@ -8,8 +8,8 @@ export const isMac = () =>
 
 /**
  * Whether the event matches the given keyboard shortcuts.
- * @param {KeyboardEvent} event `keydown` or `keypress` event.
- * @param {string} shortcuts Keyboard shortcuts like `A` or `Ctrl+S`.
+ * @param {KeyboardEvent} event - `keydown` or `keypress` event.
+ * @param {string} shortcuts - Keyboard shortcuts like `A` or `Ctrl+S`.
  * @returns {boolean} Result.
  * @see https://w3c.github.io/aria/#aria-keyshortcuts
  */
@@ -47,10 +47,10 @@ export const matchShortcuts = (event, shortcuts) => {
 
 /**
  * Activate keyboard shortcuts.
- * @param {(HTMLInputElement | HTMLButtonElement)} element Element.
- * @param {string} [shortcuts] Keyboard shortcuts like `A` or `Accel+S` to focus and click the text
- * field or button. Multiple shortcuts can be defined space-separated. The `Accel` modifier will be
- * replaced with `Ctrl` on Windows/Linux and `Command` on macOS.
+ * @param {(HTMLInputElement | HTMLButtonElement)} element - Element.
+ * @param {string} [shortcuts] - Keyboard shortcuts like `A` or `Accel+S` to focus and click the
+ * text field or button. Multiple shortcuts can be defined space-separated. The `Accel` modifier
+ * will be replaced with `Ctrl` on Windows/Linux and `Command` on macOS.
  * @returns {import('svelte/action').ActionReturn} Actions.
  */
 export const activateKeyShortcuts = (element, shortcuts = '') => {
@@ -59,10 +59,13 @@ export const activateKeyShortcuts = (element, shortcuts = '') => {
 
   /**
    * Handle the event.
-   * @param {KeyboardEvent} event `keydown` event.
+   * @param {KeyboardEvent} event - `keydown` event.
    */
   const handler = (event) => {
-    if (!!element.offsetParent && matchShortcuts(event, platformKeyShortcuts)) {
+    if (
+      !!element.offsetParent &&
+      matchShortcuts(event, /** @type {string} */ (platformKeyShortcuts))
+    ) {
       event.preventDefault();
 
       if (!element.disabled) {

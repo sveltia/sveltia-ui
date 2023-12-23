@@ -13,15 +13,17 @@
 
   export { className as class };
 
-  /** @type {HTMLElement} */
+  /** @type {HTMLElement | undefined} */
   let ref;
 
   onMount(() => {
-    document.body.appendChild(ref);
+    if (ref) {
+      document.body.appendChild(ref);
+    }
   });
 
   onDestroy(() => {
-    ref.remove();
+    ref?.remove();
   });
 </script>
 

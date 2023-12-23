@@ -64,7 +64,7 @@
 
   $: {
     if (inputComponent) {
-      inputComponent.element.setAttribute('type', passwordVisible ? 'text' : 'password');
+      inputComponent.element?.setAttribute('type', passwordVisible ? 'text' : 'password');
     }
   }
 </script>

@@ -10,7 +10,7 @@
   /**
    * The toast ID. If updated, the timer that hides the toast will be reset, meaning the same toast
    * can be displayed for a longer period of time.
-   * @type {number}
+   * @type {number | undefined}
    */
   export let id = undefined;
   /**
@@ -30,15 +30,15 @@
   export let position = 'bottom-right';
 
   /**
-   * @type {HTMLElement}
+   * @type {HTMLElement | undefined}
    */
   let popoverBase;
   /**
-   * @type {HTMLElement}
+   * @type {HTMLElement | undefined}
    */
   let popover;
   /**
-   * @type {HTMLElement}
+   * @type {HTMLElement | undefined}
    */
   let toast;
   /**
@@ -47,19 +47,23 @@
   let timerId = 0;
 
   onMount(() => {
-    popover = document.querySelector('.sui.toast-base.enabled');
+    popover =
+      /** @type {HTMLElement} */ (document.querySelector('.sui.toast-base.enabled')) ?? undefined;
 
     if (popover) {
-      popoverBase.remove();
+      popoverBase?.remove();
     } else {
       popover = popoverBase;
-      popover.classList.add('enabled');
-      (document.querySelector('.sui.app-shell') ?? document.body).appendChild(popover);
 
-      // Move the element to top layer
-      if (popover.showPopover) {
-        popover.popover = 'manual';
-        popover.showPopover();
+      if (popover) {
+        popover.classList.add('enabled');
+        (document.querySelector('.sui.app-shell') ?? document.body).appendChild(popover);
+
+        // Move the element to top layer
+        if (popover.showPopover) {
+          popover.popover = 'manual';
+          popover.showPopover();
+        }
       }
     }
 

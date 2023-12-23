@@ -63,7 +63,7 @@
   {...$$restProps}
   on:click={(event) => {
     if (!(/** @type {HTMLElement} */ (event.target).matches('button'))) {
-      buttonComponent.element.click();
+      buttonComponent?.element?.click();
     }
   }}
 >

@@ -9,7 +9,7 @@
   import Spacer from '../divider/spacer.svelte';
   import Icon from '../icon/icon.svelte';
 
-  /** @type {string?} */
+  /** @type {string | undefined} */
   export let value = undefined;
 
   /** @type {{ day: Date }[]} */
@@ -23,7 +23,7 @@
   $: firstDay = new Date(firstDayOfMonth);
 
   /**
-   *
+   * Populate {@link weeks} as per the current {@link firstDay}.
    */
   const getWeeks = () => {
     const cursor = new Date(firstDay);

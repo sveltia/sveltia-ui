@@ -8,7 +8,7 @@
   let showSuccessToast = false;
   let showWarningToast = false;
   let showPositionToast = false;
-  /** @type {ToastPosition} */
+  /** @type {ToastPosition | undefined} */
   let showPositionToastPosition = undefined;
   let showManualToast = false;
 </script>
