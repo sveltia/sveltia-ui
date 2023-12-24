@@ -27,11 +27,11 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.40.1",
-    "@sveltejs/adapter-auto": "^3.0.0",
-    "@sveltejs/kit": "^2.0.1",
-    "@sveltejs/package": "^2.2.3",
+    "@sveltejs/adapter-auto": "^3.0.1",
+    "@sveltejs/kit": "^2.0.6",
+    "@sveltejs/package": "^2.2.4",
     "@sveltejs/vite-plugin-svelte": "^3.0.1",
-    "cspell": "^8.1.3",
+    "cspell": "^8.2.3",
     "eslint": "^8.56.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-config-prettier": "^9.1.0",
@@ -49,10 +49,10 @@
     "stylelint-scss": "^6.0.0",
     "svelte-check": "^3.6.2",
     "svelte-i18n": "^4.0.0",
-    "svelte-preprocess": "^5.1.2",
+    "svelte-preprocess": "^5.1.3",
     "tslib": "^2.6.2",
     "vite": "^5.0.10",
-    "vitest": "^1.0.4"
+    "vitest": "^1.1.0"
   },
   "exports": {
     "./package.json": "./package.json",
