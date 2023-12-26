@@ -5,6 +5,8 @@
   @see https://w3c.github.io/aria/#row
 -->
 <script>
+  import { createEventDispatcher } from 'svelte';
+
   /**
    * The `class` attribute on the wrapper element.
    * @type {string}
@@ -16,6 +18,8 @@
    * @type {boolean}
    */
   export let selected = false;
+
+  const dispatch = createEventDispatcher();
 </script>
 
 <div
@@ -25,8 +29,8 @@
   aria-selected={selected}
   {...$$restProps}
   on:click
-  on:select
-  on:change
+  on:select={(event) => dispatch('select', event)}
+  on:change={(event) => dispatch('change', event)}
 >
   <slot />
 </div>

@@ -72,7 +72,7 @@
   on:select
   on:change
   on:change={(event) => {
-    selected = /** @type {CustomEvent} */ (event).detail.selected;
+    selected = event.detail.selected;
   }}
 >
   <slot name="start-icon" slot="start-icon" />

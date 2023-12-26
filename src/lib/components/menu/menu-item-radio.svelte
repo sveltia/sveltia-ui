@@ -58,7 +58,7 @@
   on:select
   on:change
   on:change={(event) => {
-    checked = /** @type {CustomEvent} */ (event).detail.checked;
+    checked = event.detail.checked;
   }}
 >
   <slot />

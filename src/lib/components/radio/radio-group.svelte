@@ -5,6 +5,7 @@
   @see https://www.w3.org/WAI/ARIA/apg/patterns/radio/
 -->
 <script>
+  import { createEventDispatcher } from 'svelte';
   import { activateGroup } from '../../services/group';
 
   /**
@@ -43,6 +44,8 @@
    * @type {'horizontal' | 'vertical'}
    */
   export let orientation = 'horizontal';
+
+  const dispatch = createEventDispatcher();
 </script>
 
 <div
@@ -58,7 +61,7 @@
   aria-orientation={orientation}
   {...$$restProps}
   use:activateGroup
-  on:change
+  on:change={(/** @type {CustomEvent} */ event) => dispatch('change', event)}
 >
   <div role="none" class="inner" inert={disabled}>
     <slot />

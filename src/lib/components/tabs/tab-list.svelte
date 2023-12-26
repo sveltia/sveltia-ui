@@ -5,6 +5,7 @@
   @see https://www.w3.org/WAI/ARIA/apg/patterns/tabs/
 -->
 <script>
+  import { createEventDispatcher } from 'svelte';
   import { activateGroup } from '../../services/group';
 
   /**
@@ -33,6 +34,8 @@
    * @type {string | undefined}
    */
   export let name = undefined;
+
+  const dispatch = createEventDispatcher();
 </script>
 
 <div
@@ -45,7 +48,7 @@
   data-name={name || undefined}
   {...$$restProps}
   use:activateGroup
-  on:change
+  on:change={(/** @type {CustomEvent} */ event) => dispatch('change', event)}
 >
   <div role="none" class="inner" inert={disabled}>
     <slot />

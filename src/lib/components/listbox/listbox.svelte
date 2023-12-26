@@ -6,6 +6,7 @@
   @see https://www.w3.org/WAI/ARIA/apg/patterns/listbox/
 -->
 <script>
+  import { createEventDispatcher } from 'svelte';
   import { activateGroup } from '../../services/group';
 
   /**
@@ -45,6 +46,8 @@
    * @type {boolean}
    */
   export let multiple = false;
+
+  const dispatch = createEventDispatcher();
 </script>
 
 <div
@@ -61,7 +64,7 @@
   {...$$restProps}
   use:activateGroup
   on:click
-  on:change
+  on:change={(/** @type {CustomEvent} */ event) => dispatch('change', event)}
 >
   <div role="none" class="inner" inert={disabled}>
     <slot />

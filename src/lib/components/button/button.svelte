@@ -7,6 +7,7 @@
 <svelte:options accessors={true} />
 
 <script>
+  import { createEventDispatcher } from 'svelte';
   import { activateKeyShortcuts } from '../../services/events';
   import Popup from '../util/popup.svelte';
 
@@ -97,6 +98,7 @@
    */
   export let popupPosition = 'bottom-left';
 
+  const dispatch = createEventDispatcher();
   /**
    * Reference to the `Popup` component.
    * @type {Popup | undefined}
@@ -131,8 +133,8 @@
   on:keydown
   on:keyup
   on:keypress
-  on:select
-  on:change
+  on:select={(/** @type {CustomEvent} */ event) => dispatch('select', event)}
+  on:change={(/** @type {CustomEvent} */ event) => dispatch('change', event)}
 >
   <slot name="start-icon" />
   {#if variant === 'link'}

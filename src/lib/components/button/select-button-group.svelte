@@ -5,6 +5,7 @@
   @see https://www.w3.org/WAI/ARIA/apg/patterns/radio/
 -->
 <script>
+  import { createEventDispatcher } from 'svelte';
   import { activateGroup } from '../../services/group';
 
   /**
@@ -38,6 +39,8 @@
    * @type {boolean}
    */
   export let invalid = false;
+
+  const dispatch = createEventDispatcher();
 </script>
 
 <div
@@ -52,7 +55,7 @@
   aria-invalid={invalid}
   {...$$restProps}
   use:activateGroup
-  on:change
+  on:change={(/** @type {CustomEvent} */ event) => dispatch('change', event)}
 >
   <div role="none" class="inner" inert={disabled}>
     <slot />

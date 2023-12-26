@@ -5,6 +5,7 @@
   @see https://w3c.github.io/aria/#grid
 -->
 <script>
+  import { createEventDispatcher } from 'svelte';
   import { activateGroup } from '../../services/group';
 
   /**
@@ -22,6 +23,8 @@
 
   /** @type {HTMLElement | undefined} */
   export let element = undefined;
+
+  const dispatch = createEventDispatcher();
 </script>
 
 <div
@@ -31,7 +34,7 @@
   {...$$restProps}
   bind:this={element}
   use:activateGroup
-  on:change
+  on:change={(/** @type {CustomEvent} */ event) => dispatch('change', event)}
 >
   <slot />
 </div>
