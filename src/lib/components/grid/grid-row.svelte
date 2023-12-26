@@ -29,8 +29,12 @@
   aria-selected={selected}
   {...$$restProps}
   on:click
-  on:select={(event) => dispatch('select', event)}
-  on:change={(event) => dispatch('change', event)}
+  on:select={(/** @type {any} */ event) => {
+    dispatch('select', /** @type {CustomEvent} */ (event).detail);
+  }}
+  on:change={(/** @type {any} */ event) => {
+    dispatch('change', /** @type {CustomEvent} */ (event).detail);
+  }}
 >
   <slot />
 </div>

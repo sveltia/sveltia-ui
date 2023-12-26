@@ -133,8 +133,12 @@
   on:keydown
   on:keyup
   on:keypress
-  on:select={(/** @type {CustomEvent} */ event) => dispatch('select', event)}
-  on:change={(/** @type {CustomEvent} */ event) => dispatch('change', event)}
+  on:select={(/** @type {CustomEvent} */ event) => {
+    dispatch('select', event.detail);
+  }}
+  on:change={(/** @type {CustomEvent} */ event) => {
+    dispatch('change', event.detail);
+  }}
 >
   <slot name="start-icon" />
   {#if variant === 'link'}

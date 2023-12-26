@@ -55,7 +55,9 @@
   aria-invalid={invalid}
   {...$$restProps}
   use:activateGroup
-  on:change={(/** @type {CustomEvent} */ event) => dispatch('change', event)}
+  on:change={(/** @type {CustomEvent} */ event) => {
+    dispatch('change', event.detail);
+  }}
 >
   <div role="none" class="inner" inert={disabled}>
     <slot />
