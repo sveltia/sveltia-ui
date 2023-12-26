@@ -98,10 +98,10 @@
     inputmode="search"
     {...$$restProps}
     bind:this={inputComponent}
-    on:input
     on:keydown
     on:keyup
     on:keypress
+    on:input
     on:change
   />
   {#if value}

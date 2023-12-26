@@ -79,9 +79,11 @@
     aria-invalid={invalid}
     {...$$restProps}
     class:auto-resize={autoResize}
-    on:click
-    on:input
+    on:keydown
+    on:keyup
     on:keypress
+    on:input
+    on:change
   />
   {#if autoResize}
     <div class="clone" aria-hidden="true">{value ?? ''}</div>

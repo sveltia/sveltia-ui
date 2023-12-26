@@ -7,6 +7,7 @@
 <svelte:options accessors={true} />
 
 <script>
+  import { createEventDispatcher } from 'svelte';
   import { getRandomId } from '../../services/util';
   import Button from '../button/button.svelte';
   import Icon from '../icon/icon.svelte';
@@ -38,6 +39,7 @@
    */
   export let label = '';
 
+  const dispatch = createEventDispatcher();
   const id = getRandomId('disclosure');
 </script>
 
@@ -61,6 +63,7 @@
       aria-expanded={expanded}
       on:click={() => {
         expanded = !expanded;
+        dispatch('change', { expanded });
       }}
     >
       <Icon name="expand_more" />

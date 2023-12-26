@@ -114,10 +114,10 @@
     {...$$restProps}
     bind:this={element}
     bind:value
-    on:input
     on:keydown
     on:keyup
     on:keypress
+    on:input
     on:change
     use:activateKeyShortcuts={keyShortcuts}
   />

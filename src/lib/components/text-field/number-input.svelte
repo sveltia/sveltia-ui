@@ -174,8 +174,11 @@
         edited = true;
       }
     }}
+    on:keydown
+    on:keyup
     on:keypress
     on:input
+    on:change
   />
 </div>
 

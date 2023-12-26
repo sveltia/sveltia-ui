@@ -5,6 +5,8 @@
   @see https://www.w3.org/WAI/ARIA/apg/patterns/switch/
 -->
 <script>
+  import { createEventDispatcher } from 'svelte';
+
   /**
    * The `class` attribute on the wrapper element.
    * @type {string}
@@ -46,6 +48,8 @@
    * @type {string | undefined}
    */
   export let label = undefined;
+
+  const dispatch = createEventDispatcher();
 </script>
 
 <button
@@ -64,6 +68,7 @@
   on:click={() => {
     if (!disabled && !readonly) {
       checked = !checked;
+      dispatch('change', { checked });
     }
   }}
 >
