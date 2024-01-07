@@ -29,6 +29,7 @@
   vertical-align: top;
 
   @media (prefers-reduced-motion) {
+    scroll-behavior: auto;
     // Disable transition but make sure the `transitionend` event works
     transition-duration: 1ms !important;
   }

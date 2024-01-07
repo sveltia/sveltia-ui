@@ -57,6 +57,8 @@ class Group {
    * @todo Check for added elements probably with `MutationObserver`.
    */
   constructor(parent) {
+    parent.dispatchEvent(new CustomEvent('initializing'));
+
     this.parent = parent;
     this.role = /** @type {string} */ (parent.getAttribute('role'));
     this.grid = this.role === 'listbox' && parent.matches('.grid');
@@ -74,21 +76,29 @@ class Group {
     this.childSelectedProp = childSelectedAttr.replace('aria-', '');
     this.focusChild = focusChild;
 
-    const { allMembers } = this;
-
-    const hasSelected = allMembers.some((element) =>
-      element.matches(`[${childSelectedAttr}="true"]`),
-    );
+    const { allMembers, selected: defaultSelected } = this;
 
     allMembers.forEach((element, index) => {
-      const isSelected = element.matches(`[${childSelectedAttr}="true"]`);
-      const controls = document.querySelector(`#${element.getAttribute('aria-controls')}`);
+      // Select the first one if no member has the `selected` attribute
+      const isSelected = defaultSelected ? element === defaultSelected : index === 0;
+
+      const controlTarget = /** @type {HTMLElement | null} */ (
+        document.querySelector(`#${element.getAttribute('aria-controls')}`)
+      );
 
       element.id ||= `${this.id}-item-${index + 1}`;
-      element.tabIndex ||= isSelected || (!hasSelected && index === 0) ? 0 : -1;
+      element.tabIndex ||= isSelected ? 0 : -1;
       element.setAttribute(this.childSelectedAttr, String(isSelected));
-      controls?.setAttribute('aria-labelledby', element.id);
-      controls?.setAttribute('aria-hidden', String(!isSelected));
+
+      if (controlTarget) {
+        controlTarget.inert = !isSelected;
+        controlTarget.setAttribute('aria-labelledby', element.id);
+        controlTarget.setAttribute('aria-hidden', String(!isSelected));
+
+        if (isSelected) {
+          controlTarget.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'auto' });
+        }
+      }
     });
 
     parent.addEventListener('click', (event) => {
@@ -100,6 +110,8 @@ class Group {
     parent.addEventListener('keydown', (event) => {
       this.onKeyDown(event);
     });
+
+    parent.dispatchEvent(new CustomEvent('initialized'));
   }
 
   /**
@@ -125,6 +137,16 @@ class Group {
   get activeMembers() {
     return this.allMembers.filter(
       (element) => !element.matches('[aria-disabled="true"], [aria-hidden="true"]'),
+    );
+  }
+
+  /**
+   * Get the currently selected member.
+   * @type {HTMLElement | undefined}
+   */
+  get selected() {
+    return this.activeMembers.find((element) =>
+      element.matches(`[${this.childSelectedAttr}="true"]`),
     );
   }
 
@@ -179,7 +201,8 @@ class Group {
       const singleSelect = isMenuItemRadio || !multiSelect;
       const isTarget = element === newTarget;
       const isSelected = element.matches(`[${this.childSelectedAttr}="true"]`);
-      const controls = element.getAttribute('aria-controls');
+      const controlTargetId = element.getAttribute('aria-controls');
+      const controlTarget = controlTargetId ? document.getElementById(controlTargetId) : null;
 
       if (multiSelect && isTarget && (selectByClick || selectByKeydown)) {
         element.setAttribute(this.childSelectedAttr, String(!isSelected));
@@ -217,13 +240,18 @@ class Group {
         element.classList.toggle('focused', isTarget);
       }
 
-      if (controls) {
-        document.getElementById(controls)?.setAttribute('aria-hidden', String(!isTarget));
+      if (controlTarget) {
+        controlTarget.inert = !isTarget;
+        controlTarget.setAttribute('aria-hidden', String(!isTarget));
+
+        if (isTarget) {
+          controlTarget.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'auto' });
+        }
       }
 
       if (isTarget) {
         this.parent.setAttribute('aria-activedescendant', element.id);
-        element.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'smooth' });
+        element.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'auto' });
       }
     });
 

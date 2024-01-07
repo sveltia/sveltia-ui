@@ -296,6 +296,11 @@
       "svelte": "./package/components/table/table.svelte",
       "default": "./package/components/table/table.svelte"
     },
+    "./components/tabs/tab-box.svelte": {
+      "types": "./package/components/tabs/tab-box.svelte.d.ts",
+      "svelte": "./package/components/tabs/tab-box.svelte",
+      "default": "./package/components/tabs/tab-box.svelte"
+    },
     "./components/tabs/tab-list.svelte": {
       "types": "./package/components/tabs/tab-list.svelte.d.ts",
       "svelte": "./package/components/tabs/tab-list.svelte",
@@ -305,6 +310,11 @@
       "types": "./package/components/tabs/tab-panel.svelte.d.ts",
       "svelte": "./package/components/tabs/tab-panel.svelte",
       "default": "./package/components/tabs/tab-panel.svelte"
+    },
+    "./components/tabs/tab-panels.svelte": {
+      "types": "./package/components/tabs/tab-panels.svelte.d.ts",
+      "svelte": "./package/components/tabs/tab-panels.svelte",
+      "default": "./package/components/tabs/tab-panels.svelte"
     },
     "./components/tabs/tab.svelte": {
       "types": "./package/components/tabs/tab.svelte.d.ts",
@@ -562,11 +572,17 @@
       "components/table/table.svelte": [
         "./package/components/table/table.svelte.d.ts"
       ],
+      "components/tabs/tab-box.svelte": [
+        "./package/components/tabs/tab-box.svelte.d.ts"
+      ],
       "components/tabs/tab-list.svelte": [
         "./package/components/tabs/tab-list.svelte.d.ts"
       ],
       "components/tabs/tab-panel.svelte": [
         "./package/components/tabs/tab-panel.svelte.d.ts"
+      ],
+      "components/tabs/tab-panels.svelte": [
+        "./package/components/tabs/tab-panels.svelte.d.ts"
       ],
       "components/tabs/tab.svelte": [
         "./package/components/tabs/tab.svelte.d.ts"

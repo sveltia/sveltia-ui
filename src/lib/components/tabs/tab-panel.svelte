@@ -13,12 +13,15 @@
   export { className as class };
 </script>
 
-<div role="tabpanel" class="sui tabpanel {className}" {...$$restProps}>
+<div role="tabpanel" class="sui tab-panel {className}" {...$$restProps}>
   <slot />
 </div>
 
 <style lang="scss">
-  .tabpanel {
+  .tab-panel {
+    flex: auto;
+    transition: all 200ms;
+
     &[aria-hidden='true'],
     &:not([aria-hidden]) {
       display: none;
