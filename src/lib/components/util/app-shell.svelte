@@ -7,6 +7,12 @@
 <script>
   import { onMount } from 'svelte';
 
+  /**
+   * Orientation of the app shell’s children.
+   * @type {'horizontal' | 'vertical' | undefined}
+   */
+  export let orientation = undefined;
+
   const stylesheets = [
     // https://fonts.google.com/share?selection.family=Merriweather%20Sans:ital,wght@0,300;0,600;1,300%7CNoto%20Sans%20Mono
     'https://fonts.googleapis.com/css2?family=Merriweather+Sans:ital,wght@0,300;0,600;1,300&family=Noto+Sans+Mono&display=swap',
@@ -63,7 +69,7 @@
 
 <div
   role="none"
-  class="sui app-shell"
+  class="sui app-shell {orientation ?? ''}"
   {...$$restProps}
   on:dragover|preventDefault
   on:drop|preventDefault
@@ -104,5 +110,17 @@
     user-select: none;
     touch-action: none;
     cursor: default;
+
+    &.horizontal {
+      display: flex;
+      flex-direction: row;
+      overflow: hidden;
+    }
+
+    &.vertical {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
   }
 </style>
