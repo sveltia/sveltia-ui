@@ -93,6 +93,11 @@
    */
   export let pill = false;
   /**
+   * Make the button width flexible.
+   * @type {boolean}
+   */
+  export let flex = false;
+  /**
    * Where to show the dropdown menu.
    * @type {PopupPosition}
    */
@@ -110,6 +115,7 @@
   class="sui button {variant ?? ''} {size} {className}"
   class:iconic
   class:pill
+  class:flex
   {type}
   {name}
   {value}
@@ -336,6 +342,12 @@
     &:global(.pill) {
       border-radius: 80px;
       padding: var(--sui-button-medium-pill-padding, 0 12px);
+    }
+
+    &:global(.flex) {
+      width: -moz-available;
+      width: -webkit-fill-available;
+      width: stretch;
     }
 
     &:global(.iconic) {
