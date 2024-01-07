@@ -133,7 +133,9 @@
                 modal.close('close');
               }}
             >
-              <Icon slot="start-icon" name="close" />
+              <slot name="close-icon" slot="start-icon">
+                <Icon name="close" />
+              </slot>
             </Button>
           {/if}
         {/if}

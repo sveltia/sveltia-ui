@@ -66,7 +66,9 @@
         dispatch('change', { expanded });
       }}
     >
-      <Icon name="expand_more" />
+      <slot name="chevron-icon" slot="start-icon">
+        <Icon name="expand_more" />
+      </slot>
       {label}
     </Button>
     <div class="content" id="{id}-content" hidden={!expanded}>

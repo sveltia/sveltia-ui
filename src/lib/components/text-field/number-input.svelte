@@ -125,7 +125,9 @@
         increase();
       }}
     >
-      <Icon slot="start-icon" name="expand_less" />
+      <slot name="increase-icon" slot="start-icon">
+        <Icon name="expand_less" />
+      </slot>
     </Button>
     <Button
       iconic
@@ -136,7 +138,9 @@
         decrease();
       }}
     >
-      <Icon slot="start-icon" name="expand_more" />
+      <slot name="decrease-icon" slot="start-icon">
+        <Icon name="expand_more" />
+      </slot>
     </Button>
   </div>
   <TextInput

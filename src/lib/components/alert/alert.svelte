@@ -15,11 +15,9 @@
 </script>
 
 <div role="alert" class="sui alert {status}" {...$$restProps}>
-  {#if $$slots.icon}
-    <slot name="icon" />
-  {:else}
+  <slot name="icon">
     <Icon name={status === 'success' ? 'check_circle' : status} />
-  {/if}
+  </slot>
   <slot />
 </div>
 

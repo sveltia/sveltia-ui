@@ -64,7 +64,9 @@
     }}
   >
     {#if selected}
-      <Icon class="check" name="check" />
+      <slot name="check-icon">
+        <Icon class="check" name="check" />
+      </slot>
     {/if}
     <slot name="start-icon" slot="start-icon" />
     <slot />

@@ -108,7 +108,9 @@
       passwordVisible = !passwordVisible;
     }}
   >
-    <Icon slot="start-icon" name={passwordVisible ? 'visibility_off' : 'visibility'} />
+    <slot name="visibility-icon" slot="start-icon">
+      <Icon name={passwordVisible ? 'visibility_off' : 'visibility'} />
+    </slot>
   </Button>
 </div>
 

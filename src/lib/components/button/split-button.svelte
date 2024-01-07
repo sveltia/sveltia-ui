@@ -76,7 +76,9 @@
     {popupPosition}
     popupPositionBaseElement={wrapper}
   >
-    <Icon slot="end-icon" name="arrow_drop_down" />
+    <slot name="chevron-icon" slot="end-icon">
+      <Icon name="arrow_drop_down" />
+    </slot>
     <slot name="popup" slot="popup" />
   </MenuButton>
 </div>

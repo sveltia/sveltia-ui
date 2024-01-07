@@ -116,7 +116,9 @@
         }
       }}
     >
-      <Icon slot="start-icon" name={indeterminate ? 'remove' : 'check'} />
+      <slot name="check-icon" slot="start-icon">
+        <Icon name={indeterminate ? 'remove' : 'check'} />
+      </slot>
     </Button>
     {#if $$slots.default || label}
       <label id="{id}-label">

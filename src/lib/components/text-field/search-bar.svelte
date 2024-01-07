@@ -83,7 +83,9 @@
   aria-hidden={hidden}
 >
   <span role="none">
-    <Icon name="search" />
+    <slot name="search-icon">
+      <Icon name="search" />
+    </slot>
   </span>
   <TextInput
     role="searchbox"
@@ -119,7 +121,9 @@
         });
       }}
     >
-      <Icon slot="start-icon" name="close" />
+      <slot name="close-button" slot="start-icon">
+        <Icon name="close" />
+      </slot>
     </Button>
   {/if}
 </div>

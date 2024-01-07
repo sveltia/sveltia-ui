@@ -157,7 +157,9 @@
       }
     }}
   >
-    <Icon slot="start-icon" name="expand_more" />
+    <slot name="chevron-icon" slot="start-icon">
+      <Icon name="expand_more" />
+    </slot>
   </Button>
 </div>
 <Popup
