@@ -35,11 +35,13 @@
         <Menu slot="popup">
           <MenuItem label="Item" />
           <MenuItem label="Item">
-            <MenuItem label="Child Item 1" />
-            <MenuItem label="Child Item 2" />
-            <MenuItem label="Child Item 3" />
-            <Divider />
-            <MenuItemCheckbox label="Checkbox" checked />
+            <svelte:fragment slot="children">
+              <MenuItem label="Child Item 1" />
+              <MenuItem label="Child Item 2" />
+              <MenuItem label="Child Item 3" />
+              <Divider />
+              <MenuItemCheckbox label="Checkbox" checked />
+            </svelte:fragment>
           </MenuItem>
           <MenuItem label="Item" disabled />
           <Divider />

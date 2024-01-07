@@ -49,7 +49,7 @@
   let buttonComponent;
   let isPopupOpen = writable(false);
 
-  $: hasChildren = role === 'menuitem' && $$slots.default;
+  $: hasChildren = role === 'menuitem' && $$slots.children;
 </script>
 
 <div role="none" class="sui menuitem {className}" hidden={hidden || undefined}>
@@ -75,27 +75,31 @@
     on:select
     on:change
   >
-    {#if iconName}
-      <Icon slot="start-icon" name={iconName} aria-label={iconLabel} />
-    {/if}
-    {#if label}
-      <span role="none" class="label">{label}</span>
-    {/if}
-    {#if $$slots['end-icon']}
-      <span role="none" class="icon-outer">
-        <slot name="end-icon" />
-      </span>
-    {/if}
+    <slot name="start-icon" slot="start-icon">
+      {#if iconName}
+        <Icon name={iconName} aria-label={iconLabel} />
+      {/if}
+    </slot>
+    <div role="none" class="content" class:label={!!label}>
+      {#if label}
+        {label}
+      {:else}
+        <slot />
+      {/if}
+    </div>
+    <slot name="end-icon" slot="end-icon" />
     {#if hasChildren}
       <span role="none" class="icon-outer">
-        <Icon name="chevron_right" />
+        <slot name="chevron-icon">
+          <Icon name="chevron_right" />
+        </slot>
       </span>
     {/if}
   </Button>
   {#if hasChildren}
     <Popup anchor={buttonComponent?.element} position="right-top" bind:open={isPopupOpen}>
       <Menu>
-        <slot />
+        <slot name="children" />
       </Menu>
     </Popup>
   {/if}
@@ -107,7 +111,6 @@
 
     :global(button) {
       display: flex;
-      justify-content: space-between !important;
       border-radius: var(--sui-option-border-radius);
       margin: 0 !important;
       padding: 0 16px;
@@ -143,6 +146,10 @@
         opacity: 1;
       }
     }
+  }
+
+  .content {
+    flex: auto;
   }
 
   .icon-outer {
