@@ -5,7 +5,7 @@
   @see https://www.w3.org/WAI/ARIA/apg/patterns/tabs/
 -->
 <script>
-  import { createEventDispatcher } from 'svelte';
+  import { createEventDispatcher, onMount } from 'svelte';
   import { activateGroup } from '../../services/group';
 
   /**
@@ -37,10 +37,10 @@
 
   const dispatch = createEventDispatcher();
   /**
-   * A reference to the inner element.
+   * A reference to the wrapper element.
    * @type {HTMLElement | undefined}
    */
-  let inner = undefined;
+  let wrapper = undefined;
   /**
    * The indicator’s CSS style.
    * @type {string | undefined}
@@ -53,7 +53,7 @@
   const updateIndicator = () => {
     window.requestAnimationFrame(() => {
       const selected = /** @type {HTMLElement | null} */ (
-        inner?.querySelector('[aria-selected="true"]')
+        wrapper?.querySelector('[role="tab"][aria-selected="true"]')
       );
 
       if (selected) {
@@ -72,6 +72,18 @@
       }
     });
   };
+
+  onMount(() => {
+    const observer = new ResizeObserver(() => {
+      updateIndicator();
+    });
+
+    observer.observe(/** @type {HTMLElement} */ (wrapper));
+
+    return () => {
+      observer.disconnect();
+    };
+  });
 </script>
 
 <div
@@ -83,6 +95,7 @@
   aria-orientation={orientation}
   data-name={name || undefined}
   {...$$restProps}
+  bind:this={wrapper}
   use:activateGroup
   on:initialized={() => {
     updateIndicator();
@@ -92,7 +105,7 @@
     updateIndicator();
   }}
 >
-  <div role="none" class="inner" inert={disabled} bind:this={inner}>
+  <div role="none" class="inner" inert={disabled}>
     <slot />
   </div>
   <div role="none" class="indicator" style={indicatorStyle} />
