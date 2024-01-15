@@ -35,7 +35,7 @@
   export let position = 'right';
   /**
    * Width or height of the drawer.
-   * @type {'small' | 'medium' | 'large' | 'x-large'}
+   * @type {'small' | 'medium' | 'large' | 'x-large' | 'full'}
    */
   export let size = 'small';
   /**
@@ -104,10 +104,10 @@
       {/if}
     </div>
     {#if title || showClose === 'inside' || $$slots.header || $$slots['header-extra']}
-      <div role="none" class="header">
-        {#if $$slots.header}
-          <slot name="header" />
-        {:else}
+      {#if $$slots.header}
+        <slot name="header" />
+      {:else}
+        <div role="none" class="header">
           <div role="none" class="title">
             {title}
           </div>
@@ -131,8 +131,8 @@
               </slot>
             </Button>
           {/if}
-        {/if}
-      </div>
+        </div>
+      {/if}
     {/if}
     <div role="none" class="main">
       <slot />
@@ -150,7 +150,6 @@
     position: absolute;
     display: flex;
     flex-direction: column;
-    border-radius: 4px;
     max-width: 100dvw;
     max-height: 100dvh;
     background-color: var(--sui-secondary-background-color-translucent);
@@ -178,6 +177,10 @@
 
     &.right {
       inset: 0 0 0 auto;
+      border-radius: var(
+        --sui-drawer-right-content-border-radius,
+        var(--sui-drawer-content-border-radius, 4px 0 0 4px)
+      );
 
       .extra-control {
         inset: 0 100% auto auto;
@@ -190,6 +193,10 @@
 
     &.left {
       inset: 0 auto 0 0;
+      border-radius: var(
+        --sui-drawer-left-content-border-radius,
+        var(--sui-drawer-content-border-radius, 0 4px 4px 0)
+      );
 
       .extra-control {
         inset: 0 auto auto 100%;
@@ -224,10 +231,20 @@
       &.x-large {
         width: 1000px;
       }
+
+      &.full {
+        border-radius: 0 !important;
+        width: 100dvw;
+        max-width: none !important;
+      }
     }
 
     &.top {
       inset: 0 0 auto 0;
+      border-radius: var(
+        --sui-drawer-top-content-border-radius,
+        var(--sui-drawer-content-border-radius, 0 0 4px 4px)
+      );
 
       .extra-control {
         inset: 100% 0 auto auto;
@@ -240,6 +257,10 @@
 
     &.bottom {
       inset: auto 0 0 0;
+      border-radius: var(
+        --sui-drawer-bottom-content-border-radius,
+        var(--sui-drawer-content-border-radius, 4px 4px 0 0)
+      );
 
       .extra-control {
         inset: auto 0 100% auto;
@@ -274,6 +295,12 @@
       &.x-large {
         height: 1000px;
       }
+
+      &.full {
+        border-radius: 0 !important;
+        height: 100dvh;
+        max-height: none !important;
+      }
     }
   }
 
@@ -285,12 +312,13 @@
   }
 
   .header {
+    flex-direction: var(--sui-drawer-header-flex-direction, row);
     box-sizing: content-box;
-    margin: 0 16px;
-    border-width: 0 0 1px;
-    border-color: var(--sui-secondary-border-color);
-    padding: 16px 8px;
-    height: 32px;
+    margin: var(--sui-drawer-header-margin, 0 16px);
+    border-width: var(--sui-drawer-header-border-width, 0 0 1px);
+    border-color: var(--sui-drawer-header-border-color, var(--sui-secondary-border-color));
+    padding: var(--sui-drawer-header-padding, 16px 8px);
+    height: var(--sui-drawer-header-height, 32px);
 
     .title {
       font-size: var(--sui-font-size-large);
@@ -304,7 +332,7 @@
   .main {
     flex: auto;
     overflow: auto;
-    padding: 24px;
+    padding: var(--sui-drawer-main-padding, 24px);
     white-space: normal;
   }
 </style>

@@ -78,10 +78,11 @@
     display: flex;
     flex-direction: column;
     margin: var(--sui-focus-ring-width);
-    border-width: 1px;
-    border-color: var(--sui-listbox-border-color);
-    border-radius: var(--sui-listbox-border-radius);
-    padding: 4px;
+    border-width: var(--sui-listbox-border-width, 1px);
+    border-style: var(--sui-listbox-border-style, solid);
+    border-color: var(--sui-listbox-border-width, var(--sui-secondary-border-color));
+    border-radius: var(--sui-listbox-border-radius, 4px);
+    padding: var(--sui-listbox-padding, 4px);
     min-width: var(--sui-listbox-min-width, calc(var(--sui-option-height) * 5));
     color: var(--sui-listbox-foreground-color);
     background-color: var(--sui-listbox-background-color);

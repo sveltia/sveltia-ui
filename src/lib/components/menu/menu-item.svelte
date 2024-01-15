@@ -111,12 +111,18 @@
 
     :global(button) {
       display: flex;
-      border-radius: var(--sui-option-border-radius);
+      gap: var(--sui-menuitem-gap, 4px);
+      align-items: var(--sui-menuitem-align-items, center);
+      border-radius: var(--sui-menuitem-border-radius, var(--sui-option-border-radius, 4px));
       margin: 0 !important;
-      padding: 0 16px;
+      padding: var(--sui-menuitem-padding, 0 16px);
       width: 100%;
-      min-width: 160px;
-      height: var(--sui-option-height);
+      min-width: var(--sui-menuitem-min-width, 160px);
+      height: var(--sui-menuitem-height, var(--sui-option-height));
+      color: var(--sui-menuitem-foreground-color, var(--sui-control-foreground-color, inherit));
+      background-color: var(--sui-menuitem-background-color, transparent);
+      font-size: var(--sui-menuitem-font-size, var(--sui-option-font-size));
+      font-weight: var(--sui-menuitem-font-weight, var(--sui-option-font-weight));
     }
 
     :global(button[aria-checked='true']) {

@@ -102,6 +102,11 @@
    * @type {PopupPosition}
    */
   export let popupPosition = 'bottom-left';
+  /**
+   * Whether to show the backdrop for the popup.
+   * @type {boolean}
+   */
+  export let showPopupBackdrop = false;
 
   const dispatch = createEventDispatcher();
   /**
@@ -169,7 +174,13 @@
 </button>
 
 {#if $$slots.popup}
-  <Popup anchor={element} position={popupPosition} touchOptimized={true} bind:this={popupComponent}>
+  <Popup
+    anchor={element}
+    position={popupPosition}
+    showBackdrop={showPopupBackdrop}
+    touchOptimized={true}
+    bind:this={popupComponent}
+  >
     <slot name="popup" />
   </Popup>
 {/if}
@@ -184,7 +195,7 @@
     border-style: solid;
     border-color: transparent;
     padding: 0;
-    color: var(--sui-control-foreground-color);
+    color: var(--sui-control-foreground-color, inherit);
     background-color: transparent;
     box-shadow: none;
     font-family: var(--sui-control-font-family);
@@ -221,74 +232,135 @@
     }
 
     &:global(.primary) {
-      border-color: var(--sui-primary-accent-color);
-      color: var(--sui-primary-accent-color-inverted);
-      background-color: var(--sui-primary-accent-color);
+      border-width: var(--sui-button-primary-border-width, 1px);
+      border-style: var(--sui-button-primary-border-style, solid);
+      border-color: var(--sui-button-primary-border-color, var(--sui-primary-accent-color));
+      color: var(--sui-button-primary-foreground-color, var(--sui-primary-accent-color-inverted));
+      background-color: var(--sui-button-primary-background-color, var(--sui-primary-accent-color));
+      font-weight: var(--sui-button-primary-font-weight, normal);
 
       &:hover,
       &:focus-visible,
       &[aria-expanded='true'] {
-        background-color: var(--sui-primary-accent-color-light);
+        color: var(--sui-button-primary-foreground-color-focus, initial);
+        background-color: var(
+          --sui-button-primary-background-color-focus,
+          var(--sui-primary-accent-color-light, initial)
+        );
       }
 
       &:active {
-        background-color: var(--sui-primary-accent-color-dark);
+        color: var(--sui-button-primary-foreground-color-active, initial);
+        background-color: var(
+          --sui-button-primary-background-color-active,
+          var(--sui-primary-accent-color-dark, initial)
+        );
       }
     }
 
     &:global(.secondary) {
-      border-color: var(--sui-primary-accent-color);
-      color: var(--sui-primary-accent-color-text);
-      background-color: var(--sui-button-background-color);
+      border-width: var(--sui-button-secondary-border-width, 1px);
+      border-style: var(--sui-button-secondary-border-style, solid);
+      border-color: var(--sui-button-secondary-border-color, var(--sui-primary-accent-color));
+      color: var(--sui-button-secondary-foreground-color, var(--sui-primary-accent-color-text));
+      background-color: var(
+        --sui-button-secondary-background-color,
+        var(--sui-button-background-color)
+      );
+      font-weight: var(--sui-button-secondary-font-weight, normal);
 
       &:hover,
       &:focus-visible,
       &[aria-expanded='true'] {
-        background-color: var(--sui-hover-background-color);
+        color: var(--sui-button-secondary-foreground-color-focus, initial);
+        background-color: var(
+          --sui-button-secondary-background-color-focus,
+          var(--sui-hover-background-color, initial)
+        );
       }
 
       &:active {
-        background-color: var(--sui-active-background-color);
+        color: var(--sui-button-secondary-foreground-color-active, initial);
+        background-color: var(
+          --sui-button-secondary-background-color-active,
+          var(--sui-active-background-color)
+        );
       }
 
       &[aria-pressed='true'] {
-        background-color: var(--sui-primary-accent-color);
+        color: var(--sui-button-secondary-foreground-color-pressed, initial);
+        background-color: var(
+          --sui-button-secondary-background-color-pressed,
+          var(--sui-primary-accent-color, initial)
+        );
       }
     }
 
     &:global(.tertiary) {
-      border-color: var(--sui-button-border-color);
-      color: var(--sui-highlight-foreground-color);
-      background-color: var(--sui-button-background-color);
+      border-width: var(--sui-button-tertiary-border-width, 1px);
+      border-style: var(--sui-button-tertiary-border-style, solid);
+      border-color: var(--sui-button-tertiary-border-color, var(--sui-button-border-color));
+      color: var(--sui-button-tertiary-foreground-color, var(--sui-highlight-foreground-color));
+      background-color: var(
+        --sui-button-tertiary-background-color,
+        var(--sui-button-background-color)
+      );
+      font-weight: var(--sui-button-tertiary-font-weight, normal);
 
       &:hover,
       &:focus-visible,
       &[aria-expanded='true'] {
-        background-color: var(--sui-hover-background-color);
+        color: var(--sui-button-tertiary-foreground-color-focus, initial);
+        background-color: var(
+          --sui-button-tertiary-background-color-focus,
+          var(--sui-hover-background-color, initial)
+        );
       }
 
       &:active {
-        background-color: var(--sui-active-background-color);
+        color: var(--sui-button-tertiary-foreground-color-active, initial);
+        background-color: var(
+          --sui-button-tertiary-background-color-active,
+          var(--sui-active-background-color, initial)
+        );
       }
 
       &[aria-pressed='true'] {
-        background-color: var(--sui-selected-background-color);
+        color: var(--sui-button-tertiary-foreground-color-pressed, initial);
+        background-color: var(
+          --sui-button-tertiary-background-color-pressed,
+          var(--sui-selected-background-color, initial)
+        );
       }
     }
 
     &:global(.ghost) {
+      font-weight: var(--sui-button-ghost-font-weight, normal);
+
       &:hover,
       &:focus-visible,
       &[aria-expanded='true'] {
-        background-color: var(--sui-hover-background-color);
+        color: var(--sui-button-ghost-foreground-color-focus, initial);
+        background-color: var(
+          --sui-button-ghost-background-color-focus,
+          var(--sui-hover-background-color, initial)
+        );
       }
 
       &:active {
-        background-color: var(--sui-active-background-color);
+        color: var(--sui-button-ghost-foreground-color-active, initial);
+        background-color: var(
+          --sui-button-ghost-background-color-active,
+          var(--sui-active-background-color, initial)
+        );
       }
 
       &[aria-pressed='true'] {
-        background-color: var(--sui-selected-background-color);
+        color: var(--sui-button-ghost-foreground-color-pressed, initial);
+        background-color: var(
+          --sui-button-ghost-background-color-pressed,
+          var(--sui-selected-background-color, initial)
+        );
       }
     }
 
@@ -319,7 +391,7 @@
       border-radius: var(--sui-button-small-border-radius);
       padding: var(--sui-button-small-padding);
       height: var(--sui-button-small-height);
-      font-size: var(--sui-font-size-small);
+      font-size: var(--sui-button-small-font-size, var(--sui-font-size-small));
 
       :global(.icon) {
         font-size: var(--sui-font-size-large);
@@ -330,13 +402,14 @@
       border-radius: var(--sui-button-medium-border-radius);
       padding: var(--sui-button-medium-padding);
       height: var(--sui-button-medium-height);
+      font-size: var(--sui-button-medium-font-size, var(--sui-font-size-default));
     }
 
     &:global(.large) {
       border-radius: var(--sui-button-large-border-radius);
       padding: var(--sui-button-large-padding);
       height: var(--sui-button-large-height);
-      font-size: var(--sui-font-size-large);
+      font-size: var(--sui-button-large-font-size, var(--sui-font-size-large));
     }
 
     &:global(.pill) {

@@ -175,7 +175,10 @@
       z-index: 1;
       border-color: transparent;
       margin: 0 !important;
-      border-radius: 0;
+      border-radius: var(--sui-tab-border-radius, 0);
+      font-family: var(--sui-tab-font-family, var(--sui-control-font-family, inherit));
+      font-size: var(--sui-tab-font-size, var(--sui-control-font-size, inherit));
+      font-weight: var(--sui-tab-font-weight, var(--sui-control-font-weight, inherit));
     }
   }
 

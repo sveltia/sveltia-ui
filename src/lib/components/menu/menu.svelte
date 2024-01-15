@@ -48,14 +48,15 @@
     display: flex;
     flex-direction: column;
     margin: 0;
-    border-width: 1px;
-    border-color: var(--sui-secondary-border-color);
-    border-radius: 4px;
-    padding: 4px;
+    border-width: var(--sui-menu-border-width, 1px);
+    border-style: var(--sui-menu-border-style, solid);
+    border-color: var(--sui-menu-border-width, var(--sui-secondary-border-color));
+    border-radius: var(--sui-menu-border-radius, 4px);
+    padding: var(--sui-menu-padding, 4px);
 
     :global([role='separator']) {
-      margin: 4px;
-      background-color: var(--sui-control-border-color);
+      margin: var(--sui-menu-divider-margin, 4px);
+      background-color: var(--sui-menu-divider-color, var(--sui-control-border-color));
     }
   }
 </style>

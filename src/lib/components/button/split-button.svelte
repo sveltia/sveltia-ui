@@ -47,6 +47,11 @@
    * @type {PopupPosition}
    */
   export let popupPosition = 'bottom-left';
+  /**
+   * Whether to show the backdrop for the popup.
+   * @type {boolean}
+   */
+  export let showPopupBackdrop = false;
 
   /**
    * @type {HTMLElement | undefined}
@@ -75,6 +80,7 @@
     aria-label={$_('_sui.split_button.more_options')}
     {popupPosition}
     popupPositionBaseElement={wrapper}
+    {showPopupBackdrop}
   >
     <slot name="chevron-icon" slot="end-icon">
       <Icon name="arrow_drop_down" />

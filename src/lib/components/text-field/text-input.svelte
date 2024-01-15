@@ -158,7 +158,7 @@
     border-width: 1px;
     border-color: var(--sui-textbox-border-color);
     border-radius: var(--sui-textbox-border-radius);
-    padding: 0 8px;
+    padding: var(--sui-textbox-padding, 0 8px);
     min-width: 0;
     height: var(--sui-textbox-height);
     color: var(--sui-textbox-foreground-color);
@@ -166,6 +166,10 @@
     font-family: var(--sui-textbox-font-family);
     font-size: var(--sui-textbox-font-size);
     line-height: var(--sui-textbox-singleline-line-height);
+    font-weight: var(--sui-textbox-font-weight, normal);
+    text-align: var(--sui-textbox-text-align, left);
+    text-indent: var(--sui-textbox-text-indent, 0);
+    letter-spacing: var(--sui-textbox-letter-spacing, normal);
     transition: all 200ms;
 
     &:focus {
@@ -184,6 +188,27 @@
 
     &[aria-invalid='true'] {
       border-color: var(--sui-error-foreground-color);
+    }
+
+    &::placeholder {
+      color: var(--sui-textbox-placeholder-foreground-color, var(--sui-textbox-foreground-color));
+      opacity: var(--sui-textbox-placeholder-opacity, 0.5);
+      font-family: var(--sui-textbox-placeholder-font-family, var(--sui-textbox-font-family));
+      font-size: var(--sui-textbox-placeholder-font-size, var(--sui-textbox-font-size));
+      line-height: var(
+        --sui-textbox-placeholder-singleline-line-height,
+        var(--sui-textbox-singleline-line-height)
+      );
+      font-weight: var(
+        --sui-textbox-placeholder-font-weight,
+        var(--sui-textbox-font-weight, normal)
+      );
+      text-align: var(--sui-textbox-placeholder-text-align, var(--sui-textbox-text-align, left));
+      text-indent: var(--sui-textbox-placeholder-text-indent, var(--sui-textbox-text-indent, 0));
+      letter-spacing: var(
+        --sui-textbox-placeholder-letter-spacing,
+        var(--sui-textbox-letter-spacing, normal)
+      );
     }
 
     ~ :global(button) {

@@ -184,12 +184,15 @@
     position: relative;
     display: flex;
     flex-direction: column;
-    border-radius: 4px;
-    max-width: calc(100dvw - 32px);
-    background-color: var(--sui-secondary-background-color-translucent);
-    box-shadow: 0 8px 16px var(--sui-popup-shadow-color);
-    -webkit-backdrop-filter: blur(16px);
-    backdrop-filter: blur(16px);
+    border-radius: var(--sui-dialog-content-border-radius, 4px);
+    max-width: calc(100dvw - var(--sui-dialog-content-margin, 16px) * 2);
+    background-color: var(
+      --sui-dialog-content-background-color,
+      var(--sui-secondary-background-color-translucent)
+    );
+    box-shadow: var(--sui-dialog-content-box-shadow, 0 8px 16px var(--sui-popup-shadow-color));
+    -webkit-backdrop-filter: var(--sui-dialog-content-backdrop-filter, blur(16px));
+    backdrop-filter: var(--sui-dialog-content-backdrop-filter, blur(16px));
     transition-property: transform;
 
     :global(dialog.open) & {
@@ -248,11 +251,11 @@
 
   .header {
     box-sizing: content-box;
-    margin: 0 16px;
-    border-width: 0 0 1px;
-    border-color: var(--sui-secondary-border-color);
-    padding: 16px 8px;
-    height: 32px;
+    margin: var(--sui-dialog-header-margin, 0 16px);
+    border-width: var(--sui-dialog-header-border-width, 0 0 1px);
+    border-color: var(--sui-dialog-header-border-color, var(--sui-secondary-border-color));
+    padding: var(--sui-dialog-header-padding, 16px 8px);
+    height: var(--sui-dialog-header-height, 32px);
 
     .title {
       font-size: var(--sui-font-size-large);
@@ -260,12 +263,12 @@
   }
 
   .footer {
-    margin: 0 24px 24px;
+    margin: var(--sui-dialog-footer-margin, 0 24px 24px);
   }
 
   .body {
     overflow: auto;
-    margin: 24px 24px;
+    margin: var(--sui-dialog-body-margin, 24px 24px);
     white-space: normal;
     line-height: var(--sui-line-height-compact);
   }

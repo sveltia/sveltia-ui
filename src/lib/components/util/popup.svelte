@@ -23,6 +23,11 @@
    */
   export let open = writable(false);
   /**
+   * Whether to show the backdrop.
+   * @type {boolean}
+   */
+  export let showBackdrop = false;
+  /**
    * A reference to the anchor element that opens the popup. Typically a `<button>`.
    * @type {HTMLElement | undefined}
    */
@@ -95,7 +100,7 @@
   role="none"
   class="popup"
   bind:open={$open}
-  showBackdrop={touch}
+  showBackdrop={showBackdrop ?? touch}
   lightDismiss={true}
   keepContent={true}
   bind:this={modal}
@@ -152,17 +157,32 @@
     backdrop-filter: blur(16px);
     transition-property: opacity, transform;
 
-    &.listbox,
     &.menu {
-      border-width: 1px;
-      border-style: solid;
-      border-color: var(--sui-secondary-border-color);
-      border-radius: 4px;
+      border-width: var(--sui-menu-border-width, 1px);
+      border-style: var(--sui-menu-border-style, solid);
+      border-color: var(--sui-menu-border-width, var(--sui-secondary-border-color));
+      border-radius: var(--sui-menu-border-radius, 4px);
+      padding: var(--sui-menu-padding, 4px);
 
-      :global(.sui.listbox),
       :global(.sui.menu) {
         border-width: 0;
         border-radius: 0;
+        padding: 0;
+        background-color: transparent;
+      }
+    }
+
+    &.listbox {
+      border-width: var(--sui-listbox-border-width, 1px);
+      border-style: var(--sui-listbox-border-style, solid);
+      border-color: var(--sui-listbox-border-width, var(--sui-secondary-border-color));
+      border-radius: var(--sui-listbox-border-radius, 4px);
+      padding: var(--sui-listbox-padding, 4px);
+
+      :global(.sui.listbox) {
+        border-width: 0;
+        border-radius: 0;
+        padding: 0;
         background-color: transparent;
       }
     }

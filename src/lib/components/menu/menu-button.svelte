@@ -34,6 +34,11 @@
    */
   export let popupPositionBaseElement = undefined;
   /**
+   * Whether to show the backdrop for the popup.
+   * @type {boolean}
+   */
+  export let showPopupBackdrop = false;
+  /**
    * Text label displayed on the button.
    * @type {string}
    */
@@ -95,6 +100,7 @@
   anchor={buttonComponent?.element}
   position={popupPosition}
   positionBaseElement={popupPositionBaseElement}
+  showBackdrop={showPopupBackdrop}
   bind:this={popupComponent}
 >
   <slot name="popup" />
