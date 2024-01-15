@@ -96,7 +96,17 @@ class Group {
         controlTarget.setAttribute('aria-hidden', String(!isSelected));
 
         if (isSelected) {
-          controlTarget.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'auto' });
+          window.setTimeout(() => {
+            try {
+              controlTarget.scrollIntoView({
+                block: 'nearest',
+                inline: 'nearest',
+                behavior: 'auto',
+              });
+            } catch {
+              controlTarget.scrollIntoView(true);
+            }
+          }, 300);
         }
       }
     });
@@ -245,13 +255,30 @@ class Group {
         controlTarget.setAttribute('aria-hidden', String(!isTarget));
 
         if (isTarget) {
-          controlTarget.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'auto' });
+          window.setTimeout(() => {
+            try {
+              controlTarget.scrollIntoView({
+                block: 'nearest',
+                inline: 'nearest',
+                behavior: 'auto',
+              });
+            } catch {
+              controlTarget.scrollIntoView(true);
+            }
+          }, 300);
         }
       }
 
       if (isTarget) {
         this.parent.setAttribute('aria-activedescendant', element.id);
-        element.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'auto' });
+
+        window.setTimeout(() => {
+          try {
+            element.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'auto' });
+          } catch {
+            element.scrollIntoView(true);
+          }
+        }, 300);
       }
     });
 
