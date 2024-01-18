@@ -109,7 +109,7 @@
     grid-area: 1 / 1 / 2 / 2;
     display: block;
     margin: 0;
-    border-width: 1px;
+    border-width: var(--sui-textbox-border-width, 1px);
     border-color: var(--sui-textbox-border-color);
     border-radius: var(--sui-textbox-border-radius);
     padding: 8px;
@@ -127,7 +127,12 @@
     }
 
     &:focus {
-      border-color: var(--sui-primary-accent-color);
+      border-color: var(--sui-textbox-border-color-focus, var(--sui-primary-accent-color));
+      color: var(--sui-textbox-foreground-color-focus, var(--sui-textbox-foreground-color));
+      background-color: var(
+        --sui-textbox-background-color-focus,
+        var(--sui-textbox-background-color)
+      );
     }
 
     &:disabled,

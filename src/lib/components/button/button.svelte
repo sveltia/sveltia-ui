@@ -242,18 +242,18 @@
       &:hover,
       &:focus-visible,
       &[aria-expanded='true'] {
-        color: var(--sui-button-primary-foreground-color-focus, initial);
+        color: var(--sui-button-primary-foreground-color-focus);
         background-color: var(
           --sui-button-primary-background-color-focus,
-          var(--sui-primary-accent-color-light, initial)
+          var(--sui-primary-accent-color-light)
         );
       }
 
       &:active {
-        color: var(--sui-button-primary-foreground-color-active, initial);
+        color: var(--sui-button-primary-foreground-color-active);
         background-color: var(
           --sui-button-primary-background-color-active,
-          var(--sui-primary-accent-color-dark, initial)
+          var(--sui-primary-accent-color-dark)
         );
       }
     }
@@ -272,15 +272,15 @@
       &:hover,
       &:focus-visible,
       &[aria-expanded='true'] {
-        color: var(--sui-button-secondary-foreground-color-focus, initial);
+        color: var(--sui-button-secondary-foreground-color-focus);
         background-color: var(
           --sui-button-secondary-background-color-focus,
-          var(--sui-hover-background-color, initial)
+          var(--sui-hover-background-color)
         );
       }
 
       &:active {
-        color: var(--sui-button-secondary-foreground-color-active, initial);
+        color: var(--sui-button-secondary-foreground-color-active);
         background-color: var(
           --sui-button-secondary-background-color-active,
           var(--sui-active-background-color)
@@ -288,10 +288,10 @@
       }
 
       &[aria-pressed='true'] {
-        color: var(--sui-button-secondary-foreground-color-pressed, initial);
+        color: var(--sui-button-secondary-foreground-color-pressed);
         background-color: var(
           --sui-button-secondary-background-color-pressed,
-          var(--sui-primary-accent-color, initial)
+          var(--sui-primary-accent-color)
         );
       }
     }
@@ -310,26 +310,26 @@
       &:hover,
       &:focus-visible,
       &[aria-expanded='true'] {
-        color: var(--sui-button-tertiary-foreground-color-focus, initial);
+        color: var(--sui-button-tertiary-foreground-color-focus);
         background-color: var(
           --sui-button-tertiary-background-color-focus,
-          var(--sui-hover-background-color, initial)
+          var(--sui-hover-background-color)
         );
       }
 
       &:active {
-        color: var(--sui-button-tertiary-foreground-color-active, initial);
+        color: var(--sui-button-tertiary-foreground-color-active);
         background-color: var(
           --sui-button-tertiary-background-color-active,
-          var(--sui-active-background-color, initial)
+          var(--sui-active-background-color)
         );
       }
 
       &[aria-pressed='true'] {
-        color: var(--sui-button-tertiary-foreground-color-pressed, initial);
+        color: var(--sui-button-tertiary-foreground-color-pressed);
         background-color: var(
           --sui-button-tertiary-background-color-pressed,
-          var(--sui-selected-background-color, initial)
+          var(--sui-selected-background-color)
         );
       }
     }
@@ -340,26 +340,26 @@
       &:hover,
       &:focus-visible,
       &[aria-expanded='true'] {
-        color: var(--sui-button-ghost-foreground-color-focus, initial);
+        color: var(--sui-button-ghost-foreground-color-focus);
         background-color: var(
           --sui-button-ghost-background-color-focus,
-          var(--sui-hover-background-color, initial)
+          var(--sui-hover-background-color)
         );
       }
 
       &:active {
-        color: var(--sui-button-ghost-foreground-color-active, initial);
+        color: var(--sui-button-ghost-foreground-color-active);
         background-color: var(
           --sui-button-ghost-background-color-active,
-          var(--sui-active-background-color, initial)
+          var(--sui-active-background-color)
         );
       }
 
       &[aria-pressed='true'] {
-        color: var(--sui-button-ghost-foreground-color-pressed, initial);
+        color: var(--sui-button-ghost-foreground-color-pressed);
         background-color: var(
           --sui-button-ghost-background-color-pressed,
-          var(--sui-selected-background-color, initial)
+          var(--sui-selected-background-color)
         );
       }
     }

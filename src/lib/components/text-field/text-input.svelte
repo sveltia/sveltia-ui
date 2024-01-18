@@ -155,7 +155,7 @@
   input {
     display: inline-block;
     flex: auto;
-    border-width: 1px;
+    border-width: var(--sui-textbox-border-width, 1px);
     border-color: var(--sui-textbox-border-color);
     border-radius: var(--sui-textbox-border-radius);
     padding: var(--sui-textbox-padding, 0 8px);
@@ -173,7 +173,12 @@
     transition: all 200ms;
 
     &:focus {
-      border-color: var(--sui-primary-accent-color);
+      border-color: var(--sui-textbox-border-color-focus, var(--sui-primary-accent-color));
+      color: var(--sui-textbox-foreground-color-focus, var(--sui-textbox-foreground-color));
+      background-color: var(
+        --sui-textbox-background-color-focus,
+        var(--sui-textbox-background-color)
+      );
     }
 
     &:read-only {
@@ -188,27 +193,6 @@
 
     &[aria-invalid='true'] {
       border-color: var(--sui-error-foreground-color);
-    }
-
-    &::placeholder {
-      color: var(--sui-textbox-placeholder-foreground-color, var(--sui-textbox-foreground-color));
-      opacity: var(--sui-textbox-placeholder-opacity, 0.5);
-      font-family: var(--sui-textbox-placeholder-font-family, var(--sui-textbox-font-family));
-      font-size: var(--sui-textbox-placeholder-font-size, var(--sui-textbox-font-size));
-      line-height: var(
-        --sui-textbox-placeholder-singleline-line-height,
-        var(--sui-textbox-singleline-line-height)
-      );
-      font-weight: var(
-        --sui-textbox-placeholder-font-weight,
-        var(--sui-textbox-font-weight, normal)
-      );
-      text-align: var(--sui-textbox-placeholder-text-align, var(--sui-textbox-text-align, left));
-      text-indent: var(--sui-textbox-placeholder-text-indent, var(--sui-textbox-text-indent, 0));
-      letter-spacing: var(
-        --sui-textbox-placeholder-letter-spacing,
-        var(--sui-textbox-letter-spacing, normal)
-      );
     }
 
     ~ :global(button) {
@@ -231,13 +215,12 @@
 
   .label {
     position: absolute;
-    inset: 0 8px;
+    inset: var(--sui-textbox-padding, 0 8px);
     z-index: 2;
     display: flex;
-    justify-content: var(--sui-textbox-label-align, flex-start);
     align-items: center;
-    color: var(--sui-primary-foreground-color);
-    opacity: 0.5;
+    justify-content: var(--sui-textbox-placeholder-text-align, var(--sui-textbox-text-align, left));
+    white-space: nowrap;
     pointer-events: none;
 
     &.hidden {
@@ -247,5 +230,24 @@
 
   input:focus + .label {
     opacity: 0;
+  }
+
+  input::placeholder,
+  .label {
+    color: var(--sui-textbox-placeholder-foreground-color, var(--sui-textbox-foreground-color));
+    opacity: var(--sui-textbox-placeholder-opacity, 0.5);
+    font-family: var(--sui-textbox-placeholder-font-family, var(--sui-textbox-font-family));
+    font-size: var(--sui-textbox-placeholder-font-size, var(--sui-textbox-font-size));
+    line-height: var(
+      --sui-textbox-placeholder-singleline-line-height,
+      var(--sui-textbox-singleline-line-height)
+    );
+    font-weight: var(--sui-textbox-placeholder-font-weight, var(--sui-textbox-font-weight, normal));
+    text-align: var(--sui-textbox-placeholder-text-align, var(--sui-textbox-text-align, left));
+    text-indent: var(--sui-textbox-placeholder-text-indent, var(--sui-textbox-text-indent, 0));
+    letter-spacing: var(
+      --sui-textbox-placeholder-letter-spacing,
+      var(--sui-textbox-letter-spacing, normal)
+    );
   }
 </style>
