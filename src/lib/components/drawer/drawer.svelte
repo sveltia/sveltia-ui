@@ -182,6 +182,10 @@
         var(--sui-drawer-content-border-radius, 4px 0 0 4px)
       );
 
+      &.full {
+        border-radius: var(--sui-drawer-right-full-content-border-radius, 0);
+      }
+
       .extra-control {
         inset: 0 100% auto auto;
       }
@@ -198,6 +202,10 @@
         var(--sui-drawer-content-border-radius, 0 4px 4px 0)
       );
 
+      &.full {
+        border-radius: var(--sui-drawer-left-full-content-border-radius, 0);
+      }
+
       .extra-control {
         inset: 0 auto auto 100%;
       }
@@ -208,34 +216,33 @@
     }
 
     &.vertical {
-      height: 100%;
-      max-width: 100dvw;
+      max-width: var(--sui-drawer-vertical-max-width, calc(100dvw - 56px));
+      height: var(--sui-drawer-vertical-height, 100dvh);
 
       :global(dialog.open) & {
-        max-width: calc(100dvw - 56px);
         transform: translateX(0%);
       }
 
       &.small {
-        width: 400px;
+        width: var(--sui-drawer-vertical-small-width, 400px);
       }
 
       &.medium {
-        width: 600px;
+        width: var(--sui-drawer-vertical-medium-width, 600px);
       }
 
       &.large {
-        width: 800px;
+        width: var(--sui-drawer-vertical-large-width, 800px);
       }
 
       &.x-large {
-        width: 1000px;
+        width: var(--sui-drawer-vertical-x-large-width, 1000px);
       }
 
       &.full {
-        border-radius: 0 !important;
         width: 100dvw;
-        max-width: none !important;
+        max-width: 100dvw;
+        height: 100dvh;
       }
     }
 
@@ -245,6 +252,10 @@
         --sui-drawer-top-content-border-radius,
         var(--sui-drawer-content-border-radius, 0 0 4px 4px)
       );
+
+      &.full {
+        border-radius: var(--sui-drawer-top-full-content-border-radius, 0);
+      }
 
       .extra-control {
         inset: 100% 0 auto auto;
@@ -262,6 +273,10 @@
         var(--sui-drawer-content-border-radius, 4px 4px 0 0)
       );
 
+      &.full {
+        border-radius: var(--sui-drawer-bottom-full-content-border-radius, 0);
+      }
+
       .extra-control {
         inset: auto 0 100% auto;
       }
@@ -272,34 +287,33 @@
     }
 
     &.horizontal {
-      width: 100%;
-      max-height: 100dvh;
+      width: var(--sui-drawer-horizontal-width, 100dvw);
+      max-height: var(--sui-drawer-horizontal-max-height, calc(100dvh - 56px));
 
       :global(dialog.open) & {
-        max-height: calc(100dvh - 56px);
         transform: translateY(0%);
       }
 
       &.small {
-        height: 400px;
+        height: var(--sui-drawer-horizontal-small-height, 400px);
       }
 
       &.medium {
-        height: 600px;
+        height: var(--sui-drawer-horizontal-medium-height, 600px);
       }
 
       &.large {
-        height: 800px;
+        height: var(--sui-drawer-horizontal-large-height, 800px);
       }
 
       &.x-large {
-        height: 1000px;
+        height: var(--sui-drawer-horizontal-x-large-height, 1000px);
       }
 
       &.full {
-        border-radius: 0 !important;
+        width: 100dvw;
         height: 100dvh;
-        max-height: none !important;
+        max-height: 100dvh;
       }
     }
   }

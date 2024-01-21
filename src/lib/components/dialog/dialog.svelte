@@ -206,8 +206,8 @@
     }
 
     &.small {
-      width: 400px;
-      max-height: 400px;
+      width: var(--sui-dialog-small-content-width, 400px);
+      max-height: var(--sui-dialog-small-content-max-height, 400px);
 
       @media (max-height: 400px) {
         max-height: calc(100dvh - 32px);
@@ -215,8 +215,8 @@
     }
 
     &.medium {
-      width: 600px;
-      max-height: 600px;
+      width: var(--sui-dialog-medium-content-width, 600px);
+      max-height: var(--sui-dialog-medium-content-max-height, 600px);
 
       @media (max-height: 600px) {
         max-height: calc(100dvh - 32px);
@@ -224,8 +224,8 @@
     }
 
     &.large {
-      width: 800px;
-      max-height: 800px;
+      width: var(--sui-dialog-large-content-width, 800px);
+      max-height: var(--sui-dialog-large-content-max-height, 800px);
 
       @media (max-height: 800px) {
         max-height: calc(100dvh - 32px);
@@ -233,8 +233,8 @@
     }
 
     &.x-large {
-      width: 1000px;
-      max-height: 1000px;
+      width: var(--sui-dialog-x-large-content-width, 1000px);
+      max-height: var(--sui-dialog-x-large-content-max-height, 1000px);
 
       @media (max-height: 1000px) {
         max-height: calc(100dvh - 32px);

@@ -169,6 +169,7 @@
     font-weight: var(--sui-textbox-font-weight, normal);
     text-align: var(--sui-textbox-text-align, left);
     text-indent: var(--sui-textbox-text-indent, 0);
+    text-transform: var(--sui-textbox-text-transform, none);
     letter-spacing: var(--sui-textbox-letter-spacing, normal);
     transition: all 200ms;
 

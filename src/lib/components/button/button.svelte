@@ -370,11 +370,12 @@
       border-radius: 0 !important;
       padding: 0 !important;
       height: auto !important;
-      color: var(--sui-primary-accent-color-text);
+      color: var(--sui-button-link-foreground-color, var(--sui-primary-accent-color-text));
 
       :global(.label) {
         padding: 0;
         line-height: var(--sui-line-height-compact);
+        text-decoration: var(--sui-button-link-text-decoration, none);
         white-space: normal;
       }
 
@@ -382,7 +383,7 @@
       &:focus,
       &:active {
         :global(.label) {
-          text-decoration: underline;
+          text-decoration: var(--sui-button-link-text-decoration-focus, underline);
         }
       }
     }
