@@ -110,6 +110,7 @@
   on:closing
   on:close
 >
+  <slot name="extra-content" slot="extra-content" />
   <div role="none" class="content {className} {size}">
     {#if title || showClose || $$slots.header || $$slots['header-extra']}
       <div role="none" class="header">

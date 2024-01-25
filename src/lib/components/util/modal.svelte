@@ -185,7 +185,7 @@
     }
   }}
 >
-  <slot name="always-show" />
+  <slot name="extra-content" />
   {#if showContent || keepContent}
     <slot />
   {/if}

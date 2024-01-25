@@ -130,6 +130,7 @@
     }
   }}
 >
+  <slot name="extra-content" slot="extra-content" />
   <div
     role="none"
     class="content {className} {contentType}"

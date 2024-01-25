@@ -84,6 +84,7 @@
   on:closing
   on:close
 >
+  <slot name="extra-content" slot="extra-content" />
   <div role="none" class="content {className} {size} {position} {orientation}">
     <div role="none" class="extra-control">
       {#if showClose === 'outside'}
