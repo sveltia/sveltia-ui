@@ -151,6 +151,7 @@
     position: absolute;
     display: flex;
     flex-direction: column;
+    overflow: hidden;
     max-width: 100dvw;
     max-height: 100dvh;
     background-color: var(--sui-secondary-background-color-translucent);

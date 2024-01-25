@@ -185,6 +185,7 @@
     position: relative;
     display: flex;
     flex-direction: column;
+    overflow: hidden;
     border-radius: var(--sui-dialog-content-border-radius, 4px);
     max-width: calc(100dvw - var(--sui-dialog-content-margin, 16px) * 2);
     background-color: var(
