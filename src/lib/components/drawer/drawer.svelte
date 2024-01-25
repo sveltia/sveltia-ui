@@ -178,14 +178,17 @@
     }
 
     &.right {
-      inset: 0 0 0 auto;
+      inset: var(--sui-drawer-right-content-inset, 0 0 0 auto);
       border-radius: var(
         --sui-drawer-right-content-border-radius,
         var(--sui-drawer-content-border-radius, 4px 0 0 4px)
       );
 
       &.full {
-        border-radius: var(--sui-drawer-right-full-content-border-radius, 0);
+        border-radius: var(
+          --sui-drawer-right-full-content-border-radius,
+          var(--sui-drawer-right-content-border-radius, 0)
+        );
       }
 
       .extra-control {
@@ -198,14 +201,17 @@
     }
 
     &.left {
-      inset: 0 auto 0 0;
+      inset: var(--sui-drawer-left-content-inset, 0 auto 0 0);
       border-radius: var(
         --sui-drawer-left-content-border-radius,
         var(--sui-drawer-content-border-radius, 0 4px 4px 0)
       );
 
       &.full {
-        border-radius: var(--sui-drawer-left-full-content-border-radius, 0);
+        border-radius: var(
+          --sui-drawer-left-full-content-border-radius,
+          var(--sui-drawer-left-content-border-radius, 0)
+        );
       }
 
       .extra-control {
@@ -218,27 +224,47 @@
     }
 
     &.vertical {
-      max-width: var(--sui-drawer-vertical-max-width, calc(100dvw - 56px));
-      height: var(--sui-drawer-vertical-height, 100dvh);
-
       :global(dialog.open) & {
         transform: translateX(0%);
       }
 
       &.small {
-        width: var(--sui-drawer-vertical-small-width, 400px);
+        width: var(--sui-drawer-vertical-small-width, var(--sui-drawer-vertical-width, 400px));
+        max-width: var(
+          --sui-drawer-vertical-small-max-width,
+          var(--sui-drawer-vertical-max-width, calc(100dvw - 56px))
+        );
+        height: var(--sui-drawer-vertical-small-height, var(--sui-drawer-vertical-height, 100dvh));
       }
 
       &.medium {
-        width: var(--sui-drawer-vertical-medium-width, 600px);
+        width: var(--sui-drawer-vertical-medium-width, var(--sui-drawer-vertical-width, 600px));
+        max-width: var(
+          --sui-drawer-vertical-medium-max-width,
+          var(--sui-drawer-vertical-max-width, calc(100dvw - 56px))
+        );
+        height: var(--sui-drawer-vertical-medium-height, var(--sui-drawer-vertical-height, 100dvh));
       }
 
       &.large {
-        width: var(--sui-drawer-vertical-large-width, 800px);
+        width: var(--sui-drawer-vertical-large-width, var(--sui-drawer-vertical-width, 800px));
+        max-width: var(
+          --sui-drawer-vertical-large-max-width,
+          var(--sui-drawer-vertical-max-width, calc(100dvw - 56px))
+        );
+        height: var(--sui-drawer-vertical-large-height, var(--sui-drawer-vertical-height, 100dvh));
       }
 
       &.x-large {
-        width: var(--sui-drawer-vertical-x-large-width, 1000px);
+        width: var(--sui-drawer-vertical-x-large-width, var(--sui-drawer-vertical-width, 1000px));
+        max-width: var(
+          --sui-drawer-vertical-x-large-max-width,
+          var(--sui-drawer-vertical-max-width, calc(100dvw - 56px))
+        );
+        height: var(
+          --sui-drawer-vertical-x-large-height,
+          var(--sui-drawer-vertical-height, 100dvh)
+        );
       }
 
       &.full {
@@ -249,14 +275,17 @@
     }
 
     &.top {
-      inset: 0 0 auto 0;
+      inset: var(--sui-drawer-top-content-inset, 0 0 auto 0);
       border-radius: var(
         --sui-drawer-top-content-border-radius,
         var(--sui-drawer-content-border-radius, 0 0 4px 4px)
       );
 
       &.full {
-        border-radius: var(--sui-drawer-top-full-content-border-radius, 0);
+        border-radius: var(
+          --sui-drawer-top-full-content-border-radius,
+          var(--sui-drawer-top-content-border-radius, 0)
+        );
       }
 
       .extra-control {
@@ -269,14 +298,17 @@
     }
 
     &.bottom {
-      inset: auto 0 0 0;
+      inset: var(--sui-drawer-bottom-content-inset, auto 0 0 0);
       border-radius: var(
         --sui-drawer-bottom-content-border-radius,
         var(--sui-drawer-content-border-radius, 4px 4px 0 0)
       );
 
       &.full {
-        border-radius: var(--sui-drawer-bottom-full-content-border-radius, 0);
+        border-radius: var(
+          --sui-drawer-bottom-full-content-border-radius,
+          var(--sui-drawer-bottom-content-border-radius, 0)
+        );
       }
 
       .extra-control {
@@ -289,27 +321,62 @@
     }
 
     &.horizontal {
-      width: var(--sui-drawer-horizontal-width, 100dvw);
-      max-height: var(--sui-drawer-horizontal-max-height, calc(100dvh - 56px));
-
       :global(dialog.open) & {
         transform: translateY(0%);
       }
 
       &.small {
-        height: var(--sui-drawer-horizontal-small-height, 400px);
+        width: var(--sui-drawer-horizontal-small-width, var(--sui-drawer-horizontal-width, 100dvw));
+        height: var(
+          --sui-drawer-horizontal-small-height,
+          var(--sui-drawer-horizontal-height, 400px)
+        );
+        max-height: var(
+          --sui-drawer-horizontal-small-max-height,
+          var(--sui-drawer-horizontal-max-height, calc(100dvh - 56px))
+        );
       }
 
       &.medium {
-        height: var(--sui-drawer-horizontal-medium-height, 600px);
+        width: var(
+          --sui-drawer-horizontal-medium-width,
+          var(--sui-drawer-horizontal-width, 100dvw)
+        );
+        height: var(
+          --sui-drawer-horizontal-medium-height,
+          var(--sui-drawer-horizontal-height, 600px)
+        );
+        max-height: var(
+          --sui-drawer-horizontal-medium-max-height,
+          var(--sui-drawer-horizontal-max-height, calc(100dvh - 56px))
+        );
       }
 
       &.large {
-        height: var(--sui-drawer-horizontal-large-height, 800px);
+        width: var(--sui-drawer-horizontal-large-width, var(--sui-drawer-horizontal-width, 100dvw));
+        height: var(
+          --sui-drawer-horizontal-large-height,
+          var(--sui-drawer-horizontal-height, 800px)
+        );
+        max-height: var(
+          --sui-drawer-horizontal-large-max-height,
+          var(--sui-drawer-horizontal-max-height, calc(100dvh - 56px))
+        );
       }
 
       &.x-large {
-        height: var(--sui-drawer-horizontal-x-large-height, 1000px);
+        width: var(
+          --sui-drawer-horizontal-x-large-width,
+          var(--sui-drawer-horizontal-width, 100dvw)
+        );
+        height: var(
+          --sui-drawer-horizontal-x-large-height,
+          var(--sui-drawer-horizontal-height, 1000px)
+        );
+        max-height: var(
+          --sui-drawer-horizontal-x-large-max-height,
+          var(--sui-drawer-horizontal-max-height, calc(100dvh - 56px))
+        );
       }
 
       &.full {
