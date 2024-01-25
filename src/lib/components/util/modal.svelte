@@ -6,6 +6,7 @@
 
 <script>
   import { createEventDispatcher, onMount } from 'svelte';
+  import { sleep } from '../../services/util';
 
   /**
    * The `class` attribute on the `<dialog>` element.
@@ -98,13 +99,11 @@
     (document.querySelector('.sui.app-shell') ?? document.body).appendChild(dialog);
     showContent = true;
     dialog.showModal();
-
-    window.requestAnimationFrame(async () => {
-      dispatch('open');
-      setOpenClass = true;
-      await waitForTransition();
-      setActiveClass = true;
-    });
+    dispatch('open');
+    await sleep(100);
+    setOpenClass = true;
+    await waitForTransition();
+    setActiveClass = true;
   };
 
   /**
