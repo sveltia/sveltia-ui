@@ -168,7 +168,7 @@
     }
 
     :global(.label) {
-      inset: 0 36px;
+      --sui-textbox-padding: 0 36px;
     }
 
     :global(.text-input) {
