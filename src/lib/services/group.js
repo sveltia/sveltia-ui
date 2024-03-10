@@ -61,7 +61,6 @@ class Group {
 
     this.parent = parent;
     this.role = /** @type {string} */ (parent.getAttribute('role'));
-    this.grid = this.role === 'listbox' && parent.matches('.grid');
     this.multi = this.parent.getAttribute('aria-multiselectable') === 'true';
     this.id = getRandomId(this.role);
     this.parentGroupSelector = `[role="group"], [role="${this.role}"]`;
@@ -112,9 +111,7 @@ class Group {
     });
 
     parent.addEventListener('click', (event) => {
-      if (/** @type {HTMLElement} */ (event.target).matches(this.selector)) {
-        this.onClick(event);
-      }
+      this.onClick(event);
     });
 
     parent.addEventListener('keydown', (event) => {
@@ -174,6 +171,14 @@ class Group {
    */
   get isReadOnly() {
     return this.parent.matches('[aria-readonly="true"]');
+  }
+
+  /**
+   * Whether the widget is displayed in grid mode.
+   * @type {boolean}
+   */
+  get grid() {
+    return this.role === 'grid' || (this.role === 'listbox' && this.parent.matches('.grid'));
   }
 
   /**
@@ -241,11 +246,14 @@ class Group {
       }
 
       if (this.focusChild) {
-        element.tabIndex = isTarget ? 0 : -1;
+        // Wait a bit before the element is rerendered
+        window.requestAnimationFrame(() => {
+          element.tabIndex = isTarget ? 0 : -1;
 
-        if (isTarget) {
-          element.focus();
-        }
+          if (isTarget) {
+            element.focus();
+          }
+        });
       } else {
         element.classList.toggle('focused', isTarget);
       }
@@ -299,7 +307,10 @@ class Group {
   onClick(event) {
     // eslint-disable-next-line prefer-destructuring
     const target = /** @type {HTMLElement} */ (event.target);
-    const newTarget = target.matches(this.selector) ? target : undefined;
+
+    const newTarget = target.matches(this.selector)
+      ? target
+      : /** @type {HTMLElement | null} */ (target.closest(this.selector));
 
     if (!newTarget || event.button !== 0) {
       return;
