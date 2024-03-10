@@ -100,7 +100,13 @@
   }
 </script>
 
-<div role="none" class="sui combobox {className}" hidden={hidden || undefined} {...$$restProps}>
+<div
+  role="none"
+  class="sui combobox {className}"
+  class:editable
+  hidden={hidden || undefined}
+  {...$$restProps}
+>
   {#if !editable}
     <div
       role="combobox"
@@ -210,7 +216,7 @@
       border-bottom-left-radius: 0;
     }
 
-    &.readonly > :global(button) {
+    &:not(.editable) > :global(button) {
       background-color: transparent !important;
     }
 

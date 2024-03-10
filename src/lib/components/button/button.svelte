@@ -242,7 +242,10 @@
       &:hover,
       &:focus-visible,
       &[aria-expanded='true'] {
-        color: var(--sui-button-primary-foreground-color-focus);
+        color: var(
+          --sui-button-primary-foreground-color-focus,
+          var(--sui-button-primary-foreground-color, var(--sui-primary-accent-color-inverted))
+        );
         background-color: var(
           --sui-button-primary-background-color-focus,
           var(--sui-primary-accent-color-light)
@@ -250,7 +253,10 @@
       }
 
       &:active {
-        color: var(--sui-button-primary-foreground-color-active);
+        color: var(
+          --sui-button-primary-foreground-color-active,
+          var(--sui-button-primary-foreground-color, var(--sui-primary-accent-color-inverted))
+        );
         background-color: var(
           --sui-button-primary-background-color-active,
           var(--sui-primary-accent-color-dark)
@@ -272,7 +278,10 @@
       &:hover,
       &:focus-visible,
       &[aria-expanded='true'] {
-        color: var(--sui-button-secondary-foreground-color-focus);
+        color: var(
+          --sui-button-secondary-foreground-color-focus,
+          var(--sui-button-secondary-foreground-color, var(--sui-primary-accent-color-text))
+        );
         background-color: var(
           --sui-button-secondary-background-color-focus,
           var(--sui-hover-background-color)
@@ -280,7 +289,10 @@
       }
 
       &:active {
-        color: var(--sui-button-secondary-foreground-color-active);
+        color: var(
+          --sui-button-secondary-foreground-color-active,
+          var(--sui-button-secondary-foreground-color, var(--sui-primary-accent-color-text))
+        );
         background-color: var(
           --sui-button-secondary-background-color-active,
           var(--sui-active-background-color)
@@ -310,7 +322,10 @@
       &:hover,
       &:focus-visible,
       &[aria-expanded='true'] {
-        color: var(--sui-button-tertiary-foreground-color-focus);
+        color: var(
+          --sui-button-tertiary-foreground-color-focus,
+          var(--sui-button-tertiary-foreground-color, var(--sui-highlight-foreground-color))
+        );
         background-color: var(
           --sui-button-tertiary-background-color-focus,
           var(--sui-hover-background-color)
@@ -318,7 +333,10 @@
       }
 
       &:active {
-        color: var(--sui-button-tertiary-foreground-color-active);
+        color: var(
+          --sui-button-tertiary-foreground-color-active,
+          var(--sui-button-tertiary-foreground-color, var(--sui-highlight-foreground-color))
+        );
         background-color: var(
           --sui-button-tertiary-background-color-active,
           var(--sui-active-background-color)
