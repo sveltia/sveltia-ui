@@ -85,12 +85,21 @@
     }
 
     :global(h2) {
+      flex: auto;
       display: flex;
       align-items: center;
       gap: 8px;
       margin: 0;
       padding: 0 8px;
+      min-width: 0;
       font-size: var(--sui-font-size-large);
+
+      :global(strong) {
+        display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
 
       :global(span) {
         font-size: var(--sui-font-size-small);
