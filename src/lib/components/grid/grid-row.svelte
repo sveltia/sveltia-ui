@@ -29,6 +29,7 @@
   aria-selected={selected}
   {...$$restProps}
   on:click
+  on:dblclick
   on:select={(/** @type {any} */ event) => {
     dispatch('select', /** @type {CustomEvent} */ (event).detail);
   }}

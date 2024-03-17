@@ -137,6 +137,7 @@
   on:mouseenter
   on:mouseleave
   on:click
+  on:dblclick
   on:dragover
   on:dragleave
   on:dragend

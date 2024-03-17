@@ -53,6 +53,7 @@
     data-type={typeof value}
     {...$$restProps}
     on:click
+    on:dblclick
     on:dragover
     on:dragleave
     on:dragend

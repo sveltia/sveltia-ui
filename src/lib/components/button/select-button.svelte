@@ -69,6 +69,7 @@
   aria-checked={selected}
   {...$$restProps}
   on:click
+  on:dblclick
   on:select
   on:change
   on:change={(event) => {
