@@ -72,6 +72,8 @@
         $isPopupOpen = false;
       }
     }}
+    on:focus
+    on:blur
     on:select
     on:change
   >

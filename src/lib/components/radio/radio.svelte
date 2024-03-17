@@ -81,6 +81,8 @@
       event.preventDefault();
       checked = true;
     }}
+    on:focus
+    on:blur
     on:select
     on:change
   />

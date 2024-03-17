@@ -37,6 +37,8 @@
   {disabled}
   aria-selected={selected}
   {...$$restProps}
+  on:focus
+  on:blur
   on:select
   on:change
 >

@@ -54,6 +54,8 @@
     {...$$restProps}
     on:click
     on:dblclick
+    on:focus
+    on:blur
     on:dragover
     on:dragleave
     on:dragend

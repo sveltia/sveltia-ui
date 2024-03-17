@@ -30,6 +30,8 @@
   {...$$restProps}
   on:click
   on:dblclick
+  on:focus
+  on:blur
   on:select={(/** @type {any} */ event) => {
     dispatch('select', /** @type {CustomEvent} */ (event).detail);
   }}

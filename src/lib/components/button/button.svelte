@@ -145,6 +145,8 @@
   on:keydown
   on:keyup
   on:keypress
+  on:focus
+  on:blur
   on:select={(/** @type {CustomEvent} */ event) => {
     dispatch('select', event.detail);
   }}

@@ -252,10 +252,15 @@ class Group {
 
           if (isTarget) {
             element.focus();
+            element.dispatchEvent(new CustomEvent('focus'));
           }
         });
       } else {
         element.classList.toggle('focused', isTarget);
+
+        if (isTarget) {
+          element.dispatchEvent(new CustomEvent('focus'));
+        }
       }
 
       if (controlTarget) {
