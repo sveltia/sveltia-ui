@@ -35,6 +35,10 @@
   }
 }
 
+::selection {
+  background-color: var(--sui-primary-accent-color-translucent);
+}
+
 * {
   -webkit-tap-highlight-color: transparent;
 }
