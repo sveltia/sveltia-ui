@@ -64,6 +64,7 @@
 
   const dispatch = createEventDispatcher();
   const id = getRandomId('combobox');
+  const selectedSelector = '[role="option"][aria-selected="true"]';
   /** @type {HTMLElement} */
   let comboboxElement;
   /** @type {TextInput | undefined} */
@@ -75,28 +76,51 @@
   let label = '';
 
   /**
-   * Update the `value` and `label` whenever an option is selected.
+   * Update the {@link label} and selected option when the {@link value} is changed.
+   */
+  const onChange = () => {
+    const selected = popupComponent?.content?.querySelector(selectedSelector);
+
+    const target = /** @type {HTMLButtonElement} */ (
+      popupComponent?.content?.querySelector(`[role="option"][value="${value}"]`)
+    );
+
+    if (target) {
+      label = target.querySelector('.label')?.textContent || target.textContent || target.value;
+
+      if (selected !== target) {
+        selected?.setAttribute('aria-selected', 'false');
+        target.setAttribute('aria-selected', 'true');
+      }
+    }
+  };
+
+  /**
+   * Update the {@link value} whenever an option is selected.
    * @param {HTMLButtonElement} target - Selected option.
    */
   const onSelect = (target) => {
     // @todo support more types
     value = target.dataset.type === 'number' ? Number(target.value) : target.value;
-    label = target.querySelector('.label')?.textContent || target.value;
+    onChange();
     dispatch('change', { target: inputComponent?.element, value });
   };
 
   $: {
     if (popupComponent?.content) {
       window.requestAnimationFrame(() => {
-        const selected = popupComponent?.content?.querySelector(
-          '[role="option"][aria-selected="true"]',
-        );
+        const selected = popupComponent?.content?.querySelector(selectedSelector);
 
         if (selected) {
           onSelect(/** @type {HTMLButtonElement} */ (selected));
         }
       });
     }
+  }
+
+  $: {
+    void value;
+    onChange();
   }
 </script>
 
