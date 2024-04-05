@@ -1,5 +1,7 @@
 <script>
   import { SelectButton, SelectButtonGroup } from '$lib';
+  import ButtonGroup from '$lib/components/button/button-group.svelte';
+  import Button from '$lib/components/button/button.svelte';
   import Example from '../../_components/example.svelte';
 </script>
 
@@ -7,6 +9,16 @@
 
 <section>
   <h3>Standard</h3>
+  <Example>
+    <div role="none">
+      <ButtonGroup>
+        <Button selected label="Strawberry" />
+        <Button label="Grape" />
+        <Button label="Lemon" />
+        <Button label="Orange" disabled />
+      </ButtonGroup>
+    </div>
+  </Example>
 </section>
 
 <section>
