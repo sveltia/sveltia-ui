@@ -37,11 +37,15 @@
     background-color: var(--sui-secondary-border-color);
 
     &[aria-orientation='horizontal'] {
+      margin: 8px 0;
+      width: 100%;
       height: 1px;
     }
 
     &[aria-orientation='vertical'] {
+      margin: 0 8px;
       width: 1px;
+      height: 100%;
     }
   }
 </style>
