@@ -107,6 +107,16 @@
         opacity: 0.8;
       }
     }
+
+    :global(.divider[aria-orientation='horizontal']) {
+      margin: 0 4px;
+      width: calc(100% - 8px);
+    }
+
+    :global(.divider[aria-orientation='vertical']) {
+      margin: 4px 0;
+      height: calc(100% - 8px);
+    }
   }
 
   .inner {
