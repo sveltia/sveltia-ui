@@ -62,16 +62,18 @@ export const activateKeyShortcuts = (element, shortcuts = '') => {
    * @param {KeyboardEvent} event - `keydown` event.
    */
   const handler = (event) => {
+    const { disabled, offsetParent, offsetLeft, offsetTop } = element;
+
+    // Check if the element is enabled, visible and clickable (not behind a modal dialog)
     if (
-      !!element.offsetParent &&
+      !disabled &&
+      !!offsetParent &&
+      document.elementsFromPoint(offsetLeft + 4, offsetTop + 4).includes(element) &&
       matchShortcuts(event, /** @type {string} */ (platformKeyShortcuts))
     ) {
       event.preventDefault();
-
-      if (!element.disabled) {
-        element.focus();
-        element.click();
-      }
+      element.focus();
+      element.click();
     }
   };
 
