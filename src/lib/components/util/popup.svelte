@@ -214,7 +214,7 @@
     }
 
     :global(dialog.open) & {
-      transition-duration: 150ms;
+      transition-duration: 50ms;
       opacity: 1;
       transform: translateY(2px);
     }

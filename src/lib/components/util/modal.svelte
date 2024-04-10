@@ -224,7 +224,7 @@
     }
 
     &.open {
-      transition-duration: 200ms;
+      transition-duration: 50ms;
       opacity: 1;
     }
 
