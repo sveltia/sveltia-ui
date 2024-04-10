@@ -13,6 +13,7 @@
   import Button from '../button/button.svelte';
   import Icon from '../icon/icon.svelte';
   import Listbox from '../listbox/listbox.svelte';
+  import SearchBar from '../text-field/search-bar.svelte';
   import TextInput from '../text-field/text-input.svelte';
   import Popup from '../util/popup.svelte';
 
@@ -74,6 +75,12 @@
   let isPopupOpen = writable(false);
   /** @type {string} */
   let label = '';
+  /** @type {boolean} */
+  let showFilter = false;
+  /** @type {string} */
+  let searchTerms = '';
+  /** @type {boolean} */
+  let hasMatchingOptions = true;
 
   /**
    * Update the {@link label} and selected option when the {@link value} is changed.
@@ -86,7 +93,7 @@
     );
 
     if (target) {
-      label = target.querySelector('.label')?.textContent || target.textContent || target.value;
+      label = target.dataset.label || target.textContent || target.value;
 
       if (selected !== target) {
         selected?.setAttribute('aria-selected', 'false');
@@ -200,16 +207,49 @@
   touchOptimized={true}
   bind:open={isPopupOpen}
   bind:this={popupComponent}
+  on:open={() => {
+    showFilter = (popupComponent?.content?.querySelectorAll('[role="option"]')?.length ?? 0) > 5;
+    searchTerms = '';
+  }}
 >
-  <Listbox
-    on:click={(event) => {
-      if (/** @type {HTMLElement} */ (event.target).matches('[role="option"]')) {
-        onSelect(/** @type {HTMLButtonElement} */ (event.target));
-      }
-    }}
-  >
-    <slot />
-  </Listbox>
+  <div role="none" class="combobox-inner">
+    {#if showFilter}
+      <SearchBar
+        flex
+        aria-label={$_('_sui.combobox.filter_options')}
+        aria-controls="{id}-listbox"
+        bind:value={searchTerms}
+        on:keydown={(event) => {
+          if (['ArrowUp', 'ArrowDown', 'Enter'].includes(event.key)) {
+            event.preventDefault();
+            popupComponent?.content
+              ?.querySelector('.sui.listbox')
+              ?.dispatchEvent(new KeyboardEvent('keydown', event));
+          }
+        }}
+      />
+    {/if}
+    <Listbox
+      id="{id}-listbox"
+      class="in-combobox"
+      {searchTerms}
+      on:click={(event) => {
+        if (/** @type {HTMLElement} */ (event.target).matches('[role="option"]')) {
+          onSelect(/** @type {HTMLButtonElement} */ (event.target));
+        }
+      }}
+      on:filter={(event) => {
+        hasMatchingOptions = !!(/** @type {CustomEvent} */ (event).detail.matched);
+      }}
+    >
+      <slot />
+    </Listbox>
+    {#if !hasMatchingOptions}
+      <div role="alert" class="no-options">
+        {$_('_sui.combobox.no_matching_options')}
+      </div>
+    {/if}
+  </div>
 </Popup>
 
 <style lang="scss">
@@ -311,6 +351,30 @@
     & + :global([role='listbox']:not(.open)) {
       opacity: 0;
       pointer-events: none;
+    }
+  }
+
+  .combobox-inner {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+
+    :global(.sui.search-bar) {
+      flex: none;
+    }
+
+    :global(.sui.listbox) {
+      flex: auto;
+      overflow-y: auto;
+    }
+
+    .no-options {
+      flex: none;
+      display: flex;
+      align-items: center;
+      padding: var(--sui-option-padding);
+      height: var(--sui-option-height);
+      color: var(--sui-tertiary-foreground-color);
     }
   }
 </style>

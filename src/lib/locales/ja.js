@@ -21,6 +21,8 @@ export const strings = {
   },
   combobox: {
     select_an_option: 'オプションを選択…',
+    filter_options: 'オプションを絞り込み',
+    no_matching_options: '一致するオプションは見つかりませんでした',
   },
   number_input: {
     decrease: '減らす',

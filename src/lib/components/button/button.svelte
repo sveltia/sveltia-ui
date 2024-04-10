@@ -153,6 +153,7 @@
   on:change={(/** @type {CustomEvent} */ event) => {
     dispatch('change', event.detail);
   }}
+  on:toggle
 >
   <slot name="start-icon" />
   {#if variant === 'link'}

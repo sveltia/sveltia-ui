@@ -31,14 +31,19 @@
   export let disabled = false;
   /**
    * Text label displayed on the item.
-   * @type {string | undefined}
+   * @type {string}
    */
-  export let label = '';
+  export let label;
   /**
    * The `value` attribute on the `<button>` element.
-   * @type {string | undefined}
+   * @type {string}
    */
-  export let value = undefined;
+  export let value = label;
+  /**
+   * The value to be searched.
+   * @type {string}
+   */
+  export let searchValue = label;
 </script>
 
 <div role="none" class="sui option {className}" hidden={hidden || undefined}>
@@ -51,6 +56,8 @@
     {hidden}
     {disabled}
     data-type={typeof value}
+    data-label={label}
+    data-search-value={searchValue}
     {...$$restProps}
     on:click
     on:dblclick
@@ -64,6 +71,10 @@
     on:change
     on:change={(event) => {
       selected = event.detail.selected;
+    }}
+    on:toggle={(event) => {
+      hidden = /** @type {CustomEvent} */ (event).detail.hidden;
+      selected = false;
     }}
   >
     {#if selected}

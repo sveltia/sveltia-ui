@@ -10,12 +10,12 @@
   <Example>
     <div role="none">
       <Select>
-        <Option label="Option 1" />
-        <Option label="Option 2" />
-        <Option label="Option 3" />
+        <Option label="Banana" />
+        <Option label="Mango" />
+        <Option label="Apple" />
         <Divider />
-        <Option label="Option 4" />
-        <Option label="Option 5" disabled />
+        <Option label="Avocado" />
+        <Option label="Grape" disabled />
       </Select>
     </div>
   </Example>
@@ -26,12 +26,12 @@
   <Example>
     <div role="none">
       <Select>
-        <Option label="Option 1" selected />
-        <Option label="Option 2" />
-        <Option label="Option 3" />
+        <Option label="Banana" selected />
+        <Option label="Mango" />
+        <Option label="Apple" />
         <Divider />
-        <Option label="Option 4" />
-        <Option label="Option 5" disabled />
+        <Option label="Avocado" />
+        <Option label="Grape" disabled />
       </Select>
     </div>
   </Example>
@@ -39,6 +39,23 @@
 
 <section>
   <h3>With Filter</h3>
+  <Example>
+    <div role="none">
+      <Select>
+        <Option label="Banana" selected />
+        <Option label="Mango" />
+        <Option label="Apple" />
+        <Divider />
+        <Option label="Avocado" />
+        <Option label="Grape" disabled />
+        <Divider />
+        <Option label="Pineapple" />
+        <Option label="Apricot" />
+        <Option label="Blueberry" />
+        <Option label="Cherry" />
+      </Select>
+    </div>
+  </Example>
 </section>
 
 <section>
@@ -46,12 +63,12 @@
   <Example>
     <div role="none">
       <Combobox>
-        <Option label="Option 1" />
-        <Option label="Option 2" />
-        <Option label="Option 3" />
+        <Option label="Banana" />
+        <Option label="Mango" />
+        <Option label="Apple" />
         <Divider />
-        <Option label="Option 4" />
-        <Option label="Option 5" disabled />
+        <Option label="Avocado" />
+        <Option label="Grape" disabled />
       </Combobox>
     </div>
   </Example>
@@ -66,22 +83,22 @@
   <Example>
     <div role="none">
       <Select disabled>
-        <Option label="Option 1" selected />
-        <Option label="Option 2" />
-        <Option label="Option 3" />
+        <Option label="Banana" selected />
+        <Option label="Mango" />
+        <Option label="Apple" />
         <Divider />
-        <Option label="Option 4" />
-        <Option label="Option 5" disabled />
+        <Option label="Avocado" />
+        <Option label="Grape" disabled />
       </Select>
     </div>
     <div role="none">
       <Combobox disabled>
-        <Option label="Option 1" />
-        <Option label="Option 2" />
-        <Option label="Option 3" />
+        <Option label="Banana" />
+        <Option label="Mango" />
+        <Option label="Apple" />
         <Divider />
-        <Option label="Option 4" />
-        <Option label="Option 5" disabled />
+        <Option label="Avocado" />
+        <Option label="Grape" disabled />
       </Combobox>
     </div>
   </Example>
@@ -92,22 +109,22 @@
   <Example>
     <div role="none">
       <Select readonly>
-        <Option label="Option 1" selected />
-        <Option label="Option 2" />
-        <Option label="Option 3" />
+        <Option label="Banana" selected />
+        <Option label="Mango" />
+        <Option label="Apple" />
         <Divider />
-        <Option label="Option 4" />
-        <Option label="Option 5" disabled />
+        <Option label="Avocado" />
+        <Option label="Grape" disabled />
       </Select>
     </div>
     <div role="none">
       <Combobox readonly>
-        <Option label="Option 1" />
-        <Option label="Option 2" />
-        <Option label="Option 3" />
+        <Option label="Banana" />
+        <Option label="Mango" />
+        <Option label="Apple" />
         <Divider />
-        <Option label="Option 4" />
-        <Option label="Option 5" disabled />
+        <Option label="Avocado" />
+        <Option label="Grape" disabled />
       </Combobox>
     </div>
   </Example>

@@ -75,7 +75,18 @@ class Group {
     this.childSelectedProp = childSelectedAttr.replace('aria-', '');
     this.focusChild = focusChild;
 
-    const { allMembers, selected: defaultSelected } = this;
+    // Wait a bit before the relevant components, including the `aria-controls` target are mounted
+    (async () => {
+      await sleep(100);
+      this.activate();
+    })();
+  }
+
+  /**
+   * Activate the members.
+   */
+  activate() {
+    const { parent, allMembers, selected: defaultSelected } = this;
 
     allMembers.forEach((element, index) => {
       // Select the first one if no member has the `selected` attribute
@@ -340,9 +351,10 @@ class Group {
     const target = /** @type {HTMLElement} */ (event.target);
     const { allMembers, activeMembers } = this;
 
+    /** @type {HTMLElement | undefined} */
     const currentTarget = (() => {
       if (!this.focusChild) {
-        return activeMembers.find((member) => member.matches('.focused')) ?? activeMembers[0];
+        return activeMembers.find((member) => member.matches('.focused'));
       }
 
       if (target.matches(this.selector)) {
@@ -352,22 +364,20 @@ class Group {
       return undefined;
     })();
 
-    if (!currentTarget) {
-      return;
-    }
-
     if (['Enter', ' ', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(key)) {
       event.preventDefault();
     }
 
     if (key === 'Enter') {
-      currentTarget.click(); // Also close the popup if needed
+      currentTarget?.click(); // Also close the popup if needed
 
       return;
     }
 
     if (key === ' ') {
-      this.selectTarget(event, currentTarget);
+      if (currentTarget) {
+        this.selectTarget(event, currentTarget);
+      }
 
       return;
     }
@@ -376,9 +386,9 @@ class Group {
     let newTarget;
 
     if (this.grid) {
-      const colCount = Math.floor(this.parent.clientWidth / currentTarget.clientWidth);
+      const colCount = Math.floor(this.parent.clientWidth / activeMembers[0].clientWidth);
 
-      index = allMembers.indexOf(currentTarget);
+      index = currentTarget ? allMembers.indexOf(currentTarget) : -1;
 
       if (key === 'ArrowUp' && index > 0) {
         newTarget = allMembers[index - colCount];
@@ -400,7 +410,7 @@ class Group {
         newTarget = undefined;
       }
     } else {
-      index = activeMembers.indexOf(currentTarget);
+      index = currentTarget ? activeMembers.indexOf(currentTarget) : -1;
 
       if (key === (this.orientation === 'horizontal' ? 'ArrowLeft' : 'ArrowUp')) {
         if (index > 0) {
@@ -431,17 +441,56 @@ class Group {
       this.selectTarget(event, newTarget);
     }
   }
+
+  /**
+   * Called whenever the params are updated. Filter the items based on the search terms.
+   * @param {{ searchTerms: string }} params - Updated params.
+   */
+  onUpdate({ searchTerms }) {
+    const terms = searchTerms.trim().toLocaleLowerCase();
+    const _terms = terms ? terms.split(/\s+/) : [];
+
+    const matched = this.allMembers
+      .map((member) => {
+        const searchValue =
+          (
+            member.dataset.searchValue ??
+            member.dataset.label ??
+            member.querySelector('.label')?.textContent ??
+            member.textContent
+          )?.toLocaleLowerCase() ?? '';
+
+        const hidden = !_terms.every((term) => searchValue.includes(term));
+
+        member.dispatchEvent(new CustomEvent('toggle', { detail: { hidden } }));
+
+        return hidden;
+      })
+      .filter((hidden) => !hidden).length;
+
+    this.parent.dispatchEvent(
+      new CustomEvent('filter', { detail: { matched, total: this.allMembers.length } }),
+    );
+  }
 }
 
 /**
  * Activate a new group.
  * @param {HTMLElement} parent - Parent element.
+ * @param {object} [_params] - Action params.
+ * @returns {import('svelte/action').ActionReturn} Action.
  */
-export const activateGroup = (parent) => {
-  (async () => {
-    // Wait a bit before the relevant components, including the `aria-controls` target are mounted
-    await sleep(100);
+// eslint-disable-next-line no-unused-vars
+export const activateGroup = (parent, _params) => {
+  const group = new Group(parent);
 
-    return new Group(parent);
-  })();
+  return {
+    /**
+     * Called whenever the params are updated.
+     * @param {any} params - Updated params.
+     */
+    update(params) {
+      group.onUpdate(params);
+    },
+  };
 };

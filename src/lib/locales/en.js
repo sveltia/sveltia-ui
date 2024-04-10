@@ -21,6 +21,8 @@ export const strings = {
   },
   combobox: {
     select_an_option: 'Select an option…',
+    filter_options: 'Filter Options',
+    no_matching_options: 'No matching options found',
   },
   number_input: {
     decrease: 'Decrease',

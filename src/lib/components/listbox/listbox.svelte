@@ -46,6 +46,16 @@
    * @type {boolean}
    */
   export let multiple = false;
+  /**
+   * Search terms to be used to filter the items.
+   * @type {string}
+   */
+  export let searchTerms = '';
+
+  /**
+   * @type {boolean}
+   */
+  let filtered = false;
 
   const dispatch = createEventDispatcher();
 </script>
@@ -53,6 +63,7 @@
 <div
   role="listbox"
   class="sui listbox {className}"
+  class:filtered
   tabindex={disabled ? -1 : 0}
   hidden={hidden || undefined}
   aria-hidden={hidden}
@@ -62,10 +73,14 @@
   aria-invalid={invalid}
   aria-multiselectable={multiple}
   {...$$restProps}
-  use:activateGroup
+  use:activateGroup={{ searchTerms }}
   on:click
   on:change={(/** @type {CustomEvent} */ event) => {
     dispatch('change', event.detail);
+  }}
+  on:filter
+  on:filter={(/** @type {CustomEvent} */ { detail: { matched, total } }) => {
+    filtered = matched !== total;
   }}
 >
   <div role="none" class="inner" inert={disabled}>
@@ -116,6 +131,16 @@
 
       :global(.option button[aria-selected='true']) {
         border-color: var(--sui-primary-accent-color-light);
+      }
+    }
+
+    &.in-combobox:focus-visible {
+      outline-color: transparent;
+    }
+
+    &.filtered {
+      :global([role='separator']) {
+        display: none;
       }
     }
   }
