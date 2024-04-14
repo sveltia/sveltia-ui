@@ -14,7 +14,8 @@ export const isMac = () =>
  * @see https://w3c.github.io/aria/#aria-keyshortcuts
  */
 export const matchShortcuts = (event, shortcuts) => {
-  const { ctrlKey, metaKey, altKey, shiftKey, key } = event;
+  const { ctrlKey, metaKey, altKey, shiftKey, code } = event;
+  const key = code.replace(/^(?:Digit|Key)(.)$/, '$1');
 
   return shortcuts.split(/\s+/).some((shortcut) => {
     const keys = shortcut.split('+');
@@ -62,13 +63,14 @@ export const activateKeyShortcuts = (element, shortcuts = '') => {
    * @param {KeyboardEvent} event - `keydown` event.
    */
   const handler = (event) => {
-    const { disabled, offsetParent, offsetLeft, offsetTop } = element;
+    const { disabled, offsetParent } = element;
+    const { top, left } = element.getBoundingClientRect();
 
     // Check if the element is enabled, visible and clickable (not behind a modal dialog)
     if (
       !disabled &&
       !!offsetParent &&
-      document.elementsFromPoint(offsetLeft + 4, offsetTop + 4).includes(element) &&
+      document.elementsFromPoint(left + 4, top + 4).includes(element) &&
       matchShortcuts(event, /** @type {string} */ (platformKeyShortcuts))
     ) {
       event.preventDefault();
