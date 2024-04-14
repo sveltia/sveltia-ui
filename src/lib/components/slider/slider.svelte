@@ -172,6 +172,8 @@
       return;
     }
 
+    event.stopPropagation();
+
     moveThumb(startX + (screenX - startScreenX));
   };
 
@@ -184,6 +186,13 @@
 
     if (disabled || readonly || !dragging || pointerId !== targetPointerId) {
       return;
+    }
+
+    event.stopPropagation();
+
+    // Handle a click on the bars
+    if (/** @type {HTMLElement} */ (event.target).matches('.base-bar, .slider-bar')) {
+      moveThumb(/** @type {any} */ (event).layerX);
     }
 
     // Reset everything
@@ -211,6 +220,8 @@
       return;
     }
 
+    event.stopPropagation();
+
     dragging = true;
     startX = clientX - /** @type {HTMLElement} */ (base).getBoundingClientRect().x;
     startScreenX = screenX;
@@ -220,18 +231,6 @@
     document.addEventListener('pointermove', onPointerMove);
     document.addEventListener('pointerup', onPointerUp);
     document.addEventListener('pointercancel', onPointerUp);
-  };
-
-  /**
-   * Handle the `click` event fired on the slider.
-   * @param {MouseEvent} event - `click` event.
-   */
-  const onClick = (event) => {
-    if (disabled || readonly || multiThumb || dragging) {
-      return;
-    }
-
-    moveThumb(/** @type {any} */ (event).layerX);
   };
 
   /**
@@ -303,14 +302,8 @@
   class:readonly
   hidden={hidden || undefined}
   {...$$restProps}
-  on:click|preventDefault|stopPropagation
 >
-  <div
-    role="none"
-    class="base"
-    bind:this={base}
-    on:click|preventDefault|stopPropagation={(event) => onClick(event)}
-  >
+  <div role="none" class="base" bind:this={base} on:pointerdown={(event) => onPointerDown(event)}>
     <div role="none" class="base-bar" />
     <div
       class="slider-bar"
