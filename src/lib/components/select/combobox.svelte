@@ -115,7 +115,7 @@
 
   $: {
     if (popupComponent?.content) {
-      window.requestAnimationFrame(() => {
+      globalThis.requestAnimationFrame(() => {
         const selected = popupComponent?.content?.querySelector(selectedSelector);
 
         if (selected) {

@@ -114,7 +114,7 @@
       on:click={() => {
         value = '';
         input?.focus();
-        window.requestIdleCallback(() => {
+        globalThis.requestIdleCallback(() => {
           input?.dispatchEvent(new KeyboardEvent('input'));
           input?.dispatchEvent(new KeyboardEvent('keypress'));
           input?.dispatchEvent(new KeyboardEvent('change'));

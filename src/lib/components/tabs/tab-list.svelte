@@ -51,7 +51,7 @@
    * Update the indicator position.
    */
   const updateIndicator = () => {
-    window.requestAnimationFrame(() => {
+    globalThis.requestAnimationFrame(() => {
       const selected = /** @type {HTMLElement | null} */ (
         wrapper?.querySelector('[role="tab"][aria-selected="true"]')
       );

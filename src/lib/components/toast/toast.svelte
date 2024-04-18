@@ -82,10 +82,10 @@
     void id;
     void show;
     void duration;
-    window.clearTimeout(timerId);
+    globalThis.clearTimeout(timerId);
 
     if (show && duration) {
-      timerId = window.setTimeout(() => {
+      timerId = globalThis.setTimeout(() => {
         show = false;
       }, duration);
     }

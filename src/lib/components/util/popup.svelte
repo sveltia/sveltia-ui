@@ -92,7 +92,7 @@
   $: touch = touchOptimized && touchEnabled;
 
   onMount(() => {
-    touchEnabled = window.matchMedia('(pointer: coarse)').matches;
+    touchEnabled = globalThis.matchMedia('(pointer: coarse)').matches;
   });
 </script>
 

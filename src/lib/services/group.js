@@ -106,7 +106,7 @@ class Group {
         controlTarget.setAttribute('aria-hidden', String(!isSelected));
 
         if (isSelected) {
-          window.setTimeout(() => {
+          globalThis.setTimeout(() => {
             try {
               controlTarget.scrollIntoView({
                 block: 'nearest',
@@ -258,7 +258,7 @@ class Group {
 
       if (this.focusChild) {
         // Wait a bit before the element is rerendered
-        window.requestAnimationFrame(() => {
+        globalThis.requestAnimationFrame(() => {
           element.tabIndex = isTarget ? 0 : -1;
 
           if (isTarget) {
@@ -279,7 +279,7 @@ class Group {
         controlTarget.setAttribute('aria-hidden', String(!isTarget));
 
         if (isTarget) {
-          window.setTimeout(() => {
+          globalThis.setTimeout(() => {
             try {
               controlTarget.scrollIntoView({
                 block: 'nearest',
@@ -296,7 +296,7 @@ class Group {
       if (isTarget) {
         this.parent.setAttribute('aria-activedescendant', element.id);
 
-        window.setTimeout(() => {
+        globalThis.setTimeout(() => {
           try {
             element.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'auto' });
           } catch {

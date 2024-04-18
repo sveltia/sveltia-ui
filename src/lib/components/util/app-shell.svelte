@@ -25,7 +25,7 @@
   let fontLoader;
 
   onMount(() => {
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const mediaQuery = globalThis.matchMedia('(prefers-color-scheme: dark)');
     const { dataset } = document.documentElement;
 
     /**
@@ -44,7 +44,7 @@
       applyTheme();
     };
 
-    window.setTimeout(() => {
+    globalThis.setTimeout(() => {
       fontLoader?.remove();
     }, 1000);
   });

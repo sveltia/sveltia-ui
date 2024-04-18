@@ -29,7 +29,7 @@ export const isObject = (input) =>
  */
 export const sleep = (ms = 1000) =>
   new Promise((resolve) => {
-    window.setTimeout(() => {
+    globalThis.setTimeout(() => {
       resolve();
     }, ms);
   });

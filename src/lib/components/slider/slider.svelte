@@ -270,7 +270,7 @@
 
   onMount(() => {
     const observer = new ResizeObserver(() => init());
-    const query = window.matchMedia('(pointer: coarse)');
+    const query = globalThis.matchMedia('(pointer: coarse)');
 
     observer.observe(/** @type {HTMLElement} */ (base));
     query.addEventListener('change', init);
