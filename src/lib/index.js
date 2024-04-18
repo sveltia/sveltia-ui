@@ -10,7 +10,7 @@ import { addMessages, init } from 'svelte-i18n';
  */
 export const initLocales = ({ fallbackLocale = 'en', initialLocale = 'en' } = {}) => {
   /** @type {{ [key: string]: { strings: object }}} */
-  const modules = import.meta.glob('$lib/locales/*.js', { eager: true });
+  const modules = import.meta.glob('./locales/*.js', { eager: true });
 
   Object.entries(modules).forEach(([path, { strings }]) => {
     const [, locale] = /** @type {string[]} */ (path.match(/([a-zA-Z-]+)\.js/));
