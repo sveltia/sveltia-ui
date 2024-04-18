@@ -6,7 +6,7 @@
 
 <script>
   import { createEventDispatcher, onMount } from 'svelte';
-  import { sleep } from '../../services/util';
+  import { sleep } from '$lib/services/util';
 
   /**
    * The `class` attribute on the `<dialog>` element.

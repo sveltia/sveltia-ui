@@ -3,7 +3,7 @@
   A menu item group.
 -->
 <script>
-  import { getRandomId } from '../../services/util';
+  import { getRandomId } from '$lib/services/util';
 
   /**
    * The `class` attribute on the wrapper element.

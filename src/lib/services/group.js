@@ -1,4 +1,4 @@
-import { getRandomId, sleep } from './util';
+import { getRandomId, sleep } from '$lib/services/util';
 
 /**
  * @type {{ [role: string]: {

@@ -7,9 +7,9 @@
 <script>
   import { onMount } from 'svelte';
   import { writable } from 'svelte/store';
-  import { activatePopup } from '../../services/popup';
-  import { sleep } from '../../services/util';
-  import Modal from './modal.svelte';
+  import Modal from '$lib/components/util/modal.svelte';
+  import { activatePopup } from '$lib/services/popup';
+  import { sleep } from '$lib/services/util';
 
   /**
    * The `class` attribute on the content element.

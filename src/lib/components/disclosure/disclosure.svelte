@@ -8,9 +8,9 @@
 
 <script>
   import { createEventDispatcher } from 'svelte';
-  import { getRandomId } from '../../services/util';
-  import Button from '../button/button.svelte';
-  import Icon from '../icon/icon.svelte';
+  import Button from '$lib/components/button/button.svelte';
+  import Icon from '$lib/components/icon/icon.svelte';
+  import { getRandomId } from '$lib/services/util';
 
   /**
    * The `class` attribute on the wrapper element.

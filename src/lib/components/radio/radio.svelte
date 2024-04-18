@@ -6,8 +6,8 @@
   @see https://www.w3.org/WAI/ARIA/apg/patterns/radio/
 -->
 <script>
-  import { getRandomId } from '../../services/util';
-  import Button from '../button/button.svelte';
+  import Button from '$lib/components/button/button.svelte';
+  import { getRandomId } from '$lib/services/util';
 
   /**
    * The `class` attribute on the wrapper element.

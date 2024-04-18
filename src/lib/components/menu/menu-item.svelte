@@ -5,10 +5,10 @@
 -->
 <script>
   import { writable } from 'svelte/store';
-  import Button from '../button/button.svelte';
-  import Icon from '../icon/icon.svelte';
-  import Popup from '../util/popup.svelte';
-  import Menu from './menu.svelte';
+  import Button from '$lib/components/button/button.svelte';
+  import Icon from '$lib/components/icon/icon.svelte';
+  import Menu from '$lib/components/menu/menu.svelte';
+  import Popup from '$lib/components/util/popup.svelte';
 
   /**
    * The `class` attribute on the wrapper element.

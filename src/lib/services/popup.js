@@ -1,7 +1,7 @@
 /* eslint-disable no-nested-ternary */
 
 import { get, writable } from 'svelte/store';
-import { getRandomId } from './util';
+import { getRandomId } from '$lib/services/util';
 
 /**
  * Implement the popup handler.

@@ -7,7 +7,7 @@
   @see https://www.w3.org/WAI/ARIA/apg/patterns/listbox/examples/listbox-grouped/
 -->
 <script>
-  import { getRandomId } from '../../services/util';
+  import { getRandomId } from '$lib/services/util';
 
   /**
    * The `class` attribute on the wrapper element.

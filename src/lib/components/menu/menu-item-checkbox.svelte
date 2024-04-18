@@ -4,8 +4,8 @@
   @see https://w3c.github.io/aria/#menuitemcheckbox
 -->
 <script>
-  import Icon from '../icon/icon.svelte';
-  import MenuItem from './menu-item.svelte';
+  import Icon from '$lib/components/icon/icon.svelte';
+  import MenuItem from '$lib/components/menu/menu-item.svelte';
 
   /**
    * The `class` attribute on the wrapper element.

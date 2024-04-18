@@ -4,12 +4,12 @@
 -->
 <script>
   import { _ } from 'svelte-i18n';
+  import Button from '$lib/components/button/button.svelte';
+  import Divider from '$lib/components/divider/divider.svelte';
+  import Icon from '$lib/components/icon/icon.svelte';
+  import TextArea from '$lib/components/text-field/text-area.svelte';
+  import Toolbar from '$lib/components/toolbar/toolbar.svelte';
   import { getRandomId } from '$lib/services/util';
-  import Button from '../button/button.svelte';
-  import Divider from '../divider/divider.svelte';
-  import Icon from '../icon/icon.svelte';
-  import Toolbar from '../toolbar/toolbar.svelte';
-  import TextArea from './text-area.svelte';
 
   /**
    * Make the text input container flexible.

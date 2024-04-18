@@ -6,11 +6,11 @@
 -->
 <script>
   import { _ } from 'svelte-i18n';
+  import Button from '$lib/components/button/button.svelte';
+  import Spacer from '$lib/components/divider/spacer.svelte';
+  import Icon from '$lib/components/icon/icon.svelte';
+  import Modal from '$lib/components/util/modal.svelte';
   import { getRandomId } from '$lib/services/util';
-  import Button from '../button/button.svelte';
-  import Spacer from '../divider/spacer.svelte';
-  import Icon from '../icon/icon.svelte';
-  import Modal from '../util/modal.svelte';
 
   /**
    * The `class` attribute on the content element.

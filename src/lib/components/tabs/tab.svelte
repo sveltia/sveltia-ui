@@ -5,7 +5,7 @@
   @see https://www.w3.org/WAI/ARIA/apg/patterns/tabs/
 -->
 <script>
-  import Button from '../button/button.svelte';
+  import Button from '$lib/components/button/button.svelte';
 
   /**
    * The `class` attribute on the `<button>` element.

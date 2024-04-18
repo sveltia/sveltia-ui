@@ -6,7 +6,7 @@
   @see https://developer.mozilla.org/en-US/docs/Web/API/Window/alert
 -->
 <script>
-  import Dialog from './dialog.svelte';
+  import Dialog from '$lib/components/dialog/dialog.svelte';
 
   /**
    * The `class` attribute on the `<dialog>` element.
