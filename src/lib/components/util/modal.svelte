@@ -180,7 +180,8 @@
   }}
   on:cancel|preventDefault={() => {
     // Escape key is pressed
-    if (escapeDismiss) {
+    if (dialog && escapeDismiss) {
+      dialog.returnValue = 'cancel';
       open = false;
     }
   }}
