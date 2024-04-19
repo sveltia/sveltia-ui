@@ -24,3 +24,11 @@
 >
   {name}
 </span>
+
+<style lang="scss">
+  .icon.small-arrow {
+    overflow: hidden;
+    width: 12px;
+    text-indent: -6px;
+  }
+</style>

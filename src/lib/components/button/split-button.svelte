@@ -83,7 +83,7 @@
     {showPopupBackdrop}
   >
     <slot name="chevron-icon" slot="end-icon">
-      <Icon name="arrow_drop_down" />
+      <Icon name="arrow_drop_down" class="small-arrow" />
     </slot>
     <slot name="popup" slot="popup" />
   </MenuButton>
@@ -107,10 +107,6 @@
         border-top-left-radius: 0;
         border-bottom-left-radius: 0;
         aspect-ratio: 3 / 4;
-
-        :global(.icon) {
-          font-size: 20px;
-        }
       }
     }
   }

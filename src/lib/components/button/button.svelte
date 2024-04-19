@@ -459,5 +459,9 @@
     :global(.label) {
       padding: 0 4px;
     }
+
+    &:has([slot='start-icon'] + [slot='end-icon']) {
+      gap: 0;
+    }
   }
 </style>

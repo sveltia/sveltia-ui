@@ -10,7 +10,7 @@
   <Example>
     <div role="none">
       <MenuButton variant="tertiary" label="Open Menu">
-        <Icon slot="end-icon" name="arrow_drop_down" />
+        <Icon slot="end-icon" name="arrow_drop_down" class="small-arrow" />
         <Menu slot="popup">
           <MenuItem label="Item" />
           <MenuItem label="Item" disabled />
@@ -31,7 +31,7 @@
   <Example>
     <div role="none">
       <MenuButton variant="tertiary" label="Open Menu">
-        <Icon slot="end-icon" name="arrow_drop_down" />
+        <Icon slot="end-icon" name="arrow_drop_down" class="small-arrow" />
         <Menu slot="popup">
           <MenuItem label="Item" />
           <MenuItem label="Item">
@@ -77,7 +77,7 @@
   <Example>
     <div role="none">
       <MenuButton variant="tertiary" label="Open Menu" disabled>
-        <Icon slot="end-icon" name="arrow_drop_down" />
+        <Icon slot="end-icon" name="arrow_drop_down" class="small-arrow" />
         <Menu slot="popup">
           <MenuItem label="Item" />
           <MenuItem label="Item" disabled />

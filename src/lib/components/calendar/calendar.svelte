@@ -56,7 +56,7 @@
       label={firstDay.toLocaleDateString('en', { year: 'numeric', month: 'short' })}
       aria-haspopup="dialog"
     >
-      <Icon slot="end-icon" name="arrow_drop_down" />
+      <Icon slot="end-icon" name="arrow_drop_down" class="small-arrow" />
       <div slot="popup" role="none" class="popup-inner" on:click|stopPropagation>
         <div role="group" aria-label={$_('_sui.calendar.year')}>
           <div role="none" class="header">

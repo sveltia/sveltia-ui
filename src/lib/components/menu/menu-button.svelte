@@ -105,14 +105,3 @@
 >
   <slot name="popup" />
 </Popup>
-
-<style lang="scss">
-  .wrapper {
-    display: contents;
-
-    :global(.label + .icon:last-child) {
-      margin: 0 -2px;
-      font-size: 20px;
-    }
-  }
-</style>
