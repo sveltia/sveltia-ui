@@ -145,7 +145,6 @@
 
   $: {
     void open;
-    void dialog;
     toggleDialog();
   }
 
