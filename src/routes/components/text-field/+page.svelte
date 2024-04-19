@@ -1,5 +1,5 @@
 <script>
-  import { MarkdownEditor, NumberInput, PasswordInput, SearchBar, TextArea, TextInput } from '$lib';
+  import { NumberInput, PasswordInput, SearchBar, TextArea, TextInput } from '$lib';
   import Example from '../../_components/example.svelte';
 </script>
 
@@ -68,15 +68,6 @@
 </section>
 
 <section>
-  <h3>Editor (WIP)</h3>
-  <Example>
-    <div role="none">
-      <MarkdownEditor />
-    </div>
-  </Example>
-</section>
-
-<section>
   <h3>Flex</h3>
   <Example>
     <div role="none">
@@ -115,9 +106,6 @@
     <div role="none">
       <TextArea disabled />
     </div>
-    <div role="none">
-      <MarkdownEditor disabled />
-    </div>
   </Example>
 </section>
 
@@ -138,9 +126,6 @@
     </div>
     <div role="none">
       <TextArea readonly />
-    </div>
-    <div role="none">
-      <MarkdownEditor readonly />
     </div>
   </Example>
 </section>

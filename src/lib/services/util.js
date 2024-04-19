@@ -33,3 +33,24 @@ export const sleep = (ms = 1000) =>
       resolve();
     }, ms);
   });
+
+/**
+ * Check if the given string is a URL.
+ * @param {string} str - String that might be a URL.
+ * @returns {boolean} Result.
+ */
+export const isURL = (str) => {
+  // @ts-ignore
+  if (typeof URL.canParse === 'function') {
+    // @ts-ignore
+    return URL.canParse(str);
+  }
+
+  try {
+    // eslint-disable-next-line no-new
+    new URL(str);
+    return true;
+  } catch {
+    return false;
+  }
+};

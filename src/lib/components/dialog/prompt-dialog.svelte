@@ -32,6 +32,11 @@
    */
   export let okLabel = '';
   /**
+   * Whether to disable the OK button.
+   * @type {boolean}
+   */
+  export let okDisabled = false;
+  /**
    * Text label displayed on the Cancel button.
    * @type {string}
    */
@@ -54,6 +59,7 @@
   bind:open
   {title}
   {okLabel}
+  {okDisabled}
   {cancelLabel}
   {...$$restProps}
   on:opening

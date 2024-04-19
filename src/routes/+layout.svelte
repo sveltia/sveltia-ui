@@ -69,6 +69,7 @@
               { key: 'select', label: 'Select' },
               { key: 'slider', label: 'Slider' },
               { key: 'switch', label: 'Switch' },
+              { key: 'text-editor', label: 'Text Editor' },
               { key: 'text-field', label: 'Text Field' },
             ]}
           />

@@ -96,6 +96,10 @@
     margin: var(--sui-focus-ring-width);
     min-width: var(--sui-textbox-multiline-min-width);
 
+    &[hidden] {
+      display: none;
+    }
+
     &.flex {
       width: -moz-available;
       width: -webkit-fill-available;
