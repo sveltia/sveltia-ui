@@ -106,6 +106,7 @@
     font-family: var(--sui-font-family-default);
     font-size: var(--sui-font-size-default);
     font-weight: var(--sui-font-weight-normal);
+    word-spacing: var(--sui-word-spacing-normal);
     -webkit-user-select: none;
     user-select: none;
     touch-action: none;

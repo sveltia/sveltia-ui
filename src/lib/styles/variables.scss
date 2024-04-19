@@ -101,6 +101,7 @@
   --sui-selected-background-color: hsl(var(--sui-background-color-5-hsl) / 75%);
   --sui-active-background-color: hsl(var(--sui-background-color-5-hsl) / 100%);
   --sui-content-background-color: hsl(var(--sui-background-color-1-hsl));
+  --sui-code-background-color: hsl(var(--sui-background-color-4-hsl));
   --sui-primary-background-color: hsl(var(--sui-background-color-2-hsl));
   --sui-primary-background-color-translucent: hsl(var(--sui-background-color-2-hsl) / 80%);
   --sui-secondary-background-color: hsl(var(--sui-background-color-3-hsl));
@@ -160,10 +161,11 @@
   --sui-font-weight-normal: 300;
   --sui-font-weight-bold: 600;
   --sui-font-family-monospace: "Noto Sans Mono", monospace;
-  --sui-font-size-monospace: 12.5px;
+  --sui-font-size-monospace: 0.9em;
   --sui-line-height-default: 1.25;
   --sui-line-height-compact: 1.5;
   --sui-line-height-comfortable: 1.75;
+  --sui-word-spacing-normal: 0.1ex;
   // Controls
   --sui-control-small-border-width: 1px;
   --sui-control-small-border-radius: calc(var(--sui-control-small-height) / 8);

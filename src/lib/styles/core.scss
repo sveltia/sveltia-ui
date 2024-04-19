@@ -1,7 +1,7 @@
 @use "variables.scss";
 
-// https://fonts.google.com/share?selection.family=Merriweather%20Sans:ital,wght@0,300;0,600;1,300%7CNoto%20Sans%20Mono
-@import url("https://fonts.googleapis.com/css2?family=Merriweather+Sans:ital,wght@0,300;0,600;1,300&family=Noto+Sans+Mono&display=swap");
+// https://fonts.google.com/share?selection.family=Merriweather+Sans:ital,wght@0,300;0,600;1,300;1,600|Noto+Sans+Mono
+@import url("https://fonts.googleapis.com/css2?family=Merriweather+Sans:ital,wght@0,300;0,600;1,300;1,600&family=Noto+Sans+Mono&display=swap");
 // https://fonts.google.com/icons?icon.set=Material+Symbols
 // Use `font-display: block;` @see https://stackoverflow.com/q/41710834
 @import url("https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=block");
@@ -61,6 +61,31 @@ h5,
 h6 {
   margin: 0;
   font-weight: var(--sui-font-weight-bold);
+  line-height: var(--sui-line-height-default);
+}
+
+h1 {
+  font-size: 32px;
+}
+
+h2 {
+  font-size: 28px;
+}
+
+h3 {
+  font-size: 24px;
+}
+
+h4 {
+  font-size: 20px;
+}
+
+h5 {
+  font-size: 16px;
+}
+
+h6 {
+  font-size: 12px;
 }
 
 strong {
@@ -79,14 +104,38 @@ li {
 
 code,
 pre {
+  border-radius: 4px;
+  background-color: var(--sui-code-background-color);
   font-family: var(--sui-font-family-monospace);
   font-size: var(--sui-font-size-monospace);
+  vertical-align: -0.05em;
 }
 
 pre {
+  padding: 8px;
   line-height: var(--sui-line-height-compact);
   -webkit-user-select: text;
   user-select: text;
+}
+
+code {
+  padding: 2px 4px;
+}
+
+table {
+  border-collapse: collapse;
+}
+
+th,
+td {
+  border: 1px solid var(--sui-textbox-border-color);
+  padding: 8px;
+}
+
+blockquote {
+  margin-left: 16px;
+  border-left: 4px solid var(--sui-textbox-border-color);
+  padding-left: 12px;
 }
 
 .disabled,
