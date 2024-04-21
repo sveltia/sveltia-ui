@@ -10,7 +10,14 @@ import { addMessages, init } from 'svelte-i18n';
  */
 export const initLocales = ({ fallbackLocale = 'en', initialLocale = 'en' } = {}) => {
   /** @type {{ [key: string]: { strings: object }}} */
-  const modules = import.meta.glob('./locales/*.js', { eager: true });
+  let modules = import.meta.glob('./locales/*.js', { eager: true });
+
+  // The file path must be relative during local development, or the import may fail when using
+  // `pnpm link -g @sveltia/ui`. On the other hand, it must start with `$lib` when being imported
+  // with `pnpm install @sveltia/ui`, otherwise the path cannot be resolved.
+  if (!Object.keys(modules).length) {
+    modules = import.meta.glob('$lib/locales/*.js', { eager: true });
+  }
 
   Object.entries(modules).forEach(([path, { strings }]) => {
     const [, locale] = /** @type {string[]} */ (path.match(/([a-zA-Z-]+)\.js/));
