@@ -5,11 +5,11 @@
   @see https://w3c.github.io/aria/#textbox
 -->
 <script>
+  import { generateElementId } from '@sveltia/utils/element';
   import { _ } from 'svelte-i18n';
   import Button from '$lib/components/button/button.svelte';
   import Icon from '$lib/components/icon/icon.svelte';
   import TextInput from '$lib/components/text-field/text-input.svelte';
-  import { getRandomId } from '$lib/services/util';
 
   /**
    * The `class` attribute on the wrapper element.
@@ -67,7 +67,7 @@
    */
   export let step = 1;
 
-  const id = getRandomId('input');
+  const id = generateElementId('input');
   let edited = false;
 
   $: maximumFractionDigits = String(step).split('.')[1]?.length || 0;

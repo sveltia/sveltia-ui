@@ -32,6 +32,7 @@
     "@lexical/selection": "^0.14.5",
     "@lexical/table": "^0.14.5",
     "@lexical/utils": "^0.14.5",
+    "@sveltia/utils": "^0.1.0",
     "lexical": "^0.14.5",
     "svelte": "^4.2.15"
   },
@@ -426,10 +427,6 @@
       "types": "./package/services/popup.d.ts",
       "default": "./package/services/popup.js"
     },
-    "./services/util": {
-      "types": "./package/services/util.d.ts",
-      "default": "./package/services/util.js"
-    },
     "./styles/core.scss": "./package/styles/core.scss",
     "./styles/variables.scss": "./package/styles/variables.scss",
     "./typedef": {
@@ -661,9 +658,6 @@
       ],
       "services/popup": [
         "./package/services/popup.d.ts"
-      ],
-      "services/util": [
-        "./package/services/util.d.ts"
       ],
       "typedef": [
         "./package/typedef.d.ts"

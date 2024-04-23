@@ -8,11 +8,11 @@
 <svelte:options accessors={true} />
 
 <script>
+  import { generateElementId } from '@sveltia/utils/element';
   import { _ } from 'svelte-i18n';
   import Button from '$lib/components/button/button.svelte';
   import Icon from '$lib/components/icon/icon.svelte';
   import TextInput from '$lib/components/text-field/text-input.svelte';
-  import { getRandomId } from '$lib/services/util';
 
   /**
    * The `class` attribute on the wrapper element.
@@ -56,7 +56,7 @@
    */
   export let value = undefined;
 
-  const id = getRandomId('searchbox');
+  const id = generateElementId('searchbox');
   /**
    * Reference to the `TextInput` component.
    * @type {TextInput | undefined}

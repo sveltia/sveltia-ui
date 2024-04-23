@@ -99,5 +99,3 @@ export { default as Toolbar } from '$lib/components/toolbar/toolbar.svelte';
 export { default as AppShell } from '$lib/components/util/app-shell.svelte';
 export { default as Group } from '$lib/components/util/group.svelte';
 export { default as Modal } from '$lib/components/util/modal.svelte';
-
-export * from '$lib/services/util';

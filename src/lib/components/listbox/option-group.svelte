@@ -7,7 +7,7 @@
   @see https://www.w3.org/WAI/ARIA/apg/patterns/listbox/examples/listbox-grouped/
 -->
 <script>
-  import { getRandomId } from '$lib/services/util';
+  import { generateElementId } from '@sveltia/utils/element';
 
   /**
    * The `class` attribute on the wrapper element.
@@ -30,7 +30,7 @@
    */
   export let label = '';
 
-  const id = getRandomId('optgroup');
+  const id = generateElementId('optgroup');
 </script>
 
 <div

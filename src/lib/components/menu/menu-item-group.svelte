@@ -3,7 +3,7 @@
   A menu item group.
 -->
 <script>
-  import { getRandomId } from '$lib/services/util';
+  import { generateElementId } from '@sveltia/utils/element';
 
   /**
    * The `class` attribute on the wrapper element.
@@ -26,7 +26,7 @@
    */
   export let title = '';
 
-  const id = getRandomId('group');
+  const id = generateElementId('group');
 </script>
 
 <div

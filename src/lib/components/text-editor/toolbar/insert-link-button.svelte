@@ -1,6 +1,7 @@
 <script>
   import { LinkNode, TOGGLE_LINK_COMMAND } from '@lexical/link';
   import { $getNearestNodeOfType as getNearestNodeOfType } from '@lexical/utils';
+  import { isURL } from '@sveltia/utils/string';
   import {
     COMMAND_PRIORITY_NORMAL,
     KEY_DOWN_COMMAND,
@@ -17,7 +18,6 @@
   import { availableButtons } from '$lib/components/text-editor';
   import TextInput from '$lib/components/text-field/text-input.svelte';
   import { isMac, matchShortcuts } from '$lib/services/events';
-  import { isURL } from '$lib/services/util';
 
   /**
    * Button type.

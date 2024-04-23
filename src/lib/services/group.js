@@ -1,4 +1,5 @@
-import { getRandomId, sleep } from '$lib/services/util';
+import { generateElementId } from '@sveltia/utils/element';
+import { sleep } from '@sveltia/utils/misc';
 
 /**
  * @type {{ [role: string]: {
@@ -62,7 +63,7 @@ class Group {
     this.parent = parent;
     this.role = /** @type {string} */ (parent.getAttribute('role'));
     this.multi = this.parent.getAttribute('aria-multiselectable') === 'true';
-    this.id = getRandomId(this.role);
+    this.id = generateElementId(this.role);
     this.parentGroupSelector = `[role="group"], [role="${this.role}"]`;
 
     const { orientation, childRoles, childSelectedAttr, focusChild } = config[this.role];

@@ -1,7 +1,7 @@
 /* eslint-disable no-nested-ternary */
 
+import { generateElementId } from '@sveltia/utils/element';
 import { get, writable } from 'svelte/store';
-import { getRandomId } from '$lib/services/util';
 
 /**
  * Implement the popup handler.
@@ -105,7 +105,7 @@ class Popup {
     this.popupElement = popupElement; // = backdrop
     this.position = position;
     this.positionBaseElement = positionBaseElement ?? anchorElement;
-    this.id = getRandomId('popup');
+    this.id = generateElementId('popup');
 
     this.anchorElement.setAttribute('aria-controls', this.id);
     this.popupElement.setAttribute('id', this.id);

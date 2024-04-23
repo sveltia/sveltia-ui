@@ -6,8 +6,8 @@
   @see https://www.w3.org/WAI/ARIA/apg/patterns/radio/
 -->
 <script>
+  import { generateElementId } from '@sveltia/utils/element';
   import Button from '$lib/components/button/button.svelte';
-  import { getRandomId } from '$lib/services/util';
 
   /**
    * The `class` attribute on the wrapper element.
@@ -46,7 +46,7 @@
    */
   export let label = undefined;
 
-  const id = getRandomId('checkbox');
+  const id = generateElementId('checkbox');
 
   /**
    * Reference to the `Button` component.

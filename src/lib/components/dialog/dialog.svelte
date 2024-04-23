@@ -5,12 +5,12 @@
   @see https://www.w3.org/WAI/ARIA/apg/patterns/dialog-modal/
 -->
 <script>
+  import { generateElementId } from '@sveltia/utils/element';
   import { _ } from 'svelte-i18n';
   import Button from '$lib/components/button/button.svelte';
   import Spacer from '$lib/components/divider/spacer.svelte';
   import Icon from '$lib/components/icon/icon.svelte';
   import Modal from '$lib/components/util/modal.svelte';
-  import { getRandomId } from '$lib/services/util';
 
   /**
    * The `class` attribute on the content element.
@@ -83,7 +83,7 @@
    * The ID of the drawer.
    * @type {string}
    */
-  const id = getRandomId('dialog');
+  const id = generateElementId('dialog');
   /**
    * A reference to the modal component.
    * @type {Modal}

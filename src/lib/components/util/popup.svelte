@@ -5,11 +5,11 @@
 <svelte:options accessors={true} />
 
 <script>
+  import { sleep } from '@sveltia/utils/misc';
   import { onMount } from 'svelte';
   import { writable } from 'svelte/store';
-  import Modal from '$lib/components/util/modal.svelte';
   import { activatePopup } from '$lib/services/popup';
-  import { sleep } from '$lib/services/util';
+  import Modal from '$lib/components/util/modal.svelte';
 
   /**
    * The `class` attribute on the content element.

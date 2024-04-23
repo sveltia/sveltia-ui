@@ -1,7 +1,7 @@
 <script>
-  import { getRandomId } from '$lib';
+  import { generateElementId } from '@sveltia/utils/element';
 
-  const id = getRandomId('example');
+  const id = generateElementId('example');
 </script>
 
 <div role="figure" aria-labelledby="{id}-title">

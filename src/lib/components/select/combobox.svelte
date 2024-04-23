@@ -6,6 +6,7 @@
   @todo Add DOM API compatibility.
 -->
 <script>
+  import { generateElementId } from '@sveltia/utils/element';
   import { createEventDispatcher } from 'svelte';
   import { _ } from 'svelte-i18n';
   import { writable } from 'svelte/store';
@@ -15,7 +16,6 @@
   import SearchBar from '$lib/components/text-field/search-bar.svelte';
   import TextInput from '$lib/components/text-field/text-input.svelte';
   import Popup from '$lib/components/util/popup.svelte';
-  import { getRandomId } from '$lib/services/util';
 
   /**
    * The `class` attribute on the wrapper element.
@@ -64,7 +64,7 @@
   export let position = 'bottom-left';
 
   const dispatch = createEventDispatcher();
-  const id = getRandomId('combobox');
+  const id = generateElementId('combobox');
   const selectedSelector = '[role="option"][aria-selected="true"]';
   /** @type {HTMLElement} */
   let comboboxElement;

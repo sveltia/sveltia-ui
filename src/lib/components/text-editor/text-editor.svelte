@@ -3,6 +3,7 @@
   A rich text editor based on Lexical.
 -->
 <script>
+  import { generateElementId } from '@sveltia/utils/element';
   import { onMount, setContext } from 'svelte';
   import { _ } from 'svelte-i18n';
   import { writable } from 'svelte/store';
@@ -16,7 +17,6 @@
   import EditorToolbar from '$lib/components/text-editor/toolbar/editor-toolbar.svelte';
   import TextArea from '$lib/components/text-field/text-area.svelte';
   import Toast from '$lib/components/toast/toast.svelte';
-  import { getRandomId } from '$lib/services/util';
 
   /**
    * Make the text input container flexible.
@@ -67,7 +67,7 @@
   const editor = writable(initEditor());
   const selectionBlockType = writable('paragraph');
   const selectionInlineTypes = writable([]);
-  const editorId = writable(getRandomId('editor'));
+  const editorId = writable(generateElementId('editor'));
   const useRichText = writable(modes.includes('rich-text'));
   const hasConverterError = writable(false);
   let showConverterError = false;

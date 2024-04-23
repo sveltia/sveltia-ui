@@ -7,8 +7,8 @@
 <svelte:options accessors={true} />
 
 <script>
+  import { generateElementId } from '@sveltia/utils/element';
   import { activateKeyShortcuts } from '$lib/services/events';
-  import { getRandomId } from '$lib/services/util';
 
   /**
    * Reference to the `<input>` element.
@@ -85,7 +85,7 @@
    */
   export let inputmode = 'text';
 
-  const id = getRandomId('input');
+  const id = generateElementId('input');
 
   $: ariaLabel = $$restProps['aria-label'];
 </script>

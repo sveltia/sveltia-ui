@@ -5,7 +5,7 @@
   @see https://w3c.github.io/aria/#rowgroup
 -->
 <script>
-  import { getRandomId } from '$lib/services/util';
+  import { generateElementId } from '@sveltia/utils/element';
 
   /**
    * The `class` attribute on the wrapper element.
@@ -20,7 +20,7 @@
    */
   export let label = '';
 
-  const id = getRandomId('tbody');
+  const id = generateElementId('tbody');
 </script>
 
 <div

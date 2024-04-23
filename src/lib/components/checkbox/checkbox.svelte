@@ -6,10 +6,10 @@
   @see https://www.w3.org/WAI/ARIA/apg/patterns/checkbox/
 -->
 <script>
+  import { generateElementId } from '@sveltia/utils/element';
   import { createEventDispatcher } from 'svelte';
   import Button from '$lib/components/button/button.svelte';
   import Icon from '$lib/components/icon/icon.svelte';
-  import { getRandomId } from '$lib/services/util';
 
   /**
    * The `class` attribute on the wrapper element.
@@ -64,7 +64,7 @@
   export let label = undefined;
 
   const dispatch = createEventDispatcher();
-  const id = getRandomId('checkbox');
+  const id = generateElementId('checkbox');
 
   /**
    * Reference to the `Button` component.

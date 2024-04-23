@@ -5,8 +5,8 @@
 <svelte:options accessors={true} />
 
 <script>
+  import { sleep } from '@sveltia/utils/misc';
   import { createEventDispatcher, onMount } from 'svelte';
-  import { sleep } from '$lib/services/util';
 
   /**
    * The `class` attribute on the `<dialog>` element.
