@@ -68,7 +68,7 @@
   const selectionBlockType = writable('paragraph');
   const selectionInlineTypes = writable([]);
   const editorId = writable(generateElementId('editor'));
-  const useRichText = writable(modes.includes('rich-text'));
+  const useRichText = writable(modes[0] === 'rich-text');
   const hasConverterError = writable(false);
   let showConverterError = false;
 
