@@ -36,8 +36,8 @@ importers:
         specifier: ^0.14.5
         version: 0.14.5
       '@sveltia/utils':
-        specifier: ^0.1.0
-        version: 0.1.0
+        specifier: ^0.1.1
+        version: 0.1.1
       lexical:
         specifier: ^0.14.5
         version: 0.14.5
@@ -880,8 +880,8 @@ packages:
       svelte: ^4.0.0 || ^5.0.0-next.0
       vite: ^5.0.0
 
-  '@sveltia/utils@0.1.0':
-    resolution: {integrity: sha512-N6/xpyrvO1b1RyPpYkKG23L+OFXBkqegVggtIjO2UBpPOeU/TFm+L5Mq5KSeHbTh6OBjHyPCDyi0NQM6j5/1SQ==}
+  '@sveltia/utils@0.1.1':
+    resolution: {integrity: sha512-eOJdqih3K6P/uXDU9SvQXhLGT8CxQG4rtC/N3YT4PVk1sQ/L59x5y4pnT83qKy+gpVvqq58LAMfFE+YMnTPJ/Q==}
 
   '@types/cookie@0.6.0':
     resolution: {integrity: sha512-4Kh9a6B2bQciAhf7FSuMRRkUWecJgJu9nPnx3yzpsfXX/c50REIqpHY4C82bXP90qrLtXtkDxTZosYO3UpOwlA==}
@@ -3578,7 +3578,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@sveltia/utils@0.1.0':
+  '@sveltia/utils@0.1.1':
     dependencies:
       base32-encode: 2.0.0
 

@@ -32,7 +32,7 @@
     "@lexical/selection": "^0.14.5",
     "@lexical/table": "^0.14.5",
     "@lexical/utils": "^0.14.5",
-    "@sveltia/utils": "^0.1.0",
+    "@sveltia/utils": "^0.1.1",
     "lexical": "^0.14.5",
     "svelte": "^4.2.15"
   },
