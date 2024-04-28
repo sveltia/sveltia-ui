@@ -16,7 +16,7 @@
   export let flex = false;
 </script>
 
-<div role="none" class="sui spacer {className}" class:flex {...$$restProps} />
+<div role="none" class="sui spacer {className}" class:flex {...$$restProps}></div>
 
 <style lang="scss">
   .spacer {

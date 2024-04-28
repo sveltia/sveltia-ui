@@ -92,7 +92,7 @@
   }
 </script>
 
-<div role="none" class="sui toast-base" bind:this={popoverBase} />
+<div role="none" class="sui toast-base" bind:this={popoverBase}></div>
 
 <div class="sui toast {position}" aria-hidden={!show} bind:this={toast} {...$$restProps}>
   <slot />

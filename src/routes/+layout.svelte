@@ -190,14 +190,6 @@
         margin: 0 0 16px;
         font-size: 16px;
       }
-
-      section {
-        padding: 0 0 24px;
-
-        &:not(:first-child) {
-          border-top: 0;
-        }
-      }
     }
   }
 

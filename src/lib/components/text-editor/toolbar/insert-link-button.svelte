@@ -1,6 +1,7 @@
 <script>
   import { LinkNode, TOGGLE_LINK_COMMAND } from '@lexical/link';
   import { $getNearestNodeOfType as getNearestNodeOfType } from '@lexical/utils';
+  import { generateElementId } from '@sveltia/utils/element';
   import { isURL } from '@sveltia/utils/string';
   import {
     COMMAND_PRIORITY_NORMAL,
@@ -12,12 +13,14 @@
   } from 'lexical';
   import { getContext, onMount } from 'svelte';
   import { _ } from 'svelte-i18n';
-  import Button from '$lib/components/button/button.svelte';
-  import Dialog from '$lib/components/dialog/dialog.svelte';
-  import Icon from '$lib/components/icon/icon.svelte';
-  import { availableButtons } from '$lib/components/text-editor';
-  import TextInput from '$lib/components/text-field/text-input.svelte';
   import { isMac, matchShortcuts } from '$lib/services/events';
+  import TextInput from '$lib/components/text-field/text-input.svelte';
+  import { availableButtons } from '$lib/components/text-editor';
+  import Icon from '$lib/components/icon/icon.svelte';
+  import Dialog from '$lib/components/dialog/dialog.svelte';
+  import Button from '$lib/components/button/button.svelte';
+
+  const id = generateElementId('insert-link');
 
   /**
    * Button type.
@@ -186,34 +189,30 @@
 >
   {#if !hasAnchor}
     <div role="none">
-      <!-- svelte-ignore a11y-label-has-associated-control -->
-      <label>
-        {$_('_sui.text_editor.text')}<br />
-        <TextInput
-          autofocus
-          bind:value={anchorText}
-          flex
-          on:keydown={(event) => {
-            onInputKeyDown(event);
-          }}
-        />
-      </label>
-    </div>
-  {/if}
-  <div role="none">
-    <!-- svelte-ignore a11y-label-has-associated-control -->
-    <label>
-      {$_('_sui.text_editor.url')}<br />
+      <label for="{id}-text">{$_('_sui.text_editor.text')}</label>
       <TextInput
-        autofocus={hasAnchor || undefined}
-        bind:value={anchorURL}
+        id="{id}-text"
+        autofocus
+        bind:value={anchorText}
         flex
-        aria-label="URL"
         on:keydown={(event) => {
           onInputKeyDown(event);
         }}
       />
-    </label>
+    </div>
+  {/if}
+  <div role="none">
+    <label for="{id}-url">{$_('_sui.text_editor.url')}</label>
+    <TextInput
+      id="{id}-url"
+      autofocus={hasAnchor || undefined}
+      bind:value={anchorURL}
+      flex
+      aria-label="URL"
+      on:keydown={(event) => {
+        onInputKeyDown(event);
+      }}
+    />
   </div>
   <svelte:fragment slot="footer-extra">
     {#if dialogMode !== 'create'}

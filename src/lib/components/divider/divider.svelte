@@ -29,7 +29,7 @@
   aria-hidden={hidden}
   aria-orientation={orientation}
   {...$$restProps}
-/>
+></div>
 
 <style lang="scss">
   .divider {

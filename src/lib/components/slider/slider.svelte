@@ -304,12 +304,12 @@
   {...$$restProps}
 >
   <div role="none" class="base" bind:this={base} on:pointerdown={(event) => onPointerDown(event)}>
-    <div role="none" class="base-bar" />
+    <div role="none" class="base-bar"></div>
     <div
       class="slider-bar"
       style:left="{multiThumb ? sliderPositions[0] : 0}px"
       style:width="{multiThumb ? sliderPositions[1] - sliderPositions[0] : sliderPositions[0]}px"
-    />
+    ></div>
     <div
       role="slider"
       tabindex={disabled ? -1 : 0}
@@ -324,7 +324,7 @@
       style:left="{sliderPositions[0]}px"
       on:pointerdown={(event) => onPointerDown(event, 0)}
       on:keydown={(event) => onKeyDown(event, 0)}
-    />
+    ></div>
     {#if multiThumb}
       <div
         role="slider"
@@ -340,7 +340,7 @@
         style:left="{sliderPositions[1]}px"
         on:pointerdown={(event) => onPointerDown(event, 1)}
         on:keydown={(event) => onKeyDown(event, 1)}
-      />
+      ></div>
     {/if}
     {#if optionLabels.length}
       {#each optionLabels as label, index}

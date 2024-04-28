@@ -108,7 +108,7 @@
   <div role="none" class="inner" inert={disabled}>
     <slot />
   </div>
-  <div role="none" class="indicator" style={indicatorStyle} />
+  <div role="none" class="indicator" style={indicatorStyle}></div>
 </div>
 
 <style lang="scss">

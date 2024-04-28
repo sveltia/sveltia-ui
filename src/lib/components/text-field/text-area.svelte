@@ -84,7 +84,7 @@
     on:keypress
     on:input
     on:change
-  />
+  ></textarea>
   {#if autoResize}
     <div class="clone" aria-hidden="true">{value ?? ''}</div>
   {/if}

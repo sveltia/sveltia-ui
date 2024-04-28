@@ -93,7 +93,7 @@
   contenteditable={editable}
   bind:this={lexicalRoot}
   hidden={!$useRichText}
-/>
+></div>
 
 <style lang="scss">
   .lexical-root {

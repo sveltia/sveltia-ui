@@ -96,18 +96,18 @@
 
     :global(button) {
       margin: 0;
+    }
 
-      &:not(.menu-button) {
-        border-top-right-radius: 0;
-        border-bottom-right-radius: 0;
-      }
+    :global(button:not(.menu-button)) {
+      border-top-right-radius: 0;
+      border-bottom-right-radius: 0;
+    }
 
-      &:is(.menu-button) {
-        border-left-width: 0;
-        border-top-left-radius: 0;
-        border-bottom-left-radius: 0;
-        aspect-ratio: 3 / 4;
-      }
+    :global(button.menu-button) {
+      border-left-width: 0;
+      border-top-left-radius: 0;
+      border-bottom-left-radius: 0;
+      aspect-ratio: 3 / 4;
     }
   }
 </style>

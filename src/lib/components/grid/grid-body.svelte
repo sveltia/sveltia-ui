@@ -31,19 +31,27 @@
   {...$$restProps}
 >
   {#if label}
-    <tr class="row-group-caption">
-      <th id="{id}-label" colspan="9999" scope="rowgroup">{label}</th>
-    </tr>
+    <div role="row" class="row-group-caption">
+      <!-- We need `colspan` here but cannot place `<th>` under `<div>`, so use a hack -->
+      <svelte:element this="th" role="rowheader" id="{id}-label" colspan="9999">
+        {label}
+      </svelte:element>
+    </div>
   {/if}
   <slot />
 </div>
 
 <style lang="scss">
-  .grid-body {
+  [role='rowgroup'] {
     display: table-row-group;
   }
 
-  th {
+  [role='row'] {
+    display: table-row;
+  }
+
+  [role='rowheader'] {
+    display: table-cell;
     padding: 8px;
     color: var(--sui-secondary-foreground-color);
     background-color: var(--sui-secondary-background-color);

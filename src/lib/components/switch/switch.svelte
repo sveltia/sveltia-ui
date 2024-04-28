@@ -72,7 +72,7 @@
     }
   }}
 >
-  <span role="none" />
+  <span role="none"></span>
   {#if label}
     {label}
   {:else}
