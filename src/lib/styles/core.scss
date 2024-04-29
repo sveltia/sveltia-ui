@@ -102,6 +102,11 @@ li {
   line-height: var(--sui-line-height-comfortable);
 }
 
+ul,
+ol {
+  padding-left: 2em;
+}
+
 code,
 pre {
   border-radius: 4px;
