@@ -1,13 +1,13 @@
 <script>
-  import { getContext, tick } from 'svelte';
+  import { getContext } from 'svelte';
   import { _ } from 'svelte-i18n';
   import ButtonGroup from '$lib/components/button/button-group.svelte';
+  import Button from '$lib/components/button/button.svelte';
   import Divider from '$lib/components/divider/divider.svelte';
   import Spacer from '$lib/components/divider/spacer.svelte';
   import Icon from '$lib/components/icon/icon.svelte';
   import MenuButton from '$lib/components/menu/menu-button.svelte';
   import Menu from '$lib/components/menu/menu.svelte';
-  import Switch from '$lib/components/switch/switch.svelte';
   import {
     availableButtons,
     blockButtonTypes,
@@ -99,20 +99,21 @@
     {/if}
     <Spacer flex />
     {#if modes.length > 1}
-      <Switch
+      <Button
+        iconic
         disabled={$hasConverterError}
-        bind:checked={$useRichText}
-        label={$_('_sui.text_editor.rich_text')}
-        aria-label={$_('_sui.text_editor.use_rich_text_mode')}
-        on:change={async () => {
-          // Wait for `$useRichText` to be updated
-          await tick();
+        pressed={!$useRichText}
+        aria-label={$_('_sui.text_editor.edit_in_markdown')}
+        on:click={() => {
+          $useRichText = !$useRichText;
 
           if ($useRichText) {
             convertMarkdown();
           }
         }}
-      />
+      >
+        <Icon slot="start-icon" name="markdown" />
+      </Button>
     {/if}
   </Toolbar>
 </div>

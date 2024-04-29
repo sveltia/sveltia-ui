@@ -56,8 +56,7 @@ export const strings = {
     update_link: 'Update Link',
     text: 'Text',
     url: 'URL',
-    rich_text: 'Rich Text',
-    use_rich_text_mode: 'Use Rich Text Mode',
+    edit_in_markdown: 'Edit in Markdown',
     converter_error:
       'There was an error while enabling rich text mode. Please use the plain text editor instead.',
   },

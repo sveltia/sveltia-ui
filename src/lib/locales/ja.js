@@ -56,8 +56,7 @@ export const strings = {
     update_link: 'リンクを更新',
     text: 'テキスト',
     url: 'URL',
-    rich_text: 'リッチテキスト',
-    use_rich_text_mode: 'リッチテキストモードを使用',
+    edit_in_markdown: 'マークダウンで編集',
     converter_error:
       'リッチテキストモードを有効化中に問題が発生しました。代わりにプレーンテキストエディターを使用してください。',
   },
