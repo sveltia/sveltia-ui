@@ -121,7 +121,14 @@
 
 <div role="none" class="sui text-editor" hidden={hidden || undefined} {...$$restProps}>
   <EditorToolbar {disabled} {readonly} />
-  <LexicalRoot {disabled} {readonly} bind:value />
+  <LexicalRoot
+    bind:value
+    hidden={!$useRichText || hidden}
+    {disabled}
+    {readonly}
+    {required}
+    {invalid}
+  />
   <TextArea
     autoResize={true}
     bind:value

@@ -2,6 +2,11 @@
   import { getContext, onMount } from 'svelte';
 
   /**
+   * Whether to hide the widget. An alias of the `aria-hidden` attribute.
+   * @type {boolean | undefined}
+   */
+  export let hidden = undefined;
+  /**
    * Whether to disable the widget. An alias of the `aria-disabled` attribute.
    * @type {boolean}
    */
@@ -12,6 +17,16 @@
    */
   export let readonly = false;
   /**
+   * Whether to mark the widget required. An alias of the `aria-required` attribute.
+   * @type {boolean}
+   */
+  export let required = false;
+  /**
+   * Whether to mark the widget invalid. An alias of the `aria-invalid` attribute.
+   * @type {boolean}
+   */
+  export let invalid = false;
+  /**
    * Input value.
    * @type {string | undefined}
    */
@@ -21,14 +36,8 @@
    * Text editor state.
    * @type {TextEditorState}
    */
-  const {
-    editor,
-    editorId,
-    selectionBlockType,
-    selectionInlineTypes,
-    useRichText,
-    hasConverterError,
-  } = getContext('state');
+  const { editor, editorId, selectionBlockType, selectionInlineTypes, hasConverterError } =
+    getContext('state');
 
   /**
    * Reference to the Lexical editor root element.
@@ -86,13 +95,16 @@
 <div
   role="textbox"
   aria-multiline="true"
+  aria-hidden={hidden}
   aria-disabled={disabled}
   aria-readonly={readonly}
+  aria-required={required}
+  aria-invalid={invalid}
   class="lexical-root"
   id="{$editorId}-lexical-root"
   contenteditable={editable}
+  {hidden}
   bind:this={lexicalRoot}
-  hidden={!$useRichText}
 ></div>
 
 <style lang="scss">
@@ -109,6 +121,10 @@
 
     &:focus-visible {
       outline: 0;
+    }
+
+    &[aria-invalid='true'] {
+      border-color: var(--sui-error-foreground-color);
     }
 
     & > :global(:first-child) {
