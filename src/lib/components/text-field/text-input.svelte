@@ -158,7 +158,7 @@
     border-width: var(--sui-textbox-border-width, 1px);
     border-color: var(--sui-textbox-border-color);
     border-radius: var(--sui-textbox-border-radius);
-    padding: var(--sui-textbox-padding, 0 8px);
+    padding: var(--sui-textbox-singleline-padding);
     min-width: 0;
     height: var(--sui-textbox-height);
     color: var(--sui-textbox-foreground-color);
@@ -216,7 +216,7 @@
 
   .label {
     position: absolute;
-    inset: var(--sui-textbox-padding, 0 8px);
+    inset: var(--sui-textbox-singleline-padding);
     z-index: 2;
     display: flex;
     align-items: center;

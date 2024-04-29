@@ -168,7 +168,7 @@
     }
 
     :global(.label) {
-      --sui-textbox-padding: 0 36px;
+      --sui-textbox-singleline-padding: 0 36px;
     }
 
     :global(.text-input) {

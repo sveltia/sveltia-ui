@@ -111,7 +111,7 @@
   .lexical-root {
     border: 1px solid var(--sui-textbox-border-color);
     border-radius: 0 0 var(--sui-textbox-border-radius) var(--sui-textbox-border-radius) !important;
-    padding: 16px;
+    padding: var(--sui-textbox-multiline-padding);
     min-height: 8em;
     color: var(--sui-textbox-foreground-color);
     background-color: var(--sui-textbox-background-color);
