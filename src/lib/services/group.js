@@ -7,6 +7,7 @@ import { sleep } from '@sveltia/utils/misc';
  * childRoles: string[],
  * childSelectedAttr: 'aria-selected' | 'aria-checked',
  * focusChild: boolean
+ * selectFirst: boolean
  * } }}
  */
 const config = {
@@ -15,36 +16,42 @@ const config = {
     childRoles: ['row'],
     childSelectedAttr: 'aria-selected',
     focusChild: true,
+    selectFirst: false,
   },
   listbox: {
     orientation: 'vertical',
     childRoles: ['option'],
     childSelectedAttr: 'aria-selected',
     focusChild: false,
+    selectFirst: false,
   },
   menu: {
     orientation: 'vertical',
     childRoles: ['menuitem', 'menuitemcheckbox', 'menuitemradio'],
     childSelectedAttr: 'aria-checked',
     focusChild: true,
+    selectFirst: false,
   },
   menubar: {
     orientation: 'horizontal',
     childRoles: ['menuitem', 'menuitemcheckbox', 'menuitemradio'],
     childSelectedAttr: 'aria-checked',
     focusChild: true,
+    selectFirst: false,
   },
   radiogroup: {
     orientation: 'horizontal',
     childRoles: ['radio'],
     childSelectedAttr: 'aria-checked',
     focusChild: true,
+    selectFirst: false,
   },
   tablist: {
     orientation: 'horizontal',
     childRoles: ['tab'],
     childSelectedAttr: 'aria-selected',
     focusChild: true,
+    selectFirst: true,
   },
 };
 
@@ -66,7 +73,8 @@ class Group {
     this.id = generateElementId(this.role);
     this.parentGroupSelector = `[role="group"], [role="${this.role}"]`;
 
-    const { orientation, childRoles, childSelectedAttr, focusChild } = config[this.role];
+    const { orientation, childRoles, childSelectedAttr, focusChild, selectFirst } =
+      config[this.role];
 
     this.orientation = this.grid
       ? 'horizontal'
@@ -75,6 +83,7 @@ class Group {
     this.childSelectedAttr = childSelectedAttr;
     this.childSelectedProp = childSelectedAttr.replace('aria-', '');
     this.focusChild = focusChild;
+    this.selectFirst = selectFirst;
 
     // Wait a bit before the relevant components, including the `aria-controls` target are mounted
     (async () => {
@@ -91,7 +100,9 @@ class Group {
 
     allMembers.forEach((element, index) => {
       // Select the first one if no member has the `selected` attribute
-      const isSelected = defaultSelected ? element === defaultSelected : index === 0;
+      const isSelected = defaultSelected
+        ? element === defaultSelected
+        : this.selectFirst && index === 0;
 
       const controlTarget = /** @type {HTMLElement | null} */ (
         document.querySelector(`#${element.getAttribute('aria-controls')}`)

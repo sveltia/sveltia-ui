@@ -10,7 +10,7 @@
   <Example>
     <div role="none">
       <RadioGroup>
-        <Radio checked label="Strawberry" />
+        <Radio label="Strawberry" />
         <Radio label="Grape" />
         <Radio label="Lemon" />
         <Radio disabled label="Orange" />
@@ -24,6 +24,20 @@
   <Example>
     <div role="none">
       <RadioGroup orientation="vertical">
+        <Radio label="Strawberry" />
+        <Radio label="Grape" />
+        <Radio label="Lemon" />
+        <Radio disabled label="Orange" />
+      </RadioGroup>
+    </div>
+  </Example>
+</section>
+
+<section>
+  <h3>Default checked</h3>
+  <Example>
+    <div role="none">
+      <RadioGroup>
         <Radio checked label="Strawberry" />
         <Radio label="Grape" />
         <Radio label="Lemon" />
