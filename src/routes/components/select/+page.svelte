@@ -1,5 +1,5 @@
 <script>
-  import { Combobox, Divider, Option, Select } from '$lib';
+  import { Combobox, Divider, Option, Select, SelectTags } from '$lib';
   import Example from '../../_components/example.svelte';
 </script>
 
@@ -76,6 +76,20 @@
 
 <section>
   <h3>Tagging</h3>
+  <Example>
+    <div role="none">
+      <SelectTags
+        values={['banana']}
+        options={[
+          { label: 'Banana', value: 'banana' },
+          { label: 'Mango', value: 'mango' },
+          { label: 'Apple', value: 'apple' },
+          { label: 'Avocado', value: 'avocado' },
+          { label: 'Grape', value: 'grape' },
+        ]}
+      />
+    </div>
+  </Example>
 </section>
 
 <section>
@@ -100,6 +114,19 @@
         <Option label="Avocado" />
         <Option label="Grape" disabled />
       </Combobox>
+    </div>
+    <div role="none">
+      <SelectTags
+        disabled
+        values={['banana']}
+        options={[
+          { label: 'Banana', value: 'banana' },
+          { label: 'Mango', value: 'mango' },
+          { label: 'Apple', value: 'apple' },
+          { label: 'Avocado', value: 'avocado' },
+          { label: 'Grape', value: 'grape' },
+        ]}
+      />
     </div>
   </Example>
 </section>
@@ -126,6 +153,19 @@
         <Option label="Avocado" />
         <Option label="Grape" disabled />
       </Combobox>
+    </div>
+    <div role="none">
+      <SelectTags
+        readonly
+        values={['banana']}
+        options={[
+          { label: 'Banana', value: 'banana' },
+          { label: 'Mango', value: 'mango' },
+          { label: 'Apple', value: 'apple' },
+          { label: 'Avocado', value: 'avocado' },
+          { label: 'Grape', value: 'grape' },
+        ]}
+      />
     </div>
   </Example>
 </section>

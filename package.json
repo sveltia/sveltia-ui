@@ -257,6 +257,11 @@
       "svelte": "./package/components/select/combobox.svelte",
       "default": "./package/components/select/combobox.svelte"
     },
+    "./components/select/select-tags.svelte": {
+      "types": "./package/components/select/select-tags.svelte.d.ts",
+      "svelte": "./package/components/select/select-tags.svelte",
+      "default": "./package/components/select/select-tags.svelte"
+    },
     "./components/select/select.svelte": {
       "types": "./package/components/select/select.svelte.d.ts",
       "svelte": "./package/components/select/select.svelte",
@@ -553,6 +558,9 @@
       ],
       "components/select/combobox.svelte": [
         "./package/components/select/combobox.svelte.d.ts"
+      ],
+      "components/select/select-tags.svelte": [
+        "./package/components/select/select-tags.svelte.d.ts"
       ],
       "components/select/select.svelte": [
         "./package/components/select/select.svelte.d.ts"

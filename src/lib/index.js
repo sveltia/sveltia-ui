@@ -72,6 +72,7 @@ export { default as Menu } from '$lib/components/menu/menu.svelte';
 export { default as RadioGroup } from '$lib/components/radio/radio-group.svelte';
 export { default as Radio } from '$lib/components/radio/radio.svelte';
 export { default as Combobox } from '$lib/components/select/combobox.svelte';
+export { default as SelectTags } from '$lib/components/select/select-tags.svelte';
 export { default as Select } from '$lib/components/select/select.svelte';
 export { default as Slider } from '$lib/components/slider/slider.svelte';
 export { default as Switch } from '$lib/components/switch/switch.svelte';
