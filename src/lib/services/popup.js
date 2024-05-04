@@ -1,6 +1,7 @@
 /* eslint-disable no-nested-ternary */
 
 import { generateElementId } from '@sveltia/utils/element';
+import { sleep } from '@sveltia/utils/misc';
 import { get, writable } from 'svelte/store';
 
 /**
@@ -127,6 +128,18 @@ class Popup {
       }
     });
 
+    this.anchorElement.addEventListener('transitionstart', () => {
+      if (this.anchorElement.closest('.hiding, .hidden, [hidden]')) {
+        this.hideImmediately();
+      }
+    });
+
+    new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting && get(this.open)) {
+        this.hideImmediately();
+      }
+    }).observe(this.anchorElement);
+
     // Close the popup when the backdrop, a menu item or an option is clicked
     this.popupElement.addEventListener('click', (event) => {
       event.stopPropagation();
@@ -187,6 +200,16 @@ class Popup {
   checkPosition() {
     this.observer.unobserve(this.positionBaseElement);
     this.observer.observe(this.positionBaseElement);
+  }
+
+  /**
+   * Hide the popup immediately (when the anchor is being hidden).
+   */
+  async hideImmediately() {
+    this.popupElement.hidden = true;
+    this.open.set(false);
+    await sleep(50);
+    this.popupElement.hidden = false;
   }
 }
 

@@ -233,6 +233,10 @@
       opacity: 0;
     }
 
+    &[hidden] {
+      transition-duration: 1ms !important;
+    }
+
     &:not(.active) {
       pointer-events: none !important;
 
