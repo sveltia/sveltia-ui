@@ -171,6 +171,7 @@
     text-indent: var(--sui-textbox-text-indent, 0);
     text-transform: var(--sui-textbox-text-transform, none);
     letter-spacing: var(--sui-textbox-letter-spacing, normal);
+    word-spacing: var(--sui-word-spacing-normal, normal);
     transition: all 200ms;
 
     &:focus {
