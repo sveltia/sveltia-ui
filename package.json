@@ -1,6 +1,6 @@
 {
   "name": "@sveltia/ui",
-  "version": "0.13.2",
+  "version": "0.14.0",
   "license": "MIT",
   "type": "module",
   "publishConfig": {
@@ -32,7 +32,7 @@
     "@lexical/selection": "^0.15.0",
     "@lexical/table": "^0.15.0",
     "@lexical/utils": "^0.15.0",
-    "@sveltia/utils": "^0.1.4",
+    "@sveltia/utils": "^0.2.0",
     "lexical": "^0.15.0",
     "svelte": "^4.2.16"
   },
