@@ -20,6 +20,10 @@
    * @type {boolean}
    */
   export let multiple = false;
+  /**
+   * Whether to select a row by clicking on it.
+   */
+  export let clickToSelect = true;
 
   /** @type {HTMLElement | undefined} */
   export let element = undefined;
@@ -33,7 +37,7 @@
   aria-multiselectable={multiple}
   {...$$restProps}
   bind:this={element}
-  use:activateGroup
+  use:activateGroup={{ clickToSelect }}
   on:change={(/** @type {CustomEvent} */ event) => {
     dispatch('change', event.detail);
   }}

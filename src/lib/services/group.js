@@ -62,9 +62,11 @@ class Group {
   /**
    * Initialize a new `Group` instance.
    * @param {HTMLElement} parent - Parent element.
+   * @param {object} [options] - Options.
+   * @param {boolean} [options.clickToSelect] - Whether to select an item by clicking on it.
    * @todo Check for added elements probably with `MutationObserver`.
    */
-  constructor(parent) {
+  constructor(parent, { clickToSelect = true } = {}) {
     parent.dispatchEvent(new CustomEvent('initializing'));
 
     this.parent = parent;
@@ -72,6 +74,7 @@ class Group {
     this.multi = this.parent.getAttribute('aria-multiselectable') === 'true';
     this.id = generateElementId(this.role);
     this.parentGroupSelector = `[role="group"], [role="${this.role}"]`;
+    this.clickToSelect = clickToSelect;
 
     const { orientation, childRoles, childSelectedAttr, focusChild, selectFirst } =
       config[this.role];
@@ -337,7 +340,7 @@ class Group {
       ? target
       : /** @type {HTMLElement | null} */ (target.closest(this.selector));
 
-    if (!newTarget || event.button !== 0) {
+    if (!newTarget || event.button !== 0 || !this.clickToSelect) {
       return;
     }
 
@@ -483,20 +486,20 @@ class Group {
 /**
  * Activate a new group.
  * @param {HTMLElement} parent - Parent element.
- * @param {object} [_params] - Action params.
+ * @param {object} [params] - Action params.
  * @returns {import('svelte/action').ActionReturn} Action.
  */
 // eslint-disable-next-line no-unused-vars
-export const activateGroup = (parent, _params) => {
-  const group = new Group(parent);
+export const activateGroup = (parent, params) => {
+  const group = new Group(parent, params);
 
   return {
     /**
      * Called whenever the params are updated.
-     * @param {any} params - Updated params.
+     * @param {any} newParams - Updated params.
      */
-    update(params) {
-      group.onUpdate(params);
+    update(newParams) {
+      group.onUpdate(newParams);
     },
   };
 };
