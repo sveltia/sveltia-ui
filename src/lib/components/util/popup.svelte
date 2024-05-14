@@ -137,7 +137,8 @@
     class:touch
     style:inset={$style.inset}
     style:z-index={$style.zIndex}
-    style:min-width={$style.width}
+    style:width={$style.width}
+    style:min-width={$style.minWidth}
     style:max-height={$style.height}
     style:visibility={$style.inset ? undefined : 'hidden'}
     bind:this={content}

@@ -44,9 +44,14 @@
    * @type {string}
    */
   export let searchValue = label;
+  /**
+   * Whether to wrap a long label.
+   * @type {boolean}
+   */
+  export let wrap = false;
 </script>
 
-<div role="none" class="sui option {className}" hidden={hidden || undefined}>
+<div role="none" class="sui option {className}" class:wrap hidden={hidden || undefined}>
   <Button
     role="option"
     tabindex="-1"
@@ -105,8 +110,15 @@
       border-radius: var(--sui-option-border-radius);
       padding: var(--sui-option-padding);
       width: 100%;
-      height: var(--sui-option-height);
+      height: auto;
+      min-height: var(--sui-option-height);
+      overflow: hidden;
+      text-overflow: ellipsis;
       white-space: nowrap;
+    }
+
+    &.wrap :global(button) {
+      white-space: normal;
     }
 
     :global(.focused),

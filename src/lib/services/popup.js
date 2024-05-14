@@ -26,8 +26,8 @@ class Popup {
         return;
       }
 
-      const { scrollHeight: contentHeight, scrollWidth: contentWidth } =
-        /** @type {HTMLElement} */ (this.popupElement.querySelector('.content'));
+      const content = /** @type {HTMLElement} */ (this.popupElement.querySelector('.content'));
+      const { scrollHeight: contentHeight, scrollWidth: contentWidth } = content;
       const topMargin = intersectionRect.top - 8;
       const bottomMargin = rootBounds.height - intersectionRect.bottom - 8;
       let { position } = this;
@@ -77,7 +77,8 @@ class Popup {
       const style = {
         inset: [top, right, bottom, left].join(' '),
         zIndex: anchorPopup ? Number(anchorPopup.style.zIndex) + 1 : 1000,
-        width: `${Math.round(intersectionRect.width)}px`,
+        width: content.matches('.menu') ? 'auto' : `${Math.round(intersectionRect.width)}px`,
+        minWidth: `${Math.round(intersectionRect.width)}px`,
         height: height ? `${Math.round(height)}px` : 'auto',
       };
 
@@ -170,6 +171,11 @@ class Popup {
 
       this.anchorElement.setAttribute('aria-expanded', String(open));
     });
+
+    // Update the popup width when the base element is resized
+    new ResizeObserver(() => {
+      this.checkPosition();
+    }).observe(this.positionBaseElement);
   }
 
   /**

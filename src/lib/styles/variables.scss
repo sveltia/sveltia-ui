@@ -184,7 +184,7 @@
   --sui-control-background-color: hsl(var(--sui-background-color-4-hsl));
   --sui-control-font-family: var(--sui-font-family-default);
   --sui-control-font-size: var(--sui-font-size-default);
-  --sui-control-line-height: var(--sui-line-height-default);
+  --sui-control-line-height: var(--sui-line-height-compact);
   // Button
   --sui-button-small-border-radius: var(--sui-control-small-border-radius);
   --sui-button-small-padding: var(--sui-control-small-padding);
@@ -204,7 +204,8 @@
   --sui-checkbox-background-color: var(--sui-control-background-color);
   // Option & menu item
   --sui-option-border-radius: var(--sui-control-medium-border-radius);
-  --sui-option-padding: var(--sui-control-medium-padding);
+  --sui-option-padding: calc((var(--sui-control-medium-height) / 6))
+    calc((var(--sui-control-medium-height) / 2));
   --sui-option-height: var(--sui-control-medium-height);
   // Listbox
   --sui-listbox-border-radius: var(--sui-control-medium-border-radius);
