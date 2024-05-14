@@ -4,7 +4,7 @@
 -->
 <script>
   import { generateElementId } from '@sveltia/utils/element';
-  import { onMount, setContext } from 'svelte';
+  import { setContext } from 'svelte';
   import { _ } from 'svelte-i18n';
   import { writable } from 'svelte/store';
   import Alert from '$lib/components/alert/alert.svelte';
@@ -70,25 +70,64 @@
   const editorId = writable(generateElementId('editor'));
   const useRichText = writable(modes[0] === 'rich-text');
   const hasConverterError = writable(false);
+  let inputValue = '';
   let showConverterError = false;
 
   /**
-   * Convert the Markdown {@link value} to Lexical nodes. Disable the rich text mode and restore the
-   * original value when there is an error while conversion.
+   * Convert the Markdown {@link inputValue} to Lexical nodes. Disable the rich text mode and
+   * restore the original value when there is an error while conversion.
    */
   const convertMarkdown = async () => {
-    const originalValue = value;
+    const originalValue = inputValue;
 
     try {
       // We should avoid an empty editor; there should be at least one `<p>`, so give it an empty
       // string if the `value` is `undefined`
       // @see https://github.com/facebook/lexical/issues/2308
-      await convertMarkdownToLexical($editor, value ?? '');
+      await convertMarkdownToLexical($editor, inputValue ?? '');
     } catch {
       $hasConverterError = true;
-      value = originalValue;
+      inputValue = originalValue;
     }
   };
+
+  /**
+   * Update {@link inputValue} based on {@link value}.
+   */
+  const setInputValue = () => {
+    const newValue = value ?? '';
+
+    // Avoid a cycle dependency & infinite loop
+    if (inputValue !== newValue) {
+      inputValue = newValue;
+
+      if ($useRichText) {
+        convertMarkdown();
+      }
+    }
+  };
+
+  /**
+   * Update {@link value} based on {@link inputValue}.
+   */
+  const setCurrentValue = () => {
+    const newValue = inputValue;
+
+    // Avoid a cycle dependency & infinite loop
+    if (value !== newValue) {
+      value = newValue;
+    }
+  };
+
+  $: {
+    void value;
+    setInputValue();
+  }
+
+  $: {
+    void inputValue;
+    setCurrentValue();
+  }
 
   $: {
     if ($hasConverterError) {
@@ -111,18 +150,12 @@
       convertMarkdown,
     }),
   );
-
-  onMount(() => {
-    if ($useRichText) {
-      convertMarkdown();
-    }
-  });
 </script>
 
 <div role="none" class="sui text-editor" hidden={hidden || undefined} {...$$restProps}>
   <EditorToolbar {disabled} {readonly} />
   <LexicalRoot
-    bind:value
+    bind:value={inputValue}
     hidden={!$useRichText || hidden}
     {disabled}
     {readonly}
@@ -131,7 +164,7 @@
   />
   <TextArea
     autoResize={true}
-    bind:value
+    bind:value={inputValue}
     {flex}
     hidden={$useRichText || hidden}
     {disabled}
