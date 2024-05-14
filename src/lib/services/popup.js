@@ -28,7 +28,6 @@ class Popup {
 
       const { scrollHeight: contentHeight, scrollWidth: contentWidth } =
         /** @type {HTMLElement} */ (this.popupElement.querySelector('.content'));
-
       const topMargin = intersectionRect.top - 8;
       const bottomMargin = rootBounds.height - intersectionRect.bottom - 8;
       let { position } = this;
@@ -59,27 +58,22 @@ class Popup {
         : position.endsWith('-top')
           ? `${Math.round(intersectionRect.top)}px`
           : 'auto';
-
       const right = position.startsWith('left-')
         ? `${Math.round(rootBounds.width - intersectionRect.left)}px`
         : position.endsWith('-right')
           ? `${Math.round(rootBounds.width - intersectionRect.right)}px`
           : 'auto';
-
       const bottom = position.startsWith('top-')
         ? `${Math.round(rootBounds.height - intersectionRect.top)}px`
         : position.endsWith('-bottom')
           ? `${Math.round(rootBounds.height - intersectionRect.bottom)}px`
           : 'auto';
-
       const left = position.startsWith('right-')
         ? `${Math.round(intersectionRect.right)}px`
         : position.endsWith('-left')
           ? `${Math.round(intersectionRect.left)}px`
           : 'auto';
-
       const anchorPopup = /** @type {HTMLElement} */ (this.anchorElement.closest('.popup'));
-
       const style = {
         inset: [top, right, bottom, left].join(' '),
         zIndex: anchorPopup ? Number(anchorPopup.style.zIndex) + 1 : 1000,

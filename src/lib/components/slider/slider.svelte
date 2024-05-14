@@ -87,7 +87,6 @@
 
     const fromIndex = positionList.findLastIndex((s) => s <= diff);
     const toIndex = positionList.findIndex((s) => diff <= s);
-
     const index =
       Math.abs(positionList[fromIndex] - diff) < Math.abs(positionList[toIndex] - diff)
         ? fromIndex

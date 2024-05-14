@@ -41,5 +41,5 @@
  * error while converting Markdown to Lexical nodes.
  * @property {(TextEditorBlockType | TextEditorInlineType)[]} enabledButtons - Enabled buttons for
  * the editor.
- * @property {Function} convertMarkdown Function to trigger the Lexical converter.
+ * @property {Function} convertMarkdown - Function to trigger the Lexical converter.
  */

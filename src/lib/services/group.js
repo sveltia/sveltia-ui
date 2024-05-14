@@ -103,7 +103,6 @@ class Group {
       const isSelected = defaultSelected
         ? element === defaultSelected
         : this.selectFirst && index === 0;
-
       const controlTarget = /** @type {HTMLElement | null} */ (
         document.querySelector(`#${element.getAttribute('aria-controls')}`)
       );
@@ -219,7 +218,6 @@ class Group {
     const targetRole = newTarget.getAttribute('role');
     const targetParent = newTarget.closest(this.parentGroupSelector);
     const selectByClick = event.type === 'click';
-
     const selectByKeydown =
       event.type === 'keydown' && /** @type {KeyboardEvent} */ (event).key === ' ';
 
@@ -335,7 +333,6 @@ class Group {
   onClick(event) {
     // eslint-disable-next-line prefer-destructuring
     const target = /** @type {HTMLElement} */ (event.target);
-
     const newTarget = target.matches(this.selector)
       ? target
       : /** @type {HTMLElement | null} */ (target.closest(this.selector));
@@ -362,7 +359,6 @@ class Group {
     // eslint-disable-next-line prefer-destructuring
     const target = /** @type {HTMLElement} */ (event.target);
     const { allMembers, activeMembers } = this;
-
     /** @type {HTMLElement | undefined} */
     const currentTarget = (() => {
       if (!this.focusChild) {
@@ -461,7 +457,6 @@ class Group {
   onUpdate({ searchTerms }) {
     const terms = searchTerms.trim().toLocaleLowerCase();
     const _terms = terms ? terms.split(/\s+/) : [];
-
     const matched = this.allMembers
       .map((member) => {
         const searchValue =
@@ -471,7 +466,6 @@ class Group {
             member.querySelector('.label')?.textContent ??
             member.textContent
           )?.toLocaleLowerCase() ?? '';
-
         const hidden = !_terms.every((term) => searchValue.includes(term));
 
         member.dispatchEvent(new CustomEvent('toggle', { detail: { hidden } }));

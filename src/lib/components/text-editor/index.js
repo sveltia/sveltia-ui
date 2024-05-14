@@ -74,17 +74,14 @@ export const availableButtons = {
     inline: false,
   },
 };
-
 /**
  * @type {TextEditorFormatType[]}
  */
 export const textFormatButtonTypes = ['bold', 'italic', 'code'];
-
 /**
  * @type {TextEditorInlineType[]}
  */
 export const inlineButtonTypes = [...textFormatButtonTypes, 'link'];
-
 /**
  * @type {TextEditorBlockType[]}
  */

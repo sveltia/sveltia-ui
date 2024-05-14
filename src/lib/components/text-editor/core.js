@@ -150,6 +150,7 @@ export const initEditor = () => {
     TOGGLE_LINK_COMMAND,
     (payload) => {
       toggleLink(typeof payload === 'string' ? payload : null);
+
       return true;
     },
     COMMAND_PRIORITY_NORMAL,
@@ -159,6 +160,7 @@ export const initEditor = () => {
     INSERT_UNORDERED_LIST_COMMAND,
     () => {
       insertList(editor, 'bullet');
+
       return true;
     },
     COMMAND_PRIORITY_NORMAL,
@@ -168,6 +170,7 @@ export const initEditor = () => {
     INSERT_ORDERED_LIST_COMMAND,
     () => {
       insertList(editor, 'number');
+
       return true;
     },
     COMMAND_PRIORITY_NORMAL,
