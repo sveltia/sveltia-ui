@@ -89,6 +89,16 @@
    * @type {Modal}
    */
   let modal;
+  /**
+   * @type {HTMLElement | undefined}
+   */
+  let content;
+
+  $: {
+    if (open && content) {
+      /** @type {HTMLElement} */ (content.querySelector('input, button.primary'))?.focus();
+    }
+  }
 </script>
 
 <Modal
@@ -111,7 +121,7 @@
   on:close
 >
   <slot name="extra-content" slot="extra-content" />
-  <div role="none" class="content {className} {size}">
+  <div role="none" class="content {className} {size}" bind:this={content}>
     {#if title || showClose || $$slots.header || $$slots['header-extra']}
       <div role="none" class="header">
         {#if $$slots.header}
