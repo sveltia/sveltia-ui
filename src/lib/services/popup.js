@@ -14,11 +14,18 @@ class Popup {
    * @type {import('svelte/store').Writable<{
    * inset: string | undefined,
    * zIndex: number | undefined,
-   * width: string | undefined,
+   * minWidth: string | undefined,
+   * maxWidth: string | undefined,
    * height: string | undefined,
    * }>}
    */
-  style = writable({ inset: undefined, zIndex: undefined, width: undefined, height: undefined });
+  style = writable({
+    inset: undefined,
+    zIndex: undefined,
+    minWidth: undefined,
+    maxWidth: undefined,
+    height: undefined,
+  });
 
   observer = new IntersectionObserver((entries) => {
     entries.forEach(({ intersectionRect, rootBounds }) => {
@@ -77,8 +84,8 @@ class Popup {
       const style = {
         inset: [top, right, bottom, left].join(' '),
         zIndex: anchorPopup ? Number(anchorPopup.style.zIndex) + 1 : 1000,
-        width: content.matches('.menu') ? 'auto' : `${Math.round(intersectionRect.width)}px`,
         minWidth: `${Math.round(intersectionRect.width)}px`,
+        maxWidth: `${Math.round(rootBounds.width - intersectionRect.left - 8)}px`,
         height: height ? `${Math.round(height)}px` : 'auto',
       };
 

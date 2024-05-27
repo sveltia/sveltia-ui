@@ -137,8 +137,8 @@
     class:touch
     style:inset={$style.inset}
     style:z-index={$style.zIndex}
-    style:width={$style.width}
     style:min-width={$style.minWidth}
+    style:max-width={$style.maxWidth}
     style:max-height={$style.height}
     style:visibility={$style.inset ? undefined : 'hidden'}
     bind:this={content}
@@ -152,6 +152,7 @@
     position: absolute;
     overflow-y: auto;
     outline-width: 0 !important;
+    width: auto;
     color: var(--sui-primary-foreground-color);
     background-color: var(--sui-secondary-background-color-translucent);
     box-shadow: 0 8px 16px var(--sui-popup-shadow-color);
