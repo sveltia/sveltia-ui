@@ -85,7 +85,9 @@ class Popup {
         inset: [top, right, bottom, left].join(' '),
         zIndex: anchorPopup ? Number(anchorPopup.style.zIndex) + 1 : 1000,
         minWidth: `${Math.round(intersectionRect.width)}px`,
-        maxWidth: `${Math.round(rootBounds.width - intersectionRect.left - 8)}px`,
+        maxWidth: position.endsWith('-left')
+          ? `${Math.round(rootBounds.width - intersectionRect.left - 8)}px`
+          : `${Math.round(intersectionRect.right - 8)}px`,
         height: height ? `${Math.round(height)}px` : 'auto',
       };
 
