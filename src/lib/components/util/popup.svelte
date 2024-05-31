@@ -82,10 +82,17 @@
     height: undefined,
   });
 
+  /**
+   * Initialize the popup.
+   */
+  const init = () => {
+    ({ open, style } = activatePopup(anchor, modal.dialog, position, positionBaseElement));
+    contentType = anchor?.getAttribute('aria-haspopup') ?? undefined;
+  };
+
   $: {
     if (anchor && modal?.dialog) {
-      ({ open, style } = activatePopup(anchor, modal.dialog, position, positionBaseElement));
-      contentType = anchor.getAttribute('aria-haspopup') ?? undefined;
+      init();
     }
   }
 
