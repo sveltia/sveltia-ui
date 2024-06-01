@@ -87,6 +87,7 @@
    */
   const onChange = () => {
     const selected = popupComponent?.content?.querySelector(selectedSelector);
+
     const target = /** @type {HTMLButtonElement} */ (
       popupComponent?.content?.querySelector(`[role="option"][value="${value}"]`)
     );
