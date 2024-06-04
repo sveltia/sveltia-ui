@@ -95,6 +95,12 @@ strong {
 a {
   color: var(--sui-primary-accent-color-text);
   text-decoration: none;
+
+  :root[data-underline-links="true"] &,
+  :host[data-underline-links="true"] & {
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
 }
 
 p,
