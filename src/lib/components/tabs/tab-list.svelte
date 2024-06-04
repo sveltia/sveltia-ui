@@ -154,10 +154,11 @@
         var(--sui-tab-list-border-width, 0 1px 0 0)
       );
       padding: var(--sui-vertical-tab-list-padding, var(--sui-tab-list-padding, 8px 0));
-      width: var(--sui-vertical-tab-list-width, 240px);
+      width: var(--sui-vertical-tab-list-width, auto);
 
       :global(button) {
         justify-content: var(--sui-vertical-tab-justify-content, flex-start);
+        padding-right: 32px;
         width: var(--sui-vertical-tab-width, var(--sui-tab-width, 100%));
         height: var(--sui-vertical-tab-height, var(--sui-tab-height, auto));
       }
