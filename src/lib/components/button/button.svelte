@@ -398,7 +398,13 @@
         padding: 0;
         line-height: var(--sui-line-height-compact);
         text-decoration: var(--sui-button-link-text-decoration, none);
+        text-underline-offset: 2px;
         white-space: normal;
+
+        :global(:root[data-underline-links='true']) &,
+        :global(:host[data-underline-links='true']) & {
+          text-decoration: underline;
+        }
       }
 
       &:hover,

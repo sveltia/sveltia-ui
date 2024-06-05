@@ -95,11 +95,17 @@ strong {
 a {
   color: var(--sui-primary-accent-color-text);
   text-decoration: none;
+  text-underline-offset: 2px;
+
+  &:hover,
+  &:focus,
+  &:active {
+    text-decoration: underline;
+  }
 
   :root[data-underline-links="true"] &,
   :host[data-underline-links="true"] & {
     text-decoration: underline;
-    text-underline-offset: 2px;
   }
 }
 
