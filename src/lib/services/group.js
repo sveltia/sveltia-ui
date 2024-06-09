@@ -99,13 +99,17 @@ class Group {
    * Activate the members.
    */
   activate() {
-    const { parent, allMembers, selected: defaultSelected } = this;
+    const { parent, role, allMembers, selected: defaultSelected } = this;
+    const multi = this.multi || role === 'menu' || role === 'menubar';
 
     allMembers.forEach((element, index) => {
       // Select the first one if no member has the `selected` attribute
-      const isSelected = defaultSelected
-        ? element === defaultSelected
-        : this.selectFirst && index === 0;
+      // eslint-disable-next-line no-nested-ternary
+      const isSelected = multi
+        ? element.getAttribute(this.childSelectedAttr) === 'true'
+        : defaultSelected
+          ? element === defaultSelected
+          : this.selectFirst && index === 0;
 
       const controlTarget = /** @type {HTMLElement | null} */ (
         document.querySelector(`#${element.getAttribute('aria-controls')}`)
