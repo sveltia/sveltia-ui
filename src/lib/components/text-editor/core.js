@@ -11,6 +11,7 @@ import {
   INSERT_UNORDERED_LIST_COMMAND,
   ListItemNode,
   ListNode,
+  $handleListInsertParagraph as handleListInsertParagraph,
   insertList,
   $isListItemNode as isListItemNode,
   $isListNode as isListNode,
@@ -32,6 +33,9 @@ import { $getNearestNodeOfType as getNearestNodeOfType } from '@lexical/utils';
 import {
   COMMAND_PRIORITY_NORMAL,
   ElementNode,
+  INDENT_CONTENT_COMMAND,
+  INSERT_PARAGRAPH_COMMAND,
+  OUTDENT_CONTENT_COMMAND,
   createEditor,
   $getSelection as getSelection,
   $isRangeSelection as isRangeSelection,
@@ -63,6 +67,11 @@ const editorConfig = {
        * @see https://github.com/facebook/lexical/discussions/4381
        */
       italic: 'italic',
+    },
+    list: {
+      nested: {
+        listitem: 'nested',
+      },
     },
   },
 };
@@ -176,6 +185,13 @@ export const initEditor = () => {
     COMMAND_PRIORITY_NORMAL,
   );
 
+  // https://github.com/facebook/lexical/blob/main/packages/lexical-react/src/shared/useList.ts
+  editor.registerCommand(
+    INSERT_PARAGRAPH_COMMAND,
+    () => handleListInsertParagraph(),
+    COMMAND_PRIORITY_NORMAL,
+  );
+
   editor.registerUpdateListener(({ editorState }) => {
     if (editor?.isComposing()) {
       return;
@@ -184,6 +200,39 @@ export const initEditor = () => {
     editorState.read(() => {
       onEditorUpdate(editor);
     });
+  });
+
+  // `editor.registerCommand(KEY_TAB_COMMAND, listener, priority)` doesn’t work for some reason, so
+  // use another method
+  editor.registerRootListener((root) => {
+    if (root) {
+      root.addEventListener('keydown', (event) => {
+        editor.update(() => {
+          if (event.key === 'Tab') {
+            const selection = getSelection();
+
+            if (!isRangeSelection(selection)) {
+              return;
+            }
+
+            const anchor = selection.anchor.getNode();
+
+            const parent =
+              anchor instanceof ElementNode ? anchor : getNearestNodeOfType(anchor, ElementNode);
+
+            if (isListItemNode(parent) && parent.canIndent()) {
+              if (!event.shiftKey) {
+                event.preventDefault();
+                editor.dispatchCommand(INDENT_CONTENT_COMMAND, undefined);
+              } else if (parent.getIndent() > 0) {
+                event.preventDefault();
+                editor.dispatchCommand(OUTDENT_CONTENT_COMMAND, undefined);
+              }
+            }
+          }
+        });
+      });
+    }
   });
 
   return editor;

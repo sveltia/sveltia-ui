@@ -139,6 +139,10 @@
       font-style: italic;
     }
 
+    :global(li.nested) {
+      list-style-type: none;
+    }
+
     :global([data-lexical-text='true']) {
       cursor: text;
     }

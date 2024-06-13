@@ -95,11 +95,11 @@
    * Update {@link inputValue} based on {@link value}.
    */
   const setInputValue = () => {
-    const newValue = value ?? '';
+    const newValue = value;
 
     // Avoid a cycle dependency & infinite loop
     if (inputValue !== newValue) {
-      inputValue = newValue;
+      inputValue = newValue ?? '';
 
       if ($useRichText) {
         convertMarkdown();

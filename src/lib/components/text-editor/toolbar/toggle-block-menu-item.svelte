@@ -66,6 +66,11 @@
         setBlocksType(getSelection(), () => createQuoteNode());
       });
     }
+
+    // Move focus back to the editor
+    window.setTimeout(() => {
+      $editor.focus();
+    }, 500);
   };
 </script>
 
