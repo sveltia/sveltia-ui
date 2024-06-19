@@ -155,7 +155,7 @@
           onButtonClick();
         }
 
-        return true;
+        return false;
       },
       COMMAND_PRIORITY_NORMAL,
     );
