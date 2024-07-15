@@ -81,7 +81,7 @@ class Group {
 
     this.orientation = this.grid
       ? 'horizontal'
-      : this.parent.getAttribute('aria-orientation') ?? orientation;
+      : (this.parent.getAttribute('aria-orientation') ?? orientation);
     this.childRoles = childRoles;
     this.childSelectedAttr = childSelectedAttr;
     this.childSelectedProp = childSelectedAttr.replace('aria-', '');

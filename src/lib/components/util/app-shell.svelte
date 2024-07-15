@@ -5,6 +5,7 @@
   `<div style="display:contents">` in a SvelteKit app).
 -->
 <script>
+  import '$lib/styles/core.scss';
   import { onMount } from 'svelte';
 
   /**
@@ -87,8 +88,6 @@
 </div>
 
 <style lang="scss" global>
-  @use '../../styles/core.scss';
-
   .font-loader {
     position: absolute;
     left: -99999px;
