@@ -1,10 +1,12 @@
+<!-- svelte-ignore options_deprecated_accessors -->
+<svelte:options accessors={true} />
+
 <!--
   @component
   A generic, single-line text field. The equivalent of the HTML `<input type="text">` element.
   @see https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/text
   @see https://w3c.github.io/aria/#textbox
 -->
-<svelte:options accessors={true} />
 
 <script>
   import { generateElementId } from '@sveltia/utils/element';

@@ -1,10 +1,12 @@
+<!-- svelte-ignore options_deprecated_accessors -->
+<svelte:options accessors={true} />
+
 <!--
   @component
   A disclosure (expander) widget. The equivalent of the HTML `<details>` element.
   @see https://developer.mozilla.org/en-US/docs/Web/HTML/Element/details
   @see https://www.w3.org/WAI/ARIA/apg/patterns/disclosure/
 -->
-<svelte:options accessors={true} />
 
 <script>
   import { generateElementId } from '@sveltia/utils/element';

@@ -1,3 +1,6 @@
+<!-- svelte-ignore options_deprecated_accessors -->
+<svelte:options accessors={true} />
+
 <!--
   @component
   The equivalent of the HTML `<input type="search">` element. It comes with a magnifier icon and
@@ -5,7 +8,6 @@
   @see https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/search
   @see https://w3c.github.io/aria/#search
 -->
-<svelte:options accessors={true} />
 
 <script>
   import { generateElementId } from '@sveltia/utils/element';
