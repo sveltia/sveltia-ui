@@ -1,10 +1,8 @@
-<!-- svelte-ignore options_deprecated_accessors -->
-<svelte:options accessors={true} />
-
 <!--
   @component
   A generic modal top-layer helper based on the HTML `<dialog>` element.
 -->
+<svelte:options accessors={true} />
 
 <script>
   import { sleep } from '@sveltia/utils/misc';

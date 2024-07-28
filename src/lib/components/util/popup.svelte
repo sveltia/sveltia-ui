@@ -1,10 +1,8 @@
-<!-- svelte-ignore options_deprecated_accessors -->
-<svelte:options accessors={true} />
-
 <!--
   @component
   Generic popup helper.
 -->
+<svelte:options accessors={true} />
 
 <script>
   import { sleep } from '@sveltia/utils/misc';

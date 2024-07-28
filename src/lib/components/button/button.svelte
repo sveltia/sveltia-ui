@@ -1,12 +1,10 @@
-<!-- svelte-ignore options_deprecated_accessors -->
-<svelte:options accessors={true} />
-
 <!--
   @component
   A generic button widget based on the HTML `<button>` element.
   @see https://w3c.github.io/aria/#button
   @see https://www.w3.org/WAI/ARIA/apg/patterns/button/
 -->
+<svelte:options accessors={true} />
 
 <script>
   import { createEventDispatcher } from 'svelte';
