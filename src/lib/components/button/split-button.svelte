@@ -7,9 +7,9 @@
 -->
 <script>
   import { _ } from 'svelte-i18n';
-  import Button from '$lib/components/button/button.svelte';
-  import Icon from '$lib/components/icon/icon.svelte';
-  import MenuButton from '$lib/components/menu/menu-button.svelte';
+  import Icon from '../icon/icon.svelte';
+  import MenuButton from '../menu/menu-button.svelte';
+  import Button from './button.svelte';
 
   /**
    * The `class` attribute on the `<button>` element.

@@ -5,8 +5,8 @@
   `<div style="display:contents">` in a SvelteKit app).
 -->
 <script>
-  import '$lib/styles/core.scss';
   import { onMount } from 'svelte';
+  import '../../styles/core.scss';
 
   /**
    * Orientation of the app shell’s children.

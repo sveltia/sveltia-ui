@@ -4,10 +4,10 @@
 -->
 <script>
   import { _ } from 'svelte-i18n';
-  import Button from '$lib/components/button/button.svelte';
-  import Divider from '$lib/components/divider/divider.svelte';
-  import Spacer from '$lib/components/divider/spacer.svelte';
-  import Icon from '$lib/components/icon/icon.svelte';
+  import Button from '../button/button.svelte';
+  import Divider from '../divider/divider.svelte';
+  import Spacer from '../divider/spacer.svelte';
+  import Icon from '../icon/icon.svelte';
 
   /** @type {string | undefined} */
   export let value = undefined;

@@ -1,10 +1,10 @@
 <script>
   import { createEventDispatcher } from 'svelte';
   import { _ } from 'svelte-i18n';
-  import Button from '$lib/components/button/button.svelte';
-  import Icon from '$lib/components/icon/icon.svelte';
-  import Option from '$lib/components/listbox/option.svelte';
-  import Select from '$lib/components/select/select.svelte';
+  import Button from '../button/button.svelte';
+  import Icon from '../icon/icon.svelte';
+  import Option from '../listbox/option.svelte';
+  import Select from './select.svelte';
 
   /**
    * The `class` attribute on the wrapper element.

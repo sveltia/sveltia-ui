@@ -13,12 +13,12 @@
   } from 'lexical';
   import { getContext, onMount } from 'svelte';
   import { _ } from 'svelte-i18n';
-  import { isMac, matchShortcuts } from '$lib/services/events';
-  import TextInput from '$lib/components/text-field/text-input.svelte';
-  import { availableButtons } from '$lib/components/text-editor';
-  import Icon from '$lib/components/icon/icon.svelte';
-  import Dialog from '$lib/components/dialog/dialog.svelte';
-  import Button from '$lib/components/button/button.svelte';
+  import { availableButtons } from '..';
+  import { isMac, matchShortcuts } from '../../../services/events';
+  import Button from '../../button/button.svelte';
+  import Dialog from '../../dialog/dialog.svelte';
+  import Icon from '../../icon/icon.svelte';
+  import TextInput from '../../text-field/text-input.svelte';
 
   const id = generateElementId('insert-link');
 

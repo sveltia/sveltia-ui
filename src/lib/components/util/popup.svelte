@@ -8,8 +8,8 @@
   import { sleep } from '@sveltia/utils/misc';
   import { onMount } from 'svelte';
   import { writable } from 'svelte/store';
-  import { activatePopup } from '$lib/services/popup';
-  import Modal from '$lib/components/util/modal.svelte';
+  import { activatePopup } from '../../services/popup';
+  import Modal from './modal.svelte';
 
   /**
    * The `class` attribute on the content element.

@@ -7,16 +7,13 @@
   import { setContext } from 'svelte';
   import { _ } from 'svelte-i18n';
   import { writable } from 'svelte/store';
-  import Alert from '$lib/components/alert/alert.svelte';
-  import { blockButtonTypes, inlineButtonTypes } from '$lib/components/text-editor';
-  import {
-    convertMarkdown as convertMarkdownToLexical,
-    initEditor,
-  } from '$lib/components/text-editor/core';
-  import LexicalRoot from '$lib/components/text-editor/lexical-root.svelte';
-  import EditorToolbar from '$lib/components/text-editor/toolbar/editor-toolbar.svelte';
-  import TextArea from '$lib/components/text-field/text-area.svelte';
-  import Toast from '$lib/components/toast/toast.svelte';
+  import Alert from '../alert/alert.svelte';
+  import { blockButtonTypes, inlineButtonTypes } from '.';
+  import { convertMarkdown as convertMarkdownToLexical, initEditor } from './core';
+  import LexicalRoot from './lexical-root.svelte';
+  import EditorToolbar from './toolbar/editor-toolbar.svelte';
+  import TextArea from '../text-field/text-area.svelte';
+  import Toast from '../toast/toast.svelte';
 
   /**
    * Make the text input container flexible.

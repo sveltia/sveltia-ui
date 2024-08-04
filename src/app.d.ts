@@ -12,11 +12,12 @@ declare namespace App {
 
 /**
  * Silence some import errors.
- * @see https://stackoverflow.com/q/70682803
+ * @see https://stackoverflow.com/q/64194571
  */
 declare module '*.svelte' {
-  const content: any;
-  export default content;
+  import type { ComponentType } from 'svelte';
+  const component: ComponentType;
+  export default component;
 }
 
 /**

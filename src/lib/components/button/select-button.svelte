@@ -5,7 +5,7 @@
   @see https://www.w3.org/WAI/ARIA/apg/patterns/radio/
 -->
 <script>
-  import Button from '$lib/components/button/button.svelte';
+  import Button from './button.svelte';
 
   /**
    * CSS class name on the button.

@@ -8,7 +8,7 @@
 
 <script>
   import { generateElementId } from '@sveltia/utils/element';
-  import { activateKeyShortcuts } from '$lib/services/events';
+  import { activateKeyShortcuts } from '../../services/events';
 
   /**
    * Reference to the `<input>` element.

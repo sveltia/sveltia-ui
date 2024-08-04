@@ -8,8 +8,8 @@
 
 <script>
   import { createEventDispatcher } from 'svelte';
-  import Popup from '$lib/components/util/popup.svelte';
-  import { activateKeyShortcuts } from '$lib/services/events';
+  import { activateKeyShortcuts } from '../../services/events';
+  import Popup from '../util/popup.svelte';
 
   /**
    * Reference to the `<button>` element.

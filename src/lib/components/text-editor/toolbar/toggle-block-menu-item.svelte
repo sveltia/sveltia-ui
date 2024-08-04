@@ -11,8 +11,8 @@
   } from 'lexical';
   import { getContext } from 'svelte';
   import { _ } from 'svelte-i18n';
-  import { availableButtons } from '$lib/components/text-editor';
-  import MenuItemCheckbox from '$lib/components/menu/menu-item-checkbox.svelte';
+  import { availableButtons } from '..';
+  import MenuItemCheckbox from '../../menu/menu-item-checkbox.svelte';
 
   /**
    * Button type.

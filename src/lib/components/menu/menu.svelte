@@ -6,7 +6,7 @@
 -->
 <script>
   import { createEventDispatcher } from 'svelte';
-  import { activateGroup } from '$lib/services/group';
+  import { activateGroup } from '../../services/group';
 
   /**
    * The `class` attribute on the wrapper element.

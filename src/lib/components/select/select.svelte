@@ -6,7 +6,7 @@
   @see https://www.w3.org/WAI/ARIA/apg/patterns/combobox/examples/combobox-select-only/
 -->
 <script>
-  import Combobox from '$lib/components/select/combobox.svelte';
+  import Combobox from './combobox.svelte';
 
   /**
    * The `class` attribute on the wrapper element.

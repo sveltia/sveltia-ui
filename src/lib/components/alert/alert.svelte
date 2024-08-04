@@ -5,7 +5,7 @@
   @see https://www.w3.org/WAI/ARIA/apg/patterns/alert/
 -->
 <script>
-  import Icon from '$lib/components/icon/icon.svelte';
+  import Icon from '../icon/icon.svelte';
 
   /**
    * Status of the alert.

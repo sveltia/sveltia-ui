@@ -2,9 +2,9 @@
   import { FORMAT_TEXT_COMMAND } from 'lexical';
   import { getContext } from 'svelte';
   import { _ } from 'svelte-i18n';
-  import Button from '$lib/components/button/button.svelte';
-  import Icon from '$lib/components/icon/icon.svelte';
-  import { availableButtons } from '$lib/components/text-editor';
+  import { availableButtons } from '..';
+  import Button from '../../button/button.svelte';
+  import Icon from '../../icon/icon.svelte';
 
   /**
    * Button type.

@@ -41,7 +41,7 @@ import {
   $getSelection as getSelection,
   $isRangeSelection as isRangeSelection,
 } from 'lexical';
-import { blockButtonTypes, textFormatButtonTypes } from '$lib/components/text-editor';
+import { blockButtonTypes, textFormatButtonTypes } from '.';
 
 /**
  * Lexical editor configuration.

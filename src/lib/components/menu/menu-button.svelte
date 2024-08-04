@@ -4,8 +4,8 @@
   @see https://www.w3.org/WAI/ARIA/apg/patterns/menu-button/
 -->
 <script>
-  import Button from '$lib/components/button/button.svelte';
-  import Popup from '$lib/components/util/popup.svelte';
+  import Button from '../button/button.svelte';
+  import Popup from '../util/popup.svelte';
 
   /**
    * The `class` attribute on the `<button>` element.

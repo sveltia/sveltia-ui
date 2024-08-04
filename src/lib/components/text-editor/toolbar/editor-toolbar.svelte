@@ -1,22 +1,18 @@
 <script>
   import { getContext } from 'svelte';
   import { _ } from 'svelte-i18n';
-  import ButtonGroup from '$lib/components/button/button-group.svelte';
-  import Button from '$lib/components/button/button.svelte';
-  import Divider from '$lib/components/divider/divider.svelte';
-  import Spacer from '$lib/components/divider/spacer.svelte';
-  import Icon from '$lib/components/icon/icon.svelte';
-  import MenuButton from '$lib/components/menu/menu-button.svelte';
-  import Menu from '$lib/components/menu/menu.svelte';
-  import {
-    availableButtons,
-    blockButtonTypes,
-    inlineButtonTypes,
-  } from '$lib/components/text-editor';
-  import FormatTextButton from '$lib/components/text-editor/toolbar/format-text-button.svelte';
-  import InsertLinkButton from '$lib/components/text-editor/toolbar/insert-link-button.svelte';
-  import ToggleBlockMenuItem from '$lib/components/text-editor/toolbar/toggle-block-menu-item.svelte';
-  import Toolbar from '$lib/components/toolbar/toolbar.svelte';
+  import { availableButtons, blockButtonTypes, inlineButtonTypes } from '..';
+  import ButtonGroup from '../../button/button-group.svelte';
+  import Button from '../../button/button.svelte';
+  import Divider from '../../divider/divider.svelte';
+  import Spacer from '../../divider/spacer.svelte';
+  import Icon from '../../icon/icon.svelte';
+  import MenuButton from '../../menu/menu-button.svelte';
+  import Menu from '../../menu/menu.svelte';
+  import FormatTextButton from './format-text-button.svelte';
+  import InsertLinkButton from './insert-link-button.svelte';
+  import ToggleBlockMenuItem from './toggle-block-menu-item.svelte';
+  import Toolbar from '../../toolbar/toolbar.svelte';
 
   /**
    * Whether to disable the widget. An alias of the `aria-disabled` attribute.

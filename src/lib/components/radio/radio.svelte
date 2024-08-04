@@ -7,7 +7,7 @@
 -->
 <script>
   import { generateElementId } from '@sveltia/utils/element';
-  import Button from '$lib/components/button/button.svelte';
+  import Button from '../button/button.svelte';
 
   /**
    * The `class` attribute on the wrapper element.

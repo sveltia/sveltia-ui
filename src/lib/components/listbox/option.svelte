@@ -5,8 +5,8 @@
   @see https://w3c.github.io/aria/#option
 -->
 <script>
-  import Button from '$lib/components/button/button.svelte';
-  import Icon from '$lib/components/icon/icon.svelte';
+  import Button from '../button/button.svelte';
+  import Icon from '../icon/icon.svelte';
 
   /**
    * The `class` attribute on the wrapper element.

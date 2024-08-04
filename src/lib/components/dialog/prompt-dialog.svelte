@@ -7,8 +7,8 @@
   @see https://developer.mozilla.org/en-US/docs/Web/API/Window/prompt
 -->
 <script>
-  import Dialog from '$lib/components/dialog/dialog.svelte';
-  import TextInput from '$lib/components/text-field/text-input.svelte';
+  import Dialog from './dialog.svelte';
+  import TextInput from '../text-field/text-input.svelte';
 
   /**
    * The `class` attribute on the `<dialog>` element.

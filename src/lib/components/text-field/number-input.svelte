@@ -7,9 +7,9 @@
 <script>
   import { generateElementId } from '@sveltia/utils/element';
   import { _ } from 'svelte-i18n';
-  import Button from '$lib/components/button/button.svelte';
-  import Icon from '$lib/components/icon/icon.svelte';
-  import TextInput from '$lib/components/text-field/text-input.svelte';
+  import Button from '../button/button.svelte';
+  import Icon from '../icon/icon.svelte';
+  import TextInput from './text-input.svelte';
 
   /**
    * The `class` attribute on the wrapper element.
