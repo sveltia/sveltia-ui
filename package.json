@@ -1,6 +1,6 @@
 {
   "name": "@sveltia/ui",
-  "version": "0.15.10",
+  "version": "0.15.11",
   "license": "MIT",
   "type": "module",
   "publishConfig": {
