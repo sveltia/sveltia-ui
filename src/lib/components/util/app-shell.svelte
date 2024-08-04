@@ -6,7 +6,6 @@
 -->
 <script>
   import { onMount } from 'svelte';
-  import '../../styles/core.scss';
 
   /**
    * Orientation of the app shell’s children.
@@ -88,6 +87,8 @@
 </div>
 
 <style lang="scss" global>
+  @import '../../styles/core';
+
   .font-loader {
     position: absolute;
     left: -99999px;
