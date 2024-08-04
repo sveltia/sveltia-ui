@@ -1,4 +1,5 @@
 import { CodeHighlightNode, CodeNode } from '@lexical/code';
+import { registerDragonSupport } from '@lexical/dragon';
 import { createEmptyHistoryState, registerHistory } from '@lexical/history';
 import {
   LinkNode,
@@ -153,6 +154,7 @@ export const initEditor = () => {
   const editor = createEditor(editorConfig);
 
   registerRichText(editor);
+  registerDragonSupport(editor);
   registerHistory(editor, createEmptyHistoryState(), 1000);
 
   editor.registerCommand(

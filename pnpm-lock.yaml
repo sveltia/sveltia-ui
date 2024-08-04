@@ -11,6 +11,9 @@ importers:
       '@lexical/code':
         specifier: ^0.17.0
         version: 0.17.0
+      '@lexical/dragon':
+        specifier: ^0.17.0
+        version: 0.17.0
       '@lexical/history':
         specifier: ^0.17.0
         version: 0.17.0
@@ -715,6 +718,9 @@ packages:
 
   '@lexical/code@0.17.0':
     resolution: {integrity: sha512-8zrgHzf27aYySfUVeSKw8YP/LkRlXHSwD03BKlkSZAb4HX/WC60SGmdXUhtyTIBucqe0pnuGsRYfR9euD0/tfw==}
+
+  '@lexical/dragon@0.17.0':
+    resolution: {integrity: sha512-XSsrHVwhjBIVF9VN9MFm6Go8fquj5H/jlYuyNzemHq0tOli8NaoSovGc5q0LwXr88RPsuIt1jluazR7Q1+kxTQ==}
 
   '@lexical/history@0.17.0':
     resolution: {integrity: sha512-SfeUKAXf9pZpqee9rMOTt33V0J0p/AS9TZLT9Un9dU6wAaHfv6NFax1ND0JoG1a9YkTc539mufxVLNjsNRc0ag==}
@@ -3316,6 +3322,10 @@ snapshots:
       '@lexical/utils': 0.17.0
       lexical: 0.17.0
       prismjs: 1.29.0
+
+  '@lexical/dragon@0.17.0':
+    dependencies:
+      lexical: 0.17.0
 
   '@lexical/history@0.17.0':
     dependencies:
