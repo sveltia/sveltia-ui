@@ -21,6 +21,11 @@ settings:
   import/parsers:
     espree:
       - ".js"
+overrides:
+  - files:
+      - "*.svelte"
+      - "*.svelte.js"
+    parser: svelte-eslint-parser
 rules:
   class-methods-use-this: off
   import/extensions: off
