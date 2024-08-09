@@ -3,6 +3,10 @@
   "version": "0.15.13",
   "license": "MIT",
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "github:sveltia/sveltia-ui"
+  },
   "publishConfig": {
     "access": "public"
   },
