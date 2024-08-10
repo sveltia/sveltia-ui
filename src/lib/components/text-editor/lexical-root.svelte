@@ -46,7 +46,7 @@
   let lexicalRoot = undefined;
 
   $: editable = !(disabled || readonly);
-  $: $editor.setEditable(editable);
+  $: $editor?.setEditable(editable);
 
   /**
    * Update {@link value} and other state variables whenever the editor content is updated.
@@ -79,17 +79,20 @@
   };
 
   onMount(() => {
-    if (lexicalRoot) {
-      $editor.setRootElement(lexicalRoot);
-      lexicalRoot.addEventListener('Update', onUpdate);
-      lexicalRoot.addEventListener('click', onClick);
-    }
+    lexicalRoot?.addEventListener('Update', onUpdate);
+    lexicalRoot?.addEventListener('click', onClick);
 
     return () => {
       lexicalRoot?.removeEventListener('Update', onUpdate);
       lexicalRoot?.removeEventListener('click', onClick);
     };
   });
+
+  $: {
+    if ($editor && lexicalRoot) {
+      $editor.setRootElement(lexicalRoot);
+    }
+  }
 </script>
 
 <div

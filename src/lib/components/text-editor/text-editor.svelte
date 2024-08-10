@@ -4,16 +4,16 @@
 -->
 <script>
   import { generateElementId } from '@sveltia/utils/element';
-  import { setContext } from 'svelte';
+  import { onMount, setContext } from 'svelte';
   import { _ } from 'svelte-i18n';
   import { writable } from 'svelte/store';
-  import Alert from '../alert/alert.svelte';
   import { blockButtonTypes, inlineButtonTypes } from '.';
+  import Alert from '../alert/alert.svelte';
+  import TextArea from '../text-field/text-area.svelte';
+  import Toast from '../toast/toast.svelte';
   import { convertMarkdown as convertMarkdownToLexical, initEditor } from './core';
   import LexicalRoot from './lexical-root.svelte';
   import EditorToolbar from './toolbar/editor-toolbar.svelte';
-  import TextArea from '../text-field/text-area.svelte';
-  import Toast from '../toast/toast.svelte';
 
   /**
    * Make the text input container flexible.
@@ -61,7 +61,8 @@
    */
   export let buttons = [...inlineButtonTypes, ...blockButtonTypes];
 
-  const editor = writable(initEditor());
+  /** @type {import('svelte/store').Writable<import('lexical').LexicalEditor | undefined>} */
+  const editor = writable();
   const selectionBlockType = writable('paragraph');
   const selectionInlineTypes = writable([]);
   const editorId = writable(generateElementId('editor'));
@@ -75,6 +76,10 @@
    * restore the original value when there is an error while conversion.
    */
   const convertMarkdown = async () => {
+    if (!$editor) {
+      return;
+    }
+
     const originalValue = inputValue;
 
     try {
@@ -132,6 +137,11 @@
       showConverterError = true;
     }
   }
+
+  // The editor has to be initialized in the browser
+  onMount(() => {
+    $editor = initEditor();
+  });
 
   setContext(
     'state',

@@ -11,7 +11,7 @@
     $getTextContent as getTextContent,
     $isRangeSelection as isRangeSelection,
   } from 'lexical';
-  import { getContext, onMount } from 'svelte';
+  import { getContext } from 'svelte';
   import { _ } from 'svelte-i18n';
   import { availableButtons } from '..';
   import { isMac, matchShortcuts } from '../../../services/events';
@@ -145,8 +145,10 @@
     anchorText = '';
   };
 
-  onMount(() => {
-    // Open the dialog with a keyboard shortcut: Accel+K
+  /**
+   * Open the dialog with a keyboard shortcut: Accel+K.
+   */
+  const _registerCommand = () => {
     $editor.registerCommand(
       KEY_DOWN_COMMAND,
       (event) => {
@@ -159,7 +161,13 @@
       },
       COMMAND_PRIORITY_NORMAL,
     );
-  });
+  };
+
+  $: {
+    if ($editor) {
+      _registerCommand();
+    }
+  }
 </script>
 
 <Button
