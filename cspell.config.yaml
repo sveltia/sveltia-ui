@@ -19,6 +19,7 @@ ignorePaths:
 words:
   - colour
   - colours
+  - CVEs
   - espree
   - jsdoc
   - nocheck
