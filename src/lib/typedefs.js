@@ -43,3 +43,5 @@
  * the editor.
  * @property {Function} convertMarkdown - Function to trigger the Lexical converter.
  */
+
+export {};

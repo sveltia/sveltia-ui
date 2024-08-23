@@ -75,15 +75,15 @@ export const availableButtons = {
   },
 };
 /**
- * @type {TextEditorFormatType[]}
+ * @type {import('$lib/typedefs').TextEditorFormatType[]}
  */
 export const textFormatButtonTypes = ['bold', 'italic', 'code'];
 /**
- * @type {TextEditorInlineType[]}
+ * @type {import('$lib/typedefs').TextEditorInlineType[]}
  */
 export const inlineButtonTypes = [...textFormatButtonTypes, 'link'];
 /**
- * @type {TextEditorBlockType[]}
+ * @type {import('$lib/typedefs').TextEditorBlockType[]}
  */
 export const blockButtonTypes = [
   'paragraph',

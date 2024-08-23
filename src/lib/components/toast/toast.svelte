@@ -25,7 +25,7 @@
   export let duration = 5000;
   /**
    * Position of the toast.
-   * @type {ToastPosition}
+   * @type {import('$lib/typedefs').ToastPosition}
    */
   export let position = 'bottom-right';
 

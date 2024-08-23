@@ -39,7 +39,7 @@
   export let content = undefined;
   /**
    * Where to show the popup.
-   * @type {PopupPosition}
+   * @type {import('$lib/typedefs').PopupPosition}
    */
   export let position = 'bottom-left';
   /**

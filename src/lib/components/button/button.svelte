@@ -99,7 +99,7 @@
   export let flex = false;
   /**
    * Where to show the dropdown menu.
-   * @type {PopupPosition}
+   * @type {import('$lib/typedefs').PopupPosition}
    */
   export let popupPosition = 'bottom-left';
   /**

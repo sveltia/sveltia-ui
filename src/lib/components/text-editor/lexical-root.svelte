@@ -34,7 +34,7 @@
 
   /**
    * Text editor state.
-   * @type {TextEditorState}
+   * @type {import('$lib/typedefs').TextEditorState}
    */
   const { editor, editorId, selectionBlockType, selectionInlineTypes, hasConverterError } =
     getContext('state');

@@ -8,7 +8,7 @@
   let showSuccessToast = false;
   let showWarningToast = false;
   let showPositionToast = false;
-  /** @type {ToastPosition | undefined} */
+  /** @type {import('$lib/typedefs').ToastPosition | undefined} */
   let showPositionToastPosition = undefined;
   let showManualToast = false;
 </script>

@@ -91,7 +91,7 @@ const onEditorUpdate = (editor) => {
   const anchor = selection.anchor.getNode();
   /** @type {ElementNode | null} */
   let parent = null;
-  /** @type {TextEditorInlineType[]} */
+  /** @type {import('$lib/typedefs').TextEditorInlineType[]} */
   const selectionInlineTypes = textFormatButtonTypes.filter((type) => selection.hasFormat(type));
 
   if (anchor.getType() !== 'root') {
@@ -107,7 +107,7 @@ const onEditorUpdate = (editor) => {
     }
   }
 
-  const selectionBlockType = /** @type {TextEditorBlockType} */ (
+  const selectionBlockType = /** @type {import('$lib/typedefs').TextEditorBlockType} */ (
     (() => {
       if (!parent) {
         return 'paragraph';

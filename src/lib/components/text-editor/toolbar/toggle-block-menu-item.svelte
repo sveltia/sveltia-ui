@@ -16,13 +16,13 @@
 
   /**
    * Button type.
-   * @type {TextEditorBlockType}
+   * @type {import('$lib/typedefs').TextEditorBlockType}
    */
   export let type;
 
   /**
    * Text editor state.
-   * @type {TextEditorState}
+   * @type {import('$lib/typedefs').TextEditorState}
    */
   const { editor, selectionBlockType } = getContext('state');
 

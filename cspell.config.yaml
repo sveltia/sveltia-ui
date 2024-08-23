@@ -30,5 +30,6 @@ words:
   - singleline
   - stylelint
   - Sveltia
+  - typedefs
   - Vite
   - wght

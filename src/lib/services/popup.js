@@ -45,7 +45,9 @@ class Popup {
       if (position.startsWith('bottom-')) {
         if (contentHeight > bottomMargin) {
           if (topMargin > bottomMargin) {
-            position = /** @type {PopupPosition} */ (position.replace('bottom-', 'top-'));
+            position = /** @type {import('$lib/typedefs').PopupPosition} */ (
+              position.replace('bottom-', 'top-')
+            );
             height = topMargin;
           } else {
             height = bottomMargin;
@@ -56,7 +58,9 @@ class Popup {
       // If the popup overflows the viewport, change the position
       if (position.endsWith('-left')) {
         if (intersectionRect.left + contentWidth > rootBounds.width - 8) {
-          position = /** @type {PopupPosition} */ (position.replace('-left', '-right'));
+          position = /** @type {import('$lib/typedefs').PopupPosition} */ (
+            position.replace('-left', '-right')
+          );
         }
       }
 
@@ -106,7 +110,7 @@ class Popup {
    * Initialize a new `Popup` instance.
    * @param {HTMLButtonElement} anchorElement - `<button>` element that triggers the popup.
    * @param {HTMLDialogElement} popupElement - `<dialog>` element to be used for the popup.
-   * @param {PopupPosition} position - Where to show the popup content.
+   * @param {import('$lib/typedefs').PopupPosition} position - Where to show the popup content.
    * @param {HTMLElement} [positionBaseElement] - The base element of the `position`. If omitted,
    * this will be the `anchorElement`.
    */

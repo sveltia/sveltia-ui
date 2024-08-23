@@ -52,12 +52,13 @@
   export let value = undefined;
   /**
    * Enabled modes.
-   * @type {TextEditorMode[]}
+   * @type {import('$lib/typedefs').TextEditorMode[]}
    */
   export let modes = ['rich-text', 'plain-text'];
   /**
    * Enabled buttons.
-   * @type {(TextEditorBlockType | TextEditorInlineType)[]}
+   * @type {(import('$lib/typedefs').TextEditorBlockType |
+   * import('$lib/typedefs').TextEditorInlineType)[]}
    */
   export let buttons = [...inlineButtonTypes, ...blockButtonTypes];
 
@@ -145,7 +146,7 @@
 
   setContext(
     'state',
-    /** @type {TextEditorState} */ ({
+    /** @type {import('$lib/typedefs').TextEditorState} */ ({
       editor,
       editorId,
       selectionBlockType,

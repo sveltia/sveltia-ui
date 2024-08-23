@@ -9,10 +9,10 @@
   import Icon from '../../icon/icon.svelte';
   import MenuButton from '../../menu/menu-button.svelte';
   import Menu from '../../menu/menu.svelte';
+  import Toolbar from '../../toolbar/toolbar.svelte';
   import FormatTextButton from './format-text-button.svelte';
   import InsertLinkButton from './insert-link-button.svelte';
   import ToggleBlockMenuItem from './toggle-block-menu-item.svelte';
-  import Toolbar from '../../toolbar/toolbar.svelte';
 
   /**
    * Whether to disable the widget. An alias of the `aria-disabled` attribute.
@@ -27,7 +27,7 @@
 
   /**
    * Text editor state.
-   * @type {TextEditorState}
+   * @type {import('$lib/typedefs').TextEditorState}
    */
   const {
     editorId,
@@ -44,7 +44,7 @@
    */
   $: blockLevelButtons = Array.from(
     new Set(
-      /** @type {TextEditorBlockType[]} */ ([
+      /** @type {import('$lib/typedefs').TextEditorBlockType[]} */ ([
         'paragraph', // Always needed
         ...enabledButtons.filter((type) => blockButtonTypes.includes(/** @type {any} */ (type))),
       ]),
@@ -56,7 +56,7 @@
    */
   $: inlineLevelButtons = Array.from(
     new Set(
-      /** @type {TextEditorInlineType[]} */ ([
+      /** @type {import('$lib/typedefs').TextEditorInlineType[]} */ ([
         ...enabledButtons.filter((type) => inlineButtonTypes.includes(/** @type {any} */ (type))),
       ]),
     ),

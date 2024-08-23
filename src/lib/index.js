@@ -93,3 +93,6 @@ export { default as Toolbar } from './components/toolbar/toolbar.svelte';
 export { default as AppShell } from './components/util/app-shell.svelte';
 export { default as Group } from './components/util/group.svelte';
 export { default as Modal } from './components/util/modal.svelte';
+
+// eslint-disable-next-line import/export
+export * from './typedefs';

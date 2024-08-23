@@ -8,13 +8,13 @@
 
   /**
    * Button type.
-   * @type {TextEditorFormatType}
+   * @type {import('$lib/typedefs').TextEditorFormatType}
    */
   export let type;
 
   /**
    * Text editor state.
-   * @type {TextEditorState}
+   * @type {import('$lib/typedefs').TextEditorState}
    */
   const { editor, editorId, selectionInlineTypes, useRichText } = getContext('state');
 </script>
