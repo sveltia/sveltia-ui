@@ -66,16 +66,29 @@ export const activateKeyShortcuts = (element, shortcuts = '') => {
     const { disabled, offsetParent } = element;
     const { top, left } = element.getBoundingClientRect();
 
-    // Check if the element is enabled, visible and clickable (not behind a modal dialog)
-    if (
-      !disabled &&
-      !!offsetParent &&
-      document.elementsFromPoint(left + 4, top + 4).includes(element) &&
-      matchShortcuts(event, /** @type {string} */ (platformKeyShortcuts))
-    ) {
+    // Check if the element is visible
+    if (!matchShortcuts(event, /** @type {string} */ (platformKeyShortcuts)) || !offsetParent) {
+      return;
+    }
+
+    if (disabled) {
+      // Make sure `elementsFromPoint()` works as expected
+      element.style.setProperty('pointer-events', 'auto');
+    }
+
+    // Check if the element is clickable (not behind a modal dialog)
+    if (document.elementsFromPoint(left + 4, top + 4).includes(element)) {
       event.preventDefault();
-      element.focus();
-      element.click();
+
+      // Trigger click only when the element is enabled
+      if (!disabled) {
+        element.focus();
+        element.click();
+      }
+    }
+
+    if (disabled) {
+      element.style.removeProperty('pointer-events');
     }
   };
 
