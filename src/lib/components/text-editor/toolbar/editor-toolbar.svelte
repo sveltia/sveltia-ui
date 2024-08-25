@@ -1,4 +1,5 @@
 <script>
+  import { unique } from '@sveltia/utils/array';
   import { getContext } from 'svelte';
   import { _ } from 'svelte-i18n';
   import { availableButtons, blockButtonTypes, inlineButtonTypes } from '..';
@@ -41,25 +42,19 @@
 
   /**
    * Enabled block level buttons.
+   * @type {import('$lib/typedefs').TextEditorBlockType[]}
    */
-  $: blockLevelButtons = Array.from(
-    new Set(
-      /** @type {import('$lib/typedefs').TextEditorBlockType[]} */ ([
-        'paragraph', // Always needed
-        ...enabledButtons.filter((type) => blockButtonTypes.includes(/** @type {any} */ (type))),
-      ]),
-    ),
-  );
+  $: blockLevelButtons = unique([
+    'paragraph', // Always needed
+    ...enabledButtons.filter((type) => blockButtonTypes.includes(/** @type {any} */ (type))),
+  ]);
 
   /**
    * Enabled inline level buttons.
+   * @type {import('$lib/typedefs').TextEditorInlineType[]}
    */
-  $: inlineLevelButtons = Array.from(
-    new Set(
-      /** @type {import('$lib/typedefs').TextEditorInlineType[]} */ ([
-        ...enabledButtons.filter((type) => inlineButtonTypes.includes(/** @type {any} */ (type))),
-      ]),
-    ),
+  $: inlineLevelButtons = unique(
+    enabledButtons.filter((type) => inlineButtonTypes.includes(/** @type {any} */ (type))),
   );
 </script>
 
