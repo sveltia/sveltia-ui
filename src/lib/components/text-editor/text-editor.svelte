@@ -123,13 +123,17 @@
   };
 
   $: {
-    void value;
-    setInputValue();
+    if ($editor) {
+      void value;
+      setInputValue();
+    }
   }
 
   $: {
-    void inputValue;
-    setCurrentValue();
+    if ($editor) {
+      void inputValue;
+      setCurrentValue();
+    }
   }
 
   $: {
