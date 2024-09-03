@@ -103,7 +103,7 @@
       {invalid}
       aria-checked={checked}
       aria-label={ariaLabel || undefined}
-      aria-labelledby={ariaLabel ? undefined : '{id}-label'}
+      aria-labelledby={ariaLabel ? undefined : `${id}-label`}
       {...$$restProps}
       bind:this={buttonComponent}
       on:click={(event) => {

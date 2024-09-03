@@ -36,7 +36,7 @@
   hidden={hidden || undefined}
   aria-hidden={hidden}
   aria-disabled={disabled}
-  aria-labelledby={title ? '{id}-title' : undefined}
+  aria-labelledby={title ? `${id}-title` : undefined}
   aria-roledescription="menu item group"
   {...$$restProps}
 >
