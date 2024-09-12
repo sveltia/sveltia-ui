@@ -69,7 +69,7 @@
   export let name = undefined;
   /**
    * Input value.
-   * @type {string | number | undefined}
+   * @type {any} = string | number | undefined
    */
   export let value = undefined;
   /**

@@ -26,6 +26,9 @@ overrides:
       - "*.svelte"
       - "*.svelte.js"
     parser: svelte-eslint-parser
+    rules:
+      # Silence an error on `<svelte:options accessors={true} />`
+      svelte/valid-compile: off
 rules:
   class-methods-use-this: off
   import/extensions: off

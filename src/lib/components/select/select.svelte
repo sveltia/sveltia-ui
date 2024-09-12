@@ -41,7 +41,7 @@
   export let invalid = false;
   /**
    * Selected option’s value.
-   * @type {(string | number | undefined)}
+   * @type {any} = string | number | undefined
    */
   export let value = undefined;
 </script>
