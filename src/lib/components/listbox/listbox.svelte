@@ -6,85 +6,79 @@
   @see https://www.w3.org/WAI/ARIA/apg/patterns/listbox/
 -->
 <script>
-  import { createEventDispatcher } from 'svelte';
-  import { activateGroup } from '../../services/group';
+  import { activateGroup } from '../../services/group.svelte';
 
   /**
-   * The `class` attribute on the wrapper element.
-   * @type {string}
-   */
-  let className = '';
-  export { className as class };
-  /**
-   * Whether to hide the widget. An alias of the `aria-hidden` attribute.
-   * @type {boolean | undefined}
-   */
-  export let hidden = undefined;
-  /**
-   * Whether to disable the widget. An alias of the `aria-disabled` attribute.
-   * @type {boolean}
-   */
-  export let disabled = false;
-  /**
-   * Whether to make the widget read-only. An alias of the `aria-readonly` attribute.
-   * @type {boolean}
-   */
-  export let readonly = false;
-  /**
-   * Whether to mark the widget required. An alias of the `aria-required` attribute.
-   * @type {boolean}
-   */
-  export let required = false;
-  /**
-   * Whether to mark the widget invalid. An alias of the `aria-invalid` attribute.
-   * @type {boolean}
-   */
-  export let invalid = false;
-  /**
-   * Whether to allow selecting more than one `<Option>`. An alias of the `aria-multiselectable`
+   * @typedef {object} Props
+   * @property {string} [class] - The `class` attribute on the wrapper element.
+   * @property {boolean} [hidden] - Whether to hide the widget. An alias of the `aria-hidden`
    * attribute.
-   * @type {boolean}
+   * @property {boolean} [disabled] - Whether to disable the widget. An alias of the `aria-disabled`
+   * attribute.
+   * @property {boolean} [readonly] - Whether to make the widget read-only. An alias of the
+   * `aria-readonly` attribute.
+   * @property {boolean} [required] - Whether to mark the widget required. An alias of the
+   * `aria-required` attribute.
+   * @property {boolean} [invalid] - Whether to mark the widget invalid. An alias of the
+   * `aria-invalid` attribute.
+   * @property {boolean} [multiple] - Whether to allow selecting more than one `<Option>`. An alias
+   * of the `aria-multiselectable` attribute.
+   * @property {string} [searchTerms] - Search terms to be used to filter the items.
+   * @property {import('svelte').Snippet} [children] - Primary slot content.
+   * @property {(event: CustomEvent) => void} [onChange] - Custom `Change` event handler.
+   * @property {(event: CustomEvent) => void} [onFilter] - Custom `Filter` event handler.
    */
-  export let multiple = false;
+
   /**
-   * Search terms to be used to filter the items.
-   * @type {string}
+   * @type {import('$lib/typedefs').CommonEventHandlers & Props & Record<string, any>}
    */
-  export let searchTerms = '';
+  let {
+    /* eslint-disable prefer-const */
+    class: className,
+    hidden = false,
+    disabled = false,
+    readonly = false,
+    required = false,
+    invalid = false,
+    multiple = false,
+    searchTerms = '',
+    children,
+    onFilter,
+    ...restProps
+    /* eslint-enable prefer-const */
+  } = $props();
 
   /**
    * @type {boolean}
    */
-  let filtered = false;
-
-  const dispatch = createEventDispatcher();
+  let filtered = $state(false);
 </script>
 
 <div
+  {...restProps}
   role="listbox"
   class="sui listbox {className}"
   class:filtered
   tabindex={disabled ? -1 : 0}
-  hidden={hidden || undefined}
+  {hidden}
   aria-hidden={hidden}
   aria-disabled={disabled}
   aria-readonly={readonly}
   aria-required={required}
   aria-invalid={invalid}
   aria-multiselectable={multiple}
-  {...$$restProps}
-  use:activateGroup={{ searchTerms }}
-  on:click
-  on:change={(/** @type {CustomEvent} */ event) => {
-    dispatch('change', event.detail);
-  }}
-  on:filter
-  on:filter={(/** @type {CustomEvent} */ { detail: { matched, total } }) => {
+  onFilter={(/** @type {CustomEvent} */ event) => {
+    const {
+      detail: { matched, total },
+    } = event;
+
     filtered = matched !== total;
+    onFilter?.(event);
   }}
+  use:activateGroup={{ searchTerms }}
 >
   <div role="none" class="inner" inert={disabled}>
-    <slot />
+    {@render children?.()}
   </div>
 </div>
 

@@ -13,46 +13,41 @@
   import Modal from '../util/modal.svelte';
 
   /**
-   * The `class` attribute on the content element.
-   * @type {string}
+   * @typedef {object} Props
+   * @property {string} [class] - The `class` attribute on the content element.
+   * @property {boolean} [open] - Whether to open the drawer.
+   * @property {string} [title] - Title text displayed on the header.
+   * @property {'top' | 'right' | 'bottom' | 'left'} [position] - Position of the drawer.
+   * @property {'small' | 'medium' | 'large' | 'x-large' | 'full'} [size] - Width or height of the
+   * drawer.
+   * @property {'inside' | 'outside' | false} [showClose] - Whether to show the Close button.
+   * @property {import('svelte').Snippet} [children] - Primary slot content.
+   * @property {import('svelte').Snippet} [header] - Header slot content.
+   * @property {import('svelte').Snippet} [headerExtra] - Header extra slot content.
+   * @property {import('svelte').Snippet} [footer] - Footer slot content.
+   * @property {import('svelte').Snippet} [closeIcon] - Close icon slot content.
+   * @property {import('svelte').Snippet} [extraContent] - Extra content slot content.
    */
-  let className = '';
-  export { className as class };
+
   /**
-   * Whether to open the drawer.
-   * @type {boolean}
+   * @type {import('$lib/typedefs').ModalProps & Props & Record<string, any>}
    */
-  export let open = false;
-  /**
-   * Title text displayed on the header.
-   * @type {string}
-   */
-  export let title = '';
-  /**
-   * Position of the drawer.
-   * @type {'top' | 'right' | 'bottom' | 'left'}
-   */
-  export let position = 'right';
-  /**
-   * Width or height of the drawer.
-   * @type {'small' | 'medium' | 'large' | 'x-large' | 'full'}
-   */
-  export let size = 'small';
-  /**
-   * Whether to show the Close button.
-   * @type {'inside' | 'outside' | false}
-   */
-  export let showClose = 'outside';
-  /**
-   * Whether to close the modal when the backdrop (outside of the modal) is clicked.
-   * @type {boolean}
-   */
-  export let lightDismiss = false;
-  /**
-   * Whether to keep the content in the DOM tree when the modal is not displayed.
-   * @type {boolean}
-   */
-  export let keepContent = false;
+  let {
+    /* eslint-disable prefer-const */
+    open = $bindable(false),
+    class: className,
+    title = '',
+    position = 'right',
+    size = 'small',
+    showClose = 'outside',
+    children,
+    header,
+    headerExtra,
+    footer,
+    closeIcon,
+    ...restProps
+    /* eslint-enable prefer-const */
+  } = $props();
 
   /**
    * The ID of the drawer.
@@ -61,30 +56,16 @@
   const id = generateElementId('drawer');
   /**
    * A reference to the modal component.
-   * @type {Modal}
+   * @type {Modal | undefined}
    */
-  let modal;
+  let modal = $state();
 
-  $: orientation = position === 'right' || position === 'left' ? 'vertical' : 'horizontal';
+  const orientation = $derived(
+    position === 'right' || position === 'left' ? 'vertical' : 'horizontal',
+  );
 </script>
 
-<Modal
-  {id}
-  class="drawer"
-  bind:open
-  showBackdrop
-  {lightDismiss}
-  {keepContent}
-  {...$$restProps}
-  bind:this={modal}
-  on:opening
-  on:open
-  on:ok
-  on:cancel
-  on:closing
-  on:close
->
-  <slot name="extra-content" slot="extra-content" />
+<Modal bind:this={modal} {...restProps} bind:open {id} class="drawer" showBackdrop>
   <div role="none" class="content {className} {size} {position} {orientation}">
     <div role="none" class="extra-control">
       {#if showClose === 'outside'}
@@ -94,28 +75,30 @@
           class="close"
           aria-label={$_('_sui.close')}
           aria-controls={id}
-          on:click={() => {
-            modal.close('close');
+          onclick={() => {
+            modal?.close('close');
           }}
         >
-          <slot name="close-button" slot="start-icon">
-            <Icon name="close" />
-          </slot>
+          {#snippet startIcon()}
+            {#if closeIcon}
+              {@render closeIcon()}
+            {:else}
+              <Icon name="close" />
+            {/if}
+          {/snippet}
         </Button>
       {/if}
     </div>
-    {#if title || showClose === 'inside' || $$slots.header || $$slots['header-extra']}
-      {#if $$slots.header}
-        <slot name="header" />
+    {#if title || showClose === 'inside' || header || headerExtra}
+      {#if header}
+        {@render header()}
       {:else}
         <div role="none" class="header">
           <div role="none" class="title">
             {title}
           </div>
           <Spacer flex={true} />
-          {#if $$slots['header-extra']}
-            <slot name="header-extra" />
-          {/if}
+          {@render headerExtra?.()}
           {#if showClose === 'inside'}
             <Button
               variant="ghost"
@@ -123,24 +106,28 @@
               class="close"
               aria-label={$_('_sui.close')}
               aria-controls={id}
-              on:click={() => {
-                modal.close('close');
+              onclick={() => {
+                modal?.close('close');
               }}
             >
-              <slot name="close-button" slot="start-icon">
-                <Icon name="close" />
-              </slot>
+              {#snippet startIcon()}
+                {#if closeIcon}
+                  {@render closeIcon()}
+                {:else}
+                  <Icon name="close" />
+                {/if}
+              {/snippet}
             </Button>
           {/if}
         </div>
       {/if}
     {/if}
     <div role="none" class="main">
-      <slot />
+      {@render children?.()}
     </div>
-    {#if $$slots.footer}
+    {#if footer}
       <div role="none" class="footer">
-        <slot name="footer" />
+        {@render footer?.()}
       </div>
     {/if}
   </div>

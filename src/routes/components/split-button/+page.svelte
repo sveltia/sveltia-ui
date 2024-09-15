@@ -12,32 +12,40 @@
   <Example>
     <div role="none">
       <SplitButton variant="primary" label="Paste">
-        <Menu slot="popup">
-          <MenuItem label="Keep Source Formatting" />
-          <MenuItem label="Match Formatting" />
-          <MenuItem label="Keep Text Only" disabled />
-        </Menu>
+        {#snippet popup()}
+          <Menu>
+            <MenuItem label="Keep Source Formatting" />
+            <MenuItem label="Match Formatting" />
+            <MenuItem label="Keep Text Only" disabled />
+          </Menu>
+        {/snippet}
       </SplitButton>
       <SplitButton variant="secondary" label="Paste">
-        <Menu slot="popup">
-          <MenuItem label="Keep Source Formatting" />
-          <MenuItem label="Match Formatting" />
-          <MenuItem label="Keep Text Only" disabled />
-        </Menu>
+        {#snippet popup()}
+          <Menu>
+            <MenuItem label="Keep Source Formatting" />
+            <MenuItem label="Match Formatting" />
+            <MenuItem label="Keep Text Only" disabled />
+          </Menu>
+        {/snippet}
       </SplitButton>
       <SplitButton variant="tertiary" label="Paste">
-        <Menu slot="popup">
-          <MenuItem label="Keep Source Formatting" />
-          <MenuItem label="Match Formatting" />
-          <MenuItem label="Keep Text Only" disabled />
-        </Menu>
+        {#snippet popup()}
+          <Menu>
+            <MenuItem label="Keep Source Formatting" />
+            <MenuItem label="Match Formatting" />
+            <MenuItem label="Keep Text Only" disabled />
+          </Menu>
+        {/snippet}
       </SplitButton>
       <SplitButton variant="ghost" label="Paste">
-        <Menu slot="popup">
-          <MenuItem label="Keep Source Formatting" />
-          <MenuItem label="Match Formatting" />
-          <MenuItem label="Keep Text Only" disabled />
-        </Menu>
+        {#snippet popup()}
+          <Menu>
+            <MenuItem label="Keep Source Formatting" />
+            <MenuItem label="Match Formatting" />
+            <MenuItem label="Keep Text Only" disabled />
+          </Menu>
+        {/snippet}
       </SplitButton>
     </div>
   </Example>
@@ -48,32 +56,40 @@
   <Example>
     <div role="none">
       <SplitButton variant="primary" label="Paste" popupPosition="bottom-right">
-        <Menu slot="popup">
-          <MenuItem label="Keep Source Formatting" />
-          <MenuItem label="Match Formatting" />
-          <MenuItem label="Keep Text Only" disabled />
-        </Menu>
+        {#snippet popup()}
+          <Menu>
+            <MenuItem label="Keep Source Formatting" />
+            <MenuItem label="Match Formatting" />
+            <MenuItem label="Keep Text Only" disabled />
+          </Menu>
+        {/snippet}
       </SplitButton>
       <SplitButton variant="secondary" label="Paste" popupPosition="bottom-right">
-        <Menu slot="popup">
-          <MenuItem label="Keep Source Formatting" />
-          <MenuItem label="Match Formatting" />
-          <MenuItem label="Keep Text Only" disabled />
-        </Menu>
+        {#snippet popup()}
+          <Menu>
+            <MenuItem label="Keep Source Formatting" />
+            <MenuItem label="Match Formatting" />
+            <MenuItem label="Keep Text Only" disabled />
+          </Menu>
+        {/snippet}
       </SplitButton>
       <SplitButton variant="tertiary" label="Paste" popupPosition="bottom-right">
-        <Menu slot="popup">
-          <MenuItem label="Keep Source Formatting" />
-          <MenuItem label="Match Formatting" />
-          <MenuItem label="Keep Text Only" disabled />
-        </Menu>
+        {#snippet popup()}
+          <Menu>
+            <MenuItem label="Keep Source Formatting" />
+            <MenuItem label="Match Formatting" />
+            <MenuItem label="Keep Text Only" disabled />
+          </Menu>
+        {/snippet}
       </SplitButton>
       <SplitButton variant="ghost" label="Paste" popupPosition="bottom-right">
-        <Menu slot="popup">
-          <MenuItem label="Keep Source Formatting" />
-          <MenuItem label="Match Formatting" />
-          <MenuItem label="Keep Text Only" disabled />
-        </Menu>
+        {#snippet popup()}
+          <Menu>
+            <MenuItem label="Keep Source Formatting" />
+            <MenuItem label="Match Formatting" />
+            <MenuItem label="Keep Text Only" disabled />
+          </Menu>
+        {/snippet}
       </SplitButton>
     </div>
   </Example>
@@ -84,32 +100,40 @@
   <Example>
     <div role="none">
       <SplitButton variant="primary" label="Paste" disabled>
-        <Menu slot="popup">
-          <MenuItem label="Keep Source Formatting" />
-          <MenuItem label="Match Formatting" />
-          <MenuItem label="Keep Text Only" disabled />
-        </Menu>
+        {#snippet popup()}
+          <Menu>
+            <MenuItem label="Keep Source Formatting" />
+            <MenuItem label="Match Formatting" />
+            <MenuItem label="Keep Text Only" disabled />
+          </Menu>
+        {/snippet}
       </SplitButton>
       <SplitButton variant="secondary" label="Paste" disabled>
-        <Menu slot="popup">
-          <MenuItem label="Keep Source Formatting" />
-          <MenuItem label="Match Formatting" />
-          <MenuItem label="Keep Text Only" disabled />
-        </Menu>
+        {#snippet popup()}
+          <Menu>
+            <MenuItem label="Keep Source Formatting" />
+            <MenuItem label="Match Formatting" />
+            <MenuItem label="Keep Text Only" disabled />
+          </Menu>
+        {/snippet}
       </SplitButton>
       <SplitButton variant="tertiary" label="Paste" disabled>
-        <Menu slot="popup">
-          <MenuItem label="Keep Source Formatting" />
-          <MenuItem label="Match Formatting" />
-          <MenuItem label="Keep Text Only" disabled />
-        </Menu>
+        {#snippet popup()}
+          <Menu>
+            <MenuItem label="Keep Source Formatting" />
+            <MenuItem label="Match Formatting" />
+            <MenuItem label="Keep Text Only" disabled />
+          </Menu>
+        {/snippet}
       </SplitButton>
       <SplitButton variant="ghost" label="Paste" disabled>
-        <Menu slot="popup">
-          <MenuItem label="Keep Source Formatting" />
-          <MenuItem label="Match Formatting" />
-          <MenuItem label="Keep Text Only" disabled />
-        </Menu>
+        {#snippet popup()}
+          <Menu>
+            <MenuItem label="Keep Source Formatting" />
+            <MenuItem label="Match Formatting" />
+            <MenuItem label="Keep Text Only" disabled />
+          </Menu>
+        {/snippet}
       </SplitButton>
     </div>
   </Example>

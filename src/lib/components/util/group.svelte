@@ -5,33 +5,38 @@
 -->
 <script>
   /**
-   * The `class` attribute on the wrapper element.
-   * @type {string}
+   * @typedef {object} Props
+   * @property {string} [class] - The `class` attribute on the wrapper element.
+   * @property {boolean} [hidden] - Whether to hide the widget.
+   * @property {boolean} [disabled] - Whether to disable the widget. An alias of the `aria-disabled`
+   * attribute.
+   * @property {import('svelte').Snippet} [children] - Primary slot content.
    */
-  let className = '';
-  export { className as class };
+
   /**
-   * Whether to hide the widget. An alias of the `aria-hidden` attribute.
-   * @type {boolean | undefined}
+   * @type {Props & Record<string, any>}
    */
-  export let hidden = undefined;
-  /**
-   * Whether to disable the widget. An alias of the `aria-disabled` attribute.
-   * @type {boolean}
-   */
-  export let disabled = false;
+  let {
+    /* eslint-disable prefer-const */
+    class: className,
+    hidden = false,
+    disabled = false,
+    children,
+    ...restProps
+    /* eslint-enable prefer-const */
+  } = $props();
 </script>
 
 <div
+  {...restProps}
   role="group"
   class="sui group {className}"
-  hidden={hidden || undefined}
+  {hidden}
   aria-hidden={hidden}
   aria-disabled={disabled}
-  {...$$restProps}
 >
   <div role="none" class="inner" inert={disabled}>
-    <slot />
+    {@render children?.()}
   </div>
 </div>
 

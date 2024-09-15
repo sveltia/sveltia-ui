@@ -4,119 +4,47 @@
   @see https://w3c.github.io/aria/#button
   @see https://www.w3.org/WAI/ARIA/apg/patterns/button/
 -->
-<svelte:options accessors={true} />
-
 <script>
-  import { createEventDispatcher } from 'svelte';
-  import { activateKeyShortcuts } from '../../services/events';
+  import { activateKeyShortcuts } from '../../services/events.svelte';
   import Popup from '../util/popup.svelte';
 
   /**
-   * Reference to the `<button>` element.
-   * @type {HTMLButtonElement | undefined}
+   * @type {import('$lib/typedefs').ButtonProps & import('$lib/typedefs').CommonEventHandlers &
+   * Record<string, any>}
    */
-  export let element = undefined;
-  /**
-   * The `class` attribute on the `<button>` element.
-   * @type {string}
-   */
-  let className = '';
-  export { className as class };
-  /**
-   * The `type` attribute on the `<button>` element.
-   * @type {'button' | 'submit' | 'reset'}
-   */
-  export let type = 'button';
-  /**
-   * The `role` attribute on the `<button>` element.
-   * @type {string}
-   */
-  export let role = 'button';
-  /**
-   * The `name` attribute on the `<button>` element.
-   * @type {string | undefined}
-   */
-  export let name = undefined;
-  /**
-   * The `value` attribute on the `<button>` element.
-   * @type {string | undefined}
-   */
-  export let value = undefined;
-  /**
-   * Whether to hide the widget. An alias of the `aria-hidden` attribute.
-   * @type {boolean | undefined}
-   */
-  export let hidden = undefined;
-  /**
-   * Whether to disable the widget. An alias of the `aria-disabled` attribute.
-   * @type {boolean}
-   */
-  export let disabled = false;
-  /**
-   * Whether to make the widget read-only. An alias of the `aria-readonly` attribute used in certain
-   * roles, including `checkbox`, `listbox`, `slider` and `textbox`.
-   * @type {boolean | undefined}
-   */
-  export let readonly = undefined;
-  /**
-   * Whether to mark the widget pressed. An alias of the `aria-pressed` attribute.
-   * @type {boolean | 'mixed' | undefined}
-   */
-  export let pressed = undefined;
-  /**
-   * Keyboard shortcuts. An alias of the `aria-keyshortcuts` attribute. Accepts the special `Accel`
-   * key, which will be replaced with `Control` or `Meta` depending on the user’s operating system.
-   * @type {string | undefined}
-   */
-  export let keyShortcuts = undefined;
-  /**
-   * Text label displayed on the button.
-   * @type {string}
-   */
-  export let label = '';
-  /**
-   * The style variant of the button.
-   * @type {'primary' | 'secondary' | 'tertiary' | 'ghost' | 'link' | undefined}
-   */
-  export let variant = undefined;
-  /**
-   * The size of the button.
-   * @type {'small' | 'medium' | 'large' | undefined}
-   */
-  export let size = 'medium';
-  /**
-   * Whether to only show an icon on the button and trim the padding.
-   */
-  export let iconic = false;
-  /**
-   * Whether to make the button rounded.
-   */
-  export let pill = false;
-  /**
-   * Make the button width flexible.
-   * @type {boolean}
-   */
-  export let flex = false;
-  /**
-   * Where to show the dropdown menu.
-   * @type {import('$lib/typedefs').PopupPosition}
-   */
-  export let popupPosition = 'bottom-left';
-  /**
-   * Whether to show the backdrop for the popup.
-   * @type {boolean}
-   */
-  export let showPopupBackdrop = false;
-
-  const dispatch = createEventDispatcher();
-  /**
-   * Reference to the `Popup` component.
-   * @type {Popup | undefined}
-   */
-  let popupComponent = undefined;
+  let {
+    /* eslint-disable prefer-const */
+    element = $bindable(),
+    class: className = '',
+    type = 'button',
+    role = 'button',
+    name = undefined,
+    value = undefined,
+    hidden = false,
+    disabled = false,
+    readonly = false,
+    pressed = undefined,
+    keyShortcuts = undefined,
+    label = '',
+    variant = undefined,
+    size = 'medium',
+    iconic = false,
+    pill = false,
+    flex = false,
+    popupPosition = 'bottom-left',
+    showPopupBackdrop = false,
+    children,
+    startIcon,
+    endIcon,
+    popup,
+    ...restProps
+    /* eslint-enable prefer-const */
+  } = $props();
 </script>
 
 <button
+  bind:this={element}
+  {...restProps}
   class="sui button {variant ?? ''} {size} {className}"
   class:iconic
   class:pill
@@ -124,38 +52,16 @@
   {type}
   {name}
   {value}
-  hidden={hidden || undefined}
-  disabled={disabled || undefined}
+  {hidden}
+  {disabled}
   {role}
   aria-hidden={hidden}
   aria-disabled={disabled}
   aria-readonly={readonly}
   aria-pressed={pressed}
-  {...$$restProps}
-  bind:this={element}
   use:activateKeyShortcuts={keyShortcuts}
-  on:mouseenter
-  on:mouseleave
-  on:click
-  on:dblclick
-  on:dragover
-  on:dragleave
-  on:dragend
-  on:drop
-  on:keydown
-  on:keyup
-  on:keypress
-  on:focus
-  on:blur
-  on:select={(/** @type {CustomEvent} */ event) => {
-    dispatch('select', event.detail);
-  }}
-  on:change={(/** @type {CustomEvent} */ event) => {
-    dispatch('change', event.detail);
-  }}
-  on:toggle
 >
-  <slot name="start-icon" />
+  {@render startIcon?.()}
   {#if variant === 'link'}
     {#if label}
       <span role="none" class="label">
@@ -163,7 +69,7 @@
       </span>
     {:else}
       <span role="none" class="label">
-        <slot />
+        {@render children?.()}
       </span>
     {/if}
   {:else}
@@ -172,20 +78,19 @@
         {label}
       </span>
     {/if}
-    <slot />
+    {@render children?.()}
   {/if}
-  <slot name="end-icon" />
+  {@render endIcon?.()}
 </button>
 
-{#if $$slots.popup}
+{#if popup}
   <Popup
     anchor={element}
     position={popupPosition}
     showBackdrop={showPopupBackdrop}
     touchOptimized={true}
-    bind:this={popupComponent}
   >
-    <slot name="popup" />
+    {@render popup()}
   </Popup>
 {/if}
 

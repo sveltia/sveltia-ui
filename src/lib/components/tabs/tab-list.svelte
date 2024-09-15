@@ -5,47 +5,48 @@
   @see https://www.w3.org/WAI/ARIA/apg/patterns/tabs/
 -->
 <script>
-  import { createEventDispatcher, onMount } from 'svelte';
-  import { activateGroup } from '../../services/group';
+  import { onMount } from 'svelte';
+  import { activateGroup } from '../../services/group.svelte';
 
   /**
-   * The `class` attribute on the wrapper element.
-   * @type {string}
+   * @typedef {object} Props
+   * @property {string} [class] - The `class` attribute on the wrapper element.
+   * @property {boolean} [hidden] - Whether to hide the widget.
+   * @property {boolean} [disabled] - Whether to disable the widget. An alias of the `aria-disabled`
+   * attribute.
+   * @property {'horizontal' | 'vertical'} [orientation] - Orientation of the widget. An alias of
+   * the `aria-orientation` attribute.
+   * @property {string | undefined} [name] - The `data-name` attribute on the wrapper element.
+   * @property {import('svelte').Snippet} [children] - Primary slot content.
+   * @property {(event: CustomEvent) => void} [onChange] - Custom `Change` event handler.
    */
-  let className = '';
-  export { className as class };
-  /**
-   * Whether to hide the widget. An alias of the `aria-hidden` attribute.
-   * @type {boolean | undefined}
-   */
-  export let hidden = undefined;
-  /**
-   * Whether to disable the widget. An alias of the `aria-disabled` attribute.
-   * @type {boolean}
-   */
-  export let disabled = false;
-  /**
-   * Orientation of the widget. An alias of the `aria-orientation` attribute.
-   * @type {'horizontal' | 'vertical'}
-   */
-  export let orientation = 'horizontal';
-  /**
-   * The `data-name` attribute on the wrapper element.
-   * @type {string | undefined}
-   */
-  export let name = undefined;
 
-  const dispatch = createEventDispatcher();
+  /**
+   * @type {Props & Record<string, any>}
+   */
+  let {
+    /* eslint-disable prefer-const */
+    class: className,
+    hidden = false,
+    disabled = false,
+    orientation = 'horizontal',
+    name = undefined,
+    children,
+    onChange,
+    ...restProps
+    /* eslint-enable prefer-const */
+  } = $props();
+
   /**
    * A reference to the wrapper element.
    * @type {HTMLElement | undefined}
    */
-  let wrapper = undefined;
+  let wrapper = $state();
   /**
    * The indicator’s CSS style.
    * @type {string | undefined}
    */
-  let indicatorStyle = undefined;
+  let indicatorStyle = $state();
 
   /**
    * Update the indicator position.
@@ -87,26 +88,26 @@
 </script>
 
 <div
+  bind:this={wrapper}
+  {...restProps}
   role="tablist"
   class="sui tab-list {className}"
-  hidden={hidden || undefined}
+  {hidden}
   aria-hidden={hidden}
   aria-disabled={disabled}
   aria-orientation={orientation}
   data-name={name || undefined}
-  {...$$restProps}
-  bind:this={wrapper}
+  onInitialized={() => {
+    updateIndicator();
+  }}
+  onChange={(/** @type {CustomEvent} */ event) => {
+    updateIndicator();
+    onChange?.(event);
+  }}
   use:activateGroup
-  on:initialized={() => {
-    updateIndicator();
-  }}
-  on:change={(/** @type {CustomEvent} */ event) => {
-    dispatch('change', event.detail);
-    updateIndicator();
-  }}
 >
   <div role="none" class="inner" inert={disabled}>
-    <slot />
+    {@render children?.()}
   </div>
   <div role="none" class="indicator" style={indicatorStyle}></div>
 </div>

@@ -5,22 +5,27 @@
 -->
 <script>
   /**
-   * The `class` attribute on the `span` element.
-   * @type {string}
+   * @typedef {object} Props
+   * @property {string} [class] - The `class` attribute on the `span` element.
+   * @property {string} [name] - Icon name, e.g. `search`, `expand_more`, `close`, etc.
    */
-  let className = '';
-  export { className as class };
+
   /**
-   * Icon name, e.g. `search`, `expand_more`, `close`, etc.
-   * @type {string}
+   * @type {Props & Record<string, any>}
    */
-  export let name = '';
+  let {
+    /* eslint-disable prefer-const */
+    class: className,
+    name,
+    ...restProps
+    /* eslint-enable prefer-const */
+  } = $props();
 </script>
 
 <span
+  {...restProps}
   class="sui icon material-symbols-outlined {className}"
-  aria-hidden={!('aria-label' in $$restProps)}
-  {...$$restProps}
+  aria-hidden={!('aria-label' in restProps)}
 >
   {name}
 </span>

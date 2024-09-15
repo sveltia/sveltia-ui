@@ -8,71 +8,72 @@
   @see https://www.w3.org/WAI/ARIA/apg/patterns/slider-multithumb/
 -->
 <script>
-  import { createEventDispatcher, onMount } from 'svelte';
+  import { onMount } from 'svelte';
 
   /**
-   * The `class` attribute on the wrapper element.
-   * @type {string}
+   * @typedef {object} Props
+   * @property {number} [value] - Current value.
+   * @property {number} [min] - Minimum allowed value. An alias of the `aria-valuemin` attribute.
+   * @property {number} [max] - Maximum allowed value. An alias of the `aria-valuemax` attribute.
+   * @property {string} [sliderLabel] - `aria-label` on the slider.
+   * @property {[number, number] | undefined} [values] - Value list for a multi-thumb slider.
+   * @property {[string, string] | undefined} [sliderLabels] - `aria-label` on a multi-thumb slider.
+   * @property {number} [step] - Step option like `<input type="range">`.
+   * @property {(string[] | number[])} [optionLabels] - Visible labels on the slider.
+   * @property {boolean} [flex] - Make the text input container flexible.
+   * @property {string} [class] - The `class` attribute on the wrapper element.
+   * @property {boolean} [hidden] - Whether to hide the widget.
+   * @property {boolean} [disabled] - Whether to disable the widget. An alias of the `aria-disabled`
+   * attribute.
+   * @property {boolean} [readonly] - Whether to make the widget read-only. An alias of the
+   * `aria-readonly` attribute.
+   * @property {boolean} [invalid] - Whether to mark the widget invalid. An alias of the
+   * `aria-invalid` attribute.
+   * @property {import('svelte').Snippet} [children] - Primary slot content.
+   * @property {(detail: { values?: number[], value?: number }) => void} [onChange] - `change` event
+   * handler.
    */
-  let className = '';
-  export { className as class };
-  /**
-   * Whether to hide the widget. An alias of the `aria-hidden` attribute.
-   * @type {boolean | undefined}
-   */
-  export let hidden = undefined;
-  /**
-   * Whether to disable the widget. An alias of the `aria-disabled` attribute.
-   * @type {boolean}
-   */
-  export let disabled = false;
-  /**
-   * Whether to make the widget read-only. An alias of the `aria-readonly` attribute.
-   * @type {boolean}
-   */
-  export let readonly = false;
-  /**
-   * Whether to mark the widget invalid. An alias of the `aria-invalid` attribute.
-   * @type {boolean}
-   */
-  export let invalid = false;
-  /**
-   * Minimum allowed value. An alias of the `aria-valuemin` attribute.
-   * @type {number}
-   */
-  export let min = 0;
-  /**
-   * Maximum allowed value. An alias of the `aria-valuemax` attribute.
-   * @type {number}
-   */
-  export let max = 100;
 
-  export let value = 0;
-  export let sliderLabel = '';
-  /** @type {[number, number] | undefined} */
-  export let values = undefined;
-  /** @type {[string, string] | undefined} */
-  export let sliderLabels = undefined;
-  export let step = 1;
-  /** @type {(string[] | number[])} */
-  export let optionLabels = [];
+  /**
+   * @type {Props & Record<string, any>}
+   */
+  let {
+    /* eslint-disable prefer-const */
+    value = $bindable(0),
+    min = 0,
+    max = 100,
+    sliderLabel = '',
+    values = undefined,
+    sliderLabels = undefined,
+    step = 1,
+    optionLabels = [],
+    class: className,
+    hidden = false,
+    disabled = false,
+    readonly = false,
+    invalid = false,
+    children,
+    onChange,
+    ...restProps
+    /* eslint-enable prefer-const */
+  } = $props();
 
-  $: multiThumb = Array.isArray(values);
+  const multiThumb = $derived(Array.isArray(values));
 
-  const dispatch = createEventDispatcher();
   /** @type {HTMLElement | undefined} */
-  let base = undefined;
-  let barWidth = 0;
+  let base = $state();
+  let barWidth = $state(0);
   /** @type {number[]} */
-  let positionList = [];
+  let positionList = $state([]);
   /** @type {number[]} */
-  let valueList = [];
-  let startX = 0;
-  let startScreenX = 0;
-  const sliderPositions = [0, 0];
-  let dragging = false;
-  let targetPointerId = 0;
-  let targetValueIndex = 0;
+  let valueList = $state([]);
+  let startX = $state(0);
+  let startScreenX = $state(0);
+  // eslint-disable-next-line prefer-const
+  let sliderPositions = $state([0, 0]);
+  let dragging = $state(false);
+  let targetPointerId = $state(0);
+  let targetValueIndex = $state(0);
 
   /**
    * Move a thumb with mouse.
@@ -104,6 +105,7 @@
 
     if (multiThumb) {
       /** @type {[number, number]} */ (values)[targetValueIndex] = valueList[index];
+      values = [.../** @type {[number, number]} */ (values)];
     } else {
       value = valueList[index];
     }
@@ -155,6 +157,7 @@
 
       if (multiThumb) {
         /** @type {[number, number]} */ (values)[valueIndex] = valueList[index];
+        values = [.../** @type {[number, number]} */ (values)];
       } else {
         value = valueList[index];
       }
@@ -242,10 +245,10 @@
 
       sliderPositions[0] = positionList[valueList.indexOf(value0)];
       sliderPositions[1] = positionList[valueList.indexOf(value1)];
-      dispatch('change', { values });
+      onChange?.({ values });
     } else {
       sliderPositions[0] = positionList[valueList.indexOf(value)];
-      dispatch('change', { value });
+      onChange?.({ value });
     }
   };
 
@@ -282,28 +285,28 @@
     };
   });
 
-  $: {
+  $effect(() => {
     void value;
     void values;
     onValueChange();
-  }
+  });
 </script>
 
 <svelte:body
-  on:click={() => {
+  onclick={() => {
     dragging = false;
   }}
 />
 
 <div
+  {...restProps}
   role="none"
   class="sui slider {className}"
   class:disabled
   class:readonly
-  hidden={hidden || undefined}
-  {...$$restProps}
+  {hidden}
 >
-  <div role="none" class="base" bind:this={base} on:pointerdown={(event) => onPointerDown(event)}>
+  <div bind:this={base} role="none" class="base" onpointerdown={(event) => onPointerDown(event)}>
     <div role="none" class="base-bar"></div>
     <div
       class="slider-bar"
@@ -322,8 +325,8 @@
       aria-valuemax={max}
       aria-valuenow={multiThumb ? values?.[0] : value}
       style:left="{sliderPositions[0]}px"
-      on:pointerdown={(event) => onPointerDown(event, 0)}
-      on:keydown={(event) => onKeyDown(event, 0)}
+      onpointerdown={(event) => onPointerDown(event, 0)}
+      onkeydown={(event) => onKeyDown(event, 0)}
     ></div>
     {#if multiThumb}
       <div
@@ -338,8 +341,8 @@
         aria-valuemax={max}
         aria-valuenow={values?.[1]}
         style:left="{sliderPositions[1]}px"
-        on:pointerdown={(event) => onPointerDown(event, 1)}
-        on:keydown={(event) => onKeyDown(event, 1)}
+        onpointerdown={(event) => onPointerDown(event, 1)}
+        onkeydown={(event) => onKeyDown(event, 1)}
       ></div>
     {/if}
     {#if optionLabels.length}

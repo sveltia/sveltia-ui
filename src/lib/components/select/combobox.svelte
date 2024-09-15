@@ -7,9 +7,7 @@
 -->
 <script>
   import { generateElementId } from '@sveltia/utils/element';
-  import { createEventDispatcher } from 'svelte';
   import { _ } from 'svelte-i18n';
-  import { writable } from 'svelte/store';
   import Button from '../button/button.svelte';
   import Icon from '../icon/icon.svelte';
   import Listbox from '../listbox/listbox.svelte';
@@ -18,78 +16,56 @@
   import Popup from '../util/popup.svelte';
 
   /**
-   * The `class` attribute on the wrapper element.
-   * @type {string}
+   * @type {import('$lib/typedefs').ComboboxProps & import('$lib/typedefs').TextInputProps &
+   * Record<string, any>}
    */
-  let className = '';
-  export { className as class };
-  /**
-   * Whether to hide the widget. An alias of the `aria-hidden` attribute.
-   * @type {boolean | undefined}
-   */
-  export let hidden = undefined;
-  /**
-   * Whether to disable the widget. An alias of the `aria-disabled` attribute.
-   * @type {boolean}
-   */
-  export let disabled = false;
-  /**
-   * Whether to make the widget read-only. An alias of the `aria-readonly` attribute.
-   * @type {boolean}
-   */
-  export let readonly = false;
-  /**
-   * Whether to mark the widget required. An alias of the `aria-required` attribute.
-   * @type {boolean}
-   */
-  export let required = false;
-  /**
-   * Whether to mark the widget invalid. An alias of the `aria-invalid` attribute.
-   * @type {boolean}
-   */
-  export let invalid = false;
-  /**
-   * Selected option’s value.
-   * @type {(string | number | undefined)}
-   */
-  export let value = undefined;
-  /**
-   * Whether to make the `combobox` editable.
-   */
-  export let editable = true;
-  /**
-   * Where to show the dropdown menu.
-   * @type {import('$lib/typedefs').PopupPosition}
-   */
-  export let position = 'bottom-left';
+  let {
+    /* eslint-disable prefer-const */
+    value = $bindable(),
+    class: className,
+    hidden = false,
+    disabled = false,
+    readonly = false,
+    required = false,
+    invalid = false,
+    editable = true,
+    position = 'bottom-left',
+    children,
+    chevronIcon,
+    onChange,
+    ...restProps
+    /* eslint-enable prefer-const */
+  } = $props();
 
-  const dispatch = createEventDispatcher();
   const id = generateElementId('combobox');
   const selectedSelector = '[role="option"][aria-selected="true"]';
+  let isPopupOpen = $state(false);
+
+  /** @type {HTMLElement | undefined} */
+  let comboboxElement = $state();
+  /** @type {HTMLInputElement | undefined} */
+  let inputElement = $state();
+  /** @type {HTMLElement | undefined} */
+  let popupContent = $state();
+  /** @type {string} */
+  let label = $state('');
+  /** @type {boolean} */
+  let showFilter = $state(false);
+  /** @type {string} */
+  let searchTerms = $state('');
+  /** @type {boolean} */
+  let hasMatchingOptions = $state(true);
   /** @type {HTMLElement} */
-  let comboboxElement;
-  /** @type {TextInput | undefined} */
-  let inputComponent;
-  /** @type {Popup | undefined} */
-  let popupComponent;
-  let isPopupOpen = writable(false);
-  /** @type {string} */
-  let label = '';
-  /** @type {boolean} */
-  let showFilter = false;
-  /** @type {string} */
-  let searchTerms = '';
-  /** @type {boolean} */
-  let hasMatchingOptions = true;
+  const anchor = $derived(/** @type {HTMLElement} */ (comboboxElement ?? inputElement));
 
   /**
    * Update the {@link label} and selected option when the {@link value} is changed.
    */
-  const onChange = () => {
-    const selected = popupComponent?.content?.querySelector(selectedSelector);
+  const _onChange = () => {
+    const selected = popupContent?.querySelector(selectedSelector);
 
     const target = /** @type {HTMLButtonElement} */ (
-      popupComponent?.content?.querySelector(`[role="option"][value="${value}"]`)
+      popupContent?.querySelector(`[role="option"][value="${value}"]`)
     );
 
     if (target) {
@@ -106,53 +82,48 @@
    * Update the {@link value} whenever an option is selected.
    * @param {HTMLButtonElement} target - Selected option.
    */
-  const onSelect = (target) => {
+  const _onSelect = (target) => {
     // @todo support more types
+    // @ts-ignore
     value = target.dataset.type === 'number' ? Number(target.value) : target.value;
-    onChange();
-    dispatch('change', { target: inputComponent?.element, value });
+    _onChange();
+    onChange?.(new CustomEvent('Change', { detail: { target: inputElement, value } }));
   };
 
-  $: {
-    if (popupComponent?.content) {
+  $effect(() => {
+    if (popupContent) {
       globalThis.requestAnimationFrame(() => {
-        const selected = popupComponent?.content?.querySelector(selectedSelector);
+        const selected = popupContent?.querySelector(selectedSelector);
 
         if (selected) {
-          onSelect(/** @type {HTMLButtonElement} */ (selected));
+          _onSelect(/** @type {HTMLButtonElement} */ (selected));
         }
       });
     }
-  }
+  });
 
-  $: {
+  $effect(() => {
     void value;
-    onChange();
-  }
+    _onChange();
+  });
 </script>
 
-<div
-  role="none"
-  class="sui combobox {className}"
-  class:editable
-  hidden={hidden || undefined}
-  {...$$restProps}
->
+<div {...restProps} role="none" class="sui combobox {className}" class:editable {hidden}>
   {#if !editable}
     <div
+      bind:this={comboboxElement}
+      {...restProps}
       role="combobox"
       {id}
       class:selected={value !== undefined}
       tabindex={disabled ? -1 : 0}
       aria-controls="{id}-popup"
-      aria-expanded={$isPopupOpen}
+      aria-expanded={isPopupOpen}
       aria-hidden={hidden}
       aria-disabled={disabled}
       aria-readonly={readonly}
       aria-haspopup="listbox"
       aria-activedescendant="selected-option"
-      {...$$restProps}
-      bind:this={comboboxElement}
     >
       <div role="none" class="label">
         {value !== undefined ? label : $_('_sui.combobox.select_an_option')}
@@ -160,6 +131,8 @@
     </div>
   {:else}
     <TextInput
+      {...restProps}
+      bind:element={inputElement}
       role="combobox"
       {id}
       {value}
@@ -169,11 +142,9 @@
       {required}
       {invalid}
       aria-controls="{id}-popup"
-      aria-expanded={$isPopupOpen}
+      aria-expanded={isPopupOpen}
       aria-haspopup="listbox"
       aria-activedescendant="selected-option"
-      {...$$restProps}
-      bind:this={inputComponent}
     />
   {/if}
   <Button
@@ -182,33 +153,37 @@
     {hidden}
     {disabled}
     tabindex={readonly || disabled ? -1 : 0}
-    aria-label={$isPopupOpen ? $_('_sui.collapse') : $_('_sui.expand')}
+    aria-label={isPopupOpen ? $_('_sui.collapse') : $_('_sui.expand')}
     aria-controls="{id}-popup"
-    aria-expanded={$isPopupOpen}
-    on:click={(event) => {
+    aria-expanded={isPopupOpen}
+    onclick={(event) => {
       event.preventDefault();
       event.stopPropagation();
 
       if (!disabled && !readonly) {
-        $isPopupOpen = !$isPopupOpen;
+        isPopupOpen = !isPopupOpen;
       }
     }}
   >
-    <slot name="chevron-icon" slot="start-icon">
-      <Icon name="expand_more" />
-    </slot>
+    {#snippet startIcon()}
+      {#if chevronIcon}
+        {@render chevronIcon()}
+      {:else}
+        <Icon name="expand_more" />
+      {/if}
+    {/snippet}
   </Button>
 </div>
 <Popup
+  bind:content={popupContent}
   id="{id}-popup"
   class="combobox"
-  anchor={comboboxElement ?? inputComponent?.element}
+  {anchor}
   {position}
   touchOptimized={true}
   bind:open={isPopupOpen}
-  bind:this={popupComponent}
-  on:open={() => {
-    showFilter = (popupComponent?.content?.querySelectorAll('[role="option"]')?.length ?? 0) > 5;
+  onopen={() => {
+    showFilter = (popupContent?.querySelectorAll('[role="option"]')?.length ?? 0) > 5;
     searchTerms = '';
   }}
 >
@@ -219,10 +194,10 @@
         aria-label={$_('_sui.combobox.filter_options')}
         aria-controls="{id}-listbox"
         bind:value={searchTerms}
-        on:keydown={(event) => {
+        onkeydown={(event) => {
           if (['ArrowUp', 'ArrowDown', 'Enter'].includes(event.key)) {
             event.preventDefault();
-            popupComponent?.content
+            popupContent
               ?.querySelector('.sui.listbox')
               ?.dispatchEvent(new KeyboardEvent('keydown', event));
           }
@@ -233,16 +208,16 @@
       id="{id}-listbox"
       class="in-combobox"
       {searchTerms}
-      on:click={(event) => {
+      onclick={(event) => {
         if (/** @type {HTMLElement} */ (event.target).matches('[role="option"]')) {
-          onSelect(/** @type {HTMLButtonElement} */ (event.target));
+          _onSelect(/** @type {HTMLButtonElement} */ (event.target));
         }
       }}
-      on:filter={(event) => {
+      onFilter={(event) => {
         hasMatchingOptions = !!(/** @type {CustomEvent} */ (event).detail.matched);
       }}
     >
-      <slot />
+      {@render children?.()}
     </Listbox>
     {#if !hasMatchingOptions}
       <div role="alert" class="no-options">

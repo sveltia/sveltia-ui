@@ -7,82 +7,53 @@
   @see https://developer.mozilla.org/en-US/docs/Web/API/Window/prompt
 -->
 <script>
-  import Dialog from './dialog.svelte';
   import TextInput from '../text-field/text-input.svelte';
+  import Dialog from './dialog.svelte';
 
   /**
-   * The `class` attribute on the `<dialog>` element.
-   * @type {string}
+   * @typedef {object} Props
+   * @property {string} [value] - Value entered on the textbox.
+   * @property {object} [textboxAttrs] - Extra attributes for the `<TextInput>`.
+   * @property {import('svelte').Snippet} [children] - Primary slot content.
+   * @property {import('svelte').Snippet} [input] - Input slot content.
    */
-  let className = '';
-  export { className as class };
+
   /**
-   * Whether to open the dialog.
-   * @type {boolean}
+   * @type {import('$lib/typedefs').ModalProps & import('$lib/typedefs').DialogProps &
+   * import('$lib/typedefs').CommonEventHandlers & import('$lib/typedefs').InputEventHandlers &
+   * Props & Record<string, any>}
    */
-  export let open = false;
-  /**
-   * Text label displayed on the header. Required.
-   * @type {string}
-   */
-  export let title;
-  /**
-   * Text label displayed on the OK button.
-   * @type {string}
-   */
-  export let okLabel = '';
-  /**
-   * Whether to disable the OK button.
-   * @type {boolean}
-   */
-  export let okDisabled = false;
-  /**
-   * Text label displayed on the Cancel button.
-   * @type {string}
-   */
-  export let cancelLabel = '';
-  /**
-   * Value entered on the textbox.
-   * @type {string}
-   */
-  export let value = '';
-  /**
-   * Extra attributes for the `<TextInput>`.
-   * @type {object}
-   */
-  export let textboxAttrs = {};
+  let {
+    /* eslint-disable prefer-const */
+    open = $bindable(false),
+    value = $bindable(''),
+    textboxAttrs = {},
+    children,
+    input,
+    onkeydown,
+    onkeyup,
+    onkeypress,
+    oninput,
+    ...restProps
+    /* eslint-enable prefer-const */
+  } = $props();
 </script>
 
-<Dialog
-  role="alertdialog"
-  class={className}
-  bind:open
-  {title}
-  {okLabel}
-  {okDisabled}
-  {cancelLabel}
-  {...$$restProps}
-  on:opening
-  on:open
-  on:ok
-  on:cancel
-  on:closing
-  on:close
->
-  <slot />
+<Dialog {...restProps} bind:open role="alertdialog">
+  {@render children?.()}
   <div class="input-outer">
-    {#if $$slots.input}
-      <slot name="input" />
+    {#if input}
+      {@render input()}
     {:else}
       <TextInput
         bind:value
         flex
         autofocus
         {...textboxAttrs}
-        on:input
-        on:keydown
-        on:keyup
-        on:keypress
+        {onkeydown}
+        {onkeyup}
+        {onkeypress}
+        {oninput}
       />
     {/if}
   </div>

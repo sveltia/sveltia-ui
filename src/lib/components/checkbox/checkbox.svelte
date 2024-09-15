@@ -7,73 +7,56 @@
 -->
 <script>
   import { generateElementId } from '@sveltia/utils/element';
-  import { createEventDispatcher } from 'svelte';
   import Button from '../button/button.svelte';
   import Icon from '../icon/icon.svelte';
 
   /**
-   * The `class` attribute on the wrapper element.
-   * @type {string}
+   * @typedef {object} Props
+   * @property {string} [class] - The `class` attribute on the wrapper element.
+   * @property {boolean} [required] - Whether to mark the widget required. An alias of the
+   * `aria-required` attribute.
+   * @property {boolean} [invalid] - Whether to mark the widget invalid. An alias of the
+   * `aria-invalid` attribute.
+   * @property {boolean | 'mixed'} [checked] - Whether to check the widget. An alias of the
+   * `aria-checked` attribute.
+   * @property {string | undefined} [label] - Text label displayed next to the checkbox.
+   * @property {string} [aria-label] - `aria-label` attribute.
+   * @property {import('svelte').Snippet} [checkIcon] - Check icon slot content.
    */
-  let className = '';
-  export { className as class };
-  /**
-   * The `name` attribute on the `<button>` element.
-   * @type {string | undefined}
-   */
-  export let name = undefined;
-  /**
-   * The `value` attribute on the `<button>` element.
-   * @type {string | undefined}
-   */
-  export let value = undefined;
-  /**
-   * Whether to hide the widget. An alias of the `aria-hidden` attribute.
-   * @type {boolean | undefined}
-   */
-  export let hidden = undefined;
-  /**
-   * Whether to disable the widget. An alias of the `aria-disabled` attribute.
-   * @type {boolean}
-   */
-  export let disabled = false;
-  /**
-   * Whether to make the widget read-only. An alias of the `aria-readonly` attribute.
-   * @type {boolean}
-   */
-  export let readonly = false;
-  /**
-   * Whether to mark the widget required. An alias of the `aria-required` attribute.
-   * @type {boolean}
-   */
-  export let required = false;
-  /**
-   * Whether to mark the widget invalid. An alias of the `aria-invalid` attribute.
-   * @type {boolean}
-   */
-  export let invalid = false;
-  /**
-   * Whether to check the widget. An alias of the `aria-checked` attribute.
-   * @type {boolean | 'mixed'}
-   */
-  export let checked = false;
-  /**
-   * Text label displayed next to the checkbox.
-   * @type {string | undefined}
-   */
-  export let label = undefined;
 
-  const dispatch = createEventDispatcher();
+  /**
+   * @type {import('$lib/typedefs').ButtonProps & import('$lib/typedefs').CommonEventHandlers &
+   * Props & Record<string, any>}
+   */
+  let {
+    /* eslint-disable prefer-const */
+    checked = $bindable(false),
+    class: className,
+    name = undefined,
+    value = undefined,
+    hidden = false,
+    disabled = false,
+    readonly = false,
+    required = false,
+    invalid = false,
+    label = undefined,
+    'aria-label': ariaLabel,
+    onChange,
+    children,
+    checkIcon,
+    ...restProps
+    /* eslint-enable prefer-const */
+  } = $props();
+
   const id = generateElementId('checkbox');
 
   /**
-   * Reference to the `Button` component.
-   * @type {Button | undefined}
+   * Reference to the `<button>` element.
+   * @type {HTMLButtonElement | undefined}
    */
-  let buttonComponent = undefined;
+  let buttonElement = $state();
 
-  $: ariaLabel = $$restProps['aria-label'];
-  $: indeterminate = checked === 'mixed';
+  const indeterminate = $derived(checked === 'mixed');
 </script>
 
 <div
@@ -83,15 +66,20 @@
   class:indeterminate
   class:disabled
   class:readonly
-  hidden={hidden || undefined}
-  on:click|preventDefault|stopPropagation={(event) => {
+  {hidden}
+  onclick={(event) => {
+    event.preventDefault();
+    event.stopPropagation();
+
     if (!(/** @type {HTMLElement} */ (event.target).matches('button'))) {
-      buttonComponent?.element?.click();
+      buttonElement?.click();
     }
   }}
 >
   <div role="none" class="inner" inert={disabled}>
     <Button
+      {...restProps}
+      bind:element={buttonElement}
       role="checkbox"
       {id}
       {name}
@@ -104,26 +92,28 @@
       aria-checked={checked}
       aria-label={ariaLabel || undefined}
       aria-labelledby={ariaLabel ? undefined : `${id}-label`}
-      {...$$restProps}
-      bind:this={buttonComponent}
-      on:click={(event) => {
+      onclick={(event) => {
         event.preventDefault();
         event.stopPropagation();
 
         if (!disabled && !readonly) {
           checked = indeterminate ? true : !checked;
-          dispatch('change', { checked });
+          onChange?.(new CustomEvent('Change', { detail: { checked } }));
         }
       }}
     >
-      <slot name="check-icon" slot="start-icon">
-        <Icon name={indeterminate ? 'remove' : 'check'} />
-      </slot>
+      {#snippet startIcon()}
+        {#if checkIcon}
+          {@render checkIcon()}
+        {:else}
+          <Icon name={indeterminate ? 'remove' : 'check'} />
+        {/if}
+      {/snippet}
     </Button>
-    {#if $$slots.default || label}
+    {#if children || label}
       <label id="{id}-label">
-        {#if $$slots.default}
-          <slot />
+        {#if children}
+          {@render children()}
         {:else}
           {label}
         {/if}

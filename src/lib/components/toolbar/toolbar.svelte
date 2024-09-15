@@ -6,44 +6,44 @@
 -->
 <script>
   /**
-   * The `class` attribute on the wrapper element.
-   * @type {string}
+   * @typedef {object} Props
+   * @property {string} [class] - The `class` attribute on the wrapper element.
+   * @property {boolean} [hidden] - Whether to hide the widget.
+   * @property {boolean} [disabled] - Whether to disable the widget. An alias of the `aria-disabled`
+   * attribute.
+   * @property {'horizontal' | 'vertical'} [orientation] - Orientation of the widget. An alias of
+   * the `aria-orientation` attribute.
+   * @property {'primary' | 'secondary' | undefined} [variant] - The style variant of the toolbar.
+   * @property {import('svelte').Snippet} [children] - Primary slot content.
    */
-  let className = '';
-  export { className as class };
+
   /**
-   * Whether to hide the widget. An alias of the `aria-hidden` attribute.
-   * @type {boolean | undefined}
+   * @type {Props & Record<string, any>}
    */
-  export let hidden = undefined;
-  /**
-   * Whether to disable the widget. An alias of the `aria-disabled` attribute.
-   * @type {boolean}
-   */
-  export let disabled = false;
-  /**
-   * Orientation of the widget. An alias of the `aria-orientation` attribute.
-   * @type {'horizontal' | 'vertical'}
-   */
-  export let orientation = 'horizontal';
-  /**
-   * The style variant of the toolbar.
-   * @type {'primary' | 'secondary' | undefined}
-   */
-  export let variant = undefined;
+  let {
+    /* eslint-disable prefer-const */
+    class: className,
+    hidden = false,
+    disabled = false,
+    orientation = 'horizontal',
+    variant = undefined,
+    children,
+    ...restProps
+    /* eslint-enable prefer-const */
+  } = $props();
 </script>
 
 <div
+  {...restProps}
   role="toolbar"
   class="sui toolbar {orientation} {variant ?? ''} {className}"
-  hidden={hidden || undefined}
+  {hidden}
   aria-hidden={hidden}
   aria-disabled={disabled}
   aria-orientation={orientation}
-  {...$$restProps}
 >
   <div role="none" class="inner" inert={disabled}>
-    <slot />
+    {@render children?.()}
   </div>
 </div>
 

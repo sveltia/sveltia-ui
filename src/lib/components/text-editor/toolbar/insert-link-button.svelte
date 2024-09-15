@@ -14,7 +14,7 @@
   import { getContext } from 'svelte';
   import { _ } from 'svelte-i18n';
   import { availableButtons } from '..';
-  import { isMac, matchShortcuts } from '../../../services/events';
+  import { isMac, matchShortcuts } from '../../../services/events.svelte';
   import Button from '../../button/button.svelte';
   import Dialog from '../../dialog/dialog.svelte';
   import Icon from '../../icon/icon.svelte';
@@ -33,12 +33,12 @@
    */
   const { editor, editorId, selectionInlineTypes, useRichText } = getContext('state');
 
-  let openDialog = false;
+  let openDialog = $state(false);
   /** @type {'create' | 'update' | 'remove'} */
-  let dialogMode = 'create';
-  let hasAnchor = false;
-  let anchorURL = '';
-  let anchorText = '';
+  let dialogMode = $state('create');
+  let hasAnchor = $state(false);
+  let anchorURL = $state('');
+  let anchorText = $state('');
 
   /**
    * Create a new link by showing a dialog to accept a URL and optionally text.
@@ -163,11 +163,11 @@
     );
   };
 
-  $: {
+  $effect(() => {
     if ($editor) {
       _registerCommand();
     }
-  }
+  });
 </script>
 
 <Button
@@ -176,11 +176,13 @@
   aria-controls="{$editorId}-lexical-root"
   disabled={!$useRichText}
   pressed={$selectionInlineTypes.includes(type)}
-  on:click={() => {
+  onclick={() => {
     onButtonClick();
   }}
 >
-  <Icon slot="start-icon" name={availableButtons[type].icon} />
+  {#snippet startIcon()}
+    <Icon name={availableButtons[type].icon} />
+  {/snippet}
 </Button>
 
 <Dialog
@@ -191,7 +193,7 @@
   bind:value={anchorURL}
   okDisabled={!isURL(anchorURL)}
   okLabel={dialogMode === 'create' ? $_('_sui.insert') : $_('_sui.update')}
-  on:close={(event) => {
+  onClose={(event) => {
     onDialogClose(event);
   }}
 >
@@ -203,7 +205,7 @@
         autofocus
         bind:value={anchorText}
         flex
-        on:keydown={(event) => {
+        onkeydown={(event) => {
           onInputKeyDown(event);
         }}
       />
@@ -217,22 +219,22 @@
       bind:value={anchorURL}
       flex
       aria-label="URL"
-      on:keydown={(event) => {
+      onkeydown={(event) => {
         onInputKeyDown(event);
       }}
     />
   </div>
-  <svelte:fragment slot="footer-extra">
+  {#snippet footerExtra()}
     {#if dialogMode !== 'create'}
       <Button
         variant="secondary"
         label={$_('_sui.remove')}
-        on:click={() => {
+        onclick={() => {
           removeLink();
           dialogMode = 'remove';
           openDialog = false;
         }}
       />
     {/if}
-  </svelte:fragment>
+  {/snippet}
 </Dialog>

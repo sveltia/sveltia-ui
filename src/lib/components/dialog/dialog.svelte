@@ -13,71 +13,34 @@
   import Modal from '../util/modal.svelte';
 
   /**
-   * The `class` attribute on the content element.
-   * @type {string}
+   * @type {import('$lib/typedefs').ModalProps & import('$lib/typedefs').DialogProps &
+   * Record<string, any>}
    */
-  let className = '';
-  export { className as class };
-  /**
-   * The `role` attribute on the `<dialog>` element.
-   * @type {'dialog' | 'alertdialog'}
-   */
-  export let role = 'dialog';
-  /**
-   * Width of the dialog.
-   * @type {('small' | 'medium' | 'large' | 'x-large')}
-   */
-  export let size = 'medium';
-  /**
-   * Whether to open the dialog.
-   * @type {boolean}
-   */
-  export let open = false;
-  /**
-   * Text label displayed on the header. Required.
-   * @type {string}
-   */
-  export let title;
-  /**
-   * Whether to show the Close button on the header.
-   * @type {boolean}
-   */
-  export let showClose = false;
-  /**
-   * Whether to show the OK button on the footer.
-   * @type {boolean}
-   */
-  export let showOk = true;
-  /**
-   * Text label displayed on the OK button.
-   * @type {string}
-   */
-  export let okLabel = '';
-  /**
-   * Whether to disable the OK button.
-   * @type {boolean}
-   */
-  export let okDisabled = false;
-  /**
-   * Whether to show the Cancel button on the footer.
-   * @type {boolean}
-   */
-  export let showCancel = true;
-  /**
-   * Text label displayed on the Cancel button.
-   * @type {string}
-   */
-  export let cancelLabel = '';
-  /**
-   * Whether to disable the Cancel button.
-   * @type {boolean}
-   */
-  export let cancelDisabled = false;
-  /**
-   * Whether to close the modal when the backdrop (outside of the modal) is clicked.
-   * @type {boolean}
-   */
-  export let lightDismiss = false;
+  let {
+    /* eslint-disable prefer-const */
+    open = $bindable(false),
+    value = $bindable(''),
+    title,
+    role = 'dialog',
+    size = 'medium',
+    class: className,
+    showClose = false,
+    showOk = true,
+    showCancel = true,
+    okLabel = '',
+    okDisabled = false,
+    cancelLabel = '',
+    cancelDisabled = false,
+    children,
+    header,
+    headerExtra,
+    footer,
+    footerExtra,
+    closeIcon,
+    input: _input,
+    ...restProps
+    /* eslint-enable prefer-const */
+  } = $props();
 
   /**
    * The ID of the drawer.
@@ -86,91 +49,83 @@
   const id = generateElementId('dialog');
   /**
    * A reference to the modal component.
-   * @type {Modal}
+   * @type {Modal | undefined}
    */
-  let modal;
+  let modal = $state();
   /**
    * @type {HTMLElement | undefined}
    */
-  let content;
+  let content = $state();
 
-  $: {
+  $effect(() => {
     if (open && content) {
       /** @type {HTMLElement} */ (content.querySelector('input, button.primary'))?.focus();
     }
-  }
+  });
 </script>
 
 <Modal
+  bind:this={modal}
+  {...restProps}
   {role}
   {id}
   class="dialog"
-  aria-label={$$slots.header ? undefined : title}
-  aria-labelledby={$$slots.header ? title : `${id}-title`}
+  aria-label={header ? undefined : title}
+  aria-labelledby={header ? title : `${id}-title`}
   aria-describedby="{id}-body"
   bind:open
   showBackdrop
-  {lightDismiss}
-  {...$$restProps}
-  bind:this={modal}
-  on:opening
-  on:open
-  on:ok
-  on:cancel
-  on:closing
-  on:close
 >
-  <slot name="extra-content" slot="extra-content" />
-  <div role="none" class="content {className} {size}" bind:this={content}>
-    {#if title || showClose || $$slots.header || $$slots['header-extra']}
+  <div bind:this={content} role="none" class="content {className} {size}">
+    {#if title || showClose || header || headerExtra}
       <div role="none" class="header">
-        {#if $$slots.header}
-          <slot name="header" />
+        {#if header}
+          {@render header()}
         {:else}
           <div role="none" id="{id}-title" class="title">
             {title}
           </div>
           <Spacer flex={true} />
-          {#if $$slots['header-extra']}
-            <slot name="header-extra" />
-          {/if}
+          {@render headerExtra?.()}
           {#if showClose}
             <Button
               variant="ghost"
               iconic
               aria-label={$_('_sui.close')}
               aria-controls={id}
-              on:click={() => {
-                modal.close('close');
+              onclick={() => {
+                modal?.close('close');
               }}
             >
-              <slot name="close-icon" slot="start-icon">
-                <Icon name="close" />
-              </slot>
+              {#snippet startIcon()}
+                {#if closeIcon}
+                  {@render closeIcon()}
+                {:else}
+                  <Icon name="close" />
+                {/if}
+              {/snippet}
             </Button>
           {/if}
         {/if}
       </div>
     {/if}
     <div role="none" id="{id}-body" class="body">
-      <slot />
+      {@render children?.()}
     </div>
-    {#if showOk || showCancel || $$slots.footer || $$slots['footer-extra']}
+    {#if showOk || showCancel || footer || footerExtra}
       <div role="none" class="footer">
-        {#if $$slots.footer}
-          <slot name="footer" />
+        {#if footer}
+          {@render footer?.()}
         {:else}
-          {#if $$slots['footer-extra']}
-            <slot name="footer-extra" />
-          {/if}
+          {@render footerExtra?.()}
           <Spacer flex={true} />
           {#if showOk}
             <Button
               variant="primary"
               label={okLabel || $_('_sui.ok')}
               disabled={okDisabled}
-              on:click={() => {
-                modal.close('ok');
+              onclick={() => {
+                modal?.close('ok');
               }}
             />
           {/if}
@@ -179,8 +134,8 @@
               variant="secondary"
               label={cancelLabel || $_('_sui.cancel')}
               disabled={cancelDisabled}
-              on:click={() => {
-                modal.close('cancel');
+              onclick={() => {
+                modal?.close('cancel');
               }}
             />
           {/if}

@@ -4,39 +4,42 @@
 -->
 <script>
   /**
-   * The `class` attribute on the wrapper element.
-   * @type {string}
+   * @typedef {object} Props
+   * @property {string} [class] - The `class` attribute on the wrapper element.
+   * @property {boolean} [hidden] - Whether to hide the widget. An alias of the `aria-hidden`
+   * attribute.
+   * @property {boolean} [disabled] - Whether to disable the widget. An alias of the `aria-disabled`
+   * attribute.
+   * @property {'horizontal'|'vertical'} [orientation] - Orientation of the widget.
+   * @property {import('svelte').Snippet} [children] - Primary slot content.
    */
-  let className = '';
-  export { className as class };
+
   /**
-   * Whether to hide the widget. An alias of the `aria-hidden` attribute.
-   * @type {boolean | undefined}
+   * @type {Props & Record<string, any>}
    */
-  export let hidden = undefined;
-  /**
-   * Whether to disable the widget. An alias of the `aria-disabled` attribute.
-   * @type {boolean}
-   */
-  export let disabled = false;
-  /**
-   * Orientation of the widget.
-   * @type {('horizontal'|'vertical')}
-   */
-  export let orientation = 'horizontal';
+  let {
+    /* eslint-disable prefer-const */
+    class: className,
+    hidden = false,
+    disabled = false,
+    orientation = 'horizontal',
+    children,
+    ...restProps
+    /* eslint-enable prefer-const */
+  } = $props();
 </script>
 
 <div
+  {...restProps}
   role="group"
   class="sui checkbox-group {className} {orientation}"
-  hidden={hidden || undefined}
+  {hidden}
   aria-hidden={hidden}
   aria-disabled={disabled}
   aria-roledescription="checkbox group"
-  {...$$restProps}
 >
   <div role="none" class="inner" inert={disabled}>
-    <slot />
+    {@render children?.()}
   </div>
 </div>
 

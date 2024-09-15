@@ -10,64 +10,64 @@
   import Button from '../button/button.svelte';
 
   /**
-   * The `class` attribute on the wrapper element.
-   * @type {string}
+   * @typedef {object} Props
+   * @property {string} [class] - The `class` attribute on the wrapper element.
+   * @property {boolean} [hidden] - Whether to hide the widget.
+   * @property {boolean} [disabled] - Whether to disable the widget. An alias of the `aria-disabled`
+   * attribute.
+   * @property {boolean} [checked] - Whether to check the widget. An alias of the `aria-checked`
+   * attribute.
+   * @property {string | undefined} [name] - The `name` attribute on the `<button>` element.
+   * @property {string | undefined} [value] - The `value` attribute on the `<button>` element.
+   * @property {string | undefined} [label] - Text label displayed next to the checkbox.
+   * @property {import('svelte').Snippet} [children] - Primary slot content.
+   * @property {import('svelte').Snippet} [default] - Default slot content.
+   * @property {(event: CustomEvent) => void} [onChange] - Custom `Change` event handler.
+   * @property {(event: CustomEvent) => void} [onSelect] - Custom `Select` event handler.
    */
-  let className = '';
-  export { className as class };
+
   /**
-   * Whether to hide the widget. An alias of the `aria-hidden` attribute.
-   * @type {boolean | undefined}
+   * @type {Props & Record<string, any>}
    */
-  export let hidden = undefined;
-  /**
-   * Whether to disable the widget. An alias of the `aria-disabled` attribute.
-   * @type {boolean}
-   */
-  export let disabled = false;
-  /**
-   * Whether to check the widget. An alias of the `aria-checked` attribute.
-   * @type {boolean}
-   */
-  export let checked = false;
-  /**
-   * The `name` attribute on the `<button>` element.
-   * @type {string | undefined}
-   */
-  export let name = undefined;
-  /**
-   * The `value` attribute on the `<button>` element.
-   * @type {string | undefined}
-   */
-  export let value = undefined;
-  /**
-   * Text label displayed next to the checkbox.
-   * @type {string | undefined}
-   */
-  export let label = undefined;
+  let {
+    /* eslint-disable prefer-const */
+    checked = false,
+    class: className,
+    hidden = false,
+    disabled = false,
+    name = undefined,
+    value = undefined,
+    label = undefined,
+    children,
+    onChange,
+    onSelect,
+    ...restProps
+    /* eslint-enable prefer-const */
+  } = $props();
 
   const id = generateElementId('checkbox');
 
   /**
-   * Reference to the `Button` component.
-   * @type {Button | undefined}
+   * Reference to the `<button>` element.
+   * @type {HTMLButtonElement | undefined}
    */
-  let buttonComponent;
+  let buttonElement = $state();
 </script>
 
 <span
+  {...restProps}
   role="none"
   class="sui radio {className}"
   class:disabled
-  hidden={hidden || undefined}
-  {...$$restProps}
-  on:click={(event) => {
+  {hidden}
+  onclick={(event) => {
     if (!(/** @type {HTMLElement} */ (event.target).matches('button'))) {
-      buttonComponent?.element?.click();
+      buttonElement?.click();
     }
   }}
 >
   <Button
+    bind:element={buttonElement}
     role="radio"
     {id}
     {hidden}
@@ -76,20 +76,17 @@
     {value}
     aria-checked={checked}
     aria-labelledby="{id}-label"
-    bind:this={buttonComponent}
-    on:click={(event) => {
+    onclick={(event) => {
       event.preventDefault();
       checked = true;
     }}
-    on:focus
-    on:blur
-    on:select
-    on:change
+    {onChange}
+    {onSelect}
   />
-  {#if $$slots.default || label}
+  {#if children || label}
     <label id="{id}-label">
-      {#if $$slots.default}
-        <slot />
+      {#if children}
+        {@render children?.()}
       {:else}
         {label}
       {/if}

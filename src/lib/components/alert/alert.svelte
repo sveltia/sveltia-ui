@@ -8,17 +8,32 @@
   import Icon from '../icon/icon.svelte';
 
   /**
-   * Status of the alert.
-   * @type {'error' | 'warning' | 'info' | 'success'}
+   * @typedef {object} Props
+   * @property {'error' | 'warning' | 'info' | 'success'} status - Alert status.
+   * @property {import('svelte').Snippet} [children] - Primary slot content.
+   * @property {import('svelte').Snippet} [icon] - Icon slot content.
    */
-  export let status = 'error';
+
+  /**
+   * @type {Props & Record<string, any>}
+   */
+  let {
+    /* eslint-disable prefer-const */
+    status,
+    children,
+    icon,
+    ...restProps
+    /* eslint-enable prefer-const */
+  } = $props();
 </script>
 
-<div role="alert" class="sui alert {status}" {...$$restProps}>
-  <slot name="icon">
+<div {...restProps} role="alert" class="sui alert {status}">
+  {#if icon}
+    {@render icon()}
+  {:else}
     <Icon name={status === 'success' ? 'check_circle' : status} />
-  </slot>
-  <slot />
+  {/if}
+  {@render children?.()}
 </div>
 
 <style lang="scss">

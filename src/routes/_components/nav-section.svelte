@@ -1,10 +1,21 @@
 <script>
   import { page } from '$app/stores';
 
-  export let title = '';
-  export let category = '';
-  /** @type {{ key: string, label: string, disabled?: boolean }[]} */
-  export let pages = [];
+  /**
+   * @typedef {object} Props
+   * @property {string} title - Title for the section.
+   * @property {string} category - Category name.
+   * @property {{ key: string, label: string, disabled?: boolean }[]} pages - Page list.
+   */
+
+  /** @type {Props} */
+  let {
+    /* eslint-disable prefer-const */
+    title = '',
+    category = '',
+    pages = [],
+    /* eslint-enable prefer-const */
+  } = $props();
 </script>
 
 <section>

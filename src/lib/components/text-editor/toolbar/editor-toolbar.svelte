@@ -16,15 +16,23 @@
   import ToggleBlockMenuItem from './toggle-block-menu-item.svelte';
 
   /**
-   * Whether to disable the widget. An alias of the `aria-disabled` attribute.
-   * @type {boolean}
+   * @typedef {object} Props
+   * @property {boolean} [hidden] - Whether to hide the widget.
+   * @property {boolean} [disabled] - Whether to disable the widget. An alias of the `aria-disabled`
+   * attribute.
+   * @property {boolean} [readonly] - Whether to make the widget read-only. An alias of the
+   * `aria-readonly` attribute.
    */
-  export let disabled = false;
+
   /**
-   * Whether to disable the widget. An alias of `aria-readonly` attribute.
-   * @type {boolean}
+   * @type {Props & Record<string, any>}
    */
-  export let readonly = false;
+  let {
+    /* eslint-disable prefer-const */
+    disabled = false,
+    readonly = false,
+    /* eslint-enable prefer-const */
+  } = $props();
 
   /**
    * Text editor state.
@@ -44,17 +52,21 @@
    * Enabled block level buttons.
    * @type {import('$lib/typedefs').TextEditorBlockType[]}
    */
-  $: blockLevelButtons = unique([
-    'paragraph', // Always needed
-    ...enabledButtons.filter((type) => blockButtonTypes.includes(/** @type {any} */ (type))),
-  ]);
+  const blockLevelButtons = $derived(
+    unique([
+      'paragraph', // Always needed
+      ...enabledButtons.filter((type) => blockButtonTypes.includes(/** @type {any} */ (type))),
+    ]),
+  );
 
   /**
    * Enabled inline level buttons.
    * @type {import('$lib/typedefs').TextEditorInlineType[]}
    */
-  $: inlineLevelButtons = unique(
-    enabledButtons.filter((type) => inlineButtonTypes.includes(/** @type {any} */ (type))),
+  const inlineLevelButtons = $derived(
+    unique([
+      ...enabledButtons.filter((type) => inlineButtonTypes.includes(/** @type {any} */ (type))),
+    ]),
   );
 </script>
 
@@ -65,16 +77,19 @@
       aria-label={$_('_sui.text_editor.show_text_style_options')}
       aria-controls="{$editorId}-lexical-root"
     >
-      <Icon
-        slot="start-icon"
-        name={availableButtons[$selectionBlockType]?.icon ?? 'format_paragraph'}
-      />
-      <Icon slot="end-icon" name="arrow_drop_down" class="small-arrow" />
-      <Menu slot="popup" aria-label={$_('_sui.text_editor.text_style_options')}>
-        {#each blockLevelButtons as type (type)}
-          <ToggleBlockMenuItem {type} />
-        {/each}
-      </Menu>
+      {#snippet startIcon()}
+        <Icon name={availableButtons[$selectionBlockType]?.icon ?? 'format_paragraph'} />
+      {/snippet}
+      {#snippet endIcon()}
+        <Icon name="arrow_drop_down" class="small-arrow" />
+      {/snippet}
+      {#snippet popup()}
+        <Menu aria-label={$_('_sui.text_editor.text_style_options')}>
+          {#each blockLevelButtons as type (type)}
+            <ToggleBlockMenuItem {type} />
+          {/each}
+        </Menu>
+      {/snippet}
     </MenuButton>
     {#if inlineLevelButtons.length}
       <Divider orientation="vertical" />
@@ -95,7 +110,7 @@
         disabled={$hasConverterError}
         pressed={!$useRichText}
         aria-label={$_('_sui.text_editor.edit_in_markdown')}
-        on:click={() => {
+        onclick={() => {
           $useRichText = !$useRichText;
 
           if ($useRichText) {
@@ -103,7 +118,9 @@
           }
         }}
       >
-        <Icon slot="start-icon" name="markdown" />
+        {#snippet startIcon()}
+          <Icon name="markdown" />
+        {/snippet}
       </Button>
     {/if}
   </Toolbar>

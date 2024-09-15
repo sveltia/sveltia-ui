@@ -12,65 +12,49 @@
   import Button from './button.svelte';
 
   /**
-   * The `class` attribute on the `<button>` element.
-   * @type {string}
+   * @typedef {object} Props
+   * @property {import('$lib/typedefs').PopupPosition} [popupPosition] - Where to show the dropdown
+   * menu.
+   * @property {boolean} [showPopupBackdrop] - Whether to show the backdrop for the popup.
+   * @property {import('svelte').Snippet} [chevronIcon] - Chevron slot content.
+   * @property {import('svelte').Snippet} [popup] - Popup slot content.
    */
-  let className = '';
-  export { className as class };
+
   /**
-   * Whether to hide the widget. An alias of the `aria-hidden` attribute.
-   * @type {boolean | undefined}
+   * @type {import('$lib/typedefs').ButtonProps & import('$lib/typedefs').CommonEventHandlers &
+   * Props & Record<string, any>}
    */
-  export let hidden = undefined;
-  /**
-   * Whether to disable the widget. An alias of the `aria-disabled` attribute.
-   * @type {boolean}
-   */
-  export let disabled = false;
-  /**
-   * Text label displayed on the button.
-   * @type {string}
-   */
-  export let label = '';
-  /**
-   * The style variant of the button.
-   * @type {'primary' | 'secondary' | 'tertiary' | 'ghost' | undefined}
-   */
-  export let variant = undefined;
-  /**
-   * The size of the button.
-   * @type {'small' | 'medium' | 'large' | undefined}
-   */
-  export let size = 'medium';
-  /**
-   * Where to show the dropdown menu.
-   * @type {import('$lib/typedefs').PopupPosition}
-   */
-  export let popupPosition = 'bottom-left';
-  /**
-   * Whether to show the backdrop for the popup.
-   * @type {boolean}
-   */
-  export let showPopupBackdrop = false;
+  let {
+    /* eslint-disable prefer-const */
+    hidden = false,
+    disabled = false,
+    label = '',
+    variant = undefined,
+    size = 'medium',
+    popupPosition = 'bottom-left',
+    showPopupBackdrop = false,
+    chevronIcon,
+    popup: _popup,
+    ...restProps
+    /* eslint-enable prefer-const */
+  } = $props();
 
   /**
    * @type {HTMLElement | undefined}
    */
-  let wrapper;
+  let wrapper = $state();
 </script>
 
 <div
+  bind:this={wrapper}
   role="group"
   class="sui split-button"
-  hidden={hidden || undefined}
+  {hidden}
   aria-hidden={hidden}
   aria-disabled={disabled}
   aria-label={$_('_sui.split_button.x_options', { values: { name: label } })}
-  bind:this={wrapper}
 >
-  <Button class={className} {hidden} {disabled} {label} {variant} {size} {...$$restProps} on:click>
-    <slot name="start-icon" slot="start-icon" />
-  </Button>
+  <Button {...restProps} {hidden} {disabled} {label} {variant} {size}></Button>
   <MenuButton
     iconic
     {hidden}
@@ -82,10 +66,16 @@
     popupPositionBaseElement={wrapper}
     {showPopupBackdrop}
   >
-    <slot name="chevron-icon" slot="end-icon">
-      <Icon name="arrow_drop_down" class="small-arrow" />
-    </slot>
-    <slot name="popup" slot="popup" />
+    {#snippet endIcon()}
+      {#if chevronIcon}
+        {@render chevronIcon()}
+      {:else}
+        <Icon name="arrow_drop_down" class="small-arrow" />
+      {/if}
+    {/snippet}
+    {#snippet popup()}
+      {@render _popup?.()}
+    {/snippet}
   </MenuButton>
 </div>
 

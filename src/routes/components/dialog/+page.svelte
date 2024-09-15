@@ -5,15 +5,15 @@
   import PromptDialog from '$lib/components/dialog/prompt-dialog.svelte';
   import Example from '../../_components/example.svelte';
 
-  let openStandardDialog = false;
-  let openAlertDialog = false;
-  let openConfirmationDialog = false;
-  let openPromptDialog = false;
-  let openSmallDialog = false;
-  let openMediumDialog = false;
-  let openLargeDialog = false;
-  let openExtraLargeDialog = false;
-  let promptValue = '';
+  let openStandardDialog = $state(false);
+  let openAlertDialog = $state(false);
+  let openConfirmationDialog = $state(false);
+  let openPromptDialog = $state(false);
+  let openSmallDialog = $state(false);
+  let openMediumDialog = $state(false);
+  let openLargeDialog = $state(false);
+  let openExtraLargeDialog = $state(false);
+  let promptValue = $state('');
 </script>
 
 <h2>Dialog</h2>
@@ -25,7 +25,7 @@
       <Button
         variant="secondary"
         label="Show Standard Dialog"
-        on:click={() => {
+        onclick={() => {
           openStandardDialog = true;
         }}
       />
@@ -35,7 +35,7 @@
       <Button
         variant="secondary"
         label="Show Alert Dialog"
-        on:click={() => {
+        onclick={() => {
           openAlertDialog = true;
         }}
       />
@@ -47,7 +47,7 @@
       <Button
         variant="secondary"
         label="Show Confirmation Dialog"
-        on:click={() => {
+        onclick={() => {
           openConfirmationDialog = true;
         }}
       />
@@ -59,7 +59,7 @@
       <Button
         variant="secondary"
         label="Show Prompt Dialog"
-        on:click={() => {
+        onclick={() => {
           openPromptDialog = true;
         }}
       />
@@ -83,7 +83,7 @@
       <Button
         variant="secondary"
         label="Show Small Dialog"
-        on:click={() => {
+        onclick={() => {
           openSmallDialog = true;
         }}
       />
@@ -93,7 +93,7 @@
       <Button
         variant="secondary"
         label="Show Medium Dialog"
-        on:click={() => {
+        onclick={() => {
           openMediumDialog = true;
         }}
       />
@@ -103,7 +103,7 @@
       <Button
         variant="secondary"
         label="Show Large Dialog"
-        on:click={() => {
+        onclick={() => {
           openLargeDialog = true;
         }}
       />
@@ -113,7 +113,7 @@
       <Button
         variant="secondary"
         label="Show Extra Large Dialog"
-        on:click={() => {
+        onclick={() => {
           openExtraLargeDialog = true;
         }}
       />

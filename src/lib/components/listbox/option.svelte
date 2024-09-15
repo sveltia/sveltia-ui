@@ -9,50 +9,43 @@
   import Icon from '../icon/icon.svelte';
 
   /**
-   * The `class` attribute on the wrapper element.
-   * @type {string}
+   * @typedef {object} Props
+   * @property {string} [class] - The `class` attribute on the wrapper element.
+   * @property {boolean} [selected] - Whether to select the widget. An alias of the `aria-selected`
+   * attribute.
+   * @property {string} label - Text label displayed on the item.
+   * @property {string} [searchValue] - The value to be searched.
+   * @property {boolean} [wrap] - Whether to wrap a long label.
+   * @property {import('svelte').Snippet} [checkIcon] - Check icon slot content.
    */
-  let className = '';
-  export { className as class };
+
   /**
-   * Whether to select the widget. An alias of the `aria-selected` attribute.
-   * @type {boolean}
+   * @type {import('$lib/typedefs').ButtonProps & import('$lib/typedefs').CommonEventHandlers &
+   * Props & Record<string, any>}
    */
-  export let selected = false;
-  /**
-   * Whether to hide the widget. An alias of the `aria-hidden` attribute.
-   * @type {boolean | undefined}
-   */
-  export let hidden = undefined;
-  /**
-   * Whether to disable the widget. An alias of the `aria-disabled` attribute.
-   * @type {boolean}
-   */
-  export let disabled = false;
-  /**
-   * Text label displayed on the item.
-   * @type {string}
-   */
-  export let label;
-  /**
-   * The `value` attribute on the `<button>` element.
-   * @type {string}
-   */
-  export let value = label;
-  /**
-   * The value to be searched.
-   * @type {string}
-   */
-  export let searchValue = label;
-  /**
-   * Whether to wrap a long label.
-   * @type {boolean}
-   */
-  export let wrap = false;
+  let {
+    /* eslint-disable prefer-const */
+    selected = $bindable(false),
+    hidden = $bindable(false),
+    class: className,
+    disabled = false,
+    label,
+    value = label,
+    searchValue = label,
+    wrap = false,
+    children,
+    checkIcon,
+    startIcon: _startIcon,
+    onChange,
+    onToggle,
+    ...restProps
+    /* eslint-enable prefer-const */
+  } = $props();
 </script>
 
-<div role="none" class="sui option {className}" class:wrap hidden={hidden || undefined}>
+<div role="none" class="sui option {className}" class:wrap {hidden}>
   <Button
+    {...restProps}
     role="option"
     tabindex="-1"
     aria-selected={selected}
@@ -63,33 +56,27 @@
     data-type={typeof value}
     data-label={label}
     data-search-value={searchValue}
-    {...$$restProps}
-    on:click
-    on:dblclick
-    on:focus
-    on:blur
-    on:dragover
-    on:dragleave
-    on:dragend
-    on:drop
-    on:select
-    on:change
-    on:change={(event) => {
+    onChange={(event) => {
       selected = event.detail.selected;
+      onChange?.(event);
     }}
-    on:toggle={(event) => {
-      hidden = /** @type {CustomEvent} */ (event).detail.hidden;
+    onToggle={(event) => {
+      hidden = event.detail.hidden;
       selected = false;
+      onToggle?.(event);
     }}
   >
     {#if selected}
-      <slot name="check-icon">
+      {#if checkIcon}
+        {@render checkIcon()}
+      {:else}
         <Icon class="check" name="check" />
-      </slot>
+      {/if}
     {/if}
-    <slot name="start-icon" slot="start-icon" />
-    <slot />
-    <slot name="end-icon" slot="end-icon" />
+    {#snippet startIcon()}
+      {@render _startIcon?.()}
+    {/snippet}
+    {@render children?.()}
   </Button>
 </div>
 

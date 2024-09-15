@@ -8,77 +8,53 @@
   import Popup from '../util/popup.svelte';
 
   /**
-   * The `class` attribute on the `<button>` element.
-   * @type {string}
+   * @typedef {object} Props
+   * @property {HTMLElement | undefined} [popupPositionBaseElement] - The base element of
+   * {@link popupPosition}. If omitted, this will be {@link buttonComponent}.
    */
-  let className = '';
-  export { className as class };
-  /**
-   * Whether to hide the widget. An alias of the `aria-hidden` attribute.
-   * @type {boolean | undefined}
-   */
-  export let hidden = undefined;
-  /**
-   * Whether to disable the widget. An alias of the `aria-disabled` attribute.
-   * @type {boolean}
-   */
-  export let disabled = false;
-  /**
-   * Where to show the dropdown menu.
-   * @type {import('$lib/typedefs').PopupPosition}
-   */
-  export let popupPosition = 'bottom-left';
-  /**
-   * The base element of {@link popupPosition}. If omitted, this will be {@link buttonComponent}.
-   * @type {HTMLElement | undefined}
-   */
-  export let popupPositionBaseElement = undefined;
-  /**
-   * Whether to show the backdrop for the popup.
-   * @type {boolean}
-   */
-  export let showPopupBackdrop = false;
-  /**
-   * Text label displayed on the button.
-   * @type {string}
-   */
-  export let label = '';
-  /**
-   * The style variant of the button.
-   * @type {'primary' | 'secondary' | 'tertiary' | 'ghost' | 'link' | undefined}
-   */
-  export let variant = undefined;
-  /**
-   * The size of the button.
-   * @type {'small' | 'medium' | 'large'}
-   */
-  export let size = 'medium';
-  /**
-   * Whether to only show an icon on the button and trim the padding.
-   */
-  export let iconic = false;
 
   /**
-   * Reference to the `Button` component.
-   * @type {Button | undefined}
+   * @type {import('$lib/typedefs').ButtonProps & import('$lib/typedefs').CommonEventHandlers &
+   * Props & Record<string, any>}
    */
-  let buttonComponent;
+  let {
+    /* eslint-disable prefer-const */
+    class: className,
+    hidden = false,
+    disabled = false,
+    popupPosition = 'bottom-left',
+    popupPositionBaseElement = undefined,
+    showPopupBackdrop = false,
+    label = '',
+    variant = undefined,
+    size = 'medium',
+    iconic = false,
+    children: _children,
+    startIcon: _startIcon,
+    endIcon: _endIcon,
+    popup,
+    ...restProps
+    /* eslint-enable prefer-const */
+  } = $props();
+
   /**
-   * Reference to the `Popup` component.
-   * @type {Popup | undefined}
+   * Reference to the `<button>` element.
+   * @type {HTMLButtonElement | undefined}
    */
-  let popupComponent;
+  let buttonElement = $state();
 
   /**
    * Move focus to the `<button>` element.
    */
   export const focus = () => {
-    buttonComponent?.element?.focus();
+    buttonElement?.focus();
   };
 </script>
 
 <div role="none" class="wrapper">
   <Button
+    {...restProps}
+    bind:element={buttonElement}
     class="sui menu-button {className}"
     {hidden}
     {disabled}
@@ -87,21 +63,24 @@
     {size}
     {iconic}
     aria-haspopup="menu"
-    {...$$restProps}
-    bind:this={buttonComponent}
   >
-    <slot name="start-icon" slot="start-icon" />
-    <slot />
-    <slot name="end-icon" slot="end-icon" />
+    {#snippet startIcon()}
+      {@render _startIcon?.()}
+    {/snippet}
+    {#snippet children()}
+      {@render _children?.()}
+    {/snippet}
+    {#snippet endIcon()}
+      {@render _endIcon?.()}
+    {/snippet}
   </Button>
 </div>
 
 <Popup
-  anchor={buttonComponent?.element}
+  anchor={buttonElement}
   position={popupPosition}
   positionBaseElement={popupPositionBaseElement}
   showBackdrop={showPopupBackdrop}
-  bind:this={popupComponent}
 >
-  <slot name="popup" />
+  {@render popup?.()}
 </Popup>

@@ -9,42 +9,15 @@
   import Dialog from './dialog.svelte';
 
   /**
-   * The `class` attribute on the `<dialog>` element.
-   * @type {string}
+   * @type {import('$lib/typedefs').ModalProps & import('$lib/typedefs').DialogProps &
+   * Record<string, any>}
    */
-  let className = '';
-  export { className as class };
-  /**
-   * Whether to open the dialog.
-   * @type {boolean}
-   */
-  export let open = false;
-  /**
-   * Text label displayed on the header. Required.
-   * @type {string}
-   */
-  export let title;
-  /**
-   * Text label displayed on the OK button.
-   * @type {string}
-   */
-  export let okLabel = '';
+  let {
+    /* eslint-disable prefer-const */
+    open = $bindable(false),
+    ...restProps
+    /* eslint-enable prefer-const */
+  } = $props();
 </script>
 
-<Dialog
-  role="alertdialog"
-  class={className}
-  bind:open
-  {title}
-  {okLabel}
-  showCancel={false}
-  {...$$restProps}
-  on:opening
-  on:open
-  on:ok
-  on:cancel
-  on:closing
-  on:close
->
-  <slot />
-</Dialog>
+<Dialog {...restProps} bind:open role="alertdialog" showCancel={false}></Dialog>

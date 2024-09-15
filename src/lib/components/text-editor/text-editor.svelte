@@ -4,7 +4,7 @@
 -->
 <script>
   import { generateElementId } from '@sveltia/utils/element';
-  import { onMount, setContext } from 'svelte';
+  import { onMount, setContext, untrack } from 'svelte';
   import { _ } from 'svelte-i18n';
   import { writable } from 'svelte/store';
   import { blockButtonTypes, inlineButtonTypes } from '.';
@@ -16,51 +16,43 @@
   import EditorToolbar from './toolbar/editor-toolbar.svelte';
 
   /**
-   * Make the text input container flexible.
-   * @type {boolean}
+   * @typedef {object} Props
+   * @property {string | undefined} [value] - Input value.
+   * @property {boolean} [flex] - Make the text input container flexible.
+   * @property {import('$lib/typedefs').TextEditorMode[]} [modes] - Enabled modes.
+   * @property {(import('$lib/typedefs').TextEditorBlockType |
+   * import('$lib/typedefs').TextEditorInlineType)[]} [buttons] - Enabled buttons.
+   * @property {string} [class] - The `class` attribute on the wrapper element.
+   * @property {boolean} [hidden] - Whether to hide the widget.
+   * @property {boolean} [disabled] - Whether to disable the widget. An alias of the `aria-disabled`
+   * attribute.
+   * @property {boolean} [readonly] - Whether to make the widget read-only. An alias of the
+   * `aria-readonly` attribute.
+   * @property {boolean} [required] - Whether to mark the widget required. An alias of the
+   * `aria-required` attribute.
+   * @property {boolean} [invalid] - Whether to mark the widget invalid. An alias of the
+   * `aria-invalid` attribute.
+   * @property {import('svelte').Snippet} [children] - Primary slot content.
    */
-  export let flex = false;
+
   /**
-   * Whether to hide the widget. An alias of the `aria-hidden` attribute.
-   * @type {boolean | undefined}
+   * @type {Props & Record<string, any>}
    */
-  export let hidden = undefined;
-  /**
-   * Whether to disable the widget. An alias of the `aria-disabled` attribute.
-   * @type {boolean}
-   */
-  export let disabled = false;
-  /**
-   * Whether to disable the widget. An alias of `aria-readonly` attribute.
-   * @type {boolean}
-   */
-  export let readonly = false;
-  /**
-   * Whether to mark the widget required. An alias of the `aria-required` attribute.
-   * @type {boolean}
-   */
-  export let required = false;
-  /**
-   * Whether to mark the widget invalid. An alias of the `aria-invalid` attribute.
-   * @type {boolean}
-   */
-  export let invalid = false;
-  /**
-   * Input value.
-   * @type {string | undefined}
-   */
-  export let value = undefined;
-  /**
-   * Enabled modes.
-   * @type {import('$lib/typedefs').TextEditorMode[]}
-   */
-  export let modes = ['rich-text', 'plain-text'];
-  /**
-   * Enabled buttons.
-   * @type {(import('$lib/typedefs').TextEditorBlockType |
-   * import('$lib/typedefs').TextEditorInlineType)[]}
-   */
-  export let buttons = [...inlineButtonTypes, ...blockButtonTypes];
+  let {
+    /* eslint-disable prefer-const */
+    value = $bindable(''),
+    flex = false,
+    modes = ['rich-text', 'plain-text'],
+    buttons = [...inlineButtonTypes, ...blockButtonTypes],
+    hidden = false,
+    disabled = false,
+    readonly = false,
+    required = false,
+    invalid = false,
+    children,
+    ...restProps
+    /* eslint-enable prefer-const */
+  } = $props();
 
   /** @type {import('svelte/store').Writable<import('lexical').LexicalEditor | undefined>} */
   const editor = writable();
@@ -69,8 +61,8 @@
   const editorId = writable(generateElementId('editor'));
   const useRichText = writable(modes[0] === 'rich-text');
   const hasConverterError = writable(false);
-  let inputValue = '';
-  let showConverterError = false;
+  let inputValue = $state('');
+  let showConverterError = $state(false);
 
   /**
    * Convert the Markdown {@link inputValue} to Lexical nodes. Disable the rich text mode and
@@ -94,54 +86,46 @@
     }
   };
 
-  /**
-   * Update {@link inputValue} based on {@link value}.
-   */
-  const setInputValue = () => {
+  $effect(() => {
+    if (!$editor) {
+      return;
+    }
+
     const newValue = value;
 
     // Avoid a cycle dependency & infinite loop
-    if (inputValue !== newValue) {
-      inputValue = newValue ?? '';
+    untrack(() => {
+      if (inputValue !== newValue) {
+        inputValue = newValue ?? '';
 
-      if ($useRichText) {
-        convertMarkdown();
+        if ($useRichText) {
+          convertMarkdown();
+        }
       }
-    }
-  };
+    });
+  });
 
-  /**
-   * Update {@link value} based on {@link inputValue}.
-   */
-  const setCurrentValue = () => {
+  $effect(() => {
+    if (!$editor) {
+      return;
+    }
+
     const newValue = inputValue;
 
     // Avoid a cycle dependency & infinite loop
-    if (value !== newValue) {
-      value = newValue;
-    }
-  };
+    untrack(() => {
+      if (value !== newValue) {
+        value = newValue;
+      }
+    });
+  });
 
-  $: {
-    if ($editor) {
-      void value;
-      setInputValue();
-    }
-  }
-
-  $: {
-    if ($editor) {
-      void inputValue;
-      setCurrentValue();
-    }
-  }
-
-  $: {
+  $effect(() => {
     if ($hasConverterError) {
       $useRichText = false;
       showConverterError = true;
     }
-  }
+  });
 
   // The editor has to be initialized in the browser
   onMount(() => {
@@ -164,7 +148,7 @@
   );
 </script>
 
-<div role="none" class="sui text-editor" hidden={hidden || undefined} {...$$restProps}>
+<div {...restProps} role="none" class="sui text-editor" {hidden}>
   <EditorToolbar {disabled} {readonly} />
   <LexicalRoot
     bind:value={inputValue}

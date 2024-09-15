@@ -12,13 +12,22 @@
   import { getContext } from 'svelte';
   import { _ } from 'svelte-i18n';
   import { availableButtons } from '..';
+  import Icon from '../../icon/icon.svelte';
   import MenuItemCheckbox from '../../menu/menu-item-checkbox.svelte';
 
   /**
-   * Button type.
-   * @type {import('$lib/typedefs').TextEditorBlockType}
+   * @typedef {object} Props
+   * @property {import('$lib/typedefs').TextEditorBlockType} type - Button type.
    */
-  export let type;
+
+  /**
+   * @type {Props & Record<string, any>}
+   */
+  let {
+    /* eslint-disable prefer-const */
+    type,
+    /* eslint-enable prefer-const */
+  } = $props();
 
   /**
    * Text editor state.
@@ -29,7 +38,7 @@
   /**
    * Whether the current selection matches the button {@link type}.
    */
-  $: selectionTypeMatches = $selectionBlockType === type;
+  const selectionTypeMatches = $derived($selectionBlockType === type);
 
   /**
    * Change the current selection’s type to {@link type}.
@@ -76,13 +85,16 @@
 
 {#key selectionTypeMatches}
   <MenuItemCheckbox
-    iconName={availableButtons[type].icon}
     label={$_(`_sui.text_editor.${availableButtons[type].labelKey}`)}
     checked={selectionTypeMatches}
-    on:click={() => {
+    onclick={() => {
       if (!selectionTypeMatches) {
         changeBlockType();
       }
     }}
-  />
+  >
+    {#snippet startIcon()}
+      <Icon name={availableButtons[type].icon} />
+    {/snippet}
+  </MenuItemCheckbox>
 {/key}

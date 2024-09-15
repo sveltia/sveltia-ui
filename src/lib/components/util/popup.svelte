@@ -2,75 +2,70 @@
   @component
   Generic popup helper.
 -->
-<svelte:options accessors={true} />
-
 <script>
   import { sleep } from '@sveltia/utils/misc';
   import { onMount } from 'svelte';
   import { writable } from 'svelte/store';
-  import { activatePopup } from '../../services/popup';
+  import { activatePopup } from '../../services/popup.svelte.js';
   import Modal from './modal.svelte';
 
   /**
-   * The `class` attribute on the content element.
-   * @type {string}
+   * @typedef {object} Props
+   * @property {string} [class] - The `class` attribute on the content element.
+   * @property {boolean} [open] - Whether to open the popup.
+   * @property {HTMLElement} anchor - A reference to the anchor element that opens the popup.
+   * Typically a `<button>`.
+   * @property {HTMLElement | undefined} [content] - A reference to the content element.
+   * @property {import('$lib/typedefs').PopupPosition} [position] - Where to show the popup.
+   * @property {HTMLElement | undefined} [positionBaseElement] - The base element of
+   * {@link position}. If omitted, this will be {@link anchor}.
+   * @property {boolean} [touchOptimized] - Whether to show the popup at the center of the screen on
+   * mobile/tablet and ignore the defined dropdown `position`.
+   * @property {import('svelte').Snippet} [children] - Primary slot content.
+   * @property {import('svelte').Snippet} [extraContent] - Extra slot content.
+   * @property {(event: CustomEvent) => void} [onOpen] - Custom `Open` event handler.
    */
-  let className = '';
-  export { className as class };
-  /**
-   * Whether to open the popup.
-   * @type {import('svelte/store').Writable<boolean>}
-   */
-  export let open = writable(false);
-  /**
-   * Whether to show the backdrop.
-   * @type {boolean}
-   */
-  export let showBackdrop = false;
-  /**
-   * A reference to the anchor element that opens the popup. Typically a `<button>`.
-   * @type {HTMLElement | undefined}
-   */
-  export let anchor;
-  /**
-   * A reference to the content element.
-   * @type {HTMLElement | undefined}
-   */
-  export let content = undefined;
-  /**
-   * Where to show the popup.
-   * @type {import('$lib/typedefs').PopupPosition}
-   */
-  export let position = 'bottom-left';
-  /**
-   * The base element of {@link position}. If omitted, this will be {@link anchor}.
-   * @type {HTMLElement | undefined}
-   */
-  export let positionBaseElement = undefined;
-  /**
-   * Whether to show the popup at the center of the screen on mobile/tablet and ignore the defined
-   * dropdown `position`.
-   * @type {boolean}
-   */
-  export let touchOptimized = false;
 
   /**
-   * A reference to the modal component.
-   * @type {Modal}
+   * @type {import('$lib/typedefs').ModalProps & Props & Record<string, any>}
    */
-  let modal;
+  let {
+    /* eslint-disable prefer-const */
+    open = $bindable(false),
+    content = $bindable(undefined),
+    class: className,
+    showBackdrop = false,
+    anchor,
+    position = 'bottom-left',
+    positionBaseElement = undefined,
+    touchOptimized = false,
+    children,
+    onOpen,
+    ...restProps
+    /* eslint-enable prefer-const */
+  } = $props();
+
+  /**
+   * @type {boolean}
+   */
+  let initialized = $state(false);
+  /**
+   * A reference to the `<dialog>` element.
+   * @type {HTMLDialogElement | undefined}
+   */
+  let dialogElement = $state();
   /**
    * Whether the touch is enabled on the user device.
    * @type {boolean}
    */
-  let touchEnabled = false;
+  let touchEnabled = $state(false);
   /**
    * The type of the content displayed in the popup, defined with the `aria-haspopup` attribute on
    * the anchor element.
    * @type {string | undefined}
    * @see https://w3c.github.io/aria/#aria-haspopup
    */
-  let contentType;
+  let contentType = $state();
   /**
    * Style to be applied to the content.
    * @type {import('svelte/store').Writable<any>}
@@ -86,17 +81,30 @@
    * Initialize the popup.
    */
   const init = () => {
-    ({ open, style } = activatePopup(anchor, modal.dialog, position, positionBaseElement));
+    let openStore = writable(false);
+
+    ({ style, open: openStore } = activatePopup(
+      anchor,
+      dialogElement,
+      position,
+      positionBaseElement,
+    ));
+
+    openStore.subscribe((_open) => {
+      open = _open;
+    });
+
     contentType = anchor?.getAttribute('aria-haspopup') ?? undefined;
+    initialized = true;
   };
 
-  $: {
-    if (anchor && modal?.dialog) {
+  $effect(() => {
+    if (anchor && dialogElement && !initialized) {
       init();
     }
-  }
+  });
 
-  $: touch = touchOptimized && touchEnabled;
+  const touch = $derived(touchOptimized && touchEnabled);
 
   onMount(() => {
     touchEnabled = globalThis.matchMedia('(pointer: coarse)').matches;
@@ -104,21 +112,17 @@
 </script>
 
 <Modal
+  {...restProps}
+  bind:dialog={dialogElement}
   role="none"
   class="popup"
-  bind:open={$open}
+  bind:open
   showBackdrop={showBackdrop ?? touch}
   lightDismiss={true}
   keepContent={true}
-  bind:this={modal}
-  {...$$restProps}
-  on:opening
-  on:open
-  on:ok
-  on:cancel
-  on:closing
-  on:close
-  on:open={async () => {
+  onOpen={async (event) => {
+    onOpen?.(event);
+
     await sleep(100);
 
     if (!content) {
@@ -137,8 +141,8 @@
     }
   }}
 >
-  <slot name="extra-content" slot="extra-content" />
   <div
+    bind:this={content}
     role="none"
     class="content {className} {contentType}"
     class:touch
@@ -148,9 +152,8 @@
     style:max-width={$style.maxWidth}
     style:max-height={$style.height}
     style:visibility={$style.inset ? undefined : 'hidden'}
-    bind:this={content}
   >
-    <slot />
+    {@render children?.()}
   </div>
 </Modal>
 

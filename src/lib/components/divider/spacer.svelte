@@ -4,19 +4,24 @@
 -->
 <script>
   /**
-   * CSS class name on the wrapper element.
-   * @type {string}
+   * @typedef {object} Props
+   * @property {string} [class] - The `class` attribute on the wrapper element.
+   * @property {boolean} [flex] - Whether to make the spacer flexible.
    */
-  let className = '';
-  export { className as class };
+
   /**
-   * Whether to make the spacer flexible.
-   * @type {boolean}
+   * @type {Props & Record<string, any>}
    */
-  export let flex = false;
+  let {
+    /* eslint-disable prefer-const */
+    class: className,
+    flex = false,
+    ...restProps
+    /* eslint-enable prefer-const */
+  } = $props();
 </script>
 
-<div role="none" class="sui spacer {className}" class:flex {...$$restProps}></div>
+<div {...restProps} role="none" class="sui spacer {className}" class:flex></div>
 
 <style lang="scss">
   .spacer {

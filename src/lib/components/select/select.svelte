@@ -9,44 +9,26 @@
   import Combobox from './combobox.svelte';
 
   /**
-   * The `class` attribute on the wrapper element.
-   * @type {string}
+   * @type {import('$lib/typedefs').ComboboxProps & Record<string, any>}
    */
-  let className = '';
-  export { className as class };
-  /**
-   * Whether to hide the widget. An alias of the `aria-hidden` attribute.
-   * @type {boolean | undefined}
-   */
-  export let hidden = undefined;
-  /**
-   * Whether to disable the widget. An alias of the `aria-disabled` attribute.
-   * @type {boolean}
-   */
-  export let disabled = false;
-  /**
-   * Whether to make the widget read-only. An alias of the `aria-readonly` attribute.
-   * @type {boolean}
-   */
-  export let readonly = false;
-  /**
-   * Whether to disable the widget. An alias of the `aria-required` attribute.
-   * @type {boolean}
-   */
-  export let required = false;
-  /**
-   * Whether to mark the widget invalid. An alias of the `aria-invalid` attribute.
-   * @type {boolean}
-   */
-  export let invalid = false;
-  /**
-   * Selected option’s value.
-   * @type {any} = string | number | undefined
-   */
-  export let value = undefined;
+  let {
+    /* eslint-disable prefer-const */
+    value = $bindable(),
+    class: className,
+    hidden = false,
+    disabled = false,
+    readonly = false,
+    required = false,
+    invalid = false,
+    children,
+    onChange,
+    ...restProps
+    /* eslint-enable prefer-const */
+  } = $props();
 </script>
 
 <Combobox
+  {...restProps}
   bind:value
   class="sui select {className}"
   {hidden}
@@ -54,9 +36,8 @@
   {readonly}
   {required}
   {invalid}
-  {...$$restProps}
+  {onChange}
   editable={false}
-  on:change
 >
-  <slot />
+  {@render children?.()}
 </Combobox>

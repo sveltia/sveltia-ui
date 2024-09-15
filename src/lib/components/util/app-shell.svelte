@@ -8,10 +8,22 @@
   import { onMount } from 'svelte';
 
   /**
-   * Orientation of the app shell’s children.
-   * @type {'horizontal' | 'vertical' | undefined}
+   * @typedef {object} Props
+   * @property {'horizontal' | 'vertical' | undefined} [orientation] - Orientation of the app
+   * shell’s children..
+   * @property {import('svelte').Snippet} [children] - Primary slot content.
    */
-  export let orientation = undefined;
+
+  /**
+   * @type {Props & Record<string, any>}
+   */
+  let {
+    /* eslint-disable prefer-const */
+    orientation = 'horizontal',
+    children,
+    ...restProps
+    /* eslint-enable prefer-const */
+  } = $props();
 
   const stylesheets = [
     // https://fonts.google.com/share?selection.family=Merriweather%20Sans:ital,wght@0,300;0,600;1,300%7CNoto%20Sans%20Mono
@@ -22,7 +34,7 @@
   ];
 
   /** @type {HTMLElement | undefined} */
-  let fontLoader;
+  let fontLoader = $state();
 
   onMount(() => {
     const mediaQuery = globalThis.matchMedia('(prefers-color-scheme: dark)');
@@ -62,18 +74,18 @@
 </svelte:head>
 
 <!-- Preload fonts, including the icons -->
-<div class="font-loader" aria-hidden="true" bind:this={fontLoader} style:opacity="0">
+<div bind:this={fontLoader} class="font-loader" aria-hidden="true" style:opacity="0">
   Loading <strong>Sveltia</strong> <em>UI</em>
   <span role="none" class="material-symbols-outlined">favorite</span>
 </div>
 
 <div
+  {...restProps}
   role="none"
   class="sui app-shell {orientation ?? ''}"
-  {...$$restProps}
-  on:dragover|preventDefault
-  on:drop|preventDefault
-  on:contextmenu={(event) => {
+  ondragover={(event) => event.preventDefault()}
+  ondrop={(event) => event.preventDefault()}
+  oncontextmenu={(event) => {
     // Enable the native context menu only in the developer mode or on text fields
     if (
       !document.documentElement.matches('[data-env="dev"]') &&
@@ -83,7 +95,7 @@
     }
   }}
 >
-  <slot />
+  {@render children?.()}
 </div>
 
 <style lang="scss" global>

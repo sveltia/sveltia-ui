@@ -29,7 +29,9 @@
     </div>
     <div role="none">
       <Button variant="link" label="Link: Lorem ipsum dolor sit amet">
-        <Icon name="help" slot="start-icon" />
+        {#snippet startIcon()}
+          <Icon name="help" />
+        {/snippet}
       </Button>
     </div>
     <!-- cSpell:enable -->
@@ -65,13 +67,19 @@
   <Example>
     <div role="none">
       <Button variant="secondary" label="Tag">
-        <Icon slot="start-icon" name="sell" />
+        {#snippet startIcon()}
+          <Icon name="sell" />
+        {/snippet}
       </Button>
       <Button variant="primary" label="Add">
-        <Icon slot="end-icon" name="add" />
+        {#snippet endIcon()}
+          <Icon name="add" />
+        {/snippet}
       </Button>
       <Button variant="secondary" iconic aria-label="Delete">
-        <Icon slot="end-icon" name="delete" />
+        {#snippet endIcon()}
+          <Icon name="delete" />
+        {/snippet}
       </Button>
     </div>
   </Example>
@@ -98,13 +106,19 @@
     <!-- cSpell:enable -->
     <div role="none">
       <Button variant="secondary" label="Tag" disabled>
-        <Icon slot="start-icon" name="sell" />
+        {#snippet startIcon()}
+          <Icon name="sell" />
+        {/snippet}
       </Button>
       <Button variant="primary" label="Add" disabled>
-        <Icon slot="end-icon" name="add" />
+        {#snippet endIcon()}
+          <Icon name="add" />
+        {/snippet}
       </Button>
       <Button variant="secondary" iconic disabled aria-label="Delete">
-        <Icon slot="end-icon" name="delete" />
+        {#snippet endIcon()}
+          <Icon name="delete" />
+        {/snippet}
       </Button>
     </div>
   </Example>

@@ -17,6 +17,7 @@ ignorePaths:
   - pnpm-lock.yaml
   - data/**/*.json
 words:
+  - beforeinput
   - colour
   - colours
   - CVEs

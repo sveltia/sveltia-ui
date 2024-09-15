@@ -6,15 +6,25 @@
 -->
 <script>
   /**
-   * The `class` attribute on the wrapper element.
-   * @type {string}
+   * @typedef {object} Props
+   * @property {string} [class] - The `class` attribute on the wrapper element.
+   * @property {import('svelte').Snippet} [children] - Primary slot content.
    */
-  let className = '';
-  export { className as class };
+
+  /**
+   * @type {Props & Record<string, any>}
+   */
+  let {
+    /* eslint-disable prefer-const */
+    class: className,
+    children,
+    ...restProps
+    /* eslint-enable prefer-const */
+  } = $props();
 </script>
 
-<div role="columnheader" class="sui table-col-header {className}" {...$$restProps}>
-  <slot />
+<div {...restProps} role="columnheader" class="sui table-col-header {className}">
+  {@render children?.()}
 </div>
 
 <style lang="scss">

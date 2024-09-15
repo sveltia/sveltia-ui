@@ -5,42 +5,45 @@
   @see https://www.w3.org/WAI/ARIA/apg/patterns/menubar/
 -->
 <script>
-  import { createEventDispatcher } from 'svelte';
-  import { activateGroup } from '../../services/group';
+  import { activateGroup } from '../../services/group.svelte';
 
   /**
-   * The `class` attribute on the wrapper element.
-   * @type {string}
+   * @typedef {object} Props
+   * @property {string} [class] - The `class` attribute on the wrapper element.
+   * @property {boolean} [hidden] - Whether to hide the widget. An alias of the `aria-hidden`
+   * attribute.
+   * @property {boolean} [disabled] - Whether to disable the widget. An alias of the `aria-disabled`
+   * attribute.
+   * @property {import('svelte').Snippet} [children] - Primary slot content.
+   * @property {(event: CustomEvent) => void} [onChange] - Custom `Change` event handler.
    */
-  let className = '';
-  export { className as class };
-  /**
-   * Whether to hide the widget. An alias of the `aria-hidden` attribute.
-   * @type {boolean | undefined}
-   */
-  export let hidden = undefined;
-  /**
-   * Whether to disable the widget. An alias of the `aria-disabled` attribute.
-   * @type {boolean}
-   */
-  export let disabled = false;
 
-  const dispatch = createEventDispatcher();
+  /**
+   * @type {Props & Record<string, any>}
+   */
+  let {
+    /* eslint-disable prefer-const */
+    class: className,
+    hidden = false,
+    disabled = false,
+    children,
+    onChange,
+    ...restProps
+    /* eslint-enable prefer-const */
+  } = $props();
 </script>
 
 <div
+  {...restProps}
   role="menu"
   class="sui menu {className}"
-  hidden={hidden || undefined}
+  {hidden}
   aria-hidden={hidden}
   aria-disabled={disabled}
-  {...$$restProps}
+  {onChange}
   use:activateGroup
-  on:change={(/** @type {CustomEvent} */ event) => {
-    dispatch('change', event.detail);
-  }}
 >
-  <slot />
+  {@render children?.()}
 </div>
 
 <style lang="scss">

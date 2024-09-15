@@ -2,6 +2,7 @@
 
 import { generateElementId } from '@sveltia/utils/element';
 import { sleep } from '@sveltia/utils/misc';
+import { on } from 'svelte/events';
 import { get, writable } from 'svelte/store';
 
 /**
@@ -124,13 +125,13 @@ class Popup {
     this.anchorElement.setAttribute('aria-controls', this.id);
     this.popupElement.setAttribute('id', this.id);
 
-    this.anchorElement.addEventListener('click', () => {
+    on(anchorElement, 'click', () => {
       if (!this.isDisabled && !this.isReadOnly) {
         this.open.set(!get(this.open));
       }
     });
 
-    this.anchorElement.addEventListener('keydown', (event) => {
+    on(anchorElement, 'keydown', (event) => {
       const { key, ctrlKey, metaKey, shiftKey, altKey } = event;
       const hasModifier = shiftKey || altKey || ctrlKey || metaKey;
 
@@ -141,7 +142,7 @@ class Popup {
       }
     });
 
-    this.anchorElement.addEventListener('transitionstart', () => {
+    on(anchorElement, 'transitionstart', () => {
       if (this.anchorElement.closest('.hiding, .hidden, [hidden]')) {
         this.hideImmediately();
       }
@@ -154,7 +155,7 @@ class Popup {
     }).observe(this.anchorElement);
 
     // Close the popup when the backdrop, a menu item or an option is clicked
-    this.popupElement.addEventListener('click', (event) => {
+    on(this.popupElement, 'click', (event) => {
       event.stopPropagation();
 
       // eslint-disable-next-line prefer-destructuring
@@ -168,7 +169,7 @@ class Popup {
       }
     });
 
-    this.popupElement.addEventListener('keydown', (event) => {
+    on(this.popupElement, 'keydown', (event) => {
       const { key, ctrlKey, metaKey, shiftKey, altKey } = event;
       const hasModifier = shiftKey || altKey || ctrlKey || metaKey;
 

@@ -9,8 +9,19 @@
   import Spacer from '../divider/spacer.svelte';
   import Icon from '../icon/icon.svelte';
 
-  /** @type {string | undefined} */
-  export let value = undefined;
+  /**
+   * @typedef {object} Props
+   * @property {string | undefined} [value] - Date.
+   */
+
+  /**
+   * @type {Props & Record<string, any>}
+   */
+  let {
+    /* eslint-disable prefer-const */
+    value = $bindable(undefined),
+    /* eslint-enable prefer-const */
+  } = $props();
 
   /** @type {{ day: Date }[]} */
   const dayList = [];
@@ -18,9 +29,13 @@
   const weeks = [];
   const now = new Date();
 
-  $: date = value ? new Date(value) : now;
-  $: firstDayOfMonth = new Date(date.getUTCFullYear(), date.getUTCMonth(), 1);
-  $: firstDay = new Date(firstDayOfMonth);
+  const date = $derived(value ? new Date(value) : now);
+  const firstDayOfMonth = $derived(new Date(date.getUTCFullYear(), date.getUTCMonth(), 1));
+  let firstDay = $state();
+
+  $effect(() => {
+    firstDay = new Date(firstDayOfMonth);
+  });
 
   /**
    * Populate {@link weeks} as per the current {@link firstDay}.
@@ -41,11 +56,11 @@
     }
   };
 
-  $: {
+  $effect(() => {
     if (firstDay) {
       getWeeks();
     }
-  }
+  });
 </script>
 
 <div role="group">
@@ -53,57 +68,67 @@
   <div role="none" class="header">
     <Button
       variant="ghost"
-      label={firstDay.toLocaleDateString('en', { year: 'numeric', month: 'short' })}
+      label={firstDay?.toLocaleDateString('en', { year: 'numeric', month: 'short' })}
       aria-haspopup="dialog"
     >
-      <Icon slot="end-icon" name="arrow_drop_down" class="small-arrow" />
-      <div slot="popup" role="none" class="popup-inner" on:click|stopPropagation>
-        <div role="group" aria-label={$_('_sui.calendar.year')}>
-          <div role="none" class="header">
-            <Button
-              aria-label={$_('_sui.calendar.previous_decade')}
-              on:click={() => {
-                //
-              }}
-            >
-              <Icon name="chevron_left" />
-            </Button>
-            <Button
-              aria-label={$_('_sui.calendar.next_decade')}
-              on:click={() => {
-                //
-              }}
-            >
-              <Icon name="chevron_right" />
-            </Button>
+      {#snippet endIcon()}
+        <Icon name="arrow_drop_down" class="small-arrow" />
+      {/snippet}
+      {#snippet popup()}
+        <div
+          role="none"
+          class="popup-inner"
+          onclick={(event) => {
+            event.stopPropagation();
+          }}
+        >
+          <div role="group" aria-label={$_('_sui.calendar.year')}>
+            <div role="none" class="header">
+              <Button
+                aria-label={$_('_sui.calendar.previous_decade')}
+                onclick={() => {
+                  //
+                }}
+              >
+                <Icon name="chevron_left" />
+              </Button>
+              <Button
+                aria-label={$_('_sui.calendar.next_decade')}
+                onclick={() => {
+                  //
+                }}
+              >
+                <Icon name="chevron_right" />
+              </Button>
+            </div>
+            <div role="none" class="grid">
+              {#each [0, 1, 2, 3, 4, 5, 6, 7, 8, 9] as year}
+                <div role="none">
+                  <Button>202{year}</Button>
+                </div>
+              {/each}
+            </div>
           </div>
-          <div role="none" class="grid">
-            {#each [0, 1, 2, 3, 4, 5, 6, 7, 8, 9] as year}
-              <div role="none">
-                <Button>202{year}</Button>
-              </div>
-            {/each}
+          <Divider orientation="vertical" />
+          <div role="group" aria-label={$_('_sui.calendar.month')}>
+            <div role="none" class="grid">
+              {#each [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] as month}
+                <div role="none">
+                  <Button>
+                    {new Date(date.getUTCFullYear(), month, 10).toLocaleDateString('en', {
+                      month: 'short',
+                    })}
+                  </Button>
+                </div>
+              {/each}
+            </div>
           </div>
         </div>
-        <Divider orientation="vertical" />
-        <div role="group" aria-label={$_('_sui.calendar.month')}>
-          <div role="none" class="grid">
-            {#each [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] as month}
-              <div role="none">
-                <Button>
-                  {new Date(date.getUTCFullYear(), month, 10).toLocaleDateString('en', {
-                    month: 'short',
-                  })}
-                </Button>
-              </div>
-            {/each}
-          </div>
-        </div>
-      </div>
+      {/snippet}
     </Button>
     <Button
       aria-label={$_('_sui.calendar.previous_month')}
-      on:click={() => {
+      onclick={() => {
         firstDay.setUTCMonth(firstDay.getUTCMonth() - 1);
         firstDay = firstDay;
       }}
@@ -112,7 +137,7 @@
     </Button>
     <Button
       aria-label={$_('_sui.calendar.next_month')}
-      on:click={() => {
+      onclick={() => {
         firstDay.setUTCMonth(firstDay.getUTCMonth() + 1);
         firstDay = firstDay;
       }}
@@ -129,7 +154,7 @@
     {#each dayList as { day }}
       <div
         role="none"
-        class:other-month={day.getUTCMonth() !== firstDay.getUTCMonth()}
+        class:other-month={day.getUTCMonth() !== firstDay?.getUTCMonth()}
         class:today={day.getFullYear() === now.getFullYear() &&
           day.getMonth() === now.getMonth() &&
           day.getDate() === now.getDate()}
@@ -137,7 +162,7 @@
         <Button
           role="option"
           aria-selected={false}
-          on:click={() => {
+          onclick={() => {
             [value] = day.toJSON().split('T');
           }}
         >
@@ -148,7 +173,7 @@
   </div>
   <div role="none" class="footer">
     <Button
-      on:click={() => {
+      onclick={() => {
         value = '';
       }}
     >
@@ -156,7 +181,7 @@
     </Button>
     <Spacer flex={true} />
     <Button
-      on:click={() => {
+      onclick={() => {
         [value] = now.toJSON().split('T');
       }}
     >

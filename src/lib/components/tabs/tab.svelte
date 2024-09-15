@@ -8,41 +8,44 @@
   import Button from '../button/button.svelte';
 
   /**
-   * The `class` attribute on the `<button>` element.
-   * @type {string}
+   * @typedef {object} Props
+   * @property {boolean} [selected] - Whether to select the widget. An alias of the `aria-selected`
+   * attribute.
    */
-  let className = '';
-  export { className as class };
+
   /**
-   * Whether to select the widget. An alias of the `aria-selected` attribute.
-   * @type {boolean}
+   * @type {import('$lib/typedefs').ButtonProps & import('$lib/typedefs').CommonEventHandlers &
+   * Props & Record<string, any>}
    */
-  export let selected = false;
-  /**
-   * Whether to hide the widget. An alias of the `aria-hidden` attribute.
-   * @type {boolean | undefined}
-   */
-  export let hidden = undefined;
-  /**
-   * Whether to disable the widget. An alias of the `aria-disabled` attribute.
-   * @type {boolean}
-   */
-  export let disabled = false;
+  let {
+    /* eslint-disable prefer-const */
+    class: className,
+    hidden = false,
+    disabled = false,
+    selected = false,
+    children: _children,
+    startIcon: _startIcon,
+    endIcon: _endIcon,
+    ...restProps
+    /* eslint-enable prefer-const */
+  } = $props();
 </script>
 
 <Button
+  {...restProps}
   role="tab"
   class="sui tab {className}"
   {hidden}
   {disabled}
   aria-selected={selected}
-  {...$$restProps}
-  on:focus
-  on:blur
-  on:select
-  on:change
 >
-  <slot name="start-icon" slot="start-icon" />
-  <slot />
-  <slot name="end-icon" slot="end-icon" />
+  {#snippet startIcon()}
+    {@render _startIcon?.()}
+  {/snippet}
+  {#snippet children()}
+    {@render _children?.()}
+  {/snippet}
+  {#snippet endIcon()}
+    {@render _endIcon?.()}
+  {/snippet}
 </Button>

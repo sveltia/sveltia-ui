@@ -10,17 +10,21 @@
   <Example>
     <div role="none">
       <MenuButton variant="tertiary" label="Open Menu">
-        <Icon slot="end-icon" name="arrow_drop_down" class="small-arrow" />
-        <Menu slot="popup">
-          <MenuItem label="Item" />
-          <MenuItem label="Item" disabled />
-          <Divider />
-          <MenuItemCheckbox label="Checkbox" checked />
-          <MenuItemCheckbox label="Checkbox" checked={false} />
-          <Divider />
-          <MenuItemRadio label="Radio" checked />
-          <MenuItemRadio label="Radio" checked={false} />
-        </Menu>
+        {#snippet endIcon()}
+          <Icon name="arrow_drop_down" class="small-arrow" />
+        {/snippet}
+        {#snippet popup()}
+          <Menu>
+            <MenuItem label="Item" />
+            <MenuItem label="Item" disabled />
+            <Divider />
+            <MenuItemCheckbox label="Checkbox" checked />
+            <MenuItemCheckbox label="Checkbox" checked={false} />
+            <Divider />
+            <MenuItemRadio label="Radio" checked />
+            <MenuItemRadio label="Radio" checked={false} />
+          </Menu>
+        {/snippet}
       </MenuButton>
     </div>
   </Example>
@@ -31,26 +35,30 @@
   <Example>
     <div role="none">
       <MenuButton variant="tertiary" label="Open Menu">
-        <Icon slot="end-icon" name="arrow_drop_down" class="small-arrow" />
-        <Menu slot="popup">
-          <MenuItem label="Item" />
-          <MenuItem label="Item">
-            <svelte:fragment slot="children">
-              <MenuItem label="Child Item 1" />
-              <MenuItem label="Child Item 2" />
-              <MenuItem label="Child Item 3" />
-              <Divider />
-              <MenuItemCheckbox label="Checkbox" checked />
-            </svelte:fragment>
-          </MenuItem>
-          <MenuItem label="Item" disabled />
-          <Divider />
-          <MenuItemCheckbox label="Checkbox" checked />
-          <MenuItemCheckbox label="Checkbox" checked={false} />
-          <Divider />
-          <MenuItemRadio label="Radio" checked />
-          <MenuItemRadio label="Radio" checked={false} />
-        </Menu>
+        {#snippet endIcon()}
+          <Icon name="arrow_drop_down" class="small-arrow" />
+        {/snippet}
+        {#snippet popup()}
+          <Menu>
+            <MenuItem label="Item" />
+            <MenuItem label="Item">
+              {#snippet items()}
+                <MenuItem label="Child Item 1" />
+                <MenuItem label="Child Item 2" />
+                <MenuItem label="Child Item 3" />
+                <Divider />
+                <MenuItemCheckbox label="Checkbox" checked />
+              {/snippet}
+            </MenuItem>
+            <MenuItem label="Item" disabled />
+            <Divider />
+            <MenuItemCheckbox label="Checkbox" checked />
+            <MenuItemCheckbox label="Checkbox" checked={false} />
+            <Divider />
+            <MenuItemRadio label="Radio" checked />
+            <MenuItemRadio label="Radio" checked={false} />
+          </Menu>
+        {/snippet}
       </MenuButton>
     </div>
   </Example>
@@ -77,17 +85,21 @@
   <Example>
     <div role="none">
       <MenuButton variant="tertiary" label="Open Menu" disabled>
-        <Icon slot="end-icon" name="arrow_drop_down" class="small-arrow" />
-        <Menu slot="popup">
-          <MenuItem label="Item" />
-          <MenuItem label="Item" disabled />
-          <Divider />
-          <MenuItemCheckbox label="Item" checked />
-          <MenuItemCheckbox label="Item" checked={false} />
-          <Divider />
-          <MenuItemRadio label="Item" checked />
-          <MenuItemRadio label="Item" checked={false} />
-        </Menu>
+        {#snippet endIcon()}
+          <Icon name="arrow_drop_down" class="small-arrow" />
+        {/snippet}
+        {#snippet popup()}
+          <Menu>
+            <MenuItem label="Item" />
+            <MenuItem label="Item" disabled />
+            <Divider />
+            <MenuItemCheckbox label="Item" checked />
+            <MenuItemCheckbox label="Item" checked={false} />
+            <Divider />
+            <MenuItemRadio label="Item" checked />
+            <MenuItemRadio label="Item" checked={false} />
+          </Menu>
+        {/snippet}
       </MenuButton>
     </div>
   </Example>

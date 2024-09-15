@@ -4,55 +4,56 @@
   @see https://developer.mozilla.org/en-US/docs/Web/HTML/Element/details
   @see https://www.w3.org/WAI/ARIA/apg/patterns/disclosure/
 -->
-<svelte:options accessors={true} />
-
 <script>
   import { generateElementId } from '@sveltia/utils/element';
-  import { createEventDispatcher } from 'svelte';
   import Button from '../button/button.svelte';
   import Icon from '../icon/icon.svelte';
 
   /**
-   * The `class` attribute on the wrapper element.
-   * @type {string}
+   * @typedef {object} Props
+   * @property {string} [class] - The `class` attribute on the wrapper element.
+   * @property {boolean} [hidden] - Whether to hide the widget. An alias of the `aria-hidden`
+   * attribute.
+   * @property {boolean} [disabled] - Whether to disable the widget. An alias of the `aria-disabled`
+   * attribute.
+   * @property {boolean} [expanded] - Whether to show the content. An alias of the `aria-expanded`
+   * attribute.
+   * @property {string} [label] - Text label displayed next to the expander.
+   * @property {import('svelte').Snippet} [children] - Primary slot content.
+   * @property {import('svelte').Snippet} [chevronIcon] - Chevron slot content.
+   * @property {(event: CustomEvent) => void} [onChange] - Custom `Change` event handler.
    */
-  let className = '';
-  export { className as class };
-  /**
-   * Whether to hide the widget. An alias of the `aria-hidden` attribute.
-   * @type {boolean | undefined}
-   */
-  export let hidden = undefined;
-  /**
-   * Whether to disable the widget. An alias of the `aria-disabled` attribute.
-   * @type {boolean}
-   */
-  export let disabled = false;
-  /**
-   * Whether to show the content. An alias of the `aria-expanded` attribute.
-   * @type {boolean}
-   */
-  export let expanded = false;
-  /**
-   * Text label displayed next to the expander.
-   * @type {string}
-   */
-  export let label = '';
 
-  const dispatch = createEventDispatcher();
+  /**
+   * @type {Props & Record<string, any>}
+   */
+  let {
+    /* eslint-disable prefer-const */
+    expanded = $bindable(false),
+    class: className,
+    hidden = false,
+    disabled = false,
+    label = '',
+    children,
+    chevronIcon,
+    onChange,
+    ...restProps
+    /* eslint-enable prefer-const */
+  } = $props();
+
   const id = generateElementId('disclosure');
 </script>
 
 <div
+  {...restProps}
   role="group"
   {id}
   class="sui disclosure {className}"
-  hidden={hidden || undefined}
+  {hidden}
   aria-hidden={hidden}
   aria-disabled={disabled}
   aria-labelledby="{id}-header"
   aria-roledescription="disclosure"
-  {...$$restProps}
 >
   <div role="none" class="inner" inert={disabled}>
     <Button
@@ -61,18 +62,22 @@
       {disabled}
       aria-controls="{id}-content"
       aria-expanded={expanded}
-      on:click={() => {
+      onclick={() => {
         expanded = !expanded;
-        dispatch('change', { expanded });
+        onChange?.(new CustomEvent('change', { detail: { expanded } }));
       }}
     >
-      <slot name="chevron-icon" slot="start-icon">
-        <Icon name="expand_more" />
-      </slot>
+      {#snippet startIcon()}
+        {#if chevronIcon}
+          {@render chevronIcon()}
+        {:else}
+          <Icon name="expand_more" />
+        {/if}
+      {/snippet}
       {label}
     </Button>
     <div class="content" id="{id}-content" hidden={!expanded}>
-      <slot />
+      {@render children?.()}
     </div>
   </div>
 </div>

@@ -5,58 +5,49 @@
   @see https://www.w3.org/WAI/ARIA/apg/patterns/switch/
 -->
 <script>
-  import { createEventDispatcher } from 'svelte';
+  /**
+   * @typedef {object} Props
+   * @property {string | undefined} [label] - Text label displayed next to the switch.
+   * @property {string} [class] - The `class` attribute on the wrapper element.
+   * @property {boolean} [hidden] - Whether to hide the widget.
+   * @property {boolean} [disabled] - Whether to disable the widget. An alias of the `aria-disabled`
+   * attribute.
+   * @property {boolean} [readonly] - Whether to make the widget read-only. An alias of the
+   * `aria-readonly` attribute.
+   * @property {boolean} [required] - Whether to mark the widget required. An alias of the
+   * `aria-required` attribute.
+   * @property {boolean} [invalid] - Whether to mark the widget invalid. An alias of the
+   * `aria-invalid` attribute.
+   * @property {import('svelte').Snippet} [children] - Primary slot content.
+   * @property {(event: CustomEvent) => void} [onChange] - Custom `Change` event handler.
+   */
 
   /**
-   * The `class` attribute on the wrapper element.
-   * @type {string}
+   * @type {Props & Record<string, any>}
    */
-  let className = '';
-  export { className as class };
-  /**
-   * Whether to hide the widget. An alias of the `aria-hidden` attribute.
-   * @type {boolean | undefined}
-   */
-  export let hidden = undefined;
-  /**
-   * Whether to disable the widget. An alias of the `aria-disabled` attribute.
-   * @type {boolean}
-   */
-  export let disabled = false;
-  /**
-   * Whether to make the widget read-only. An alias of the `aria-readonly` attribute.
-   * @type {boolean}
-   */
-  export let readonly = false;
-  /**
-   * Whether to mark the widget required. An alias of the `aria-required` attribute.
-   * @type {boolean}
-   */
-  export let required = false;
-  /**
-   * Whether to mark the widget invalid. An alias of the `aria-invalid` attribute.
-   * @type {boolean}
-   */
-  export let invalid = false;
-  /**
-   * Whether to check the widget. An alias of the `aria-checked` attribute.
-   * @type {boolean | 'mixed'}
-   */
-  export let checked = false;
-  /**
-   * Text label displayed next to the switch.
-   * @type {string | undefined}
-   */
-  export let label = undefined;
-
-  const dispatch = createEventDispatcher();
+  let {
+    /* eslint-disable prefer-const */
+    checked = $bindable(false),
+    label = undefined,
+    class: className,
+    hidden = false,
+    disabled = false,
+    readonly = false,
+    required = false,
+    invalid = false,
+    children,
+    onChange,
+    ...restProps
+    /* eslint-enable prefer-const */
+  } = $props();
 </script>
 
 <button
+  {...restProps}
   role="switch"
   class="sui switch {className}"
   type="button"
-  hidden={hidden || undefined}
+  {hidden}
   disabled={disabled || undefined}
   aria-checked={checked}
   aria-hidden={hidden}
@@ -64,11 +55,10 @@
   aria-readonly={readonly}
   aria-required={required}
   aria-invalid={invalid}
-  {...$$restProps}
-  on:click={() => {
+  onclick={() => {
     if (!disabled && !readonly) {
       checked = !checked;
-      dispatch('change', { checked });
+      onChange?.(new CustomEvent('Change', { detail: { checked } }));
     }
   }}
 >
@@ -76,7 +66,7 @@
   {#if label}
     {label}
   {:else}
-    <slot />
+    {@render children?.()}
   {/if}
 </button>
 

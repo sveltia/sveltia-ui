@@ -7,56 +7,45 @@
 -->
 <script>
   /**
-   * The `class` attribute on the wrapper element.
-   * @type {string}
+   * @typedef {object} Props
+   * @property {string | undefined} [value] - Input value.
+   * @property {boolean} [flex] - Make the text input container flexible.
+   * @property {string | undefined} [name] - The `name` attribute on the `<textarea>` element.
+   * @property {boolean} [autoResize] - Whether to automatically resize the `<textarea>` based on
+   * the content.
+   * @property {string} [class] - The `class` attribute on the wrapper element.
+   * @property {boolean} [hidden] - Whether to hide the widget.
+   * @property {boolean} [disabled] - Whether to disable the widget. An alias of the `aria-disabled`
+   * attribute.
+   * @property {boolean} [readonly] - Whether to make the widget read-only. An alias of the
+   * `aria-readonly` attribute.
+   * @property {boolean} [required] - Whether to mark the widget required. An alias of the
+   * `aria-required` attribute.
+   * @property {boolean} [invalid] - Whether to mark the widget invalid. An alias of the
+   * `aria-invalid` attribute.
+   * @property {import('svelte').Snippet} [children] - Primary slot content.
    */
-  let className = '';
-  export { className as class };
+
   /**
-   * Make the text input container flexible.
-   * @type {boolean}
+   * @type {import('$lib/typedefs').CommonEventHandlers & import('$lib/typedefs').InputEventHandlers
+   * & Props & Record<string, any>}
    */
-  export let flex = false;
-  /**
-   * Whether to hide the widget. An alias of the `aria-hidden` attribute.
-   * @type {boolean | undefined}
-   */
-  export let hidden = undefined;
-  /**
-   * Whether to disable the widget. An alias of the `aria-disabled` attribute.
-   * @type {boolean}
-   */
-  export let disabled = false;
-  /**
-   * Whether to disable the widget. An alias of `aria-readonly` attribute.
-   * @type {boolean}
-   */
-  export let readonly = false;
-  /**
-   * Whether to mark the widget required. An alias of the `aria-required` attribute.
-   * @type {boolean}
-   */
-  export let required = false;
-  /**
-   * Whether to mark the widget invalid. An alias of the `aria-invalid` attribute.
-   * @type {boolean}
-   */
-  export let invalid = false;
-  /**
-   * The `name` attribute on the `<textarea>` element.
-   * @type {string | undefined}
-   */
-  export let name = undefined;
-  /**
-   * Input value.
-   * @type {string | undefined}
-   */
-  export let value = undefined;
-  /**
-   * Whether to automatically resize the `<textarea>` based on the content.
-   * @type {boolean}
-   */
-  export let autoResize = false;
+  let {
+    /* eslint-disable prefer-const */
+    value = $bindable(''),
+    flex = false,
+    name = undefined,
+    autoResize = false,
+    class: className,
+    hidden = false,
+    disabled = false,
+    readonly = false,
+    required = false,
+    invalid = false,
+    children,
+    ...restProps
+    /* eslint-enable prefer-const */
+  } = $props();
 </script>
 
 <div
@@ -65,9 +54,10 @@
   class:flex
   class:disabled
   class:readonly
-  hidden={hidden || undefined}
+  {hidden}
 >
   <textarea
+    {...restProps}
     {name}
     bind:value
     disabled={disabled || undefined}
@@ -77,13 +67,7 @@
     aria-readonly={readonly}
     aria-required={required}
     aria-invalid={invalid}
-    {...$$restProps}
     class:auto-resize={autoResize}
-    on:keydown
-    on:keyup
-    on:keypress
-    on:input
-    on:change
   ></textarea>
   {#if autoResize}
     <div class="clone" aria-hidden="true">{value ?? ''}</div>

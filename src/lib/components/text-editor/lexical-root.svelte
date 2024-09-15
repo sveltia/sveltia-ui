@@ -2,35 +2,37 @@
   import { getContext, onMount } from 'svelte';
 
   /**
-   * Whether to hide the widget. An alias of the `aria-hidden` attribute.
-   * @type {boolean | undefined}
+   * @typedef {object} Props
+   * @property {string | undefined} [value] - Input value.
+   * @property {string} [class] - The `class` attribute on the wrapper element.
+   * @property {boolean} [hidden] - Whether to hide the widget.
+   * @property {boolean} [disabled] - Whether to disable the widget. An alias of the `aria-disabled`
+   * attribute.
+   * @property {boolean} [readonly] - Whether to make the widget read-only. An alias of the
+   * `aria-readonly` attribute.
+   * @property {boolean} [required] - Whether to mark the widget required. An alias of the
+   * `aria-required` attribute.
+   * @property {boolean} [invalid] - Whether to mark the widget invalid. An alias of the
+   * `aria-invalid` attribute.
+   * @property {import('svelte').Snippet} [children] - Primary slot content.
    */
-  export let hidden = undefined;
+
   /**
-   * Whether to disable the widget. An alias of the `aria-disabled` attribute.
-   * @type {boolean}
+   * @type {Props & Record<string, any>}
    */
-  export let disabled = false;
-  /**
-   * Whether to disable the widget. An alias of `aria-readonly` attribute.
-   * @type {boolean}
-   */
-  export let readonly = false;
-  /**
-   * Whether to mark the widget required. An alias of the `aria-required` attribute.
-   * @type {boolean}
-   */
-  export let required = false;
-  /**
-   * Whether to mark the widget invalid. An alias of the `aria-invalid` attribute.
-   * @type {boolean}
-   */
-  export let invalid = false;
-  /**
-   * Input value.
-   * @type {string | undefined}
-   */
-  export let value = undefined;
+  let {
+    /* eslint-disable prefer-const */
+    value = $bindable(),
+    class: className,
+    hidden = false,
+    disabled = false,
+    readonly = false,
+    required = false,
+    invalid = false,
+    children,
+    ...restProps
+    /* eslint-enable prefer-const */
+  } = $props();
 
   /**
    * Text editor state.
@@ -43,10 +45,13 @@
    * Reference to the Lexical editor root element.
    * @type {HTMLElement | undefined}
    */
-  let lexicalRoot = undefined;
+  let lexicalRoot = $state();
 
-  $: editable = !(disabled || readonly);
-  $: $editor?.setEditable(editable);
+  const editable = $derived(!(disabled || readonly));
+
+  $effect(() => {
+    $editor?.setEditable(editable);
+  });
 
   /**
    * Update {@link value} and other state variables whenever the editor content is updated.
@@ -88,14 +93,16 @@
     };
   });
 
-  $: {
+  $effect(() => {
     if ($editor && lexicalRoot) {
       $editor.setRootElement(lexicalRoot);
     }
-  }
+  });
 </script>
 
 <div
+  bind:this={lexicalRoot}
+  {...restProps}
   role="textbox"
   aria-multiline="true"
   aria-hidden={hidden}
@@ -107,7 +114,6 @@
   id="{$editorId}-lexical-root"
   contenteditable={editable}
   {hidden}
-  bind:this={lexicalRoot}
 ></div>
 
 <style lang="scss">

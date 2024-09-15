@@ -5,30 +5,34 @@
 -->
 <script>
   /**
-   * CSS class name on the wrapper element.
-   * @type {string}
+   * @typedef {object} Props
+   * @property {string} [class] - The `class` attribute on the wrapper element.
+   * @property {boolean} [hidden] - Whether to hide the widget. An alias of the `aria-hidden`
+   * attribute.
+   * @property {'horizontal'|'vertical'} [orientation] - Orientation of the widget. An alias of the
+   * `aria-orientation` attribute.
    */
-  let className = '';
-  export { className as class };
+
   /**
-   * Whether to hide the widget. An alias of the `aria-hidden` attribute.
-   * @type {boolean | undefined}
+   * @type {Props & Record<string, any>}
    */
-  export let hidden = undefined;
-  /**
-   * Orientation of the widget. An alias of the `aria-orientation` attribute.
-   * @type {'horizontal' | 'vertical'}
-   */
-  export let orientation = 'horizontal';
+  let {
+    /* eslint-disable prefer-const */
+    class: className,
+    hidden = false,
+    orientation = 'horizontal',
+    ...restProps
+    /* eslint-enable prefer-const */
+  } = $props();
 </script>
 
 <div
+  {...restProps}
   role="separator"
   class="sui divider {className}"
-  hidden={hidden || undefined}
+  {hidden}
   aria-hidden={hidden}
   aria-orientation={orientation}
-  {...$$restProps}
 ></div>
 
 <style lang="scss">

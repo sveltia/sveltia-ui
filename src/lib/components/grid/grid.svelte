@@ -5,44 +5,45 @@
   @see https://w3c.github.io/aria/#grid
 -->
 <script>
-  import { createEventDispatcher } from 'svelte';
-  import { activateGroup } from '../../services/group';
+  import { activateGroup } from '../../services/group.svelte';
 
   /**
-   * The `class` attribute on the wrapper element.
-   * @type {string}
+   * @typedef {object} Props
+   * @property {string} [class] - The `class` attribute on the wrapper element.
+   * @property {boolean} [selected] - Whether to allow selecting more than one `<GridRow>` and/or
+   * `<GridCell>`. An alias of the `aria-multiselectable` attribute.
+   * @property {boolean} [clickToSelect] - Whether to select a row by clicking on it.
+   * @property {HTMLElement | undefined} [element] - A reference to the wrapper element.
+   * @property {import('svelte').Snippet} [children] - Primary slot content.
+   * @property {(event: CustomEvent) => void} [onChange] - Custom `Change` event handler.
    */
-  let className = '';
-  export { className as class };
-  /**
-   * Whether to allow selecting more than one `<GridRow>` and/or `<GridCell>`. An alias of the
-   * `aria-multiselectable` attribute.
-   * @type {boolean}
-   */
-  export let multiple = false;
-  /**
-   * Whether to select a row by clicking on it.
-   */
-  export let clickToSelect = true;
 
-  /** @type {HTMLElement | undefined} */
-  export let element = undefined;
-
-  const dispatch = createEventDispatcher();
+  /**
+   * @type {Props & Record<string, any>}
+   */
+  let {
+    /* eslint-disable prefer-const */
+    element = $bindable(),
+    class: className,
+    multiple = false,
+    clickToSelect = true,
+    children,
+    onChange,
+    ...restProps
+    /* eslint-enable prefer-const */
+  } = $props();
 </script>
 
 <div
+  bind:this={element}
+  {...restProps}
   role="grid"
   class="sui grid {className}"
   aria-multiselectable={multiple}
-  {...$$restProps}
-  bind:this={element}
+  {onChange}
   use:activateGroup={{ clickToSelect }}
-  on:change={(/** @type {CustomEvent} */ event) => {
-    dispatch('change', event.detail);
-  }}
 >
-  <slot />
+  {@render children?.()}
 </div>
 
 <style lang="scss">

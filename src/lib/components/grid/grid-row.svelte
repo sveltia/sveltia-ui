@@ -5,41 +5,37 @@
   @see https://w3c.github.io/aria/#row
 -->
 <script>
-  import { createEventDispatcher } from 'svelte';
+  /**
+   * @typedef {object} Props
+   * @property {string} [class] - The `class` attribute on the wrapper element.
+   * @property {boolean} [selected] - Whether to select the widget. An alias of the `aria-selected`
+   * attribute.
+   * @property {import('svelte').Snippet} [children] - Primary slot content.
+   * @property {(event: CustomEvent) => void} [onChange] - Custom `Change` event handler.
+   * @property {(event: CustomEvent) => void} [onSelect] - Custom `Select` event handler.
+   */
 
   /**
-   * The `class` attribute on the wrapper element.
-   * @type {string}
+   * @type {Props & Record<string, any>}
    */
-  let className = '';
-  export { className as class };
-  /**
-   * Whether to select the widget. An alias of the `aria-selected` attribute.
-   * @type {boolean}
-   */
-  export let selected = false;
-
-  const dispatch = createEventDispatcher();
+  let {
+    /* eslint-disable prefer-const */
+    class: className,
+    selected = false,
+    children,
+    ...restProps
+    /* eslint-enable prefer-const */
+  } = $props();
 </script>
 
 <div
+  {...restProps}
   role="row"
   class="sui grid-row {className}"
   tabindex="0"
   aria-selected={selected}
-  {...$$restProps}
-  on:click
-  on:dblclick
-  on:focus
-  on:blur
-  on:select={(/** @type {any} */ event) => {
-    dispatch('select', /** @type {CustomEvent} */ (event).detail);
-  }}
-  on:change={(/** @type {any} */ event) => {
-    dispatch('change', /** @type {CustomEvent} */ (event).detail);
-  }}
 >
-  <slot />
+  {@render children?.()}
 </div>
 
 <style lang="scss">

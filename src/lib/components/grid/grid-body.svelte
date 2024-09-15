@@ -8,38 +8,43 @@
   import { generateElementId } from '@sveltia/utils/element';
 
   /**
-   * The `class` attribute on the wrapper element.
-   * @type {string}
+   * @typedef {object} Props
+   * @property {string} [class] - The `class` attribute on the wrapper element.
+   * @property {string} [label] - Display label for the row group.
+   * @property {import('svelte').Snippet} [children] - Primary slot content.
    */
-  let className = '';
-  export { className as class };
 
   /**
-   * Display label for the row group.
-   * @type {string}
+   * @type {Props & Record<string, any>}
    */
-  export let label = '';
+  let {
+    /* eslint-disable prefer-const */
+    class: className,
+    label = '',
+    children,
+    ...restProps
+    /* eslint-enable prefer-const */
+  } = $props();
 
   const id = generateElementId('tbody');
 </script>
 
 <div
+  {...restProps}
   role="rowgroup"
   class="sui grid-body row-group {className}"
   aria-labelledby={label ? `${id}-label` : undefined}
   aria-roledescription="grid body"
-  {...$$restProps}
 >
   {#if label}
     <div role="row" class="row-group-caption">
       <!-- We need `colspan` here but cannot place `<th>` under `<div>`, so use a hack -->
-      <!-- prettier-ignore -->
       <svelte:element this={'th'} role="rowheader" id="{id}-label" colspan="9999">
         {label}
       </svelte:element>
     </div>
   {/if}
-  <slot />
+  {@render children?.()}
 </div>
 
 <style lang="scss">

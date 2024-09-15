@@ -28,25 +28,33 @@
   <Example>
     <div role="none">
       <Alert status="error">
-        <Icon name="dangerous" slot="icon" />
+        {#snippet icon()}
+          <Icon name="dangerous" />
+        {/snippet}
         Error
       </Alert>
     </div>
     <div role="none">
       <Alert status="warning">
-        <Icon name="emergency_home" slot="icon" />
+        {#snippet icon()}
+          <Icon name="emergency_home" />
+        {/snippet}
         Warning
       </Alert>
     </div>
     <div role="none">
       <Alert status="info">
-        <Icon name="help" slot="icon" />
+        {#snippet icon()}
+          <Icon name="help" />
+        {/snippet}
         Info
       </Alert>
     </div>
     <div role="none">
       <Alert status="success">
-        <Icon name="verified" slot="icon" />
+        {#snippet icon()}
+          <Icon name="verified" />
+        {/snippet}
         Success
       </Alert>
     </div>

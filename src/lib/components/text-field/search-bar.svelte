@@ -5,7 +5,6 @@
   @see https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/search
   @see https://w3c.github.io/aria/#search
 -->
-<svelte:options accessors={true} />
 
 <script>
   import { generateElementId } from '@sveltia/utils/element';
@@ -15,61 +14,44 @@
   import TextInput from './text-input.svelte';
 
   /**
-   * The `class` attribute on the wrapper element.
-   * @type {string}
+   * @typedef {object} Props
+   * @property {import('svelte').Snippet} [searchIcon] - Search icon slot content.
+   * @property {import('svelte').Snippet} [closeIcon] - Close icon slot content.
    */
-  let className = '';
-  export { className as class };
+
   /**
-   * Make the text input container flexible.
-   * @type {boolean}
+   * @type {import('$lib/typedefs').TextInputProps & import('$lib/typedefs').CommonEventHandlers &
+   * import('$lib/typedefs').InputEventHandlers & Props & Record<string, any>}
    */
-  export let flex = false;
-  /**
-   * Whether to hide the widget. An alias of the `aria-hidden` attribute.
-   * @type {boolean | undefined}
-   */
-  export let hidden = undefined;
-  /**
-   * Whether to disable the widget. An alias of the `aria-disabled` attribute.
-   * @type {boolean}
-   */
-  export let disabled = false;
-  /**
-   * Whether to disable the widget. An alias of `aria-readonly` attribute.
-   * @type {boolean}
-   */
-  export let readonly = false;
-  /**
-   * Whether to mark the widget required. An alias of the `aria-required` attribute.
-   * @type {boolean}
-   */
-  export let required = false;
-  /**
-   * Whether to mark the widget invalid. An alias of the `aria-invalid` attribute.
-   * @type {boolean}
-   */
-  export let invalid = false;
-  /**
-   * Input value.
-   * @type {string | undefined}
-   */
-  export let value = undefined;
+  let {
+    /* eslint-disable prefer-const */
+    value = $bindable(),
+    flex = false,
+    class: className,
+    hidden = false,
+    disabled = false,
+    readonly = false,
+    required = false,
+    invalid = false,
+    children,
+    searchIcon,
+    closeIcon,
+    ...restProps
+    /* eslint-enable prefer-const */
+  } = $props();
 
   const id = generateElementId('searchbox');
   /**
-   * Reference to the `TextInput` component.
-   * @type {TextInput | undefined}
+   * Reference to the `<input>` element.
+   * @type {HTMLInputElement | undefined}
    */
-  let inputComponent;
-
-  $: input = inputComponent?.element;
+  let inputElement = $state();
 
   /**
    * Move focus to the `<input>` element.
    */
   export const focus = () => {
-    input?.focus();
+    inputElement?.focus();
   };
 </script>
 
@@ -79,15 +61,19 @@
   class:flex
   class:disabled
   class:readonly
-  hidden={hidden || undefined}
+  {hidden}
   aria-hidden={hidden}
 >
   <span role="none">
-    <slot name="search-icon">
+    {#if searchIcon}
+      {@render searchIcon()}
+    {:else}
       <Icon name="search" />
-    </slot>
+    {/if}
   </span>
   <TextInput
+    bind:element={inputElement}
+    {...restProps}
     role="searchbox"
     {id}
     bind:value
@@ -98,32 +84,29 @@
     {required}
     {invalid}
     inputmode="search"
-    {...$$restProps}
-    bind:this={inputComponent}
-    on:keydown
-    on:keyup
-    on:keypress
-    on:input
-    on:change
   />
   {#if value}
     <Button
       iconic
       aria-label={$_('_sui.clear')}
       aria-controls={id}
-      on:click={() => {
+      onclick={() => {
         value = '';
-        input?.focus();
+        inputElement?.focus();
         globalThis.requestIdleCallback(() => {
-          input?.dispatchEvent(new KeyboardEvent('input'));
-          input?.dispatchEvent(new KeyboardEvent('keypress'));
-          input?.dispatchEvent(new KeyboardEvent('change'));
+          inputElement?.dispatchEvent(new KeyboardEvent('input'));
+          inputElement?.dispatchEvent(new KeyboardEvent('keypress'));
+          inputElement?.dispatchEvent(new KeyboardEvent('change'));
         });
       }}
     >
-      <slot name="close-button" slot="start-icon">
-        <Icon name="close" />
-      </slot>
+      {#snippet startIcon()}
+        {#if closeIcon}
+          {@render closeIcon()}
+        {:else}
+          <Icon name="close" />
+        {/if}
+      {/snippet}
     </Button>
   {/if}
 </div>

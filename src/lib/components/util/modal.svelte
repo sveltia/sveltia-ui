@@ -2,53 +2,36 @@
   @component
   A generic modal top-layer helper based on the HTML `<dialog>` element.
 -->
-<svelte:options accessors={true} />
-
 <script>
   import { sleep } from '@sveltia/utils/misc';
-  import { createEventDispatcher, onMount } from 'svelte';
+  import { mount, onMount, unmount } from 'svelte';
+  import Placeholder from './placeholder.svelte';
 
   /**
-   * The `class` attribute on the `<dialog>` element.
-   * @type {string}
+   * @type {import('$lib/typedefs').ModalProps & Record<string, any>}
    */
-  let className = '';
-  export { className as class };
-  /**
-   * The `role` attribute on the `<dialog>` element.
-   * @type {'dialog' | 'alertdialog' | 'none'}
-   */
-  export let role = 'dialog';
-  /**
-   * Whether to show the modal.
-   * @type {boolean}
-   */
-  export let open = false;
-  /**
-   * Whether to show the backdrop.
-   * @type {boolean}
-   */
-  export let showBackdrop = false;
-  /**
-   * Whether to close the modal when the backdrop (outside of the modal) is clicked.
-   * @type {boolean}
-   */
-  export let lightDismiss = false;
-  /**
-   * Whether to close the modal when the Escape key is pressed.
-   * @type {boolean}
-   */
-  export let escapeDismiss = true;
-  /**
-   * Whether to keep the content in the DOM tree when the modal is not displayed.
-   * @type {boolean}
-   */
-  export let keepContent = false;
-  /**
-   * A reference to the `<dialog>` element.
-   * @type {HTMLDialogElement | undefined}
-   */
-  export let dialog = undefined;
+  let {
+    /* eslint-disable prefer-const */
+    open = $bindable(false),
+    dialog = $bindable(),
+    class: className,
+    role = 'dialog',
+    showBackdrop = false,
+    lightDismiss = false,
+    escapeDismiss = true,
+    keepContent = false,
+    children,
+    extraContent,
+    onOpening,
+    onOpen,
+    onClosing,
+    onOk,
+    onCancel,
+    onClose,
+    ...restProps
+    /* eslint-enable prefer-const */
+  } = $props();
+
   /**
    * Close the modal.
    * @param {string} returnValue - Return value to be used for `<dialog>`.
@@ -62,10 +45,9 @@
     open = false;
   };
 
-  const dispatch = createEventDispatcher();
-  let setOpenClass = false;
-  let setActiveClass = false;
-  let showContent = false;
+  let setOpenClass = $state(false);
+  let setActiveClass = $state(false);
+  let showContent = $state(false);
 
   /**
    * Resolve once the transition is complete.
@@ -91,15 +73,14 @@
    * Show the modal.
    */
   const openDialog = async () => {
-    if (!dialog) {
+    if (!dialog || dialog?.open) {
       return;
     }
 
-    dispatch('opening');
-    (document.querySelector('.sui.app-shell') ?? document.body).appendChild(dialog);
+    onOpening?.(new CustomEvent('Opening'));
     showContent = true;
     dialog.showModal();
-    dispatch('open');
+    onOpen?.(new CustomEvent('Open'));
     await sleep(100);
     setOpenClass = true;
     await waitForTransition();
@@ -110,91 +91,94 @@
    * Hide the modal.
    */
   const closeDialog = async () => {
-    if (!dialog) {
+    if (!dialog || !dialog.open) {
       return;
     }
 
-    dispatch('closing');
+    onClosing?.(new CustomEvent('Closing'));
     setActiveClass = false;
     setOpenClass = false;
     await waitForTransition();
     showContent = false;
     dialog.close();
-    dialog.remove();
 
-    if (['ok', 'cancel'].includes(dialog.returnValue)) {
-      dispatch(dialog?.returnValue);
+    if (dialog.returnValue === 'ok') {
+      onOk?.(new CustomEvent('Ok'));
+      onClose?.(new CustomEvent('Close', { detail: { returnValue: 'ok' } }));
     }
 
-    dispatch('close', dialog.returnValue);
+    if (dialog.returnValue === 'cancel') {
+      onCancel?.(new CustomEvent('Cancel'));
+      onClose?.(new CustomEvent('Close', { detail: { returnValue: 'cancel' } }));
+    }
+
     dialog.returnValue = '';
   };
 
-  /**
-   * Toggle the modal.
-   */
-  const toggleDialog = () => {
-    if (dialog) {
-      if (open) {
-        openDialog();
-      } else {
-        closeDialog();
-      }
+  $effect(() => {
+    if (open) {
+      openDialog();
+    } else {
+      closeDialog();
     }
-  };
-
-  $: {
-    void open;
-    toggleDialog();
-  }
+  });
 
   onMount(() => {
-    dialog?.remove();
+    const placeholder = mount(Placeholder, {
+      target: document.querySelector('.sui.app-shell') ?? document.body,
+      // eslint-disable-next-line no-use-before-define
+      props: { children: dialogSnippet },
+    });
 
     // onUnmount
     return () => {
       dialog?.close();
-      dialog?.remove();
+      unmount(placeholder);
     };
   });
 </script>
 
-<dialog
-  {role}
-  class="sui modal {className}"
-  class:backdrop={showBackdrop}
-  class:open={setOpenClass}
-  class:active={setActiveClass}
-  {...$$restProps}
-  bind:this={dialog}
-  on:click={({ target }) => {
-    if (
-      dialog &&
-      lightDismiss &&
-      /** @type {HTMLElement | undefined} */ (target)?.matches('dialog')
-    ) {
-      dialog.returnValue = 'cancel';
-      open = false;
-    }
-  }}
-  on:cancel|preventDefault={() => {
-    // Escape key is pressed
-    if (dialog && escapeDismiss) {
-      dialog.returnValue = 'cancel';
-      open = false;
-    }
-  }}
->
-  <slot name="extra-content" />
-  {#if showContent || keepContent}
-    <slot />
-  {/if}
-</dialog>
+{#snippet dialogSnippet()}
+  <dialog
+    bind:this={dialog}
+    {...restProps}
+    {role}
+    class="sui modal {className}"
+    class:backdrop={showBackdrop}
+    class:open={setOpenClass}
+    class:active={setActiveClass}
+    onclick={({ target }) => {
+      if (
+        dialog &&
+        lightDismiss &&
+        /** @type {HTMLElement | undefined} */ (target)?.matches('dialog')
+      ) {
+        dialog.returnValue = 'cancel';
+        open = false;
+      }
+    }}
+    oncancel={(event) => {
+      event.preventDefault();
+
+      // Escape key is pressed
+      if (dialog && escapeDismiss) {
+        dialog.returnValue = 'cancel';
+        open = false;
+      }
+    }}
+  >
+    {@render extraContent?.()}
+    {#if showContent || keepContent}
+      {@render children?.()}
+    {/if}
+  </dialog>
+{/snippet}
 
 <style lang="scss">
   dialog {
     position: fixed;
     inset: 0;
+    z-index: 9999999;
     display: flex;
     justify-content: center;
     align-items: center;

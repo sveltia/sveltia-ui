@@ -10,43 +10,47 @@
   import { generateElementId } from '@sveltia/utils/element';
 
   /**
-   * The `class` attribute on the wrapper element.
-   * @type {string}
+   * @typedef {object} Props
+   * @property {string} [class] - The `class` attribute on the wrapper element.
+   * @property {boolean} [hidden] - Whether to hide the widget. An alias of the `aria-hidden`
+   * attribute.
+   * @property {boolean} [disabled] - Whether to disable the widget. An alias of the `aria-disabled`
+   * attribute.
+   * @property {string} [label] - The group’s label to be displayed above the child `<Option>`s.
+   * @property {import('svelte').Snippet} [children] - Primary slot content.
    */
-  let className = '';
-  export { className as class };
+
   /**
-   * Whether to hide the widget. An alias of the `aria-hidden` attribute.
-   * @type {boolean | undefined}
+   * @type {Props & Record<string, any>}
    */
-  export let hidden = undefined;
-  /**
-   * Whether to disable the widget. An alias of the `aria-disabled` attribute.
-   * @type {boolean}
-   */
-  export let disabled = false;
-  /**
-   * The group’s label to be displayed above the child `<Option>`s.
-   */
-  export let label = '';
+  let {
+    /* eslint-disable prefer-const */
+    class: className,
+    hidden = false,
+    disabled = false,
+    label = '',
+    children,
+    ...restProps
+    /* eslint-enable prefer-const */
+  } = $props();
 
   const id = generateElementId('optgroup');
 </script>
 
 <div
+  {...restProps}
   role="group"
   {id}
   class="sui option-group {className}"
-  hidden={hidden || undefined}
+  {hidden}
   aria-hidden={hidden}
   aria-disabled={disabled}
   aria-labelledby="{id}-label"
   aria-roledescription="option group"
-  {...$$restProps}
 >
   <div role="none" id="{id}-label" class="label">{label}</div>
   <div role="none" class="inner" inert={disabled}>
-    <slot />
+    {@render children?.()}
   </div>
 </div>
 

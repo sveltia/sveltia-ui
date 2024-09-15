@@ -4,6 +4,18 @@
   import NavSection from './_components/nav-section.svelte';
 
   initLocales();
+
+  /**
+   * @typedef {object} Props
+   * @property {import('svelte').Snippet} [children] - Primary slot content.
+   */
+
+  /** @type {Props} */
+  let {
+    /* eslint-disable prefer-const */
+    children,
+    /* eslint-enable prefer-const */
+  } = $props();
 </script>
 
 {#if !$isLoading}
@@ -144,7 +156,7 @@
         </section>
       </nav>
       <main>
-        <slot />
+        {@render children?.()}
       </main>
     </div>
   </AppShell>

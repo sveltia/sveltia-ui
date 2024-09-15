@@ -6,45 +6,48 @@
   import { generateElementId } from '@sveltia/utils/element';
 
   /**
-   * The `class` attribute on the wrapper element.
-   * @type {string}
+   * @typedef {object} Props
+   * @property {string} [class] - The `class` attribute on the wrapper element.
+   * @property {boolean} [hidden] - Whether to hide the widget. An alias of the `aria-hidden`
+   * attribute.
+   * @property {boolean} [disabled] - Whether to disable the widget. An alias of the `aria-disabled`
+   * attribute.
+   * @property {string} [title] - Text label displayed above the group items.
    */
-  let className = '';
-  export { className as class };
+
   /**
-   * Whether to hide the widget. An alias of the `aria-hidden` attribute.
-   * @type {boolean | undefined}
+   * @type {import('$lib/typedefs').CommonEventHandlers & Props & Record<string, any>}
    */
-  export let hidden = undefined;
-  /**
-   * Whether to disable the widget. An alias of the `aria-disabled` attribute.
-   * @type {boolean}
-   */
-  export let disabled = false;
-  /**
-   * Text label displayed above the group items.
-   */
-  export let title = '';
+  let {
+    /* eslint-disable prefer-const */
+    class: className,
+    hidden = false,
+    disabled = false,
+    title = '',
+    children,
+    ...restProps
+    /* eslint-enable prefer-const */
+  } = $props();
 
   const id = generateElementId('group');
 </script>
 
 <div
+  {...restProps}
   role="group"
   {id}
   class="sui menu-item-group {className}"
-  hidden={hidden || undefined}
+  {hidden}
   aria-hidden={hidden}
   aria-disabled={disabled}
   aria-labelledby={title ? `${id}-title` : undefined}
   aria-roledescription="menu item group"
-  {...$$restProps}
 >
   {#if title}
     <div role="none" class="title" id="{id}-title">{title}</div>
   {/if}
   <div role="none" class="inner" inert={disabled}>
-    <slot />
+    {@render children?.()}
   </div>
 </div>
 

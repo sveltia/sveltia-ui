@@ -4,104 +4,95 @@
   @see https://w3c.github.io/aria/#menuitem
 -->
 <script>
-  import { writable } from 'svelte/store';
   import Button from '../button/button.svelte';
   import Icon from '../icon/icon.svelte';
-  import Menu from './menu.svelte';
   import Popup from '../util/popup.svelte';
+  import Menu from './menu.svelte';
 
   /**
-   * The `class` attribute on the wrapper element.
-   * @type {string}
+   * @type {import('$lib/typedefs').ButtonProps & import('$lib/typedefs').MenuItemProps &
+   * import('$lib/typedefs').CommonEventHandlers & Record<string, any>}
    */
-  let className = '';
-  export { className as class };
-  /**
-   * The `role` attribute on the `<button>` element.
-   * @type {'menuitem' | 'menuitemcheckbox' | 'menuitemradio'}
-   */
-  export let role = 'menuitem';
-  /**
-   * Whether to hide the widget. An alias of the `aria-hidden` attribute.
-   * @type {boolean | undefined}
-   */
-  export let hidden = undefined;
-  /**
-   * Whether to disable the widget. An alias of the `aria-disabled` attribute.
-   * @type {boolean}
-   */
-  export let disabled = false;
-  /**
-   * Text label displayed on the item.
-   * @type {string | undefined}
-   */
-  export let label = '';
-  /**
-   * Name of `<Icon>` displayed before the label.
-   */
-  export let iconName = '';
-  /**
-   * ARIA label of `<Icon>` displayed before the label.
-   */
-  export let iconLabel = '';
+  let {
+    /* eslint-disable prefer-const */
+    class: className,
+    role = 'menuitem',
+    hidden = false,
+    disabled = false,
+    label = '',
+    children: _children,
+    startIcon: _startIcon,
+    endIcon: _endIcon,
+    chevronIcon,
+    items,
+    onChange,
+    onSelect,
+    ...restProps
+    /* eslint-enable prefer-const */
+  } = $props();
 
-  /** @type {Button} */
-  let buttonComponent;
-  let isPopupOpen = writable(false);
+  let isPopupOpen = $state(false);
 
-  $: hasChildren = role === 'menuitem' && $$slots.children;
+  /**
+   * Reference to the `<button>` element.
+   * @type {HTMLButtonElement | undefined}
+   */
+  let buttonElement = $state();
+
+  const hasItems = $derived(role === 'menuitem' && !!items);
 </script>
 
-<div role="none" class="sui menuitem {className}" hidden={hidden || undefined}>
+<div role="none" class="sui menuitem {className}" {hidden}>
   <Button
+    bind:element={buttonElement}
+    {...restProps}
     {role}
     {hidden}
     {disabled}
-    aria-haspopup={hasChildren ? 'menu' : undefined}
-    aria-expanded={hasChildren ? $isPopupOpen : undefined}
-    {...$$restProps}
-    bind:this={buttonComponent}
-    on:click
-    on:mouseenter={() => {
-      if (hasChildren) {
-        $isPopupOpen = true;
+    aria-haspopup={hasItems ? 'menu' : undefined}
+    aria-expanded={hasItems ? isPopupOpen : undefined}
+    onmouseenter={() => {
+      if (hasItems) {
+        isPopupOpen = true;
       }
     }}
-    on:mouseleave={() => {
-      if (hasChildren) {
-        $isPopupOpen = false;
+    onmouseleave={() => {
+      if (hasItems) {
+        isPopupOpen = false;
       }
     }}
-    on:focus
-    on:blur
-    on:select
-    on:change
+    {onChange}
+    {onSelect}
   >
-    <slot name="start-icon" slot="start-icon">
-      {#if iconName}
-        <Icon name={iconName} aria-label={iconLabel} />
+    {#snippet startIcon()}
+      {@render _startIcon?.()}
+    {/snippet}
+    {#snippet children()}
+      <div role="none" class="content" class:label={!!label}>
+        {#if label}
+          {label}
+        {:else}
+          {@render _children?.()}
+        {/if}
+      </div>
+      {#if hasItems}
+        <span role="none" class="icon-outer">
+          {#if chevronIcon}
+            {@render chevronIcon()}
+          {:else}
+            <Icon name="chevron_right" />
+          {/if}
+        </span>
       {/if}
-    </slot>
-    <div role="none" class="content" class:label={!!label}>
-      {#if label}
-        {label}
-      {:else}
-        <slot />
-      {/if}
-    </div>
-    <slot name="end-icon" slot="end-icon" />
-    {#if hasChildren}
-      <span role="none" class="icon-outer">
-        <slot name="chevron-icon">
-          <Icon name="chevron_right" />
-        </slot>
-      </span>
-    {/if}
+    {/snippet}
+    {#snippet endIcon()}
+      {@render _endIcon?.()}
+    {/snippet}
   </Button>
-  {#if hasChildren}
-    <Popup anchor={buttonComponent?.element} position="right-top" bind:open={isPopupOpen}>
+  {#if hasItems}
+    <Popup anchor={buttonElement} position="right-top" bind:open={isPopupOpen}>
       <Menu>
-        <slot name="children" />
+        {@render items?.()}
       </Menu>
     </Popup>
   {/if}

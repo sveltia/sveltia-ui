@@ -5,21 +5,28 @@
 -->
 <script>
   /**
-   * The `class` attribute on the wrapper element.
-   * @type {string}
+   * @typedef {object} Props
+   * @property {string} [class] - The `class` attribute on the wrapper element.
+   * @property {'horizontal' | 'vertical'} [orientation] - Orientation of the widget. This is
+   * typically contrary to `<TabList>`’s `orientation`.
+   * @property {import('svelte').Snippet} [children] - Primary slot content.
    */
-  let className = '';
-  export { className as class };
 
   /**
-   * Orientation of the widget. This is typically contrary to `<TabList>`’s `orientation`.
-   * @type {'horizontal' | 'vertical'}
+   * @type {Props & Record<string, any>}
    */
-  export let orientation = 'vertical';
+  let {
+    /* eslint-disable prefer-const */
+    class: className,
+    orientation = 'vertical',
+    children,
+    ...restProps
+    /* eslint-enable prefer-const */
+  } = $props();
 </script>
 
-<div role="none" class="sui tab-box {orientation} {className}">
-  <slot />
+<div {...restProps} role="none" class="sui tab-box {orientation} {className}">
+  {@render children?.()}
 </div>
 
 <style lang="scss">

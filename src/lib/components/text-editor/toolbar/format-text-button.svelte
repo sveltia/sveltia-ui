@@ -7,10 +7,18 @@
   import Icon from '../../icon/icon.svelte';
 
   /**
-   * Button type.
-   * @type {import('$lib/typedefs').TextEditorFormatType}
+   * @typedef {object} Props
+   * @property {import('$lib/typedefs').TextEditorFormatType} type - Button type.
    */
-  export let type;
+
+  /**
+   * @type {Props & Record<string, any>}
+   */
+  let {
+    /* eslint-disable prefer-const */
+    type,
+    /* eslint-enable prefer-const */
+  } = $props();
 
   /**
    * Text editor state.
@@ -25,9 +33,11 @@
   aria-controls="{$editorId}-lexical-root"
   disabled={!$useRichText}
   pressed={$selectionInlineTypes.includes(type)}
-  on:click={() => {
+  onclick={() => {
     $editor.dispatchCommand(FORMAT_TEXT_COMMAND, type);
   }}
 >
-  <Icon slot="start-icon" name={availableButtons[type].icon} />
+  {#snippet startIcon()}
+    <Icon name={availableButtons[type].icon} />
+  {/snippet}
 </Button>

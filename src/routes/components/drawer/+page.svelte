@@ -2,7 +2,7 @@
   import { Button, Drawer } from '$lib';
   import Example from '../../_components/example.svelte';
 
-  const openStandardDrawer = { top: false, right: false, bottom: false, left: false };
+  const openStandardDrawer = $state({ top: false, right: false, bottom: false, left: false });
 </script>
 
 <h2>Drawer</h2>
@@ -14,7 +14,7 @@
       <Button
         variant="secondary"
         label="Show Drawer: right"
-        on:click={() => {
+        onclick={() => {
           openStandardDrawer.right = true;
         }}
       />
@@ -26,7 +26,7 @@
       <Button
         variant="secondary"
         label="Show Drawer: left"
-        on:click={() => {
+        onclick={() => {
           openStandardDrawer.left = true;
         }}
       />
@@ -38,7 +38,7 @@
       <Button
         variant="secondary"
         label="Show Drawer: top"
-        on:click={() => {
+        onclick={() => {
           openStandardDrawer.top = true;
         }}
       />
@@ -48,7 +48,7 @@
       <Button
         variant="secondary"
         label="Show Drawer: bottom"
-        on:click={() => {
+        onclick={() => {
           openStandardDrawer.bottom = true;
         }}
       />

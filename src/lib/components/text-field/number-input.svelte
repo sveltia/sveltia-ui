@@ -12,77 +12,56 @@
   import TextInput from './text-input.svelte';
 
   /**
-   * The `class` attribute on the wrapper element.
-   * @type {string}
+   * @typedef {object} Props
+   * @property {number | undefined} [min] - Minimum allowed value.
+   * @property {number | undefined} [max] - Maximum allowed value.
+   * @property {number} [step] - Value to be added or removed when using the up/down arrow key or
+   * button.
+   * @property {import('svelte').Snippet} [increaseIcon] - Increase icon slot content.
+   * @property {import('svelte').Snippet} [decreaseIcon] - Decrease icon slot content.
    */
-  let className = '';
-  export { className as class };
+
   /**
-   * Make the text input container flexible.
-   * @type {boolean}
+   * @type {import('$lib/typedefs').TextInputProps & import('$lib/typedefs').CommonEventHandlers &
+   * import('$lib/typedefs').InputEventHandlers & Props & Record<string, any>}
    */
-  export let flex = false;
-  /**
-   * Whether to hide the widget. An alias of the `aria-hidden` attribute.
-   * @type {boolean | undefined}
-   */
-  export let hidden = undefined;
-  /**
-   * Whether to disable the widget. An alias of the `aria-disabled` attribute.
-   * @type {boolean}
-   */
-  export let disabled = false;
-  /**
-   * Whether to disable the widget. An alias of `aria-readonly` attribute.
-   * @type {boolean}
-   */
-  export let readonly = false;
-  /**
-   * Whether to mark the widget required. An alias of the `aria-required` attribute.
-   * @type {boolean}
-   */
-  export let required = false;
-  /**
-   * Whether to mark the widget invalid. An alias of the `aria-invalid` attribute.
-   * @type {boolean}
-   */
-  export let invalid = false;
-  /**
-   * Input value.
-   * @type {string | undefined}
-   */
-  export let value = undefined;
-  /**
-   * Minimum allowed value.
-   * @type {number | undefined}
-   */
-  export let min = undefined;
-  /**
-   * Maximum allowed value.
-   * @type {number | undefined}
-   */
-  export let max = undefined;
-  /**
-   * Value to be added or removed when using the up/down arrow key or button.
-   */
-  export let step = 1;
+  let {
+    /* eslint-disable prefer-const */
+    value = $bindable(),
+    invalid = $bindable(false),
+    flex = false,
+    min = undefined,
+    max = undefined,
+    step = 1,
+    class: className,
+    hidden = false,
+    disabled = false,
+    readonly = false,
+    required = false,
+    children,
+    increaseIcon,
+    decreaseIcon,
+    onChange,
+    ...restProps
+    /* eslint-enable prefer-const */
+  } = $props();
 
   const id = generateElementId('input');
-  let edited = false;
+  let edited = $state(false);
 
-  $: maximumFractionDigits = String(step).split('.')[1]?.length || 0;
-  $: isMin = typeof min === 'number' && Number(value || 0) <= min;
-  $: isMax = typeof max === 'number' && Number(value || 0) >= max;
+  const maximumFractionDigits = $derived(String(step).split('.')[1]?.length || 0);
+  const isMin = $derived(typeof min === 'number' && Number(value || 0) <= min);
+  const isMax = $derived(typeof max === 'number' && Number(value || 0) >= max);
 
-  $: invalid =
-    (required && edited && (value === undefined || value === '')) ||
-    (value !== undefined &&
-      value !== '' &&
-      (Number.isNaN(Number(value)) ||
-        (typeof min === 'number' && Number(value || 0) < min) ||
-        (typeof max === 'number' && Number(value || 0) > max)));
-
-  let component;
+  $effect(() => {
+    invalid =
+      (required && edited && (value === undefined || value === '')) ||
+      (value !== undefined &&
+        value !== '' &&
+        (Number.isNaN(Number(value)) ||
+          (typeof min === 'number' && Number(value || 0) < min) ||
+          (typeof max === 'number' && Number(value || 0) > max)));
+  });
 
   /**
    * Decrease the number.
@@ -113,7 +92,7 @@
   class:flex
   class:disabled
   class:readonly
-  hidden={hidden || undefined}
+  {hidden}
 >
   <div role="none" class="buttons">
     <Button
@@ -121,29 +100,38 @@
       disabled={disabled || readonly || Number.isNaN(Number(value)) || isMax}
       aria-label={$_('_sui.number_input.increase')}
       aria-controls={id}
-      on:click={() => {
+      onclick={() => {
         increase();
       }}
     >
-      <slot name="increase-icon" slot="start-icon">
-        <Icon name="expand_less" />
-      </slot>
+      {#snippet startIcon()}
+        {#if increaseIcon}
+          {@render increaseIcon()}
+        {:else}
+          <Icon name="expand_less" />
+        {/if}
+      {/snippet}
     </Button>
     <Button
       iconic
       disabled={disabled || readonly || Number.isNaN(Number(value)) || isMin}
       aria-label={$_('_sui.number_input.decrease')}
       aria-controls={id}
-      on:click={() => {
+      onclick={() => {
         decrease();
       }}
     >
-      <slot name="decrease-icon" slot="start-icon">
-        <Icon name="expand_more" />
-      </slot>
+      {#snippet startIcon()}
+        {#if decreaseIcon}
+          {@render decreaseIcon()}
+        {:else}
+          <Icon name="expand_more" />
+        {/if}
+      {/snippet}
     </Button>
   </div>
   <TextInput
+    {...restProps}
     role="spinbutton"
     {id}
     bind:value
@@ -158,9 +146,7 @@
     aria-valuemin={min}
     aria-valuemax={max}
     inputmode={maximumFractionDigits > 0 ? 'decimal' : 'numeric'}
-    {...$$restProps}
-    bind:this={component}
-    on:keydown={(event) => {
+    onkeydown={(event) => {
       const { key, ctrlKey, metaKey, altKey, shiftKey } = event;
       const hasModifier = shiftKey || altKey || ctrlKey || metaKey;
 
@@ -178,11 +164,7 @@
         edited = true;
       }
     }}
-    on:keydown
-    on:keyup
-    on:keypress
-    on:input
-    on:change
+    {onChange}
   />
 </div>
 

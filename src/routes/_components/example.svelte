@@ -1,13 +1,25 @@
 <script>
   import { generateElementId } from '@sveltia/utils/element';
 
+  /**
+   * @typedef {object} Props
+   * @property {import('svelte').Snippet} [children] - Primary slot content.
+   */
+
+  /** @type {Props} */
+  let {
+    /* eslint-disable prefer-const */
+    children,
+    /* eslint-enable prefer-const */
+  } = $props();
+
   const id = generateElementId('example');
 </script>
 
 <div role="figure" aria-labelledby="{id}-title">
   <div role="caption" id="{id}-title">Preview</div>
   <div role="none" class="body">
-    <slot />
+    {@render children?.()}
   </div>
 </div>
 

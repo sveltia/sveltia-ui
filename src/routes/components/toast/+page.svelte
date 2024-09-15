@@ -3,14 +3,14 @@
   import Alert from '$lib/components/alert/alert.svelte';
   import Example from '../../_components/example.svelte';
 
-  let showStandardToast = false;
-  let showErrorToast = false;
-  let showSuccessToast = false;
-  let showWarningToast = false;
-  let showPositionToast = false;
+  let showStandardToast = $state(false);
+  let showErrorToast = $state(false);
+  let showSuccessToast = $state(false);
+  let showWarningToast = $state(false);
+  let showPositionToast = $state(false);
   /** @type {import('$lib/typedefs').ToastPosition | undefined} */
-  let showPositionToastPosition = undefined;
-  let showManualToast = false;
+  let showPositionToastPosition = $state();
+  let showManualToast = $state(false);
 </script>
 
 <h2>Toast</h2>
@@ -22,7 +22,7 @@
       <Button
         variant="secondary"
         label="Show Error Toast"
-        on:click={() => {
+        onclick={() => {
           showErrorToast = true;
         }}
       />
@@ -36,7 +36,7 @@
       <Button
         variant="secondary"
         label="Show Warning Toast"
-        on:click={() => {
+        onclick={() => {
           showWarningToast = true;
         }}
       />
@@ -48,7 +48,7 @@
       <Button
         variant="secondary"
         label="Show Information Toast"
-        on:click={() => {
+        onclick={() => {
           showStandardToast = true;
         }}
       />
@@ -60,7 +60,7 @@
       <Button
         variant="secondary"
         label="Show Success Toast"
-        on:click={() => {
+        onclick={() => {
           showSuccessToast = true;
         }}
       />
@@ -78,7 +78,7 @@
       <Button
         variant="secondary"
         label="Top Left"
-        on:click={() => {
+        onclick={() => {
           showPositionToast = true;
           showPositionToastPosition = 'top-left';
         }}
@@ -86,7 +86,7 @@
       <Button
         variant="secondary"
         label="Top Center"
-        on:click={() => {
+        onclick={() => {
           showPositionToast = true;
           showPositionToastPosition = 'top-center';
         }}
@@ -94,7 +94,7 @@
       <Button
         variant="secondary"
         label="Top Right"
-        on:click={() => {
+        onclick={() => {
           showPositionToast = true;
           showPositionToastPosition = 'top-right';
         }}
@@ -102,7 +102,7 @@
       <Button
         variant="secondary"
         label="Bottom Left"
-        on:click={() => {
+        onclick={() => {
           showPositionToast = true;
           showPositionToastPosition = 'bottom-left';
         }}
@@ -110,7 +110,7 @@
       <Button
         variant="secondary"
         label="Bottom Center"
-        on:click={() => {
+        onclick={() => {
           showPositionToast = true;
           showPositionToastPosition = 'bottom-center';
         }}
@@ -118,7 +118,7 @@
       <Button
         variant="secondary"
         label="Bottom Right"
-        on:click={() => {
+        onclick={() => {
           showPositionToast = true;
           showPositionToastPosition = 'bottom-right';
         }}
@@ -141,14 +141,14 @@
       <Button
         variant="secondary"
         label="Show Toast"
-        on:click={() => {
+        onclick={() => {
           showManualToast = true;
         }}
       />
       <Button
         variant="secondary"
         label="Hide Toast"
-        on:click={() => {
+        onclick={() => {
           showManualToast = false;
         }}
       />

@@ -5,46 +5,49 @@
   @see https://developer.chrome.com/blog/introducing-popover-api/
 -->
 <script>
-  import { onMount } from 'svelte';
+  import { onMount, untrack } from 'svelte';
 
   /**
-   * The toast ID. If updated, the timer that hides the toast will be reset, meaning the same toast
-   * can be displayed for a longer period of time.
-   * @type {number | undefined}
+   * @typedef {object} Props
+   * @property {string | number | undefined} [id] - The toast ID. If updated, the timer that hides
+   * the toast will be reset, meaning the same toast can be displayed for a longer period of time.
+   * @property {boolean} [show] - Whether to show the toast.
+   * @property {number} [duration] - Duration to automatically hide the toast. Use `0` to hide it
+   * manually from the consumer.
+   * @property {import('$lib/typedefs').ToastPosition} [position] - Position of the toast.
+   * @property {import('svelte').Snippet} [children] - Primary slot content.
    */
-  export let id = undefined;
+
   /**
-   * Whether to show the toast.
-   * @type {boolean}
+   * @type {Props & Record<string, any>}
    */
-  export let show = false;
-  /**
-   * Duration to automatically hide the toast. Use `0` to hide it manually from the consumer.
-   * @type {number}
-   */
-  export let duration = 5000;
-  /**
-   * Position of the toast.
-   * @type {import('$lib/typedefs').ToastPosition}
-   */
-  export let position = 'bottom-right';
+  let {
+    /* eslint-disable prefer-const */
+    show = $bindable(false),
+    id = undefined,
+    duration = 5000,
+    position = 'bottom-right',
+    children,
+    ...restProps
+    /* eslint-enable prefer-const */
+  } = $props();
 
   /**
    * @type {HTMLElement | undefined}
    */
-  let popoverBase;
+  let popoverBase = $state();
   /**
    * @type {HTMLElement | undefined}
    */
-  let popover;
+  let popover = $state();
   /**
    * @type {HTMLElement | undefined}
    */
-  let toast;
+  let toast = $state();
   /**
    * @type {number}
    */
-  let timerId = 0;
+  let timerId = $state(0);
 
   onMount(() => {
     popover =
@@ -72,30 +75,33 @@
     };
   });
 
-  $: {
+  $effect(() => {
     if (popover && toast) {
       popover.appendChild(toast);
     }
-  }
+  });
 
-  $: {
+  $effect(() => {
     void id;
     void show;
     void duration;
-    globalThis.clearTimeout(timerId);
+
+    untrack(() => {
+      globalThis.clearTimeout(timerId);
+    });
 
     if (show && duration) {
       timerId = globalThis.setTimeout(() => {
         show = false;
       }, duration);
     }
-  }
+  });
 </script>
 
-<div role="none" class="sui toast-base" bind:this={popoverBase}></div>
+<div bind:this={popoverBase} role="none" class="sui toast-base"></div>
 
-<div class="sui toast {position}" aria-hidden={!show} bind:this={toast} {...$$restProps}>
-  <slot />
+<div {...restProps} bind:this={toast} class="sui toast {position}" aria-hidden={!show}>
+  {@render children?.()}
 </div>
 
 <style lang="scss">

@@ -67,7 +67,7 @@ class Group {
    * @todo Check for added elements probably with `MutationObserver`.
    */
   constructor(parent, { clickToSelect = true } = {}) {
-    parent.dispatchEvent(new CustomEvent('initializing'));
+    parent.dispatchEvent(new CustomEvent('Initializing'));
 
     this.parent = parent;
     this.role = /** @type {string} */ (parent.getAttribute('role'));
@@ -148,7 +148,7 @@ class Group {
       this.onKeyDown(event);
     });
 
-    parent.dispatchEvent(new CustomEvent('initialized'));
+    parent.dispatchEvent(new CustomEvent('Initialized'));
   }
 
   /**
@@ -252,11 +252,11 @@ class Group {
       if (multiSelect && isTarget && (selectByClick || selectByKeydown)) {
         element.setAttribute(this.childSelectedAttr, String(!isSelected));
         element.dispatchEvent(
-          new CustomEvent('change', { detail: { [this.childSelectedProp]: !isSelected } }),
+          new CustomEvent('Change', { detail: { [this.childSelectedProp]: !isSelected } }),
         );
 
         if (!isSelected) {
-          element.dispatchEvent(new CustomEvent('select'));
+          element.dispatchEvent(new CustomEvent('Select'));
         }
       }
 
@@ -267,11 +267,11 @@ class Group {
       ) {
         element.setAttribute(this.childSelectedAttr, String(isTarget));
         element.dispatchEvent(
-          new CustomEvent('change', { detail: { [this.childSelectedProp]: isTarget } }),
+          new CustomEvent('Change', { detail: { [this.childSelectedProp]: isTarget } }),
         );
 
         if (isTarget) {
-          element.dispatchEvent(new CustomEvent('select'));
+          element.dispatchEvent(new CustomEvent('Select'));
         }
       }
 
@@ -282,14 +282,14 @@ class Group {
 
           if (isTarget) {
             element.focus();
-            element.dispatchEvent(new CustomEvent('focus'));
+            element.dispatchEvent(new CustomEvent('Focus'));
           }
         });
       } else {
         element.classList.toggle('focused', isTarget);
 
         if (isTarget) {
-          element.dispatchEvent(new CustomEvent('focus'));
+          element.dispatchEvent(new CustomEvent('Focus'));
         }
       }
 
@@ -326,7 +326,7 @@ class Group {
     });
 
     this.parent.dispatchEvent(
-      new CustomEvent('change', {
+      new CustomEvent('Change', {
         detail: {
           value: /** @type {any} */ (newTarget).value,
           name: /** @type {any} */ (newTarget).name,
@@ -481,14 +481,14 @@ class Group {
 
         const hidden = !_terms.every((term) => searchValue.includes(term));
 
-        member.dispatchEvent(new CustomEvent('toggle', { detail: { hidden } }));
+        member.dispatchEvent(new CustomEvent('Toggle', { detail: { hidden } }));
 
         return hidden;
       })
       .filter((hidden) => !hidden).length;
 
     this.parent.dispatchEvent(
-      new CustomEvent('filter', { detail: { matched, total: this.allMembers.length } }),
+      new CustomEvent('Filter', { detail: { matched, total: this.allMembers.length } }),
     );
   }
 }
@@ -499,7 +499,6 @@ class Group {
  * @param {object} [params] - Action params.
  * @returns {import('svelte/action').ActionReturn} Action.
  */
-// eslint-disable-next-line no-unused-vars
 export const activateGroup = (parent, params) => {
   const group = new Group(parent, params);
 
