@@ -40,7 +40,9 @@
   role="grid"
   class="sui grid {className}"
   aria-multiselectable={multiple}
-  {onChange}
+  onChange={(/** @type {CustomEvent} */ event) => {
+    onChange?.(event);
+  }}
   use:activateGroup={{ clickToSelect }}
 >
   {@render children?.()}

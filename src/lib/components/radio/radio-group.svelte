@@ -56,7 +56,9 @@
   aria-required={required}
   aria-invalid={invalid}
   aria-orientation={orientation}
-  {onChange}
+  onChange={(/** @type {CustomEvent} */ event) => {
+    onChange?.(event);
+  }}
   use:activateGroup
 >
   <div role="none" class="inner" inert={disabled}>

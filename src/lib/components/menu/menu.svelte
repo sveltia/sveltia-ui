@@ -40,7 +40,9 @@
   {hidden}
   aria-hidden={hidden}
   aria-disabled={disabled}
-  {onChange}
+  onChange={(/** @type {CustomEvent} */ event) => {
+    onChange?.(event);
+  }}
   use:activateGroup
 >
   {@render children?.()}
