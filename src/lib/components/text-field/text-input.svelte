@@ -30,7 +30,6 @@
     invalid = false,
     'aria-label': ariaLabel,
     children,
-    onChange,
     ...restProps
     /* eslint-enable prefer-const */
   } = $props();
@@ -62,7 +61,6 @@
     aria-readonly={readonly}
     aria-required={required}
     aria-invalid={invalid}
-    {onChange}
     use:activateKeyShortcuts={keyShortcuts}
   />
   {#if ariaLabel && showInlineLabel}

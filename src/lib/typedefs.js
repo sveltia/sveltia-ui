@@ -154,7 +154,6 @@
  * `aria-invalid` attribute.
  * @property {string} [aria-label] - `aria-label` attribute.
  * @property {import('svelte').Snippet} [children] - Primary slot content.
- * @property {(event: CustomEvent) => void} [onChange] - Custom `Change` event handler.
  */
 
 /**
@@ -198,6 +197,7 @@
  * @typedef {object} InputEventHandlers
  * @property {(event: Event) => void} [oninput] - `input` event handler.
  * @property {(event: Event) => void} [onbeforeinput] - `beforeinput` event handler.
+ * @property {(event: Event) => void} [onchange] - `change` event handler.
  */
 
 /**
