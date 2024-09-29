@@ -56,7 +56,7 @@
   const id = generateElementId('drawer');
   /**
    * A reference to the modal component.
-   * @type {Modal | undefined}
+   * @type {any}
    */
   let modal = $state();
 

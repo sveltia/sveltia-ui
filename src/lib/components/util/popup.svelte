@@ -13,7 +13,7 @@
    * @typedef {object} Props
    * @property {string} [class] - The `class` attribute on the content element.
    * @property {boolean} [open] - Whether to open the popup.
-   * @property {HTMLElement} anchor - A reference to the anchor element that opens the popup.
+   * @property {HTMLElement} [anchor] - A reference to the anchor element that opens the popup.
    * Typically a `<button>`.
    * @property {HTMLElement | undefined} [content] - A reference to the content element.
    * @property {import('$lib/typedefs').PopupPosition} [position] - Where to show the popup.
