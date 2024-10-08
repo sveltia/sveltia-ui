@@ -122,11 +122,8 @@
     &:focus-visible {
       outline: 0;
 
-      span::before {
-        outline-offset: 1px;
-        outline-width: 2px;
-        outline-style: solid;
-        outline-color: var(--sui-primary-accent-color-light);
+      span {
+        outline-color: var(--sui-primary-accent-color-translucent);
       }
     }
 
