@@ -142,6 +142,7 @@
   <dialog
     bind:this={dialog}
     {...restProps}
+    inert={!showContent}
     {role}
     class="sui modal {className}"
     class:backdrop={showBackdrop}
