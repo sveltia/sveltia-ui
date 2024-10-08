@@ -152,7 +152,7 @@
     iconic
     {hidden}
     {disabled}
-    tabindex={readonly || disabled ? -1 : 0}
+    tabindex={!editable || readonly || disabled ? -1 : 0}
     aria-label={isPopupOpen ? $_('_sui.collapse') : $_('_sui.expand')}
     aria-controls="{id}-popup"
     aria-expanded={isPopupOpen}
