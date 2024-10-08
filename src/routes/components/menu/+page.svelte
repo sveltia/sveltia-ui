@@ -1,5 +1,5 @@
 <script>
-  import { Divider, Icon, Menu, MenuButton, MenuItem, MenuItemCheckbox, MenuItemRadio } from '$lib';
+  import { Divider, Menu, MenuButton, MenuItem, MenuItemCheckbox, MenuItemRadio } from '$lib';
   import Example from '../../_components/example.svelte';
 </script>
 
@@ -10,9 +10,6 @@
   <Example>
     <div role="none">
       <MenuButton variant="tertiary" label="Open Menu">
-        {#snippet endIcon()}
-          <Icon name="arrow_drop_down" class="small-arrow" />
-        {/snippet}
         {#snippet popup()}
           <Menu>
             <MenuItem label="Item" />
@@ -35,9 +32,6 @@
   <Example>
     <div role="none">
       <MenuButton variant="tertiary" label="Open Menu">
-        {#snippet endIcon()}
-          <Icon name="arrow_drop_down" class="small-arrow" />
-        {/snippet}
         {#snippet popup()}
           <Menu>
             <MenuItem label="Item" />
@@ -85,9 +79,6 @@
   <Example>
     <div role="none">
       <MenuButton variant="tertiary" label="Open Menu" disabled>
-        {#snippet endIcon()}
-          <Icon name="arrow_drop_down" class="small-arrow" />
-        {/snippet}
         {#snippet popup()}
           <Menu>
             <MenuItem label="Item" />

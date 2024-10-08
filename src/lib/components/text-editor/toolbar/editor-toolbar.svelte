@@ -80,9 +80,6 @@
       {#snippet startIcon()}
         <Icon name={availableButtons[$selectionBlockType]?.icon ?? 'format_paragraph'} />
       {/snippet}
-      {#snippet endIcon()}
-        <Icon name="arrow_drop_down" class="small-arrow" />
-      {/snippet}
       {#snippet popup()}
         <Menu aria-label={$_('_sui.text_editor.text_style_options')}>
           {#each blockLevelButtons as type (type)}

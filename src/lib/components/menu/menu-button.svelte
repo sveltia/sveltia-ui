@@ -5,6 +5,7 @@
 -->
 <script>
   import Button from '../button/button.svelte';
+  import Icon from '../icon/icon.svelte';
   import Popup from '../util/popup.svelte';
 
   /**
@@ -71,7 +72,13 @@
       {@render _children?.()}
     {/snippet}
     {#snippet endIcon()}
-      {@render _endIcon?.()}
+      {#if _endIcon}
+        {@render _endIcon()}
+      {:else if iconic}
+        <Icon name="more_vert" />
+      {:else}
+        <Icon name="arrow_drop_down" class="small-arrow" />
+      {/if}
     {/snippet}
   </Button>
 </div>
