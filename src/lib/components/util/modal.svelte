@@ -81,7 +81,7 @@
     showContent = true;
     dialog.showModal();
     onOpen?.(new CustomEvent('Open'));
-    await sleep(100);
+    await sleep(0);
     setOpenClass = true;
     await waitForTransition();
     setActiveClass = true;
@@ -96,11 +96,11 @@
     }
 
     onClosing?.(new CustomEvent('Closing'));
+    dialog.close();
     setActiveClass = false;
     setOpenClass = false;
     await waitForTransition();
     showContent = false;
-    dialog.close();
 
     if (dialog.returnValue === 'ok') {
       onOk?.(new CustomEvent('Ok'));
@@ -142,7 +142,7 @@
   <dialog
     bind:this={dialog}
     {...restProps}
-    inert={!showContent}
+    inert={!setOpenClass}
     {role}
     class="sui modal {className}"
     class:backdrop={showBackdrop}
