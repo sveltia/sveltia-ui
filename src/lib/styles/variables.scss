@@ -149,7 +149,7 @@
   // Shadows
   --sui-popup-shadow-color: hsl(var(--sui-shadow-color) / 40%);
   --sui-popup-backdrop-color: hsl(var(--sui-shadow-color) / 40%);
-  // Fonts
+  // Text
   --sui-font-family-default: "Merriweather Sans", sans-serif;
   --sui-font-size-xxx-large: 23px;
   --sui-font-size-xx-large: 19px;
@@ -166,6 +166,7 @@
   --sui-line-height-compact: 1.5;
   --sui-line-height-comfortable: 1.75;
   --sui-word-spacing-normal: 0.1ex;
+  --sui-paragraph-margin: 1.75em;
   // Controls
   --sui-control-small-border-width: 1px;
   --sui-control-small-border-radius: calc(var(--sui-control-small-height) / 8);
