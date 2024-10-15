@@ -118,6 +118,10 @@
       background-color: var(--sui-active-background-color);
     }
 
+    :global(.icon.check) {
+      margin: -2px;
+    }
+
     :global(button[aria-selected='true']) {
       :global(.icon) {
         color: var(--sui-primary-accent-color-text);
