@@ -74,7 +74,8 @@
       color: var(--sui-primary-foreground-color);
 
       &:first-child {
-        border-radius: 4px 0 0 4px !important;
+        border-top-left-radius: 4px !important;
+        border-bottom-left-radius: 4px !important;
       }
 
       &:not(:first-child) {
@@ -82,7 +83,8 @@
       }
 
       &:last-child {
-        border-radius: 0 4px 4px 0 !important;
+        border-top-right-radius: 4px !important;
+        border-bottom-right-radius: 4px !important;
       }
     }
 
