@@ -117,7 +117,7 @@ li {
 
 ul,
 ol {
-  padding-left: 2em;
+  padding-inline: 2em;
 }
 
 code,
@@ -151,9 +151,9 @@ td {
 }
 
 blockquote {
-  margin-left: 16px;
-  border-left: 4px solid var(--sui-textbox-border-color);
-  padding-left: 12px;
+  margin-inline: 16px 0;
+  border-inline-start: 4px solid var(--sui-textbox-border-color);
+  padding-inline-start: 12px;
 }
 
 .disabled,

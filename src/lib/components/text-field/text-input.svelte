@@ -51,6 +51,7 @@
     bind:value
     type="text"
     {role}
+    dir="auto"
     name={name || undefined}
     tabindex={disabled ? -1 : 0}
     disabled={disabled || undefined}
@@ -109,7 +110,7 @@
     font-size: var(--sui-textbox-font-size);
     line-height: var(--sui-textbox-singleline-line-height);
     font-weight: var(--sui-textbox-font-weight, normal);
-    text-align: var(--sui-textbox-text-align, left);
+    text-align: var(--sui-textbox-text-align, start);
     text-indent: var(--sui-textbox-text-indent, 0);
     text-transform: var(--sui-textbox-text-transform, none);
     letter-spacing: var(--sui-textbox-letter-spacing, normal);
@@ -163,7 +164,10 @@
     z-index: 2;
     display: flex;
     align-items: center;
-    justify-content: var(--sui-textbox-placeholder-text-align, var(--sui-textbox-text-align, left));
+    justify-content: var(
+      --sui-textbox-placeholder-text-align,
+      var(--sui-textbox-text-align, start)
+    );
     white-space: nowrap;
     pointer-events: none;
 
@@ -187,7 +191,7 @@
       var(--sui-textbox-singleline-line-height)
     );
     font-weight: var(--sui-textbox-placeholder-font-weight, var(--sui-textbox-font-weight, normal));
-    text-align: var(--sui-textbox-placeholder-text-align, var(--sui-textbox-text-align, left));
+    text-align: var(--sui-textbox-placeholder-text-align, var(--sui-textbox-text-align, start));
     text-indent: var(--sui-textbox-placeholder-text-indent, var(--sui-textbox-text-indent, 0));
     letter-spacing: var(
       --sui-textbox-placeholder-letter-spacing,

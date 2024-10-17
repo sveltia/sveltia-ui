@@ -111,7 +111,7 @@
     font-size: var(--sui-control-font-size);
     line-height: var(--sui-control-line-height);
     font-weight: normal;
-    text-align: left;
+    text-align: start;
     white-space: nowrap;
     cursor: pointer;
     transition: all 200ms;

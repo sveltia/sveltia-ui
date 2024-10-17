@@ -61,6 +61,6 @@
     color: var(--sui-secondary-foreground-color);
     background-color: var(--sui-secondary-background-color);
     font-size: var(--sui-font-size-default);
-    text-align: left;
+    text-align: start;
   }
 </style>
