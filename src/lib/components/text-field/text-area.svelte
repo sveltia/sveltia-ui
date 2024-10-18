@@ -109,7 +109,7 @@
     font-family: var(--sui-textbox-font-family);
     font-size: var(--sui-textbox-font-size);
     line-height: var(--sui-textbox-multiline-line-height);
-    font-weight: var(--sui-textbox-font-weight, normal);
+    font-weight: var(--sui-textbox-font-weight, var(--sui-font-weight-normal, normal));
     text-align: var(--sui-textbox-text-align, start);
     text-indent: var(--sui-textbox-text-indent, 0);
     text-transform: var(--sui-textbox-text-transform, none);

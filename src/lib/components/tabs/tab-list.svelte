@@ -180,7 +180,7 @@
       border-radius: var(--sui-tab-border-radius, 0);
       font-family: var(--sui-tab-font-family, var(--sui-control-font-family, inherit));
       font-size: var(--sui-tab-font-size, var(--sui-control-font-size, inherit));
-      font-weight: var(--sui-tab-font-weight, var(--sui-control-font-weight, inherit));
+      font-weight: var(--sui-tab-font-weight, var(--sui-control-font-weight, normal));
     }
   }
 

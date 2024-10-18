@@ -60,7 +60,7 @@ h4,
 h5,
 h6 {
   margin: 0;
-  font-weight: var(--sui-font-weight-bold);
+  font-weight: var(--sui-font-weight-bold, bold);
   line-height: var(--sui-line-height-default);
 }
 
@@ -89,7 +89,7 @@ h6 {
 }
 
 strong {
-  font-weight: var(--sui-font-weight-bold);
+  font-weight: var(--sui-font-weight-bold, bold);
 }
 
 a {

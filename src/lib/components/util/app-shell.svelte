@@ -117,7 +117,7 @@
     background-color: var(--sui-primary-background-color);
     font-family: var(--sui-font-family-default);
     font-size: var(--sui-font-size-default);
-    font-weight: var(--sui-font-weight-normal);
+    font-weight: var(--sui-font-weight-normal, normal);
     word-spacing: var(--sui-word-spacing-normal);
     -webkit-user-select: none;
     user-select: none;

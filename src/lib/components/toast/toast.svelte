@@ -122,7 +122,7 @@
     background-color: transparent;
     font-family: var(--sui-font-family-default);
     font-size: var(--sui-font-size-default);
-    font-weight: var(--sui-font-weight-normal);
+    font-weight: var(--sui-font-weight-normal, normal);
     pointer-events: none;
     -webkit-user-select: none;
     user-select: none;

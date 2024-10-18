@@ -110,7 +110,7 @@
     font-family: var(--sui-control-font-family);
     font-size: var(--sui-control-font-size);
     line-height: var(--sui-control-line-height);
-    font-weight: var(--sui-font-weight-normal);
+    font-weight: var(--sui-font-weight-normal, normal);
     text-align: start;
     white-space: nowrap;
     cursor: pointer;
@@ -146,7 +146,7 @@
       border-color: var(--sui-button-primary-border-color, var(--sui-primary-accent-color));
       color: var(--sui-button-primary-foreground-color, var(--sui-primary-accent-color-inverted));
       background-color: var(--sui-button-primary-background-color, var(--sui-primary-accent-color));
-      font-weight: var(--sui-button-primary-font-weight, normal);
+      font-weight: var(--sui-button-primary-font-weight, var(--sui-font-weight-normal, normal));
 
       &:hover,
       &:focus-visible,
@@ -182,7 +182,7 @@
         --sui-button-secondary-background-color,
         var(--sui-button-background-color)
       );
-      font-weight: var(--sui-button-secondary-font-weight, normal);
+      font-weight: var(--sui-button-secondary-font-weight, var(--sui-font-weight-normal, normal));
 
       &:hover,
       &:focus-visible,
@@ -226,7 +226,7 @@
         --sui-button-tertiary-background-color,
         var(--sui-button-background-color)
       );
-      font-weight: var(--sui-button-tertiary-font-weight, normal);
+      font-weight: var(--sui-button-tertiary-font-weight, var(--sui-font-weight-normal, normal));
 
       &:hover,
       &:focus-visible,
@@ -262,7 +262,7 @@
     }
 
     &:global(.ghost) {
-      font-weight: var(--sui-button-ghost-font-weight, normal);
+      font-weight: var(--sui-button-ghost-font-weight, var(--sui-font-weight-normal, normal));
 
       &:hover,
       &:focus-visible,
