@@ -110,7 +110,7 @@
     font-family: var(--sui-control-font-family);
     font-size: var(--sui-control-font-size);
     line-height: var(--sui-control-line-height);
-    font-weight: normal;
+    font-weight: var(--sui-font-weight-normal);
     text-align: start;
     white-space: nowrap;
     cursor: pointer;

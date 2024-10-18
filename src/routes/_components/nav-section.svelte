@@ -48,7 +48,7 @@
     padding: 0 0 4px;
     color: var(--sui-tertiary-foreground-color);
     font-size: 12px;
-    font-weight: normal;
+    font-weight: var(--sui-font-weight-normal);
     text-transform: uppercase;
     letter-spacing: 0.1ex;
   }
@@ -65,7 +65,7 @@
   }
 
   [aria-current='page'] {
-    font-weight: bold;
+    font-weight: var(--sui-font-weight-bold);
     text-decoration: underline;
   }
 </style>
