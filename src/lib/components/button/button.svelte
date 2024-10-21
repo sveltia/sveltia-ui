@@ -371,7 +371,7 @@
       padding: 0 4px;
     }
 
-    &:has([slot='start-icon'] + [slot='end-icon']) {
+    &:global(:has([slot='start-icon'] + [slot='end-icon'])) {
       gap: 0;
     }
   }
