@@ -115,7 +115,10 @@
       color: var(--sui-menuitem-foreground-color, var(--sui-control-foreground-color, inherit));
       background-color: var(--sui-menuitem-background-color, transparent);
       font-size: var(--sui-menuitem-font-size, var(--sui-option-font-size));
-      font-weight: var(--sui-menuitem-font-weight, var(--sui-option-font-weight, normal));
+      font-weight: var(
+        --sui-menuitem-font-weight,
+        var(--sui-option-font-weight, var(--sui-font-weight-normal, normal))
+      );
     }
 
     :global(button[aria-checked='true']) {

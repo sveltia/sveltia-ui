@@ -190,7 +190,10 @@
       --sui-textbox-placeholder-singleline-line-height,
       var(--sui-textbox-singleline-line-height)
     );
-    font-weight: var(--sui-textbox-placeholder-font-weight, var(--sui-textbox-font-weight, normal));
+    font-weight: var(
+      --sui-textbox-placeholder-font-weight,
+      var(--sui-textbox-font-weight, var(--sui-font-weight-normal, normal))
+    );
     text-align: var(--sui-textbox-placeholder-text-align, var(--sui-textbox-text-align, start));
     text-indent: var(--sui-textbox-placeholder-text-indent, var(--sui-textbox-text-indent, 0));
     letter-spacing: var(
