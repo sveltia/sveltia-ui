@@ -157,6 +157,7 @@
     }
 
     :global(button) {
+      flex: none;
       align-items: center;
       justify-content: center;
       overflow: hidden;
