@@ -138,7 +138,10 @@ const onEditorUpdate = (editor) => {
   editor.getRootElement()?.dispatchEvent(
     new CustomEvent('Update', {
       detail: {
-        value: convertToMarkdownString(TRANSFORMERS),
+        value: convertToMarkdownString(
+          // Use underscores for italic text in Markdown instead of asterisks
+          TRANSFORMERS.filter((/** @type {any} */ { tag }) => tag !== '*'),
+        ),
         selectionBlockType,
         selectionInlineTypes,
       },
