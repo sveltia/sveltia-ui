@@ -2,7 +2,6 @@
   import { LinkNode, TOGGLE_LINK_COMMAND } from '@lexical/link';
   import { $getNearestNodeOfType as getNearestNodeOfType } from '@lexical/utils';
   import { generateElementId } from '@sveltia/utils/element';
-  import { isURL } from '@sveltia/utils/string';
   import {
     COMMAND_PRIORITY_NORMAL,
     KEY_DOWN_COMMAND,
@@ -47,7 +46,7 @@
     $editor.getEditorState().read(() => {
       const textContent = getTextContent().trim();
 
-      anchorURL = isURL(textContent) ? textContent : '';
+      anchorURL = textContent;
       hasAnchor = !!textContent;
       dialogMode = 'create';
       openDialog = true;
@@ -105,7 +104,7 @@
    * @param {KeyboardEvent} event - `keydown` event.
    */
   const onInputKeyDown = (event) => {
-    if (matchShortcuts(event, 'Enter') && isURL(anchorURL)) {
+    if (matchShortcuts(event, 'Enter') && anchorURL) {
       openDialog = false;
     }
   };
@@ -191,7 +190,7 @@
     : $_('_sui.text_editor.update_link')}
   bind:open={openDialog}
   bind:value={anchorURL}
-  okDisabled={!isURL(anchorURL)}
+  okDisabled={!anchorURL}
   okLabel={dialogMode === 'create' ? $_('_sui.insert') : $_('_sui.update')}
   onClose={(event) => {
     onDialogClose(event);
