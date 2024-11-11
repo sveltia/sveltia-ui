@@ -62,6 +62,7 @@ export { default as MenuItemGroup } from './components/menu/menu-item-group.svel
 export { default as MenuItemRadio } from './components/menu/menu-item-radio.svelte';
 export { default as MenuItem } from './components/menu/menu-item.svelte';
 export { default as Menu } from './components/menu/menu.svelte';
+export { default as Progressbar } from './components/progressbar/progressbar.svelte';
 export { default as RadioGroup } from './components/radio/radio-group.svelte';
 export { default as Radio } from './components/radio/radio.svelte';
 export { default as Combobox } from './components/select/combobox.svelte';
