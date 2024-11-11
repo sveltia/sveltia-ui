@@ -55,7 +55,7 @@
       height: 100%;
       background-color: var(
         --sui-progressbar-foreground-color,
-        var(--sui-primary-accent-color-text)
+        var(--sui-primary-accent-color-light)
       );
       transition: width 250ms;
     }
