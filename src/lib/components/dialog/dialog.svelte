@@ -6,6 +6,7 @@
 -->
 <script>
   import { generateElementId } from '@sveltia/utils/element';
+  import { sleep } from '@sveltia/utils/misc';
   import { _ } from 'svelte-i18n';
   import Button from '../button/button.svelte';
   import Spacer from '../divider/spacer.svelte';
@@ -59,7 +60,13 @@
 
   $effect(() => {
     if (open && content) {
-      /** @type {HTMLElement} */ (content.querySelector('input, button.primary'))?.focus();
+      (async () => {
+        await sleep(50);
+        /** @type {HTMLInputElement | HTMLButtonElement} */ (
+          content.querySelector('input, button.primary')
+        )?.focus();
+        /** @type {HTMLInputElement} */ (content.querySelector('input'))?.select();
+      })();
     }
   });
 </script>

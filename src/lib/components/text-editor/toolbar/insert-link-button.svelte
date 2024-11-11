@@ -2,13 +2,18 @@
   import { LinkNode, TOGGLE_LINK_COMMAND } from '@lexical/link';
   import { $getNearestNodeOfType as getNearestNodeOfType } from '@lexical/utils';
   import { generateElementId } from '@sveltia/utils/element';
+  import { sleep } from '@sveltia/utils/misc';
   import {
     COMMAND_PRIORITY_NORMAL,
     KEY_DOWN_COMMAND,
+    $createRangeSelection as createRangeSelection,
+    $createTextNode as createTextNode,
     $getPreviousSelection as getPreviousSelection,
     $getSelection as getSelection,
     $getTextContent as getTextContent,
+    $insertNodes as insertNodes,
     $isRangeSelection as isRangeSelection,
+    $setSelection as setSelection,
   } from 'lexical';
   import { getContext } from 'svelte';
   import { _ } from 'svelte-i18n';
@@ -116,26 +121,34 @@
    */
   const onDialogClose = async (event) => {
     if (event.detail !== 'cancel' && dialogMode !== 'remove') {
-      if (!hasAnchor) {
-        anchorText = anchorText.trim();
-        anchorText ||= anchorURL;
+      await new Promise((resolve) => {
+        $editor.update(async () => {
+          let selection = getSelection() ?? getPreviousSelection()?.clone();
 
-        await new Promise((resolve) => {
-          $editor.update(() => {
-            const selection = getSelection() ?? getPreviousSelection()?.clone();
+          if (!isRangeSelection(selection)) {
+            selection = createRangeSelection();
+          }
 
-            if (isRangeSelection(selection)) {
-              const { anchor, focus } = selection;
+          if (!hasAnchor) {
+            anchorText = anchorText.trim();
+            anchorText ||= anchorURL;
 
-              selection.insertText(anchorText);
-              anchor.offset -= anchorText.length;
-              focus.offset = anchor.offset + anchorText.length;
+            const { anchor, focus } = /** @type {import('lexical').RangeSelection} */ (selection);
+            const node = createTextNode(anchorText);
+            const key = node.getKey();
 
-              resolve(void 0);
-            }
-          });
+            insertNodes([node]);
+            anchor.set(key, anchorText.length, 'text');
+            focus.set(key, 0, 'text');
+          }
+
+          setSelection(selection);
+          resolve(undefined);
         });
-      }
+      });
+
+      // Wait a sec until the text is selected
+      await sleep(50);
 
       $editor.dispatchCommand(TOGGLE_LINK_COMMAND, anchorURL);
     }
@@ -196,25 +209,10 @@
     onDialogClose(event);
   }}
 >
-  {#if !hasAnchor}
-    <div role="none">
-      <label for="{id}-text">{$_('_sui.text_editor.text')}</label>
-      <TextInput
-        id="{id}-text"
-        autofocus
-        bind:value={anchorText}
-        flex
-        onkeydown={(event) => {
-          onInputKeyDown(event);
-        }}
-      />
-    </div>
-  {/if}
   <div role="none">
     <label for="{id}-url">{$_('_sui.text_editor.url')}</label>
     <TextInput
       id="{id}-url"
-      autofocus={hasAnchor || undefined}
       bind:value={anchorURL}
       flex
       aria-label="URL"
@@ -223,6 +221,19 @@
       }}
     />
   </div>
+  {#if !hasAnchor}
+    <div role="none">
+      <label for="{id}-text">{$_('_sui.text_editor.text')}</label>
+      <TextInput
+        id="{id}-text"
+        bind:value={anchorText}
+        flex
+        onkeydown={(event) => {
+          onInputKeyDown(event);
+        }}
+      />
+    </div>
+  {/if}
   {#snippet footerExtra()}
     {#if dialogMode !== 'create'}
       <Button
