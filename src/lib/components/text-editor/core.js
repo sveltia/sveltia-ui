@@ -5,7 +5,7 @@ import {
   LinkNode,
   TOGGLE_LINK_COMMAND,
   $isLinkNode as isLinkNode,
-  toggleLink,
+  $toggleLink as toggleLink,
 } from '@lexical/link';
 import {
   INSERT_ORDERED_LIST_COMMAND,
