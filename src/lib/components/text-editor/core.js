@@ -261,3 +261,15 @@ export const convertMarkdown = async (editor, value) =>
       }
     });
   });
+
+/**
+ * Move focus to the editor so the user can start editing immediately.
+ * @param {import('lexical').LexicalEditor} editor - Editor instance.
+ * @returns {Promise<void>} Nothing.
+ */
+export const focusEditor = async (editor) =>
+  new Promise((resolve) => {
+    editor.focus(() => {
+      resolve(undefined);
+    });
+  });

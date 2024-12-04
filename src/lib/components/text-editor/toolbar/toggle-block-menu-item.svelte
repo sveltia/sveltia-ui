@@ -14,6 +14,7 @@
   import { availableButtons } from '..';
   import Icon from '../../icon/icon.svelte';
   import MenuItemCheckbox from '../../menu/menu-item-checkbox.svelte';
+  import { focusEditor } from '../core';
 
   /**
    * @typedef {object} Props
@@ -43,7 +44,9 @@
   /**
    * Change the current selection’s type to {@link type}.
    */
-  const changeBlockType = () => {
+  const changeBlockType = async () => {
+    await focusEditor($editor);
+
     const [, headingLevel] = type.match(/^heading-(\d)$/) ?? [];
 
     if (headingLevel) {
@@ -75,11 +78,6 @@
         setBlocksType(getSelection(), () => createQuoteNode());
       });
     }
-
-    // Move focus back to the editor
-    window.setTimeout(() => {
-      $editor.focus();
-    }, 500);
   };
 </script>
 

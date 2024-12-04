@@ -160,7 +160,7 @@ blockquote {
 .readonly,
 [aria-disabled="true"],
 [aria-readonly="true"],
-[inert] {
+[inert]:not(body) {
   cursor: default;
   pointer-events: none;
   -webkit-user-select: none;

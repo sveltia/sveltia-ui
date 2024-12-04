@@ -2,7 +2,6 @@
   import { LinkNode, TOGGLE_LINK_COMMAND } from '@lexical/link';
   import { $getNearestNodeOfType as getNearestNodeOfType } from '@lexical/utils';
   import { generateElementId } from '@sveltia/utils/element';
-  import { sleep } from '@sveltia/utils/misc';
   import {
     COMMAND_PRIORITY_NORMAL,
     KEY_DOWN_COMMAND,
@@ -23,6 +22,7 @@
   import Dialog from '../../dialog/dialog.svelte';
   import Icon from '../../icon/icon.svelte';
   import TextInput from '../../text-field/text-input.svelte';
+  import { focusEditor } from '../core';
 
   const id = generateElementId('insert-link');
 
@@ -147,9 +147,7 @@
         });
       });
 
-      // Wait a sec until the text is selected
-      await sleep(50);
-
+      await focusEditor($editor);
       $editor.dispatchCommand(TOGGLE_LINK_COMMAND, anchorURL);
     }
 

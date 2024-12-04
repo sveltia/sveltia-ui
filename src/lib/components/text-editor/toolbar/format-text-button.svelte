@@ -5,6 +5,7 @@
   import { availableButtons } from '..';
   import Button from '../../button/button.svelte';
   import Icon from '../../icon/icon.svelte';
+  import { focusEditor } from '../core';
 
   /**
    * @typedef {object} Props
@@ -33,7 +34,8 @@
   aria-controls="{$editorId}-lexical-root"
   disabled={!$useRichText}
   pressed={$selectionInlineTypes.includes(type)}
-  onclick={() => {
+  onclick={async () => {
+    await focusEditor($editor);
     $editor.dispatchCommand(FORMAT_TEXT_COMMAND, type);
   }}
 >

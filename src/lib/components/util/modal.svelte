@@ -95,23 +95,27 @@
       return;
     }
 
+    const { returnValue } = dialog;
+
     onClosing?.(new CustomEvent('Closing'));
+    // Prevent a button behind the `<dialog>` from being clicked erroneously (Svelte bug)
+    document.body.inert = true;
     dialog.close();
+    document.body.inert = false;
     setActiveClass = false;
     setOpenClass = false;
     await waitForTransition();
     showContent = false;
 
-    if (dialog.returnValue === 'ok') {
+    if (returnValue === 'ok') {
       onOk?.(new CustomEvent('Ok'));
-      onClose?.(new CustomEvent('Close', { detail: { returnValue: 'ok' } }));
     }
 
-    if (dialog.returnValue === 'cancel') {
+    if (returnValue === 'cancel') {
       onCancel?.(new CustomEvent('Cancel'));
-      onClose?.(new CustomEvent('Close', { detail: { returnValue: 'cancel' } }));
     }
 
+    onClose?.(new CustomEvent('Close', { detail: { returnValue } }));
     dialog.returnValue = '';
   };
 

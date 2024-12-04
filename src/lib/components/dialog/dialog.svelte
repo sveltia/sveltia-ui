@@ -63,9 +63,9 @@
       (async () => {
         await sleep(50);
         /** @type {HTMLInputElement | HTMLButtonElement} */ (
-          content.querySelector('input, button.primary')
+          content?.querySelector('input, button.primary')
         )?.focus();
-        /** @type {HTMLInputElement} */ (content.querySelector('input'))?.select();
+        /** @type {HTMLInputElement} */ (content?.querySelector('input'))?.select();
       })();
     }
   });
