@@ -110,7 +110,9 @@ a {
 }
 
 p,
-li {
+ul,
+ol,
+dl {
   margin: var(--sui-paragraph-margin) 0;
   line-height: var(--sui-line-height-comfortable);
 }
