@@ -6,7 +6,6 @@
 -->
 <script>
   import { onMount } from 'svelte';
-  import '../../styles/core.scss';
 
   /**
    * @typedef {object} Props
@@ -100,6 +99,8 @@
 </div>
 
 <style lang="scss">
+  @use '../../styles/core';
+
   .font-loader {
     position: absolute;
     left: -99999px;

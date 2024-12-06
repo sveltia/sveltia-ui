@@ -70,209 +70,211 @@
   --sui-alert-border-color-lightness: 18%;
 }
 
-:root,
-:host {
-  // Base HSL values
-  --sui-base-hue: 210;
-  // Foreground
-  --sui-highlight-foreground-color: hsl(var(--sui-foreground-color-1-hsl));
-  --sui-primary-foreground-color: hsl(var(--sui-foreground-color-2-hsl));
-  --sui-secondary-foreground-color: hsl(var(--sui-foreground-color-3-hsl));
-  --sui-tertiary-foreground-color: hsl(var(--sui-foreground-color-4-hsl));
-  --sui-disabled-foreground-color: hsl(var(--sui-foreground-color-5-hsl));
-  --sui-error-foreground-color: hsl(
-    var(--sui-error-color-hue) var(--sui-alert-foreground-color-saturation)
-      var(--sui-alert-foreground-color-lightness)
-  );
-  --sui-warning-foreground-color: hsl(
-    var(--sui-warning-color-hue) var(--sui-alert-foreground-color-saturation)
-      var(--sui-alert-foreground-color-lightness)
-  );
-  --sui-info-foreground-color: hsl(
-    var(--sui-info-color-hue) var(--sui-alert-foreground-color-saturation)
-      var(--sui-alert-foreground-color-lightness)
-  );
-  --sui-success-foreground-color: hsl(
-    var(--sui-success-color-hue) var(--sui-alert-foreground-color-saturation)
-      var(--sui-alert-foreground-color-lightness)
-  );
-  // Background
-  --sui-hover-background-color: hsl(var(--sui-background-color-5-hsl) / 35%);
-  --sui-selected-background-color: hsl(var(--sui-background-color-5-hsl) / 75%);
-  --sui-active-background-color: hsl(var(--sui-background-color-5-hsl) / 100%);
-  --sui-content-background-color: hsl(var(--sui-background-color-1-hsl));
-  --sui-code-background-color: hsl(var(--sui-background-color-4-hsl));
-  --sui-primary-background-color: hsl(var(--sui-background-color-2-hsl));
-  --sui-primary-background-color-translucent: hsl(var(--sui-background-color-2-hsl) / 80%);
-  --sui-secondary-background-color: hsl(var(--sui-background-color-3-hsl));
-  --sui-secondary-background-color-translucent: hsl(var(--sui-background-color-3-hsl) / 80%);
-  --sui-tertiary-background-color: hsl(var(--sui-background-color-4-hsl));
-  --sui-tertiary-background-color-translucent: hsl(var(--sui-background-color-4-hsl) / 80%);
-  --sui-disabled-background-color: hsl(var(--sui-background-color-4-hsl));
-  --sui-error-background-color: hsl(
-    var(--sui-error-color-hue) var(--sui-alert-background-color-saturation)
-      var(--sui-alert-background-color-lightness)
-  );
-  --sui-warning-background-color: hsl(
-    var(--sui-warning-color-hue) var(--sui-alert-background-color-saturation)
-      var(--sui-alert-background-color-lightness)
-  );
-  --sui-info-background-color: hsl(
-    var(--sui-info-color-hue) var(--sui-alert-background-color-saturation)
-      var(--sui-alert-background-color-lightness)
-  );
-  --sui-success-background-color: hsl(
-    var(--sui-success-color-hue) var(--sui-alert-background-color-saturation)
-      var(--sui-alert-background-color-lightness)
-  );
-  // Outline
-  --sui-focus-ring-width: 4px;
-  // Borders
-  --sui-primary-border-color: hsl(var(--sui-border-color-2-hsl));
-  --sui-secondary-border-color: hsl(var(--sui-border-color-3-hsl));
-  --sui-error-border-color: hsl(
-    var(--sui-error-color-hue) var(--sui-alert-border-color-saturation)
-      var(--sui-alert-border-color-lightness)
-  );
-  --sui-warning-border-color: hsl(
-    var(--sui-warning-color-hue) var(--sui-alert-border-color-saturation)
-      var(--sui-alert-border-color-lightness)
-  );
-  --sui-info-border-color: hsl(
-    var(--sui-info-color-hue) var(--sui-alert-border-color-saturation)
-      var(--sui-alert-border-color-lightness)
-  );
-  --sui-success-border-color: hsl(
-    var(--sui-success-color-hue) var(--sui-alert-border-color-saturation)
-      var(--sui-alert-border-color-lightness)
-  );
-  // Shadows
-  --sui-popup-shadow-color: hsl(var(--sui-shadow-color) / 40%);
-  --sui-popup-backdrop-color: hsl(var(--sui-shadow-color) / 40%);
-  // Text
-  --sui-font-family-default: "Merriweather Sans", sans-serif;
-  --sui-font-size-xxx-large: 23px;
-  --sui-font-size-xx-large: 19px;
-  --sui-font-size-x-large: 17px;
-  --sui-font-size-large: 15px;
-  --sui-font-size-default: 13px;
-  --sui-font-size-small: 11px;
-  --sui-font-size-x-small: 9px;
-  --sui-font-weight-normal: 325; // Merriweather Sans is a little bit bold, so we need to adjust the weight
-  --sui-font-weight-bold: 625; // ditto
-  --sui-font-family-monospace: "Noto Sans Mono", monospace;
-  --sui-font-size-monospace: 0.9em;
-  --sui-line-height-default: 1.25;
-  --sui-line-height-compact: 1.5;
-  --sui-line-height-comfortable: 1.75;
-  --sui-word-spacing-normal: 0.1ex;
-  --sui-paragraph-margin: 1.75em;
-  // Controls
-  --sui-control-small-border-width: 1px;
-  --sui-control-small-border-radius: calc(var(--sui-control-small-height) / 8);
-  --sui-control-small-padding: 0 calc((var(--sui-control-small-height) / 5));
-  --sui-control-small-height: 24px;
-  --sui-control-medium-border-width: 1px;
-  --sui-control-medium-border-radius: calc(var(--sui-control-medium-height) / 8);
-  --sui-control-medium-padding: 0 calc((var(--sui-control-medium-height) / 4));
-  --sui-control-medium-height: 32px;
-  --sui-control-large-border-width: 1px;
-  --sui-control-large-border-radius: calc(var(--sui-control-large-height) / 8);
-  --sui-control-large-padding: 0 calc((var(--sui-control-large-height) / 3));
-  --sui-control-large-height: 48px;
-  --sui-control-border-color: hsl(var(--sui-border-color-2-hsl));
-  --sui-control-foreground-color: var(--sui-primary-foreground-color);
-  --sui-control-background-color: hsl(var(--sui-background-color-4-hsl));
-  --sui-control-font-family: var(--sui-font-family-default);
-  --sui-control-font-size: var(--sui-font-size-default);
-  --sui-control-line-height: var(--sui-line-height-compact);
-  // Button
-  --sui-button-small-border-radius: var(--sui-control-small-border-radius);
-  --sui-button-small-padding: var(--sui-control-small-padding);
-  --sui-button-small-height: var(--sui-control-small-height);
-  --sui-button-medium-border-radius: var(--sui-control-medium-border-radius);
-  --sui-button-medium-padding: var(--sui-control-medium-padding);
-  --sui-button-medium-height: var(--sui-control-medium-height);
-  --sui-button-large-border-radius: var(--sui-control-large-border-radius);
-  --sui-button-large-padding: var(--sui-control-large-padding);
-  --sui-button-large-height: var(--sui-control-large-height);
-  --sui-button-border-color: var(--sui-control-border-color);
-  --sui-button-background-color: var(--sui-control-background-color);
-  // Checkbox, radio button, switch
-  --sui-checkbox-border-radius: var(--sui-control-medium-border-radius);
-  --sui-checkbox-height: 20px;
-  --sui-checkbox-border-color: hsl(var(--sui-border-color-1-hsl));
-  --sui-checkbox-background-color: var(--sui-control-background-color);
-  // Option & menu item
-  --sui-option-border-radius: var(--sui-control-medium-border-radius);
-  --sui-option-padding: calc((var(--sui-control-medium-height) / 6))
-    calc((var(--sui-control-medium-height) / 5));
-  --sui-option-height: var(--sui-control-medium-height);
-  // Listbox
-  --sui-listbox-border-radius: var(--sui-control-medium-border-radius);
-  --sui-listbox-border-color: var(--sui-control-border-color);
-  --sui-listbox-foreground-color: var(--sui-control-foreground-color);
-  --sui-listbox-background-color: hsl(var(--sui-background-color-1-hsl));
-  // Textbox: singleline & multiline text fields
-  --sui-textbox-border-radius: var(--sui-control-medium-border-radius);
-  --sui-textbox-height: var(--sui-control-medium-height);
-  --sui-textbox-border-color: var(--sui-control-border-color);
-  --sui-textbox-foreground-color: var(--sui-control-foreground-color);
-  --sui-textbox-background-color: hsl(var(--sui-background-color-1-hsl));
-  --sui-textbox-font-family: var(--sui-font-family-default);
-  --sui-textbox-font-size: var(--sui-font-size-default);
-  --sui-textbox-singleline-padding: 0 8px;
-  --sui-textbox-singleline-min-width: 240px;
-  --sui-textbox-singleline-line-height: var(--sui-line-height-compact);
-  --sui-textbox-multiline-padding: 16px;
-  --sui-textbox-multiline-min-width: 480px;
-  --sui-textbox-multiline-line-height: var(--sui-line-height-comfortable);
-  // Tab
-  --sui-tab-height: var(--sui-control-medium-height);
-  --sui-tab-small-height: var(--sui-control-small-height);
-  --sui-tab-medium-height: var(--sui-control-medium-height);
-  --sui-tab-large-height: var(--sui-control-large-height);
-  // Toolbar
-  --sui-primary-toolbar-size: 48px;
-  --sui-secondary-toolbar-size: 40px;
-  // table
-  --sui-primary-row-height: 48px;
-  --sui-secondary-row-height: 40px;
+:global {
+  :root,
+  :host {
+    // Base HSL values
+    --sui-base-hue: 210;
+    // Foreground
+    --sui-highlight-foreground-color: hsl(var(--sui-foreground-color-1-hsl));
+    --sui-primary-foreground-color: hsl(var(--sui-foreground-color-2-hsl));
+    --sui-secondary-foreground-color: hsl(var(--sui-foreground-color-3-hsl));
+    --sui-tertiary-foreground-color: hsl(var(--sui-foreground-color-4-hsl));
+    --sui-disabled-foreground-color: hsl(var(--sui-foreground-color-5-hsl));
+    --sui-error-foreground-color: hsl(
+      var(--sui-error-color-hue) var(--sui-alert-foreground-color-saturation)
+        var(--sui-alert-foreground-color-lightness)
+    );
+    --sui-warning-foreground-color: hsl(
+      var(--sui-warning-color-hue) var(--sui-alert-foreground-color-saturation)
+        var(--sui-alert-foreground-color-lightness)
+    );
+    --sui-info-foreground-color: hsl(
+      var(--sui-info-color-hue) var(--sui-alert-foreground-color-saturation)
+        var(--sui-alert-foreground-color-lightness)
+    );
+    --sui-success-foreground-color: hsl(
+      var(--sui-success-color-hue) var(--sui-alert-foreground-color-saturation)
+        var(--sui-alert-foreground-color-lightness)
+    );
+    // Background
+    --sui-hover-background-color: hsl(var(--sui-background-color-5-hsl) / 35%);
+    --sui-selected-background-color: hsl(var(--sui-background-color-5-hsl) / 75%);
+    --sui-active-background-color: hsl(var(--sui-background-color-5-hsl) / 100%);
+    --sui-content-background-color: hsl(var(--sui-background-color-1-hsl));
+    --sui-code-background-color: hsl(var(--sui-background-color-4-hsl));
+    --sui-primary-background-color: hsl(var(--sui-background-color-2-hsl));
+    --sui-primary-background-color-translucent: hsl(var(--sui-background-color-2-hsl) / 80%);
+    --sui-secondary-background-color: hsl(var(--sui-background-color-3-hsl));
+    --sui-secondary-background-color-translucent: hsl(var(--sui-background-color-3-hsl) / 80%);
+    --sui-tertiary-background-color: hsl(var(--sui-background-color-4-hsl));
+    --sui-tertiary-background-color-translucent: hsl(var(--sui-background-color-4-hsl) / 80%);
+    --sui-disabled-background-color: hsl(var(--sui-background-color-4-hsl));
+    --sui-error-background-color: hsl(
+      var(--sui-error-color-hue) var(--sui-alert-background-color-saturation)
+        var(--sui-alert-background-color-lightness)
+    );
+    --sui-warning-background-color: hsl(
+      var(--sui-warning-color-hue) var(--sui-alert-background-color-saturation)
+        var(--sui-alert-background-color-lightness)
+    );
+    --sui-info-background-color: hsl(
+      var(--sui-info-color-hue) var(--sui-alert-background-color-saturation)
+        var(--sui-alert-background-color-lightness)
+    );
+    --sui-success-background-color: hsl(
+      var(--sui-success-color-hue) var(--sui-alert-background-color-saturation)
+        var(--sui-alert-background-color-lightness)
+    );
+    // Outline
+    --sui-focus-ring-width: 4px;
+    // Borders
+    --sui-primary-border-color: hsl(var(--sui-border-color-2-hsl));
+    --sui-secondary-border-color: hsl(var(--sui-border-color-3-hsl));
+    --sui-error-border-color: hsl(
+      var(--sui-error-color-hue) var(--sui-alert-border-color-saturation)
+        var(--sui-alert-border-color-lightness)
+    );
+    --sui-warning-border-color: hsl(
+      var(--sui-warning-color-hue) var(--sui-alert-border-color-saturation)
+        var(--sui-alert-border-color-lightness)
+    );
+    --sui-info-border-color: hsl(
+      var(--sui-info-color-hue) var(--sui-alert-border-color-saturation)
+        var(--sui-alert-border-color-lightness)
+    );
+    --sui-success-border-color: hsl(
+      var(--sui-success-color-hue) var(--sui-alert-border-color-saturation)
+        var(--sui-alert-border-color-lightness)
+    );
+    // Shadows
+    --sui-popup-shadow-color: hsl(var(--sui-shadow-color) / 40%);
+    --sui-popup-backdrop-color: hsl(var(--sui-shadow-color) / 40%);
+    // Text
+    --sui-font-family-default: "Merriweather Sans", sans-serif;
+    --sui-font-size-xxx-large: 23px;
+    --sui-font-size-xx-large: 19px;
+    --sui-font-size-x-large: 17px;
+    --sui-font-size-large: 15px;
+    --sui-font-size-default: 13px;
+    --sui-font-size-small: 11px;
+    --sui-font-size-x-small: 9px;
+    --sui-font-weight-normal: 325; // Merriweather Sans is a little bit bold, so we need to adjust the weight
+    --sui-font-weight-bold: 625; // ditto
+    --sui-font-family-monospace: "Noto Sans Mono", monospace;
+    --sui-font-size-monospace: 0.9em;
+    --sui-line-height-default: 1.25;
+    --sui-line-height-compact: 1.5;
+    --sui-line-height-comfortable: 1.75;
+    --sui-word-spacing-normal: 0.1ex;
+    --sui-paragraph-margin: 1.75em;
+    // Controls
+    --sui-control-small-border-width: 1px;
+    --sui-control-small-border-radius: calc(var(--sui-control-small-height) / 8);
+    --sui-control-small-padding: 0 calc((var(--sui-control-small-height) / 5));
+    --sui-control-small-height: 24px;
+    --sui-control-medium-border-width: 1px;
+    --sui-control-medium-border-radius: calc(var(--sui-control-medium-height) / 8);
+    --sui-control-medium-padding: 0 calc((var(--sui-control-medium-height) / 4));
+    --sui-control-medium-height: 32px;
+    --sui-control-large-border-width: 1px;
+    --sui-control-large-border-radius: calc(var(--sui-control-large-height) / 8);
+    --sui-control-large-padding: 0 calc((var(--sui-control-large-height) / 3));
+    --sui-control-large-height: 48px;
+    --sui-control-border-color: hsl(var(--sui-border-color-2-hsl));
+    --sui-control-foreground-color: var(--sui-primary-foreground-color);
+    --sui-control-background-color: hsl(var(--sui-background-color-4-hsl));
+    --sui-control-font-family: var(--sui-font-family-default);
+    --sui-control-font-size: var(--sui-font-size-default);
+    --sui-control-line-height: var(--sui-line-height-compact);
+    // Button
+    --sui-button-small-border-radius: var(--sui-control-small-border-radius);
+    --sui-button-small-padding: var(--sui-control-small-padding);
+    --sui-button-small-height: var(--sui-control-small-height);
+    --sui-button-medium-border-radius: var(--sui-control-medium-border-radius);
+    --sui-button-medium-padding: var(--sui-control-medium-padding);
+    --sui-button-medium-height: var(--sui-control-medium-height);
+    --sui-button-large-border-radius: var(--sui-control-large-border-radius);
+    --sui-button-large-padding: var(--sui-control-large-padding);
+    --sui-button-large-height: var(--sui-control-large-height);
+    --sui-button-border-color: var(--sui-control-border-color);
+    --sui-button-background-color: var(--sui-control-background-color);
+    // Checkbox, radio button, switch
+    --sui-checkbox-border-radius: var(--sui-control-medium-border-radius);
+    --sui-checkbox-height: 20px;
+    --sui-checkbox-border-color: hsl(var(--sui-border-color-1-hsl));
+    --sui-checkbox-background-color: var(--sui-control-background-color);
+    // Option & menu item
+    --sui-option-border-radius: var(--sui-control-medium-border-radius);
+    --sui-option-padding: calc((var(--sui-control-medium-height) / 6))
+      calc((var(--sui-control-medium-height) / 5));
+    --sui-option-height: var(--sui-control-medium-height);
+    // Listbox
+    --sui-listbox-border-radius: var(--sui-control-medium-border-radius);
+    --sui-listbox-border-color: var(--sui-control-border-color);
+    --sui-listbox-foreground-color: var(--sui-control-foreground-color);
+    --sui-listbox-background-color: hsl(var(--sui-background-color-1-hsl));
+    // Textbox: singleline & multiline text fields
+    --sui-textbox-border-radius: var(--sui-control-medium-border-radius);
+    --sui-textbox-height: var(--sui-control-medium-height);
+    --sui-textbox-border-color: var(--sui-control-border-color);
+    --sui-textbox-foreground-color: var(--sui-control-foreground-color);
+    --sui-textbox-background-color: hsl(var(--sui-background-color-1-hsl));
+    --sui-textbox-font-family: var(--sui-font-family-default);
+    --sui-textbox-font-size: var(--sui-font-size-default);
+    --sui-textbox-singleline-padding: 0 8px;
+    --sui-textbox-singleline-min-width: 240px;
+    --sui-textbox-singleline-line-height: var(--sui-line-height-compact);
+    --sui-textbox-multiline-padding: 16px;
+    --sui-textbox-multiline-min-width: 480px;
+    --sui-textbox-multiline-line-height: var(--sui-line-height-comfortable);
+    // Tab
+    --sui-tab-height: var(--sui-control-medium-height);
+    --sui-tab-small-height: var(--sui-control-small-height);
+    --sui-tab-medium-height: var(--sui-control-medium-height);
+    --sui-tab-large-height: var(--sui-control-large-height);
+    // Toolbar
+    --sui-primary-toolbar-size: 48px;
+    --sui-secondary-toolbar-size: 40px;
+    // table
+    --sui-primary-row-height: 48px;
+    --sui-secondary-row-height: 40px;
 
-  // Make controls larger on touch devices, e.g. mobile & tablet
-  @media (pointer: coarse) {
-    --sui-control-small-height: 30px;
-    --sui-control-medium-height: 40px;
-    --sui-control-large-height: 60px;
-    --sui-checkbox-height: 24px;
-    --sui-primary-toolbar-size: 56px;
-    --sui-secondary-toolbar-size: 48px;
-    --sui-primary-row-height: 56px;
-    --sui-secondary-row-height: 48px;
-  }
+    // Make controls larger on touch devices, e.g. mobile & tablet
+    @media (pointer: coarse) {
+      --sui-control-small-height: 30px;
+      --sui-control-medium-height: 40px;
+      --sui-control-large-height: 60px;
+      --sui-checkbox-height: 24px;
+      --sui-primary-toolbar-size: 56px;
+      --sui-secondary-toolbar-size: 48px;
+      --sui-primary-row-height: 56px;
+      --sui-secondary-row-height: 48px;
+    }
 
-  @media (prefers-reduced-transparency) {
-    --sui-primary-background-color-translucent: hsl(var(--sui-background-color-2-hsl));
-    --sui-secondary-background-color-translucent: hsl(var(--sui-background-color-3-hsl));
-    --sui-tertiary-background-color-translucent: hsl(var(--sui-background-color-4-hsl));
-  }
+    @media (prefers-reduced-transparency) {
+      --sui-primary-background-color-translucent: hsl(var(--sui-background-color-2-hsl));
+      --sui-secondary-background-color-translucent: hsl(var(--sui-background-color-3-hsl));
+      --sui-tertiary-background-color-translucent: hsl(var(--sui-background-color-4-hsl));
+    }
 
-  &[data-theme="light"] {
-    @include light-theme;
-  }
-
-  &[data-theme="dark"] {
-    @include dark-theme;
-  }
-
-  // Follow the system appearance setting when the `data-theme` attribute is not set (yet)
-  &:not([data-theme]) {
-    @media (prefers-color-scheme: light) {
+    &[data-theme="light"] {
       @include light-theme;
     }
 
-    @media (prefers-color-scheme: dark) {
+    &[data-theme="dark"] {
       @include dark-theme;
+    }
+
+    // Follow the system appearance setting when the `data-theme` attribute is not set (yet)
+    &:not([data-theme]) {
+      @media (prefers-color-scheme: light) {
+        @include light-theme;
+      }
+
+      @media (prefers-color-scheme: dark) {
+        @include dark-theme;
+      }
     }
   }
 }

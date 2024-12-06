@@ -6,181 +6,183 @@
 // Use `font-display: block;` @see https://stackoverflow.com/q/41710834
 @import url("https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=block");
 
-.material-symbols-outlined {
-  font-variation-settings:
-    "FILL" 0,
-    "wght" 300,
-    "GRAD" 0,
-    "opsz" 24;
-}
-
-*,
-::before,
-::after {
-  overflow-anchor: none;
-  scroll-behavior: smooth;
-  box-sizing: border-box;
-  outline-offset: 0px;
-  outline-width: var(--sui-focus-ring-width) !important;
-  outline-style: solid;
-  outline-color: transparent;
-  border-width: 0;
-  border-style: solid;
-  vertical-align: top;
-
-  @media (prefers-reduced-motion) {
-    scroll-behavior: auto;
-    // Disable transition but make sure the `transitionend` event works
-    transition-duration: 1ms !important;
-  }
-}
-
-::selection {
-  background-color: var(--sui-primary-accent-color-translucent);
-}
-
-* {
-  -webkit-tap-highlight-color: transparent;
-}
-
-:focus {
-  z-index: 1;
-  outline-width: 0;
-}
-
-:focus-visible {
-  outline-color: var(--sui-primary-accent-color-translucent);
-  z-index: 2;
-}
-
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  margin: 0;
-  font-weight: var(--sui-font-weight-bold, bold);
-  line-height: var(--sui-line-height-default);
-}
-
-h1 {
-  font-size: 32px;
-}
-
-h2 {
-  font-size: 28px;
-}
-
-h3 {
-  font-size: 24px;
-}
-
-h4 {
-  font-size: 20px;
-}
-
-h5 {
-  font-size: 16px;
-}
-
-h6 {
-  font-size: 12px;
-}
-
-strong {
-  font-weight: var(--sui-font-weight-bold, bold);
-}
-
-a {
-  color: var(--sui-primary-accent-color-text);
-  text-decoration: none;
-  text-underline-offset: 2px;
-
-  &:hover,
-  &:focus,
-  &:active {
-    text-decoration: underline;
+:global {
+  .material-symbols-outlined {
+    font-variation-settings:
+      "FILL" 0,
+      "wght" 300,
+      "GRAD" 0,
+      "opsz" 24;
   }
 
-  :root[data-underline-links="true"] &,
-  :host[data-underline-links="true"] & {
-    text-decoration: underline;
+  *,
+  ::before,
+  ::after {
+    overflow-anchor: none;
+    scroll-behavior: smooth;
+    box-sizing: border-box;
+    outline-offset: 0px;
+    outline-width: var(--sui-focus-ring-width) !important;
+    outline-style: solid;
+    outline-color: transparent;
+    border-width: 0;
+    border-style: solid;
+    vertical-align: top;
+
+    @media (prefers-reduced-motion) {
+      scroll-behavior: auto;
+      // Disable transition but make sure the `transitionend` event works
+      transition-duration: 1ms !important;
+    }
   }
-}
 
-p,
-ul,
-ol,
-dl {
-  margin: var(--sui-paragraph-margin) 0;
-  line-height: var(--sui-line-height-comfortable);
-}
-
-ul,
-ol {
-  padding-inline: 2em;
-}
-
-code,
-pre {
-  border-radius: 4px;
-  background-color: var(--sui-code-background-color);
-  font-family: var(--sui-font-family-monospace);
-  font-size: var(--sui-font-size-monospace);
-  vertical-align: -0.05em;
-}
-
-pre {
-  padding: 8px;
-  line-height: var(--sui-line-height-compact);
-  -webkit-user-select: text;
-  user-select: text;
-}
-
-code {
-  padding: 2px 4px;
-}
-
-table {
-  border-collapse: collapse;
-}
-
-th,
-td {
-  border: 1px solid var(--sui-textbox-border-color);
-  padding: 8px;
-}
-
-blockquote {
-  margin-inline: 16px 0;
-  border-inline-start: 4px solid var(--sui-textbox-border-color);
-  padding-inline-start: 12px;
-}
-
-.disabled,
-.readonly,
-[aria-disabled="true"],
-[aria-readonly="true"],
-[inert]:not(body) {
-  cursor: default;
-  pointer-events: none;
-  -webkit-user-select: none;
-  user-select: none;
-  filter: grayscale(1) opacity(0.35);
-
-  :global(*) {
-    filter: grayscale(0) opacity(1); // Maintain the opacity on child nodes
+  ::selection {
+    background-color: var(--sui-primary-accent-color-translucent);
   }
-}
 
-.disabled *,
-.readonly *,
-[aria-disabled="true"] *,
-[aria-readonly="true"] *,
-[inert] * {
-  cursor: default;
-  pointer-events: none;
-  -webkit-user-select: none;
-  user-select: none;
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  :focus {
+    z-index: 1;
+    outline-width: 0;
+  }
+
+  :focus-visible {
+    outline-color: var(--sui-primary-accent-color-translucent);
+    z-index: 2;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    margin: 0;
+    font-weight: var(--sui-font-weight-bold, bold);
+    line-height: var(--sui-line-height-default);
+  }
+
+  h1 {
+    font-size: 32px;
+  }
+
+  h2 {
+    font-size: 28px;
+  }
+
+  h3 {
+    font-size: 24px;
+  }
+
+  h4 {
+    font-size: 20px;
+  }
+
+  h5 {
+    font-size: 16px;
+  }
+
+  h6 {
+    font-size: 12px;
+  }
+
+  strong {
+    font-weight: var(--sui-font-weight-bold, bold);
+  }
+
+  a {
+    color: var(--sui-primary-accent-color-text);
+    text-decoration: none;
+    text-underline-offset: 2px;
+
+    &:hover,
+    &:focus,
+    &:active {
+      text-decoration: underline;
+    }
+
+    :global(:root[data-underline-links="true"]) &,
+    :global(:host[data-underline-links="true"]) & {
+      text-decoration: underline;
+    }
+  }
+
+  p,
+  ul,
+  ol,
+  dl {
+    margin: var(--sui-paragraph-margin) 0;
+    line-height: var(--sui-line-height-comfortable);
+  }
+
+  ul,
+  ol {
+    padding-inline: 2em;
+  }
+
+  code,
+  pre {
+    border-radius: 4px;
+    background-color: var(--sui-code-background-color);
+    font-family: var(--sui-font-family-monospace);
+    font-size: var(--sui-font-size-monospace);
+    vertical-align: -0.05em;
+  }
+
+  pre {
+    padding: 8px;
+    line-height: var(--sui-line-height-compact);
+    -webkit-user-select: text;
+    user-select: text;
+  }
+
+  code {
+    padding: 2px 4px;
+  }
+
+  table {
+    border-collapse: collapse;
+  }
+
+  th,
+  td {
+    border: 1px solid var(--sui-textbox-border-color);
+    padding: 8px;
+  }
+
+  blockquote {
+    margin-inline: 16px 0;
+    border-inline-start: 4px solid var(--sui-textbox-border-color);
+    padding-inline-start: 12px;
+  }
+
+  .disabled,
+  .readonly,
+  [aria-disabled="true"],
+  [aria-readonly="true"],
+  [inert]:not(body) {
+    cursor: default;
+    pointer-events: none;
+    -webkit-user-select: none;
+    user-select: none;
+    filter: grayscale(1) opacity(0.35);
+
+    :global(*) {
+      filter: grayscale(0) opacity(1); // Maintain the opacity on child nodes
+    }
+  }
+
+  .disabled *,
+  .readonly *,
+  [aria-disabled="true"] *,
+  [aria-readonly="true"] *,
+  [inert] * {
+    cursor: default;
+    pointer-events: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
 }
