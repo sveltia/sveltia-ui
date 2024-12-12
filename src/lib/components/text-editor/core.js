@@ -43,6 +43,8 @@ import {
 } from 'lexical';
 import { blockButtonTypes, textFormatButtonTypes } from '.';
 
+const allTransformers = [...TRANSFORMERS];
+
 /**
  * Lexical editor configuration.
  * @type {import('lexical').CreateEditorArgs}
@@ -78,27 +80,28 @@ const editorConfig = {
 };
 
 /**
- * Listen to changes on the editor.
- * @param {import('lexical').LexicalEditor} editor - Editor instance.
+ * Get the current selection’s block and inline level types.
+ * @returns {{ blockType: import('$lib/typedefs').TextEditorBlockType,
+ * inlineTypes: import('$lib/typedefs').TextEditorInlineType[] }} Types.
  */
-const onEditorUpdate = (editor) => {
+const getSelectionTypes = () => {
   const selection = getSelection();
 
   if (!isRangeSelection(selection)) {
-    return;
+    return { blockType: 'paragraph', inlineTypes: [] };
   }
 
   const anchor = selection.anchor.getNode();
   /** @type {ElementNode | null} */
   let parent = null;
   /** @type {import('$lib/typedefs').TextEditorInlineType[]} */
-  const selectionInlineTypes = textFormatButtonTypes.filter((type) => selection.hasFormat(type));
+  const inlineTypes = textFormatButtonTypes.filter((type) => selection.hasFormat(type));
 
   if (anchor.getType() !== 'root') {
     parent = anchor instanceof ElementNode ? anchor : getNearestNodeOfType(anchor, ElementNode);
 
     if (isLinkNode(parent)) {
-      selectionInlineTypes.push('link');
+      inlineTypes.push('link');
       parent = getNearestNodeOfType(parent, ElementNode);
     }
 
@@ -107,7 +110,7 @@ const onEditorUpdate = (editor) => {
     }
   }
 
-  const selectionBlockType = /** @type {import('$lib/typedefs').TextEditorBlockType} */ (
+  const blockType = /** @type {import('$lib/typedefs').TextEditorBlockType} */ (
     (() => {
       if (!parent) {
         return 'paragraph';
@@ -135,15 +138,25 @@ const onEditorUpdate = (editor) => {
     })()
   );
 
+  return { blockType, inlineTypes };
+};
+
+/**
+ * Listen to changes made on the editor and trigger the Update event.
+ * @param {import('lexical').LexicalEditor} editor - Editor instance.
+ */
+const onEditorUpdate = (editor) => {
+  const { blockType, inlineTypes } = getSelectionTypes();
+
   editor.getRootElement()?.dispatchEvent(
     new CustomEvent('Update', {
       detail: {
         value: convertToMarkdownString(
           // Use underscores for italic text in Markdown instead of asterisks
-          TRANSFORMERS.filter((/** @type {any} */ { tag }) => tag !== '*'),
+          allTransformers.filter((/** @type {any} */ { tag }) => tag !== '*'),
         ),
-        selectionBlockType,
-        selectionInlineTypes,
+        selectionBlockType: blockType,
+        selectionInlineTypes: inlineTypes,
       },
     }),
   );
@@ -151,9 +164,16 @@ const onEditorUpdate = (editor) => {
 
 /**
  * Initialize the Lexical editor.
+ * @param {object} [options] - Options.
+ * @param {import('$lib/typedefs').TextEditorComponent[]} [options.components] - Editor components.
  * @returns {import('lexical').LexicalEditor} Editor instance.
  */
-export const initEditor = () => {
+export const initEditor = ({ components } = {}) => {
+  components?.forEach(({ node, transformer }) => {
+    /** @type {any[]} */ (editorConfig.nodes).unshift(node);
+    allTransformers.unshift(transformer);
+  });
+
   const editor = createEditor(editorConfig);
 
   registerRichText(editor);
@@ -254,10 +274,10 @@ export const convertMarkdown = async (editor, value) =>
   new Promise((resolve, reject) => {
     editor.update(() => {
       try {
-        convertFromMarkdownString(value, TRANSFORMERS);
+        convertFromMarkdownString(value, allTransformers);
         resolve(void 0);
-      } catch {
-        reject(new Error('Failed to convert Markdown'));
+      } catch (ex) {
+        reject(new Error('Failed to convert Markdown', { cause: ex }));
       }
     });
   });

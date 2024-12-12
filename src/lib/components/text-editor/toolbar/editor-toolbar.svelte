@@ -12,7 +12,9 @@
   import Menu from '../../menu/menu.svelte';
   import Toolbar from '../../toolbar/toolbar.svelte';
   import FormatTextButton from './format-text-button.svelte';
+  import InsertImageButton from './insert-image-button.svelte';
   import InsertLinkButton from './insert-link-button.svelte';
+  import InsertMenuButton from './insert-menu-button.svelte';
   import ToggleBlockMenuItem from './toggle-block-menu-item.svelte';
 
   /**
@@ -45,8 +47,12 @@
     useRichText,
     hasConverterError,
     enabledButtons,
+    components,
     convertMarkdown,
   } = getContext('state');
+
+  const imageComponent = $derived(components.find(({ id }) => id === 'image'));
+  const otherComponents = $derived(components.filter(({ id }) => id !== 'image'));
 
   /**
    * Enabled block level buttons.
@@ -99,6 +105,15 @@
           {/if}
         {/each}
       </ButtonGroup>
+    {/if}
+    {#if components.length}
+      <Divider orientation="vertical" />
+      {#if imageComponent}
+        <InsertImageButton component={imageComponent} />
+      {/if}
+      {#if otherComponents.length}
+        <InsertMenuButton components={otherComponents} />
+      {/if}
     {/if}
     <Spacer flex />
     {#if modes.length > 1}

@@ -228,6 +228,17 @@
  */
 
 /**
+ * @typedef {object} TextEditorComponent
+ * @property {string} id - Component ID.
+ * @property {string} label - Component label.
+ * @property {string} [icon] - Material Symbols icon name.
+ * @property {import('lexical').LexicalNode} node - Lexical node class implementation.
+ * @property {(props?: Record<string, any>) => import('lexical').LexicalNode} createNode - Function
+ * to create a new node instance.
+ * @property {import('@lexical/markdown').Transformer} transformer - Node transformer.
+ */
+
+/**
  * @typedef {object} TextEditorState
  * @property {import('svelte/store').Writable<import('lexical').LexicalEditor>} editor - Lexical
  * editor instance.
@@ -243,6 +254,7 @@
  * error while converting Markdown to Lexical nodes.
  * @property {(TextEditorBlockType | TextEditorInlineType)[]} enabledButtons - Enabled buttons for
  * the editor.
+ * @property {TextEditorComponent[]} components - Editor components.
  * @property {Function} convertMarkdown - Function to trigger the Lexical converter.
  */
 

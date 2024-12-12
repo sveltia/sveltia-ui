@@ -22,6 +22,7 @@
    * @property {import('$lib/typedefs').TextEditorMode[]} [modes] - Enabled modes.
    * @property {(import('$lib/typedefs').TextEditorBlockType |
    * import('$lib/typedefs').TextEditorInlineType)[]} [buttons] - Enabled buttons.
+   * @property {import('$lib/typedefs').TextEditorComponent[]} [components] - Editor components.
    * @property {string} [class] - The `class` attribute on the wrapper element.
    * @property {boolean} [hidden] - Whether to hide the widget.
    * @property {boolean} [disabled] - Whether to disable the widget. An alias of the `aria-disabled`
@@ -44,6 +45,7 @@
     flex = false,
     modes = ['rich-text', 'plain-text'],
     buttons = [...inlineButtonTypes, ...blockButtonTypes],
+    components = [],
     hidden = false,
     disabled = false,
     readonly = false,
@@ -69,7 +71,7 @@
    * restore the original value when there is an error while conversion.
    */
   const convertMarkdown = async () => {
-    if (!$editor) {
+    if (!$editor?.getRootElement()) {
       return;
     }
 
@@ -80,16 +82,16 @@
       // string if the `value` is `undefined`
       // @see https://github.com/facebook/lexical/issues/2308
       await convertMarkdownToLexical($editor, inputValue ?? '');
-    } catch {
+    } catch (ex) {
       $hasConverterError = true;
       inputValue = originalValue;
+      // eslint-disable-next-line no-console
+      console.error(ex);
     }
   };
 
   $effect(() => {
-    if (!$editor) {
-      return;
-    }
+    void $editor;
 
     const newValue = value;
 
@@ -129,7 +131,7 @@
 
   // The editor has to be initialized in the browser
   onMount(() => {
-    $editor = initEditor();
+    $editor = initEditor({ components });
   });
 
   setContext(
@@ -143,6 +145,7 @@
       useRichText,
       hasConverterError,
       enabledButtons: buttons,
+      components,
       convertMarkdown,
     }),
   );

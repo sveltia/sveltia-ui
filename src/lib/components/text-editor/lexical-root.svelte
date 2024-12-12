@@ -1,5 +1,4 @@
 <script>
-  import { $createParagraphNode as createParagraphNode, $getRoot as getRoot } from 'lexical';
   import { getContext, onMount } from 'svelte';
 
   /**
@@ -97,11 +96,6 @@
   $effect(() => {
     if ($editor && lexicalRoot) {
       $editor.setRootElement(lexicalRoot);
-      // We should avoid an empty editor; there should be at least one `<p>`
-      // @see https://github.com/facebook/lexical/issues/2308
-      $editor.update(() => {
-        getRoot().append(createParagraphNode());
-      });
     }
   });
 </script>
