@@ -1,4 +1,4 @@
 node_modules
 /.svelte-kit
-/package
+/dist
 pnpm-lock.yaml
