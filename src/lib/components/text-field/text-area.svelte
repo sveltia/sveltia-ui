@@ -71,7 +71,7 @@
     class:auto-resize={autoResize}
   ></textarea>
   {#if autoResize}
-    <div class="clone" aria-hidden="true">{value ?? ''}</div>
+    <div class="clone" aria-hidden="true">{value}</div>
   {/if}
 </div>
 

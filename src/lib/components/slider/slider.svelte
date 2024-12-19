@@ -316,7 +316,7 @@
     <div
       role="slider"
       tabindex={disabled ? -1 : 0}
-      aria-label={multiThumb ? sliderLabels?.[0] || '' : sliderLabel}
+      aria-label={multiThumb ? sliderLabels?.[0] : sliderLabel}
       aria-hidden={hidden}
       aria-disabled={disabled}
       aria-readonly={readonly}
@@ -332,7 +332,7 @@
       <div
         role="slider"
         tabindex={disabled ? -1 : 0}
-        aria-label={sliderLabels?.[1] || ''}
+        aria-label={sliderLabels?.[1]}
         aria-hidden={hidden}
         aria-disabled={disabled}
         aria-readonly={readonly}

@@ -82,7 +82,7 @@
 <div
   {...restProps}
   role="none"
-  class="sui app-shell {orientation ?? ''}"
+  class="sui app-shell {orientation}"
   ondragover={(event) => event.preventDefault()}
   ondrop={(event) => event.preventDefault()}
   oncontextmenu={(event) => {

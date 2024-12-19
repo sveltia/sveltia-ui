@@ -36,7 +36,7 @@
 <div
   {...restProps}
   role="toolbar"
-  class="sui toolbar {orientation} {variant ?? ''} {className}"
+  class="sui toolbar {orientation} {variant} {className}"
   {hidden}
   aria-hidden={hidden}
   aria-disabled={disabled}
