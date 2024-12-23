@@ -15,6 +15,15 @@
 </section>
 
 <section>
+  <h3>Invalid</h3>
+  <Example>
+    <div role="none">
+      <TextEditor invalid />
+    </div>
+  </Example>
+</section>
+
+<section>
   <h3>Disabled</h3>
   <Example>
     <div role="none">

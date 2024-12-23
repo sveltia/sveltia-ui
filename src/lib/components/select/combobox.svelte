@@ -122,8 +122,9 @@
       aria-hidden={hidden}
       aria-disabled={disabled}
       aria-readonly={readonly}
+      aria-required={required}
+      aria-invalid={invalid}
       aria-haspopup="listbox"
-      aria-activedescendant="selected-option"
     >
       <div role="none" class="label">
         {value !== undefined ? label : $_('_sui.combobox.select_an_option')}
@@ -144,7 +145,6 @@
       aria-controls="{id}-popup"
       aria-expanded={isPopupOpen}
       aria-haspopup="listbox"
-      aria-activedescendant="selected-option"
     />
   {/if}
   <Button
@@ -289,6 +289,11 @@
       &:hover,
       &:focus {
         background-color: var(--sui-hover-background-color);
+      }
+
+      &[aria-invalid='true'] {
+        border-color: var(--sui-error-border-color);
+        background-color: var(--sui-error-background-color);
       }
 
       .label {

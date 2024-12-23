@@ -304,6 +304,7 @@
   class="sui slider {className}"
   class:disabled
   class:readonly
+  class:invalid
   {hidden}
 >
   <div bind:this={base} role="none" class="base" onpointerdown={(event) => onPointerDown(event)}>
@@ -404,6 +405,10 @@
     height: calc(var(--sui-checkbox-height) / 2);
     border-radius: var(--sui-checkbox-height);
     background-color: var(--sui-primary-accent-color-light);
+
+    .invalid & {
+      background-color: var(--sui-error-border-color);
+    }
   }
 
   [role='slider'] {
@@ -419,6 +424,10 @@
       calc((var(--sui-checkbox-height) / 2 - 1px) * -1),
       calc((var(--sui-checkbox-height) / 4 - 1px) * -1)
     );
+
+    .invalid & {
+      border-color: var(--sui-error-border-color);
+    }
   }
 
   .label {

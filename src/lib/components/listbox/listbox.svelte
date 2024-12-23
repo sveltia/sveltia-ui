@@ -104,6 +104,10 @@
       background-color: var(--sui-control-border-color);
     }
 
+    &[aria-invalid='true'] {
+      border-color: var(--sui-error-border-color);
+    }
+
     &:global(.tabs) {
       padding: 0;
       border-width: 0 1px 0 0;

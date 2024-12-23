@@ -34,6 +34,20 @@
 </section>
 
 <section>
+  <h3>Invalid</h3>
+  <Example>
+    <div role="none">
+      <CheckboxGroup aria-label="Ingredients">
+        <Checkbox name="ingredients" value="rice" checked label="Rice" invalid />
+        <Checkbox name="ingredients" value="beans" checked={false} label="Beans" invalid />
+        <Checkbox name="ingredients" value="cheese" checked="mixed" label="Cheese" invalid />
+        <Checkbox name="ingredients" value="cheese" disabled label="Lettuce" invalid />
+      </CheckboxGroup>
+    </div>
+  </Example>
+</section>
+
+<section>
   <h3>Disabled</h3>
   <Example>
     <div role="none">

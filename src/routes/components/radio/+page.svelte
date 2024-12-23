@@ -48,6 +48,20 @@
 </section>
 
 <section>
+  <h3>Invalid</h3>
+  <Example>
+    <div role="none">
+      <RadioGroup invalid>
+        <Radio checked label="Strawberry" />
+        <Radio label="Grape" />
+        <Radio label="Lemon" />
+        <Radio disabled label="Orange" />
+      </RadioGroup>
+    </div>
+  </Example>
+</section>
+
+<section>
   <h3>Disabled</h3>
   <Example>
     <div role="none">

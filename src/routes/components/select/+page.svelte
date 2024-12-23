@@ -93,6 +93,45 @@
 </section>
 
 <section>
+  <h3>Invalid</h3>
+  <Example>
+    <div role="none">
+      <Select invalid>
+        <Option label="Banana" selected />
+        <Option label="Mango" />
+        <Option label="Apple" />
+        <Divider />
+        <Option label="Avocado" />
+        <Option label="Grape" disabled />
+      </Select>
+    </div>
+    <div role="none">
+      <Combobox invalid>
+        <Option label="Banana" />
+        <Option label="Mango" />
+        <Option label="Apple" />
+        <Divider />
+        <Option label="Avocado" />
+        <Option label="Grape" disabled />
+      </Combobox>
+    </div>
+    <div role="none">
+      <SelectTags
+        invalid
+        values={['banana']}
+        options={[
+          { label: 'Banana', value: 'banana' },
+          { label: 'Mango', value: 'mango' },
+          { label: 'Apple', value: 'apple' },
+          { label: 'Avocado', value: 'avocado' },
+          { label: 'Grape', value: 'grape' },
+        ]}
+      />
+    </div>
+  </Example>
+</section>
+
+<section>
   <h3>Disabled</h3>
   <Example>
     <div role="none">

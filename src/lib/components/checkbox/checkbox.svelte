@@ -88,7 +88,7 @@
       {disabled}
       {readonly}
       {required}
-      {invalid}
+      aria-invalid={invalid}
       aria-checked={checked}
       aria-label={ariaLabel || undefined}
       aria-labelledby={ariaLabel ? undefined : `${id}-label`}
@@ -188,6 +188,15 @@
 
     :global(button[aria-checked='false']) {
       color: transparent;
+    }
+
+    :global(button[aria-invalid='true']) {
+      border-color: var(--sui-error-border-color);
+      color: var(--sui-error-foreground-color);
+    }
+
+    :global(button[aria-checked='true'][aria-invalid='true']) {
+      background-color: var(--sui-error-background-color);
     }
 
     label {

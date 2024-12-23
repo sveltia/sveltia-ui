@@ -55,6 +55,21 @@
 </section>
 
 <section>
+  <h3>Invalid</h3>
+  <Example>
+    <div role="none">
+      <Listbox invalid>
+        <Option label="Option 1" selected />
+        <Option label="Option 2" />
+        <Option label="Option 3" />
+        <Option label="Option 4" />
+        <Option label="Option 5" disabled />
+      </Listbox>
+    </div>
+  </Example>
+</section>
+
+<section>
   <h3>Disabled</h3>
   <Example>
     <div role="none">

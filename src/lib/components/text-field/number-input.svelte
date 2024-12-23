@@ -54,13 +54,15 @@
   const isMax = $derived(typeof max === 'number' && Number(value || 0) >= max);
 
   $effect(() => {
-    invalid =
-      (required && edited && (value === undefined || value === '')) ||
-      (value !== undefined &&
-        value !== '' &&
-        (Number.isNaN(Number(value)) ||
-          (typeof min === 'number' && Number(value || 0) < min) ||
-          (typeof max === 'number' && Number(value || 0) > max)));
+    if (edited) {
+      invalid =
+        (required && (value === undefined || value === '')) ||
+        (value !== undefined &&
+          value !== '' &&
+          (Number.isNaN(Number(value)) ||
+            (typeof min === 'number' && Number(value || 0) < min) ||
+            (typeof max === 'number' && Number(value || 0) > max)));
+    }
   });
 
   /**

@@ -88,6 +88,18 @@
         gap: 8px;
       }
     }
+
+    &[aria-invalid='true'] :global(button) {
+      border-color: var(--sui-error-border-color);
+    }
+
+    &[aria-invalid='true'] :global(button[aria-checked='true']) {
+      border-color: var(--sui-error-border-color);
+    }
+
+    &[aria-invalid='true'] :global(button[aria-checked='true']::before) {
+      background-color: var(--sui-error-border-color);
+    }
   }
 
   .inner {

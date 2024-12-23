@@ -89,6 +89,27 @@
 </section>
 
 <section>
+  <h3>Invalid</h3>
+  <Example>
+    <div role="none">
+      <TextInput invalid />
+    </div>
+    <div role="none">
+      <PasswordInput invalid />
+    </div>
+    <div role="none">
+      <NumberInput min={0} invalid />
+    </div>
+    <div role="none">
+      <SearchBar invalid />
+    </div>
+    <div role="none">
+      <TextArea invalid />
+    </div>
+  </Example>
+</section>
+
+<section>
   <h3>Disabled</h3>
   <Example>
     <div role="none">

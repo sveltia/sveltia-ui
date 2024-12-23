@@ -36,6 +36,20 @@
 </section>
 
 <section>
+  <h3>Invalid</h3>
+  <Example>
+    <div role="none">
+      <SelectButtonGroup invalid>
+        <SelectButton variant="tertiary" selected label="Strawberry" />
+        <SelectButton variant="tertiary" label="Grape" />
+        <SelectButton variant="tertiary" label="Lemon" />
+        <SelectButton variant="tertiary" label="Orange" disabled />
+      </SelectButtonGroup>
+    </div>
+  </Example>
+</section>
+
+<section>
   <h3>Disabled</h3>
   <Example>
     <div role="none">

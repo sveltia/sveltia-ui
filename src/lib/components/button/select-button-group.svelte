@@ -88,6 +88,10 @@
       }
     }
 
+    &[aria-invalid='true'] :global(button) {
+      border-color: var(--sui-error-border-color);
+    }
+
     :global(button[aria-checked='true']) {
       color: var(--sui-highlight-foreground-color);
       background-color: var(--sui-selected-background-color);

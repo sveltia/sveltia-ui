@@ -31,6 +31,25 @@
 </section>
 
 <section>
+  <h3>Invalid</h3>
+  <Example>
+    <div role="none">
+      <Slider invalid />
+    </div>
+    <div role="none">
+      <Slider
+        values={[0, 24]}
+        min={0}
+        max={24}
+        step={3}
+        optionLabels={[0, 6, 12, 18, 24]}
+        invalid
+      />
+    </div>
+  </Example>
+</section>
+
+<section>
   <h3>Disabled</h3>
   <Example>
     <div role="none">

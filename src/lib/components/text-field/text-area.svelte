@@ -145,7 +145,7 @@
     }
 
     &[aria-invalid='true'] {
-      border-color: var(--sui-error-foreground-color);
+      border-color: var(--sui-error-border-color);
     }
   }
 

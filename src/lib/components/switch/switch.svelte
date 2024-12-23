@@ -91,6 +91,12 @@
     -webkit-user-select: none;
     user-select: none;
 
+    &[aria-invalid='true'] {
+      span {
+        background-color: var(--sui-error-border-color) !important;
+      }
+    }
+
     &:hover {
       &[aria-checked='false'] {
         span {
