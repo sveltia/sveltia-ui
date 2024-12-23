@@ -10,7 +10,7 @@
    * @property {{ label: string, value: string, searchValue?: string }[]} options - Available
    * options.
    * @property {string[]} [values] - Selected option values.
-   * @property {number | undefined} [max] - Maximum number of selectable options.
+   * @property {number} [max] - Maximum number of selectable options.
    * @property {string} [class] - The `class` attribute on the wrapper element.
    * @property {boolean} [hidden] - Whether to hide the widget.
    * @property {boolean} [disabled] - Whether to disable the widget. An alias of the `aria-disabled`

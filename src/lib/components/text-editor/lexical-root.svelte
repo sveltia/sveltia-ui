@@ -3,7 +3,7 @@
 
   /**
    * @typedef {object} Props
-   * @property {string | undefined} [value] - Input value.
+   * @property {string} [value] - Input value.
    * @property {string} [class] - The `class` attribute on the wrapper element.
    * @property {boolean} [hidden] - Whether to hide the widget.
    * @property {boolean} [disabled] - Whether to disable the widget. An alias of the `aria-disabled`

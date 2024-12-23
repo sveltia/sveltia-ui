@@ -17,9 +17,9 @@
    * attribute.
    * @property {boolean} [checked] - Whether to check the widget. An alias of the `aria-checked`
    * attribute.
-   * @property {string | undefined} [name] - The `name` attribute on the `<button>` element.
-   * @property {string | undefined} [value] - The `value` attribute on the `<button>` element.
-   * @property {string | undefined} [label] - Text label displayed next to the checkbox.
+   * @property {string} [name] - The `name` attribute on the `<button>` element.
+   * @property {string} [value] - The `value` attribute on the `<button>` element.
+   * @property {string} [label] - Text label displayed next to the checkbox.
    * @property {import('svelte').Snippet} [children] - Primary slot content.
    * @property {import('svelte').Snippet} [default] - Default slot content.
    * @property {(event: CustomEvent) => void} [onChange] - Custom `Change` event handler.

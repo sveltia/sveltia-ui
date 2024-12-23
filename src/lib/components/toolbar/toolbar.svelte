@@ -13,7 +13,7 @@
    * attribute.
    * @property {'horizontal' | 'vertical'} [orientation] - Orientation of the widget. An alias of
    * the `aria-orientation` attribute.
-   * @property {'primary' | 'secondary' | undefined} [variant] - The style variant of the toolbar.
+   * @property {'primary' | 'secondary'} [variant] - The style variant of the toolbar.
    * @property {import('svelte').Snippet} [children] - Primary slot content.
    */
 

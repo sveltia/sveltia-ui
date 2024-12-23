@@ -1,12 +1,12 @@
 /**
  * @typedef {object} ButtonProps
- * @property {HTMLButtonElement | undefined} [element] - Reference to the `<button>` element.
+ * @property {HTMLButtonElement} [element] - Reference to the `<button>` element.
  * @property {string} [class] - The `class` attribute on the `<button>` element.
  * @property {'button' | 'submit' | 'reset'} [type] - The `type` attribute on the `<button>`
  * element.
  * @property {string} [role] - The `role` attribute on the `<button>` element.
- * @property {string | undefined} [name] - The `name` attribute on the `<button>` element.
- * @property {string | undefined} [value] - The `value` attribute on the `<button>` element.
+ * @property {string} [name] - The `name` attribute on the `<button>` element.
+ * @property {string} [value] - The `value` attribute on the `<button>` element.
  * @property {boolean} [hidden] - Whether to hide the widget. An alias of the `aria-hidden`
  * attribute.
  * @property {boolean} [disabled] - Whether to disable the widget. An alias of the `aria-disabled`
@@ -14,15 +14,15 @@
  * @property {boolean} [readonly] - Whether to make the widget read-only. An alias of the
  * `aria-readonly` attribute used in certain roles, including `checkbox`, `listbox`, `slider` and
  * `textbox`.
- * @property {boolean | 'mixed' | undefined} [pressed] - Whether to mark the widget pressed. An
+ * @property {boolean | 'mixed'} [pressed] - Whether to mark the widget pressed. An
  * alias of the `aria-pressed` attribute.
- * @property {string | undefined} [keyShortcuts] - Keyboard shortcuts. An alias of the
+ * @property {string} [keyShortcuts] - Keyboard shortcuts. An alias of the
  * `aria-keyshortcuts` attribute. Accepts the special `Accel` key, which will be replaced with
  * `Control` or `Meta` depending on the user’s operating system.
  * @property {string} [label] - Text label displayed on the button.
- * @property {'primary' | 'secondary' | 'tertiary' | 'ghost' | 'link' | undefined} [variant] - The
+ * @property {'primary' | 'secondary' | 'tertiary' | 'ghost' | 'link'} [variant] - The
  * style variant of the button.
- * @property {'small' | 'medium' | 'large' | undefined} [size] - The size of the button.
+ * @property {'small' | 'medium' | 'large'} [size] - The size of the button.
  * @property {boolean} [iconic] - Whether to only show an icon on the button and trim the padding.
  * @property {boolean} [pill] - Whether to make the button rounded.
  * @property {boolean} [flex] - Make the button width flexible.
@@ -49,7 +49,7 @@
  * @property {boolean} [escapeDismiss] - Whether to close the modal when the Escape key is pressed.
  * @property {boolean} [keepContent] - Whether to keep the content in the DOM tree when the modal is
  * not displayed.
- * @property {HTMLDialogElement | undefined} [dialog] - A reference to the `<dialog>` element.
+ * @property {HTMLDialogElement} [dialog] - A reference to the `<dialog>` element.
  * @property {import('svelte').Snippet} [children] - Primary slot content.
  * @property {import('svelte').Snippet} [extraContent] - Extra slot content.
  * @property {(event: CustomEvent) => void} [onOpening] - Custom `Opening` event handler.
@@ -119,7 +119,7 @@
  * `aria-required` attribute.
  * @property {boolean} [invalid] - Whether to mark the widget invalid. An alias of the
  * `aria-invalid` attribute.
- * @property {string | undefined} [value] - Selected option’s value.
+ * @property {string} [value] - Selected option’s value.
  * @property {boolean} [editable] - Whether to make the `combobox` editable.
  * @property {PopupPosition} [position] - Where to show the dropdown menu.
  * @property {import('svelte').Snippet} [children] - Primary slot content.
@@ -129,13 +129,13 @@
 
 /**
  * @typedef {object} TextInputProps
- * @property {HTMLInputElement | undefined} [element] - Reference to the `<input>` element.
+ * @property {HTMLInputElement} [element] - Reference to the `<input>` element.
  * @property {'textbox' | 'searchbox' | 'combobox' | 'spinbutton'} [role] - The `role` attribute on
  * the `<input>` element.
- * @property {string | undefined} [keyShortcuts] - Keyboard shortcuts. An alias of the
+ * @property {string} [keyShortcuts] - Keyboard shortcuts. An alias of the
  * `aria-keyshortcuts` attribute. Accepts the special `Accel` key, which will be replaced with
  * `Control` or `Meta` depending on the user’s operating system.
- * @property {string | undefined} [name] - The `name` attribute on the `<input>` element.
+ * @property {string} [name] - The `name` attribute on the `<input>` element.
  * @property {boolean} [showInlineLabel] - Whether to display `aria-label` over the `<input>`
  * element if it’s empty, just like how the HTML `placeholder` attribute works.
  * @property {'text' | 'decimal' | 'numeric' | 'tel' | 'search' | 'email' | 'url'} [inputmode] - The

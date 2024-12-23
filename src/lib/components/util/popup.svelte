@@ -15,9 +15,9 @@
    * @property {boolean} [open] - Whether to open the popup.
    * @property {HTMLElement} [anchor] - A reference to the anchor element that opens the popup.
    * Typically a `<button>`.
-   * @property {HTMLElement | undefined} [content] - A reference to the content element.
+   * @property {HTMLElement} [content] - A reference to the content element.
    * @property {import('$lib/typedefs').PopupPosition} [position] - Where to show the popup.
-   * @property {HTMLElement | undefined} [positionBaseElement] - The base element of
+   * @property {HTMLElement} [positionBaseElement] - The base element of
    * {@link position}. If omitted, this will be {@link anchor}.
    * @property {boolean} [touchOptimized] - Whether to show the popup at the center of the screen on
    * mobile/tablet and ignore the defined dropdown `position`.

@@ -17,7 +17,7 @@
 
   /**
    * @typedef {object} Props
-   * @property {string | undefined} [value] - Input value.
+   * @property {string} [value] - Input value.
    * @property {boolean} [flex] - Make the text input container flexible.
    * @property {import('$lib/typedefs').TextEditorMode[]} [modes] - Enabled modes.
    * @property {(import('$lib/typedefs').TextEditorBlockType |

@@ -10,7 +10,7 @@
 
   /**
    * @typedef {object} Props
-   * @property {HTMLElement | undefined} [popupPositionBaseElement] - The base element of
+   * @property {HTMLElement} [popupPositionBaseElement] - The base element of
    * {@link popupPosition}. If omitted, this will be {@link buttonComponent}.
    */
 

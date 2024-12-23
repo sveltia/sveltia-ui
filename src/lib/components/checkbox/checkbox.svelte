@@ -19,7 +19,7 @@
    * `aria-invalid` attribute.
    * @property {boolean | 'mixed'} [checked] - Whether to check the widget. An alias of the
    * `aria-checked` attribute.
-   * @property {string | undefined} [label] - Text label displayed next to the checkbox.
+   * @property {string} [label] - Text label displayed next to the checkbox.
    * @property {string} [aria-label] - `aria-label` attribute.
    * @property {import('svelte').Snippet} [checkIcon] - Check icon slot content.
    */

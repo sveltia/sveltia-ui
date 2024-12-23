@@ -16,7 +16,7 @@
    * attribute.
    * @property {'horizontal' | 'vertical'} [orientation] - Orientation of the widget. An alias of
    * the `aria-orientation` attribute.
-   * @property {string | undefined} [name] - The `data-name` attribute on the wrapper element.
+   * @property {string} [name] - The `data-name` attribute on the wrapper element.
    * @property {import('svelte').Snippet} [children] - Primary slot content.
    * @property {(event: CustomEvent) => void} [onChange] - Custom `Change` event handler.
    */

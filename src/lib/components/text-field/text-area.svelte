@@ -8,9 +8,9 @@
 <script>
   /**
    * @typedef {object} Props
-   * @property {string | undefined} [value] - Input value.
+   * @property {string} [value] - Input value.
    * @property {boolean} [flex] - Make the text input container flexible.
-   * @property {string | undefined} [name] - The `name` attribute on the `<textarea>` element.
+   * @property {string} [name] - The `name` attribute on the `<textarea>` element.
    * @property {boolean} [autoResize] - Whether to automatically resize the `<textarea>` based on
    * the content.
    * @property {string} [class] - The `class` attribute on the wrapper element.

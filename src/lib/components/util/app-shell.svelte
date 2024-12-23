@@ -9,7 +9,7 @@
 
   /**
    * @typedef {object} Props
-   * @property {'horizontal' | 'vertical' | undefined} [orientation] - Orientation of the app
+   * @property {'horizontal' | 'vertical'} [orientation] - Orientation of the app
    * shell’s children..
    * @property {import('svelte').Snippet} [children] - Primary slot content.
    */

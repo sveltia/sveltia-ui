@@ -13,7 +13,7 @@
    * @property {boolean} [selected] - Whether to allow selecting more than one `<GridRow>` and/or
    * `<GridCell>`. An alias of the `aria-multiselectable` attribute.
    * @property {boolean} [clickToSelect] - Whether to select a row by clicking on it.
-   * @property {HTMLElement | undefined} [element] - A reference to the wrapper element.
+   * @property {HTMLElement} [element] - A reference to the wrapper element.
    * @property {import('svelte').Snippet} [children] - Primary slot content.
    * @property {(event: CustomEvent) => void} [onChange] - Custom `Change` event handler.
    */

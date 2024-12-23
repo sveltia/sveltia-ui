@@ -11,7 +11,7 @@
 
   /**
    * @typedef {object} Props
-   * @property {string | undefined} [value] - Date.
+   * @property {string} [value] - Date.
    */
 
   /**

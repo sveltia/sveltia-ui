@@ -7,7 +7,7 @@
 <script>
   /**
    * @typedef {object} Props
-   * @property {string | undefined} [label] - Text label displayed next to the switch.
+   * @property {string} [label] - Text label displayed next to the switch.
    * @property {string} [class] - The `class` attribute on the wrapper element.
    * @property {boolean} [hidden] - Whether to hide the widget.
    * @property {boolean} [disabled] - Whether to disable the widget. An alias of the `aria-disabled`

@@ -14,8 +14,8 @@
   /**
    * @typedef {object} Props
    * @property {number} [value] - Input value.
-   * @property {number | undefined} [min] - Minimum allowed value.
-   * @property {number | undefined} [max] - Maximum allowed value.
+   * @property {number} [min] - Minimum allowed value.
+   * @property {number} [max] - Maximum allowed value.
    * @property {number} [step] - Value to be added or removed when using the up/down arrow key or
    * button.
    * @property {import('svelte').Snippet} [increaseIcon] - Increase icon slot content.

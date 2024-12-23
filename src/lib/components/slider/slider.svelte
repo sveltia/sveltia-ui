@@ -16,8 +16,8 @@
    * @property {number} [min] - Minimum allowed value. An alias of the `aria-valuemin` attribute.
    * @property {number} [max] - Maximum allowed value. An alias of the `aria-valuemax` attribute.
    * @property {string} [sliderLabel] - `aria-label` on the slider.
-   * @property {[number, number] | undefined} [values] - Value list for a multi-thumb slider.
-   * @property {[string, string] | undefined} [sliderLabels] - `aria-label` on a multi-thumb slider.
+   * @property {[number, number]} [values] - Value list for a multi-thumb slider.
+   * @property {[string, string]} [sliderLabels] - `aria-label` on a multi-thumb slider.
    * @property {number} [step] - Step option like `<input type="range">`.
    * @property {(string[] | number[])} [optionLabels] - Visible labels on the slider.
    * @property {boolean} [flex] - Make the text input container flexible.
