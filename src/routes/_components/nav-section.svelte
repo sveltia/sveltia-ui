@@ -1,5 +1,5 @@
 <script>
-  import { page } from '$app/stores';
+  import { page } from '$app/state';
 
   /**
    * @typedef {object} Props
@@ -22,7 +22,7 @@
   <h3>{title}</h3>
   <ul>
     {#each pages as { key, label, disabled } (key)}
-      {@const current = $page.url.pathname === `/components/${key}`}
+      {@const current = page.url.pathname === `/components/${key}`}
       <li>
         {#if disabled}
           {label}
