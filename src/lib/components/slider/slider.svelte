@@ -365,7 +365,7 @@
     position: relative;
     display: inline-block;
     margin: var(--sui-focus-ring-width);
-    padding: var(--sui-checkbox-height) calc(var(--sui-checkbox-height) / 2);
+    padding: 4px 6px;
     touch-action: none;
 
     &:hover {
@@ -383,7 +383,7 @@
 
   .base {
     position: relative;
-    width: var(--sui-slider-base-width, calc(var(--sui-checkbox-height) * 10));
+    width: var(--sui-slider-base-width, 240px);
     height: calc(var(--sui-checkbox-height) / 2);
     cursor: pointer;
   }
@@ -393,7 +393,7 @@
     border-style: solid;
     border-color: var(--sui-control-border-color);
     border-radius: var(--sui-checkbox-height);
-    background-color: var(--sui-button-background-color);
+    background-color: var(--sui-slider-background-color, var(--sui-secondary-background-color));
     transition: all 200ms;
     width: 100%;
     height: 100%;

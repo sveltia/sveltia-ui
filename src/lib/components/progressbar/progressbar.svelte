@@ -43,9 +43,12 @@
 <style lang="scss">
   .progressbar {
     overflow: hidden;
+    border-width: var(--sui-progressbar-border-width, 1px);
+    border-style: var(--sui-progressbar-border-style, solid);
+    border-color: var(--sui-progressbar-border-color, var(--sui-control-border-color));
     border-radius: var(--sui-progressbar-border-radius, 16px);
     width: var(--sui-progressbar-width, 240px);
-    height: var(--sui-progressbar-height, 8px);
+    height: var(--sui-progressbar-height, 10px);
     background-color: var(
       --sui-progressbar-background-color,
       var(--sui-secondary-background-color)
