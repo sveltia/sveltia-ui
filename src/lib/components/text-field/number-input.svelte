@@ -13,6 +13,7 @@
 
   /**
    * @typedef {object} Props
+   * @property {number} [value] - Input value.
    * @property {number | undefined} [min] - Minimum allowed value.
    * @property {number | undefined} [max] - Maximum allowed value.
    * @property {number} [step] - Value to be added or removed when using the up/down arrow key or
@@ -48,20 +49,27 @@
 
   const id = generateElementId('input');
   let edited = $state(false);
+  let inputValue = $state('');
 
   const maximumFractionDigits = $derived(String(step).split('.')[1]?.length || 0);
-  const isMin = $derived(typeof min === 'number' && Number(value || 0) <= min);
-  const isMax = $derived(typeof max === 'number' && Number(value || 0) >= max);
+  const isMin = $derived(typeof min === 'number' && Number(inputValue || 0) <= min);
+  const isMax = $derived(typeof max === 'number' && Number(inputValue || 0) >= max);
+
+  $effect(() => {
+    const newValue = inputValue.trim() ? Number(inputValue) : NaN;
+
+    value = !Number.isNaN(newValue) ? newValue : undefined;
+  });
 
   $effect(() => {
     if (edited) {
       invalid =
-        (required && (value === undefined || value === '')) ||
-        (value !== undefined &&
-          value !== '' &&
-          (Number.isNaN(Number(value)) ||
-            (typeof min === 'number' && Number(value || 0) < min) ||
-            (typeof max === 'number' && Number(value || 0) > max)));
+        (required && (value === undefined || inputValue === '')) ||
+        (inputValue !== undefined &&
+          inputValue !== '' &&
+          (Number.isNaN(Number(inputValue)) ||
+            (typeof min === 'number' && Number(inputValue || 0) < min) ||
+            (typeof max === 'number' && Number(inputValue || 0) > max)));
     }
   });
 
@@ -69,22 +77,22 @@
    * Decrease the number.
    */
   const decrease = () => {
-    if (isMin) {
+    if (isMin || Number.isNaN(Number(inputValue))) {
       return;
     }
 
-    value = Number(Number(value || 0) - step).toFixed(maximumFractionDigits);
+    inputValue = Number(Number(inputValue || 0) - step).toFixed(maximumFractionDigits);
   };
 
   /**
    * Increase the number.
    */
   const increase = () => {
-    if (isMax) {
+    if (isMax || Number.isNaN(Number(inputValue))) {
       return;
     }
 
-    value = Number(Number(value || 0) + step).toFixed(maximumFractionDigits);
+    inputValue = Number(Number(inputValue || 0) + step).toFixed(maximumFractionDigits);
   };
 </script>
 
@@ -136,7 +144,7 @@
     {...restProps}
     role="spinbutton"
     {id}
-    bind:value
+    bind:value={inputValue}
     spellcheck="false"
     {flex}
     {hidden}
@@ -162,6 +170,11 @@
         increase();
       }
 
+      if (!edited) {
+        edited = true;
+      }
+    }}
+    oninput={() => {
       if (!edited) {
         edited = true;
       }

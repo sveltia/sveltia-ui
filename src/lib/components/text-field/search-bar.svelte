@@ -15,6 +15,7 @@
 
   /**
    * @typedef {object} Props
+   * @property {string} [value] - Input value.
    * @property {import('svelte').Snippet} [searchIcon] - Search icon slot content.
    * @property {import('svelte').Snippet} [closeIcon] - Close icon slot content.
    */

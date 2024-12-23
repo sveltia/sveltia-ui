@@ -129,7 +129,6 @@
 
 /**
  * @typedef {object} TextInputProps
- * @property {string | undefined} [value] - Input value.
  * @property {HTMLInputElement | undefined} [element] - Reference to the `<input>` element.
  * @property {'textbox' | 'searchbox' | 'combobox' | 'spinbutton'} [role] - The `role` attribute on
  * the `<input>` element.

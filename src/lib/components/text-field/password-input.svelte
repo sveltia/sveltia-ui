@@ -14,6 +14,7 @@
 
   /**
    * @typedef {object} Props
+   * @property {string} [value] - Input value.
    * @property {import('svelte').Snippet} [visibilityIcon] - Visibility icon slot content.
    */
 
