@@ -78,6 +78,9 @@
     const originalValue = inputValue;
 
     try {
+      // We should avoid an empty editor; there should be at least one `<p>`, so give it an empty
+      // string if the `value` is `undefined`
+      // @see https://github.com/facebook/lexical/issues/2308
       await convertMarkdownToLexical($editor, inputValue ?? '');
     } catch (ex) {
       $hasConverterError = true;
@@ -88,27 +91,20 @@
   };
 
   $effect(() => {
-    // We should avoid an empty editor; there should be at least one `<p>`, so give it an empty
-    // string if the `value` is `undefined`
-    // @see https://github.com/facebook/lexical/issues/2308
-    if ($editor?.getEditorState().isEmpty()) {
-      convertMarkdownToLexical($editor, '');
-    }
-  });
-
-  $effect(() => {
     void $editor;
 
     const newValue = value;
 
     // Avoid a cycle dependency & infinite loop
     untrack(() => {
-      if (inputValue !== newValue) {
-        inputValue = newValue ?? '';
+      const hasChange = inputValue !== newValue;
 
-        if ($useRichText) {
-          convertMarkdown();
-        }
+      if (hasChange) {
+        inputValue = newValue ?? '';
+      }
+
+      if ($useRichText && (hasChange || $editor?.getEditorState().isEmpty())) {
+        convertMarkdown();
       }
     });
   });
