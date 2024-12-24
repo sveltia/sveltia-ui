@@ -48,6 +48,7 @@ export const strings = {
     bulleted_list: 'Bulleted List',
     numbered_list: 'Numbered List',
     blockquote: 'Block Quote',
+    code_block: 'Code Block',
     bold: 'Bold',
     italic: 'Italic',
     code: 'Code',

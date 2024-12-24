@@ -10,6 +10,10 @@ declare namespace App {
   // interface Platform {}
 }
 
+interface Window {
+  Prism: any;
+}
+
 /**
  * Silence some import errors.
  * @see https://stackoverflow.com/q/64194571

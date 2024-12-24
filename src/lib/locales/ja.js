@@ -48,6 +48,7 @@ export const strings = {
     bulleted_list: '番号なしリスト',
     numbered_list: '番号付きリスト',
     blockquote: 'ブロック引用',
+    code_block: 'コードブロック',
     bold: '太字',
     italic: '斜体',
     code: 'コード',

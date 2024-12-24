@@ -1,4 +1,10 @@
-import { CodeHighlightNode, CodeNode } from '@lexical/code';
+import {
+  CodeHighlightNode,
+  CodeNode,
+  $isCodeHighlightNode as isCodeHighlightNode,
+  $isCodeNode as isCodeNode,
+  registerCodeHighlighting,
+} from '@lexical/code';
 import { registerDragonSupport } from '@lexical/dragon';
 import { createEmptyHistoryState, registerHistory } from '@lexical/history';
 import {
@@ -31,6 +37,7 @@ import {
 } from '@lexical/rich-text';
 import { TableCellNode, TableNode, TableRowNode } from '@lexical/table';
 import { $getNearestNodeOfType as getNearestNodeOfType } from '@lexical/utils';
+import { sleep } from '@sveltia/utils/misc';
 import {
   COMMAND_PRIORITY_NORMAL,
   ElementNode,
@@ -41,6 +48,7 @@ import {
   $getSelection as getSelection,
   $isRangeSelection as isRangeSelection,
 } from 'lexical';
+import prismComponents from 'prismjs/components';
 import { blockButtonTypes, textFormatButtonTypes } from '.';
 
 const allTransformers = [...TRANSFORMERS];
@@ -75,6 +83,40 @@ const editorConfig = {
       nested: {
         listitem: 'nested',
       },
+    },
+    code: 'code-block',
+    // https://github.com/facebook/lexical/blob/main/packages/lexical-website/docs/getting-started/theming.md
+    codeHighlight: {
+      atrule: 'token atrule',
+      attr: 'token attr',
+      boolean: 'token boolean',
+      builtin: 'token builtin',
+      cdata: 'token cdata',
+      char: 'token char',
+      class: 'token class',
+      'class-name': 'token class-name',
+      comment: 'token comment',
+      constant: 'token constant',
+      deleted: 'token deleted',
+      doctype: 'token doctype',
+      entity: 'token entity',
+      function: 'token function',
+      important: 'token important',
+      inserted: 'token inserted',
+      keyword: 'token keyword',
+      namespace: 'token namespace',
+      number: 'token number',
+      operator: 'token operator',
+      prolog: 'token prolog',
+      property: 'token property',
+      punctuation: 'token punctuation',
+      regex: 'token regex',
+      selector: 'token selector',
+      string: 'token string',
+      symbol: 'token symbol',
+      tag: 'token tag',
+      url: 'token url',
+      variable: 'token variable',
     },
   },
 };
@@ -128,6 +170,10 @@ const getSelectionTypes = () => {
         return 'blockquote';
       }
 
+      if (isCodeNode(parent) || isCodeHighlightNode(parent)) {
+        return 'code-block';
+      }
+
       const type = parent.getType();
 
       if (blockButtonTypes.includes(/** @type {any} */ (type))) {
@@ -179,6 +225,13 @@ export const initEditor = ({ components } = {}) => {
   registerRichText(editor);
   registerDragonSupport(editor);
   registerHistory(editor, createEmptyHistoryState(), 1000);
+
+  registerCodeHighlighting(editor, {
+    defaultLanguage: 'plain',
+    // eslint-disable-next-line jsdoc/require-jsdoc
+    tokenize: (code, language = 'plain') =>
+      window.Prism.tokenize(code, window.Prism.languages[language] ?? window.Prism.languages.plain),
+  });
 
   editor.registerCommand(
     TOGGLE_LINK_COMMAND,
@@ -270,8 +323,24 @@ export const initEditor = ({ components } = {}) => {
  * @returns {Promise<void>} Nothing.
  * @throws {Error} Failed to convert the value to Lexical nodes.
  */
-export const convertMarkdown = async (editor, value) =>
-  new Promise((resolve, reject) => {
+export const convertMarkdown = async (editor, value) => {
+  // Load Prism language support on demand; the `loadLanguages` Prism utility method cannot be used
+  await Promise.all(
+    [...value.matchAll(/^```(?<lang>.+?)\n/gm)].map(async ({ groups: { lang } = {} }) => {
+      if (!(lang in window.Prism.languages) && lang in prismComponents.languages) {
+        try {
+          await import(
+            // eslint-disable-next-line jsdoc/no-bad-blocks
+            /* @vite-ignore */ `https://unpkg.com/prismjs@1.29.0/components/prism-${lang}.min.js`
+          );
+        } catch {
+          //
+        }
+      }
+    }),
+  );
+
+  return new Promise((resolve, reject) => {
     editor.update(() => {
       try {
         convertFromMarkdownString(value, allTransformers);
@@ -281,15 +350,20 @@ export const convertMarkdown = async (editor, value) =>
       }
     });
   });
+};
 
 /**
  * Move focus to the editor so the user can start editing immediately.
  * @param {import('lexical').LexicalEditor} editor - Editor instance.
  * @returns {Promise<void>} Nothing.
  */
-export const focusEditor = async (editor) =>
-  new Promise((resolve) => {
+export const focusEditor = async (editor) => {
+  await sleep(100);
+  editor.getRootElement()?.focus();
+
+  return new Promise((resolve) => {
     editor.focus(() => {
       resolve(undefined);
     });
   });
+};

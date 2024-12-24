@@ -1,4 +1,5 @@
 <script>
+  import { $createCodeNode as createCodeNode } from '@lexical/code';
   import { INSERT_ORDERED_LIST_COMMAND, INSERT_UNORDERED_LIST_COMMAND } from '@lexical/list';
   import {
     $createHeadingNode as createHeadingNode,
@@ -76,6 +77,12 @@
     if (type === 'blockquote') {
       $editor.update(() => {
         setBlocksType(getSelection(), () => createQuoteNode());
+      });
+    }
+
+    if (type === 'code-block') {
+      $editor.update(() => {
+        setBlocksType(getSelection(), () => createCodeNode());
       });
     }
   };

@@ -17,6 +17,7 @@ ignorePaths:
   - pnpm-lock.yaml
   - data/**/*.json
 words:
+  - atrule
   - beforeinput
   - colour
   - colours
@@ -28,6 +29,7 @@ words:
   - plusplus
   - pnpm
   - postcss
+  - prismjs
   - singleline
   - stylelint
   - Sveltia

@@ -73,6 +73,11 @@ export const availableButtons = {
     icon: 'format_quote',
     inline: false,
   },
+  'code-block': {
+    labelKey: 'code_block',
+    icon: 'code_blocks',
+    inline: false,
+  },
 };
 /**
  * @type {import('$lib/typedefs').TextEditorFormatType[]}
@@ -96,4 +101,5 @@ export const blockButtonTypes = [
   'bulleted-list',
   'numbered-list',
   'blockquote',
+  'code-block',
 ];
