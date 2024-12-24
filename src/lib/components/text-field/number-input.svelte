@@ -6,6 +6,7 @@
 -->
 <script>
   import { generateElementId } from '@sveltia/utils/element';
+  import { untrack } from 'svelte';
   import { _ } from 'svelte-i18n';
   import Button from '../button/button.svelte';
   import Icon from '../icon/icon.svelte';
@@ -54,6 +55,16 @@
   const maximumFractionDigits = $derived(String(step).split('.')[1]?.length || 0);
   const isMin = $derived(typeof min === 'number' && Number(inputValue || 0) <= min);
   const isMax = $derived(typeof max === 'number' && Number(inputValue || 0) >= max);
+
+  $effect(() => {
+    const newInputValue = String(value ?? '');
+
+    untrack(() => {
+      if (inputValue !== newInputValue) {
+        inputValue = newInputValue;
+      }
+    });
+  });
 
   $effect(() => {
     const newValue = inputValue.trim() ? Number(inputValue) : NaN;
