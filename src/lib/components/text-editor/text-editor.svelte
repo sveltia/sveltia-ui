@@ -78,9 +78,6 @@
     const originalValue = inputValue;
 
     try {
-      // We should avoid an empty editor; there should be at least one `<p>`, so give it an empty
-      // string if the `value` is `undefined`
-      // @see https://github.com/facebook/lexical/issues/2308
       await convertMarkdownToLexical($editor, inputValue ?? '');
     } catch (ex) {
       $hasConverterError = true;
@@ -89,6 +86,15 @@
       console.error(ex);
     }
   };
+
+  $effect(() => {
+    // We should avoid an empty editor; there should be at least one `<p>`, so give it an empty
+    // string if the `value` is `undefined`
+    // @see https://github.com/facebook/lexical/issues/2308
+    if ($editor?.getEditorState().isEmpty()) {
+      convertMarkdownToLexical($editor, '');
+    }
+  });
 
   $effect(() => {
     void $editor;
