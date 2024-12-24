@@ -28,19 +28,19 @@
     "test:unit": "vitest"
   },
   "dependencies": {
-    "@lexical/code": "^0.21.0",
-    "@lexical/dragon": "^0.21.0",
-    "@lexical/history": "^0.21.0",
-    "@lexical/link": "^0.21.0",
-    "@lexical/list": "^0.21.0",
-    "@lexical/markdown": "^0.21.0",
-    "@lexical/rich-text": "^0.21.0",
-    "@lexical/selection": "^0.21.0",
-    "@lexical/table": "^0.21.0",
-    "@lexical/utils": "^0.21.0",
+    "@lexical/code": "^0.22.0",
+    "@lexical/dragon": "^0.22.0",
+    "@lexical/history": "^0.22.0",
+    "@lexical/link": "^0.22.0",
+    "@lexical/list": "^0.22.0",
+    "@lexical/markdown": "^0.22.0",
+    "@lexical/rich-text": "^0.22.0",
+    "@lexical/selection": "^0.22.0",
+    "@lexical/table": "^0.22.0",
+    "@lexical/utils": "^0.22.0",
     "@sveltia/utils": "^0.6.3",
     "prismjs": "^1.29.0",
-    "lexical": "^0.21.0"
+    "lexical": "^0.22.0"
   },
   "peerDependencies": {
     "svelte": "^5.0.0"
@@ -48,7 +48,7 @@
   "devDependencies": {
     "@playwright/test": "^1.49.1",
     "@sveltejs/adapter-auto": "^3.3.1",
-    "@sveltejs/kit": "^2.14.1",
+    "@sveltejs/kit": "^2.15.0",
     "@sveltejs/package": "^2.3.7",
     "@sveltejs/vite-plugin-svelte": "5.0.3",
     "cspell": "^8.17.1",
