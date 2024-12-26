@@ -196,7 +196,7 @@
     }
 
     :global(button[aria-checked='true'][aria-invalid='true']) {
-      background-color: var(--sui-error-background-color);
+      background-color: var(--sui-checkbox-background-color);
     }
 
     label {

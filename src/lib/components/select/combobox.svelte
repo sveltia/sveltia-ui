@@ -293,7 +293,6 @@
 
       &[aria-invalid='true'] {
         border-color: var(--sui-error-border-color);
-        background-color: var(--sui-error-background-color);
       }
 
       .label {
