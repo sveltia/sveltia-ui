@@ -130,8 +130,8 @@
 /**
  * @typedef {object} TextInputProps
  * @property {HTMLInputElement} [element] - Reference to the `<input>` element.
- * @property {'textbox' | 'searchbox' | 'combobox' | 'spinbutton'} [role] - The `role` attribute on
- * the `<input>` element.
+ * @property {'textbox' | 'searchbox' | 'combobox' | 'spinbutton' | 'gridcell'} [role] - The `role`
+ * attribute on the `<input>` element.
  * @property {string} [keyShortcuts] - Keyboard shortcuts. An alias of the
  * `aria-keyshortcuts` attribute. Accepts the special `Accel` key, which will be replaced with
  * `Control` or `Meta` depending on the user’s operating system.
