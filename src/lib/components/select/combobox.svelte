@@ -182,7 +182,7 @@
   {position}
   touchOptimized={true}
   bind:open={isPopupOpen}
-  onopen={() => {
+  onOpen={() => {
     showFilter = (popupContent?.querySelectorAll('[role="option"]')?.length ?? 0) > 5;
     searchTerms = '';
   }}
