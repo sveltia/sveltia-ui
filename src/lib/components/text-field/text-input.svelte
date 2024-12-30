@@ -62,6 +62,7 @@
     disabled={disabled || undefined}
     readonly={readonly || undefined}
     {inputmode}
+    aria-label={ariaLabel}
     aria-hidden={hidden}
     aria-disabled={disabled}
     aria-readonly={readonly}
