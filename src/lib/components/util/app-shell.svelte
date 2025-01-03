@@ -26,8 +26,8 @@
   } = $props();
 
   const stylesheets = [
-    // https://fonts.google.com/share?selection.family=Merriweather%20Sans:ital,wght@0,300;0,600;1,300%7CNoto%20Sans%20Mono
-    'https://fonts.googleapis.com/css2?family=Merriweather+Sans:ital,wght@0,300;0,600;1,300&family=Noto+Sans+Mono&display=swap',
+    // https://fonts.google.com/share?selection.family=Merriweather+Sans:ital,wght@0,300..800;1,300..800|Noto+Sans+Mono:wght@100..900
+    'https://fonts.googleapis.com/css2?family=Merriweather+Sans:ital,wght@0,300..800;1,300..800&family=Noto+Sans+Mono:wght@100..900&display=swap',
     // https://fonts.google.com/icons?icon.set=Material+Symbols
     // Use `font-display: block;` @see https://stackoverflow.com/q/41710834
     'https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=block',
