@@ -120,7 +120,7 @@
    * @see https://github.com/facebook/lexical/discussions/3013
    */
   const onDialogClose = async (event) => {
-    if (event.detail !== 'cancel' && dialogMode !== 'remove') {
+    if (event.detail.returnValue !== 'cancel' && dialogMode !== 'remove') {
       await new Promise((resolve) => {
         $editor.update(async () => {
           let selection = getSelection() ?? getPreviousSelection()?.clone();
