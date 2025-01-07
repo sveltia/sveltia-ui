@@ -227,7 +227,7 @@ export const initEditor = ({ components } = {}) => {
   registerHistory(editor, createEmptyHistoryState(), 1000);
 
   registerCodeHighlighting(editor, {
-    defaultLanguage: 'plain',
+    defaultLanguage: '',
     // eslint-disable-next-line jsdoc/require-jsdoc
     tokenize: (code, language = 'plain') =>
       window.Prism.tokenize(code, window.Prism.languages[language] ?? window.Prism.languages.plain),
