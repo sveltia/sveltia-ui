@@ -145,6 +145,7 @@
     :global([role='toolbar']) {
       position: sticky;
       top: 0;
+      z-index: 1;
       display: flex;
       gap: 8px;
       border-width: 1px 1px 0;
