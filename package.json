@@ -48,8 +48,8 @@
   "devDependencies": {
     "@playwright/test": "^1.49.1",
     "@sveltejs/adapter-auto": "^4.0.0",
-    "@sveltejs/kit": "^2.16.0",
-    "@sveltejs/package": "^2.3.7",
+    "@sveltejs/kit": "^2.16.1",
+    "@sveltejs/package": "^2.3.8",
     "@sveltejs/vite-plugin-svelte": "5.0.3",
     "cspell": "^8.17.2",
     "eslint": "^8.57.1",
@@ -66,13 +66,13 @@
     "stylelint": "^16.13.2",
     "stylelint-config-recommended-scss": "^14.1.0",
     "stylelint-scss": "^6.10.1",
-    "svelte": "5.19.0",
+    "svelte": "5.19.1",
     "svelte-check": "^4.1.4",
     "svelte-i18n": "^4.0.1",
     "svelte-preprocess": "^6.0.3",
     "tslib": "^2.8.1",
-    "vite": "^6.0.7",
-    "vitest": "^3.0.2"
+    "vite": "^6.0.11",
+    "vitest": "^3.0.3"
   },
   "exports": {
     ".": {
