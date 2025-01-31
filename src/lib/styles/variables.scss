@@ -7,12 +7,12 @@
   --sui-foreground-color-5-hsl: var(--sui-base-hue) 5% 65%; // disabled
   --sui-background-color-1-hsl: var(--sui-base-hue) 5% 100%; // content/input
   --sui-background-color-2-hsl: var(--sui-base-hue) 5% 98%; // primary
-  --sui-background-color-3-hsl: var(--sui-base-hue) 5% 96%; // secondary
-  --sui-background-color-4-hsl: var(--sui-base-hue) 5% 94%; // tertiary/disabled
+  --sui-background-color-3-hsl: var(--sui-base-hue) 5% 95%; // secondary
+  --sui-background-color-4-hsl: var(--sui-base-hue) 5% 92%; // tertiary/disabled
   --sui-background-color-5-hsl: var(--sui-base-hue) 5% 84%; // highlight
-  --sui-border-color-1-hsl: var(--sui-base-hue) 5% 65%; // control
-  --sui-border-color-2-hsl: var(--sui-base-hue) 5% 84%; // primary
-  --sui-border-color-3-hsl: var(--sui-base-hue) 5% 88%; // secondary
+  --sui-border-color-1-hsl: var(--sui-base-hue) 5% 60%; // control
+  --sui-border-color-2-hsl: var(--sui-base-hue) 5% 86%; // primary
+  --sui-border-color-3-hsl: var(--sui-base-hue) 5% 90%; // secondary
   --sui-shadow-color: var(--sui-base-hue) 10% 0%;
   // Accents
   --sui-primary-accent-color-text: hsl(var(--sui-base-hue) 80% 40%);
@@ -41,14 +41,14 @@
   --sui-foreground-color-3-hsl: var(--sui-base-hue) 10% 65%; // secondary
   --sui-foreground-color-4-hsl: var(--sui-base-hue) 10% 55%; // tertiary
   --sui-foreground-color-5-hsl: var(--sui-base-hue) 10% 35%; // disabled
-  --sui-background-color-1-hsl: var(--sui-base-hue) 10% 10%; // content/input
-  --sui-background-color-2-hsl: var(--sui-base-hue) 10% 12%; // primary
-  --sui-background-color-3-hsl: var(--sui-base-hue) 10% 14%; // secondary
+  --sui-background-color-1-hsl: var(--sui-base-hue) 10% 8%; // content/input
+  --sui-background-color-2-hsl: var(--sui-base-hue) 10% 10%; // primary
+  --sui-background-color-3-hsl: var(--sui-base-hue) 10% 13%; // secondary
   --sui-background-color-4-hsl: var(--sui-base-hue) 10% 16%; // tertiary/disabled
   --sui-background-color-5-hsl: var(--sui-base-hue) 10% 26%; // highlight
-  --sui-border-color-1-hsl: var(--sui-base-hue) 10% 45%; // control
-  --sui-border-color-2-hsl: var(--sui-base-hue) 10% 26%; // primary
-  --sui-border-color-3-hsl: var(--sui-base-hue) 10% 22%; // secondary
+  --sui-border-color-1-hsl: var(--sui-base-hue) 10% 40%; // control
+  --sui-border-color-2-hsl: var(--sui-base-hue) 10% 24%; // primary
+  --sui-border-color-3-hsl: var(--sui-base-hue) 10% 20%; // secondary
   --sui-shadow-color: var(--sui-base-hue) 10% 0%;
   // Accents
   --sui-primary-accent-color-text: hsl(var(--sui-base-hue) 100% 60%); // lighter
@@ -234,10 +234,10 @@
     --sui-tab-medium-height: var(--sui-control-medium-height);
     --sui-tab-large-height: var(--sui-control-large-height);
     // Toolbar
-    --sui-primary-toolbar-size: 48px;
-    --sui-secondary-toolbar-size: 40px;
+    --sui-primary-toolbar-size: 56px;
+    --sui-secondary-toolbar-size: 48px;
     // table
-    --sui-primary-row-height: 48px;
+    --sui-primary-row-height: 56px;
     --sui-secondary-row-height: 40px;
 
     // Make controls larger on touch devices, e.g. mobile & tablet
@@ -246,9 +246,9 @@
       --sui-control-medium-height: 40px;
       --sui-control-large-height: 60px;
       --sui-checkbox-height: 24px;
-      --sui-primary-toolbar-size: 56px;
-      --sui-secondary-toolbar-size: 48px;
-      --sui-primary-row-height: 56px;
+      --sui-primary-toolbar-size: 64px;
+      --sui-secondary-toolbar-size: 56px;
+      --sui-primary-row-height: 64px;
       --sui-secondary-row-height: 48px;
     }
 
