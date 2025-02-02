@@ -16,7 +16,7 @@ const config = {
     childRoles: ['row'],
     childSelectedAttr: 'aria-selected',
     focusChild: true,
-    selectFirst: false,
+    selectFirst: true,
   },
   listbox: {
     orientation: 'vertical',
@@ -88,6 +88,8 @@ class Group {
     this.focusChild = focusChild;
     this.selectFirst = selectFirst;
 
+    this.parent.tabIndex = focusChild ? -1 : 0;
+
     // Wait a bit before the relevant components, including the `aria-controls` target are mounted
     (async () => {
       await sleep(100);
@@ -104,19 +106,16 @@ class Group {
 
     allMembers.forEach((element, index) => {
       // Select the first one if no member has the `selected` attribute
-      // eslint-disable-next-line no-nested-ternary
-      const isSelected = multi
-        ? element.getAttribute(this.childSelectedAttr) === 'true'
-        : defaultSelected
-          ? element === defaultSelected
-          : this.selectFirst && index === 0;
+      const isSelected = defaultSelected
+        ? element === defaultSelected
+        : this.selectFirst && index === 0;
 
       const controlTarget = /** @type {HTMLElement | null} */ (
         document.querySelector(`#${element.getAttribute('aria-controls')}`)
       );
 
       element.id ||= `${this.id}-item-${index + 1}`;
-      element.tabIndex ||= isSelected ? 0 : -1;
+      element.tabIndex = isSelected ? 0 : -1;
       element.setAttribute(this.childSelectedAttr, String(isSelected));
 
       if (controlTarget) {
