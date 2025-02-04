@@ -101,8 +101,7 @@ class Group {
    * Activate the members.
    */
   activate() {
-    const { parent, role, allMembers, selected: defaultSelected } = this;
-    const multi = this.multi || role === 'menu' || role === 'menubar';
+    const { parent, allMembers, selected: defaultSelected } = this;
 
     allMembers.forEach((element, index) => {
       // Select the first one if no member has the `selected` attribute
