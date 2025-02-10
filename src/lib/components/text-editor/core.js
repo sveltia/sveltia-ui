@@ -19,7 +19,7 @@ import {
   ListItemNode,
   ListNode,
   $handleListInsertParagraph as handleListInsertParagraph,
-  insertList,
+  $insertList as insertList,
   $isListItemNode as isListItemNode,
   $isListNode as isListNode,
 } from '@lexical/list';
@@ -246,7 +246,7 @@ export const initEditor = ({ components } = {}) => {
   editor.registerCommand(
     INSERT_UNORDERED_LIST_COMMAND,
     () => {
-      insertList(editor, 'bullet');
+      insertList('bullet');
 
       return true;
     },
@@ -256,7 +256,7 @@ export const initEditor = ({ components } = {}) => {
   editor.registerCommand(
     INSERT_ORDERED_LIST_COMMAND,
     () => {
-      insertList(editor, 'number');
+      insertList('number');
 
       return true;
     },
