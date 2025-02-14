@@ -23,6 +23,11 @@ settings:
       - ".js"
 overrides:
   - files:
+      - "*.svelte"
+    rules:
+      # Silence an error on https://svelte.dev/e/css_global_block_invalid_list
+      svelte/valid-compile: off
+  - files:
       - "*.svelte.js"
     parser: svelte-eslint-parser
     rules:
