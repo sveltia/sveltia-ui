@@ -36,6 +36,7 @@ export const strings = {
   },
   text_editor: {
     text_editor: 'テキストエディター',
+    code_editor: 'コードエディター',
     text_style_options: 'テキストスタイルオプション',
     show_text_style_options: 'テキストスタイルオプションを表示',
     paragraph: '段落',
@@ -60,5 +61,7 @@ export const strings = {
     edit_in_markdown: 'マークダウンで編集',
     converter_error:
       'リッチテキストモードを有効化中に問題が発生しました。代わりにプレーンテキストエディターを使用してください。',
+    language: '言語',
+    plain_text: 'プレーンテキスト',
   },
 };

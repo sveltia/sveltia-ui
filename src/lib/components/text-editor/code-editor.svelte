@@ -1,26 +1,22 @@
 <!--
   @component
-  A rich text editor based on Lexical.
+  A code editor based on Lexical.
 -->
 <script>
   import { setContext, untrack } from 'svelte';
   import { _ } from 'svelte-i18n';
-  import { blockButtonTypes, inlineButtonTypes } from '.';
   import Alert from '../alert/alert.svelte';
-  import TextArea from '../text-field/text-area.svelte';
   import Toast from '../toast/toast.svelte';
   import LexicalRoot from './lexical-root.svelte';
   import { createEditorStore } from './store.svelte';
-  import TextEditorToolbar from './toolbar/text-editor-toolbar.svelte';
+  import CodeEditorToolbar from './toolbar/code-editor-toolbar.svelte';
 
   /**
    * @typedef {object} Props
-   * @property {string} [value] - Input value.
+   * @property {string} [code] - Input value.
+   * @property {string} [lang] - Selected language.
+   * @property {boolean} [showLanguageSwitcher] - Whether to show the language selector.
    * @property {boolean} [flex] - Make the text input container flexible.
-   * @property {import('$lib/typedefs').TextEditorMode[]} [modes] - Enabled modes.
-   * @property {(import('$lib/typedefs').TextEditorBlockType |
-   * import('$lib/typedefs').TextEditorInlineType)[]} [buttons] - Enabled buttons.
-   * @property {import('$lib/typedefs').TextEditorComponent[]} [components] - Editor components.
    * @property {string} [class] - The `class` attribute on the wrapper element.
    * @property {boolean} [hidden] - Whether to hide the widget.
    * @property {boolean} [disabled] - Whether to disable the widget. An alias of the `aria-disabled`
@@ -39,11 +35,10 @@
    */
   let {
     /* eslint-disable prefer-const */
-    value = $bindable(''),
+    code = $bindable(''),
+    lang = $bindable(''),
+    showLanguageSwitcher = false,
     flex = false,
-    modes = ['rich-text', 'plain-text'],
-    buttons = [...inlineButtonTypes, ...blockButtonTypes],
-    components = [],
     hidden = false,
     disabled = false,
     readonly = false,
@@ -54,11 +49,11 @@
     /* eslint-enable prefer-const */
   } = $props();
 
+  const backticks = '```';
   const editorStore = createEditorStore();
 
-  editorStore.config.modes = modes;
-  editorStore.config.enabledButtons = buttons;
-  editorStore.config.components = components;
+  editorStore.config.isCodeEditor = true;
+  editorStore.config.defaultLanguage = lang;
 
   setContext('editorStore', editorStore);
 
@@ -67,9 +62,14 @@
       return;
     }
 
-    const newValue = value;
+    void code;
+    void lang;
 
     untrack(() => {
+      const newValue = code
+        ? `${backticks}${lang}\n${code}\n${backticks}`
+        : `${backticks}${lang}\n${backticks}`;
+
       editorStore.inputValue = newValue;
     });
   });
@@ -79,30 +79,29 @@
       return;
     }
 
-    const newValue = editorStore.inputValue;
+    void editorStore.inputValue;
 
     untrack(() => {
-      if (value !== newValue) {
-        value = newValue;
+      const { lang: _lang = '', code: _code = '' } =
+        editorStore.inputValue.match(/^```(?<lang>\w+?)?\n(?:(?<code>.*)\n)?```/s)?.groups ?? {};
+
+      if (lang !== _lang) {
+        lang = _lang;
+      }
+
+      if (code !== _code) {
+        code = _code;
       }
     });
   });
 </script>
 
-<div {...restProps} role="none" class="sui text-editor" class:flex {hidden}>
-  <TextEditorToolbar {disabled} {readonly} />
+<div {...restProps} role="none" class="sui code-editor" class:flex {hidden}>
+  {#if showLanguageSwitcher}
+    <CodeEditorToolbar {disabled} {readonly} />
+  {/if}
   <LexicalRoot
     hidden={!editorStore.useRichText || hidden}
-    {disabled}
-    {readonly}
-    {required}
-    {invalid}
-  />
-  <TextArea
-    autoResize={true}
-    bind:value={editorStore.inputValue}
-    {flex}
-    hidden={editorStore.useRichText || hidden}
     {disabled}
     {readonly}
     {required}
@@ -117,19 +116,8 @@
 {/if}
 
 <style lang="scss">
-  .text-editor {
+  .code-editor {
     margin: var(--sui-focus-ring-width);
     width: calc(100% - var(--sui-focus-ring-width) * 2);
-
-    :global(.sui.text-area) {
-      margin: 0 !important;
-      width: 100% !important;
-      min-width: auto;
-
-      :global(textarea) {
-        border-radius: //
-          0 0 var(--sui-textbox-border-radius) var(--sui-textbox-border-radius) !important;
-      }
-    }
   }
 </style>

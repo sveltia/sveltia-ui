@@ -21,22 +21,22 @@
     /* eslint-enable prefer-const */
   } = $props();
 
-  /**
-   * Text editor state.
-   * @type {import('$lib/typedefs').TextEditorState}
-   */
-  const { editor, editorId, selectionInlineTypes, useRichText } = getContext('state');
+  /** @type {import('$lib/typedefs').TextEditorStore} */
+  const editorStore = getContext('editorStore');
+  const selectionTypeMatches = $derived(editorStore.selection.inlineTypes.includes(type));
 </script>
 
 <Button
   iconic
   aria-label={$_(`_sui.text_editor.${availableButtons[type].labelKey}`)}
-  aria-controls="{$editorId}-lexical-root"
-  disabled={!$useRichText}
-  pressed={$selectionInlineTypes.includes(type)}
+  aria-controls="{editorStore.editorId}-lexical-root"
+  disabled={!editorStore.useRichText}
+  pressed={selectionTypeMatches}
   onclick={async () => {
-    await focusEditor($editor);
-    $editor.dispatchCommand(FORMAT_TEXT_COMMAND, type);
+    if (editorStore.editor) {
+      await focusEditor(editorStore.editor);
+      editorStore.editor.dispatchCommand(FORMAT_TEXT_COMMAND, type);
+    }
   }}
 >
   {#snippet startIcon()}

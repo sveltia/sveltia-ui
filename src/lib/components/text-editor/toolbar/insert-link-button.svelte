@@ -31,11 +31,9 @@
    */
   const type = 'link';
 
-  /**
-   * Text editor state.
-   * @type {import('$lib/typedefs').TextEditorState}
-   */
-  const { editor, editorId, selectionInlineTypes, useRichText } = getContext('state');
+  /** @type {import('$lib/typedefs').TextEditorStore} */
+  const editorStore = getContext('editorStore');
+  const selectionTypeMatches = $derived(editorStore.selection.inlineTypes.includes(type));
 
   let openDialog = $state(false);
   /** @type {'create' | 'update' | 'remove'} */
@@ -48,7 +46,7 @@
    * Create a new link by showing a dialog to accept a URL and optionally text.
    */
   const createLink = () => {
-    $editor.getEditorState().read(() => {
+    editorStore.editor?.getEditorState().read(() => {
       const textContent = getTextContent().trim();
 
       anchorURL = textContent;
@@ -62,18 +60,18 @@
    * Remove an existing link.
    */
   const removeLink = () => {
-    $editor.dispatchCommand(TOGGLE_LINK_COMMAND, null);
+    editorStore.editor?.dispatchCommand(TOGGLE_LINK_COMMAND, null);
   };
 
   /**
    * Update an existing link.
    */
   const updateLink = () => {
-    $editor.getEditorState().read(() => {
-      const selection = getSelection();
+    editorStore.editor?.getEditorState().read(() => {
+      const _selection = getSelection();
 
-      if (isRangeSelection(selection)) {
-        const anchor = selection.anchor.getNode();
+      if (isRangeSelection(_selection)) {
+        const anchor = _selection.anchor.getNode();
         const parent = anchor instanceof LinkNode ? anchor : getNearestNodeOfType(anchor, LinkNode);
         const url = parent?.getURL();
 
@@ -97,7 +95,7 @@
    * create a new link.
    */
   const onButtonClick = () => {
-    if ($selectionInlineTypes.includes(type)) {
+    if (selectionTypeMatches) {
       updateLink();
     } else {
       createLink();
@@ -121,19 +119,23 @@
    */
   const onDialogClose = async (event) => {
     if (event.detail.returnValue !== 'cancel' && dialogMode !== 'remove') {
-      await new Promise((resolve) => {
-        $editor.update(async () => {
-          let selection = getSelection() ?? getPreviousSelection()?.clone();
+      if (!editorStore.editor) {
+        return;
+      }
 
-          if (!isRangeSelection(selection)) {
-            selection = createRangeSelection();
+      await new Promise((resolve) => {
+        editorStore.editor?.update(async () => {
+          let _selection = getSelection() ?? getPreviousSelection()?.clone();
+
+          if (!isRangeSelection(_selection)) {
+            _selection = createRangeSelection();
           }
 
           if (!hasAnchor) {
             anchorText = anchorText.trim();
             anchorText ||= anchorURL;
 
-            const { anchor, focus } = /** @type {import('lexical').RangeSelection} */ (selection);
+            const { anchor, focus } = /** @type {import('lexical').RangeSelection} */ (_selection);
             const node = createTextNode(anchorText);
             const key = node.getKey();
 
@@ -142,13 +144,13 @@
             focus.set(key, 0, 'text');
           }
 
-          setSelection(selection);
+          setSelection(_selection);
           resolve(undefined);
         });
       });
 
-      await focusEditor($editor);
-      $editor.dispatchCommand(TOGGLE_LINK_COMMAND, anchorURL);
+      await focusEditor(editorStore.editor);
+      editorStore.editor.dispatchCommand(TOGGLE_LINK_COMMAND, anchorURL);
     }
 
     anchorURL = '';
@@ -159,7 +161,7 @@
    * Open the dialog with a keyboard shortcut: Accel+K.
    */
   const _registerCommand = () => {
-    $editor.registerCommand(
+    editorStore.editor?.registerCommand(
       KEY_DOWN_COMMAND,
       (event) => {
         if (matchShortcuts(event, isMac() ? 'Meta+K' : 'Ctrl+K')) {
@@ -174,7 +176,7 @@
   };
 
   $effect(() => {
-    if ($editor) {
+    if (editorStore.editor) {
       _registerCommand();
     }
   });
@@ -183,9 +185,9 @@
 <Button
   iconic
   aria-label={$_(`_sui.text_editor.${availableButtons[type].labelKey}`)}
-  aria-controls="{$editorId}-lexical-root"
-  disabled={!$useRichText}
-  pressed={$selectionInlineTypes.includes(type)}
+  aria-controls="{editorStore.editorId}-lexical-root"
+  disabled={!editorStore.useRichText}
+  pressed={selectionTypeMatches}
   onclick={() => {
     onButtonClick();
   }}

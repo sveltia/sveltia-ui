@@ -36,6 +36,7 @@ export const strings = {
   },
   text_editor: {
     text_editor: 'Text Editor',
+    code_editor: 'Code Editor',
     text_style_options: 'Text Style Options',
     show_text_style_options: 'Show Text Style Options',
     paragraph: 'Paragraph',
@@ -60,5 +61,7 @@ export const strings = {
     edit_in_markdown: 'Edit in Markdown',
     converter_error:
       'There was an error while enabling rich text mode. Please use the plain text editor instead.',
+    language: 'Language',
+    plain_text: 'Plain Text',
   },
 };

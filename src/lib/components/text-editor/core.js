@@ -1,6 +1,7 @@
 import {
   CodeHighlightNode,
   CodeNode,
+  $createCodeNode as createCodeNode,
   $isCodeHighlightNode as isCodeHighlightNode,
   $isCodeNode as isCodeNode,
   registerCodeHighlighting,
@@ -45,6 +46,7 @@ import {
   INSERT_PARAGRAPH_COMMAND,
   OUTDENT_CONTENT_COMMAND,
   createEditor,
+  $getRoot as getRoot,
   $getSelection as getSelection,
   $isRangeSelection as isRangeSelection,
 } from 'lexical';
@@ -122,15 +124,18 @@ const editorConfig = {
 };
 
 /**
- * Get the current selection’s block and inline level types.
- * @returns {{ blockType: import('$lib/typedefs').TextEditorBlockType,
- * inlineTypes: import('$lib/typedefs').TextEditorInlineType[] }} Types.
+ * Get the current selection’s block node key as well as block and inline level types.
+ * @returns {import('$lib/typedefs').TextEditorSelectionState} Current selection state.
  */
 const getSelectionTypes = () => {
   const selection = getSelection();
 
   if (!isRangeSelection(selection)) {
-    return { blockType: 'paragraph', inlineTypes: [] };
+    return {
+      blockNodeKey: null,
+      blockType: 'paragraph',
+      inlineTypes: [],
+    };
   }
 
   const anchor = selection.anchor.getNode();
@@ -184,7 +189,11 @@ const getSelectionTypes = () => {
     })()
   );
 
-  return { blockType, inlineTypes };
+  return {
+    blockNodeKey: parent?.getKey() ?? null,
+    blockType,
+    inlineTypes,
+  };
 };
 
 /**
@@ -192,8 +201,6 @@ const getSelectionTypes = () => {
  * @param {import('lexical').LexicalEditor} editor - Editor instance.
  */
 const onEditorUpdate = (editor) => {
-  const { blockType, inlineTypes } = getSelectionTypes();
-
   editor.getRootElement()?.dispatchEvent(
     new CustomEvent('Update', {
       detail: {
@@ -201,8 +208,7 @@ const onEditorUpdate = (editor) => {
           // Use underscores for italic text in Markdown instead of asterisks
           allTransformers.filter((/** @type {any} */ { tag }) => tag !== '*'),
         ),
-        selectionBlockType: blockType,
-        selectionInlineTypes: inlineTypes,
+        selection: getSelectionTypes(),
       },
     }),
   );
@@ -210,12 +216,11 @@ const onEditorUpdate = (editor) => {
 
 /**
  * Initialize the Lexical editor.
- * @param {object} [options] - Options.
- * @param {import('$lib/typedefs').TextEditorComponent[]} [options.components] - Editor components.
+ * @param {import('$lib/typedefs').TextEditorConfig} config - Editor configuration.
  * @returns {import('lexical').LexicalEditor} Editor instance.
  */
-export const initEditor = ({ components } = {}) => {
-  components?.forEach(({ node, transformer }) => {
+export const initEditor = ({ components = [], isCodeEditor = false, defaultLanguage = '' }) => {
+  components.forEach(({ node, transformer }) => {
     /** @type {any[]} */ (editorConfig.nodes).unshift(node);
     allTransformers.unshift(transformer);
   });
@@ -227,10 +232,10 @@ export const initEditor = ({ components } = {}) => {
   registerHistory(editor, createEmptyHistoryState(), 1000);
 
   registerCodeHighlighting(editor, {
-    defaultLanguage: '',
+    defaultLanguage,
     // eslint-disable-next-line jsdoc/require-jsdoc
-    tokenize: (code, language = 'plain') =>
-      window.Prism.tokenize(code, window.Prism.languages[language] ?? window.Prism.languages.plain),
+    tokenize: (code, lang = 'plain') =>
+      window.Prism.tokenize(code, window.Prism.languages[lang] ?? window.Prism.languages.plain),
   });
 
   editor.registerCommand(
@@ -270,12 +275,31 @@ export const initEditor = ({ components } = {}) => {
     COMMAND_PRIORITY_NORMAL,
   );
 
-  editor.registerUpdateListener(({ editorState }) => {
+  editor.registerUpdateListener(async () => {
     if (editor?.isComposing()) {
       return;
     }
 
-    editorState.read(() => {
+    await sleep(100);
+
+    editor.update(() => {
+      // Prevent CodeNode from being removed
+      if (isCodeEditor) {
+        const root = getRoot();
+        const children = root.getChildren();
+
+        if (children.length === 1 && !isCodeNode(children[0])) {
+          children[0].remove();
+        }
+
+        if (children.length === 0) {
+          const node = createCodeNode();
+
+          node.setLanguage(defaultLanguage);
+          root.append(node);
+        }
+      }
+
       onEditorUpdate(editor);
     });
   });
@@ -317,34 +341,54 @@ export const initEditor = ({ components } = {}) => {
 };
 
 /**
+ * Load additional Prism syntax highlighter settings for the given programming language.
+ * @param {string} lang - Language name, like scss.
+ */
+export const loadCodeHighlighter = async (lang) => {
+  if (lang in window.Prism.languages) {
+    return;
+  }
+
+  const canonicalLang = Object.entries(prismComponents.languages).find(
+    // @ts-ignore
+    ([key, { alias }]) =>
+      key === lang || (Array.isArray(alias) ? alias.includes(lang) : alias === lang),
+  )?.[0];
+
+  if (!canonicalLang) {
+    return;
+  }
+
+  try {
+    await import(
+      // eslint-disable-next-line jsdoc/no-bad-blocks
+      /* @vite-ignore */ `https://unpkg.com/prismjs@1.29.0/components/prism-${canonicalLang}.min.js`
+    );
+  } catch {
+    //
+  }
+};
+
+/**
  * Convert Markdown to Lexical nodes.
  * @param {import('lexical').LexicalEditor} editor - Editor instance.
  * @param {string} value - Current Markdown value.
  * @returns {Promise<void>} Nothing.
  * @throws {Error} Failed to convert the value to Lexical nodes.
  */
-export const convertMarkdown = async (editor, value) => {
+export const convertMarkdownToLexical = async (editor, value) => {
   // Load Prism language support on demand; the `loadLanguages` Prism utility method cannot be used
   await Promise.all(
-    [...value.matchAll(/^```(?<lang>.+?)\n/gm)].map(async ({ groups: { lang } = {} }) => {
-      if (!(lang in window.Prism.languages) && lang in prismComponents.languages) {
-        try {
-          await import(
-            // eslint-disable-next-line jsdoc/no-bad-blocks
-            /* @vite-ignore */ `https://unpkg.com/prismjs@1.29.0/components/prism-${lang}.min.js`
-          );
-        } catch {
-          //
-        }
-      }
-    }),
+    [...value.matchAll(/^```(?<lang>.+?)\n/gm)].map(async ({ groups: { lang } = {} }) =>
+      loadCodeHighlighter(lang),
+    ),
   );
 
   return new Promise((resolve, reject) => {
     editor.update(() => {
       try {
         convertFromMarkdownString(value, allTransformers);
-        resolve(void 0);
+        resolve(undefined);
       } catch (ex) {
         reject(new Error('Failed to convert Markdown', { cause: ex }));
       }
@@ -362,7 +406,8 @@ export const focusEditor = async (editor) => {
   editor.getRootElement()?.focus();
 
   return new Promise((resolve) => {
-    editor.focus(() => {
+    editor.focus(async () => {
+      await sleep(100);
       resolve(undefined);
     });
   });

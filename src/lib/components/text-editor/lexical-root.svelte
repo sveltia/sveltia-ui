@@ -1,9 +1,9 @@
 <script>
   import { getContext, onMount } from 'svelte';
+  import { initEditor } from './core';
 
   /**
    * @typedef {object} Props
-   * @property {string} [value] - Input value.
    * @property {string} [class] - The `class` attribute on the wrapper element.
    * @property {boolean} [hidden] - Whether to hide the widget.
    * @property {boolean} [disabled] - Whether to disable the widget. An alias of the `aria-disabled`
@@ -22,7 +22,6 @@
    */
   let {
     /* eslint-disable prefer-const */
-    value = $bindable(),
     class: className,
     hidden = false,
     disabled = false,
@@ -34,12 +33,8 @@
     /* eslint-enable prefer-const */
   } = $props();
 
-  /**
-   * Text editor state.
-   * @type {import('$lib/typedefs').TextEditorState}
-   */
-  const { editor, editorId, selectionBlockType, selectionInlineTypes, hasConverterError } =
-    getContext('state');
+  /** @type {import('$lib/typedefs').TextEditorStore} */
+  const editorStore = getContext('editorStore');
 
   /**
    * Reference to the Lexical editor root element.
@@ -50,7 +45,7 @@
   const editable = $derived(!(disabled || readonly));
 
   $effect(() => {
-    $editor?.setEditable(editable);
+    editorStore.editor?.setEditable(editable);
   });
 
   /**
@@ -58,19 +53,31 @@
    * @param {Event} event - `Update` custom event.
    */
   const onUpdate = (event) => {
-    if ($hasConverterError) {
+    if (editorStore.hasConverterError) {
       return;
     }
 
     const { detail } = /** @type {CustomEvent} */ (event);
     const newValue = detail.value;
 
-    if (value !== newValue) {
-      value = newValue;
+    if (editorStore.inputValue !== newValue) {
+      const { useRichText } = editorStore;
+
+      if (useRichText) {
+        // Temporarily disable rich text to prevent unnecessary Markdown conversion that resets
+        // Lexical nodes and selection
+        editorStore.useRichText = false;
+      }
+
+      editorStore.inputValue = newValue;
+
+      if (useRichText) {
+        // Restore the rich text state
+        editorStore.useRichText = true;
+      }
     }
 
-    $selectionBlockType = detail.selectionBlockType;
-    $selectionInlineTypes = detail.selectionInlineTypes;
+    editorStore.selection = detail.selection;
   };
 
   /**
@@ -84,6 +91,8 @@
   };
 
   onMount(() => {
+    editorStore.editor = initEditor(editorStore.config);
+
     lexicalRoot?.addEventListener('Update', onUpdate);
     lexicalRoot?.addEventListener('click', onClick);
 
@@ -94,8 +103,9 @@
   });
 
   $effect(() => {
-    if ($editor && lexicalRoot) {
-      $editor.setRootElement(lexicalRoot);
+    if (editorStore.editor && lexicalRoot) {
+      editorStore.editor.setRootElement(lexicalRoot);
+      editorStore.initialized = true;
     }
   });
 </script>
@@ -111,15 +121,17 @@
   aria-required={required}
   aria-invalid={invalid}
   class="lexical-root"
-  id="{$editorId}-lexical-root"
+  class:code={editorStore.config.isCodeEditor}
+  id="{editorStore.editorId}-lexical-root"
   contenteditable={editable}
   {hidden}
 ></div>
 
 <style lang="scss">
   .lexical-root {
+    overflow: hidden;
     border: 1px solid var(--sui-textbox-border-color);
-    border-radius: 0 0 var(--sui-textbox-border-radius) var(--sui-textbox-border-radius) !important;
+    border-radius: var(--sui-textbox-border-radius) !important;
     padding: var(--sui-textbox-multiline-padding);
     min-height: 8em;
     color: var(--sui-textbox-foreground-color);
@@ -127,6 +139,20 @@
     font-family: var(--sui-textbox-font-family);
     font-size: var(--sui-textbox-font-size);
     line-height: var(--sui-textbox-multiline-line-height);
+
+    &:not(:first-child) {
+      border-top-left-radius: 0 !important;
+      border-top-right-radius: 0 !important;
+    }
+
+    &.code {
+      padding: 0;
+
+      :global(.code-block) {
+        border-radius: 0 !important;
+        min-height: 120px;
+      }
+    }
 
     &:focus-visible {
       outline: 0;
@@ -177,7 +203,7 @@
         padding: 8px;
         min-width: 40px;
         color: var(--sui-tertiary-foreground-color);
-        background-color: var(--sui-secondary-background-color);
+        background-color: var(--sui-tertiary-background-color);
         text-align: right;
       }
 

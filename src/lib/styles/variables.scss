@@ -102,7 +102,7 @@
     --sui-selected-background-color: hsl(var(--sui-background-color-5-hsl) / 75%);
     --sui-active-background-color: hsl(var(--sui-background-color-5-hsl) / 100%);
     --sui-content-background-color: hsl(var(--sui-background-color-1-hsl));
-    --sui-code-background-color: hsl(var(--sui-background-color-4-hsl));
+    --sui-code-background-color: hsl(var(--sui-background-color-3-hsl));
     --sui-primary-background-color: hsl(var(--sui-background-color-2-hsl));
     --sui-primary-background-color-translucent: hsl(var(--sui-background-color-2-hsl) / 80%);
     --sui-secondary-background-color: hsl(var(--sui-background-color-3-hsl));
@@ -162,7 +162,7 @@
     --sui-font-weight-normal: 325; // Merriweather Sans is a little bit bold, so we need to adjust the weight
     --sui-font-weight-bold: 625; // ditto
     --sui-font-family-monospace: "Noto Sans Mono", monospace;
-    --sui-font-size-monospace: 0.9em;
+    --sui-font-size-monospace: 0.95em;
     --sui-line-height-default: 1.25;
     --sui-line-height-compact: 1.5;
     --sui-line-height-comfortable: 1.75;

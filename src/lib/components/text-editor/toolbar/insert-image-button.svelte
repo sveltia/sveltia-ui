@@ -19,20 +19,17 @@
     /* eslint-enable prefer-const */
   } = $props();
 
-  /**
-   * Text editor state.
-   * @type {import('$lib/typedefs').TextEditorState}
-   */
-  const { editor, editorId, useRichText } = getContext('state');
+  /** @type {import('$lib/typedefs').TextEditorStore} */
+  const editorStore = getContext('editorStore');
 </script>
 
 <Button
   iconic
   aria-label={component.label}
-  aria-controls="{$editorId}-lexical-root"
-  disabled={!$useRichText}
+  aria-controls="{editorStore.editorId}-lexical-root"
+  disabled={!editorStore.useRichText}
   onclick={() => {
-    $editor.update(() => {
+    editorStore.editor?.update(() => {
       insertNodes([component.createNode(), createParagraphNode()]);
     });
   }}

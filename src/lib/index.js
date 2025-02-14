@@ -83,6 +83,7 @@ export { default as TabList } from './components/tabs/tab-list.svelte';
 export { default as TabPanel } from './components/tabs/tab-panel.svelte';
 export { default as TabPanels } from './components/tabs/tab-panels.svelte';
 export { default as Tab } from './components/tabs/tab.svelte';
+export { default as CodeEditor } from './components/text-editor/code-editor.svelte';
 export { default as TextEditor } from './components/text-editor/text-editor.svelte';
 export { default as NumberInput } from './components/text-field/number-input.svelte';
 export { default as PasswordInput } from './components/text-field/password-input.svelte';

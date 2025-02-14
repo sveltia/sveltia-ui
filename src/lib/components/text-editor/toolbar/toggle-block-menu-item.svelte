@@ -31,27 +31,24 @@
     /* eslint-enable prefer-const */
   } = $props();
 
-  /**
-   * Text editor state.
-   * @type {import('$lib/typedefs').TextEditorState}
-   */
-  const { editor, selectionBlockType } = getContext('state');
-
-  /**
-   * Whether the current selection matches the button {@link type}.
-   */
-  const selectionTypeMatches = $derived($selectionBlockType === type);
+  /** @type {import('$lib/typedefs').TextEditorStore} */
+  const editorStore = getContext('editorStore');
+  const selectionTypeMatches = $derived(editorStore.selection.blockType === type);
 
   /**
    * Change the current selection’s type to {@link type}.
    */
   const changeBlockType = async () => {
-    await focusEditor($editor);
+    if (!editorStore.editor) {
+      return;
+    }
+
+    await focusEditor(editorStore.editor);
 
     const [, headingLevel] = type.match(/^heading-(\d)$/) ?? [];
 
     if (headingLevel) {
-      $editor.update(() => {
+      editorStore.editor.update(() => {
         setBlocksType(getSelection(), () =>
           createHeadingNode(
             /** @type {import('@lexical/rich-text').HeadingTagType} */ (`h${headingLevel}`),
@@ -61,27 +58,27 @@
     }
 
     if (type === 'paragraph') {
-      $editor.update(() => {
+      editorStore.editor.update(() => {
         setBlocksType(getSelection(), () => createParagraphNode());
       });
     }
 
     if (type === 'bulleted-list') {
-      $editor.dispatchCommand(INSERT_UNORDERED_LIST_COMMAND, undefined);
+      editorStore.editor.dispatchCommand(INSERT_UNORDERED_LIST_COMMAND, undefined);
     }
 
     if (type === 'numbered-list') {
-      $editor.dispatchCommand(INSERT_ORDERED_LIST_COMMAND, undefined);
+      editorStore.editor.dispatchCommand(INSERT_ORDERED_LIST_COMMAND, undefined);
     }
 
     if (type === 'blockquote') {
-      $editor.update(() => {
+      editorStore.editor.update(() => {
         setBlocksType(getSelection(), () => createQuoteNode());
       });
     }
 
     if (type === 'code-block') {
-      $editor.update(() => {
+      editorStore.editor.update(() => {
         setBlocksType(getSelection(), () => createCodeNode());
       });
     }

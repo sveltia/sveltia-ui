@@ -239,23 +239,36 @@
  */
 
 /**
- * @typedef {object} TextEditorState
- * @property {import('svelte/store').Writable<import('lexical').LexicalEditor>} editor - Lexical
- * editor instance.
- * @property {import('svelte/store').Writable<string>} editorId - Random ID assigned to the editor.
- * @property {import('svelte/store').Writable<TextEditorBlockType>} selectionBlockType - Block level
- * type of the current selection.
- * @property {import('svelte/store').Writable<TextEditorInlineType[]>} selectionInlineTypes - Inline
- * level types of the current selection.
+ * @typedef {object} TextEditorConfig
  * @property {TextEditorMode[]} modes - Enabled modes.
- * @property {import('svelte/store').Writable<boolean>} useRichText - Whether to use rich text mode.
- * If `false`, the editor shows the plain text editor.
- * @property {import('svelte/store').Writable<boolean>} hasConverterError - `true` if there was an
- * error while converting Markdown to Lexical nodes.
  * @property {(TextEditorBlockType | TextEditorInlineType)[]} enabledButtons - Enabled buttons for
  * the editor.
  * @property {TextEditorComponent[]} components - Editor components.
- * @property {Function} convertMarkdown - Function to trigger the Lexical converter.
+ * @property {boolean} isCodeEditor - Whether the editor is used as a code editor.
+ * @property {string} [defaultLanguage] - Default language for the code editor.
+ */
+
+/**
+ * @typedef {object} TextEditorSelectionState
+ * @property {?string} blockNodeKey - Block level node key.
+ * @property {TextEditorBlockType} blockType - Block level type of the current selection.
+ * @property {TextEditorInlineType[]} inlineTypes - Inline level types of the current selection.
+ */
+
+/**
+ * @typedef {object} TextEditorStore
+ * @property {import('lexical').LexicalEditor | undefined} editor - Lexical editor instance.
+ * @property {boolean} initialized - Whether the Lexical editor is initialized.
+ * @property {string} editorId - Random ID assigned to the editor.
+ * @property {TextEditorConfig} config - Editor configuration.
+ * @property {string} inputValue - Value entered the Lexical editor.
+ * @property {TextEditorSelectionState} selection - Current selection state.
+ * @property {boolean} useRichText - Whether to use rich text mode. If `false`, the editor shows the
+ * plain text editor.
+ * @property {boolean} hasConverterError - Whether there was an error while converting Markdown to
+ * Lexical nodes.
+ * @property {boolean} showConverterError - Whether to show a converter error in the UI.
+ * @property {() => Promise<void>} convertMarkdown - Function to trigger the Lexical converter.
  */
 
 export {};

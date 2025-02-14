@@ -19,14 +19,11 @@
     /* eslint-enable prefer-const */
   } = $props();
 
-  /**
-   * Text editor state.
-   * @type {import('$lib/typedefs').TextEditorState}
-   */
-  const { editor, useRichText } = getContext('state');
+  /** @type {import('$lib/typedefs').TextEditorStore} */
+  const editorStore = getContext('editorStore');
 </script>
 
-<MenuButton disabled={!$useRichText} label={$_('_sui.insert')}>
+<MenuButton disabled={!editorStore.useRichText} label={$_('_sui.insert')}>
   {#snippet endIcon()}
     <Icon name="arrow_drop_down" class="small-arrow" />
   {/snippet}
@@ -36,7 +33,7 @@
         <MenuItem
           {label}
           onclick={() => {
-            $editor.update(() => {
+            editorStore.editor?.update(() => {
               insertNodes([createNode()]);
             });
           }}
