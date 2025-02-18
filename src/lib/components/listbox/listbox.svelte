@@ -100,7 +100,7 @@
     line-height: var(--sui-control-line-height);
 
     :global([role='separator']) {
-      margin: 4px;
+      margin: 4px 0;
       background-color: var(--sui-control-border-color);
     }
 

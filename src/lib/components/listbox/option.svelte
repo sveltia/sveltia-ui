@@ -91,7 +91,6 @@
     :global(button) {
       flex: none;
       display: flex;
-      justify-content: space-between;
       gap: 4px;
       margin: 0 !important;
       border-radius: var(--sui-option-border-radius);
@@ -102,6 +101,14 @@
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
+
+      :global(*) {
+        flex: none;
+      }
+
+      :global(.label) {
+        flex: auto;
+      }
     }
 
     &.wrap :global(button) {
@@ -123,7 +130,7 @@
     }
 
     :global(button[aria-selected='true']) {
-      :global(.icon) {
+      :global(.icon.check) {
         color: var(--sui-primary-accent-color-text);
       }
     }
