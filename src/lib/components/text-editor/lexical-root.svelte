@@ -210,6 +210,13 @@
       [data-lexical-text='true'] {
         cursor: text;
       }
+
+      th > p,
+      td > p {
+        margin: 0;
+        white-space: normal;
+        word-break: normal;
+      }
     }
   }
 

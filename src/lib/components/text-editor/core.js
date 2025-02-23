@@ -52,8 +52,9 @@ import {
 } from 'lexical';
 import prismComponents from 'prismjs/components';
 import { blockButtonTypes, textFormatButtonTypes } from '.';
+import { TABLE } from './transformers/table';
 
-const allTransformers = [...TRANSFORMERS];
+const allTransformers = [...TRANSFORMERS, TABLE];
 
 /**
  * Lexical editor configuration.
