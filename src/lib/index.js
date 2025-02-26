@@ -28,6 +28,7 @@ export const initLocales = ({ fallbackLocale = 'en', initialLocale = 'en' } = {}
 initLocales();
 
 export { default as Alert } from './components/alert/alert.svelte';
+export { default as Infobar } from './components/alert/infobar.svelte';
 export { default as ButtonGroup } from './components/button/button-group.svelte';
 export { default as Button } from './components/button/button.svelte';
 export { default as SelectButtonGroup } from './components/button/select-button-group.svelte';

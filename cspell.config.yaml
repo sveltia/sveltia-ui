@@ -23,6 +23,7 @@ words:
   - colours
   - CVEs
   - espree
+  - infobar
   - jsdoc
   - nocheck
   - opsz

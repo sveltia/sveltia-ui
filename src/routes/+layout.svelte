@@ -126,14 +126,15 @@
             title="Feedback"
             category="components"
             pages={[
-              { key: 'inline-alert', label: 'Inline Alert' },
               { key: 'dialog', label: 'Dialog' },
-              { key: 'toast', label: 'Toast' },
-              { key: 'progressbar', label: 'Progressbar', disabled: false },
+              { key: 'infobar', label: 'Infobar' },
+              { key: 'inline-alert', label: 'Inline Alert' },
               { key: 'meter', label: 'Meter', disabled: true },
+              { key: 'progressbar', label: 'Progressbar', disabled: false },
               { key: 'skeleton', label: 'Skeleton', disabled: true },
               { key: 'spinner', label: 'Spinner', disabled: true },
               { key: 'statusbar', label: 'Statusbar', disabled: true },
+              { key: 'toast', label: 'Toast' },
             ]}
           />
           <NavSection
