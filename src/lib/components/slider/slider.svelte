@@ -43,7 +43,7 @@
     min = 0,
     max = 100,
     sliderLabel = '',
-    values = undefined,
+    values = $bindable(undefined),
     sliderLabels = undefined,
     step = 1,
     optionLabels = [],
