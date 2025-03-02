@@ -8,6 +8,7 @@ export const strings = {
   remove: '削除',
   collapse: '折り畳む',
   expand: '広げる',
+  dismiss: '閉じる',
   calendar: {
     year: '年',
     previous_decade: '前の 10 年',

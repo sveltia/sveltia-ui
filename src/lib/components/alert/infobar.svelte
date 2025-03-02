@@ -40,7 +40,7 @@
           iconic
           size="small"
           variant="ghost"
-          aria-label={$_('dismiss')}
+          aria-label={$_('_sui.dismiss')}
           onclick={() => {
             show = false;
           }}

@@ -8,6 +8,7 @@ export const strings = {
   remove: 'Remove',
   collapse: 'Collapse',
   expand: 'Expand',
+  dismiss: 'Dismiss',
   calendar: {
     year: 'Year',
     previous_decade: 'Previous Decade',
