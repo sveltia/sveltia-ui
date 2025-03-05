@@ -5,7 +5,6 @@
   @see https://www.w3.org/WAI/ARIA/apg/patterns/dialog-modal/
 -->
 <script>
-  import { generateElementId } from '@sveltia/utils/element';
   import { sleep } from '@sveltia/utils/misc';
   import { _ } from 'svelte-i18n';
   import Button from '../button/button.svelte';
@@ -47,7 +46,7 @@
    * The ID of the drawer.
    * @type {string}
    */
-  const id = generateElementId('dialog');
+  const id = $props.id();
   /**
    * A reference to the modal component.
    * @type {any}

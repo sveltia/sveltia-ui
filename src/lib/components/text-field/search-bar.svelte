@@ -7,7 +7,6 @@
 -->
 
 <script>
-  import { generateElementId } from '@sveltia/utils/element';
   import { _ } from 'svelte-i18n';
   import Button from '../button/button.svelte';
   import Icon from '../icon/icon.svelte';
@@ -41,7 +40,8 @@
     /* eslint-enable prefer-const */
   } = $props();
 
-  const id = generateElementId('searchbox');
+  const id = $props.id();
+
   /**
    * Reference to the `<input>` element.
    * @type {HTMLInputElement | undefined}

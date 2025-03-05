@@ -5,7 +5,6 @@
   @see https://www.w3.org/WAI/ARIA/apg/patterns/disclosure/
 -->
 <script>
-  import { generateElementId } from '@sveltia/utils/element';
   import Button from '../button/button.svelte';
   import Icon from '../icon/icon.svelte';
 
@@ -41,7 +40,7 @@
     /* eslint-enable prefer-const */
   } = $props();
 
-  const id = generateElementId('disclosure');
+  const id = $props.id();
 </script>
 
 <div

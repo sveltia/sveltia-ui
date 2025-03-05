@@ -5,7 +5,6 @@
   @see https://w3c.github.io/aria/#textbox
 -->
 <script>
-  import { generateElementId } from '@sveltia/utils/element';
   import { activateKeyShortcuts } from '../../services/events.svelte';
 
   /**
@@ -39,7 +38,7 @@
     /* eslint-enable prefer-const */
   } = $props();
 
-  const id = generateElementId('input');
+  const id = $props.id();
 </script>
 
 <div

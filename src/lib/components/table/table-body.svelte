@@ -5,7 +5,6 @@
   @see https://w3c.github.io/aria/#rowgroup
 -->
 <script>
-  import { generateElementId } from '@sveltia/utils/element';
   /**
    * @typedef {object} Props
    * @property {string} [class] - The `class` attribute on the wrapper element.
@@ -25,7 +24,7 @@
     /* eslint-enable prefer-const */
   } = $props();
 
-  const id = generateElementId('tbody');
+  const id = $props.id();
 </script>
 
 <div

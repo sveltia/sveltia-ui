@@ -1,7 +1,6 @@
 <script>
   import { LinkNode, TOGGLE_LINK_COMMAND } from '@lexical/link';
   import { $getNearestNodeOfType as getNearestNodeOfType } from '@lexical/utils';
-  import { generateElementId } from '@sveltia/utils/element';
   import {
     COMMAND_PRIORITY_NORMAL,
     KEY_DOWN_COMMAND,
@@ -24,7 +23,7 @@
   import TextInput from '../../text-field/text-input.svelte';
   import { focusEditor } from '../core';
 
-  const id = generateElementId('insert-link');
+  const id = $props.id();
 
   /**
    * Button type.

@@ -6,7 +6,6 @@
   @see https://w3c.github.io/aria/#textbox
 -->
 <script>
-  import { generateElementId } from '@sveltia/utils/element';
   import { _ } from 'svelte-i18n';
   import Button from '../button/button.svelte';
   import Icon from '../icon/icon.svelte';
@@ -38,7 +37,7 @@
     /* eslint-enable prefer-const */
   } = $props();
 
-  const id = generateElementId('input');
+  const id = $props.id();
 
   /**
    * Reference to the `<input>` element.

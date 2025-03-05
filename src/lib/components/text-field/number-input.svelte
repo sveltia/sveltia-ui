@@ -5,7 +5,6 @@
   @see https://w3c.github.io/aria/#textbox
 -->
 <script>
-  import { generateElementId } from '@sveltia/utils/element';
   import { untrack } from 'svelte';
   import { _ } from 'svelte-i18n';
   import Button from '../button/button.svelte';
@@ -48,7 +47,8 @@
     /* eslint-enable prefer-const */
   } = $props();
 
-  const id = generateElementId('input');
+  const id = $props.id();
+
   let edited = $state(false);
   let inputValue = $state('');
 

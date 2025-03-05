@@ -6,7 +6,6 @@
   @see https://www.w3.org/WAI/ARIA/apg/patterns/radio/
 -->
 <script>
-  import { generateElementId } from '@sveltia/utils/element';
   import Button from '../button/button.svelte';
 
   /**
@@ -45,7 +44,7 @@
     /* eslint-enable prefer-const */
   } = $props();
 
-  const id = generateElementId('checkbox');
+  const id = $props.id();
 
   /**
    * Reference to the `<button>` element.

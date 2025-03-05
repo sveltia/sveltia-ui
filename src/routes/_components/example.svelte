@@ -1,6 +1,4 @@
 <script>
-  import { generateElementId } from '@sveltia/utils/element';
-
   /**
    * @typedef {object} Props
    * @property {import('svelte').Snippet} [children] - Primary slot content.
@@ -13,7 +11,7 @@
     /* eslint-enable prefer-const */
   } = $props();
 
-  const id = generateElementId('example');
+  const id = $props.id();
 </script>
 
 <div role="figure" aria-labelledby="{id}-title">

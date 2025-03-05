@@ -6,7 +6,6 @@
   @todo Add DOM API compatibility.
 -->
 <script>
-  import { generateElementId } from '@sveltia/utils/element';
   import { _ } from 'svelte-i18n';
   import Button from '../button/button.svelte';
   import Icon from '../icon/icon.svelte';
@@ -37,7 +36,7 @@
     /* eslint-enable prefer-const */
   } = $props();
 
-  const id = generateElementId('combobox');
+  const id = $props.id();
   const selectedSelector = '[role="option"][aria-selected="true"]';
   let isPopupOpen = $state(false);
 

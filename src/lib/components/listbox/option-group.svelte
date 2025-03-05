@@ -7,8 +7,6 @@
   @see https://www.w3.org/WAI/ARIA/apg/patterns/listbox/examples/listbox-grouped/
 -->
 <script>
-  import { generateElementId } from '@sveltia/utils/element';
-
   /**
    * @typedef {object} Props
    * @property {string} [class] - The `class` attribute on the wrapper element.
@@ -34,7 +32,7 @@
     /* eslint-enable prefer-const */
   } = $props();
 
-  const id = generateElementId('optgroup');
+  const id = $props.id();
 </script>
 
 <div

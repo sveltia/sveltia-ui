@@ -6,7 +6,6 @@
   @see https://www.w3.org/WAI/ARIA/apg/patterns/checkbox/
 -->
 <script>
-  import { generateElementId } from '@sveltia/utils/element';
   import Button from '../button/button.svelte';
   import Icon from '../icon/icon.svelte';
 
@@ -48,7 +47,7 @@
     /* eslint-enable prefer-const */
   } = $props();
 
-  const id = generateElementId('checkbox');
+  const id = $props.id();
 
   /**
    * Reference to the `<button>` element.
