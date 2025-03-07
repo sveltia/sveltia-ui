@@ -104,8 +104,10 @@
       {#snippet startIcon()}
         {#if checkIcon}
           {@render checkIcon()}
-        {:else}
-          <Icon name={indeterminate ? 'remove' : 'check'} />
+        {:else if indeterminate}
+          <Icon name="remove" />
+        {:else if checked}
+          <Icon name="check" />
         {/if}
       {/snippet}
     </Button>
@@ -183,10 +185,6 @@
         --sui-checkbox-background-color-checked,
         var(--sui-primary-accent-color)
       );
-    }
-
-    :global(button[aria-checked='false']) {
-      color: transparent;
     }
 
     :global(button[aria-invalid='true']) {
