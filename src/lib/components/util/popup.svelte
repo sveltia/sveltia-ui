@@ -73,7 +73,7 @@
   let contentType = $state();
   /**
    * Style to be applied to the content.
-   * @type {import('svelte/store').Writable<any>}
+   * @type {import('svelte/store').Writable<Record<string, any>>}
    */
   let style = writable({
     inset: undefined,
@@ -82,22 +82,21 @@
     height: undefined,
   });
 
+  /**
+   * @type {{ style: import('svelte/store').Writable<Record<string, any>>, open:
+   * import('svelte/store').Writable<boolean>, checkPosition: () => void } | undefined}
+   */
+  let popupInstance = undefined;
   let hoveredTimeout = 0;
 
   /**
    * Initialize the popup.
    */
   const init = () => {
-    let openStore = writable(false);
+    popupInstance = activatePopup(anchor, dialogElement, position, positionBaseElement);
 
-    ({ style, open: openStore } = activatePopup(
-      anchor,
-      dialogElement,
-      position,
-      positionBaseElement,
-    ));
-
-    openStore.subscribe((_open) => {
+    style = popupInstance.style;
+    popupInstance.open.subscribe((_open) => {
       open = _open;
     });
 
@@ -115,6 +114,12 @@
   $effect(() => {
     if (anchor && dialogElement && !initialized) {
       init();
+    }
+  });
+
+  $effect(() => {
+    if (parentDialogElement && open) {
+      popupInstance?.checkPosition();
     }
   });
 
