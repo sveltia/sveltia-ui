@@ -4,6 +4,7 @@
   @see https://w3c.github.io/aria/#menuitem
 -->
 <script>
+  import { onMount } from 'svelte';
   import Button from '../button/button.svelte';
   import Icon from '../icon/icon.svelte';
   import Popup from '../util/popup.svelte';
@@ -25,6 +26,9 @@
     endIcon: _endIcon,
     chevronIcon,
     items,
+    onmouseenter,
+    onmouseleave,
+    onclick,
     onChange,
     onSelect,
     ...restProps
@@ -32,6 +36,7 @@
   } = $props();
 
   let isPopupOpen = $state(false);
+  let isPopupHovered = $state(false);
 
   /**
    * Reference to the `<button>` element.
@@ -39,7 +44,17 @@
    */
   let buttonElement = $state();
 
+  /**
+   * Reference to the `<button>` element.
+   * @type {HTMLDialogElement | undefined}
+   */
+  let dialogElement = $state();
+
   const hasItems = $derived(role === 'menuitem' && !!items);
+
+  onMount(() => {
+    dialogElement = buttonElement?.closest('dialog') ?? undefined;
+  });
 </script>
 
 <div role="none" class="sui menuitem {className}" {hidden}>
@@ -51,15 +66,34 @@
     {disabled}
     aria-haspopup={hasItems ? 'menu' : undefined}
     aria-expanded={hasItems ? isPopupOpen : undefined}
-    onmouseenter={() => {
+    onmouseenter={(event) => {
       if (hasItems) {
-        isPopupOpen = true;
+        window.setTimeout(() => {
+          isPopupOpen = true;
+        }, 200);
       }
+
+      onmouseenter?.(event);
     }}
-    onmouseleave={() => {
+    onmouseleave={(event) => {
       if (hasItems) {
-        isPopupOpen = false;
+        window.setTimeout(() => {
+          if (!isPopupHovered) {
+            isPopupOpen = false;
+          }
+        }, 200);
       }
+
+      onmouseleave?.(event);
+    }}
+    onclick={(event) => {
+      if (hasItems) {
+        event.preventDefault();
+        event.stopPropagation();
+        isPopupOpen = !isPopupOpen;
+      }
+
+      onclick?.(event);
     }}
     {onChange}
     {onSelect}
@@ -89,8 +123,14 @@
       {@render _endIcon?.()}
     {/snippet}
   </Button>
-  {#if hasItems}
-    <Popup anchor={buttonElement} position="right-top" bind:open={isPopupOpen}>
+  {#if hasItems && buttonElement && dialogElement}
+    <Popup
+      anchor={buttonElement}
+      parentDialogElement={dialogElement}
+      position="right-top"
+      bind:open={isPopupOpen}
+      bind:hovered={isPopupHovered}
+    >
       <Menu>
         {@render items?.()}
       </Menu>

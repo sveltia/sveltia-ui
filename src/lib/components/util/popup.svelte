@@ -13,12 +13,15 @@
    * @typedef {object} Props
    * @property {string} [class] - The `class` attribute on the content element.
    * @property {boolean} [open] - Whether to open the popup.
+   * @property {boolean} [hovered] - Whether the content is hovered.
    * @property {HTMLElement} [anchor] - A reference to the anchor element that opens the popup.
    * Typically a `<button>`.
    * @property {HTMLElement} [content] - A reference to the content element.
    * @property {import('$lib/typedefs').PopupPosition} [position] - Where to show the popup.
-   * @property {HTMLElement} [positionBaseElement] - The base element of
-   * {@link position}. If omitted, this will be {@link anchor}.
+   * @property {HTMLElement} [positionBaseElement] - The base element of {@link position}. If
+   * omitted, this will be {@link anchor}.
+   * @property {HTMLDialogElement} [parentDialogElement] - A reference to a dialog element that is
+   * already displayed. This should be provided for a nested popup.
    * @property {boolean} [touchOptimized] - Whether to show the popup at the center of the screen on
    * mobile/tablet and ignore the defined dropdown `position`.
    * @property {import('svelte').Snippet} [children] - Primary slot content.
@@ -32,12 +35,14 @@
   let {
     /* eslint-disable prefer-const */
     open = $bindable(false),
+    hovered = $bindable(false),
     content = $bindable(undefined),
     class: className,
     showBackdrop = false,
     anchor,
     position = 'bottom-left',
     positionBaseElement = undefined,
+    parentDialogElement = undefined,
     touchOptimized = false,
     children,
     onOpen,
@@ -77,6 +82,8 @@
     height: undefined,
   });
 
+  let hoveredTimeout = 0;
+
   /**
    * Initialize the popup.
    */
@@ -99,6 +106,13 @@
   };
 
   $effect(() => {
+    if (parentDialogElement && !dialogElement && content) {
+      dialogElement = parentDialogElement;
+      dialogElement.append(content);
+    }
+  });
+
+  $effect(() => {
     if (anchor && dialogElement && !initialized) {
       init();
     }
@@ -111,38 +125,10 @@
   });
 </script>
 
-<Modal
-  {...restProps}
-  bind:dialog={dialogElement}
-  role="none"
-  class="popup"
-  bind:open
-  showBackdrop={showBackdrop ?? touch}
-  lightDismiss={true}
-  keepContent={true}
-  onOpen={async (event) => {
-    onOpen?.(event);
-
-    await sleep(100);
-
-    if (!content) {
-      return;
-    }
-
-    const target = /** @type {HTMLElement} */ (
-      content.querySelector('[tabindex]:not([aria-disabled="true"])')
-    );
-
-    if (target) {
-      target.focus();
-    } else {
-      content.tabIndex = -1;
-      content.focus();
-    }
-  }}
->
+{#snippet contentWrapper()}
   <div
     bind:this={content}
+    hidden={!open}
     role="none"
     class="content {className} {contentType}"
     class:touch
@@ -152,10 +138,63 @@
     style:max-width={$style.maxWidth}
     style:max-height={$style.height}
     style:visibility={$style.inset ? undefined : 'hidden'}
+    onmouseenter={() => {
+      hovered = true;
+
+      if (parentDialogElement) {
+        window.clearTimeout(hoveredTimeout);
+      }
+    }}
+    onmouseleave={() => {
+      hovered = false;
+
+      if (parentDialogElement) {
+        hoveredTimeout = window.setTimeout(() => {
+          open = false;
+        }, 200);
+      }
+    }}
   >
     {@render children?.()}
   </div>
-</Modal>
+{/snippet}
+
+{#if parentDialogElement}
+  {@render contentWrapper()}
+{:else}
+  <Modal
+    {...restProps}
+    bind:dialog={dialogElement}
+    role="none"
+    class="popup"
+    bind:open
+    showBackdrop={showBackdrop ?? touch}
+    lightDismiss={true}
+    keepContent={true}
+    onOpen={async (event) => {
+      onOpen?.(event);
+
+      await sleep(100);
+
+      if (!content) {
+        return;
+      }
+
+      const target = /** @type {HTMLElement} */ (
+        content.querySelector('[tabindex]:not([aria-disabled="true"])')
+      );
+
+      if (target) {
+        target.focus();
+      } else {
+        content.tabIndex = -1;
+        content.focus();
+      }
+    }}
+  >
+    {@render contentWrapper()}
+  </Modal>
+{/if}
 
 <style lang="scss">
   .content {

@@ -89,11 +89,9 @@ class Popup {
           ? `${Math.round(intersectionRect.left)}px`
           : 'auto';
 
-      const anchorPopup = /** @type {HTMLElement} */ (this.anchorElement.closest('.popup'));
-
       const style = {
         inset: [top, right, bottom, left].join(' '),
-        zIndex: anchorPopup ? Number(anchorPopup.style.zIndex) + 1 : 1000,
+        zIndex: 1000,
         minWidth: `${Math.round(intersectionRect.width)}px`,
         maxWidth: position.endsWith('-left')
           ? `${Math.round(rootBounds.width - intersectionRect.left - 8)}px`

@@ -164,6 +164,9 @@
 
 /**
  * @typedef {object} MouseEventHandlers
+ * @property {(event: MouseEvent) => void} [onmouseenter] - `mouseenter` event handler.
+ * @property {(event: MouseEvent) => void} [onmouseleave] - `mouseleave` event handler.
+ * @property {(event: MouseEvent) => void} [onmouseover] - `mouseover` event handler.
  * @property {(event: MouseEvent) => void} [onmousedown] - `mousedown` event handler.
  * @property {(event: MouseEvent) => void} [onmouseup] - `mouseup` event handler.
  * @property {(event: MouseEvent) => void} [onclick] - `click` event handler.
