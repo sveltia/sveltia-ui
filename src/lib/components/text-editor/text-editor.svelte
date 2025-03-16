@@ -56,9 +56,7 @@
 
   const editorStore = createEditorStore();
 
-  editorStore.config.modes = modes;
-  editorStore.config.enabledButtons = buttons;
-  editorStore.config.components = components;
+  editorStore.config = { ...editorStore.config, modes, enabledButtons: buttons, components };
 
   setContext('editorStore', editorStore);
 

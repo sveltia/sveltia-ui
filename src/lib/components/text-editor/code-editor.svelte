@@ -52,8 +52,7 @@
   const backticks = '```';
   const editorStore = createEditorStore();
 
-  editorStore.config.isCodeEditor = true;
-  editorStore.config.defaultLanguage = lang;
+  editorStore.config = { ...editorStore.config, isCodeEditor: true, defaultLanguage: lang };
 
   setContext('editorStore', editorStore);
 
