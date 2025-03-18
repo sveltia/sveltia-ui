@@ -58,31 +58,23 @@
    * @param {Event} event `Update` custom event.
    */
   const onUpdate = (event) => {
-    if (editorStore.hasConverterError) {
+    const { hasConverterError, useRichText, inputValue } = editorStore;
+
+    if (hasConverterError || !useRichText) {
       return;
     }
 
-    const { detail } = /** @type {CustomEvent} */ (event);
-    const newValue = detail.value;
+    const { value: newValue, selection } = /** @type {CustomEvent} */ (event).detail;
 
-    if (editorStore.inputValue !== newValue) {
-      const { useRichText } = editorStore;
-
-      if (useRichText) {
-        // Temporarily disable rich text to prevent unnecessary Markdown conversion that resets
-        // Lexical nodes and selection
-        editorStore.useRichText = false;
-      }
-
+    if (inputValue !== newValue) {
+      // Temporarily disable rich text to prevent unnecessary Markdown conversion that resets
+      // Lexical nodes and selection, then restore the state
+      editorStore.useRichText = false;
       editorStore.inputValue = newValue;
-
-      if (useRichText) {
-        // Restore the rich text state
-        editorStore.useRichText = true;
-      }
+      editorStore.useRichText = true;
     }
 
-    editorStore.selection = detail.selection;
+    editorStore.selection = selection;
   };
 
   /**
