@@ -6,11 +6,11 @@
 <script>
   /**
    * @typedef {object} Props
-   * @property {string} [class] - The `class` attribute on the wrapper element.
-   * @property {number} now - The `aria-valuenow` attribute on the wrapper element.
-   * @property {number} [min] - The `aria-valuemin` attribute on the wrapper element.
-   * @property {number} [max] - The `aria-valuemax` attribute on the wrapper element.
-   * @property {string} [text] - The `aria-valuetext` attribute on the wrapper element.
+   * @property {string} [class] The `class` attribute on the wrapper element.
+   * @property {number} now The `aria-valuenow` attribute on the wrapper element.
+   * @property {number} [min] The `aria-valuemin` attribute on the wrapper element.
+   * @property {number} [max] The `aria-valuemax` attribute on the wrapper element.
+   * @property {string} [text] The `aria-valuetext` attribute on the wrapper element.
    */
 
   /**

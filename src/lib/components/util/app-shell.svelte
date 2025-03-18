@@ -8,10 +8,13 @@
   import { onMount } from 'svelte';
 
   /**
+   * @import { Snippet } from 'svelte';
+   */
+
+  /**
    * @typedef {object} Props
-   * @property {'horizontal' | 'vertical'} [orientation] - Orientation of the app
-   * shell’s children..
-   * @property {import('svelte').Snippet} [children] - Primary slot content.
+   * @property {'horizontal' | 'vertical'} [orientation] Orientation of the app shell’s children.
+   * @property {Snippet} [children] Primary slot content.
    */
 
   /**

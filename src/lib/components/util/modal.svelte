@@ -8,7 +8,11 @@
   import Placeholder from './placeholder.svelte';
 
   /**
-   * @type {import('$lib/typedefs').ModalProps & Record<string, any>}
+   * @import { ModalProps } from '$lib/typedefs';
+   */
+
+  /**
+   * @type {ModalProps & Record<string, any>}
    */
   let {
     /* eslint-disable prefer-const */
@@ -34,7 +38,7 @@
 
   /**
    * Close the modal.
-   * @param {string} returnValue - Return value to be used for `<dialog>`.
+   * @param {string} returnValue Return value to be used for `<dialog>`.
    */
   export const close = (returnValue) => {
     if (!dialog) {
@@ -57,7 +61,7 @@
     new Promise((resolve) => {
       /**
        * Transition event listener.
-       * @param {TransitionEvent} event - `transition` event.
+       * @param {TransitionEvent} event `transition` event.
        */
       const listener = (event) => {
         if (event.target === dialog) {

@@ -12,17 +12,20 @@
   import Button from './button.svelte';
 
   /**
-   * @typedef {object} Props
-   * @property {import('$lib/typedefs').PopupPosition} [popupPosition] - Where to show the dropdown
-   * menu.
-   * @property {boolean} [showPopupBackdrop] - Whether to show the backdrop for the popup.
-   * @property {import('svelte').Snippet} [chevronIcon] - Chevron slot content.
-   * @property {import('svelte').Snippet} [popup] - Popup slot content.
+   * @import { Snippet } from 'svelte';
+   * @import { ButtonProps, CommonEventHandlers, PopupPosition } from '$lib/typedefs';
    */
 
   /**
-   * @type {import('$lib/typedefs').ButtonProps & import('$lib/typedefs').CommonEventHandlers &
-   * Props & Record<string, any>}
+   * @typedef {object} Props
+   * @property {PopupPosition} [popupPosition] Where to show the dropdown menu.
+   * @property {boolean} [showPopupBackdrop] Whether to show the backdrop for the popup.
+   * @property {Snippet} [chevronIcon] Chevron slot content.
+   * @property {Snippet} [popup] Popup slot content.
+   */
+
+  /**
+   * @type {ButtonProps & CommonEventHandlers & Props & Record<string, any>}
    */
   let {
     /* eslint-disable prefer-const */

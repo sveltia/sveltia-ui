@@ -10,22 +10,26 @@
   import Icon from '../icon/icon.svelte';
 
   /**
-   * @typedef {object} Props
-   * @property {string} [class] - The `class` attribute on the wrapper element.
-   * @property {boolean} [required] - Whether to mark the widget required. An alias of the
-   * `aria-required` attribute.
-   * @property {boolean} [invalid] - Whether to mark the widget invalid. An alias of the
-   * `aria-invalid` attribute.
-   * @property {boolean | 'mixed'} [checked] - Whether to check the widget. An alias of the
-   * `aria-checked` attribute.
-   * @property {string} [label] - Text label displayed next to the checkbox.
-   * @property {string} [aria-label] - `aria-label` attribute.
-   * @property {import('svelte').Snippet} [checkIcon] - Check icon slot content.
+   * @import { Snippet } from 'svelte';
+   * @import { ButtonProps, CommonEventHandlers } from '$lib/typedefs';
    */
 
   /**
-   * @type {import('$lib/typedefs').ButtonProps & import('$lib/typedefs').CommonEventHandlers &
-   * Props & Record<string, any>}
+   * @typedef {object} Props
+   * @property {string} [class] The `class` attribute on the wrapper element.
+   * @property {boolean} [required] Whether to mark the widget required. An alias of the
+   * `aria-required` attribute.
+   * @property {boolean} [invalid] Whether to mark the widget invalid. An alias of the
+   * `aria-invalid` attribute.
+   * @property {boolean | 'mixed'} [checked] Whether to check the widget. An alias of the
+   * `aria-checked` attribute.
+   * @property {string} [label] Text label displayed next to the checkbox.
+   * @property {string} [aria-label] `aria-label` attribute.
+   * @property {Snippet} [checkIcon] Check icon slot content.
+   */
+
+  /**
+   * @type {ButtonProps & CommonEventHandlers & Props & Record<string, any>}
    */
   let {
     /* eslint-disable prefer-const */

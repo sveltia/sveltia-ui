@@ -12,24 +12,29 @@
   import Modal from '../util/modal.svelte';
 
   /**
-   * @typedef {object} Props
-   * @property {string} [class] - The `class` attribute on the content element.
-   * @property {boolean} [open] - Whether to open the drawer.
-   * @property {string} [title] - Title text displayed on the header.
-   * @property {'top' | 'right' | 'bottom' | 'left'} [position] - Position of the drawer.
-   * @property {'small' | 'medium' | 'large' | 'x-large' | 'full'} [size] - Width or height of the
-   * drawer.
-   * @property {'inside' | 'outside' | false} [showClose] - Whether to show the Close button.
-   * @property {import('svelte').Snippet} [children] - Primary slot content.
-   * @property {import('svelte').Snippet} [header] - Header slot content.
-   * @property {import('svelte').Snippet} [headerExtra] - Header extra slot content.
-   * @property {import('svelte').Snippet} [footer] - Footer slot content.
-   * @property {import('svelte').Snippet} [closeIcon] - Close icon slot content.
-   * @property {import('svelte').Snippet} [extraContent] - Extra content slot content.
+   * @import { Snippet } from 'svelte';
+   * @import { ModalProps } from '$lib/typedefs';
    */
 
   /**
-   * @type {import('$lib/typedefs').ModalProps & Props & Record<string, any>}
+   * @typedef {object} Props
+   * @property {string} [class] The `class` attribute on the content element.
+   * @property {boolean} [open] Whether to open the drawer.
+   * @property {string} [title] Title text displayed on the header.
+   * @property {'top' | 'right' | 'bottom' | 'left'} [position] Position of the drawer.
+   * @property {'small' | 'medium' | 'large' | 'x-large' | 'full'} [size] Width or height of the
+   * drawer.
+   * @property {'inside' | 'outside' | false} [showClose] Whether to show the Close button.
+   * @property {Snippet} [children] Primary slot content.
+   * @property {Snippet} [header] Header slot content.
+   * @property {Snippet} [headerExtra] Header extra slot content.
+   * @property {Snippet} [footer] Footer slot content.
+   * @property {Snippet} [closeIcon] Close icon slot content.
+   * @property {Snippet} [extraContent] Extra content slot content.
+   */
+
+  /**
+   * @type {ModalProps & Props & Record<string, any>}
    */
   let {
     /* eslint-disable prefer-const */

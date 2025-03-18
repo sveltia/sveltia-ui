@@ -23,6 +23,10 @@ import {
 } from '@lexical/table';
 import { $isParagraphNode as isParagraphNode, $isTextNode as isTextNode } from 'lexical';
 
+/**
+ * @import { ElementTransformer } from '@lexical/markdown';
+ */
+
 const TABLE_ROW_REG_EXP = /^(?:\|)(.+)(?:\|)\s?$/;
 const TABLE_ROW_DIVIDER_REG_EXP = /^(\| ?:?-*:? ?)+\|\s?$/;
 
@@ -68,7 +72,7 @@ const mapToTableCells = (textContent) => {
 };
 
 /**
- * @type {import('@lexical/markdown').ElementTransformer}
+ * @type {ElementTransformer}
  */
 export const TABLE = {
   dependencies: [TableNode, TableRowNode, TableCellNode],

@@ -9,19 +9,23 @@
   import Icon from '../icon/icon.svelte';
 
   /**
-   * @typedef {object} Props
-   * @property {string} [class] - The `class` attribute on the wrapper element.
-   * @property {boolean} [selected] - Whether to select the widget. An alias of the `aria-selected`
-   * attribute.
-   * @property {string} label - Text label displayed on the item.
-   * @property {string} [searchValue] - The value to be searched.
-   * @property {boolean} [wrap] - Whether to wrap a long label.
-   * @property {import('svelte').Snippet} [checkIcon] - Check icon slot content.
+   * @import { Snippet } from 'svelte';
+   * @import { ButtonProps, CommonEventHandlers } from '$lib/typedefs';
    */
 
   /**
-   * @type {import('$lib/typedefs').ButtonProps & import('$lib/typedefs').CommonEventHandlers &
-   * Props & Record<string, any>}
+   * @typedef {object} Props
+   * @property {string} [class] The `class` attribute on the wrapper element.
+   * @property {boolean} [selected] Whether to select the widget. An alias of the `aria-selected`
+   * attribute.
+   * @property {string} label Text label displayed on the item.
+   * @property {string} [searchValue] The value to be searched.
+   * @property {boolean} [wrap] Whether to wrap a long label.
+   * @property {Snippet} [checkIcon] Check icon slot content.
+   */
+
+  /**
+   * @type {ButtonProps & CommonEventHandlers & Props & Record<string, any>}
    */
   let {
     /* eslint-disable prefer-const */

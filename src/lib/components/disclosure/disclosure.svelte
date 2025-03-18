@@ -9,18 +9,22 @@
   import Icon from '../icon/icon.svelte';
 
   /**
+   * @import { Snippet } from 'svelte';
+   */
+
+  /**
    * @typedef {object} Props
-   * @property {string} [class] - The `class` attribute on the wrapper element.
-   * @property {boolean} [hidden] - Whether to hide the widget. An alias of the `aria-hidden`
+   * @property {string} [class] The `class` attribute on the wrapper element.
+   * @property {boolean} [hidden] Whether to hide the widget. An alias of the `aria-hidden`
    * attribute.
-   * @property {boolean} [disabled] - Whether to disable the widget. An alias of the `aria-disabled`
+   * @property {boolean} [disabled] Whether to disable the widget. An alias of the `aria-disabled`
    * attribute.
-   * @property {boolean} [expanded] - Whether to show the content. An alias of the `aria-expanded`
+   * @property {boolean} [expanded] Whether to show the content. An alias of the `aria-expanded`
    * attribute.
-   * @property {string} [label] - Text label displayed next to the expander.
-   * @property {import('svelte').Snippet} [children] - Primary slot content.
-   * @property {import('svelte').Snippet} [chevronIcon] - Chevron slot content.
-   * @property {(event: CustomEvent) => void} [onChange] - Custom `Change` event handler.
+   * @property {string} [label] Text label displayed next to the expander.
+   * @property {Snippet} [children] Primary slot content.
+   * @property {Snippet} [chevronIcon] Chevron slot content.
+   * @property {(event: CustomEvent) => void} [onChange] Custom `Change` event handler.
    */
 
   /**

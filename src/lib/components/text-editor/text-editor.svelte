@@ -14,24 +14,34 @@
   import TextEditorToolbar from './toolbar/text-editor-toolbar.svelte';
 
   /**
+   * @import { Snippet } from 'svelte';
+   * @import {
+   * TextEditorBlockType,
+   * TextEditorComponent,
+   * TextEditorInlineType,
+   * TextEditorMode,
+   * } from '$lib/typedefs';
+   */
+
+  /**
    * @typedef {object} Props
-   * @property {string} [value] - Input value.
-   * @property {boolean} [flex] - Make the text input container flexible.
-   * @property {import('$lib/typedefs').TextEditorMode[]} [modes] - Enabled modes.
-   * @property {(import('$lib/typedefs').TextEditorBlockType |
-   * import('$lib/typedefs').TextEditorInlineType)[]} [buttons] - Enabled buttons.
-   * @property {import('$lib/typedefs').TextEditorComponent[]} [components] - Editor components.
-   * @property {string} [class] - The `class` attribute on the wrapper element.
-   * @property {boolean} [hidden] - Whether to hide the widget.
-   * @property {boolean} [disabled] - Whether to disable the widget. An alias of the `aria-disabled`
+   * @property {string} [value] Input value.
+   * @property {boolean} [flex] Make the text input container flexible.
+   * @property {TextEditorMode[]} [modes] Enabled modes.
+   * @property {(TextEditorBlockType |
+   * TextEditorInlineType)[]} [buttons] Enabled buttons.
+   * @property {TextEditorComponent[]} [components] Editor components.
+   * @property {string} [class] The `class` attribute on the wrapper element.
+   * @property {boolean} [hidden] Whether to hide the widget.
+   * @property {boolean} [disabled] Whether to disable the widget. An alias of the `aria-disabled`
    * attribute.
-   * @property {boolean} [readonly] - Whether to make the widget read-only. An alias of the
+   * @property {boolean} [readonly] Whether to make the widget read-only. An alias of the
    * `aria-readonly` attribute.
-   * @property {boolean} [required] - Whether to mark the widget required. An alias of the
+   * @property {boolean} [required] Whether to mark the widget required. An alias of the
    * `aria-required` attribute.
-   * @property {boolean} [invalid] - Whether to mark the widget invalid. An alias of the
+   * @property {boolean} [invalid] Whether to mark the widget invalid. An alias of the
    * `aria-invalid` attribute.
-   * @property {import('svelte').Snippet} [children] - Primary slot content.
+   * @property {Snippet} [children] Primary slot content.
    */
 
   /**

@@ -6,8 +6,8 @@
 <script>
   /**
    * @typedef {object} Props
-   * @property {string} [class] - The `class` attribute on the `span` element.
-   * @property {string} [name] - Icon name, e.g. `search`, `expand_more`, `close`, etc.
+   * @property {string} [class] The `class` attribute on the `span` element.
+   * @property {string} [name] Icon name, e.g. `search`, `expand_more`, `close`, etc.
    */
 
   /**

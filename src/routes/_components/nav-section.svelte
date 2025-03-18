@@ -3,9 +3,9 @@
 
   /**
    * @typedef {object} Props
-   * @property {string} title - Title for the section.
-   * @property {string} category - Category name.
-   * @property {{ key: string, label: string, disabled?: boolean }[]} pages - Page list.
+   * @property {string} title Title for the section.
+   * @property {string} category Category name.
+   * @property {{ key: string, label: string, disabled?: boolean }[]} pages Page list.
    */
 
   /** @type {Props} */

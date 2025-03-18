@@ -4,12 +4,16 @@
   import Icon from '../icon/icon.svelte';
 
   /**
+   * @import { Snippet } from 'svelte';
+   */
+
+  /**
    * @typedef {object} Props
-   * @property {boolean} [show] - Whether to show the toast.
-   * @property {boolean} [dismissible] - Whether to show the close button.
-   * @property {'error' | 'warning' | 'info' | 'success'} [status] - Information status.
-   * @property {import('svelte').Snippet} [children] - Primary slot content.
-   * @property {import('svelte').Snippet} [icon] - Icon slot content.
+   * @property {boolean} [show] Whether to show the toast.
+   * @property {boolean} [dismissible] Whether to show the close button.
+   * @property {'error' | 'warning' | 'info' | 'success'} [status] Information status.
+   * @property {Snippet} [children] Primary slot content.
+   * @property {Snippet} [icon] Icon slot content.
    */
 
   /** @type {Props} */

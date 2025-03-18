@@ -8,13 +8,17 @@
   import { activateKeyShortcuts } from '../../services/events.svelte';
 
   /**
-   * @typedef {object} Props
-   * @property {string} [value] - Input value.
+   * @import { Snippet } from 'svelte';
+   * @import { CommonEventHandlers, InputEventHandlers, TextInputProps } from '$lib/typedefs';
    */
 
   /**
-   * @type {import('$lib/typedefs').TextInputProps & import('$lib/typedefs').CommonEventHandlers &
-   * import('$lib/typedefs').InputEventHandlers & Props & Record<string, any>}
+   * @typedef {object} Props
+   * @property {string} [value] Input value.
+   */
+
+  /**
+   * @type {TextInputProps & CommonEventHandlers & InputEventHandlers & Props & Record<string, any>}
    */
   let {
     /* eslint-disable prefer-const */

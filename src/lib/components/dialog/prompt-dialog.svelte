@@ -11,17 +11,26 @@
   import Dialog from './dialog.svelte';
 
   /**
-   * @typedef {object} Props
-   * @property {string} [value] - Value entered on the textbox.
-   * @property {object} [textboxAttrs] - Extra attributes for the `<TextInput>`.
-   * @property {import('svelte').Snippet} [children] - Primary slot content.
-   * @property {import('svelte').Snippet} [input] - Input slot content.
+   * @import { Snippet } from 'svelte';
+   * @import {
+   * CommonEventHandlers,
+   * DialogProps,
+   * InputEventHandlers,
+   * ModalProps,
+   * } from '$lib/typedefs';
    */
 
   /**
-   * @type {import('$lib/typedefs').ModalProps & import('$lib/typedefs').DialogProps &
-   * import('$lib/typedefs').CommonEventHandlers & import('$lib/typedefs').InputEventHandlers &
-   * Props & Record<string, any>}
+   * @typedef {object} Props
+   * @property {string} [value] Value entered on the textbox.
+   * @property {object} [textboxAttrs] Extra attributes for the `<TextInput>`.
+   * @property {Snippet} [children] Primary slot content.
+   * @property {Snippet} [input] Input slot content.
+   */
+
+  /**
+   * @type {ModalProps & DialogProps & CommonEventHandlers & InputEventHandlers & Props &
+   * Record<string, any>}
    */
   let {
     /* eslint-disable prefer-const */

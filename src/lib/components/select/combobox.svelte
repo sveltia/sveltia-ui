@@ -15,8 +15,11 @@
   import Popup from '../util/popup.svelte';
 
   /**
-   * @type {import('$lib/typedefs').ComboboxProps & import('$lib/typedefs').TextInputProps &
-   * Record<string, any>}
+   * @import { ComboboxProps, TextInputProps } from '$lib/typedefs';
+   */
+
+  /**
+   * @type {ComboboxProps & TextInputProps & Record<string, any>}
    */
   let {
     /* eslint-disable prefer-const */
@@ -79,7 +82,7 @@
 
   /**
    * Update the {@link value} whenever an option is selected.
-   * @param {HTMLButtonElement} target - Selected option.
+   * @param {HTMLButtonElement} target Selected option.
    */
   const _onSelect = (target) => {
     // @todo support more types

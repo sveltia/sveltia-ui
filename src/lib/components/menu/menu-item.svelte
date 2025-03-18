@@ -11,8 +11,11 @@
   import Menu from './menu.svelte';
 
   /**
-   * @type {import('$lib/typedefs').ButtonProps & import('$lib/typedefs').MenuItemProps &
-   * import('$lib/typedefs').CommonEventHandlers & Record<string, any>}
+   * @import { ButtonProps, CommonEventHandlers, MenuItemProps } from '$lib/typedefs';
+   */
+
+  /**
+   * @type {ButtonProps & MenuItemProps & CommonEventHandlers & Record<string, any>}
    */
   let {
     /* eslint-disable prefer-const */

@@ -8,8 +8,12 @@
   import { focusEditor } from '../core';
 
   /**
+   * @import { TextEditorFormatType, TextEditorStore } from '$lib/typedefs';
+   */
+
+  /**
    * @typedef {object} Props
-   * @property {import('$lib/typedefs').TextEditorFormatType} type - Button type.
+   * @property {TextEditorFormatType} type Button type.
    */
 
   /**
@@ -21,7 +25,7 @@
     /* eslint-enable prefer-const */
   } = $props();
 
-  /** @type {import('$lib/typedefs').TextEditorStore} */
+  /** @type {TextEditorStore} */
   const editorStore = getContext('editorStore');
   const selectionTypeMatches = $derived(editorStore.selection.inlineTypes.includes(type));
 </script>

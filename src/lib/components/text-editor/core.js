@@ -54,11 +54,21 @@ import prismComponents from 'prismjs/components';
 import { blockButtonTypes, textFormatButtonTypes } from '.';
 import { TABLE } from './transformers/table';
 
+/**
+ * @import { CreateEditorArgs, LexicalEditor } from 'lexical';
+ * @import {
+ * TextEditorBlockType,
+ * TextEditorConfig,
+ * TextEditorInlineType,
+ * TextEditorSelectionState,
+ * } from '$lib/typedefs';
+ */
+
 const allTransformers = [...TRANSFORMERS, TABLE];
 
 /**
  * Lexical editor configuration.
- * @type {import('lexical').CreateEditorArgs}
+ * @type {CreateEditorArgs}
  */
 const editorConfig = {
   namespace: 'editor',
@@ -126,7 +136,7 @@ const editorConfig = {
 
 /**
  * Get the current selection’s block node key as well as block and inline level types.
- * @returns {import('$lib/typedefs').TextEditorSelectionState} Current selection state.
+ * @returns {TextEditorSelectionState} Current selection state.
  */
 const getSelectionTypes = () => {
   const selection = getSelection();
@@ -142,7 +152,7 @@ const getSelectionTypes = () => {
   const anchor = selection.anchor.getNode();
   /** @type {ElementNode | null} */
   let parent = null;
-  /** @type {import('$lib/typedefs').TextEditorInlineType[]} */
+  /** @type {TextEditorInlineType[]} */
   const inlineTypes = textFormatButtonTypes.filter((type) => selection.hasFormat(type));
 
   if (anchor.getType() !== 'root') {
@@ -158,7 +168,7 @@ const getSelectionTypes = () => {
     }
   }
 
-  const blockType = /** @type {import('$lib/typedefs').TextEditorBlockType} */ (
+  const blockType = /** @type {TextEditorBlockType} */ (
     (() => {
       if (!parent) {
         return 'paragraph';
@@ -199,7 +209,7 @@ const getSelectionTypes = () => {
 
 /**
  * Listen to changes made on the editor and trigger the Update event.
- * @param {import('lexical').LexicalEditor} editor - Editor instance.
+ * @param {LexicalEditor} editor Editor instance.
  */
 const onEditorUpdate = (editor) => {
   editor.getRootElement()?.dispatchEvent(
@@ -217,8 +227,8 @@ const onEditorUpdate = (editor) => {
 
 /**
  * Initialize the Lexical editor.
- * @param {import('$lib/typedefs').TextEditorConfig} config - Editor configuration.
- * @returns {import('lexical').LexicalEditor} Editor instance.
+ * @param {TextEditorConfig} config Editor configuration.
+ * @returns {LexicalEditor} Editor instance.
  */
 export const initEditor = ({ components = [], isCodeEditor = false, defaultLanguage = '' }) => {
   components.forEach(({ node, transformer }) => {
@@ -343,7 +353,7 @@ export const initEditor = ({ components = [], isCodeEditor = false, defaultLangu
 
 /**
  * Load additional Prism syntax highlighter settings for the given programming language.
- * @param {string} lang - Language name, like scss.
+ * @param {string} lang Language name, like scss.
  */
 export const loadCodeHighlighter = async (lang) => {
   if (lang in window.Prism.languages) {
@@ -372,8 +382,8 @@ export const loadCodeHighlighter = async (lang) => {
 
 /**
  * Convert Markdown to Lexical nodes.
- * @param {import('lexical').LexicalEditor} editor - Editor instance.
- * @param {string} value - Current Markdown value.
+ * @param {LexicalEditor} editor Editor instance.
+ * @param {string} value Current Markdown value.
  * @returns {Promise<void>} Nothing.
  * @throws {Error} Failed to convert the value to Lexical nodes.
  */
@@ -399,7 +409,7 @@ export const convertMarkdownToLexical = async (editor, value) => {
 
 /**
  * Move focus to the editor so the user can start editing immediately.
- * @param {import('lexical').LexicalEditor} editor - Editor instance.
+ * @param {LexicalEditor} editor Editor instance.
  * @returns {Promise<void>} Nothing.
  */
 export const focusEditor = async (editor) => {

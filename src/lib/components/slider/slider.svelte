@@ -11,26 +11,30 @@
   import { onMount } from 'svelte';
 
   /**
+   * @import { Snippet } from 'svelte';
+   */
+
+  /**
    * @typedef {object} Props
-   * @property {number} [value] - Current value.
-   * @property {number} [min] - Minimum allowed value. An alias of the `aria-valuemin` attribute.
-   * @property {number} [max] - Maximum allowed value. An alias of the `aria-valuemax` attribute.
-   * @property {string} [sliderLabel] - `aria-label` on the slider.
-   * @property {[number, number]} [values] - Value list for a multi-thumb slider.
-   * @property {[string, string]} [sliderLabels] - `aria-label` on a multi-thumb slider.
-   * @property {number} [step] - Step option like `<input type="range">`.
-   * @property {(string[] | number[])} [optionLabels] - Visible labels on the slider.
-   * @property {boolean} [flex] - Make the text input container flexible.
-   * @property {string} [class] - The `class` attribute on the wrapper element.
-   * @property {boolean} [hidden] - Whether to hide the widget.
-   * @property {boolean} [disabled] - Whether to disable the widget. An alias of the `aria-disabled`
+   * @property {number} [value] Current value.
+   * @property {number} [min] Minimum allowed value. An alias of the `aria-valuemin` attribute.
+   * @property {number} [max] Maximum allowed value. An alias of the `aria-valuemax` attribute.
+   * @property {string} [sliderLabel] `aria-label` on the slider.
+   * @property {[number, number]} [values] Value list for a multi-thumb slider.
+   * @property {[string, string]} [sliderLabels] `aria-label` on a multi-thumb slider.
+   * @property {number} [step] Step option like `<input type="range">`.
+   * @property {(string[] | number[])} [optionLabels] Visible labels on the slider.
+   * @property {boolean} [flex] Make the text input container flexible.
+   * @property {string} [class] The `class` attribute on the wrapper element.
+   * @property {boolean} [hidden] Whether to hide the widget.
+   * @property {boolean} [disabled] Whether to disable the widget. An alias of the `aria-disabled`
    * attribute.
-   * @property {boolean} [readonly] - Whether to make the widget read-only. An alias of the
+   * @property {boolean} [readonly] Whether to make the widget read-only. An alias of the
    * `aria-readonly` attribute.
-   * @property {boolean} [invalid] - Whether to mark the widget invalid. An alias of the
+   * @property {boolean} [invalid] Whether to mark the widget invalid. An alias of the
    * `aria-invalid` attribute.
-   * @property {import('svelte').Snippet} [children] - Primary slot content.
-   * @property {(detail: { values?: number[], value?: number }) => void} [onChange] - `change` event
+   * @property {Snippet} [children] Primary slot content.
+   * @property {(detail: { values?: number[], value?: number }) => void} [onChange] `change` event
    * handler.
    */
 
@@ -77,7 +81,7 @@
 
   /**
    * Move a thumb with mouse.
-   * @param {number} diff - Distance from the original X position in pixels.
+   * @param {number} diff Distance from the original X position in pixels.
    */
   const moveThumb = (diff) => {
     if (diff < 0) {
@@ -113,9 +117,8 @@
 
   /**
    * Handle the `keydown` event fired on the slider.
-   * @param {KeyboardEvent} event - `keydown` event.
-   * @param {number} [valueIndex] - Index in the {@link values} array to be used to get/set the
-   * value.
+   * @param {KeyboardEvent} event `keydown` event.
+   * @param {number} [valueIndex] Index in the {@link values} array to be used to get/set the value.
    */
   const onKeyDown = (event, valueIndex = 0) => {
     const { key, ctrlKey, metaKey, shiftKey, altKey } = event;
@@ -166,7 +169,7 @@
 
   /**
    * Handle the `pointermove` event fired anywhere on the page.
-   * @param {PointerEvent} event - `pointermove` event.
+   * @param {PointerEvent} event `pointermove` event.
    */
   const onPointerMove = (event) => {
     const { screenX, pointerId } = event;
@@ -182,7 +185,7 @@
 
   /**
    * Handle the `pointerup` and `pointercancel` events fired anywhere on the page.
-   * @param {PointerEvent} event - `pointerup` or `pointercancel` event.
+   * @param {PointerEvent} event `pointerup` or `pointercancel` event.
    */
   const onPointerUp = (event) => {
     const { pointerId } = event;
@@ -212,9 +215,8 @@
 
   /**
    * Handle the `pointerdown` event fired on the slider.
-   * @param {PointerEvent} event - `pointerdown` event.
-   * @param {number} [valueIndex] - Index in the {@link values} array to be used to get/set the
-   * value.
+   * @param {PointerEvent} event `pointerdown` event.
+   * @param {number} [valueIndex] Index in the {@link values} array to be used to get/set the value.
    */
   const onPointerDown = (event, valueIndex = 0) => {
     const { clientX, screenX, pointerId } = event;

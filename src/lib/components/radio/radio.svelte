@@ -9,20 +9,24 @@
   import Button from '../button/button.svelte';
 
   /**
+   * @import { Snippet } from 'svelte';
+   */
+
+  /**
    * @typedef {object} Props
-   * @property {string} [class] - The `class` attribute on the wrapper element.
-   * @property {boolean} [hidden] - Whether to hide the widget.
-   * @property {boolean} [disabled] - Whether to disable the widget. An alias of the `aria-disabled`
+   * @property {string} [class] The `class` attribute on the wrapper element.
+   * @property {boolean} [hidden] Whether to hide the widget.
+   * @property {boolean} [disabled] Whether to disable the widget. An alias of the `aria-disabled`
    * attribute.
-   * @property {boolean} [checked] - Whether to check the widget. An alias of the `aria-checked`
+   * @property {boolean} [checked] Whether to check the widget. An alias of the `aria-checked`
    * attribute.
-   * @property {string} [name] - The `name` attribute on the `<button>` element.
-   * @property {string} [value] - The `value` attribute on the `<button>` element.
-   * @property {string} [label] - Text label displayed next to the checkbox.
-   * @property {import('svelte').Snippet} [children] - Primary slot content.
-   * @property {import('svelte').Snippet} [default] - Default slot content.
-   * @property {(event: CustomEvent) => void} [onChange] - Custom `Change` event handler.
-   * @property {(event: CustomEvent) => void} [onSelect] - Custom `Select` event handler.
+   * @property {string} [name] The `name` attribute on the `<button>` element.
+   * @property {string} [value] The `value` attribute on the `<button>` element.
+   * @property {string} [label] Text label displayed next to the checkbox.
+   * @property {Snippet} [children] Primary slot content.
+   * @property {Snippet} [default] Default slot content.
+   * @property {(event: CustomEvent) => void} [onChange] Custom `Change` event handler.
+   * @property {(event: CustomEvent) => void} [onSelect] Custom `Select` event handler.
    */
 
   /**

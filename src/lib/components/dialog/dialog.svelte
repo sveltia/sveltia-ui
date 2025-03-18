@@ -13,8 +13,11 @@
   import Modal from '../util/modal.svelte';
 
   /**
-   * @type {import('$lib/typedefs').ModalProps & import('$lib/typedefs').DialogProps &
-   * Record<string, any>}
+   * @import { DialogProps, ModalProps } from '$lib/typedefs';
+   */
+
+  /**
+   * @type {ModalProps & DialogProps & Record<string, any>}
    */
   let {
     /* eslint-disable prefer-const */

@@ -2,9 +2,9 @@ import { addMessages, init } from 'svelte-i18n';
 
 /**
  * Load strings and initialize the locales.
- * @param {object} [init] - Initialize options.
- * @param {string} [init.fallbackLocale] - Fallback locale.
- * @param {string} [init.initialLocale] - Initial locale.
+ * @param {object} [init] Initialize options.
+ * @param {string} [init.fallbackLocale] Fallback locale.
+ * @param {string} [init.initialLocale] Initial locale.
  * @see https://github.com/kaisermann/svelte-i18n/blob/main/docs/Getting%20Started.md
  * @see https://vitejs.dev/guide/features.html#glob-import
  */

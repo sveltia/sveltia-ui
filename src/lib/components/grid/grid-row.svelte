@@ -6,13 +6,17 @@
 -->
 <script>
   /**
+   * @import { Snippet } from 'svelte';
+   */
+
+  /**
    * @typedef {object} Props
-   * @property {string} [class] - The `class` attribute on the wrapper element.
-   * @property {boolean} [selected] - Whether to select the widget. An alias of the `aria-selected`
+   * @property {string} [class] The `class` attribute on the wrapper element.
+   * @property {boolean} [selected] Whether to select the widget. An alias of the `aria-selected`
    * attribute.
-   * @property {import('svelte').Snippet} [children] - Primary slot content.
-   * @property {(event: CustomEvent) => void} [onChange] - Custom `Change` event handler.
-   * @property {(event: CustomEvent) => void} [onSelect] - Custom `Select` event handler.
+   * @property {Snippet} [children] Primary slot content.
+   * @property {(event: CustomEvent) => void} [onChange] Custom `Change` event handler.
+   * @property {(event: CustomEvent) => void} [onSelect] Custom `Select` event handler.
    */
 
   /**

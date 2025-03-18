@@ -9,8 +9,11 @@
   import Popup from '../util/popup.svelte';
 
   /**
-   * @type {import('$lib/typedefs').ButtonProps & import('$lib/typedefs').CommonEventHandlers &
-   * Record<string, any>}
+   * @import { ButtonProps, CommonEventHandlers } from '$lib/typedefs';
+   */
+
+  /**
+   * @type {ButtonProps & CommonEventHandlers & Record<string, any>}
    */
   let {
     /* eslint-disable prefer-const */

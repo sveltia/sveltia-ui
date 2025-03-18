@@ -18,8 +18,13 @@
   import { focusEditor } from '../core';
 
   /**
+   * @import { TextEditorBlockType, TextEditorStore } from '$lib/typedefs';
+   * @import { HeadingTagType } from '@lexical/rich-text';
+   */
+
+  /**
    * @typedef {object} Props
-   * @property {import('$lib/typedefs').TextEditorBlockType} type - Button type.
+   * @property {TextEditorBlockType} type Button type.
    */
 
   /**
@@ -31,7 +36,7 @@
     /* eslint-enable prefer-const */
   } = $props();
 
-  /** @type {import('$lib/typedefs').TextEditorStore} */
+  /** @type {TextEditorStore} */
   const editorStore = getContext('editorStore');
   const selectionTypeMatches = $derived(editorStore.selection.blockType === type);
 
@@ -50,9 +55,7 @@
     if (headingLevel) {
       editorStore.editor.update(() => {
         setBlocksType(getSelection(), () =>
-          createHeadingNode(
-            /** @type {import('@lexical/rich-text').HeadingTagType} */ (`h${headingLevel}`),
-          ),
+          createHeadingNode(/** @type {HeadingTagType} */ (`h${headingLevel}`)),
         );
       });
     }

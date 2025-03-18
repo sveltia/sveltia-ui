@@ -3,12 +3,16 @@
   import Alert from '$lib/components/alert/alert.svelte';
   import Example from '../../_components/example.svelte';
 
+  /**
+   * @import { ToastPosition } from '$lib/typedefs';
+   */
+
   let showStandardToast = $state(false);
   let showErrorToast = $state(false);
   let showSuccessToast = $state(false);
   let showWarningToast = $state(false);
   let showPositionToast = $state(false);
-  /** @type {import('$lib/typedefs').ToastPosition | undefined} */
+  /** @type {ToastPosition | undefined} */
   let showPositionToastPosition = $state();
   let showManualToast = $state(false);
 </script>

@@ -12,22 +12,26 @@
   import CodeEditorToolbar from './toolbar/code-editor-toolbar.svelte';
 
   /**
+   * @import { Snippet } from 'svelte';
+   */
+
+  /**
    * @typedef {object} Props
-   * @property {string} [code] - Input value.
-   * @property {string} [lang] - Selected language.
-   * @property {boolean} [showLanguageSwitcher] - Whether to show the language selector.
-   * @property {boolean} [flex] - Make the text input container flexible.
-   * @property {string} [class] - The `class` attribute on the wrapper element.
-   * @property {boolean} [hidden] - Whether to hide the widget.
-   * @property {boolean} [disabled] - Whether to disable the widget. An alias of the `aria-disabled`
+   * @property {string} [code] Input value.
+   * @property {string} [lang] Selected language.
+   * @property {boolean} [showLanguageSwitcher] Whether to show the language selector.
+   * @property {boolean} [flex] Make the text input container flexible.
+   * @property {string} [class] The `class` attribute on the wrapper element.
+   * @property {boolean} [hidden] Whether to hide the widget.
+   * @property {boolean} [disabled] Whether to disable the widget. An alias of the `aria-disabled`
    * attribute.
-   * @property {boolean} [readonly] - Whether to make the widget read-only. An alias of the
+   * @property {boolean} [readonly] Whether to make the widget read-only. An alias of the
    * `aria-readonly` attribute.
-   * @property {boolean} [required] - Whether to mark the widget required. An alias of the
+   * @property {boolean} [required] Whether to mark the widget required. An alias of the
    * `aria-required` attribute.
-   * @property {boolean} [invalid] - Whether to mark the widget invalid. An alias of the
+   * @property {boolean} [invalid] Whether to mark the widget invalid. An alias of the
    * `aria-invalid` attribute.
-   * @property {import('svelte').Snippet} [children] - Primary slot content.
+   * @property {Snippet} [children] Primary slot content.
    */
 
   /**

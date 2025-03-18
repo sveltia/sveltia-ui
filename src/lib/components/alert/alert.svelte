@@ -8,10 +8,14 @@
   import Icon from '../icon/icon.svelte';
 
   /**
+   * @import { Snippet } from 'svelte';
+   */
+
+  /**
    * @typedef {object} Props
-   * @property {'error' | 'warning' | 'info' | 'success'} status - Alert status.
-   * @property {import('svelte').Snippet} [children] - Primary slot content.
-   * @property {import('svelte').Snippet} [icon] - Icon slot content.
+   * @property {'error' | 'warning' | 'info' | 'success'} status Alert status.
+   * @property {Snippet} [children] Primary slot content.
+   * @property {Snippet} [icon] Icon slot content.
    */
 
   /**

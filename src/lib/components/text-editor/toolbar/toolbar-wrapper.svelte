@@ -2,12 +2,16 @@
   import Toolbar from '../../toolbar/toolbar.svelte';
 
   /**
+   * @import { Snippet } from 'svelte';
+   */
+
+  /**
    * @typedef {object} Props
-   * @property {boolean} [disabled] - Whether to disable the widget. An alias of the `aria-disabled`
+   * @property {boolean} [disabled] Whether to disable the widget. An alias of the `aria-disabled`
    * attribute.
-   * @property {boolean} [readonly] - Whether to make the widget read-only. An alias of the
+   * @property {boolean} [readonly] Whether to make the widget read-only. An alias of the
    * `aria-readonly` attribute.
-   * @property {import('svelte').Snippet} [children] - Primary slot content.
+   * @property {Snippet} [children] Primary slot content.
    */
 
   /**

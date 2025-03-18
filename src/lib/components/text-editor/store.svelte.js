@@ -2,21 +2,26 @@ import { generateElementId } from '@sveltia/utils/element';
 import { convertMarkdownToLexical } from './core';
 
 /**
+ * @import { TextEditorConfig, TextEditorSelectionState, TextEditorStore } from '$lib/typedefs';
+ * @import { LexicalEditor } from 'lexical';
+ */
+
+/**
  * Create an editor editor store that contains all the states and configuration.
- * @returns {import('../../typedefs').TextEditorStore} Store.
+ * @returns {TextEditorStore} Store.
  */
 export const createEditorStore = () => {
   /** @type {string} */
   const editorId = generateElementId('editor');
   /** @type {boolean} */
   let initialized = $state(false);
-  /** @type {import('lexical').LexicalEditor | undefined} */
+  /** @type {LexicalEditor | undefined} */
   let editor = $state();
-  /** @type {import('../../typedefs').TextEditorConfig} */
+  /** @type {TextEditorConfig} */
   let config = $state({ modes: [], enabledButtons: [], components: [], isCodeEditor: false });
   /** @type {string} */
   let inputValue = $state('');
-  /** @type {import('../../typedefs').TextEditorSelectionState} */
+  /** @type {TextEditorSelectionState} */
   let selection = $state({ blockNodeKey: null, blockType: 'paragraph', inlineTypes: [] });
   /** @type {boolean} */
   let useRichText = $state(true);

@@ -19,11 +19,15 @@
   import ToolbarWrapper from './toolbar-wrapper.svelte';
 
   /**
+   * @import { TextEditorBlockType, TextEditorInlineType, TextEditorStore } from '$lib/typedefs';
+   */
+
+  /**
    * @typedef {object} Props
-   * @property {boolean} [hidden] - Whether to hide the widget.
-   * @property {boolean} [disabled] - Whether to disable the widget. An alias of the `aria-disabled`
+   * @property {boolean} [hidden] Whether to hide the widget.
+   * @property {boolean} [disabled] Whether to disable the widget. An alias of the `aria-disabled`
    * attribute.
-   * @property {boolean} [readonly] - Whether to make the widget read-only. An alias of the
+   * @property {boolean} [readonly] Whether to make the widget read-only. An alias of the
    * `aria-readonly` attribute.
    */
 
@@ -37,7 +41,7 @@
     /* eslint-enable prefer-const */
   } = $props();
 
-  /** @type {import('$lib/typedefs').TextEditorStore} */
+  /** @type {TextEditorStore} */
   const editorStore = getContext('editorStore');
   const imageComponent = $derived(editorStore.config.components.find(({ id }) => id === 'image'));
   const otherComponents = $derived(
@@ -46,7 +50,7 @@
 
   /**
    * Enabled block level buttons.
-   * @type {import('$lib/typedefs').TextEditorBlockType[]}
+   * @type {TextEditorBlockType[]}
    */
   const blockLevelButtons = $derived(
     unique([
@@ -59,7 +63,7 @@
 
   /**
    * Enabled inline level buttons.
-   * @type {import('$lib/typedefs').TextEditorInlineType[]}
+   * @type {TextEditorInlineType[]}
    */
   const inlineLevelButtons = $derived(
     unique([

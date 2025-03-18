@@ -4,8 +4,12 @@
 -->
 <script>
   /**
+   * @import { Snippet } from 'svelte';
+   */
+
+  /**
    * @typedef {object} Props
-   * @property {import('svelte').Snippet} [children] - Primary slot content.
+   * @property {Snippet} [children] Primary slot content.
    */
 
   /**

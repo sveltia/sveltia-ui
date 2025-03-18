@@ -8,14 +8,17 @@
   import Button from './button.svelte';
 
   /**
+   * @import { ButtonProps, CommonEventHandlers } from '$lib/typedefs';
+   */
+
+  /**
    * @typedef {object} Props
-   * @property {boolean} [selected] - Whether to select the widget. An alias of the `aria-checked`
+   * @property {boolean} [selected] Whether to select the widget. An alias of the `aria-checked`
    * attribute. Because the UI is a button, we expose `selected` instead of `checked`.
    */
 
   /**
-   * @type {import('$lib/typedefs').ButtonProps & import('$lib/typedefs').CommonEventHandlers &
-   * Props & Record<string, any>}
+   * @type {ButtonProps & CommonEventHandlers & Props & Record<string, any>}
    */
   let {
     /* eslint-disable prefer-const */

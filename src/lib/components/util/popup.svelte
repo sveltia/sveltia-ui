@@ -10,27 +10,33 @@
   import Modal from './modal.svelte';
 
   /**
-   * @typedef {object} Props
-   * @property {string} [class] - The `class` attribute on the content element.
-   * @property {boolean} [open] - Whether to open the popup.
-   * @property {boolean} [hovered] - Whether the content is hovered.
-   * @property {HTMLElement} [anchor] - A reference to the anchor element that opens the popup.
-   * Typically a `<button>`.
-   * @property {HTMLElement} [content] - A reference to the content element.
-   * @property {import('$lib/typedefs').PopupPosition} [position] - Where to show the popup.
-   * @property {HTMLElement} [positionBaseElement] - The base element of {@link position}. If
-   * omitted, this will be {@link anchor}.
-   * @property {HTMLDialogElement} [parentDialogElement] - A reference to a dialog element that is
-   * already displayed. This should be provided for a nested popup.
-   * @property {boolean} [touchOptimized] - Whether to show the popup at the center of the screen on
-   * mobile/tablet and ignore the defined dropdown `position`.
-   * @property {import('svelte').Snippet} [children] - Primary slot content.
-   * @property {import('svelte').Snippet} [extraContent] - Extra slot content.
-   * @property {(event: CustomEvent) => void} [onOpen] - Custom `Open` event handler.
+   * @import { Snippet } from 'svelte';
+   * @import { Writable } from 'svelte/store';
+   * @import { ModalProps, PopupPosition } from '$lib/typedefs';
    */
 
   /**
-   * @type {import('$lib/typedefs').ModalProps & Props & Record<string, any>}
+   * @typedef {object} Props
+   * @property {string} [class] The `class` attribute on the content element.
+   * @property {boolean} [open] Whether to open the popup.
+   * @property {boolean} [hovered] Whether the content is hovered.
+   * @property {HTMLElement} [anchor] A reference to the anchor element that opens the popup.
+   * Typically a `<button>`.
+   * @property {HTMLElement} [content] A reference to the content element.
+   * @property {PopupPosition} [position] Where to show the popup.
+   * @property {HTMLElement} [positionBaseElement] The base element of {@link position}. If omitted,
+   * this will be {@link anchor}.
+   * @property {HTMLDialogElement} [parentDialogElement] A reference to a dialog element that is
+   * already displayed. This should be provided for a nested popup.
+   * @property {boolean} [touchOptimized] Whether to show the popup at the center of the screen on
+   * mobile/tablet and ignore the defined dropdown `position`.
+   * @property {Snippet} [children] Primary slot content.
+   * @property {Snippet} [extraContent] Extra slot content.
+   * @property {(event: CustomEvent) => void} [onOpen] Custom `Open` event handler.
+   */
+
+  /**
+   * @type {ModalProps & Props & Record<string, any>}
    */
   let {
     /* eslint-disable prefer-const */
@@ -73,7 +79,7 @@
   let contentType = $state();
   /**
    * Style to be applied to the content.
-   * @type {import('svelte/store').Writable<Record<string, any>>}
+   * @type {Writable<Record<string, any>>}
    */
   let style = writable({
     inset: undefined,
@@ -83,8 +89,8 @@
   });
 
   /**
-   * @type {{ style: import('svelte/store').Writable<Record<string, any>>, open:
-   * import('svelte/store').Writable<boolean>, checkPosition: () => void } | undefined}
+   * @type {{ style: Writable<Record<string, any>>, open: Writable<boolean>, checkPosition:
+   * () => void } | undefined}
    */
   let popupInstance = undefined;
   let hoveredTimeout = 0;

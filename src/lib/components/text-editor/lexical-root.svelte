@@ -3,18 +3,23 @@
   import { initEditor } from './core';
 
   /**
+   * @import { Snippet } from 'svelte';
+   * @import { TextEditorStore } from '$lib/typedefs';
+   */
+
+  /**
    * @typedef {object} Props
-   * @property {string} [class] - The `class` attribute on the wrapper element.
-   * @property {boolean} [hidden] - Whether to hide the widget.
-   * @property {boolean} [disabled] - Whether to disable the widget. An alias of the `aria-disabled`
+   * @property {string} [class] The `class` attribute on the wrapper element.
+   * @property {boolean} [hidden] Whether to hide the widget.
+   * @property {boolean} [disabled] Whether to disable the widget. An alias of the `aria-disabled`
    * attribute.
-   * @property {boolean} [readonly] - Whether to make the widget read-only. An alias of the
+   * @property {boolean} [readonly] Whether to make the widget read-only. An alias of the
    * `aria-readonly` attribute.
-   * @property {boolean} [required] - Whether to mark the widget required. An alias of the
+   * @property {boolean} [required] Whether to mark the widget required. An alias of the
    * `aria-required` attribute.
-   * @property {boolean} [invalid] - Whether to mark the widget invalid. An alias of the
+   * @property {boolean} [invalid] Whether to mark the widget invalid. An alias of the
    * `aria-invalid` attribute.
-   * @property {import('svelte').Snippet} [children] - Primary slot content.
+   * @property {Snippet} [children] Primary slot content.
    */
 
   /**
@@ -33,7 +38,7 @@
     /* eslint-enable prefer-const */
   } = $props();
 
-  /** @type {import('$lib/typedefs').TextEditorStore} */
+  /** @type {TextEditorStore} */
   const editorStore = getContext('editorStore');
 
   /**
@@ -50,7 +55,7 @@
 
   /**
    * Update {@link value} and other state variables whenever the editor content is updated.
-   * @param {Event} event - `Update` custom event.
+   * @param {Event} event `Update` custom event.
    */
   const onUpdate = (event) => {
     if (editorStore.hasConverterError) {
@@ -82,7 +87,7 @@
 
   /**
    * Listen to `click` events on the editor. Ignore a click on a link.
-   * @param {MouseEvent} event - `click` event.
+   * @param {MouseEvent} event `click` event.
    */
   const onClick = (event) => {
     if (/** @type {HTMLElement} */ (event.target)?.matches('a')) {

@@ -8,8 +8,12 @@
   import Menu from '../../menu/menu.svelte';
 
   /**
+   * @import { TextEditorComponent, TextEditorStore } from '$lib/typedefs';
+   */
+
+  /**
    * @typedef {object} Props
-   * @property {import('$lib/typedefs').TextEditorComponent[]} components - Editor components.
+   * @property {TextEditorComponent[]} components Editor components.
    */
 
   /** @type {Props} */
@@ -19,7 +23,7 @@
     /* eslint-enable prefer-const */
   } = $props();
 
-  /** @type {import('$lib/typedefs').TextEditorStore} */
+  /** @type {TextEditorStore} */
   const editorStore = getContext('editorStore');
 </script>
 

@@ -6,24 +6,27 @@
   import Select from './select.svelte';
 
   /**
+   * @import { Snippet } from 'svelte';
+   */
+
+  /**
    * @typedef {object} Props
-   * @property {{ label: string, value: string, searchValue?: string }[]} options - Available
-   * options.
-   * @property {string[]} [values] - Selected option values.
-   * @property {number} [max] - Maximum number of selectable options.
-   * @property {string} [class] - The `class` attribute on the wrapper element.
-   * @property {boolean} [hidden] - Whether to hide the widget.
-   * @property {boolean} [disabled] - Whether to disable the widget. An alias of the `aria-disabled`
+   * @property {{ label: string, value: string, searchValue?: string }[]} options Available options.
+   * @property {string[]} [values] Selected option values.
+   * @property {number} [max] Maximum number of selectable options.
+   * @property {string} [class] The `class` attribute on the wrapper element.
+   * @property {boolean} [hidden] Whether to hide the widget.
+   * @property {boolean} [disabled] Whether to disable the widget. An alias of the `aria-disabled`
    * attribute.
-   * @property {boolean} [readonly] - Whether to make the widget read-only. An alias of the
+   * @property {boolean} [readonly] Whether to make the widget read-only. An alias of the
    * `aria-readonly` attribute.
-   * @property {boolean} [required] - Whether to mark the widget required. An alias of the
+   * @property {boolean} [required] Whether to mark the widget required. An alias of the
    * `aria-required` attribute.
-   * @property {boolean} [invalid] - Whether to mark the widget invalid. An alias of the
+   * @property {boolean} [invalid] Whether to mark the widget invalid. An alias of the
    * `aria-invalid` attribute.
-   * @property {import('svelte').Snippet} [children] - Primary slot content.
-   * @property {(event: CustomEvent) => void} [onAddValue] - Custom `AddValue` event handler.
-   * @property {(event: CustomEvent) => void} [onRemoveValue] - Custom `RemoveValue` event handler.
+   * @property {Snippet} [children] Primary slot content.
+   * @property {(event: CustomEvent) => void} [onAddValue] Custom `AddValue` event handler.
+   * @property {(event: CustomEvent) => void} [onRemoveValue] Custom `RemoveValue` event handler.
    */
 
   /**

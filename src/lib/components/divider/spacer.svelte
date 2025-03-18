@@ -5,8 +5,8 @@
 <script>
   /**
    * @typedef {object} Props
-   * @property {string} [class] - The `class` attribute on the wrapper element.
-   * @property {boolean} [flex] - Whether to make the spacer flexible.
+   * @property {string} [class] The `class` attribute on the wrapper element.
+   * @property {boolean} [flex] Whether to make the spacer flexible.
    */
 
   /**

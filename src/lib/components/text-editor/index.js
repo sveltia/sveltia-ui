@@ -1,4 +1,8 @@
 /**
+ * @import { TextEditorBlockType, TextEditorFormatType, TextEditorInlineType } from '$lib/typedefs';
+ */
+
+/**
  * List of available buttons.
  * @type {{ [key: string]: { labelKey: string, icon: string, inline: boolean } }}
  */
@@ -80,15 +84,15 @@ export const availableButtons = {
   },
 };
 /**
- * @type {import('$lib/typedefs').TextEditorFormatType[]}
+ * @type {TextEditorFormatType[]}
  */
 export const textFormatButtonTypes = ['bold', 'italic', 'code'];
 /**
- * @type {import('$lib/typedefs').TextEditorInlineType[]}
+ * @type {TextEditorInlineType[]}
  */
 export const inlineButtonTypes = [...textFormatButtonTypes, 'link'];
 /**
- * @type {import('$lib/typedefs').TextEditorBlockType[]}
+ * @type {TextEditorBlockType[]}
  */
 export const blockButtonTypes = [
   'paragraph',

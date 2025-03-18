@@ -9,14 +9,17 @@
   import Popup from '../util/popup.svelte';
 
   /**
-   * @typedef {object} Props
-   * @property {HTMLElement} [popupPositionBaseElement] - The base element of
-   * {@link popupPosition}. If omitted, this will be {@link buttonComponent}.
+   * @import { ButtonProps, CommonEventHandlers } from '$lib/typedefs';
    */
 
   /**
-   * @type {import('$lib/typedefs').ButtonProps & import('$lib/typedefs').CommonEventHandlers &
-   * Props & Record<string, any>}
+   * @typedef {object} Props
+   * @property {HTMLElement} [popupPositionBaseElement] The base element of {@link popupPosition}.
+   * If omitted, this will be {@link buttonComponent}.
+   */
+
+  /**
+   * @type {ButtonProps & CommonEventHandlers & Props & Record<string, any>}
    */
   let {
     /* eslint-disable prefer-const */

@@ -8,14 +8,18 @@
   import { activateGroup } from '../../services/group.svelte';
 
   /**
+   * @import { Snippet } from 'svelte';
+   */
+
+  /**
    * @typedef {object} Props
-   * @property {string} [class] - The `class` attribute on the wrapper element.
-   * @property {boolean} [selected] - Whether to allow selecting more than one `<GridRow>` and/or
+   * @property {string} [class] The `class` attribute on the wrapper element.
+   * @property {boolean} [selected] Whether to allow selecting more than one `<GridRow>` and/or
    * `<GridCell>`. An alias of the `aria-multiselectable` attribute.
-   * @property {boolean} [clickToSelect] - Whether to select a row by clicking on it.
-   * @property {HTMLElement} [element] - A reference to the wrapper element.
-   * @property {import('svelte').Snippet} [children] - Primary slot content.
-   * @property {(event: CustomEvent) => void} [onChange] - Custom `Change` event handler.
+   * @property {boolean} [clickToSelect] Whether to select a row by clicking on it.
+   * @property {HTMLElement} [element] A reference to the wrapper element.
+   * @property {Snippet} [children] Primary slot content.
+   * @property {(event: CustomEvent) => void} [onChange] Custom `Change` event handler.
    */
 
   /**

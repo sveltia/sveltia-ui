@@ -5,11 +5,15 @@
 -->
 <script>
   /**
+   * @import { Snippet } from 'svelte';
+   */
+
+  /**
    * @typedef {object} Props
-   * @property {string} [class] - The `class` attribute on the wrapper element.
-   * @property {'horizontal' | 'vertical'} [orientation] - Orientation of the widget. This is
+   * @property {string} [class] The `class` attribute on the wrapper element.
+   * @property {'horizontal' | 'vertical'} [orientation] Orientation of the widget. This is
    * typically contrary to `<TabList>`’s `orientation`.
-   * @property {import('svelte').Snippet} [children] - Primary slot content.
+   * @property {Snippet} [children] Primary slot content.
    */
 
   /**

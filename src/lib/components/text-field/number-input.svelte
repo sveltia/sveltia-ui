@@ -12,19 +12,23 @@
   import TextInput from './text-input.svelte';
 
   /**
-   * @typedef {object} Props
-   * @property {number} [value] - Input value.
-   * @property {number} [min] - Minimum allowed value.
-   * @property {number} [max] - Maximum allowed value.
-   * @property {number} [step] - Value to be added or removed when using the up/down arrow key or
-   * button.
-   * @property {import('svelte').Snippet} [increaseIcon] - Increase icon slot content.
-   * @property {import('svelte').Snippet} [decreaseIcon] - Decrease icon slot content.
+   * @import { Snippet } from 'svelte';
+   * @import { CommonEventHandlers, InputEventHandlers, TextInputProps } from '$lib/typedefs';
    */
 
   /**
-   * @type {import('$lib/typedefs').TextInputProps & import('$lib/typedefs').CommonEventHandlers &
-   * import('$lib/typedefs').InputEventHandlers & Props & Record<string, any>}
+   * @typedef {object} Props
+   * @property {number} [value] Input value.
+   * @property {number} [min] Minimum allowed value.
+   * @property {number} [max] Maximum allowed value.
+   * @property {number} [step] Value to be added or removed when using the up/down arrow key or
+   * button.
+   * @property {Snippet} [increaseIcon] Increase icon slot content.
+   * @property {Snippet} [decreaseIcon] Decrease icon slot content.
+   */
+
+  /**
+   * @type {TextInputProps & CommonEventHandlers & InputEventHandlers & Props & Record<string, any>}
    */
   let {
     /* eslint-disable prefer-const */

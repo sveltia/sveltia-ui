@@ -8,14 +8,19 @@
   import { onMount, untrack } from 'svelte';
 
   /**
+   * @import { Snippet } from 'svelte';
+   * @import { ToastPosition } from '$lib/typedefs';
+   */
+
+  /**
    * @typedef {object} Props
-   * @property {string | number} [id] - The toast ID. If updated, the timer that hides
+   * @property {string | number} [id] The toast ID. If updated, the timer that hides
    * the toast will be reset, meaning the same toast can be displayed for a longer period of time.
-   * @property {boolean} [show] - Whether to show the toast.
-   * @property {number} [duration] - Duration to automatically hide the toast. Use `0` to hide it
+   * @property {boolean} [show] Whether to show the toast.
+   * @property {number} [duration] Duration to automatically hide the toast. Use `0` to hide it
    * manually from the consumer.
-   * @property {import('$lib/typedefs').ToastPosition} [position] - Position of the toast.
-   * @property {import('svelte').Snippet} [children] - Primary slot content.
+   * @property {ToastPosition} [position] Position of the toast.
+   * @property {Snippet} [children] Primary slot content.
    */
 
   /**

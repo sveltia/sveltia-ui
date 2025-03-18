@@ -9,28 +9,33 @@
   import { activateGroup } from '../../services/group.svelte';
 
   /**
-   * @typedef {object} Props
-   * @property {string} [class] - The `class` attribute on the wrapper element.
-   * @property {boolean} [hidden] - Whether to hide the widget. An alias of the `aria-hidden`
-   * attribute.
-   * @property {boolean} [disabled] - Whether to disable the widget. An alias of the `aria-disabled`
-   * attribute.
-   * @property {boolean} [readonly] - Whether to make the widget read-only. An alias of the
-   * `aria-readonly` attribute.
-   * @property {boolean} [required] - Whether to mark the widget required. An alias of the
-   * `aria-required` attribute.
-   * @property {boolean} [invalid] - Whether to mark the widget invalid. An alias of the
-   * `aria-invalid` attribute.
-   * @property {boolean} [multiple] - Whether to allow selecting more than one `<Option>`. An alias
-   * of the `aria-multiselectable` attribute.
-   * @property {string} [searchTerms] - Search terms to be used to filter the items.
-   * @property {import('svelte').Snippet} [children] - Primary slot content.
-   * @property {(event: CustomEvent) => void} [onChange] - Custom `Change` event handler.
-   * @property {(event: CustomEvent) => void} [onFilter] - Custom `Filter` event handler.
+   * @import { Snippet } from 'svelte';
+   * @import { ButtonProps, CommonEventHandlers } from '$lib/typedefs';
    */
 
   /**
-   * @type {import('$lib/typedefs').CommonEventHandlers & Props & Record<string, any>}
+   * @typedef {object} Props
+   * @property {string} [class] The `class` attribute on the wrapper element.
+   * @property {boolean} [hidden] Whether to hide the widget. An alias of the `aria-hidden`
+   * attribute.
+   * @property {boolean} [disabled] Whether to disable the widget. An alias of the `aria-disabled`
+   * attribute.
+   * @property {boolean} [readonly] Whether to make the widget read-only. An alias of the
+   * `aria-readonly` attribute.
+   * @property {boolean} [required] Whether to mark the widget required. An alias of the
+   * `aria-required` attribute.
+   * @property {boolean} [invalid] Whether to mark the widget invalid. An alias of the
+   * `aria-invalid` attribute.
+   * @property {boolean} [multiple] Whether to allow selecting more than one `<Option>`. An alias of
+   * the `aria-multiselectable` attribute.
+   * @property {string} [searchTerms] Search terms to be used to filter the items.
+   * @property {Snippet} [children] Primary slot content.
+   * @property {(event: CustomEvent) => void} [onChange] Custom `Change` event handler.
+   * @property {(event: CustomEvent) => void} [onFilter] Custom `Filter` event handler.
+   */
+
+  /**
+   * @type {CommonEventHandlers & Props & Record<string, any>}
    */
   let {
     /* eslint-disable prefer-const */

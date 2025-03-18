@@ -9,8 +9,12 @@
   import { focusEditor, loadCodeHighlighter } from '../core';
 
   /**
+   * @import { TextEditorStore } from '$lib/typedefs';
+   */
+
+  /**
    * @typedef {object} Props
-   * @property {boolean} [disabled] - Whether to disable the switcher.
+   * @property {boolean} [disabled] Whether to disable the switcher.
    */
 
   /** @type {Props} */
@@ -39,7 +43,7 @@
     .flat(1)
     .sort((a, b) => a.label.localeCompare(b.label));
 
-  /** @type {import('$lib/typedefs').TextEditorStore} */
+  /** @type {TextEditorStore} */
   const editorStore = getContext('editorStore');
 
   let selectedLanguage = $state('');

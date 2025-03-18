@@ -9,7 +9,11 @@
   import Combobox from './combobox.svelte';
 
   /**
-   * @type {import('$lib/typedefs').ComboboxProps & Record<string, any>}
+   * @import { ComboboxProps } from '$lib/typedefs';
+   */
+
+  /**
+   * @type {ComboboxProps & Record<string, any>}
    */
   let {
     /* eslint-disable prefer-const */

@@ -6,15 +6,19 @@
 -->
 <script>
   /**
+   * @import { Snippet } from 'svelte';
+   */
+
+  /**
    * @typedef {object} Props
-   * @property {string} [class] - The `class` attribute on the wrapper element.
-   * @property {boolean} [hidden] - Whether to hide the widget.
-   * @property {boolean} [disabled] - Whether to disable the widget. An alias of the `aria-disabled`
+   * @property {string} [class] The `class` attribute on the wrapper element.
+   * @property {boolean} [hidden] Whether to hide the widget.
+   * @property {boolean} [disabled] Whether to disable the widget. An alias of the `aria-disabled`
    * attribute.
-   * @property {'horizontal' | 'vertical'} [orientation] - Orientation of the widget. An alias of
-   * the `aria-orientation` attribute.
-   * @property {'primary' | 'secondary'} [variant] - The style variant of the toolbar.
-   * @property {import('svelte').Snippet} [children] - Primary slot content.
+   * @property {'horizontal' | 'vertical'} [orientation] Orientation of the widget. An alias of the
+   * `aria-orientation` attribute.
+   * @property {'primary' | 'secondary'} [variant] The style variant of the toolbar.
+   * @property {Snippet} [children] Primary slot content.
    */
 
   /**

@@ -23,6 +23,11 @@
   import TextInput from '../../text-field/text-input.svelte';
   import { focusEditor } from '../core';
 
+  /**
+   * @import { TextEditorStore } from '$lib/typedefs';
+   * @import { RangeSelection } from 'lexical';
+   */
+
   const id = $props.id();
 
   /**
@@ -30,7 +35,7 @@
    */
   const type = 'link';
 
-  /** @type {import('$lib/typedefs').TextEditorStore} */
+  /** @type {TextEditorStore} */
   const editorStore = getContext('editorStore');
   const selectionTypeMatches = $derived(editorStore.selection.inlineTypes.includes(type));
 
@@ -103,7 +108,7 @@
 
   /**
    * Handle `keydown` event fired on the input fields on the dialog.
-   * @param {KeyboardEvent} event - `keydown` event.
+   * @param {KeyboardEvent} event `keydown` event.
    */
   const onInputKeyDown = (event) => {
     if (matchShortcuts(event, 'Enter') && anchorURL) {
@@ -113,7 +118,7 @@
 
   /**
    * Handle `close` event fired on the dialog. Insert a link with the given URL and optionally text.
-   * @param {CustomEvent} event - `close` event.
+   * @param {CustomEvent} event `close` event.
    * @see https://github.com/facebook/lexical/discussions/3013
    */
   const onDialogClose = async (event) => {
@@ -134,7 +139,7 @@
             anchorText = anchorText.trim();
             anchorText ||= anchorURL;
 
-            const { anchor, focus } = /** @type {import('lexical').RangeSelection} */ (_selection);
+            const { anchor, focus } = /** @type {RangeSelection} */ (_selection);
             const node = createTextNode(anchorText);
             const key = node.getKey();
 

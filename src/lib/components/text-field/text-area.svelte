@@ -7,28 +7,32 @@
 -->
 <script>
   /**
-   * @typedef {object} Props
-   * @property {string} [value] - Input value.
-   * @property {boolean} [flex] - Make the text input container flexible.
-   * @property {string} [name] - The `name` attribute on the `<textarea>` element.
-   * @property {boolean} [autoResize] - Whether to automatically resize the `<textarea>` based on
-   * the content.
-   * @property {string} [class] - The `class` attribute on the wrapper element.
-   * @property {boolean} [hidden] - Whether to hide the widget.
-   * @property {boolean} [disabled] - Whether to disable the widget. An alias of the `aria-disabled`
-   * attribute.
-   * @property {boolean} [readonly] - Whether to make the widget read-only. An alias of the
-   * `aria-readonly` attribute.
-   * @property {boolean} [required] - Whether to mark the widget required. An alias of the
-   * `aria-required` attribute.
-   * @property {boolean} [invalid] - Whether to mark the widget invalid. An alias of the
-   * `aria-invalid` attribute.
-   * @property {import('svelte').Snippet} [children] - Primary slot content.
+   * @import { Snippet } from 'svelte';
+   * @import { CommonEventHandlers, InputEventHandlers } from '$lib/typedefs';
    */
 
   /**
-   * @type {import('$lib/typedefs').CommonEventHandlers & import('$lib/typedefs').InputEventHandlers
-   * & Props & Record<string, any>}
+   * @typedef {object} Props
+   * @property {string} [value] Input value.
+   * @property {boolean} [flex] Make the text input container flexible.
+   * @property {string} [name] The `name` attribute on the `<textarea>` element.
+   * @property {boolean} [autoResize] Whether to automatically resize the `<textarea>` based on the
+   * content.
+   * @property {string} [class] The `class` attribute on the wrapper element.
+   * @property {boolean} [hidden] Whether to hide the widget.
+   * @property {boolean} [disabled] Whether to disable the widget. An alias of the `aria-disabled`
+   * attribute.
+   * @property {boolean} [readonly] Whether to make the widget read-only. An alias of the
+   * `aria-readonly` attribute.
+   * @property {boolean} [required] Whether to mark the widget required. An alias of the
+   * `aria-required` attribute.
+   * @property {boolean} [invalid] Whether to mark the widget invalid. An alias of the
+   * `aria-invalid` attribute.
+   * @property {Snippet} [children] Primary slot content.
+   */
+
+  /**
+   * @type {CommonEventHandlers & InputEventHandlers & Props & Record<string, any>}
    */
   let {
     /* eslint-disable prefer-const */

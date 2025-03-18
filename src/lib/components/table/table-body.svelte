@@ -6,10 +6,14 @@
 -->
 <script>
   /**
+   * @import { Snippet } from 'svelte';
+   */
+
+  /**
    * @typedef {object} Props
-   * @property {string} [class] - The `class` attribute on the wrapper element.
-   * @property {string} [label] - Display label for the row group.
-   * @property {import('svelte').Snippet} [children] - Primary slot content.
+   * @property {string} [class] The `class` attribute on the wrapper element.
+   * @property {string} [label] Display label for the row group.
+   * @property {Snippet} [children] Primary slot content.
    */
 
   /**

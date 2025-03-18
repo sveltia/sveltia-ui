@@ -3,11 +3,15 @@
   import { AppShell, initLocales } from '$lib';
   import NavSection from './_components/nav-section.svelte';
 
+  /**
+   * @import { Snippet } from 'svelte';
+   */
+
   initLocales();
 
   /**
    * @typedef {object} Props
-   * @property {import('svelte').Snippet} [children] - Primary slot content.
+   * @property {Snippet} [children] Primary slot content.
    */
 
   /** @type {Props} */

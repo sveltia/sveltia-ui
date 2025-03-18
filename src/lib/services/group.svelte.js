@@ -1,3 +1,7 @@
+/**
+ * @import { ActionReturn } from 'svelte/action';
+ */
+
 import { generateElementId } from '@sveltia/utils/element';
 import { sleep } from '@sveltia/utils/misc';
 
@@ -61,9 +65,9 @@ const config = {
 class Group {
   /**
    * Initialize a new `Group` instance.
-   * @param {HTMLElement} parent - Parent element.
-   * @param {object} [options] - Options.
-   * @param {boolean} [options.clickToSelect] - Whether to select an item by clicking on it.
+   * @param {HTMLElement} parent Parent element.
+   * @param {object} [options] Options.
+   * @param {boolean} [options.clickToSelect] Whether to select an item by clicking on it.
    * @todo Check for added elements probably with `MutationObserver`.
    */
   constructor(parent, { clickToSelect = true } = {}) {
@@ -211,8 +215,8 @@ class Group {
 
   /**
    * Select (and move focus to) the given target.
-   * @param {(MouseEvent | KeyboardEvent)} event - Triggered event.
-   * @param {HTMLElement} newTarget - Target element.
+   * @param {(MouseEvent | KeyboardEvent)} event Triggered event.
+   * @param {HTMLElement} newTarget Target element.
    */
   selectTarget(event, newTarget) {
     if (this.isDisabled || this.isReadOnly) {
@@ -335,7 +339,7 @@ class Group {
 
   /**
    * Handle the `click` event on the widget.
-   * @param {MouseEvent} event - `click` event.
+   * @param {MouseEvent} event `click` event.
    */
   onClick(event) {
     // eslint-disable-next-line prefer-destructuring
@@ -354,7 +358,7 @@ class Group {
 
   /**
    * Handle the `keydown` event on the widget.
-   * @param {KeyboardEvent} event - `keydown` event.
+   * @param {KeyboardEvent} event `keydown` event.
    */
   onKeyDown(event) {
     const { key, ctrlKey, metaKey, shiftKey, altKey } = event;
@@ -461,7 +465,7 @@ class Group {
 
   /**
    * Called whenever the params are updated. Filter the items based on the search terms.
-   * @param {{ searchTerms: string }} params - Updated params.
+   * @param {{ searchTerms: string }} params Updated params.
    */
   onUpdate({ searchTerms }) {
     const terms = searchTerms.trim().toLocaleLowerCase();
@@ -493,9 +497,9 @@ class Group {
 
 /**
  * Activate a new group.
- * @param {HTMLElement} parent - Parent element.
- * @param {object} [params] - Action params.
- * @returns {import('svelte/action').ActionReturn} Action.
+ * @param {HTMLElement} parent Parent element.
+ * @param {object} [params] Action params.
+ * @returns {ActionReturn} Action.
  */
 export const activateGroup = (parent, params) => {
   const group = new Group(parent, params);
@@ -503,7 +507,7 @@ export const activateGroup = (parent, params) => {
   return {
     /**
      * Called whenever the params are updated.
-     * @param {any} newParams - Updated params.
+     * @param {any} newParams Updated params.
      */
     update(newParams) {
       group.onUpdate(newParams);

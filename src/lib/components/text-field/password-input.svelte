@@ -12,14 +12,18 @@
   import TextInput from './text-input.svelte';
 
   /**
-   * @typedef {object} Props
-   * @property {string} [value] - Input value.
-   * @property {import('svelte').Snippet} [visibilityIcon] - Visibility icon slot content.
+   * @import { Snippet } from 'svelte';
+   * @import { CommonEventHandlers, InputEventHandlers, TextInputProps } from '$lib/typedefs';
    */
 
   /**
-   * @type {import('$lib/typedefs').TextInputProps & import('$lib/typedefs').CommonEventHandlers &
-   * import('$lib/typedefs').InputEventHandlers & Props & Record<string, any>}
+   * @typedef {object} Props
+   * @property {string} [value] Input value.
+   * @property {Snippet} [visibilityIcon] Visibility icon slot content.
+   */
+
+  /**
+   * @type {TextInputProps & CommonEventHandlers & InputEventHandlers & Props & Record<string, any>}
    */
   let {
     /* eslint-disable prefer-const */
