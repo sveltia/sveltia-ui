@@ -28,8 +28,7 @@
    * @property {string} [value] Input value.
    * @property {boolean} [flex] Make the text input container flexible.
    * @property {TextEditorMode[]} [modes] Enabled modes.
-   * @property {(TextEditorBlockType |
-   * TextEditorInlineType)[]} [buttons] Enabled buttons.
+   * @property {(TextEditorBlockType | TextEditorInlineType)[]} [buttons] Enabled buttons.
    * @property {TextEditorComponent[]} [components] Editor components.
    * @property {string} [class] The `class` attribute on the wrapper element.
    * @property {boolean} [hidden] Whether to hide the widget.
