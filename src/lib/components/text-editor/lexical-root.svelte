@@ -159,11 +159,11 @@
       border-color: var(--sui-error-border-color);
     }
 
-    & > :global(:first-child) {
+    & :global(:first-child) {
       margin-top: 0;
     }
 
-    & > :global(:last-child) {
+    & :global(:last-child) {
       margin-bottom: 0;
     }
 
