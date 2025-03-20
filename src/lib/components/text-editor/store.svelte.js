@@ -73,7 +73,7 @@ export const createEditorStore = () => {
     },
     set config(newValue) {
       config = newValue;
-      useRichText = newValue.modes[0] === 'rich-text';
+      useRichText = newValue.modes[0] === 'rich-text' || newValue.isCodeEditor;
     },
     get inputValue() {
       return inputValue;

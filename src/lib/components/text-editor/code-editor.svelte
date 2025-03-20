@@ -103,13 +103,7 @@
   {#if showLanguageSwitcher}
     <CodeEditorToolbar {disabled} {readonly} />
   {/if}
-  <LexicalRoot
-    hidden={!editorStore.useRichText || hidden}
-    {disabled}
-    {readonly}
-    {required}
-    {invalid}
-  />
+  <LexicalRoot {hidden} {disabled} {readonly} {required} {invalid} />
 </div>
 
 {#if editorStore.showConverterError}
