@@ -52,6 +52,7 @@ import {
 } from 'lexical';
 import prismComponents from 'prismjs/components';
 import { blockButtonTypes, textFormatButtonTypes } from '.';
+import { dependencies } from '../../../../package.json';
 import { TABLE } from './transformers/table';
 
 /**
@@ -65,6 +66,8 @@ import { TABLE } from './transformers/table';
  */
 
 const allTransformers = [...TRANSFORMERS, TABLE];
+const prismVersion = dependencies.prismjs.replace(/^\D/, '');
+const prismBaseURL = `https://unpkg.com/prismjs@${prismVersion}`;
 
 /**
  * Lexical editor configuration.
@@ -371,10 +374,8 @@ export const loadCodeHighlighter = async (lang) => {
   }
 
   try {
-    await import(
-      // eslint-disable-next-line jsdoc/no-bad-blocks
-      /* @vite-ignore */ `https://unpkg.com/prismjs@1.29.0/components/prism-${canonicalLang}.min.js`
-    );
+    // eslint-disable-next-line jsdoc/no-bad-blocks
+    await import(/* @vite-ignore */ `${prismBaseURL}/components/prism-${canonicalLang}.min.js`);
   } catch {
     //
   }
