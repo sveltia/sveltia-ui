@@ -52,7 +52,6 @@ import {
 } from 'lexical';
 import prismComponents from 'prismjs/components';
 import { blockButtonTypes, textFormatButtonTypes } from '.';
-import { dependencies } from '../../../../package.json';
 import { TABLE } from './transformers/table';
 
 /**
@@ -66,8 +65,7 @@ import { TABLE } from './transformers/table';
  */
 
 const allTransformers = [...TRANSFORMERS, TABLE];
-const prismVersion = dependencies.prismjs.replace(/^\D/, '');
-const prismBaseURL = `https://unpkg.com/prismjs@${prismVersion}`;
+const prismBaseURL = `https://unpkg.com/prismjs@1.30.0`;
 
 /**
  * Lexical editor configuration.
