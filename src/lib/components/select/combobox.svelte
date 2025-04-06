@@ -190,6 +190,7 @@
   class="combobox"
   {anchor}
   {position}
+  showBackdrop={true}
   touchOptimized={true}
   bind:open={isPopupOpen}
   onOpen={() => {
@@ -306,11 +307,12 @@
       }
 
       .label {
-        display: block;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 1;
+        line-clamp: 1;
         overflow: hidden;
         width: 100%;
-        white-space: nowrap;
-        text-overflow: ellipsis;
       }
     }
 
