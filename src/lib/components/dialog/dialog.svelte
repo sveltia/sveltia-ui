@@ -252,6 +252,10 @@
 
   .footer {
     margin: var(--sui-dialog-footer-margin, 0 24px 24px);
+
+    @media (width < 768px) {
+      margin: var(--sui-dialog-footer-margin, 0 16px 16px);
+    }
   }
 
   .body {
@@ -259,5 +263,9 @@
     margin: var(--sui-dialog-body-margin, 24px 24px);
     white-space: normal;
     line-height: var(--sui-line-height-compact);
+
+    @media (width < 768px) {
+      margin: var(--sui-dialog-body-margin, 16px 16px);
+    }
   }
 </style>
