@@ -84,9 +84,13 @@
       align-items: center;
       gap: 8px;
       margin: 0;
-      padding: 0 12px;
+      padding-inline-end: 12px;
       min-width: 0;
       font-size: var(--sui-font-size-x-large);
+
+      &:first-child {
+        padding-inline-start: 12px;
+      }
 
       :global(strong) {
         display: block;
