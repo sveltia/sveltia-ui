@@ -90,6 +90,7 @@
     font-family: var(--sui-control-font-family);
     font-size: var(--sui-control-font-size);
     line-height: var(--sui-control-line-height);
+    font-weight: var(--sui-font-weight-normal, normal);
     text-align: start;
     cursor: pointer;
     -webkit-user-select: none;
