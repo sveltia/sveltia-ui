@@ -89,7 +89,15 @@
     // @ts-ignore
     value = target.dataset.type === 'number' ? Number(target.value) : target.value;
     _onChange();
-    onChange?.(new CustomEvent('Change', { detail: { target: inputElement, value } }));
+    onChange?.(
+      new CustomEvent('Change', {
+        detail: {
+          target: inputElement,
+          name: target.name,
+          value,
+        },
+      }),
+    );
   };
 
   $effect(() => {
