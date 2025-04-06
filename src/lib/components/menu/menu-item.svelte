@@ -11,11 +11,21 @@
   import Menu from './menu.svelte';
 
   /**
-   * @import { ButtonProps, CommonEventHandlers, MenuItemProps } from '$lib/typedefs';
+   * @import {
+   * ButtonProps,
+   * CommonEventHandlers,
+   * MenuItemProps,
+   * PopupPosition,
+   * } from '$lib/typedefs';
    */
 
   /**
-   * @type {ButtonProps & MenuItemProps & CommonEventHandlers & Record<string, any>}
+   * @typedef {object} Props
+   * @property {PopupPosition} [popupPosition] Where to show the dropdown menu.
+   */
+
+  /**
+   * @type {ButtonProps & MenuItemProps & CommonEventHandlers & Props & Record<string, any>}
    */
   let {
     /* eslint-disable prefer-const */
@@ -24,6 +34,7 @@
     hidden = false,
     disabled = false,
     label = '',
+    popupPosition = 'right-top', // @todo Make this auto detect
     children: _children,
     startIcon: _startIcon,
     endIcon: _endIcon,
@@ -130,7 +141,7 @@
     <Popup
       anchor={buttonElement}
       parentDialogElement={dialogElement}
-      position="right-top"
+      position={popupPosition}
       bind:open={isPopupOpen}
       bind:hovered={isPopupHovered}
     >

@@ -50,6 +50,11 @@
       border-radius: var(--sui-textbox-border-radius) var(--sui-textbox-border-radius) 0 0;
       padding: 8px;
       background-color: var(--sui-tertiary-background-color);
+
+      @media (width < 768px) {
+        flex-wrap: wrap;
+        height: auto;
+      }
     }
 
     :global(.sui.menu-button) {
