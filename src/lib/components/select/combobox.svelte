@@ -33,6 +33,7 @@
     invalid = false,
     editable = true,
     position = 'bottom-left',
+    filterThreshold = 5,
     children,
     chevronIcon,
     onChange,
@@ -197,7 +198,10 @@
   touchOptimized={true}
   bind:open={isPopupOpen}
   onOpen={() => {
-    showFilter = (popupContent?.querySelectorAll('[role="option"]')?.length ?? 0) > 5;
+    showFilter =
+      filterThreshold === -1
+        ? false
+        : (popupContent?.querySelectorAll('[role="option"]')?.length ?? 0) > filterThreshold;
     searchTerms = '';
   }}
 >

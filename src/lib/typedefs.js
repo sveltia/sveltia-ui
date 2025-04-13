@@ -127,6 +127,8 @@
  * @property {string} [value] Selected option’s value.
  * @property {boolean} [editable] Whether to make the `combobox` editable.
  * @property {PopupPosition} [position] Where to show the dropdown menu.
+ * @property {number} [filterThreshold] Number of items to start showing the filter. Default: `5`.
+ * Use `-1` to always hide the filter.
  * @property {Snippet} [children] Primary slot content.
  * @property {Snippet} [chevronIcon] Chevron icon slot content.
  * @property {(event: CustomEvent) => void} [onChange] Custom `change` event handler.
