@@ -6,6 +6,7 @@
 -->
 <script>
   import { activateKeyShortcuts } from '../../services/events.svelte';
+  import TruncatedText from '../typography/truncated-text.svelte';
   import Popup from '../util/popup.svelte';
 
   /**
@@ -29,6 +30,7 @@
     pressed = undefined,
     keyShortcuts = undefined,
     label = '',
+    lines = 1,
     variant = undefined,
     size = 'medium',
     iconic = false,
@@ -68,7 +70,9 @@
   {#if variant === 'link'}
     {#if label}
       <span role="none" class="label">
-        {label}
+        <TruncatedText {lines}>
+          {label}
+        </TruncatedText>
       </span>
     {:else}
       <span role="none" class="label">
@@ -78,7 +82,9 @@
   {:else}
     {#if label}
       <span role="none" class="label">
-        {label}
+        <TruncatedText {lines}>
+          {label}
+        </TruncatedText>
       </span>
     {/if}
     {@render children?.()}
@@ -115,7 +121,6 @@
     line-height: var(--sui-control-line-height);
     font-weight: var(--sui-font-weight-normal, normal);
     text-align: start;
-    white-space: nowrap;
     cursor: pointer;
     transition: all 200ms;
 

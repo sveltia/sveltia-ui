@@ -24,6 +24,7 @@
  * attribute. Accepts the special `Accel` key, which will be replaced with `Control` or `Meta`
  * depending on the user’s operating system.
  * @property {string} [label] Text label displayed on the button.
+ * @property {number} [lines] Number of lines to show the label. Overflowing text will be truncated.
  * @property {'primary' | 'secondary' | 'tertiary' | 'ghost' | 'link'} [variant] The style variant
  * of the button.
  * @property {'small' | 'medium' | 'large'} [size] The size of the button.

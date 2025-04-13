@@ -7,6 +7,8 @@
   @see https://www.w3.org/WAI/ARIA/apg/patterns/listbox/examples/listbox-grouped/
 -->
 <script>
+  import TruncatedText from '../typography/truncated-text.svelte';
+
   /**
    * @import { Snippet } from 'svelte';
    */
@@ -50,7 +52,11 @@
   aria-labelledby="{id}-label"
   aria-roledescription="option group"
 >
-  <div role="none" id="{id}-label" class="label">{label}</div>
+  <div role="none" id="{id}-label" class="label">
+    <TruncatedText>
+      {label}
+    </TruncatedText>
+  </div>
   <div role="none" class="inner" inert={disabled}>
     {@render children?.()}
   </div>

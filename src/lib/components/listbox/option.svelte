@@ -102,9 +102,6 @@
       width: 100%;
       height: auto;
       min-height: var(--sui-option-height);
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
 
       :global(*) {
         flex: none;

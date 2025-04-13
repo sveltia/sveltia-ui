@@ -12,6 +12,7 @@
   import Listbox from '../listbox/listbox.svelte';
   import SearchBar from '../text-field/search-bar.svelte';
   import TextInput from '../text-field/text-input.svelte';
+  import TruncatedText from '../typography/truncated-text.svelte';
   import Popup from '../util/popup.svelte';
 
   /**
@@ -137,7 +138,9 @@
       aria-haspopup="listbox"
     >
       <div role="none" class="label">
-        {value !== undefined ? label : $_('_sui.combobox.select_an_option')}
+        <TruncatedText>
+          {value !== undefined ? label : $_('_sui.combobox.select_an_option')}
+        </TruncatedText>
       </div>
     </div>
   {:else}
@@ -307,11 +310,6 @@
       }
 
       .label {
-        display: -webkit-box;
-        -webkit-box-orient: vertical;
-        -webkit-line-clamp: 1;
-        line-clamp: 1;
-        overflow: hidden;
         width: 100%;
       }
     }

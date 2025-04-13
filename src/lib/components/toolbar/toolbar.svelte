@@ -98,13 +98,6 @@
         padding-inline-start: 12px;
       }
 
-      :global(strong) {
-        display: block;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-      }
-
       :global(span) {
         font-size: var(--sui-font-size-small);
         font-weight: var(--sui-font-weight-normal, normal);

@@ -6,6 +6,7 @@
 -->
 <script>
   import { activateKeyShortcuts } from '../../services/events.svelte';
+  import TruncatedText from '../typography/truncated-text.svelte';
 
   /**
    * @import { Snippet } from 'svelte';
@@ -75,7 +76,9 @@
   />
   {#if ariaLabel && showInlineLabel}
     <span id="{id}-label" class="label" class:hidden={!!value} aria-hidden="true">
-      {ariaLabel}
+      <TruncatedText>
+        {ariaLabel}
+      </TruncatedText>
     </span>
   {/if}
 </div>
@@ -177,7 +180,6 @@
       --sui-textbox-placeholder-text-align,
       var(--sui-textbox-text-align, start)
     );
-    white-space: nowrap;
     pointer-events: none;
 
     &.hidden {
