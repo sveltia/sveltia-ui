@@ -27,6 +27,7 @@
 
 <style lang="scss">
   .button-group {
+    flex: none;
     display: inline-flex;
     align-items: center;
   }

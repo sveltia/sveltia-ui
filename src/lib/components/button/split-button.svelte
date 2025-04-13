@@ -84,6 +84,7 @@
 
 <style lang="scss">
   .split-button {
+    flex: none;
     display: inline-flex;
     margin: var(--sui-focus-ring-width);
 

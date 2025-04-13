@@ -105,6 +105,7 @@
 
 <style lang="scss">
   button {
+    flex: none;
     display: inline-flex;
     align-items: center;
     gap: 4px;
@@ -360,6 +361,7 @@
     }
 
     &:global(.flex) {
+      flex: auto;
       width: -moz-available;
       width: -webkit-fill-available;
       width: stretch;

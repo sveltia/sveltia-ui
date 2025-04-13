@@ -64,6 +64,7 @@
 
 <style lang="scss">
   .select-button-group {
+    flex: none;
     display: inline-flex;
     align-items: center;
     margin: var(--sui-focus-ring-width);

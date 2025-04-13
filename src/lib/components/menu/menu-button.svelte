@@ -55,36 +55,34 @@
   };
 </script>
 
-<div role="none" class="wrapper">
-  <Button
-    {...restProps}
-    bind:element={buttonElement}
-    class="sui menu-button {className}"
-    {hidden}
-    {disabled}
-    {label}
-    {variant}
-    {size}
-    {iconic}
-    aria-haspopup="menu"
-  >
-    {#snippet startIcon()}
-      {@render _startIcon?.()}
-    {/snippet}
-    {#snippet children()}
-      {@render _children?.()}
-    {/snippet}
-    {#snippet endIcon()}
-      {#if _endIcon}
-        {@render _endIcon()}
-      {:else if iconic}
-        <Icon name="more_vert" />
-      {:else}
-        <Icon name="arrow_drop_down" class="small-arrow" />
-      {/if}
-    {/snippet}
-  </Button>
-</div>
+<Button
+  {...restProps}
+  bind:element={buttonElement}
+  class="sui menu-button {className}"
+  {hidden}
+  {disabled}
+  {label}
+  {variant}
+  {size}
+  {iconic}
+  aria-haspopup="menu"
+>
+  {#snippet startIcon()}
+    {@render _startIcon?.()}
+  {/snippet}
+  {#snippet children()}
+    {@render _children?.()}
+  {/snippet}
+  {#snippet endIcon()}
+    {#if _endIcon}
+      {@render _endIcon()}
+    {:else if iconic}
+      <Icon name="more_vert" />
+    {:else}
+      <Icon name="arrow_drop_down" class="small-arrow" />
+    {/if}
+  {/snippet}
+</Button>
 
 <Popup
   anchor={buttonElement}
