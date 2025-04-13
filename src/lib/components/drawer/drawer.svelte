@@ -396,6 +396,7 @@
 
     .title {
       font-size: var(--sui-font-size-large);
+      font-weight: var(--sui-font-weight-bold);
     }
   }
 
