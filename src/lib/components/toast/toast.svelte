@@ -31,7 +31,7 @@
     show = $bindable(false),
     id = undefined,
     duration = 5000,
-    position = 'bottom-right',
+    position = 'auto',
     children,
     ...restProps
     /* eslint-enable prefer-const */
@@ -80,6 +80,22 @@
     };
   });
 
+  onMount(() => {
+    if (position === 'auto') {
+      const mql = globalThis.matchMedia('(width < 1024px)');
+
+      // eslint-disable-next-line jsdoc/require-jsdoc
+      const setMode = () => {
+        position = mql.matches
+          ? 'bottom-center'
+          : `bottom-${document.dir === 'rtl' ? 'left' : 'right'}`;
+      };
+
+      setMode();
+      mql.addEventListener('change', setMode);
+    }
+  });
+
   $effect(() => {
     if (popover && toast) {
       popover.appendChild(toast);
@@ -112,7 +128,7 @@
 <style lang="scss">
   .toast-base {
     position: fixed;
-    inset: 0;
+    inset: 16px;
     z-index: 99999;
     display: flex;
     flex-direction: column;
@@ -121,20 +137,29 @@
     gap: 8px;
     margin: 0;
     border: 0;
-    padding: 16px;
-    width: 100dvw;
-    height: 100dvh;
+    padding: 0;
+    width: auto;
+    height: auto;
     background-color: transparent;
     font-family: var(--sui-font-family-default);
     font-size: var(--sui-font-size-default);
     font-weight: var(--sui-font-weight-normal, normal);
+    text-align: center;
     pointer-events: none;
     -webkit-user-select: none;
     user-select: none;
   }
 
+  :global {
+    body:has(.sui.bottom-navigation:not([inert]:not([hidden]))) .toast-base {
+      bottom: calc(var(--sui-bottom-navigation-height) + 16px);
+    }
+  }
+
   .toast {
     position: absolute;
+    width: max-content;
+    max-width: 80dvw;
     box-shadow: 0 8px 16px var(--sui-popup-shadow-color);
     opacity: 1;
     transition-duration: 250ms;
