@@ -132,7 +132,7 @@
     }
 
     :global(.icon) {
-      font-size: var(--sui-font-size-xx-large);
+      font-size: calc(var(--sui-textbox-height) * 0.6);
       opacity: 0.5;
     }
 
