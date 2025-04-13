@@ -98,7 +98,7 @@
         padding-inline-start: 12px;
       }
 
-      :global(span) {
+      :global(span:not(.sui.truncated-text)) {
         font-size: var(--sui-font-size-small);
         font-weight: var(--sui-font-weight-normal, normal);
         opacity: 0.8;
