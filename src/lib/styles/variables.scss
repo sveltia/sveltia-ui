@@ -243,9 +243,9 @@
 
     // Make controls larger on touch devices, e.g. mobile & tablet
     @media (pointer: coarse) {
-      --sui-control-small-height: 40px;
-      --sui-control-medium-height: 48px;
-      --sui-control-large-height: 56px;
+      --sui-control-small-height: 32px;
+      --sui-control-medium-height: 40px;
+      --sui-control-large-height: 48px;
       --sui-checkbox-height: 24px;
       --sui-secondary-row-height: 48px;
     }

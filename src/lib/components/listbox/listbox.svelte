@@ -104,6 +104,10 @@
     font-size: var(--sui-control-font-size);
     line-height: var(--sui-control-line-height);
 
+    @media (pointer: coarse) {
+      gap: 8px 0;
+    }
+
     :global([role='separator']) {
       margin: 4px 0;
       background-color: var(--sui-control-border-color);
