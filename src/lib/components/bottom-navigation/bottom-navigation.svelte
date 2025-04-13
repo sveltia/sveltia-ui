@@ -37,6 +37,10 @@
     border-top-style: var(--sui-bottom-navigation-border-style, solid);
     border-top-color: var(--sui-bottom-navigation-border-color, var(--sui-secondary-border-color));
 
+    &:is([inert], [hidden]) {
+      display: none;
+    }
+
     :global {
       .buttons {
         flex: auto;
