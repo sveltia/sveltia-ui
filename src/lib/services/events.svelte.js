@@ -100,7 +100,7 @@ export const activateKeyShortcuts = (element, shortcuts = '') => {
    * Remove the event listener.
    */
   const removeListener = () => {
-    globalThis.removeEventListener('keydown', handler);
+    globalThis.removeEventListener('keydown', handler, { capture: true });
     element.removeAttribute('aria-keyshortcuts');
   };
 
@@ -113,7 +113,7 @@ export const activateKeyShortcuts = (element, shortcuts = '') => {
       : undefined;
 
     if (platformKeyShortcuts) {
-      globalThis.addEventListener('keydown', handler);
+      globalThis.addEventListener('keydown', handler, { capture: true });
       element.setAttribute('aria-keyshortcuts', platformKeyShortcuts);
     }
   };
