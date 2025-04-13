@@ -57,11 +57,17 @@
     flex: none !important;
     display: flex;
     align-items: center;
-    padding: 0 8px;
+    padding-inline: 8px;
     background-color: var(--toolbar-background-color, transparent);
 
     &.primary {
       --toolbar-size: var(--sui-primary-toolbar-size);
+    }
+
+    &.secondary {
+      @media (width < 768px) {
+        padding-inline: 0;
+      }
     }
 
     &[aria-orientation='horizontal'] {
