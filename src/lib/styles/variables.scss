@@ -180,7 +180,7 @@
     --sui-control-large-border-width: 1px;
     --sui-control-large-border-radius: calc(var(--sui-control-large-height) / 8);
     --sui-control-large-padding: 0 calc((var(--sui-control-large-height) / 3));
-    --sui-control-large-height: 48px;
+    --sui-control-large-height: 40px;
     --sui-control-border-color: hsl(var(--sui-border-color-2-hsl));
     --sui-control-foreground-color: var(--sui-primary-foreground-color);
     --sui-control-background-color: hsl(var(--sui-background-color-4-hsl));
@@ -242,9 +242,9 @@
 
     // Make controls larger on touch devices, e.g. mobile & tablet
     @media (pointer: coarse) {
-      --sui-control-small-height: 30px;
-      --sui-control-medium-height: 40px;
-      --sui-control-large-height: 60px;
+      --sui-control-small-height: 40px;
+      --sui-control-medium-height: 48px;
+      --sui-control-large-height: 56px;
       --sui-checkbox-height: 24px;
       --sui-secondary-row-height: 48px;
     }
