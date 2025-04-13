@@ -31,6 +31,7 @@ export { default as Alert } from './components/alert/alert.svelte';
 export { default as Infobar } from './components/alert/infobar.svelte';
 export { default as ButtonGroup } from './components/button/button-group.svelte';
 export { default as Button } from './components/button/button.svelte';
+export { default as FloatingActionButtonWrapper } from './components/button/floating-action-button-wrapper.svelte';
 export { default as SelectButtonGroup } from './components/button/select-button-group.svelte';
 export { default as SelectButton } from './components/button/select-button.svelte';
 export { default as SplitButton } from './components/button/split-button.svelte';
@@ -45,6 +46,7 @@ export { default as Disclosure } from './components/disclosure/disclosure.svelte
 export { default as Divider } from './components/divider/divider.svelte';
 export { default as Spacer } from './components/divider/spacer.svelte';
 export { default as Drawer } from './components/drawer/drawer.svelte';
+export { default as FilePicker } from './components/file/file-picker.svelte';
 export { default as GridBody } from './components/grid/grid-body.svelte';
 export { default as GridCell } from './components/grid/grid-cell.svelte';
 export { default as GridColHeader } from './components/grid/grid-col-header.svelte';
@@ -66,6 +68,7 @@ export { default as Menu } from './components/menu/menu.svelte';
 export { default as Progressbar } from './components/progressbar/progressbar.svelte';
 export { default as RadioGroup } from './components/radio/radio-group.svelte';
 export { default as Radio } from './components/radio/radio.svelte';
+export { default as InfiniteScroll } from './components/scroll/infinite-scroll.svelte';
 export { default as Combobox } from './components/select/combobox.svelte';
 export { default as SelectTags } from './components/select/select-tags.svelte';
 export { default as Select } from './components/select/select.svelte';
@@ -94,6 +97,7 @@ export { default as TextInput } from './components/text-field/text-input.svelte'
 export { default as Toast } from './components/toast/toast.svelte';
 export { default as Toolbar } from './components/toolbar/toolbar.svelte';
 export { default as AppShell } from './components/util/app-shell.svelte';
+export { default as EmptyState } from './components/util/empty-state.svelte';
 export { default as Group } from './components/util/group.svelte';
 export { default as Modal } from './components/util/modal.svelte';
 
