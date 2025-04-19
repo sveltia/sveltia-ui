@@ -1,6 +1,6 @@
 <script>
-  import { isLoading } from 'svelte-i18n';
   import { AppShell, initLocales } from '$lib';
+  import { isLoading } from 'svelte-i18n';
   import NavSection from './_components/nav-section.svelte';
 
   /**
@@ -47,6 +47,7 @@
             category="components"
             pages={[
               { key: 'app-bar', label: 'App Bar', disabled: true },
+              { key: 'app-shell', label: 'App Shell', disabled: true },
               { key: 'box', label: 'Box', disabled: true },
               { key: 'divider', label: 'Divider' },
               { key: 'form', label: 'Form', disabled: true },
@@ -65,6 +66,7 @@
               { key: 'button', label: 'Button' },
               { key: 'button-group', label: 'Button Group' },
               { key: 'copy-button', label: 'Copy Button', disabled: true },
+              { key: 'floating-button', label: 'Floating Button', disabled: true },
               { key: 'spin-button', label: 'Spin Button', disabled: true },
               { key: 'split-button', label: 'Split Button' },
             ]}
@@ -112,6 +114,7 @@
               { key: 'tooltip', label: 'Tooltip', disabled: true },
               { key: 'tree', label: 'Tree', disabled: true },
               { key: 'tree-grid', label: 'Tree Grid', disabled: true },
+              { key: 'truncated-text', label: 'Truncated Text', disabled: true },
             ]}
           />
           <NavSection
@@ -148,10 +151,12 @@
               { key: 'bottom-nav', label: 'Bottom Navigation', disabled: true },
               { key: 'breadcrumbs', label: 'Breadcrumbs', disabled: true },
               { key: 'drawer', label: 'Drawer' },
+              { key: 'infinite-scroll', label: 'Infinite Scroll', disabled: true },
               { key: 'link', label: 'Link', disabled: true },
               { key: 'menu', label: 'Menu' },
               { key: 'pagination', label: 'Pagination', disabled: true },
               { key: 'scrollable-strip', label: 'Scrollable Strip', disabled: true },
+              { key: 'scrollbar', label: 'Scrollbar', disabled: true },
               { key: 'tabs', label: 'Tabs' },
               { key: 'tour', label: 'Tour', disabled: true },
               { key: 'wizard', label: 'Wizard', disabled: true },
