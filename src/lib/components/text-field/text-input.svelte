@@ -191,7 +191,8 @@
     opacity: 0;
   }
 
-  :is(input::placeholder, .label) {
+  input::placeholder,
+  .label {
     color: var(--sui-textbox-placeholder-foreground-color, var(--sui-textbox-foreground-color));
     opacity: var(--sui-textbox-placeholder-opacity, 0.5);
     font-family: var(--sui-textbox-placeholder-font-family, var(--sui-textbox-font-family));
