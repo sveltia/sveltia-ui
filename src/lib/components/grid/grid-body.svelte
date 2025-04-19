@@ -41,7 +41,7 @@
   {#if label}
     <div role="row" class="row-group-caption">
       <!-- We need `colspan` here but cannot place `<th>` under `<div>`, so use a hack -->
-      <svelte:element this={'th'} role="rowheader" id="{id}-label" colspan="9999">
+      <svelte:element this={'th'} role="columnheader" id="{id}-label" colspan="9999">
         {label}
       </svelte:element>
     </div>
@@ -58,7 +58,7 @@
     display: table-row;
   }
 
-  [role='rowheader'] {
+  [role='columnheader'] {
     display: table-cell;
     padding: 8px;
     color: var(--sui-secondary-foreground-color);
