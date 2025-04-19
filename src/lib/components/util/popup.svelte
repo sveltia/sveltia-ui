@@ -44,7 +44,7 @@
     hovered = $bindable(false),
     content = $bindable(undefined),
     class: className,
-    showBackdrop = false,
+    showBackdrop = undefined,
     anchor,
     position = 'bottom-left',
     positionBaseElement = undefined,

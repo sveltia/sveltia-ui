@@ -194,7 +194,6 @@
   class="combobox"
   {anchor}
   {position}
-  showBackdrop={true}
   touchOptimized={true}
   bind:open={isPopupOpen}
   onOpen={() => {
