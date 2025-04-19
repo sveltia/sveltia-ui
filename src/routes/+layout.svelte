@@ -1,6 +1,6 @@
 <script>
-  import { AppShell, initLocales } from '$lib';
   import { isLoading } from 'svelte-i18n';
+  import { AppShell, initLocales } from '$lib';
   import NavSection from './_components/nav-section.svelte';
 
   /**
