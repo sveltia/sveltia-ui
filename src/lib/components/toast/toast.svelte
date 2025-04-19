@@ -171,29 +171,29 @@
     }
 
     &.top-left {
-      inset: 16px auto auto 16px;
+      inset: 0 auto auto 0;
     }
 
     &.top-center {
-      inset: 16px auto auto 50%;
+      inset: 0 auto auto 50%;
       transform: translateX(-50%);
     }
 
     &.top-right {
-      inset: 16px 16px auto auto;
+      inset: 0 0 auto auto;
     }
 
     &.bottom-left {
-      inset: auto auto 16px 16px;
+      inset: auto auto 0 0;
     }
 
     &.bottom-center {
-      inset: auto auto 16px 50%;
+      inset: auto auto 0 50%;
       transform: translateX(-50%);
     }
 
     &.bottom-right {
-      inset: auto 16px 16px auto;
+      inset: auto 0 0 auto;
     }
   }
 </style>
