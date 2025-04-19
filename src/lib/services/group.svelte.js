@@ -109,9 +109,9 @@ class Group {
 
     allMembers.forEach((element, index) => {
       // Select the first one if no member has the `selected` attribute
-      const isSelected = defaultSelected
-        ? element === defaultSelected
-        : this.selectFirst && index === 0;
+      const isSelected =
+        element.getAttribute(this.childSelectedAttr) === 'true' ||
+        (defaultSelected ? element === defaultSelected : this.selectFirst && index === 0);
 
       const controlTarget = /** @type {HTMLElement | null} */ (
         document.querySelector(`#${element.getAttribute('aria-controls')}`)
