@@ -36,12 +36,15 @@
     /* eslint-enable prefer-const */
   } = $props();
 
+  let opening = false;
+  let closing = false;
+
   /**
    * Close the modal.
    * @param {string} returnValue Return value to be used for `<dialog>`.
    */
   export const close = (returnValue) => {
-    if (!dialog) {
+    if (!dialog || !dialog.open || opening || closing) {
       return;
     }
 
@@ -77,10 +80,15 @@
    * Show the modal.
    */
   const openDialog = async () => {
-    if (!dialog || dialog?.open) {
+    if (!dialog || dialog?.open || opening || closing) {
+      if (closing) {
+        open = false;
+      }
+
       return;
     }
 
+    opening = true;
     onOpening?.(new CustomEvent('Opening'));
     showContent = true;
     dialog.showModal();
@@ -89,18 +97,24 @@
     setOpenClass = true;
     await waitForTransition();
     setActiveClass = true;
+    opening = false;
   };
 
   /**
    * Hide the modal.
    */
   const closeDialog = async () => {
-    if (!dialog || !dialog.open) {
+    if (!dialog || !dialog.open || opening || closing) {
+      if (opening) {
+        open = false;
+      }
+
       return;
     }
 
     const { returnValue } = dialog;
 
+    closing = true;
     onClosing?.(new CustomEvent('Closing'));
     // Prevent a button behind the `<dialog>` from being clicked erroneously (Svelte bug)
     document.body.inert = true;
@@ -121,6 +135,7 @@
 
     onClose?.(new CustomEvent('Close', { detail: { returnValue } }));
     dialog.returnValue = '';
+    closing = false;
   };
 
   $effect(() => {
@@ -162,8 +177,7 @@
         lightDismiss &&
         /** @type {HTMLElement | undefined} */ (target)?.matches('dialog')
       ) {
-        dialog.returnValue = 'cancel';
-        open = false;
+        close('cancel');
       }
     }}
     oncancel={(event) => {
@@ -171,8 +185,7 @@
 
       // Escape key is pressed
       if (dialog && escapeDismiss) {
-        dialog.returnValue = 'cancel';
-        open = false;
+        close('cancel');
       }
     }}
   >
