@@ -253,34 +253,6 @@
     position: relative;
     min-width: var(--sui-combobox-min-width, calc(var(--sui-option-height) * 5));
 
-    :global(.icon) {
-      font-size: var(--sui-font-size-xx-large);
-      opacity: 0.5;
-    }
-
-    & > :global(.icon) {
-      position: absolute;
-      inset: 8px auto auto 8px;
-      z-index: 1;
-    }
-
-    & > :global(button) {
-      position: absolute;
-      inset: 0 0 auto auto;
-      z-index: 1;
-      margin: 0 !important;
-      border-top-left-radius: 0;
-      border-bottom-left-radius: 0;
-    }
-
-    &:not(.editable) > :global(button) {
-      background-color: transparent !important;
-    }
-
-    & > :global(button[tabindex='-1']) {
-      pointer-events: none;
-    }
-
     div[role='combobox'] {
       display: flex;
       align-items: center;
@@ -304,8 +276,7 @@
         font-style: italic;
       }
 
-      &:hover,
-      &:focus {
+      &:is(:hover, :focus) {
         background-color: var(--sui-hover-background-color);
       }
 
@@ -318,32 +289,62 @@
       }
     }
 
-    :global(.text-input) {
-      margin: 0 !important;
-      width: 100% !important;
-    }
+    :global {
+      .icon {
+        font-size: var(--sui-font-size-xx-large);
+        opacity: 0.5;
+      }
 
-    :global(input) {
-      padding: 0 32px 0 8px;
-      width: 0; // = auto
-    }
+      & > .icon {
+        position: absolute;
+        inset: 8px auto auto 8px;
+        z-index: 1;
+      }
 
-    & + :global([role='listbox']) {
-      position: fixed;
-      z-index: 100;
-      border-radius: var(--sui-control-medium-border-radius);
-      box-shadow: 0 8px 16px var(--sui-popup-shadow-color);
-      overflow: auto;
-      background-color: var(--sui-secondary-background-color);
-      -webkit-backdrop-filter: blur(32px);
-      backdrop-filter: blur(32px);
-      /* Add .1s delay before the position can be determined */
-      transition: opacity 100ms 100ms;
-    }
+      & > button {
+        position: absolute;
+        inset: 0 0 auto auto;
+        z-index: 1;
+        margin: 0 !important;
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
 
-    & + :global([role='listbox']:not(.open)) {
-      opacity: 0;
-      pointer-events: none;
+        &[tabindex='-1'] {
+          pointer-events: none;
+        }
+      }
+
+      &:not(.editable) > button {
+        background-color: transparent !important;
+      }
+
+      .text-input {
+        margin: 0 !important;
+        width: 100% !important;
+      }
+
+      input {
+        padding: 0 32px 0 8px;
+        width: 0; // = auto
+      }
+
+      & + [role='listbox'] {
+        position: fixed;
+        z-index: 100;
+        border-radius: var(--sui-control-medium-border-radius);
+        box-shadow: 0 8px 16px var(--sui-popup-shadow-color);
+        overflow: auto;
+        background-color: var(--sui-secondary-background-color);
+        -webkit-backdrop-filter: blur(32px);
+        backdrop-filter: blur(32px);
+        /* Add .1s delay before the position can be determined */
+        transition: opacity 100ms 100ms;
+
+        &:not(.open) {
+          opacity: 0;
+          pointer-events: none;
+        }
+      }
     }
   }
 
@@ -352,13 +353,15 @@
     flex-direction: column;
     overflow: hidden;
 
-    :global(.sui.search-bar) {
-      flex: none;
-    }
+    :global {
+      .sui.search-bar {
+        flex: none;
+      }
 
-    :global(.sui.listbox) {
-      flex: auto;
-      overflow-y: auto;
+      .sui.listbox {
+        flex: auto;
+        overflow-y: auto;
+      }
     }
 
     .no-options {

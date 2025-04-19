@@ -38,36 +38,38 @@
   .wrapper {
     display: contents;
 
-    :global([role='toolbar']) {
-      position: sticky;
-      top: 0;
-      z-index: 1;
-      display: flex;
-      gap: 8px;
-      border-width: 1px 1px 0;
-      border-style: solid;
-      border-color: var(--sui-textbox-border-color);
-      border-radius: var(--sui-textbox-border-radius) var(--sui-textbox-border-radius) 0 0;
-      padding: 8px;
-      background-color: var(--sui-tertiary-background-color);
+    :global {
+      [role='toolbar'] {
+        position: sticky;
+        top: 0;
+        z-index: 1;
+        display: flex;
+        gap: 8px;
+        border-width: 1px 1px 0;
+        border-style: solid;
+        border-color: var(--sui-textbox-border-color);
+        border-radius: var(--sui-textbox-border-radius) var(--sui-textbox-border-radius) 0 0;
+        padding: 8px;
+        background-color: var(--sui-tertiary-background-color);
 
-      @media (width < 768px) {
-        flex-wrap: wrap;
-        height: auto;
+        @media (width < 768px) {
+          flex-wrap: wrap;
+          height: auto;
+        }
       }
-    }
 
-    :global(.sui.menu-button) {
-      padding: 0 4px;
-    }
+      .sui.menu-button {
+        padding: 0 4px;
+      }
 
-    :global(.sui.button) {
-      flex: none;
-      margin: 0 !important;
-    }
+      .sui.button {
+        flex: none;
+        margin: 0 !important;
+      }
 
-    :global(.sui.button-group) {
-      gap: 4px;
+      .sui.button-group {
+        gap: 4px;
+      }
     }
   }
 </style>

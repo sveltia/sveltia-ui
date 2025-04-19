@@ -142,62 +142,71 @@
     user-select: none;
 
     &:hover {
-      :global(button) {
-        background-color: var(--sui-hover-background-color);
-      }
+      :global {
+        button {
+          background-color: var(--sui-hover-background-color);
 
-      :global(button[aria-checked='true']) {
-        background-color: var(--sui-primary-accent-color-light);
+          &[aria-checked='true'] {
+            background-color: var(--sui-primary-accent-color-light);
+          }
+        }
       }
     }
 
     &:active {
-      :global(button) {
-        background-color: var(--sui-active-background-color);
-      }
+      :global {
+        button {
+          background-color: var(--sui-active-background-color);
 
-      :global(button[aria-checked='true']) {
-        background-color: var(--sui-primary-accent-color-dark);
-      }
-    }
-
-    :global(button) {
-      flex: none;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-      margin: 0 !important;
-      border-width: var(--sui-checkbox-border-width, 1.5px);
-      border-color: var(--sui-checkbox-border-color);
-      border-radius: var(--sui-checkbox-border-radius);
-      padding: 0;
-      width: var(--sui-checkbox-height);
-      height: var(--sui-checkbox-height);
-      color: var(--sui-primary-accent-text-color);
-      background-color: var(--sui-checkbox-background-color);
-      transition: all 200ms;
-
-      :global(.icon) {
-        font-size: calc(var(--sui-checkbox-height) - 2px);
+          &[aria-checked='true'] {
+            background-color: var(--sui-primary-accent-color-dark);
+          }
+        }
       }
     }
 
-    :global(button[aria-checked='true']) {
-      border-color: var(--sui-checkbox-border-color-checked, var(--sui-primary-accent-color));
-      color: var(--sui-checkbox-foreground-color-checked, var(--sui-primary-accent-color-inverted));
-      background-color: var(
-        --sui-checkbox-background-color-checked,
-        var(--sui-primary-accent-color)
-      );
-    }
+    :global {
+      button {
+        flex: none;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        margin: 0 !important;
+        border-width: var(--sui-checkbox-border-width, 1.5px);
+        border-color: var(--sui-checkbox-border-color);
+        border-radius: var(--sui-checkbox-border-radius);
+        padding: 0;
+        width: var(--sui-checkbox-height);
+        height: var(--sui-checkbox-height);
+        color: var(--sui-primary-accent-text-color);
+        background-color: var(--sui-checkbox-background-color);
+        transition: all 200ms;
 
-    :global(button[aria-invalid='true']) {
-      border-color: var(--sui-error-border-color);
-      color: var(--sui-error-foreground-color);
-    }
+        &[aria-checked='true'] {
+          border-color: var(--sui-checkbox-border-color-checked, var(--sui-primary-accent-color));
+          color: var(
+            --sui-checkbox-foreground-color-checked,
+            var(--sui-primary-accent-color-inverted)
+          );
+          background-color: var(
+            --sui-checkbox-background-color-checked,
+            var(--sui-primary-accent-color)
+          );
+        }
 
-    :global(button[aria-checked='true'][aria-invalid='true']) {
-      background-color: var(--sui-checkbox-background-color);
+        &[aria-invalid='true'] {
+          border-color: var(--sui-error-border-color);
+          color: var(--sui-error-foreground-color);
+        }
+
+        &[aria-checked='true'][aria-invalid='true'] {
+          background-color: var(--sui-checkbox-background-color);
+        }
+
+        .icon {
+          font-size: calc(var(--sui-checkbox-height) - 2px);
+        }
+      }
     }
 
     label {

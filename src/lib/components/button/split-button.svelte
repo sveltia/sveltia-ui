@@ -88,20 +88,22 @@
     display: inline-flex;
     margin: var(--sui-focus-ring-width);
 
-    :global(button) {
-      margin: 0;
-    }
+    :global {
+      button {
+        margin: 0;
 
-    :global(button:not(.menu-button)) {
-      border-top-right-radius: 0;
-      border-bottom-right-radius: 0;
-    }
+        &.menu-button {
+          border-left-width: 0;
+          border-top-left-radius: 0;
+          border-bottom-left-radius: 0;
+          aspect-ratio: 3 / 4;
+        }
 
-    :global(button.menu-button) {
-      border-left-width: 0;
-      border-top-left-radius: 0;
-      border-bottom-left-radius: 0;
-      aspect-ratio: 3 / 4;
+        &:not(.menu-button) {
+          border-top-right-radius: 0;
+          border-bottom-right-radius: 0;
+        }
+      }
     }
   }
 </style>

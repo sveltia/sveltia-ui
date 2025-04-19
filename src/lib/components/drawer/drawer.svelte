@@ -154,8 +154,10 @@
     .extra-control {
       position: absolute;
 
-      :global(button.close) {
-        margin: 8px;
+      :global {
+        button.close {
+          margin: 8px;
+        }
       }
     }
 
@@ -378,8 +380,7 @@
     }
   }
 
-  .header,
-  .footer {
+  :is(.header, .footer) {
     display: flex;
     align-items: center;
     gap: 8px;

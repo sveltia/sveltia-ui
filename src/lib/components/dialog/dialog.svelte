@@ -230,8 +230,7 @@
     }
   }
 
-  .header,
-  .footer {
+  :is(.header, .footer) {
     display: flex;
     align-items: center;
     gap: 4px;

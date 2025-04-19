@@ -128,14 +128,16 @@
     margin: var(--sui-focus-ring-width);
     width: calc(100% - var(--sui-focus-ring-width) * 2);
 
-    :global(.sui.text-area) {
-      margin: 0 !important;
-      width: 100% !important;
-      min-width: auto;
+    :global {
+      .sui.text-area {
+        margin: 0 !important;
+        width: 100% !important;
+        min-width: auto;
 
-      :global(textarea) {
-        border-radius: //
-          0 0 var(--sui-textbox-border-radius) var(--sui-textbox-border-radius) !important;
+        textarea {
+          border-radius: //
+            0 0 var(--sui-textbox-border-radius) var(--sui-textbox-border-radius) !important;
+        }
       }
     }
   }

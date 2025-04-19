@@ -125,31 +125,24 @@
     cursor: pointer;
     transition: all 200ms;
 
-    & > :global(*) {
-      pointer-events: none;
-    }
-
-    &:global(:not(:disabled):focus-visible) {
-      z-index: 1;
-    }
-
     &[hidden] {
       display: none !important;
     }
 
-    &:global(.primary),
-    &:global(.secondary),
-    &:global(.tertiary),
-    &:global(.ghost) {
+    &:not(:disabled):focus-visible {
+      z-index: 1;
+    }
+
+    &:is(.primary, .secondary, .tertiary, .ghost) {
       justify-content: center;
       border-width: 1px;
 
-      :global(.label:only-child) {
+      .label:only-child {
         padding: 0 4px;
       }
     }
 
-    &:global(.primary) {
+    &.primary {
       border-width: var(--sui-button-primary-border-width, 1px);
       border-style: var(--sui-button-primary-border-style, solid);
       border-color: var(--sui-button-primary-border-color, var(--sui-primary-accent-color));
@@ -157,9 +150,7 @@
       background-color: var(--sui-button-primary-background-color, var(--sui-primary-accent-color));
       font-weight: var(--sui-button-primary-font-weight, var(--sui-font-weight-normal, normal));
 
-      &:hover,
-      &:focus-visible,
-      &[aria-expanded='true'] {
+      &:is(:hover, :focus-visible, [aria-expanded='true']) {
         color: var(
           --sui-button-primary-foreground-color-focus,
           var(--sui-button-primary-foreground-color, var(--sui-primary-accent-color-inverted))
@@ -182,7 +173,7 @@
       }
     }
 
-    &:global(.secondary) {
+    &.secondary {
       border-width: var(--sui-button-secondary-border-width, 1px);
       border-style: var(--sui-button-secondary-border-style, solid);
       border-color: var(--sui-button-secondary-border-color, var(--sui-primary-accent-color));
@@ -193,9 +184,7 @@
       );
       font-weight: var(--sui-button-secondary-font-weight, var(--sui-font-weight-normal, normal));
 
-      &:hover,
-      &:focus-visible,
-      &[aria-expanded='true'] {
+      &:is(:hover, :focus-visible, [aria-expanded='true']) {
         color: var(
           --sui-button-secondary-foreground-color-focus,
           var(--sui-button-secondary-foreground-color, var(--sui-primary-accent-color-text))
@@ -226,7 +215,7 @@
       }
     }
 
-    &:global(.tertiary) {
+    &.tertiary {
       border-width: var(--sui-button-tertiary-border-width, 1px);
       border-style: var(--sui-button-tertiary-border-style, solid);
       border-color: var(--sui-button-tertiary-border-color, var(--sui-button-border-color));
@@ -237,9 +226,7 @@
       );
       font-weight: var(--sui-button-tertiary-font-weight, var(--sui-font-weight-normal, normal));
 
-      &:hover,
-      &:focus-visible,
-      &[aria-expanded='true'] {
+      &:is(:hover, :focus-visible, [aria-expanded='true']) {
         color: var(
           --sui-button-tertiary-foreground-color-focus,
           var(--sui-button-tertiary-foreground-color, var(--sui-highlight-foreground-color))
@@ -270,12 +257,10 @@
       }
     }
 
-    &:global(.ghost) {
+    &.ghost {
       font-weight: var(--sui-button-ghost-font-weight, var(--sui-font-weight-normal, normal));
 
-      &:hover,
-      &:focus-visible,
-      &[aria-expanded='true'] {
+      &:is(:hover, :focus-visible, [aria-expanded='true']) {
         color: var(--sui-button-ghost-foreground-color-focus);
         background-color: var(
           --sui-button-ghost-background-color-focus,
@@ -300,7 +285,7 @@
       }
     }
 
-    &:global(.link) {
+    &.link {
       outline: 0;
       margin: 0;
       border-radius: 0 !important;
@@ -308,81 +293,86 @@
       height: auto !important;
       color: var(--sui-button-link-foreground-color, var(--sui-primary-accent-color-text));
 
-      :global(.label) {
+      .label {
         padding: 0;
         line-height: var(--sui-line-height-compact);
         text-decoration: var(--sui-button-link-text-decoration, none);
         text-underline-offset: 2px;
         white-space: normal;
 
-        :global(:root[data-underline-links='true']) &,
-        :global(:host[data-underline-links='true']) & {
+        :global(:is(:root, :host)[data-underline-links='true']) & {
           text-decoration: underline;
         }
       }
 
-      &:hover,
-      &:focus,
-      &:active {
-        :global(.label) {
+      &:is(:hover, :focus, :active) {
+        .label {
           text-decoration: var(--sui-button-link-text-decoration-focus, underline);
         }
       }
     }
 
-    &:global(.small) {
+    &.small {
       border-radius: var(--sui-button-small-border-radius);
       padding: var(--sui-button-small-padding);
       height: var(--sui-button-small-height);
       font-size: var(--sui-button-small-font-size, var(--sui-font-size-small));
 
-      :global(.icon) {
-        font-size: var(--sui-font-size-large);
+      :global {
+        .icon {
+          font-size: var(--sui-font-size-large);
+        }
       }
     }
 
-    &:global(.medium) {
+    &.medium {
       border-radius: var(--sui-button-medium-border-radius);
       padding: var(--sui-button-medium-padding);
       height: var(--sui-button-medium-height);
       font-size: var(--sui-button-medium-font-size, var(--sui-font-size-default));
     }
 
-    &:global(.large) {
+    &.large {
       border-radius: var(--sui-button-large-border-radius);
       padding: var(--sui-button-large-padding);
       height: var(--sui-button-large-height);
       font-size: var(--sui-button-large-font-size, var(--sui-font-size-large));
     }
 
-    &:global(.pill) {
+    &.pill {
       border-radius: 80px;
       padding: var(--sui-button-medium-pill-padding, 0 12px);
     }
 
-    &:global(.flex) {
+    &.flex {
       flex: auto;
       width: -moz-available;
       width: -webkit-fill-available;
       width: stretch;
     }
 
-    &:global(.iconic) {
+    &.iconic {
       justify-content: center;
       padding: 0;
       aspect-ratio: 1 / 1;
     }
 
-    &:global(.danger) {
+    &.danger {
       background-color: var(--sui-error-background-color);
     }
 
-    :global(.label) {
+    .label {
       padding: 0 4px;
     }
 
-    &:global(:has([slot='start-icon'] + [slot='end-icon'])) {
-      gap: 0;
+    :global {
+      & > * {
+        pointer-events: none;
+      }
+
+      &:has([slot='start-icon'] + [slot='end-icon']) {
+        gap: 0;
+      }
     }
   }
 </style>

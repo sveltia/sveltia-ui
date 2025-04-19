@@ -131,11 +131,6 @@
       min-width: 0;
     }
 
-    :global(.icon) {
-      font-size: calc(var(--sui-textbox-height) * 0.6);
-      opacity: 0.5;
-    }
-
     & > span {
       position: absolute;
       inset: 0 auto 0 0;
@@ -147,29 +142,36 @@
       height: var(--sui-button-medium-height);
     }
 
-    & > :global(button) {
-      position: absolute;
-      inset: 0 0 auto auto;
-      z-index: 2;
-      margin: 0 !important;
-      height: var(--sui-button-medium-height);
-    }
+    :global {
+      .icon {
+        font-size: calc(var(--sui-textbox-height) * 0.6);
+        opacity: 0.5;
+      }
 
-    :global(.label) {
-      --sui-textbox-singleline-padding: 0 36px;
-    }
+      & > button {
+        position: absolute;
+        inset: 0 0 auto auto;
+        z-index: 2;
+        margin: 0 !important;
+        height: var(--sui-button-medium-height);
+      }
 
-    :global(.text-input) {
-      flex: auto;
-      margin: 0 !important;
-      width: 0; // = auto
-      min-width: 0 !important;
-    }
+      .label {
+        --sui-textbox-singleline-padding: 0 36px;
+      }
 
-    :global(input) {
-      z-index: 1;
-      padding: 0 var(--sui-button-medium-height) !important;
-      width: 100%;
+      .text-input {
+        flex: auto;
+        margin: 0 !important;
+        width: 0; // = auto
+        min-width: 0 !important;
+      }
+
+      input {
+        z-index: 1;
+        padding: 0 var(--sui-button-medium-height) !important;
+        width: 100%;
+      }
     }
   }
 </style>

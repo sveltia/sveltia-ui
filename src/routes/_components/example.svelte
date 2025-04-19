@@ -42,8 +42,10 @@
     .body {
       margin: 16px 0 0;
 
-      > :global(div:not(:first-child)) {
-        margin: 8px 0 0;
+      :global {
+        & > div:not(:first-child) {
+          margin: 8px 0 0;
+        }
       }
     }
   }

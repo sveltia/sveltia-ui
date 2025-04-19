@@ -38,12 +38,14 @@
     overflow: hidden;
     scroll-snap-type: x mandatory;
 
-    & > :global(.tab-panel) {
-      flex: none;
-      display: block !important;
-      width: 100%;
-      overflow: auto;
-      scroll-snap-align: center;
+    :global {
+      & > .tab-panel {
+        flex: none;
+        display: block !important;
+        width: 100%;
+        overflow: auto;
+        scroll-snap-align: center;
+      }
     }
   }
 </style>

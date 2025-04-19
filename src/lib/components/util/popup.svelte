@@ -227,11 +227,13 @@
       border-radius: var(--sui-menu-border-radius, 4px);
       padding: var(--sui-menu-padding, 4px);
 
-      :global(.sui.menu) {
-        border-width: 0;
-        border-radius: 0;
-        padding: 0;
-        background-color: transparent;
+      :global {
+        .sui.menu {
+          border-width: 0;
+          border-radius: 0;
+          padding: 0;
+          background-color: transparent;
+        }
       }
     }
 
@@ -242,11 +244,13 @@
       border-radius: var(--sui-listbox-border-radius, 4px);
       padding: var(--sui-listbox-padding, 4px);
 
-      :global(.sui.listbox) {
-        border-width: 0;
-        border-radius: 0;
-        padding: 0;
-        background-color: transparent;
+      :global {
+        .sui.listbox {
+          border-width: 0;
+          border-radius: 0;
+          padding: 0;
+          background-color: transparent;
+        }
       }
     }
 
@@ -268,9 +272,11 @@
       }
 
       &.combobox {
-        :global(.sui.listbox) {
-          gap: 4px;
-          padding: 8px 4px !important;
+        :global {
+          .sui.listbox {
+            gap: 4px;
+            padding: 8px 4px !important;
+          }
         }
       }
     }

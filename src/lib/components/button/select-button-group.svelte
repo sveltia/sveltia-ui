@@ -73,42 +73,44 @@
       outline-width: 0 !important;
     }
 
-    :global(button) {
-      margin: 0 !important;
-      border-radius: 0 !important;
-      color: var(--sui-primary-foreground-color);
+    :global {
+      button {
+        margin: 0 !important;
+        border-radius: 0 !important;
+        color: var(--sui-primary-foreground-color);
 
-      &:first-child {
-        border-top-left-radius: 4px !important;
-        border-bottom-left-radius: 4px !important;
+        &:first-child {
+          border-top-left-radius: 4px !important;
+          border-bottom-left-radius: 4px !important;
+        }
+
+        &:not(:first-child) {
+          border-left-width: 0;
+        }
+
+        &:last-child {
+          border-top-right-radius: 4px !important;
+          border-bottom-right-radius: 4px !important;
+        }
+
+        &[aria-checked='true'] {
+          color: var(--sui-highlight-foreground-color);
+          background-color: var(--sui-selected-background-color);
+        }
       }
 
-      &:not(:first-child) {
-        border-left-width: 0;
+      &[aria-invalid='true'] button {
+        border-color: var(--sui-error-border-color);
       }
 
-      &:last-child {
-        border-top-right-radius: 4px !important;
-        border-bottom-right-radius: 4px !important;
-      }
-    }
+      // Maintain the border opacity
+      &[aria-disabled='false'] {
+        button[aria-disabled='true'] {
+          filter: grayscale(0) opacity(1);
 
-    &[aria-invalid='true'] :global(button) {
-      border-color: var(--sui-error-border-color);
-    }
-
-    :global(button[aria-checked='true']) {
-      color: var(--sui-highlight-foreground-color);
-      background-color: var(--sui-selected-background-color);
-    }
-
-    // Maintain the border opacity
-    &[aria-disabled='false'] {
-      :global(button[aria-disabled='true']) {
-        filter: grayscale(0) opacity(1);
-
-        :global(*) {
-          filter: grayscale(1) opacity(0.35);
+          * {
+            filter: grayscale(1) opacity(0.35);
+          }
         }
       }
     }

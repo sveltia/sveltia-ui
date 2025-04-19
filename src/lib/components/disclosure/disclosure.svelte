@@ -87,17 +87,19 @@
 
 <style lang="scss">
   .disclosure {
-    :global(button) {
-      display: flex;
-      width: 100%;
-    }
+    :global {
+      button {
+        display: flex;
+        width: 100%;
 
-    :global(button .icon) {
-      transition: all 200ms;
-    }
+        .icon {
+          transition: all 200ms;
+        }
 
-    :global(button[aria-expanded='false'] .icon) {
-      transform: rotate(-90deg);
+        &[aria-expanded='false'] .icon {
+          transform: rotate(-90deg);
+        }
+      }
     }
   }
 

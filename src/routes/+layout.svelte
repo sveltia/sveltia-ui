@@ -217,14 +217,16 @@
     overflow-y: auto;
     padding: 32px;
 
-    & > :global(section) {
-      margin: 32px 0 0;
+    :global {
+      & > section {
+        margin: 32px 0 0;
 
-      :global(h4) {
-        margin: 8px 0;
-
-        & ~ :global(div) {
+        h4 {
           margin: 8px 0;
+
+          & ~ div {
+            margin: 8px 0;
+          }
         }
       }
     }

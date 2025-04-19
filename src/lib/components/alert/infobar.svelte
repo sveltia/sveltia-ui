@@ -101,12 +101,14 @@
     gap: var(--sui-infobar-message-gap, 6px);
     padding: var(--sui-infobar-message-padding, 0 8px);
 
-    :global(button) {
-      font-size: inherit !important;
-    }
+    :global {
+      button {
+        font-size: inherit !important;
+      }
 
-    :global(.icon) {
-      font-size: 16px; /* !hardcoded */
+      .icon {
+        font-size: 16px; /* !hardcoded */
+      }
     }
   }
 </style>

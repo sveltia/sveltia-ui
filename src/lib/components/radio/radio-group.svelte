@@ -93,16 +93,18 @@
       }
     }
 
-    &[aria-invalid='true'] :global(button) {
-      border-color: var(--sui-error-border-color);
-    }
+    :global {
+      &[aria-invalid='true'] button {
+        border-color: var(--sui-error-border-color);
 
-    &[aria-invalid='true'] :global(button[aria-checked='true']) {
-      border-color: var(--sui-error-border-color);
-    }
+        &[aria-checked='true'] {
+          border-color: var(--sui-error-border-color);
 
-    &[aria-invalid='true'] :global(button[aria-checked='true']::before) {
-      background-color: var(--sui-error-border-color);
+          &::before {
+            background-color: var(--sui-error-border-color);
+          }
+        }
+      }
     }
   }
 

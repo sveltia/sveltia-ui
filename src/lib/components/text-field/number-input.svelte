@@ -212,32 +212,34 @@
       min-width: 0;
     }
 
-    :global(:not(:first-child) input) {
-      border-top-left-radius: 0;
-      border-bottom-left-radius: 0;
-    }
+    :global {
+      :not(:first-child) input {
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+      }
 
-    :global(:not(:last-child) input) {
-      border-top-right-radius: 0;
-      border-bottom-right-radius: 0;
-    }
+      :not(:last-child) input {
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
+      }
 
-    // Maintain the border opacity
-    &:not(.disabled) {
-      :global(button[aria-disabled='true']) {
-        filter: grayscale(0) opacity(1);
+      // Maintain the border opacity
+      &:not(.disabled) {
+        button[aria-disabled='true'] {
+          filter: grayscale(0) opacity(1);
 
-        :global(*) {
-          filter: grayscale(1) opacity(0.35);
+          * {
+            filter: grayscale(1) opacity(0.35);
+          }
         }
       }
-    }
 
-    :global(.text-input) {
-      flex: auto;
-      margin: 0 !important;
-      width: 0; // = auto
-      min-width: 0 !important;
+      .text-input {
+        flex: auto;
+        margin: 0 !important;
+        width: 0; // = auto
+        min-width: 0 !important;
+      }
     }
   }
 
@@ -247,30 +249,32 @@
     width: 24px;
     height: var(--sui-textbox-height);
 
-    :global(button) {
-      flex: none;
-      margin: 0 !important;
-      border-width: 1px;
-      border-color: var(--sui-textbox-border-color);
-      width: 100%;
-      height: 50%;
+    :global {
+      button {
+        flex: none;
+        margin: 0 !important;
+        border-width: 1px;
+        border-color: var(--sui-textbox-border-color);
+        width: 100%;
+        height: 50%;
 
-      &:first-of-type {
-        border-top-right-radius: 0;
-        border-bottom-right-radius: 0;
-        border-bottom-left-radius: 0;
-        border-width: 1px 0 0 1px;
-      }
+        &:first-of-type {
+          border-top-right-radius: 0;
+          border-bottom-right-radius: 0;
+          border-bottom-left-radius: 0;
+          border-width: 1px 0 0 1px;
+        }
 
-      &:last-of-type {
-        border-top-left-radius: 0;
-        border-top-right-radius: 0;
-        border-bottom-right-radius: 0;
-        border-width: 0 0 1px 1px;
-      }
+        &:last-of-type {
+          border-top-left-radius: 0;
+          border-top-right-radius: 0;
+          border-bottom-right-radius: 0;
+          border-width: 0 0 1px 1px;
+        }
 
-      :global(.icon) {
-        font-size: 20px;
+        .icon {
+          font-size: 20px;
+        }
       }
     }
   }

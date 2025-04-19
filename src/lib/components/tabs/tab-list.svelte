@@ -136,10 +136,12 @@
       );
       padding: var(--sui-horizontal-tab-list-padding, var(--sui-tab-list-padding, 0 16px));
 
-      :global(button) {
-        width: var(--sui-horizontal-tab-width, var(--sui-tab-width, auto));
-        height: var(--sui-horizontal-tab-height, var(--sui-tab-height, 100%));
-        justify-content: var(--sui-horizontal-tab-justify-content, center);
+      :global {
+        button {
+          width: var(--sui-horizontal-tab-width, var(--sui-tab-width, auto));
+          height: var(--sui-horizontal-tab-height, var(--sui-tab-height, 100%));
+          justify-content: var(--sui-horizontal-tab-justify-content, center);
+        }
       }
 
       .indicator {
@@ -161,11 +163,13 @@
       padding: var(--sui-vertical-tab-list-padding, var(--sui-tab-list-padding, 8px 0));
       width: var(--sui-vertical-tab-list-width, auto);
 
-      :global(button) {
-        justify-content: var(--sui-vertical-tab-justify-content, flex-start);
-        padding-right: 32px;
-        width: var(--sui-vertical-tab-width, var(--sui-tab-width, 100%));
-        height: var(--sui-vertical-tab-height, var(--sui-tab-height, auto));
+      :global {
+        button {
+          justify-content: var(--sui-vertical-tab-justify-content, flex-start);
+          padding-right: 32px;
+          width: var(--sui-vertical-tab-width, var(--sui-tab-width, 100%));
+          height: var(--sui-vertical-tab-height, var(--sui-tab-height, auto));
+        }
       }
 
       .indicator {
@@ -176,18 +180,20 @@
       }
     }
 
-    :global(button) {
-      position: relative;
-      z-index: 1;
-      border-color: transparent;
-      margin: 0 !important;
-      border-radius: var(--sui-tab-border-radius, 0);
-      font-family: var(--sui-tab-font-family, var(--sui-control-font-family, inherit));
-      font-size: var(--sui-tab-font-size, var(--sui-control-font-size, inherit));
-      font-weight: var(
-        --sui-tab-font-weight,
-        var(--sui-control-font-weight, var(--sui-font-weight-normal, normal))
-      );
+    :global {
+      button {
+        position: relative;
+        z-index: 1;
+        border-color: transparent;
+        margin: 0 !important;
+        border-radius: var(--sui-tab-border-radius, 0);
+        font-family: var(--sui-tab-font-family, var(--sui-control-font-family, inherit));
+        font-size: var(--sui-tab-font-size, var(--sui-control-font-size, inherit));
+        font-weight: var(
+          --sui-tab-font-weight,
+          var(--sui-control-font-weight, var(--sui-font-weight-normal, normal))
+        );
+      }
     }
   }
 

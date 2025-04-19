@@ -37,14 +37,14 @@
     margin: var(--sui-focus-ring-width);
     width: calc(100% - var(--sui-focus-ring-width) * 2);
 
-    &:global(.data) {
+    &.data {
       border-collapse: collapse;
 
-      :global(.table-col-header),
-      :global(.table-row-header),
-      :global(.table-cell) {
-        border: 1px solid var(--sui-secondary-border-color);
-        padding: 8px 8px;
+      :global {
+        :is(.table-col-header, .table-row-header, .table-cell) {
+          border: 1px solid var(--sui-secondary-border-color);
+          padding: 8px 8px;
+        }
       }
     }
   }

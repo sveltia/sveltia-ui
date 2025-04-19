@@ -48,12 +48,7 @@
     z-index: 2;
   }
 
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
+  :is(h1, h2, h3, h4, h5, h6) {
     margin: 0;
     font-weight: var(--sui-font-weight-bold, bold);
     line-height: var(--sui-line-height-default);
@@ -92,33 +87,25 @@
     text-decoration: none;
     text-underline-offset: 2px;
 
-    &:hover,
-    &:focus,
-    &:active {
+    &:is(:hover, :focus, :active) {
       text-decoration: underline;
     }
 
-    :global(:root[data-underline-links="true"]) &,
-    :global(:host[data-underline-links="true"]) & {
+    :is(:root, :host)[data-underline-links="true"] & {
       text-decoration: underline;
     }
   }
 
-  p,
-  ul,
-  ol,
-  dl {
+  :is(p, ul, ol, dl) {
     margin: var(--sui-paragraph-margin) 0;
     line-height: var(--sui-line-height-comfortable);
   }
 
-  ul,
-  ol {
+  :is(ul, ol) {
     padding-inline: 2em;
   }
 
-  code,
-  pre {
+  :is(code, pre) {
     border-radius: 4px;
     background-color: var(--sui-code-background-color);
     font-family: var(--sui-font-family-monospace);
@@ -141,8 +128,7 @@
     border-collapse: collapse;
   }
 
-  th,
-  td {
+  :is(th, td) {
     border: 1px solid var(--sui-textbox-border-color);
     padding: 8px;
   }
@@ -153,30 +139,24 @@
     padding-inline-start: 12px;
   }
 
-  .disabled,
-  .readonly,
-  [aria-disabled="true"],
-  [aria-readonly="true"],
-  [inert]:not(body) {
+  :is(.disabled, .readonly, [aria-disabled="true"], [aria-readonly="true"], [inert]):not(body) {
     cursor: default;
     pointer-events: none;
     -webkit-user-select: none;
     user-select: none;
     filter: grayscale(1) opacity(0.35);
 
-    :global(*) {
+    * {
       filter: grayscale(0) opacity(1); // Maintain the opacity on child nodes
     }
   }
 
-  .disabled *,
-  .readonly *,
-  [aria-disabled="true"] *,
-  [aria-readonly="true"] *,
-  [inert] * {
-    cursor: default;
-    pointer-events: none;
-    -webkit-user-select: none;
-    user-select: none;
+  :is(.disabled, .readonly, [aria-disabled="true"], [aria-readonly="true"], [inert]) {
+    * {
+      cursor: default;
+      pointer-events: none;
+      -webkit-user-select: none;
+      user-select: none;
+    }
   }
 }

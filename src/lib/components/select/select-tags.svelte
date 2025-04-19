@@ -127,8 +127,10 @@
       border-radius: var(--sui-control-medium-border-radius);
       background-color: var(--sui-secondary-background-color);
 
-      :global(.icon) {
-        font-size: var(--sui-font-size-large);
+      :global {
+        .icon {
+          font-size: var(--sui-font-size-large);
+        }
       }
     }
   }

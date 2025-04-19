@@ -233,9 +233,11 @@
     &:not(.active) {
       pointer-events: none !important;
 
-      :global(*) {
-        transition-duration: 0ms !important;
-        pointer-events: none !important;
+      :global {
+        * {
+          transition-duration: 0ms !important;
+          pointer-events: none !important;
+        }
       }
     }
   }

@@ -97,8 +97,7 @@
     }
   }
 
-  textarea,
-  .clone {
+  :is(textarea, .clone) {
     grid-area: 1 / 1 / 2 / 2;
     display: block;
     margin: 0;
@@ -134,8 +133,7 @@
       );
     }
 
-    &:disabled,
-    &:read-only {
+    &:is(:disabled, :read-only) {
       background-color: var(--sui-disabled-background-color);
     }
   }

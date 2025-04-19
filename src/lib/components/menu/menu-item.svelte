@@ -156,50 +156,52 @@
   .menuitem {
     position: relative;
 
-    :global(button) {
-      display: flex;
-      gap: var(--sui-menuitem-gap, 4px);
-      align-items: var(--sui-menuitem-align-items, center);
-      border-radius: var(--sui-menuitem-border-radius, var(--sui-option-border-radius, 4px));
-      margin: 0 !important;
-      padding: var(--sui-menuitem-padding, 0 16px);
-      width: 100%;
-      min-width: var(--sui-menuitem-min-width, 160px);
-      height: var(--sui-menuitem-height, var(--sui-option-height));
-      color: var(--sui-menuitem-foreground-color, var(--sui-control-foreground-color, inherit));
-      background-color: var(--sui-menuitem-background-color, transparent);
-      font-size: var(--sui-menuitem-font-size, var(--sui-option-font-size));
-      font-weight: var(
-        --sui-menuitem-font-weight,
-        var(--sui-option-font-weight, var(--sui-font-weight-normal, normal))
-      );
-    }
+    :global {
+      button {
+        display: flex;
+        gap: var(--sui-menuitem-gap, 4px);
+        align-items: var(--sui-menuitem-align-items, center);
+        border-radius: var(--sui-menuitem-border-radius, var(--sui-option-border-radius, 4px));
+        margin: 0 !important;
+        padding: var(--sui-menuitem-padding, 0 16px);
+        width: 100%;
+        min-width: var(--sui-menuitem-min-width, 160px);
+        height: var(--sui-menuitem-height, var(--sui-option-height));
+        color: var(--sui-menuitem-foreground-color, var(--sui-control-foreground-color, inherit));
+        background-color: var(--sui-menuitem-background-color, transparent);
+        font-size: var(--sui-menuitem-font-size, var(--sui-option-font-size));
+        font-weight: var(
+          --sui-menuitem-font-weight,
+          var(--sui-option-font-weight, var(--sui-font-weight-normal, normal))
+        );
 
-    :global(button[aria-checked='true']) {
-      :global(.icon) {
-        color: var(--sui-primary-accent-color-text);
+        &[aria-checked='true'] {
+          .icon {
+            color: var(--sui-primary-accent-color-text);
+          }
+        }
+
+        &:hover {
+          color: var(--sui-highlight-foreground-color);
+          background-color: var(--sui-hover-background-color);
+        }
+
+        &:active {
+          background-color: var(--sui-active-background-color);
+        }
       }
-    }
 
-    :global(button:hover) {
-      color: var(--sui-highlight-foreground-color);
-      background-color: var(--sui-hover-background-color);
-    }
-
-    :global(button:active) {
-      background-color: var(--sui-active-background-color);
-    }
-
-    &:hover > :global([role='menu']) {
-      opacity: 1;
-    }
-
-    & > :global([role='menu']) {
-      position: absolute;
-      inset: 2px auto auto calc(100% + 4px);
-
-      &:hover {
+      &:hover > [role='menu'] {
         opacity: 1;
+      }
+
+      & > [role='menu'] {
+        position: absolute;
+        inset: 2px auto auto calc(100% + 4px);
+
+        &:hover {
+          opacity: 1;
+        }
       }
     }
   }

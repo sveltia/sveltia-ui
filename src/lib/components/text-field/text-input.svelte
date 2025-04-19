@@ -100,8 +100,7 @@
   }
 
   // https://stackoverflow.com/a/68240841
-  input:-webkit-autofill,
-  input:-webkit-autofill:focus {
+  input:is(:-webkit-autofill, :-webkit-autofill:focus) {
     transition:
       background-color 0s 600000s,
       color 0s 600000s;
@@ -143,8 +142,7 @@
       border-color: var(--sui-textbox-border-color) !important;
     }
 
-    &:disabled,
-    &:read-only {
+    &:is(:disabled, :read-only) {
       background-color: var(--sui-disabled-background-color);
     }
 
@@ -152,20 +150,22 @@
       border-color: var(--sui-error-border-color);
     }
 
-    ~ :global(button) {
-      flex: none;
-      margin-left: -1px;
-      border-width: 1px;
-      border-color: var(--sui-textbox-border-color);
-      height: var(--sui-textbox-height);
-      aspect-ratio: 1 / 1;
+    :global {
+      & ~ button {
+        flex: none;
+        margin-left: -1px;
+        border-width: 1px;
+        border-color: var(--sui-textbox-border-color);
+        height: var(--sui-textbox-height);
+        aspect-ratio: 1 / 1;
 
-      &:last-child {
-        border-radius: 0 4px 4px 0;
-      }
+        &:last-child {
+          border-radius: 0 4px 4px 0;
+        }
 
-      :global(.icon) {
-        font-size: var(--sui-font-size-xx-large);
+        .icon {
+          font-size: var(--sui-font-size-xx-large);
+        }
       }
     }
   }
@@ -191,8 +191,7 @@
     opacity: 0;
   }
 
-  input::placeholder,
-  .label {
+  :is(input::placeholder, .label) {
     color: var(--sui-textbox-placeholder-foreground-color, var(--sui-textbox-foreground-color));
     opacity: var(--sui-textbox-placeholder-opacity, 0.5);
     font-family: var(--sui-textbox-placeholder-font-family, var(--sui-textbox-font-family));
