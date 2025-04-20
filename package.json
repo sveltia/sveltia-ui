@@ -38,7 +38,7 @@
     "@lexical/selection": "^0.30.0",
     "@lexical/table": "^0.30.0",
     "@lexical/utils": "^0.30.0",
-    "@sveltia/utils": "^0.7.1",
+    "@sveltia/utils": "^0.7.3",
     "lexical": "^0.30.0",
     "prismjs": "^1.30.0"
   },
