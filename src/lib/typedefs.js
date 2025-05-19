@@ -79,6 +79,8 @@
  * @property {boolean} [okDisabled] Whether to disable the OK button.
  * @property {string} [cancelLabel] Text label displayed on the Cancel button.
  * @property {boolean} [cancelDisabled] Whether to disable the Cancel button.
+ * @property {boolean} [focusInput] Whether to automatically focus the first input field or primary
+ * action button. Default: `true`. If `false`, the `<dialog>` gets focused.
  * @property {boolean} [lightDismiss] Whether to close the modal when the backdrop (outside of the
  * modal) is clicked.
  * @property {string} [value] Value entered on the textbox.

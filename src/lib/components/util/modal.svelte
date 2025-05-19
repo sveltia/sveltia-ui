@@ -37,6 +37,13 @@
   } = $props();
 
   /**
+   * Focus the `<dialog>` element.
+   */
+  export const focus = () => {
+    dialog?.focus();
+  };
+
+  /**
    * Close the modal.
    * @param {string} returnValue Return value to be used for `<dialog>`.
    */

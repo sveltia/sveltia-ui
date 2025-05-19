@@ -34,6 +34,7 @@
     okDisabled = false,
     cancelLabel = '',
     cancelDisabled = false,
+    focusInput = true,
     children,
     header,
     headerExtra,
@@ -52,7 +53,7 @@
   const id = $props.id();
   /**
    * A reference to the modal component.
-   * @type {any}
+   * @type {Modal | undefined}
    */
   let modal = $state();
   /**
@@ -64,10 +65,15 @@
     if (open && content) {
       (async () => {
         await sleep(50);
-        /** @type {HTMLInputElement | HTMLButtonElement} */ (
-          content?.querySelector('input, button.primary')
-        )?.focus();
-        /** @type {HTMLInputElement} */ (content?.querySelector('input'))?.select();
+
+        if (focusInput) {
+          /** @type {HTMLInputElement | HTMLButtonElement} */ (
+            content?.querySelector('input, button.primary')
+          )?.focus();
+          /** @type {HTMLInputElement} */ (content?.querySelector('input'))?.select();
+        } else {
+          modal?.focus();
+        }
       })();
     }
   });
