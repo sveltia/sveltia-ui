@@ -85,7 +85,7 @@
       }
 
       h2 {
-        flex: none;
+        flex: auto;
         display: flex;
         align-items: center;
         gap: 8px;
