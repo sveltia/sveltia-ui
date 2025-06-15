@@ -10,8 +10,10 @@
  * @property {string} [class] The `class` attribute on the `<button>` element.
  * @property {'button' | 'submit' | 'reset'} [type] The `type` attribute on the `<button>` element.
  * @property {string} [role] The `role` attribute on the `<button>` element.
- * @property {string} [name] The `name` attribute on the `<button>` element.
- * @property {string} [value] The `value` attribute on the `<button>` element.
+ * @property {string} [name] The `data-name` attribute on the `<button>` element.
+ * @property {any} [value] The `data-value` attribute on the `<button>` element.
+ * @property {string} [valueType] Data type of the `value`. Typically `string`, `number` or
+ * `boolean`. Default: auto detect.
  * @property {boolean} [hidden] Whether to hide the widget. An alias of the `aria-hidden` attribute.
  * @property {boolean} [disabled] Whether to disable the widget. An alias of the `aria-disabled`
  * attribute.
@@ -126,7 +128,7 @@
  * `aria-required` attribute.
  * @property {boolean} [invalid] Whether to mark the widget invalid. An alias of the `aria-invalid`
  * attribute.
- * @property {string} [value] Selected option’s value.
+ * @property {any} [value] Selected option’s value.
  * @property {boolean} [editable] Whether to make the `combobox` editable.
  * @property {PopupPosition} [position] Where to show the dropdown menu.
  * @property {number} [filterThreshold] Number of items to start showing the filter. Default: `5`.
@@ -281,6 +283,15 @@
  * Lexical nodes.
  * @property {boolean} showConverterError Whether to show a converter error in the UI.
  * @property {() => Promise<void>} convertMarkdown Function to trigger the Lexical converter.
+ */
+
+/**
+ * @typedef {object} SelectedItemDetail
+ * @property {HTMLElement} target Element to get the detail from.
+ * @property {string} type Data type of the `value`. Typically `string`, `number` or `boolean`.
+ * @property {string | undefined} name The `data-name` attribute on the element.
+ * @property {string | undefined} label The `data-label` attribute on the element.
+ * @property {any} value The `data-value` attribute on the element. Casted to the `valueType`.
  */
 
 export {};

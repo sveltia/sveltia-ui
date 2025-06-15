@@ -11,7 +11,7 @@
 
   /**
    * @typedef {object} Props
-   * @property {{ label: string, value: string, searchValue?: string }[]} options Available options.
+   * @property {{ label: string, value: any, searchValue?: string }[]} options Available options.
    * @property {string[]} [values] Selected option values.
    * @property {number} [max] Maximum number of selectable options.
    * @property {string} [class] The `class` attribute on the wrapper element.

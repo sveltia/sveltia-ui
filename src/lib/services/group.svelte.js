@@ -4,6 +4,7 @@
 
 import { generateElementId } from '@sveltia/utils/element';
 import { sleep } from '@sveltia/utils/misc';
+import { getSelectedItemDetail } from './select.svelte';
 
 /**
  * @type {{ [role: string]: {
@@ -328,12 +329,7 @@ class Group {
     });
 
     this.parent.dispatchEvent(
-      new CustomEvent('Change', {
-        detail: {
-          value: /** @type {any} */ (newTarget).value,
-          name: /** @type {any} */ (newTarget).name,
-        },
-      }),
+      new CustomEvent('Change', { detail: getSelectedItemDetail(newTarget) }),
     );
   }
 

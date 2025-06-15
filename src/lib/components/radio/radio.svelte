@@ -20,8 +20,10 @@
    * attribute.
    * @property {boolean} [checked] Whether to check the widget. An alias of the `aria-checked`
    * attribute.
-   * @property {string} [name] The `name` attribute on the `<button>` element.
-   * @property {string} [value] The `value` attribute on the `<button>` element.
+   * @property {string} [name] The `data-name` attribute on the `<button>` element.
+   * @property {any} [value] The `data-value` attribute on the `<button>` element.
+   * @property {string} [valueType] Data type of the `value`. Typically `string`, `number` or
+   * `boolean`. Default: auto detect.
    * @property {string} [label] Text label displayed next to the checkbox.
    * @property {Snippet} [children] Primary slot content.
    * @property {Snippet} [default] Default slot content.
@@ -40,6 +42,7 @@
     disabled = false,
     name = undefined,
     value = undefined,
+    valueType = undefined,
     label = undefined,
     children,
     onChange,
@@ -77,6 +80,7 @@
     {disabled}
     {name}
     {value}
+    {valueType}
     aria-checked={checked}
     aria-labelledby="{id}-label"
     onclick={(event) => {

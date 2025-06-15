@@ -24,6 +24,7 @@
     role = 'button',
     name = undefined,
     value = undefined,
+    valueType = typeof value,
     hidden = false,
     disabled = false,
     readonly = false,
@@ -64,6 +65,10 @@
   aria-disabled={disabled}
   aria-readonly={readonly}
   aria-pressed={pressed}
+  data-type={valueType}
+  data-name={name}
+  data-label={label}
+  data-value={value}
   use:activateKeyShortcuts={keyShortcuts}
 >
   {@render startIcon?.()}

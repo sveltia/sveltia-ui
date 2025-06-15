@@ -57,8 +57,6 @@
     {value}
     {hidden}
     {disabled}
-    data-type={typeof value}
-    data-label={label}
     data-search-value={searchValue}
     onChange={(event) => {
       selected = event.detail.selected;

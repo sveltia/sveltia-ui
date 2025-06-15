@@ -7,6 +7,7 @@
 -->
 <script>
   import { _ } from 'svelte-i18n';
+  import { getSelectedItemDetail } from '../../services/select.svelte';
   import Button from '../button/button.svelte';
   import Icon from '../icon/icon.svelte';
   import Listbox from '../listbox/listbox.svelte';
@@ -69,11 +70,11 @@
     const selected = popupContent?.querySelector(selectedSelector);
 
     const target = /** @type {HTMLButtonElement} */ (
-      popupContent?.querySelector(`[role="option"][value="${value}"]`)
+      popupContent?.querySelector(`[role="option"][data-value="${value}"]`)
     );
 
     if (target) {
-      label = target.dataset.label || target.textContent || target.value;
+      label = target.dataset.label || target.dataset.value || target.textContent || '';
 
       if (selected !== target) {
         selected?.setAttribute('aria-selected', 'false');
@@ -87,19 +88,12 @@
    * @param {HTMLButtonElement} target Selected option.
    */
   const _onSelect = (target) => {
-    // @todo support more types
-    // @ts-ignore
-    value = target.dataset.type === 'number' ? Number(target.value) : target.value;
+    const detail = getSelectedItemDetail(target);
+
+    value = detail.value;
+
     _onChange();
-    onChange?.(
-      new CustomEvent('Change', {
-        detail: {
-          target: inputElement,
-          name: target.name,
-          value,
-        },
-      }),
-    );
+    onChange?.(new CustomEvent('Change', { detail }));
   };
 
   $effect(() => {
@@ -150,7 +144,7 @@
       bind:element={inputElement}
       role="combobox"
       {id}
-      {value}
+      value={value === undefined ? '' : String(value)}
       {hidden}
       {disabled}
       {readonly}
