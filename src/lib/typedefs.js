@@ -78,8 +78,14 @@
  * @property {boolean} [showOk] Whether to show the OK button on the footer.
  * @property {boolean} [showCancel] Whether to show the Cancel button on the footer.
  * @property {string} [okLabel] Text label displayed on the OK button.
+ * @property {string} [okShortcuts] Keyboard shortcuts for the OK button. An alias of the
+ * `aria-keyshortcuts` attribute. Accepts the special `Accel` key, which will be replaced with
+ * `Control` or `Meta` depending on the user’s operating system.
  * @property {boolean} [okDisabled] Whether to disable the OK button.
  * @property {string} [cancelLabel] Text label displayed on the Cancel button.
+ * @property {string} [cancelShortcuts] Keyboard shortcuts for the Cancel button. An alias of the
+ * `aria-keyshortcuts` attribute. Accepts the special `Accel` key, which will be replaced with
+ * `Control` or `Meta` depending on the user’s operating system.
  * @property {boolean} [cancelDisabled] Whether to disable the Cancel button.
  * @property {boolean} [focusInput] Whether to automatically focus the first input field or primary
  * action button. Default: `true`. If `false`, the `<dialog>` gets focused.

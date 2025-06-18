@@ -31,8 +31,10 @@
     showOk = true,
     showCancel = true,
     okLabel = '',
+    okShortcuts = undefined,
     okDisabled = false,
     cancelLabel = '',
+    cancelShortcuts = undefined,
     cancelDisabled = false,
     focusInput = true,
     children,
@@ -138,6 +140,7 @@
             <Button
               variant="primary"
               label={okLabel || $_('_sui.ok')}
+              keyShortcuts={okShortcuts}
               disabled={okDisabled}
               onclick={() => {
                 modal?.close('ok');
@@ -148,6 +151,7 @@
             <Button
               variant="secondary"
               label={cancelLabel || $_('_sui.cancel')}
+              keyShortcuts={cancelShortcuts}
               disabled={cancelDisabled}
               onclick={() => {
                 modal?.close('cancel');
