@@ -219,7 +219,9 @@ const onEditorUpdate = (editor) => {
         value: convertToMarkdownString(
           // Use underscores for italic text in Markdown instead of asterisks
           allTransformers.filter((/** @type {any} */ { tag }) => tag !== '*'),
-        ),
+        ) // Remove unnecessary backslashes for underscores
+          // @see https://github.com/sveltia/sveltia-cms/issues/430
+          .replace(/\\_/g, '_'),
         selection: getSelectionTypes(),
       },
     }),
