@@ -46,7 +46,7 @@
     "svelte": "^5.0.0"
   },
   "devDependencies": {
-    "@playwright/test": "^1.53.0",
+    "@playwright/test": "^1.53.1",
     "@sveltejs/adapter-auto": "^6.0.1",
     "@sveltejs/kit": "^2.21.5",
     "@sveltejs/package": "^2.3.11",
@@ -63,11 +63,11 @@
     "prettier": "^3.5.3",
     "prettier-plugin-svelte": "^3.4.0",
     "sass": "^1.89.2",
-    "stylelint": "^16.20.0",
+    "stylelint": "^16.21.0",
     "stylelint-config-recommended-scss": "^15.0.1",
     "stylelint-scss": "^6.12.1",
-    "svelte": "5.34.5",
-    "svelte-check": "^4.2.1",
+    "svelte": "5.34.7",
+    "svelte-check": "^4.2.2",
     "svelte-i18n": "^4.0.1",
     "svelte-preprocess": "^6.0.3",
     "tslib": "^2.8.1",
