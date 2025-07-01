@@ -301,6 +301,7 @@
         margin: 0 !important;
         border-top-left-radius: 0;
         border-bottom-left-radius: 0;
+        background-color: transparent !important;
 
         &[tabindex='-1'] {
           pointer-events: none;
