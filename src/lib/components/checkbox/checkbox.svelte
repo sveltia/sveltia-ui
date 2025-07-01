@@ -33,7 +33,7 @@
    */
   let {
     /* eslint-disable prefer-const */
-    checked = $bindable(false),
+    checked = $bindable(),
     class: className,
     name = undefined,
     value = undefined,
