@@ -108,6 +108,9 @@
 
     contentType = anchor?.getAttribute('aria-haspopup') ?? undefined;
     initialized = true;
+
+    // Work around Svelte 5.35.0 bug where the style is not reactive
+    void $style;
   };
 
   $effect(() => {
