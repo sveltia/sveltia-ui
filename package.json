@@ -28,18 +28,18 @@
     "test:unit": "vitest"
   },
   "dependencies": {
-    "@lexical/code": "^0.32.1",
-    "@lexical/dragon": "^0.32.1",
-    "@lexical/history": "^0.32.1",
-    "@lexical/link": "^0.32.1",
-    "@lexical/list": "^0.32.1",
-    "@lexical/markdown": "^0.32.1",
-    "@lexical/rich-text": "^0.32.1",
-    "@lexical/selection": "^0.32.1",
-    "@lexical/table": "^0.32.1",
-    "@lexical/utils": "^0.32.1",
+    "@lexical/code": "^0.33.0",
+    "@lexical/dragon": "^0.33.0",
+    "@lexical/history": "^0.33.0",
+    "@lexical/link": "^0.33.0",
+    "@lexical/list": "^0.33.0",
+    "@lexical/markdown": "^0.33.0",
+    "@lexical/rich-text": "^0.33.0",
+    "@lexical/selection": "^0.33.0",
+    "@lexical/table": "^0.33.0",
+    "@lexical/utils": "^0.33.0",
     "@sveltia/utils": "^0.8.0",
-    "lexical": "^0.32.1",
+    "lexical": "^0.33.0",
     "prismjs": "^1.30.0"
   },
   "peerDependencies": {
@@ -71,7 +71,7 @@
     "svelte-i18n": "^4.0.1",
     "svelte-preprocess": "^6.0.3",
     "tslib": "^2.8.1",
-    "vite": "^7.0.1",
+    "vite": "^7.0.2",
     "vitest": "^3.2.4"
   },
   "exports": {
