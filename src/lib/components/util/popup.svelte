@@ -81,12 +81,12 @@
    * Style to be applied to the content.
    * @type {Writable<Record<string, any>>}
    */
-  let style = writable({
+  let style = $state(writable({
     inset: undefined,
     zIndex: undefined,
     width: undefined,
     height: undefined,
-  });
+  }));
 
   /**
    * @type {{ style: Writable<Record<string, any>>, open: Writable<boolean>, checkPosition:
@@ -108,9 +108,6 @@
 
     contentType = anchor?.getAttribute('aria-haspopup') ?? undefined;
     initialized = true;
-
-    // Work around Svelte 5.35.0 bug where the style is not reactive
-    void $style;
   };
 
   $effect(() => {
