@@ -81,12 +81,14 @@
    * Style to be applied to the content.
    * @type {Writable<Record<string, any>>}
    */
-  let style = $state(writable({
-    inset: undefined,
-    zIndex: undefined,
-    width: undefined,
-    height: undefined,
-  }));
+  let style = $state(
+    writable({
+      inset: undefined,
+      zIndex: undefined,
+      width: undefined,
+      height: undefined,
+    }),
+  );
 
   /**
    * @type {{ style: Writable<Record<string, any>>, open: Writable<boolean>, checkPosition:
