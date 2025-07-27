@@ -413,14 +413,9 @@ export const convertMarkdownToLexical = async (editor, value) => {
  * @param {LexicalEditor} editor Editor instance.
  * @returns {Promise<void>} Nothing.
  */
-export const focusEditor = async (editor) => {
-  await sleep(100);
-  editor.getRootElement()?.focus();
-
-  return new Promise((resolve) => {
-    editor.focus(async () => {
-      await sleep(100);
+export const focusEditor = async (editor) =>
+  new Promise((resolve) => {
+    editor.focus(() => {
       resolve(undefined);
     });
   });
-};
