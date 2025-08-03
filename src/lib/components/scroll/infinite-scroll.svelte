@@ -11,8 +11,9 @@
    * @typedef {object} Props
    * @property {any[]} items Item list.
    * @property {string} itemKey Item key used for the `each` loop.
-   * @property {number} [itemChunkSize] Number of items to be loaded at once.
-   * @property {Snippet<[any]>} renderItem Snippet to render each item.
+   * @property {number} [itemChunkSize] Number of items to be loaded at once. Defaults to 25.
+   * @property {Snippet<[any, number]>} renderItem Snippet to render each item. The snippet receives
+   * the item and its index as parameters.
    */
 
   /** @type {Props} */
@@ -50,8 +51,8 @@
   });
 </script>
 
-{#each items.slice(0, loadedItemSize) as item (item[itemKey])}
-  {@render renderItem(item)}
+{#each items.slice(0, loadedItemSize) as item, index (item[itemKey] ?? index)}
+  {@render renderItem(item, index)}
 {/each}
 
 {#if loading}
