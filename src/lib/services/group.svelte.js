@@ -7,6 +7,26 @@ import { sleep } from '@sveltia/utils/misc';
 import { getSelectedItemDetail } from './select.svelte';
 
 /**
+ * Normalize the given string for search value comparison. Since `transliterate` is slow, we only
+ * apply basic normalization.
+ * @param {string} value Original value.
+ * @returns {string} Normalized value.
+ * @todo Move this to @sveltia/utils.
+ */
+const normalize = (value) => {
+  value = value.trim();
+
+  if (!value) {
+    return '';
+  }
+
+  return value
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+    .toLocaleLowerCase();
+};
+
+/**
  * @type {{ [role: string]: {
  * orientation: 'vertical' | 'horizontal',
  * childRoles: string[],
@@ -464,18 +484,18 @@ class Group {
    * @param {{ searchTerms: string }} params Updated params.
    */
   onUpdate({ searchTerms }) {
-    const terms = searchTerms.trim().toLocaleLowerCase();
+    const terms = normalize(searchTerms);
     const _terms = terms ? terms.split(/\s+/) : [];
 
     const matched = this.allMembers
       .map((member) => {
-        const searchValue =
-          (
-            member.dataset.searchValue ??
+        const searchValue = normalize(
+          member.dataset.searchValue ??
             member.dataset.label ??
             member.querySelector('.label')?.textContent ??
-            member.textContent
-          )?.toLocaleLowerCase() ?? '';
+            member.textContent ??
+            '',
+        );
 
         const hidden = !_terms.every((term) => searchValue.includes(term));
 
