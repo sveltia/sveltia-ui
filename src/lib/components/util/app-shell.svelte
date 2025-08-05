@@ -93,13 +93,24 @@
   ondragover={(event) => event.preventDefault()}
   ondrop={(event) => event.preventDefault()}
   oncontextmenu={(event) => {
-    // Enable the native context menu only in the developer mode or on text fields
-    if (
-      !document.documentElement.matches('[data-env="dev"]') &&
-      !(/** @type {HTMLElement} */ (event.target)?.matches('input[type="text"], textarea'))
-    ) {
-      event.preventDefault();
+    // Allow context menu in developer mode
+    if (document.documentElement.matches('[data-env="dev"]')) {
+      return;
     }
+
+    // eslint-disable-next-line prefer-destructuring
+    const target = /** @type {HTMLElement} */ (event.target);
+
+    // Allow context menu on text inputs and contentEditable elements
+    if (
+      document.documentElement.matches('[data-env="dev"]') ||
+      (target?.matches('input, textarea') && 'maxLength' in target) ||
+      /** @type {HTMLElement} */ (target?.closest('[role="textbox"]'))?.contentEditable === 'true'
+    ) {
+      return;
+    }
+
+    event.preventDefault();
   }}
 >
   {@render children?.()}
