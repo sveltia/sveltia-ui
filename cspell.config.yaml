@@ -31,6 +31,7 @@ words:
   - pnpm
   - postcss
   - prismjs
+  - Shiki
   - singleline
   - stylelint
   - Sveltia
