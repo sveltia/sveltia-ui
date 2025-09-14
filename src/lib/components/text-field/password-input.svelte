@@ -29,6 +29,7 @@
     /* eslint-disable prefer-const */
     value = $bindable(),
     flex = false,
+    monospace = true,
     class: className,
     hidden = false,
     disabled = false,
@@ -71,6 +72,7 @@
     type="password"
     spellcheck="false"
     {flex}
+    {monospace}
     {hidden}
     {disabled}
     {readonly}

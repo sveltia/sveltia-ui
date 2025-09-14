@@ -9,7 +9,6 @@
   import TruncatedText from '../typography/truncated-text.svelte';
 
   /**
-   * @import { Snippet } from 'svelte';
    * @import { CommonEventHandlers, InputEventHandlers, TextInputProps } from '$lib/typedefs';
    */
 
@@ -31,6 +30,7 @@
     showInlineLabel = false,
     inputmode = 'text',
     flex = false,
+    monospace = false,
     class: className,
     hidden = false,
     disabled = false,
@@ -50,6 +50,7 @@
   role="none"
   class="sui text-input {className}"
   class:flex
+  class:monospace
   class:disabled
   class:readonly
   {hidden}
@@ -96,6 +97,10 @@
       width: -webkit-fill-available;
       width: stretch;
       min-width: 0;
+    }
+
+    &.monospace {
+      --sui-textbox-font-family: var(--sui-font-family-monospace, monospace);
     }
   }
 

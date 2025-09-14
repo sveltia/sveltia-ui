@@ -158,6 +158,7 @@
  * @property {'text' | 'decimal' | 'numeric' | 'tel' | 'search' | 'email' | 'url'} [inputmode] The
  * `inputmode` attribute on the `<input>`.
  * @property {boolean} [flex] Make the text input container flexible.
+ * @property {boolean} [monospace] Whether to use a monospace font for the input text.
  * @property {string} [class] The `class` attribute on the wrapper element.
  * @property {boolean} [hidden] Whether to hide the widget.
  * @property {boolean} [disabled] Whether to disable the widget. An alias of the `aria-disabled`

@@ -15,6 +15,15 @@
 </section>
 
 <section>
+  <h3>Monospace</h3>
+  <Example>
+    <div role="none">
+      <TextInput monospace />
+    </div>
+  </Example>
+</section>
+
+<section>
   <h3>Password</h3>
   <Example>
     <div role="none">
