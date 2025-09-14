@@ -1,4 +1,4 @@
-import { addMessages, init } from 'svelte-i18n';
+import { addMessages, locale as appLocale, init } from 'svelte-i18n';
 
 /**
  * Load strings and initialize the locales.
@@ -24,3 +24,24 @@ export const initLocales = ({ fallbackLocale = 'en', initialLocale = 'en' } = {}
     initialLocale,
   });
 };
+
+/**
+ * List of RTL locales: Arabic, Persian, Hebrew, Urdu.
+ */
+const RTL_LOCALES = ['ar', 'fa', 'he', 'ur'];
+
+/**
+ * Get the text direction of the given locale.
+ * @param {string | null | undefined} locale Locale code.
+ * @returns {'rtl' | 'ltr'} Text direction.
+ */
+const getDirection = (locale) =>
+  locale && RTL_LOCALES.includes(locale.split('-')[0]) ? 'rtl' : 'ltr';
+
+if (!import.meta.env.SSR) {
+  // Set the `dir` attribute on the HTML element based on the current locale.
+  // @todo Move this to Sveltia UI and then Sveltia I18N
+  appLocale.subscribe((value) => {
+    document.documentElement.dir = getDirection(value);
+  });
+}
