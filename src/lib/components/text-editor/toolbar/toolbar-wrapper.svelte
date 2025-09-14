@@ -20,7 +20,7 @@
   let {
     /* eslint-disable prefer-const */
     code = $bindable(''),
-    lang = $bindable(''),
+    lang = $bindable('plain'),
     disabled = false,
     children,
     ...restProps

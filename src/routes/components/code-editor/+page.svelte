@@ -18,7 +18,7 @@
   <h3>Language Switcher + Default Language</h3>
   <Example>
     <div role="none">
-      <CodeEditor showLanguageSwitcher={true} defaultLanguage="javascript" />
+      <CodeEditor showLanguageSwitcher={true} lang="javascript" />
     </div>
   </Example>
 </section>
@@ -32,7 +32,7 @@
   </Example>
   <Example>
     <div role="none">
-      <CodeEditor invalid showLanguageSwitcher={true} defaultLanguage="javascript" />
+      <CodeEditor invalid showLanguageSwitcher={true} lang="javascript" />
     </div>
   </Example>
 </section>
@@ -46,7 +46,7 @@
   </Example>
   <Example>
     <div role="none">
-      <CodeEditor disabled showLanguageSwitcher={true} defaultLanguage="javascript" />
+      <CodeEditor disabled showLanguageSwitcher={true} lang="javascript" />
     </div>
   </Example>
 </section>
@@ -60,7 +60,7 @@
   </Example>
   <Example>
     <div role="none">
-      <CodeEditor readonly showLanguageSwitcher={true} defaultLanguage="javascript" />
+      <CodeEditor readonly showLanguageSwitcher={true} lang="javascript" />
     </div>
   </Example>
 </section>

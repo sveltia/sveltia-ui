@@ -46,7 +46,7 @@
   /** @type {TextEditorStore} */
   const editorStore = getContext('editorStore');
 
-  let selectedLanguage = $state('');
+  let selectedLanguage = $state('plain');
 
   $effect(() => {
     void editorStore.selection.blockNodeKey;
@@ -57,7 +57,7 @@
         : getNodeByKey(/** @type {string} */ (editorStore.selection.blockNodeKey));
 
       if (isCodeNode(node)) {
-        selectedLanguage = node.getLanguage() ?? editorStore.config.defaultLanguage ?? '';
+        selectedLanguage = node.getLanguage() ?? editorStore.config.defaultLanguage ?? 'plain';
       }
     });
   });
@@ -89,7 +89,7 @@
     }
   }}
 >
-  <Option label={$_('_sui.text_editor.plain_text')} value="" />
+  <Option label={$_('_sui.text_editor.plain_text')} value="plain" />
   {#each codeLanguages as { key, label, aliases } (key)}
     <Option
       {label}

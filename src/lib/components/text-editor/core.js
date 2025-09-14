@@ -1,6 +1,7 @@
 import {
   CodeHighlightNode,
   CodeNode,
+  PrismTokenizer,
   $createCodeNode as createCodeNode,
   $isCodeHighlightNode as isCodeHighlightNode,
   $isCodeNode as isCodeNode,
@@ -233,7 +234,11 @@ const onEditorUpdate = (editor) => {
  * @param {TextEditorConfig} config Editor configuration.
  * @returns {LexicalEditor} Editor instance.
  */
-export const initEditor = ({ components = [], isCodeEditor = false, defaultLanguage = '' }) => {
+export const initEditor = ({
+  components = [],
+  isCodeEditor = false,
+  defaultLanguage = 'plain',
+}) => {
   components.forEach(({ node, transformer }) => {
     /** @type {any[]} */ (editorConfig.nodes).unshift(node);
     allTransformers.unshift(transformer);
@@ -250,6 +255,7 @@ export const initEditor = ({ components = [], isCodeEditor = false, defaultLangu
     // eslint-disable-next-line jsdoc/require-jsdoc
     tokenize: (code, lang = 'plain') =>
       window.Prism.tokenize(code, window.Prism.languages[lang] ?? window.Prism.languages.plain),
+    $tokenize: PrismTokenizer.$tokenize,
   });
 
   editor.registerCommand(
@@ -391,7 +397,7 @@ export const loadCodeHighlighter = async (lang) => {
 export const convertMarkdownToLexical = async (editor, value) => {
   // Load Prism language support on demand; the `loadLanguages` Prism utility method cannot be used
   await Promise.all(
-    [...value.matchAll(/^```(?<lang>.+?)\n/gm)].map(async ({ groups: { lang } = {} }) =>
+    [...value.matchAll(/^```(?<lang>.+?)\n/gm)].map(async ({ groups: { lang = 'plain' } = {} }) =>
       loadCodeHighlighter(lang),
     ),
   );

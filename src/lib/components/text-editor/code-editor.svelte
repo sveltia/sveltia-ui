@@ -40,7 +40,7 @@
   let {
     /* eslint-disable prefer-const */
     code = $bindable(''),
-    lang = $bindable(''),
+    lang = $bindable('plain'),
     showLanguageSwitcher = false,
     flex = false,
     hidden = false,
@@ -85,7 +85,7 @@
     void editorStore.inputValue;
 
     untrack(() => {
-      const { lang: _lang = '', code: _code = '' } =
+      const { lang: _lang = 'plain', code: _code = '' } =
         editorStore.inputValue.match(/^```(?<lang>\w+?)?\n(?:(?<code>.*)\n)?```/s)?.groups ?? {};
 
       if (lang !== _lang) {
