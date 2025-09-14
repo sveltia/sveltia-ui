@@ -6,3 +6,5 @@ reject:
   # need to investigate an infinite loop and migrate to Shiki
   - lexical
   - "@lexical/*"
+  # https://github.com/gajus/eslint-plugin-jsdoc/issues/1478
+  - eslint-plugin-jsdoc
