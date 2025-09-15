@@ -52,7 +52,7 @@ import {
   $isRangeSelection as isRangeSelection,
 } from 'lexical';
 import prismComponents from 'prismjs/components';
-import { blockButtonTypes, textFormatButtonTypes } from '.';
+import { BLOCK_BUTTON_TYPES, TEXT_FORMAT_BUTTON_TYPES } from './constants';
 import { TABLE } from './transformers/table';
 
 /**
@@ -155,7 +155,7 @@ const getSelectionTypes = () => {
   /** @type {ElementNode | null} */
   let parent = null;
   /** @type {TextEditorInlineType[]} */
-  const inlineTypes = textFormatButtonTypes.filter((type) => selection.hasFormat(type));
+  const inlineTypes = TEXT_FORMAT_BUTTON_TYPES.filter((type) => selection.hasFormat(type));
 
   if (anchor.getType() !== 'root') {
     parent = anchor instanceof ElementNode ? anchor : getNearestNodeOfType(anchor, ElementNode);
@@ -194,7 +194,7 @@ const getSelectionTypes = () => {
 
       const type = parent.getType();
 
-      if (blockButtonTypes.includes(/** @type {any} */ (type))) {
+      if (BLOCK_BUTTON_TYPES.includes(/** @type {any} */ (type))) {
         return type;
       }
 

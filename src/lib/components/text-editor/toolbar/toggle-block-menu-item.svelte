@@ -12,9 +12,9 @@
   } from 'lexical';
   import { getContext } from 'svelte';
   import { _ } from 'svelte-i18n';
-  import { availableButtons } from '..';
   import Icon from '../../icon/icon.svelte';
   import MenuItemCheckbox from '../../menu/menu-item-checkbox.svelte';
+  import { AVAILABLE_BUTTONS } from '../constants';
   import { focusEditor } from '../core';
 
   /**
@@ -90,7 +90,7 @@
 
 {#key selectionTypeMatches}
   <MenuItemCheckbox
-    label={$_(`_sui.text_editor.${availableButtons[type].labelKey}`)}
+    label={$_(`_sui.text_editor.${AVAILABLE_BUTTONS[type].labelKey}`)}
     checked={selectionTypeMatches}
     onclick={() => {
       if (!selectionTypeMatches) {
@@ -99,7 +99,7 @@
     }}
   >
     {#snippet startIcon()}
-      <Icon name={availableButtons[type].icon} />
+      <Icon name={AVAILABLE_BUTTONS[type].icon} />
     {/snippet}
   </MenuItemCheckbox>
 {/key}

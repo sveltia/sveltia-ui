@@ -5,10 +5,10 @@
 <script>
   import { setContext, untrack } from 'svelte';
   import { _ } from 'svelte-i18n';
-  import { blockButtonTypes, inlineButtonTypes } from '.';
   import Alert from '../alert/alert.svelte';
   import TextArea from '../text-field/text-area.svelte';
   import Toast from '../toast/toast.svelte';
+  import { BLOCK_BUTTON_TYPES, INLINE_BUTTON_TYPES } from './constants';
   import LexicalRoot from './lexical-root.svelte';
   import { createEditorStore } from './store.svelte';
   import TextEditorToolbar from './toolbar/text-editor-toolbar.svelte';
@@ -51,7 +51,7 @@
     value = $bindable(''),
     flex = false,
     modes = ['rich-text', 'plain-text'],
-    buttons = [...inlineButtonTypes, ...blockButtonTypes],
+    buttons = [...INLINE_BUTTON_TYPES, ...BLOCK_BUTTON_TYPES],
     components = [],
     hidden = false,
     disabled = false,

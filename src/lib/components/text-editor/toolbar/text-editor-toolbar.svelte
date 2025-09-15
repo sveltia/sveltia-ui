@@ -2,7 +2,6 @@
   import { unique } from '@sveltia/utils/array';
   import { getContext } from 'svelte';
   import { _ } from 'svelte-i18n';
-  import { availableButtons, blockButtonTypes, IMAGE_COMPONENT_IDS, inlineButtonTypes } from '..';
   import ButtonGroup from '../../button/button-group.svelte';
   import Button from '../../button/button.svelte';
   import Divider from '../../divider/divider.svelte';
@@ -10,6 +9,12 @@
   import Icon from '../../icon/icon.svelte';
   import MenuButton from '../../menu/menu-button.svelte';
   import Menu from '../../menu/menu.svelte';
+  import {
+    AVAILABLE_BUTTONS,
+    BLOCK_BUTTON_TYPES,
+    IMAGE_COMPONENT_IDS,
+    INLINE_BUTTON_TYPES,
+  } from '../constants';
   import CodeLanguageSwitcher from './code-language-switcher.svelte';
   import FormatTextButton from './format-text-button.svelte';
   import InsertImageButton from './insert-image-button.svelte';
@@ -58,7 +63,7 @@
     unique([
       'paragraph', // Always needed
       ...editorStore.config.enabledButtons.filter((type) =>
-        blockButtonTypes.includes(/** @type {any} */ (type)),
+        BLOCK_BUTTON_TYPES.includes(/** @type {any} */ (type)),
       ),
     ]),
   );
@@ -70,7 +75,7 @@
   const inlineLevelButtons = $derived(
     unique([
       ...editorStore.config.enabledButtons.filter((type) =>
-        inlineButtonTypes.includes(/** @type {any} */ (type)),
+        INLINE_BUTTON_TYPES.includes(/** @type {any} */ (type)),
       ),
     ]),
   );
@@ -84,7 +89,7 @@
   >
     {#snippet startIcon()}
       <Icon
-        name={availableButtons[editorStore.selection.blockType ?? '']?.icon ?? 'format_paragraph'}
+        name={AVAILABLE_BUTTONS[editorStore.selection.blockType ?? '']?.icon ?? 'format_paragraph'}
       />
     {/snippet}
     {#snippet popup()}

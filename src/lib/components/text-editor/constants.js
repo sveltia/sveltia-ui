@@ -6,7 +6,7 @@
  * List of available buttons.
  * @type {{ [key: string]: { labelKey: string, icon: string, inline: boolean } }}
  */
-export const availableButtons = {
+export const AVAILABLE_BUTTONS = {
   bold: {
     labelKey: 'bold',
     icon: 'format_bold',
@@ -83,18 +83,21 @@ export const availableButtons = {
     inline: false,
   },
 };
+
 /**
  * @type {TextEditorFormatType[]}
  */
-export const textFormatButtonTypes = ['bold', 'italic', 'code'];
+export const TEXT_FORMAT_BUTTON_TYPES = ['bold', 'italic', 'code'];
+
 /**
  * @type {TextEditorInlineType[]}
  */
-export const inlineButtonTypes = [...textFormatButtonTypes, 'link'];
+export const INLINE_BUTTON_TYPES = [...TEXT_FORMAT_BUTTON_TYPES, 'link'];
+
 /**
  * @type {TextEditorBlockType[]}
  */
-export const blockButtonTypes = [
+export const BLOCK_BUTTON_TYPES = [
   'paragraph',
   'heading-1',
   'heading-2',
