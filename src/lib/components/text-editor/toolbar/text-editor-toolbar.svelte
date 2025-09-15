@@ -2,7 +2,7 @@
   import { unique } from '@sveltia/utils/array';
   import { getContext } from 'svelte';
   import { _ } from 'svelte-i18n';
-  import { availableButtons, blockButtonTypes, inlineButtonTypes } from '..';
+  import { availableButtons, blockButtonTypes, IMAGE_COMPONENT_IDS, inlineButtonTypes } from '..';
   import ButtonGroup from '../../button/button-group.svelte';
   import Button from '../../button/button.svelte';
   import Divider from '../../divider/divider.svelte';
@@ -43,9 +43,11 @@
 
   /** @type {TextEditorStore} */
   const editorStore = getContext('editorStore');
-  const imageComponent = $derived(editorStore.config.components.find(({ id }) => id === 'image'));
+  const imageComponent = $derived(
+    editorStore.config.components.find(({ id }) => IMAGE_COMPONENT_IDS.includes(id)),
+  );
   const otherComponents = $derived(
-    editorStore.config.components.filter(({ id }) => id !== 'image'),
+    editorStore.config.components.filter(({ id }) => !IMAGE_COMPONENT_IDS.includes(id)),
   );
 
   /**

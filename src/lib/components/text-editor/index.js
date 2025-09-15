@@ -107,3 +107,8 @@ export const blockButtonTypes = [
   'blockquote',
   'code-block',
 ];
+
+/**
+ * Image related components IDs. `linked-image` is used in Sveltia CMS.
+ */
+export const IMAGE_COMPONENT_IDS = ['image', 'linked-image'];
