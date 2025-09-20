@@ -22,6 +22,7 @@ words:
   - colour
   - colours
   - CVEs
+  - esbuild
   - espree
   - infobar
   - jsdoc

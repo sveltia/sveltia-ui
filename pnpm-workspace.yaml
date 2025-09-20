@@ -1,0 +1,6 @@
+overrides:
+  "cookie@<0.7.0": ">=0.7.0"
+  "esbuild@<=0.24.2": ">=0.25.0"
+onlyBuiltDependencies:
+  - esbuild
+  - svelte-preprocess
