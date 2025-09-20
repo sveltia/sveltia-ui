@@ -21,6 +21,7 @@ words:
   - beforeinput
   - colour
   - colours
+  - cooldown
   - CVEs
   - esbuild
   - espree
