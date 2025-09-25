@@ -90,7 +90,6 @@
     }
   },
   "publishConfig": {
-    "directory": "package",
     "access": "public",
     "provenance": true
   }
