@@ -1,6 +1,8 @@
 <script>
   import { Radio, RadioGroup } from '$lib';
   import Example from '../../_components/example.svelte';
+
+  let fruit = $state('');
 </script>
 
 <h2>Radio</h2>
@@ -85,6 +87,23 @@
         <Radio label="Lemon" />
         <Radio disabled label="Orange" />
       </RadioGroup>
+    </div>
+  </Example>
+</section>
+
+<section>
+  <h3>Group binding</h3>
+  <Example>
+    <div role="none">
+      <RadioGroup>
+        <Radio label="Strawberry" value="strawberry" bind:group={fruit} />
+        <Radio label="Grape" value="grape" bind:group={fruit} />
+        <Radio label="Lemon" value="lemon" bind:group={fruit} />
+        <Radio disabled label="Orange" value="orange" bind:group={fruit} />
+      </RadioGroup>
+    </div>
+    <div role="none">
+      Selected fruit: {fruit}
     </div>
   </Example>
 </section>

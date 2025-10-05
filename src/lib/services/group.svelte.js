@@ -294,6 +294,7 @@ class Group {
         );
 
         if (isTarget) {
+          element.click();
           element.dispatchEvent(new CustomEvent('Select'));
         }
       }

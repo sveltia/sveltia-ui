@@ -25,6 +25,9 @@
    * @property {string} [valueType] Data type of the `value`. Typically `string`, `number` or
    * `boolean`. Default: auto detect.
    * @property {string} [label] Text label displayed next to the checkbox.
+   * @property {string} [group] The two-way bound variable to manage the state of a group of radio
+   * buttons. It works in the same way as the [`<input
+   * bind:group>`](https://svelte.dev/docs/svelte/bind#input-bind:group) of Svelte.
    * @property {Snippet} [children] Primary slot content.
    * @property {Snippet} [default] Default slot content.
    * @property {(event: CustomEvent) => void} [onChange] Custom `Change` event handler.
@@ -44,6 +47,7 @@
     value = undefined,
     valueType = undefined,
     label = undefined,
+    group = $bindable(''),
     children,
     onChange,
     onSelect,
@@ -58,6 +62,17 @@
    * @type {HTMLButtonElement | undefined}
    */
   let buttonElement = $state();
+
+  // Sync `checked` with `group` and `value`
+  $effect(() => {
+    if (group === value) {
+      if (!checked) {
+        checked = true;
+      }
+    } else if (checked) {
+      checked = false;
+    }
+  });
 </script>
 
 <span
@@ -85,7 +100,13 @@
     aria-labelledby="{id}-label"
     onclick={(event) => {
       event.preventDefault();
+
+      if (disabled || checked) {
+        return;
+      }
+
       checked = true;
+      group = value;
     }}
     {onChange}
     {onSelect}

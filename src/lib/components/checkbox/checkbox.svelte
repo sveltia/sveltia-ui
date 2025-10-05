@@ -26,6 +26,9 @@
    * @property {string} [label] Text label displayed next to the checkbox.
    * @property {string} [aria-label] `aria-label` attribute.
    * @property {Snippet} [checkIcon] Check icon slot content.
+   * @property {string[]} [group] The two-way bound variable to manage the state of a group of
+   * checkboxes. It works in the same way as the [`<input
+   * bind:group>`](https://svelte.dev/docs/svelte/bind#input-bind:group) of Svelte.
    */
 
   /**
@@ -44,6 +47,7 @@
     invalid = false,
     label = undefined,
     'aria-label': ariaLabel,
+    group = $bindable([]),
     onChange,
     children,
     checkIcon,
@@ -60,6 +64,17 @@
   let buttonElement = $state();
 
   const indeterminate = $derived(checked === 'mixed');
+
+  // Sync `checked` with `group` and `value`
+  $effect(() => {
+    if (group.includes(value)) {
+      if (checked !== true) {
+        checked = true;
+      }
+    } else if (checked !== false) {
+      checked = false;
+    }
+  });
 </script>
 
 <div
@@ -99,9 +114,19 @@
         event.preventDefault();
         event.stopPropagation();
 
-        if (!disabled && !readonly) {
-          checked = indeterminate ? true : !checked;
-          onChange?.(new CustomEvent('Change', { detail: { checked } }));
+        if (disabled || readonly) {
+          return;
+        }
+
+        checked = indeterminate ? true : !checked;
+        onChange?.(new CustomEvent('Change', { detail: { checked } }));
+
+        if (checked) {
+          if (!group.includes(value)) {
+            group = [...group, value];
+          }
+        } else if (group.includes(value)) {
+          group = group.filter((v) => v !== value);
         }
       }}
     >
