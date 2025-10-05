@@ -97,7 +97,13 @@
         }
 
         &[aria-expanded='false'] .icon {
-          transform: rotate(-90deg);
+          &:dir(ltr) {
+            transform: rotate(-90deg);
+          }
+
+          &:dir(rtl) {
+            transform: rotate(90deg);
+          }
         }
       }
     }

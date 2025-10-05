@@ -121,7 +121,7 @@
 
   .font-loader {
     position: absolute;
-    left: -99999px;
+    inset-inline-start: -99999px;
     font-family: var(--sui-font-family-default);
   }
 

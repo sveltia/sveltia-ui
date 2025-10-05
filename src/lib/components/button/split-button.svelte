@@ -93,15 +93,15 @@
         margin: 0;
 
         &.menu-button {
-          border-left-width: 0;
-          border-top-left-radius: 0;
-          border-bottom-left-radius: 0;
+          border-inline-start-width: 0;
+          border-start-start-radius: 0;
+          border-end-start-radius: 0;
           aspect-ratio: 3 / 4;
         }
 
         &:not(.menu-button) {
-          border-top-right-radius: 0;
-          border-bottom-right-radius: 0;
+          border-start-end-radius: 0;
+          border-end-end-radius: 0;
         }
       }
     }

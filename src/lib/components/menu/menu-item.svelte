@@ -5,6 +5,7 @@
 -->
 <script>
   import { onMount } from 'svelte';
+  import { browser } from '$app/environment';
   import Button from '../button/button.svelte';
   import Icon from '../icon/icon.svelte';
   import Popup from '../util/popup.svelte';
@@ -128,7 +129,7 @@
           {#if chevronIcon}
             {@render chevronIcon()}
           {:else}
-            <Icon name="chevron_right" />
+            <Icon name={browser && document.dir === 'rtl' ? 'chevron_left' : 'chevron_right'} />
           {/if}
         </span>
       {/if}
@@ -197,7 +198,10 @@
 
       & > [role='menu'] {
         position: absolute;
-        inset: 2px auto auto calc(100% + 4px);
+        inset-block-start: 2px;
+        inset-block-end: auto;
+        inset-inline-start: calc(100% + 4px);
+        inset-inline-end: auto;
 
         &:hover {
           opacity: 1;

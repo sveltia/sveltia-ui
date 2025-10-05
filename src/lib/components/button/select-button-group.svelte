@@ -80,17 +80,17 @@
         color: var(--sui-primary-foreground-color);
 
         &:first-child {
-          border-top-left-radius: 4px !important;
-          border-bottom-left-radius: 4px !important;
+          border-start-start-radius: 4px !important;
+          border-end-start-radius: 4px !important;
         }
 
         &:not(:first-child) {
-          border-left-width: 0;
+          border-inline-start-width: 0;
         }
 
         &:last-child {
-          border-top-right-radius: 4px !important;
-          border-bottom-right-radius: 4px !important;
+          border-start-end-radius: 4px !important;
+          border-end-end-radius: 4px !important;
         }
 
         &[aria-checked='true'] {

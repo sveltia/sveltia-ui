@@ -123,7 +123,8 @@
       display: inline-flex;
       align-items: center;
       margin: var(--sui-focus-ring-width);
-      padding: 0 0 0 8px;
+      padding: 0;
+      padding-inline-start: 8px;
       border-radius: var(--sui-control-medium-border-radius);
       background-color: var(--sui-secondary-background-color);
 

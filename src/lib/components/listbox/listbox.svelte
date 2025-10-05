@@ -121,17 +121,21 @@
 
     &.tabs {
       padding: 0;
-      border-width: 0 1px 0 0;
+      border-block-start-width: 0;
+      border-block-end-width: 0;
+      border-inline-end-width: 1px;
+      border-inline-start-width: 0;
       border-color: var(--sui-control-border-color);
 
       :global {
         .option button {
           justify-content: flex-start;
-          border-width: 0 2px 0 0;
+          border-width: 0;
+          border-inline-end-width: 2px;
           border-color: transparent;
           padding: 0 12px;
-          border-top-right-radius: 0;
-          border-bottom-right-radius: 0;
+          border-start-end-radius: 0;
+          border-end-end-radius: 0;
           height: var(--sui-tab-medium-height);
 
           &[aria-selected='true'] {

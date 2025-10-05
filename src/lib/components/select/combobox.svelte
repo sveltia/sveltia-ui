@@ -252,7 +252,9 @@
       border-width: 1px;
       border-color: var(--sui-control-border-color);
       border-radius: var(--sui-textbox-border-radius);
-      padding: 0 var(--sui-textbox-height) 0 calc(var(--sui-textbox-height) / 4);
+      padding-block: 0;
+      padding-inline-start: calc(var(--sui-textbox-height) / 4);
+      padding-inline-end: var(--sui-textbox-height);
       width: 100%;
       height: var(--sui-textbox-height);
       color: var(--sui-control-foreground-color);
@@ -290,17 +292,19 @@
 
       & > .icon {
         position: absolute;
-        inset: 8px auto auto 8px;
+        inset-block-start: 8px;
+        inset-inline-start: 8px;
         z-index: 1;
       }
 
       & > button {
         position: absolute;
-        inset: 0 0 auto auto;
+        inset-block-start: 0;
+        inset-inline-end: 0;
         z-index: 1;
         margin: 0 !important;
-        border-top-left-radius: 0;
-        border-bottom-left-radius: 0;
+        border-start-start-radius: 0;
+        border-end-start-radius: 0;
         background-color: transparent !important;
 
         &[tabindex='-1'] {
@@ -318,7 +322,8 @@
       }
 
       input {
-        padding: 0 32px 0 8px;
+        padding-block: 0;
+        padding-inline: 8px 32px;
         width: 0; // = auto
       }
 

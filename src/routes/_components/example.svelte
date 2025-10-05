@@ -29,7 +29,10 @@
   [role='figure'] {
     margin: 16px 0;
     padding: 16px;
-    border-width: 1px 1px 1px 8px;
+    border-block-start-width: 1px;
+    border-block-end-width: 1px;
+    border-inline-end-width: 1px;
+    border-inline-start-width: 8px;
     border-style: solid;
     border-color: var(--sui-info-border-color);
     background-color: var(--sui-info-background-color);

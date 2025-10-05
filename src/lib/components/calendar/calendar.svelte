@@ -4,6 +4,7 @@
 -->
 <script>
   import { _ } from 'svelte-i18n';
+  import { browser } from '$app/environment';
   import Button from '../button/button.svelte';
   import Divider from '../divider/divider.svelte';
   import Spacer from '../divider/spacer.svelte';
@@ -98,7 +99,7 @@
                   //
                 }}
               >
-                <Icon name="chevron_right" />
+                <Icon name={browser && document.dir === 'rtl' ? 'chevron_left' : 'chevron_right'} />
               </Button>
             </div>
             <div role="none" class="grid">
@@ -142,7 +143,7 @@
         firstDay = firstDay;
       }}
     >
-      <Icon name="chevron_right" />
+      <Icon name={browser && document.dir === 'rtl' ? 'chevron_left' : 'chevron_right'} />
     </Button>
   </div>
   <div role="listbox" class="grid">

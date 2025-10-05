@@ -48,7 +48,10 @@
         border-width: 1px 1px 0;
         border-style: solid;
         border-color: var(--sui-textbox-border-color);
-        border-radius: var(--sui-textbox-border-radius) var(--sui-textbox-border-radius) 0 0;
+        border-start-start-radius: var(--sui-textbox-border-radius);
+        border-start-end-radius: var(--sui-textbox-border-radius);
+        border-end-start-radius: 0;
+        border-end-end-radius: 0;
         padding: 8px;
         background-color: var(--sui-tertiary-background-color);
 

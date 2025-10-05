@@ -144,9 +144,21 @@
         border-color: transparent;
 
         &::before {
-          transform: translateX(calc(var(--sui-checkbox-height) * 2 - var(--sui-checkbox-height)));
+          --translateX: var(--sui-checkbox-height) * 2 - var(--sui-checkbox-height);
           border-color: var(--sui-primary-accent-color);
           background-color: var(--sui-primary-accent-color-inverted);
+        }
+
+        &:dir(ltr) {
+          &::before {
+            transform: translateX(calc(var(--translateX)));
+          }
+        }
+
+        &:dir(rtl) {
+          &::before {
+            transform: translateX(calc((var(--translateX)) * -1));
+          }
         }
       }
     }

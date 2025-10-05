@@ -135,8 +135,10 @@
         min-width: auto;
 
         textarea {
-          border-radius: //
-            0 0 var(--sui-textbox-border-radius) var(--sui-textbox-border-radius) !important;
+          border-start-start-radius: 0 !important;
+          border-start-end-radius: 0 !important;
+          border-end-start-radius: var(--sui-textbox-border-radius) !important;
+          border-end-end-radius: var(--sui-textbox-border-radius) !important;
         }
       }
     }

@@ -171,10 +171,23 @@
     }
 
     &.right {
-      inset: var(--sui-drawer-right-content-inset, 0 0 0 auto);
-      border-radius: var(
-        --sui-drawer-right-content-border-radius,
-        var(--sui-drawer-content-border-radius, 4px 0 0 4px)
+      inset-block: var(--sui-drawer-right-content-inset-block, 0);
+      inset-inline: var(--sui-drawer-right-content-inset-inline, auto 0);
+      border-start-start-radius: var(
+        --sui-drawer-right-content-border-start-start-radius,
+        var(--sui-drawer-content-border-start-start-radius, 4px)
+      );
+      border-start-end-radius: var(
+        --sui-drawer-right-content-border-start-end-radius,
+        var(--sui-drawer-content-border-start-end-radius, 0)
+      );
+      border-end-end-radius: var(
+        --sui-drawer-right-content-border-end-end-radius,
+        var(--sui-drawer-content-border-end-end-radius, 0)
+      );
+      border-end-start-radius: var(
+        --sui-drawer-right-content-border-end-start-radius,
+        var(--sui-drawer-content-border-end-start-radius, 4px)
       );
 
       &.full {
@@ -185,19 +198,39 @@
       }
 
       .extra-control {
-        inset: 0 100% auto auto;
+        inset-block-start: 0;
+        inset-inline-end: 100%;
       }
 
       :global(dialog:not(.open)) & {
-        transform: translateX(105%);
+        &:dir(ltr) {
+          transform: translateX(105%);
+        }
+
+        &:dir(rtl) {
+          transform: translateX(-105%);
+        }
       }
     }
 
     &.left {
-      inset: var(--sui-drawer-left-content-inset, 0 auto 0 0);
-      border-radius: var(
-        --sui-drawer-left-content-border-radius,
-        var(--sui-drawer-content-border-radius, 0 4px 4px 0)
+      inset-block: var(--sui-drawer-left-content-inset-block, 0);
+      inset-inline: var(--sui-drawer-left-content-inset-inline, 0 auto);
+      border-start-start-radius: var(
+        --sui-drawer-left-content-border-start-start-radius,
+        var(--sui-drawer-content-border-start-start-radius, 0)
+      );
+      border-start-end-radius: var(
+        --sui-drawer-left-content-border-start-end-radius,
+        var(--sui-drawer-content-border-start-end-radius, 4px)
+      );
+      border-end-end-radius: var(
+        --sui-drawer-left-content-border-end-end-radius,
+        var(--sui-drawer-content-border-end-end-radius, 4px)
+      );
+      border-end-start-radius: var(
+        --sui-drawer-left-content-border-end-start-radius,
+        var(--sui-drawer-content-border-end-start-radius, 0)
       );
 
       &.full {
@@ -208,11 +241,18 @@
       }
 
       .extra-control {
-        inset: 0 auto auto 100%;
+        inset-block-start: 0;
+        inset-inline-start: 100%;
       }
 
       :global(dialog:not(.open)) & {
-        transform: translateX(-105%);
+        &:dir(ltr) {
+          transform: translateX(-105%);
+        }
+
+        &:dir(rtl) {
+          transform: translateX(105%);
+        }
       }
     }
 
@@ -268,10 +308,23 @@
     }
 
     &.top {
-      inset: var(--sui-drawer-top-content-inset, 0 0 auto 0);
-      border-radius: var(
-        --sui-drawer-top-content-border-radius,
-        var(--sui-drawer-content-border-radius, 0 0 4px 4px)
+      inset-block-start: var(--sui-drawer-top-content-inset-block, 0);
+      inset-inline: var(--sui-drawer-top-content-inset-inline, 0 0);
+      border-start-start-radius: var(
+        --sui-drawer-top-content-border-start-start-radius,
+        var(--sui-drawer-content-border-start-start-radius, 0)
+      );
+      border-start-end-radius: var(
+        --sui-drawer-top-content-border-start-end-radius,
+        var(--sui-drawer-content-border-start-end-radius, 0)
+      );
+      border-end-end-radius: var(
+        --sui-drawer-top-content-border-end-end-radius,
+        var(--sui-drawer-content-border-end-end-radius, 4px)
+      );
+      border-end-start-radius: var(
+        --sui-drawer-top-content-border-end-start-radius,
+        var(--sui-drawer-content-border-end-start-radius, 4px)
       );
 
       &.full {
@@ -282,7 +335,8 @@
       }
 
       .extra-control {
-        inset: 100% 0 auto auto;
+        inset-block-start: 100%;
+        inset-inline-end: 0;
       }
 
       :global(dialog:not(.open)) & {
@@ -291,10 +345,24 @@
     }
 
     &.bottom {
-      inset: var(--sui-drawer-bottom-content-inset, auto 0 0 0);
-      border-radius: var(
-        --sui-drawer-bottom-content-border-radius,
-        var(--sui-drawer-content-border-radius, 4px 4px 0 0)
+      inset-block: var(--sui-drawer-bottom-content-inset-block, auto 0);
+      inset-inline: var(--sui-drawer-bottom-content-inset-inline, 0);
+
+      border-start-start-radius: var(
+        --sui-drawer-bottom-content-border-start-start-radius,
+        var(--sui-drawer-content-border-start-start-radius, 4px)
+      );
+      border-start-end-radius: var(
+        --sui-drawer-bottom-content-border-start-end-radius,
+        var(--sui-drawer-content-border-start-end-radius, 4px)
+      );
+      border-end-end-radius: var(
+        --sui-drawer-bottom-content-border-end-end-radius,
+        var(--sui-drawer-content-border-end-end-radius, 0)
+      );
+      border-end-start-radius: var(
+        --sui-drawer-bottom-content-border-end-start-radius,
+        var(--sui-drawer-content-border-end-start-radius, 0)
       );
 
       &.full {
@@ -305,7 +373,8 @@
       }
 
       .extra-control {
-        inset: auto 0 100% auto;
+        inset-block-end: 100%;
+        inset-inline-end: 0;
       }
 
       :global(dialog:not(.open)) & {

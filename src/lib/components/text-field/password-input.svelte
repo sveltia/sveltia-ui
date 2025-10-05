@@ -124,20 +124,25 @@
       }
 
       input {
-        border-top-right-radius: 0;
-        border-bottom-right-radius: 0;
+        border-start-end-radius: 0;
+        border-end-end-radius: 0;
       }
 
       button {
         flex: none;
-        margin: 0 0 0 -1px;
+        margin-block: 0;
+        margin-inline-start: -1px;
+        margin-inline-end: 0;
         border-width: 1px;
         border-color: var(--sui-textbox-border-color);
         width: var(--sui-textbox-height);
         aspect-ratio: 1 / 1;
 
         &:last-child {
-          border-radius: 0 4px 4px 0;
+          border-start-start-radius: 0;
+          border-start-end-radius: 4px;
+          border-end-end-radius: 4px;
+          border-end-start-radius: 0;
         }
 
         .icon {

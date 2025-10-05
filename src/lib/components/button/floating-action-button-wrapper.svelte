@@ -27,7 +27,8 @@
     @media (width < 768px) {
       display: block;
       position: fixed;
-      inset: auto 16px 72px auto;
+      inset-inline-end: 16px;
+      inset-block-end: 72px;
       z-index: 100;
 
       :global {

@@ -133,7 +133,9 @@
 
     & > span {
       position: absolute;
-      inset: 0 auto 0 0;
+      inset-block: 0;
+      inset-inline-start: 0;
+      inset-inline-end: auto;
       z-index: 2;
       display: flex;
       align-items: center;
@@ -150,7 +152,9 @@
 
       & > button {
         position: absolute;
-        inset: 0 0 auto auto;
+        inset-block: 0;
+        inset-inline-start: auto;
+        inset-inline-end: 0;
         z-index: 2;
         margin: 0 !important;
         height: var(--sui-button-medium-height);

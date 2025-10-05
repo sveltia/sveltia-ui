@@ -313,7 +313,7 @@
     <div role="none" class="base-bar"></div>
     <div
       class="slider-bar"
-      style:left="{multiThumb ? sliderPositions[0] : 0}px"
+      style:inset-inline-start="{multiThumb ? sliderPositions[0] : 0}px"
       style:width="{multiThumb ? sliderPositions[1] - sliderPositions[0] : sliderPositions[0]}px"
     ></div>
     <div
@@ -327,7 +327,7 @@
       aria-valuemin={min}
       aria-valuemax={max}
       aria-valuenow={multiThumb ? values?.[0] : value}
-      style:left="{sliderPositions[0]}px"
+      style:inset-inline-start="{sliderPositions[0]}px"
       onpointerdown={(event) => onPointerDown(event, 0)}
       onkeydown={(event) => onKeyDown(event, 0)}
     ></div>
@@ -343,7 +343,7 @@
         aria-valuemin={min}
         aria-valuemax={max}
         aria-valuenow={values?.[1]}
-        style:left="{sliderPositions[1]}px"
+        style:inset-inline-start="{sliderPositions[1]}px"
         onpointerdown={(event) => onPointerDown(event, 1)}
         onkeydown={(event) => onKeyDown(event, 1)}
       ></div>
@@ -353,7 +353,7 @@
         <span
           role="none"
           class="label"
-          style:left="{(barWidth / (optionLabels.length - 1)) * index}px"
+          style:inset-inline-start="{(barWidth / (optionLabels.length - 1)) * index}px"
         >
           {label}
         </span>
@@ -422,10 +422,20 @@
     height: calc(var(--sui-checkbox-height) - 2px);
     background-color: var(--sui-primary-accent-color-inverted);
     cursor: pointer;
-    transform: translate(
-      calc((var(--sui-checkbox-height) / 2 - 1px) * -1),
-      calc((var(--sui-checkbox-height) / 4 - 1px) * -1)
-    );
+
+    &:dir(ltr) {
+      transform: translate(
+        calc((var(--sui-checkbox-height) / 2 - 1px) * -1),
+        calc((var(--sui-checkbox-height) / 4 - 1px) * -1)
+      );
+    }
+
+    &:dir(rtl) {
+      transform: translate(
+        calc((var(--sui-checkbox-height) / 2 - 1px)),
+        calc((var(--sui-checkbox-height) / 4 - 1px) * -1)
+      );
+    }
 
     .invalid & {
       border-color: var(--sui-error-border-color);
@@ -435,7 +445,14 @@
   .label {
     position: absolute;
     top: calc(var(--sui-checkbox-height) / 2 + 8px);
-    transform: translateX(-50%);
     font-size: var(--sui-font-size-x-small);
+
+    &:dir(ltr) {
+      transform: translateX(-50%);
+    }
+
+    &:dir(rtl) {
+      transform: translateX(50%);
+    }
   }
 </style>

@@ -138,8 +138,8 @@
     line-height: var(--sui-textbox-multiline-line-height);
 
     &:not(:first-child) {
-      border-top-left-radius: 0 !important;
-      border-top-right-radius: 0 !important;
+      border-start-start-radius: 0 !important;
+      border-start-end-radius: 0 !important;
     }
 
     &.code {
@@ -181,7 +181,9 @@
       .code-block {
         position: relative;
         display: block;
-        padding: 8px 8px 8px 56px;
+        padding-block: 8px;
+        padding-inline-start: 56px;
+        padding-inline-end: 8px;
         background-color: var(--sui-code-background-color);
         overflow-x: auto;
         white-space: pre;
@@ -196,13 +198,15 @@
 
         &::before {
           position: absolute;
-          inset: 0 auto 0 0;
+          inset-block: 0;
+          inset-inline-start: 0;
+          inset-inline-end: auto;
           content: attr(data-gutter);
           padding: 8px;
           min-width: 40px;
           color: var(--sui-tertiary-foreground-color);
           background-color: var(--sui-tertiary-background-color);
-          text-align: right;
+          text-align: end;
         }
       }
 

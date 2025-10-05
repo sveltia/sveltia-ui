@@ -214,13 +214,13 @@
 
     :global {
       :not(:first-child) input {
-        border-top-left-radius: 0;
-        border-bottom-left-radius: 0;
+        border-start-start-radius: 0;
+        border-end-start-radius: 0;
       }
 
       :not(:last-child) input {
-        border-top-right-radius: 0;
-        border-bottom-right-radius: 0;
+        border-start-end-radius: 0;
+        border-end-end-radius: 0;
       }
 
       // Maintain the border opacity
@@ -259,17 +259,23 @@
         height: 50%;
 
         &:first-of-type {
-          border-top-right-radius: 0;
-          border-bottom-right-radius: 0;
-          border-bottom-left-radius: 0;
-          border-width: 1px 0 0 1px;
+          border-block-start-width: 1px;
+          border-block-end-width: 0;
+          border-inline-end-width: 0;
+          border-inline-start-width: 1px;
+          border-start-end-radius: 0;
+          border-end-end-radius: 0;
+          border-end-start-radius: 0;
         }
 
         &:last-of-type {
-          border-top-left-radius: 0;
-          border-top-right-radius: 0;
-          border-bottom-right-radius: 0;
-          border-width: 0 0 1px 1px;
+          border-block-start-width: 0;
+          border-block-end-width: 1px;
+          border-inline-end-width: 0;
+          border-inline-start-width: 1px;
+          border-start-start-radius: 0;
+          border-start-end-radius: 0;
+          border-end-end-radius: 0;
         }
 
         .icon {

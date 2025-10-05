@@ -46,6 +46,22 @@ class Popup {
       let { position } = this;
       let height;
 
+      // Normalize RTL-friendly positions to LTR for LTR documents
+      // @todo Rename `PopupPosition` enums to be direction-agnostic
+      if (document.dir === 'rtl') {
+        if (position.endsWith('-left')) {
+          position = /** @type {PopupPosition} */ (position.replace('-left', '-right'));
+        } else if (position.endsWith('-right')) {
+          position = /** @type {PopupPosition} */ (position.replace('-right', '-left'));
+        }
+
+        if (position.startsWith('left-')) {
+          position = /** @type {PopupPosition} */ (position.replace('left-', 'right-'));
+        } else if (position.startsWith('right-')) {
+          position = /** @type {PopupPosition} */ (position.replace('right-', 'left-'));
+        }
+      }
+
       // Alter the position if the space is limited
       // @todo Handle more overflow cases
       if (position.startsWith('bottom-')) {

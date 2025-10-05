@@ -129,11 +129,10 @@
 
     &[aria-orientation='horizontal'] {
       gap: var(--sui-horizontal-tab-list-gap, var(--sui-tab-list-gap, 8px));
-      margin: var(--sui-horizontal-tab-list-margin, var(--sui-tab-list-margin, 0 0 32px));
-      border-width: var(
-        --sui-horizontal-tab-list-border-width,
-        var(--sui-tab-list-border-width, 0 0 1px)
-      );
+      margin-block: var(--sui-horizontal-tab-list-margin-block, 0 32px);
+      margin-inline: var(--sui-horizontal-tab-list-margin-inline, 0);
+      border-block-width: var(--sui-horizontal-tab-list-border-block-width, 0 1px);
+      border-inline-width: var(--sui-horizontal-tab-list-border-inline-width, 0 0);
       padding: var(--sui-horizontal-tab-list-padding, var(--sui-tab-list-padding, 0 16px));
 
       :global {
@@ -145,38 +144,33 @@
       }
 
       .indicator {
-        border-width: var(
-          --sui-horizontal-tab-list-indicator-border-width,
-          var(--sui-tab-list-indicator-border-width, 0 0 2px 0)
-        );
+        border-block-width: var(--sui-horizontal-tab-list-indicator-border-block-width, 0 2px);
+        border-inline-width: var(--sui-horizontal-tab-list-indicator-border-inline-width, 0 0);
       }
     }
 
     &[aria-orientation='vertical'] {
       gap: var(--sui-vertical-tab-list-gap, var(--sui-tab-list-gap, 8px));
       flex-direction: column;
-      margin: var(--sui-vertical-tab-list-margin, var(--sui-tab-list-margin, 0 32px 0 0));
-      border-width: var(
-        --sui-vertical-tab-list-border-width,
-        var(--sui-tab-list-border-width, 0 1px 0 0)
-      );
+      margin-block: var(--sui-vertical-tab-list-margin-block, 0);
+      margin-inline: var(--sui-vertical-tab-list-margin-inline, 0 32px);
+      border-block-width: var(--sui-vertical-tab-list-border-block-width, 0 0);
+      border-inline-width: var(--sui-vertical-tab-list-border-inline-width, 0 1px);
       padding: var(--sui-vertical-tab-list-padding, var(--sui-tab-list-padding, 8px 0));
       width: var(--sui-vertical-tab-list-width, auto);
 
       :global {
         button {
           justify-content: var(--sui-vertical-tab-justify-content, flex-start);
-          padding-right: 32px;
+          padding-inline-end: 32px;
           width: var(--sui-vertical-tab-width, var(--sui-tab-width, 100%));
           height: var(--sui-vertical-tab-height, var(--sui-tab-height, auto));
         }
       }
 
       .indicator {
-        border-width: var(
-          --sui-horizontal-tab-list-vertical-border-width,
-          var(--sui-tab-list-indicator-border-width, 0 2px 0 0)
-        );
+        border-block-width: var(--sui-vertical-tab-list-indicator-border-block-width, 0 0);
+        border-inline-width: var(--sui-vertical-tab-list-indicator-border-inline-width, 0 2px);
       }
     }
 
