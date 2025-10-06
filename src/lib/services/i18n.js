@@ -1,4 +1,11 @@
 import { addMessages, locale as appLocale, init } from 'svelte-i18n';
+import { writable } from 'svelte/store';
+
+/**
+ * Whether the current document is in RTL mode.
+ * @type {import('svelte/store').Writable<boolean>}
+ */
+export const isRTL = writable(false);
 
 /**
  * Load strings and initialize the locales.
@@ -43,5 +50,13 @@ if (!import.meta.env.SSR) {
   // @todo Move this to Sveltia UI and then Sveltia I18N
   appLocale.subscribe((value) => {
     document.documentElement.dir = getDirection(value);
+  });
+
+  // Update `isRTL` store based on the current document direction.
+  new MutationObserver(() => {
+    isRTL.set(document.dir === 'rtl');
+  }).observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ['dir'],
   });
 }

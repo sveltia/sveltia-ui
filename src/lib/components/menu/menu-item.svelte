@@ -5,7 +5,7 @@
 -->
 <script>
   import { onMount } from 'svelte';
-  import { browser } from '$app/environment';
+  import { isRTL } from '../../services/i18n';
   import Button from '../button/button.svelte';
   import Icon from '../icon/icon.svelte';
   import Popup from '../util/popup.svelte';
@@ -129,7 +129,7 @@
           {#if chevronIcon}
             {@render chevronIcon()}
           {:else}
-            <Icon name={browser && document.dir === 'rtl' ? 'chevron_left' : 'chevron_right'} />
+            <Icon name={$isRTL ? 'chevron_left' : 'chevron_right'} />
           {/if}
         </span>
       {/if}
