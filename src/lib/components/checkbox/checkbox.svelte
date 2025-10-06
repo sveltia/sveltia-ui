@@ -119,7 +119,6 @@
         }
 
         checked = indeterminate ? true : !checked;
-        onChange?.(new CustomEvent('Change', { detail: { checked } }));
 
         if (checked) {
           if (!group.includes(value)) {
@@ -128,6 +127,8 @@
         } else if (group.includes(value)) {
           group = group.filter((v) => v !== value);
         }
+
+        onChange?.(new CustomEvent('Change', { detail: { checked } }));
       }}
     >
       {#snippet startIcon()}
