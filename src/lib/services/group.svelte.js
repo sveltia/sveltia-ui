@@ -294,7 +294,10 @@ class Group {
         );
 
         if (isTarget) {
-          element.click();
+          if (event.type === 'keydown' && element.matches('[role="radio"]')) {
+            element.click();
+          }
+
           element.dispatchEvent(new CustomEvent('Select'));
         }
       }
