@@ -73,11 +73,11 @@
    * @type {TextEditorInlineType[]}
    */
   const inlineLevelButtons = $derived(
-    unique([
-      ...editorStore.config.enabledButtons.filter((type) =>
+    unique(
+      editorStore.config.enabledButtons.filter((type) =>
         INLINE_BUTTON_TYPES.includes(/** @type {any} */ (type)),
       ),
-    ]),
+    ),
   );
 </script>
 

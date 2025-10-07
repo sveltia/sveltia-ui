@@ -266,9 +266,10 @@
 
     const stepCount = (max - min) / step + 1;
     const stepWidth = barWidth / (stepCount - 1);
+    const emptyArray = Array.from({ length: stepCount });
 
-    valueList = new Array(stepCount).fill(0).map((_, index) => index * step + min, 10);
-    positionList = new Array(stepCount).fill(0).map((_, index) => index * stepWidth);
+    valueList = emptyArray.map((_, index) => index * step + min, 10);
+    positionList = emptyArray.map((_, index) => index * stepWidth);
 
     onValueChange();
   };
