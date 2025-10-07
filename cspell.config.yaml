@@ -29,6 +29,7 @@ words:
   - jsdoc
   - nocheck
   - opsz
+  - oxlint
   - plusplus
   - pnpm
   - postcss
