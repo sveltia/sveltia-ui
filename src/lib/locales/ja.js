@@ -53,6 +53,7 @@ export const strings = {
     code_block: 'コードブロック',
     bold: '太字',
     italic: '斜体',
+    strikethrough: '取り消し線',
     code: 'コード',
     link: 'リンク',
     insert_link: 'リンクを挿入',

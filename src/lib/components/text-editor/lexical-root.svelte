@@ -174,6 +174,10 @@
         font-style: italic;
       }
 
+      .strikethrough {
+        text-decoration: line-through;
+      }
+
       li.nested {
         list-style-type: none;
       }

@@ -53,6 +53,7 @@ export const strings = {
     code_block: 'Code Block',
     bold: 'Bold',
     italic: 'Italic',
+    strikethrough: 'Strikethrough',
     code: 'Code',
     link: 'Link',
     insert_link: 'Insert Link',

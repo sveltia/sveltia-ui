@@ -237,7 +237,7 @@
  */
 
 /**
- * @typedef {'bold' | 'italic' | 'code'} TextEditorFormatType
+ * @typedef {'bold' | 'italic' | 'strikethrough' | 'code'} TextEditorFormatType
  */
 
 /**

@@ -17,6 +17,11 @@ export const AVAILABLE_BUTTONS = {
     icon: 'format_italic',
     inline: true,
   },
+  strikethrough: {
+    labelKey: 'strikethrough',
+    icon: 'strikethrough_s',
+    inline: true,
+  },
   code: {
     labelKey: 'code',
     icon: 'code',
@@ -87,7 +92,7 @@ export const AVAILABLE_BUTTONS = {
 /**
  * @type {TextEditorFormatType[]}
  */
-export const TEXT_FORMAT_BUTTON_TYPES = ['bold', 'italic', 'code'];
+export const TEXT_FORMAT_BUTTON_TYPES = ['bold', 'italic', 'strikethrough', 'code'];
 
 /**
  * @type {TextEditorInlineType[]}

@@ -89,10 +89,11 @@ const editorConfig = {
   theme: {
     text: {
       /**
-       * Enable bold+italic styling.
+       * Enable bold+italic and strikethrough styling.
        * @see https://github.com/facebook/lexical/discussions/4381
        */
       italic: 'italic',
+      strikethrough: 'strikethrough',
     },
     list: {
       nested: {
