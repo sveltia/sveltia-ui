@@ -47,7 +47,7 @@
     invalid = false,
     label = undefined,
     'aria-label': ariaLabel,
-    group = $bindable([]),
+    group = $bindable(),
     onChange,
     children,
     checkIcon,
@@ -67,12 +67,14 @@
 
   // Sync `checked` with `group` and `value`
   $effect(() => {
-    if (group.includes(value)) {
-      if (checked !== true) {
-        checked = true;
+    if (Array.isArray(group)) {
+      if (group.includes(value)) {
+        if (checked !== true) {
+          checked = true;
+        }
+      } else if (checked !== false) {
+        checked = false;
       }
-    } else if (checked !== false) {
-      checked = false;
     }
   });
 </script>
@@ -120,12 +122,14 @@
 
         checked = indeterminate ? true : !checked;
 
-        if (checked) {
-          if (!group.includes(value)) {
-            group = [...group, value];
+        if (Array.isArray(group)) {
+          if (checked) {
+            if (!group.includes(value)) {
+              group = [...group, value];
+            }
+          } else if (group.includes(value)) {
+            group = group.filter((v) => v !== value);
           }
-        } else if (group.includes(value)) {
-          group = group.filter((v) => v !== value);
         }
 
         onChange?.(new CustomEvent('Change', { detail: { checked } }));

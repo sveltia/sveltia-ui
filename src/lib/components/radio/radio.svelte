@@ -47,7 +47,7 @@
     value = undefined,
     valueType = undefined,
     label = undefined,
-    group = $bindable(''),
+    group = $bindable(),
     children,
     onChange,
     onSelect,
@@ -65,12 +65,14 @@
 
   // Sync `checked` with `group` and `value`
   $effect(() => {
-    if (group === value) {
-      if (!checked) {
-        checked = true;
+    if (typeof group === 'string') {
+      if (group === value) {
+        if (!checked) {
+          checked = true;
+        }
+      } else if (checked) {
+        checked = false;
       }
-    } else if (checked) {
-      checked = false;
     }
   });
 </script>
@@ -106,7 +108,10 @@
       }
 
       checked = true;
-      group = value;
+
+      if (typeof group === 'string') {
+        group = value;
+      }
     }}
     {onChange}
     {onSelect}
