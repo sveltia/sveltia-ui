@@ -58,6 +58,7 @@ rules:
   jsdoc/no-bad-blocks: 1
   jsdoc/no-blank-block-descriptions: 1
   jsdoc/no-defaults: 1
+  jsdoc/reject-any-type: 0
   jsdoc/require-asterisk-prefix: 1
   jsdoc/require-description: 1
   jsdoc/require-description-complete-sentence: 1
@@ -68,6 +69,7 @@ rules:
         property: never
   jsdoc/require-throws: 1
   jsdoc/sort-tags: 1
+  jsdoc/valid-types: 0
   max-len:
     - error
     - code: 100

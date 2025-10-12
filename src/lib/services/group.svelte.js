@@ -11,7 +11,7 @@ import { getSelectedItemDetail } from './select.svelte';
  * apply basic normalization.
  * @param {string} value Original value.
  * @returns {string} Normalized value.
- * @todo Move this to @sveltia/utils.
+ * @todo Move this to `@sveltia/utils`.
  */
 const normalize = (value) => {
   value = value.trim();
