@@ -48,34 +48,52 @@
     z-index: 2;
   }
 
-  :is(h1, h2, h3, h4, h5, h6) {
-    margin: 0;
-    font-weight: var(--sui-font-weight-bold, bold);
-    line-height: var(--sui-line-height-default);
-  }
-
   h1 {
-    font-size: 32px;
+    margin: var(--sui-h1-margin, var(--sui-heading-margin));
+    font-size: var(--sui-h1-font-size, 32px);
+    font-family: var(--sui-h1-font-family, var(--sui-heading-font-family));
+    font-weight: var(--sui-h1-font-weight, var(--sui-heading-font-weight));
+    line-height: var(--sui-h1-line-height, var(--sui-heading-line-height));
   }
 
   h2 {
-    font-size: 28px;
+    margin: var(--sui-h2-margin, var(--sui-heading-margin));
+    font-size: var(--sui-h2-font-size, 28px);
+    font-family: var(--sui-h2-font-family, var(--sui-heading-font-family));
+    font-weight: var(--sui-h2-font-weight, var(--sui-heading-font-weight));
+    line-height: var(--sui-h2-line-height, var(--sui-heading-line-height));
   }
 
   h3 {
-    font-size: 24px;
+    margin: var(--sui-h3-margin, var(--sui-heading-margin));
+    font-size: var(--sui-h3-font-size, 24px);
+    font-family: var(--sui-h3-font-family, var(--sui-heading-font-family));
+    font-weight: var(--sui-h3-font-weight, var(--sui-heading-font-weight));
+    line-height: var(--sui-h3-line-height, var(--sui-heading-line-height));
   }
 
   h4 {
-    font-size: 20px;
+    margin: var(--sui-h4-margin, var(--sui-heading-margin));
+    font-size: var(--sui-h4-font-size, 20px);
+    font-family: var(--sui-h4-font-family, var(--sui-heading-font-family));
+    font-weight: var(--sui-h4-font-weight, var(--sui-heading-font-weight));
+    line-height: var(--sui-h4-line-height, var(--sui-heading-line-height));
   }
 
   h5 {
-    font-size: 16px;
+    margin: var(--sui-h5-margin, var(--sui-heading-margin));
+    font-size: var(--sui-h5-font-size, 16px);
+    font-family: var(--sui-h5-font-family, var(--sui-heading-font-family));
+    font-weight: var(--sui-h5-font-weight, var(--sui-heading-font-weight));
+    line-height: var(--sui-h5-line-height, var(--sui-heading-line-height));
   }
 
   h6 {
-    font-size: 12px;
+    margin: var(--sui-h6-margin, var(--sui-heading-margin));
+    font-size: var(--sui-h6-font-size, 12px);
+    font-family: var(--sui-h6-font-family, var(--sui-heading-font-family));
+    font-weight: var(--sui-h6-font-weight, var(--sui-heading-font-weight));
+    line-height: var(--sui-h6-line-height, var(--sui-heading-line-height));
   }
 
   strong {

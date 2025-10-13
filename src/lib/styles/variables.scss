@@ -167,6 +167,10 @@
     --sui-line-height-compact: 1.5;
     --sui-line-height-comfortable: 1.75;
     --sui-word-spacing-normal: 0.1ex;
+    --sui-heading-margin: 0;
+    --sui-heading-font-family: var(--sui-font-family-default);
+    --sui-heading-font-weight: var(--sui-font-weight-bold);
+    --sui-heading-line-height: var(--sui-line-height-default);
     --sui-paragraph-margin: 1.75em;
     // Controls
     --sui-control-small-border-width: 1px;
