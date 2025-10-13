@@ -29,7 +29,8 @@ overrides:
       svelte/valid-compile: off
   - files:
       - "*.svelte.js"
-    parser: svelte-eslint-parser
+    globals:
+      $state: readonly
     rules:
       # Silence an error on `<svelte:options accessors={true} />`
       svelte/valid-compile: off
