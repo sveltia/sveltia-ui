@@ -79,6 +79,7 @@ rules:
       ignoreStrings: true
   no-param-reassign: off
   no-void: off
+  no-nested-ternary: off
   # https://github.com/sveltejs/eslint-plugin-svelte#white_check_mark-rules
   svelte/no-at-html-tags: off
   # https://svelte.dev/docs#component-format-script

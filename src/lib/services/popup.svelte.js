@@ -1,5 +1,3 @@
-/* eslint-disable no-nested-ternary */
-
 import { generateElementId } from '@sveltia/utils/element';
 import { sleep } from '@sveltia/utils/misc';
 import { on } from 'svelte/events';

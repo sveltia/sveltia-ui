@@ -456,6 +456,7 @@ class Group {
       }
     } else {
       index = currentTarget ? activeMembers.indexOf(currentTarget) : -1;
+
       const _isRTL = get(isRTL);
 
       // For horizontal orientation in RTL: ArrowLeft moves forward, ArrowRight moves backward
