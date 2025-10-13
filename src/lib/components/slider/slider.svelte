@@ -9,6 +9,7 @@
 -->
 <script>
   import { onMount } from 'svelte';
+  import { isRTL } from '$lib/services/i18n.js';
 
   /**
    * @import { Snippet } from 'svelte';
@@ -81,22 +82,23 @@
 
   /**
    * Move a thumb with mouse.
-   * @param {number} diff Distance from the original X position in pixels.
+   * @param {number} physicalX Physical X position in pixels from the left edge.
    */
-  const moveThumb = (diff) => {
-    if (diff < 0) {
-      diff = 0;
-    } else if (diff > barWidth) {
-      diff = barWidth;
+  const moveThumb = (physicalX) => {
+    // Convert physical position to logical position (always LTR)
+    // In RTL, left side (physicalX=0) maps to max value (logicalX=barWidth)
+    // In LTR, left side (physicalX=0) maps to min value (logicalX=0)
+    const logicalX = $isRTL ? barWidth - physicalX : physicalX;
+
+    if (logicalX < 0 || logicalX > barWidth) {
+      return;
     }
 
-    const fromIndex = positionList.findLastIndex((s) => s <= diff);
-    const toIndex = positionList.findIndex((s) => diff <= s);
-
-    const index =
-      Math.abs(positionList[fromIndex] - diff) < Math.abs(positionList[toIndex] - diff)
-        ? fromIndex
-        : toIndex;
+    const fromIndex = positionList.findLastIndex((s) => s <= logicalX);
+    const toIndex = positionList.findIndex((s) => logicalX <= s);
+    const fromDiff = Math.abs(positionList[fromIndex] - logicalX);
+    const toDiff = Math.abs(positionList[toIndex] - logicalX);
+    const index = fromDiff < toDiff ? fromIndex : toIndex;
 
     if (
       sliderPositions[targetValueIndex] === positionList[index] ||
@@ -130,8 +132,11 @@
 
     const _value = multiThumb ? /** @type {[number, number]} */ (values)[valueIndex] : value;
     let index = -1;
+    // In RTL, ArrowLeft increases value, ArrowRight decreases value
+    const decreaseKeys = $isRTL ? ['ArrowDown', 'ArrowRight'] : ['ArrowDown', 'ArrowLeft'];
+    const increaseKeys = $isRTL ? ['ArrowUp', 'ArrowLeft'] : ['ArrowUp', 'ArrowRight'];
 
-    if (['ArrowDown', 'ArrowLeft'].includes(key)) {
+    if (decreaseKeys.includes(key)) {
       if (_value > min) {
         index = valueList.indexOf(_value) - 1;
       }
@@ -140,7 +145,7 @@
       event.stopPropagation();
     }
 
-    if (['ArrowUp', 'ArrowRight'].includes(key)) {
+    if (increaseKeys.includes(key)) {
       if (_value < max) {
         index = valueList.indexOf(_value) + 1;
       }
@@ -180,7 +185,11 @@
 
     event.stopPropagation();
 
-    moveThumb(startX + (screenX - startScreenX));
+    const screenDiff = screenX - startScreenX;
+    // Calculate new physical position from left edge
+    const physicalX = startX + screenDiff;
+
+    moveThumb(physicalX);
   };
 
   /**
@@ -198,7 +207,11 @@
 
     // Handle a click on the bars
     if (/** @type {HTMLElement} */ (event.target).matches('.base-bar, .slider-bar')) {
-      moveThumb(/** @type {any} */ (event).layerX);
+      const rect = /** @type {HTMLElement} */ (base).getBoundingClientRect();
+      // Get physical X position from left edge
+      const physicalX = /** @type {any} */ (event).clientX - rect.left;
+
+      moveThumb(physicalX);
     }
 
     // Reset everything
@@ -228,7 +241,11 @@
     event.stopPropagation();
 
     dragging = true;
-    startX = clientX - /** @type {HTMLElement} */ (base).getBoundingClientRect().x;
+
+    const rect = /** @type {HTMLElement} */ (base).getBoundingClientRect();
+
+    // Store physical X position from left edge (same in LTR and RTL)
+    startX = clientX - rect.left;
     startScreenX = screenX;
     targetPointerId = pointerId;
     targetValueIndex = valueIndex;

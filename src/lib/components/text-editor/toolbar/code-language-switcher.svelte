@@ -89,12 +89,13 @@
     }
   }}
 >
-  <Option label={$_('_sui.text_editor.plain_text')} value="plain" />
+  <Option label={$_('_sui.text_editor.plain_text')} value="plain" dir="ltr" />
   {#each codeLanguages as { key, label, aliases } (key)}
     <Option
       {label}
       value={key}
       selected={key === selectedLanguage || aliases.includes(selectedLanguage)}
+      dir="ltr"
     />
   {/each}
 </Select>

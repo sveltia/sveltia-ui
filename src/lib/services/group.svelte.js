@@ -4,6 +4,8 @@
 
 import { generateElementId } from '@sveltia/utils/element';
 import { sleep } from '@sveltia/utils/misc';
+import { get } from 'svelte/store';
+import { isRTL } from './i18n.js';
 import { getSelectedItemDetail } from './select.svelte';
 
 /**
@@ -428,6 +430,7 @@ class Group {
 
     if (this.grid) {
       const colCount = Math.floor(this.parent.clientWidth / activeMembers[0].clientWidth);
+      const _isRTL = get(isRTL);
 
       index = currentTarget ? allMembers.indexOf(currentTarget) : -1;
 
@@ -439,12 +442,13 @@ class Group {
         newTarget = allMembers[index + colCount];
       }
 
+      // In RTL, ArrowLeft moves right (next), ArrowRight moves left (previous)
       if (key === 'ArrowLeft' && index > 0) {
-        newTarget = allMembers[index - 1];
+        newTarget = allMembers[index + (_isRTL ? 1 : -1)];
       }
 
       if (key === 'ArrowRight' && index < allMembers.length - 1) {
-        newTarget = allMembers[index + 1];
+        newTarget = allMembers[index + (_isRTL ? -1 : 1)];
       }
 
       if (newTarget?.matches('[aria-disabled="true"], [aria-hidden="true"]')) {
@@ -452,8 +456,16 @@ class Group {
       }
     } else {
       index = currentTarget ? activeMembers.indexOf(currentTarget) : -1;
+      const _isRTL = get(isRTL);
 
-      if (key === (this.orientation === 'horizontal' ? 'ArrowLeft' : 'ArrowUp')) {
+      // For horizontal orientation in RTL: ArrowLeft moves forward, ArrowRight moves backward
+      const prevKey =
+        this.orientation === 'horizontal' ? (_isRTL ? 'ArrowRight' : 'ArrowLeft') : 'ArrowUp';
+
+      const nextKey =
+        this.orientation === 'horizontal' ? (_isRTL ? 'ArrowLeft' : 'ArrowRight') : 'ArrowDown';
+
+      if (key === prevKey) {
         if (index > 0) {
           // Previous member
           newTarget = activeMembers[index - 1];
@@ -465,7 +477,7 @@ class Group {
         }
       }
 
-      if (key === (this.orientation === 'horizontal' ? 'ArrowRight' : 'ArrowDown')) {
+      if (key === nextKey) {
         if (index < activeMembers.length - 1) {
           // Next member
           newTarget = activeMembers[index + 1];

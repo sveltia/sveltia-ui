@@ -82,6 +82,12 @@ class Popup {
         }
       }
 
+      if (position.endsWith('-right')) {
+        if (intersectionRect.right - contentWidth < 8) {
+          position = /** @type {PopupPosition} */ (position.replace('-right', '-left'));
+        }
+      }
+
       const top = position.startsWith('bottom-')
         ? `${Math.round(intersectionRect.bottom)}px`
         : position.endsWith('-top')
