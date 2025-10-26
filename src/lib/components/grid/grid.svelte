@@ -5,7 +5,7 @@
   @see https://w3c.github.io/aria/#grid
 -->
 <script>
-  import { activateGroup } from '../../services/group.svelte';
+  import { activateGroup } from '../../services/group.svelte.js';
 
   /**
    * @import { Snippet } from 'svelte';

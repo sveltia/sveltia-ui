@@ -1,4 +1,4 @@
-import { initLocales, isRTL } from './services/i18n';
+import { initLocales, isRTL } from './services/i18n.js';
 
 initLocales();
 
@@ -80,4 +80,4 @@ export { default as Modal } from './components/util/modal.svelte';
 export { initLocales, isRTL };
 
 // eslint-disable-next-line import/export
-export * from './typedefs';
+export * from './typedefs.js';

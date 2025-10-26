@@ -36,7 +36,9 @@ overrides:
       svelte/valid-compile: off
 rules:
   class-methods-use-this: off
-  import/extensions: off
+  import/extensions:
+    - error
+    - ignorePackages
   import/no-extraneous-dependencies: off
   import/no-mutable-exports: off
   import/no-unresolved: off

@@ -6,7 +6,7 @@
 -->
 <script>
   import { onMount } from 'svelte';
-  import { activateGroup } from '../../services/group.svelte';
+  import { activateGroup } from '../../services/group.svelte.js';
 
   /**
    * @import { Snippet } from 'svelte';

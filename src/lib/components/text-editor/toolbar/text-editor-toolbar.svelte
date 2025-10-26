@@ -14,7 +14,7 @@
     BLOCK_BUTTON_TYPES,
     IMAGE_COMPONENT_IDS,
     INLINE_BUTTON_TYPES,
-  } from '../constants';
+  } from '../constants.js';
   import CodeLanguageSwitcher from './code-language-switcher.svelte';
   import FormatTextButton from './format-text-button.svelte';
   import InsertImageButton from './insert-image-button.svelte';

@@ -1,4 +1,5 @@
 <script>
+  // eslint-disable-next-line import/extensions
   import { page } from '$app/state';
 
   /**

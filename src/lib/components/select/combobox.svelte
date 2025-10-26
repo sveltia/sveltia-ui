@@ -7,7 +7,7 @@
 -->
 <script>
   import { _ } from 'svelte-i18n';
-  import { getSelectedItemDetail } from '../../services/select.svelte';
+  import { getSelectedItemDetail } from '../../services/select.svelte.js';
   import Button from '../button/button.svelte';
   import Icon from '../icon/icon.svelte';
   import Listbox from '../listbox/listbox.svelte';

@@ -4,8 +4,8 @@
   import { _ } from 'svelte-i18n';
   import Button from '../../button/button.svelte';
   import Icon from '../../icon/icon.svelte';
-  import { AVAILABLE_BUTTONS } from '../constants';
-  import { focusEditor } from '../core';
+  import { AVAILABLE_BUTTONS } from '../constants.js';
+  import { focusEditor } from '../core.js';
 
   /**
    * @import { TextEditorFormatType, TextEditorStore } from '$lib/typedefs';

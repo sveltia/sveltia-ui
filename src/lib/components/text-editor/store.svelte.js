@@ -1,5 +1,5 @@
 import { generateElementId } from '@sveltia/utils/element';
-import { convertMarkdownToLexical } from './core';
+import { convertMarkdownToLexical } from './core.js';
 
 /**
  * @import { TextEditorConfig, TextEditorSelectionState, TextEditorStore } from '$lib/typedefs';

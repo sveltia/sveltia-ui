@@ -1,6 +1,6 @@
 <script>
   import { getContext, onMount } from 'svelte';
-  import { initEditor } from './core';
+  import { initEditor } from './core.js';
 
   /**
    * @import { Snippet } from 'svelte';

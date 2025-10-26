@@ -6,7 +6,7 @@
   import { _ } from 'svelte-i18n';
   import Option from '../../listbox/option.svelte';
   import Select from '../../select/select.svelte';
-  import { focusEditor, loadCodeHighlighter } from '../core';
+  import { focusEditor, loadCodeHighlighter } from '../core.js';
 
   /**
    * @import { TextEditorStore } from '$lib/typedefs';

@@ -8,9 +8,9 @@
   import Alert from '../alert/alert.svelte';
   import TextArea from '../text-field/text-area.svelte';
   import Toast from '../toast/toast.svelte';
-  import { BLOCK_BUTTON_TYPES, INLINE_BUTTON_TYPES } from './constants';
+  import { BLOCK_BUTTON_TYPES, INLINE_BUTTON_TYPES } from './constants.js';
   import LexicalRoot from './lexical-root.svelte';
-  import { createEditorStore } from './store.svelte';
+  import { createEditorStore } from './store.svelte.js';
   import TextEditorToolbar from './toolbar/text-editor-toolbar.svelte';
 
   /**

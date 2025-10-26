@@ -8,7 +8,7 @@
   import Alert from '../alert/alert.svelte';
   import Toast from '../toast/toast.svelte';
   import LexicalRoot from './lexical-root.svelte';
-  import { createEditorStore } from './store.svelte';
+  import { createEditorStore } from './store.svelte.js';
   import CodeEditorToolbar from './toolbar/code-editor-toolbar.svelte';
 
   /**

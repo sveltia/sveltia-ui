@@ -5,7 +5,7 @@
 -->
 <script>
   import { onMount } from 'svelte';
-  import { isRTL } from '../../services/i18n';
+  import { isRTL } from '../../services/i18n.js';
   import Button from '../button/button.svelte';
   import Icon from '../icon/icon.svelte';
   import Popup from '../util/popup.svelte';

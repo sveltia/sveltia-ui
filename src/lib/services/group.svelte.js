@@ -6,7 +6,7 @@ import { generateElementId } from '@sveltia/utils/element';
 import { sleep } from '@sveltia/utils/misc';
 import { get } from 'svelte/store';
 import { isRTL } from './i18n.js';
-import { getSelectedItemDetail } from './select.svelte';
+import { getSelectedItemDetail } from './select.svelte.js';
 
 /**
  * Normalize the given string for search value comparison. Since `transliterate` is slow, we only

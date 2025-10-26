@@ -4,7 +4,7 @@
 -->
 <script>
   import { _ } from 'svelte-i18n';
-  import { isRTL } from '../../services/i18n';
+  import { isRTL } from '../../services/i18n.js';
   import Button from '../button/button.svelte';
   import Divider from '../divider/divider.svelte';
   import Spacer from '../divider/spacer.svelte';

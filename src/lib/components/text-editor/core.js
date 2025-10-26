@@ -52,8 +52,8 @@ import {
   $isRangeSelection as isRangeSelection,
 } from 'lexical';
 import prismComponents from 'prismjs/components';
-import { BLOCK_BUTTON_TYPES, TEXT_FORMAT_BUTTON_TYPES } from './constants';
-import { TABLE } from './transformers/table';
+import { BLOCK_BUTTON_TYPES, TEXT_FORMAT_BUTTON_TYPES } from './constants.js';
+import { TABLE } from './transformers/table.js';
 
 /**
  * @import { CreateEditorArgs, LexicalEditor } from 'lexical';

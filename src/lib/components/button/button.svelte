@@ -5,7 +5,7 @@
   @see https://www.w3.org/WAI/ARIA/apg/patterns/button/
 -->
 <script>
-  import { activateKeyShortcuts } from '../../services/events.svelte';
+  import { activateKeyShortcuts } from '../../services/events.svelte.js';
   import TruncatedText from '../typography/truncated-text.svelte';
   import Popup from '../util/popup.svelte';
 

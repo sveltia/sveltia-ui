@@ -15,13 +15,13 @@
   } from 'lexical';
   import { getContext } from 'svelte';
   import { _ } from 'svelte-i18n';
-  import { isMac, matchShortcuts } from '../../../services/events.svelte';
+  import { isMac, matchShortcuts } from '../../../services/events.svelte.js';
   import Button from '../../button/button.svelte';
   import Dialog from '../../dialog/dialog.svelte';
   import Icon from '../../icon/icon.svelte';
   import TextInput from '../../text-field/text-input.svelte';
-  import { AVAILABLE_BUTTONS } from '../constants';
-  import { focusEditor } from '../core';
+  import { AVAILABLE_BUTTONS } from '../constants.js';
+  import { focusEditor } from '../core.js';
 
   /**
    * @import { TextEditorStore } from '$lib/typedefs';
