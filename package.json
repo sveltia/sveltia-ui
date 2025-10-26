@@ -37,7 +37,7 @@
     "@lexical/selection": "^0.37.0",
     "@lexical/table": "^0.37.0",
     "@lexical/utils": "^0.37.0",
-    "@sveltia/utils": "^0.8.5",
+    "@sveltia/utils": "^0.8.6",
     "lexical": "^0.37.0",
     "prismjs": "^1.30.0",
     "svelte-i18n": "^4.0.1"
@@ -71,7 +71,7 @@
     "svelte-preprocess": "^6.0.3",
     "tslib": "^2.8.1",
     "vite": "^7.1.12",
-    "vitest": "^3.2.4"
+    "vitest": "^4.0.3"
   },
   "exports": {
     ".": {
