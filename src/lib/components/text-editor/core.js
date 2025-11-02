@@ -225,10 +225,11 @@ const onEditorUpdate = (editor) => {
           // @see https://github.com/sveltia/sveltia-cms/issues/430
           // @see https://github.com/sveltia/sveltia-cms/issues/512
           .replace(/\\([_\\])/g, '$1')
-          // Replace non-breaking space before markdown syntax characters with regular space.
-          // This can happen when bold or italic text ends with a space
+          // Replace encoded spaces with regular spaces. The HTML entity can appear with a
+          // combination of bold and italic text
           // @see https://github.com/sveltia/sveltia-cms/issues/511
-          .replace(/&#32;([*_]+)/g, '$1 '),
+          // @see https://github.com/sveltia/sveltia-cms/issues/534
+          .replace(/&#32;/g, ' '),
         selection: getSelectionTypes(),
       },
     }),
