@@ -417,6 +417,16 @@ export const convertMarkdownToLexical = async (editor, value) => {
     .replace(/~~([^~\n]+?)\n([^~\n]+?)~~/gm, '~~$1~~\n~~$2~~')
     .replace(/`([^`\n]+?)\n([^`\n]+?)`/gm, '`$1`\n`$2`');
 
+  // Increase list indentation levels to prevent Markdown parsing issues: Slate uses 2 spaces for
+  // each indentation level, whereas Lexical uses 4 spaces
+  // @see https://github.com/sveltia/sveltia-cms/issues/549
+  if (value.match(/^\s{2}(?:-|\+|\*|\d+\.)\s/m)) {
+    value = value.replace(
+      /^(\s+)(-|\+|\*|\d+\.)/gm,
+      (_match, p1, p2) => `${' '.repeat(p1.length * 2)}${p2}`,
+    );
+  }
+
   return new Promise((resolve, reject) => {
     editor.update(() => {
       try {
