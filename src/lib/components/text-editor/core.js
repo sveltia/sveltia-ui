@@ -409,6 +409,14 @@ export const convertMarkdownToLexical = async (editor, value) => {
     ),
   );
 
+  // Split multiline formatting into separate lines to prevent Markdown parsing issues
+  // @see https://github.com/sveltia/sveltia-cms/issues/548
+  value = value
+    .replace(/_([^_\n]+?)\n([^_\n]+?)_/gm, '_$1_\n_$2_')
+    .replace(/\*\*([^*\n]+?)\n([^*\n]+?)\*\*/gm, '**$1**\n**$2**')
+    .replace(/~~([^~\n]+?)\n([^~\n]+?)~~/gm, '~~$1~~\n~~$2~~')
+    .replace(/`([^`\n]+?)\n([^`\n]+?)`/gm, '`$1`\n`$2`');
+
   return new Promise((resolve, reject) => {
     editor.update(() => {
       try {
