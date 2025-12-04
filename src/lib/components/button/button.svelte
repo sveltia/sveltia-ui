@@ -24,6 +24,7 @@
     role = 'button',
     name = undefined,
     value = undefined,
+    // svelte-ignore state_referenced_locally
     valueType = typeof value,
     hidden = false,
     disabled = false,

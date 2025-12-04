@@ -35,6 +35,8 @@ overrides:
       # Silence an error on `<svelte:options accessors={true} />`
       svelte/valid-compile: off
 rules:
+  # Ignore false errors
+  svelte/no-unused-svelte-ignore: off
   class-methods-use-this: off
   import/extensions:
     - error

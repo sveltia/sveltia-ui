@@ -65,6 +65,7 @@
 
   const editorStore = createEditorStore();
 
+  // svelte-ignore state_referenced_locally
   editorStore.config = { ...editorStore.config, modes, enabledButtons: buttons, components };
 
   setContext('editorStore', editorStore);

@@ -27,7 +27,7 @@
   } = $props();
 
   /** @type {number} */
-  let loadedItemSize = $state(itemChunkSize);
+  let loadedItemSize = $derived(itemChunkSize);
 
   /** @type {HTMLElement | undefined} */
   let spinner = $state(undefined);

@@ -34,7 +34,9 @@
     class: className,
     disabled = false,
     label,
+    // svelte-ignore state_referenced_locally
     value = label,
+    // svelte-ignore state_referenced_locally
     searchValue = label,
     wrap = false,
     children,
