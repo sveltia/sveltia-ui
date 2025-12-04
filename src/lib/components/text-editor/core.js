@@ -412,10 +412,10 @@ export const convertMarkdownToLexical = async (editor, value) => {
   // Split multiline formatting into separate lines to prevent Markdown parsing issues
   // @see https://github.com/sveltia/sveltia-cms/issues/548
   value = value
-    .replace(/_([^_\n]+?)\n([^_\n]+?)_/gm, '_$1_\n_$2_')
-    .replace(/\*\*([^*\n]+?)\n([^*\n]+?)\*\*/gm, '**$1**\n**$2**')
-    .replace(/~~([^~\n]+?)\n([^~\n]+?)~~/gm, '~~$1~~\n~~$2~~')
-    .replace(/`([^`\n]+?)\n([^`\n]+?)`/gm, '`$1`\n`$2`');
+    .replace(/(\s+)_([^_\n]+?)\n([^_\n]+?)_(\s+)/gm, '$1_$2_\n_$3_$4')
+    .replace(/(\s+)\*\*([^*\n]+?)\n([^*\n]+?)\*\*(\s+)/gm, '$1**$2**\n**$3**$4')
+    .replace(/(\s+)~~([^~\n]+?)\n([^~\n]+?)~~(\s+)/gm, '$1~~$2~~\n~~$3~~$4')
+    .replace(/(\s+)`([^`\n]+?)\n([^`\n]+?)`(\s+)/gm, '$1`$2`\n`$3`$4');
 
   // Increase list indentation levels to prevent Markdown parsing issues: Slate uses 2 spaces for
   // each indentation level, whereas Lexical uses 4 spaces
