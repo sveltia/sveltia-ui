@@ -113,6 +113,24 @@ describe('fixMarkdownFormatting', () => {
       'snake_case_variable **foo** bar',
     );
   });
+
+  it('should fix unclosed strikethrough markers with space in between', () => {
+    expect(fixMarkdownFormatting('~~foo ~~bar')).toBe('~~foo~~ bar');
+  });
+
+  it('should fix multiple strikethrough markers', () => {
+    expect(fixMarkdownFormatting('~~foo ~~bar ~~baz ~~qux')).toBe('~~foo~~ bar ~~baz~~ qux');
+  });
+
+  it('should fix mixed formatting with strikethrough', () => {
+    expect(fixMarkdownFormatting('**bold **text _italic _text ~~strike ~~text')).toBe(
+      '**bold** text _italic_ text ~~strike~~ text',
+    );
+  });
+
+  it('should not affect properly closed strikethrough markers', () => {
+    expect(fixMarkdownFormatting('~~foo~~ bar')).toBe('~~foo~~ bar');
+  });
 });
 
 describe('increaseListIndentation', () => {

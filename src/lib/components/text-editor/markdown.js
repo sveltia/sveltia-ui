@@ -20,7 +20,10 @@ export const splitMultilineFormatting = (value) =>
  * @see https://github.com/sveltia/sveltia-cms/issues/599
  */
 export const fixMarkdownFormatting = (value) =>
-  value.replace(/\*\*(\S+?) \*\*/gm, '**$1** ').replace(/_(\S+?) _/gm, '_$1_ ');
+  value
+    .replace(/\*\*(\S+?) \*\*/gm, '**$1** ')
+    .replace(/_(\S+?) _/gm, '_$1_ ')
+    .replace(/~~(\S+?) ~~/gm, '~~$1~~ ');
 
 /**
  * Increase list indentation levels to prevent Markdown parsing issues.
