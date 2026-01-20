@@ -69,6 +69,17 @@ const allTransformers = [...TRANSFORMERS, TABLE];
 const prismBaseURL = `https://unpkg.com/prismjs@1.30.0`;
 
 /**
+ * Fix malformed Markdown formatting markers.
+ * Converts unclosed formatting markers like `**foo **bar` to `**foo** bar`.
+ * This works around a Lexical bug with certain formatting patterns.
+ * @param {string} value Markdown string to fix.
+ * @returns {string} Fixed Markdown string.
+ * @see https://github.com/sveltia/sveltia-cms/issues/599
+ */
+export const fixMarkdownFormatting = (value) =>
+  value.replace(/\*\*(\S+?) \*\*/gm, '**$1** ').replace(/_(\S+?) _/gm, '_$1_ ');
+
+/**
  * Lexical editor configuration.
  * @type {CreateEditorArgs}
  */
@@ -416,6 +427,9 @@ export const convertMarkdownToLexical = async (editor, value) => {
     .replace(/(\s+)\*\*([^*\n]+?)\n([^*\n]+?)\*\*(\s+)/gm, '$1**$2**\n**$3**$4')
     .replace(/(\s+)~~([^~\n]+?)\n([^~\n]+?)~~(\s+)/gm, '$1~~$2~~\n~~$3~~$4')
     .replace(/(\s+)`([^`\n]+?)\n([^`\n]+?)`(\s+)/gm, '$1`$2`\n`$3`$4');
+
+  // Fix unclosed formatting markers (work around Lexical bug)
+  value = fixMarkdownFormatting(value);
 
   // Increase list indentation levels to prevent Markdown parsing issues: Slate uses 2 spaces for
   // each indentation level, whereas Lexical uses 4 spaces
