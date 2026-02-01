@@ -13,3 +13,8 @@ overrides:
 onlyBuiltDependencies:
   - esbuild
   - svelte-preprocess
+
+auditConfig:
+  ignoreCves:
+    # ESLint https://github.com/advisories/GHSA-p5wg-g6qr-c7cg
+    - CVE-2025-50537
