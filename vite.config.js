@@ -1,8 +1,17 @@
+/// <reference types="vitest/config" />
+
 import { sveltekit } from '@sveltejs/kit/vite';
+import { defineConfig } from 'vite';
 
 /** @type {import('vite').UserConfig} */
-const config = {
+export default defineConfig({
   plugins: [sveltekit()],
-};
-
-export default config;
+  test: {
+    include: ['src/lib/{components,services}/**/*.test.js'],
+    coverage: {
+      include: ['src/lib/{components,services}/**/*.js'],
+      reporter: ['text'],
+    },
+    silent: true,
+  },
+});
