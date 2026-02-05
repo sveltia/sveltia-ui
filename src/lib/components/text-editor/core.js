@@ -54,11 +54,7 @@ import {
 } from 'lexical';
 import prismComponents from 'prismjs/components';
 import { BLOCK_BUTTON_TYPES, TEXT_FORMAT_BUTTON_TYPES } from './constants.js';
-import {
-  fixMarkdownFormatting,
-  increaseListIndentation,
-  splitMultilineFormatting,
-} from './markdown.js';
+import { increaseListIndentation, splitMultilineFormatting } from './markdown.js';
 import { HR } from './transformers/hr.js';
 import { TABLE } from './transformers/table.js';
 
@@ -419,9 +415,6 @@ export const convertMarkdownToLexical = async (editor, value) => {
 
   // Split multiline formatting into separate lines to prevent Markdown parsing issues
   value = splitMultilineFormatting(value);
-
-  // Fix unclosed formatting markers (work around Lexical bug)
-  value = fixMarkdownFormatting(value);
 
   // Increase list indentation levels to prevent Markdown parsing issues
   value = increaseListIndentation(value);
