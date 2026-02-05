@@ -8,6 +8,7 @@ import {
   registerCodeHighlighting,
 } from '@lexical/code';
 import { registerDragonSupport } from '@lexical/dragon';
+import { HorizontalRuleNode } from '@lexical/extension';
 import { createEmptyHistoryState, registerHistory } from '@lexical/history';
 import {
   LinkNode,
@@ -58,6 +59,7 @@ import {
   increaseListIndentation,
   splitMultilineFormatting,
 } from './markdown.js';
+import { HR } from './transformers/hr.js';
 import { TABLE } from './transformers/table.js';
 
 /**
@@ -70,7 +72,7 @@ import { TABLE } from './transformers/table.js';
  * } from '$lib/typedefs';
  */
 
-const allTransformers = [...TRANSFORMERS, TABLE];
+const allTransformers = [...TRANSFORMERS, HR, TABLE];
 const prismBaseURL = `https://unpkg.com/prismjs@1.30.0`;
 
 /**
@@ -87,6 +89,7 @@ const editorConfig = {
     ListItemNode,
     CodeNode,
     CodeHighlightNode,
+    HorizontalRuleNode,
     TableNode,
     TableCellNode,
     TableRowNode,

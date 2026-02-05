@@ -223,6 +223,20 @@
         white-space: normal;
         word-break: normal;
       }
+
+      hr {
+        margin: var(--sui-paragraph-margin) 0;
+        border: none;
+        padding: 0;
+
+        &::after {
+          display: block;
+          height: 2px;
+          background-color: var(--sui-control-border-color);
+          line-height: 2px;
+          content: '';
+        }
+      }
     }
   }
 
