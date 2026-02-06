@@ -1,56 +1,51 @@
 import {
+  $createCodeNode,
+  $isCodeHighlightNode,
+  $isCodeNode,
   CodeHighlightNode,
   CodeNode,
   PrismTokenizer,
-  $createCodeNode as createCodeNode,
-  $isCodeHighlightNode as isCodeHighlightNode,
-  $isCodeNode as isCodeNode,
   registerCodeHighlighting,
 } from '@lexical/code';
 import { registerDragonSupport } from '@lexical/dragon';
 import { HorizontalRuleNode } from '@lexical/extension';
 import { createEmptyHistoryState, registerHistory } from '@lexical/history';
+import { $isLinkNode, $toggleLink, LinkNode, TOGGLE_LINK_COMMAND } from '@lexical/link';
 import {
-  LinkNode,
-  TOGGLE_LINK_COMMAND,
-  $isLinkNode as isLinkNode,
-  $toggleLink as toggleLink,
-} from '@lexical/link';
-import {
+  $handleListInsertParagraph,
+  $insertList,
+  $isListItemNode,
+  $isListNode,
   INSERT_ORDERED_LIST_COMMAND,
   INSERT_UNORDERED_LIST_COMMAND,
   ListItemNode,
   ListNode,
-  $handleListInsertParagraph as handleListInsertParagraph,
-  $insertList as insertList,
-  $isListItemNode as isListItemNode,
-  $isListNode as isListNode,
 } from '@lexical/list';
 import {
+  $convertFromMarkdownString,
+  $convertToMarkdownString,
   TRANSFORMERS,
-  $convertFromMarkdownString as convertFromMarkdownString,
-  $convertToMarkdownString as convertToMarkdownString,
 } from '@lexical/markdown';
 import {
+  $isHeadingNode,
+  $isQuoteNode,
   HeadingNode,
   QuoteNode,
-  $isHeadingNode as isHeadingNode,
-  $isQuoteNode as isQuoteNode,
   registerRichText,
 } from '@lexical/rich-text';
 import { TableCellNode, TableNode, TableRowNode } from '@lexical/table';
-import { $getNearestNodeOfType as getNearestNodeOfType } from '@lexical/utils';
+import { $getNearestNodeOfType } from '@lexical/utils';
 import { sleep } from '@sveltia/utils/misc';
 import {
+  $getRoot,
+  $getSelection,
+  $isRangeSelection,
   COMMAND_PRIORITY_NORMAL,
   ElementNode,
   INDENT_CONTENT_COMMAND,
   INSERT_PARAGRAPH_COMMAND,
   OUTDENT_CONTENT_COMMAND,
   createEditor,
-  $getRoot as getRoot,
-  $getSelection as getSelection,
-  $isRangeSelection as isRangeSelection,
 } from 'lexical';
 import prismComponents from 'prismjs/components';
 import { BLOCK_BUTTON_TYPES, TEXT_FORMAT_BUTTON_TYPES } from './constants.js';
@@ -146,9 +141,9 @@ const editorConfig = {
  * @returns {TextEditorSelectionState} Current selection state.
  */
 const getSelectionTypes = () => {
-  const selection = getSelection();
+  const selection = $getSelection();
 
-  if (!isRangeSelection(selection)) {
+  if (!$isRangeSelection(selection)) {
     return {
       blockNodeKey: null,
       blockType: 'paragraph',
@@ -163,15 +158,15 @@ const getSelectionTypes = () => {
   const inlineTypes = TEXT_FORMAT_BUTTON_TYPES.filter((type) => selection.hasFormat(type));
 
   if (anchor.getType() !== 'root') {
-    parent = anchor instanceof ElementNode ? anchor : getNearestNodeOfType(anchor, ElementNode);
+    parent = anchor instanceof ElementNode ? anchor : $getNearestNodeOfType(anchor, ElementNode);
 
-    if (isLinkNode(parent)) {
+    if ($isLinkNode(parent)) {
       inlineTypes.push('link');
-      parent = getNearestNodeOfType(parent, ElementNode);
+      parent = $getNearestNodeOfType(parent, ElementNode);
     }
 
-    if (isListItemNode(parent)) {
-      parent = getNearestNodeOfType(parent, ListNode);
+    if ($isListItemNode(parent)) {
+      parent = $getNearestNodeOfType(parent, ListNode);
     }
   }
 
@@ -181,19 +176,19 @@ const getSelectionTypes = () => {
         return 'paragraph';
       }
 
-      if (isHeadingNode(parent)) {
+      if ($isHeadingNode(parent)) {
         return `heading-${parent.getTag().match(/\d/)?.[0]}`;
       }
 
-      if (isListNode(parent)) {
+      if ($isListNode(parent)) {
         return parent.getListType() === 'bullet' ? 'bulleted-list' : 'numbered-list';
       }
 
-      if (isQuoteNode(parent)) {
+      if ($isQuoteNode(parent)) {
         return 'blockquote';
       }
 
-      if (isCodeNode(parent) || isCodeHighlightNode(parent)) {
+      if ($isCodeNode(parent) || $isCodeHighlightNode(parent)) {
         return 'code-block';
       }
 
@@ -222,7 +217,7 @@ const onEditorUpdate = (editor) => {
   editor.getRootElement()?.dispatchEvent(
     new CustomEvent('Update', {
       detail: {
-        value: convertToMarkdownString(
+        value: $convertToMarkdownString(
           // Use underscores for italic text in Markdown instead of asterisks
           allTransformers.filter((/** @type {any} */ { tag }) => tag !== '*'),
         ) // Remove unnecessary backslash for underscore and backslash characters
@@ -272,7 +267,7 @@ export const initEditor = ({
   editor.registerCommand(
     TOGGLE_LINK_COMMAND,
     (payload) => {
-      toggleLink(typeof payload === 'string' ? payload : null);
+      $toggleLink(typeof payload === 'string' ? payload : null);
 
       return true;
     },
@@ -282,7 +277,7 @@ export const initEditor = ({
   editor.registerCommand(
     INSERT_UNORDERED_LIST_COMMAND,
     () => {
-      insertList('bullet');
+      $insertList('bullet');
 
       return true;
     },
@@ -292,7 +287,7 @@ export const initEditor = ({
   editor.registerCommand(
     INSERT_ORDERED_LIST_COMMAND,
     () => {
-      insertList('number');
+      $insertList('number');
 
       return true;
     },
@@ -302,7 +297,7 @@ export const initEditor = ({
   // https://github.com/facebook/lexical/blob/main/packages/lexical-react/src/shared/useList.ts
   editor.registerCommand(
     INSERT_PARAGRAPH_COMMAND,
-    () => handleListInsertParagraph(),
+    () => $handleListInsertParagraph(),
     COMMAND_PRIORITY_NORMAL,
   );
 
@@ -316,15 +311,15 @@ export const initEditor = ({
     editor.update(() => {
       // Prevent CodeNode from being removed
       if (isCodeEditor) {
-        const root = getRoot();
+        const root = $getRoot();
         const children = root.getChildren();
 
-        if (children.length === 1 && !isCodeNode(children[0])) {
+        if (children.length === 1 && !$isCodeNode(children[0])) {
           children[0].remove();
         }
 
         if (children.length === 0) {
-          const node = createCodeNode();
+          const node = $createCodeNode();
 
           node.setLanguage(defaultLanguage);
           root.append(node);
@@ -342,18 +337,18 @@ export const initEditor = ({
       root.addEventListener('keydown', (event) => {
         editor.update(() => {
           if (event.key === 'Tab') {
-            const selection = getSelection();
+            const selection = $getSelection();
 
-            if (!isRangeSelection(selection)) {
+            if (!$isRangeSelection(selection)) {
               return;
             }
 
             const anchor = selection.anchor.getNode();
 
             const parent =
-              anchor instanceof ElementNode ? anchor : getNearestNodeOfType(anchor, ElementNode);
+              anchor instanceof ElementNode ? anchor : $getNearestNodeOfType(anchor, ElementNode);
 
-            if (isListItemNode(parent) && parent.canIndent()) {
+            if ($isListItemNode(parent) && parent.canIndent()) {
               if (!event.shiftKey) {
                 event.preventDefault();
                 editor.dispatchCommand(INDENT_CONTENT_COMMAND, undefined);
@@ -422,7 +417,7 @@ export const convertMarkdownToLexical = async (editor, value) => {
   return new Promise((resolve, reject) => {
     editor.update(() => {
       try {
-        convertFromMarkdownString(value, allTransformers);
+        $convertFromMarkdownString(value, allTransformers);
         resolve(undefined);
       } catch (ex) {
         reject(new Error('Failed to convert Markdown', { cause: ex }));
