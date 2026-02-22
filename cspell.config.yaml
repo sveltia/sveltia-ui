@@ -25,6 +25,8 @@ words:
   - CVEs
   - esbuild
   - espree
+  - GHSA
+  - Ghsas
   - infobar
   - jsdoc
   - nocheck
