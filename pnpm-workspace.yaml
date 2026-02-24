@@ -13,8 +13,3 @@ overrides:
 onlyBuiltDependencies:
   - esbuild
   - svelte-preprocess
-
-auditConfig:
-  ignoreGhsas:
-    # https://github.com/advisories/GHSA-3ppc-4f35-3m26
-    - GHSA-3ppc-4f35-3m26
