@@ -5,6 +5,8 @@ minimumReleaseAgeExclude:
   - svelte
   - "@sveltejs/*"
   - "@sveltia/*"
+  - lexical
+  - "@lexical/*"
 
 overrides:
   "cookie@<0.7.0": ">=0.7.0"
