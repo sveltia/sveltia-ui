@@ -53,8 +53,8 @@
               { key: 'form', label: 'Form', disabled: true },
               { key: 'group', label: 'Group' },
               { key: 'landmarks', label: 'Landmarks', disabled: true },
+              { key: 'resizable-pane', label: 'Resizable Pane' },
               { key: 'spacer', label: 'Spacer' },
-              { key: 'splitter', label: 'Splitter', disabled: true },
               { key: 'tiles', label: 'Tiles', disabled: true },
               { key: 'toolbar', label: 'Toolbar' },
             ]}

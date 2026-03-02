@@ -301,4 +301,27 @@
  * @property {any} value The `data-value` attribute on the element. Casted to the `valueType`.
  */
 
+/**
+ * @typedef {object} ResizablePaneDefinition
+ * @property {string} id ResizablePane element ID (generated via `$props.id()` in the pane
+ * component).
+ * @property {number | undefined} defaultSize Default size as a percentage (0–100).
+ * @property {number} minSize Minimum size as a percentage.
+ * @property {number} maxSize Maximum size as a percentage.
+ */
+
+/**
+ * @typedef {object} PaneGroupContext
+ * @property {'horizontal' | 'vertical'} direction Layout direction of the panes.
+ * @property {number[]} sizes Current pane sizes as percentages.
+ * @property {(def: ResizablePaneDefinition) => { index: number }} registerPane Register a pane and
+ * return its index.
+ * @property {() => number} registerHandle Register a resize handle and return its index.
+ * @property {(handleIndex: number, deltaPercent: number) => void} resize Resize panes around a
+ * handle by the given delta.
+ * @property {(handleIndex: number) => void} toggleCollapse Toggle collapse of the primary pane
+ * before the given handle.
+ * @property {ResizablePaneDefinition[]} paneDefs Registered pane definitions.
+ */
+
 export {};
