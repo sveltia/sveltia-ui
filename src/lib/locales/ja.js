@@ -35,6 +35,10 @@ export const strings = {
     show_password: 'パスワードを表示',
     hide_password: 'パスワードを隠す',
   },
+  select_tags: {
+    selected_options: '選択済みのオプション',
+    remove_x: '{name} を削除',
+  },
   text_editor: {
     text_editor: 'テキストエディター',
     code_editor: 'コードエディター',
