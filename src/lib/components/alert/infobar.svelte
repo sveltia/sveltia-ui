@@ -99,7 +99,7 @@
     align-items: center;
     justify-content: var(--sui-infobar-message-justify-content, start);
     gap: var(--sui-infobar-message-gap, 6px);
-    padding: var(--sui-infobar-message-padding, 0 8px);
+    padding: var(--sui-infobar-message-padding, 6px);
 
     :global {
       button {
