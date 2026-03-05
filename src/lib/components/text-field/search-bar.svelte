@@ -22,6 +22,7 @@
    * @property {string} [value] Input value.
    * @property {Snippet} [searchIcon] Search icon slot content.
    * @property {Snippet} [closeIcon] Close icon slot content.
+   * @property {() => void} [onClear] Callback invoked when the clear button is clicked.
    */
 
   /**
@@ -40,6 +41,7 @@
     children,
     searchIcon,
     closeIcon,
+    onClear,
     ...restProps
     /* eslint-enable prefer-const */
   } = $props();
@@ -98,11 +100,7 @@
       onclick={() => {
         value = '';
         inputElement?.focus();
-        globalThis.requestIdleCallback(() => {
-          inputElement?.dispatchEvent(new KeyboardEvent('input'));
-          inputElement?.dispatchEvent(new KeyboardEvent('keypress'));
-          inputElement?.dispatchEvent(new KeyboardEvent('change'));
-        });
+        onClear?.();
       }}
     >
       {#snippet startIcon()}
