@@ -35,6 +35,10 @@ export const strings = {
     show_password: 'パスワードを表示',
     hide_password: 'パスワードを隠す',
   },
+  secret_input: {
+    show_secret: 'シークレットを表示',
+    hide_secret: 'シークレットを隠す',
+  },
   select_tags: {
     selected_options: '選択済みのオプション',
     remove_x: '{name} を削除',

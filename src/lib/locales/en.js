@@ -35,6 +35,10 @@ export const strings = {
     show_password: 'Show Password',
     hide_password: 'Hide Password',
   },
+  secret_input: {
+    show_secret: 'Show Secret',
+    hide_secret: 'Hide Secret',
+  },
   select_tags: {
     selected_options: 'Selected options',
     remove_x: 'Remove {name}',

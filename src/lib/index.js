@@ -71,6 +71,7 @@ export { default as TextEditor } from './components/text-editor/text-editor.svel
 export { default as NumberInput } from './components/text-field/number-input.svelte';
 export { default as PasswordInput } from './components/text-field/password-input.svelte';
 export { default as SearchBar } from './components/text-field/search-bar.svelte';
+export { default as SecretInput } from './components/text-field/secret-input.svelte';
 export { default as TextArea } from './components/text-field/text-area.svelte';
 export { default as TextInput } from './components/text-field/text-input.svelte';
 export { default as Toast } from './components/toast/toast.svelte';

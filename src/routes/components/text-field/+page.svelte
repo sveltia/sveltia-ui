@@ -1,5 +1,5 @@
 <script>
-  import { NumberInput, PasswordInput, SearchBar, TextArea, TextInput } from '$lib';
+  import { NumberInput, PasswordInput, SearchBar, SecretInput, TextArea, TextInput } from '$lib';
   import Example from '../../_components/example.svelte';
 </script>
 
@@ -28,6 +28,15 @@
   <Example>
     <div role="none">
       <PasswordInput />
+    </div>
+  </Example>
+</section>
+
+<section>
+  <h3>Secret</h3>
+  <Example>
+    <div role="none">
+      <SecretInput />
     </div>
   </Example>
 </section>
