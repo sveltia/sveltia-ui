@@ -350,7 +350,8 @@
       padding: var(--sui-button-medium-pill-padding, 0 12px);
     }
 
-    &.flex {
+    &.flex:not([hidden]) {
+      display: inline-flex; // Avoid Tailwind .flex class collisions
       flex: auto;
       width: -moz-available;
       width: -webkit-fill-available;

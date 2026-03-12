@@ -89,7 +89,8 @@
       display: none;
     }
 
-    &.flex {
+    &.flex:not([hidden]) {
+      display: inline-grid; // Avoid Tailwind .flex class collisions
       width: -moz-available;
       width: -webkit-fill-available;
       width: stretch;

@@ -129,6 +129,10 @@
     margin: var(--sui-focus-ring-width);
     width: calc(100% - var(--sui-focus-ring-width) * 2);
 
+    &.flex:not([hidden]) {
+      display: block; // Avoid Tailwind .flex class collisions
+    }
+
     :global {
       .sui.text-area {
         margin: 0 !important;

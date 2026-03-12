@@ -108,7 +108,8 @@
     margin: var(--sui-focus-ring-width);
     min-width: var(--sui-textbox-singleline-min-width);
 
-    &.flex {
+    &.flex:not([hidden]) {
+      display: inline-flex; // Avoid Tailwind .flex class collisions
       width: -moz-available;
       width: -webkit-fill-available;
       width: stretch;

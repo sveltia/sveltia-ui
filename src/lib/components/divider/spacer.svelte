@@ -25,7 +25,8 @@
 
 <style lang="scss">
   .spacer {
-    &.flex {
+    &.flex:not([hidden]) {
+      display: block; // Avoid Tailwind .flex class collisions
       flex: auto;
     }
 
