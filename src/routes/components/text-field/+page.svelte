@@ -1,6 +1,13 @@
 <script>
   import { NumberInput, PasswordInput, SearchBar, SecretInput, TextArea, TextInput } from '$lib';
   import Example from '../../_components/example.svelte';
+
+  let value = $state('');
+
+  $effect(() => {
+    // eslint-disable-next-line no-console
+    console.log('Value changed:', value);
+  });
 </script>
 
 <h2>Text Field</h2>
@@ -55,6 +62,22 @@
   <Example>
     <div role="none">
       <SearchBar />
+    </div>
+  </Example>
+</section>
+
+<section>
+  <h3>Search with debounce</h3>
+  <Example>
+    <div role="none">
+      <SearchBar
+        debounce
+        bind:value
+        oninput={(event) => {
+          // eslint-disable-next-line no-console
+          console.log('input event fired:', event);
+        }}
+      />
     </div>
   </Example>
 </section>

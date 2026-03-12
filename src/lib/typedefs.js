@@ -159,6 +159,10 @@
  * `inputmode` attribute on the `<input>`.
  * @property {boolean} [flex] Make the text input container flexible.
  * @property {boolean} [monospace] Whether to use a monospace font for the input text.
+ * @property {boolean | number} [debounce] Whether to debounce the `input` event. If `true`, the
+ * `input` event will be debounced by 300ms. If a number is provided, it will be used as the
+ * debounce delay in milliseconds. This is useful for performance optimization when the input event
+ * triggers expensive operations like API calls. Default: `false`.
  * @property {string} [class] The `class` attribute on the wrapper element.
  * @property {boolean} [hidden] Whether to hide the widget.
  * @property {boolean} [disabled] Whether to disable the widget. An alias of the `aria-disabled`

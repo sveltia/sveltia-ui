@@ -31,6 +31,7 @@
     inputmode = 'text',
     flex = false,
     monospace = false,
+    debounce = false,
     class: className,
     hidden = false,
     disabled = false,
@@ -39,11 +40,43 @@
     invalid = false,
     'aria-label': ariaLabel,
     children,
+    oninput,
     ...restProps
     /* eslint-enable prefer-const */
   } = $props();
 
   const id = $props.id();
+  const timeout = $derived(typeof debounce === 'number' ? debounce : 300);
+
+  let debounceTimer = 0;
+
+  $effect(() => () => {
+    clearTimeout(debounceTimer);
+  });
+
+  /**
+   * Update the `value` and call the `oninput` callback.
+   * @param {InputEvent} event The `input` event object.
+   */
+  const fireInput = (event) => {
+    value = /** @type {HTMLInputElement} */ (event.target).value;
+    oninput?.(event);
+  };
+
+  /**
+   * Handle the `input` event. If `debounce` is `true`, the event will be debounced by 300ms.
+   * @param {InputEvent} event The `input` event object.
+   */
+  const handleInput = (event) => {
+    if (debounce) {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        fireInput(event);
+      }, timeout);
+    } else {
+      fireInput(event);
+    }
+  };
 </script>
 
 <div
@@ -58,7 +91,7 @@
   <input
     bind:this={element}
     {...restProps}
-    bind:value
+    {value}
     type="text"
     {role}
     dir="auto"
@@ -73,6 +106,7 @@
     aria-readonly={readonly}
     aria-required={required}
     aria-invalid={invalid}
+    oninput={handleInput}
     use:activateKeyShortcuts={keyShortcuts}
   />
   {#if ariaLabel && showInlineLabel}
