@@ -19,6 +19,12 @@ export const isMac = () =>
  */
 export const matchShortcuts = (event, shortcuts) => {
   const { ctrlKey, metaKey, altKey, shiftKey, code } = event;
+
+  // The `code` property can be `undefined` in some cases
+  if (!code) {
+    return false;
+  }
+
   const key = code.replace(/^(?:Digit|Key)(.)$/, '$1');
 
   return shortcuts.split(/\s+/).some((shortcut) => {
