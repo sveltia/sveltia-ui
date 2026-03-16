@@ -17,11 +17,12 @@ const DIACRITIC_RE = /\p{Diacritic}/gu;
 /**
  * Normalize the given string for search value comparison. Since `transliterate` is slow, we only
  * apply basic normalization.
+ * @internal
  * @param {string} value Original value.
  * @returns {string} Normalized value.
  * @todo Move this to `@sveltia/utils`.
  */
-const normalize = (value) => {
+export const normalize = (value) => {
   value = value.trim();
 
   if (!value) {
@@ -475,8 +476,8 @@ class Group {
           newTarget = activeMembers[index - 1];
         }
 
-        if (index === 0) {
-          // Last member
+        if (index <= 0) {
+          // Last member (also handles the case when nothing is focused, index === -1)
           newTarget = activeMembers[activeMembers.length - 1];
         }
       }

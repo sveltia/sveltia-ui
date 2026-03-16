@@ -112,9 +112,13 @@
     });
 
     if (show && duration) {
-      timerId = globalThis.setTimeout(() => {
-        show = false;
-      }, duration);
+      timerId = /** @type {number} */ (
+        /** @type {unknown} */ (
+          globalThis.setTimeout(() => {
+            show = false;
+          }, duration)
+        )
+      );
     }
   });
 </script>

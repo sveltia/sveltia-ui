@@ -70,9 +70,13 @@
   const handleInput = (event) => {
     if (debounce) {
       clearTimeout(debounceTimer);
-      debounceTimer = setTimeout(() => {
-        fireInput(event);
-      }, timeout);
+      debounceTimer = /** @type {number} */ (
+        /** @type {unknown} */ (
+          setTimeout(() => {
+            fireInput(event);
+          }, timeout)
+        )
+      );
     } else {
       fireInput(event);
     }

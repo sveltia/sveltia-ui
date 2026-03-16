@@ -34,15 +34,17 @@ export const initLocales = ({ fallbackLocale = 'en', initialLocale = 'en' } = {}
 
 /**
  * List of RTL locales: Arabic, Persian, Hebrew, Urdu.
+ * @internal
  */
-const RTL_LOCALES = ['ar', 'fa', 'he', 'ur'];
+export const RTL_LOCALES = ['ar', 'fa', 'he', 'ur'];
 
 /**
  * Get the text direction of the given locale.
+ * @internal
  * @param {string | null | undefined} locale Locale code.
  * @returns {'rtl' | 'ltr'} Text direction.
  */
-const getDirection = (locale) =>
+export const getDirection = (locale) =>
   locale && RTL_LOCALES.includes(locale.split('-')[0]) ? 'rtl' : 'ltr';
 
 if (!import.meta.env.SSR) {

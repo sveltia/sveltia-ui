@@ -59,6 +59,7 @@
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-jsdoc": "^62.8.0",
     "eslint-plugin-svelte": "^2.46.1",
+    "happy-dom": "^20.8.4",
     "oxlint": "^1.55.0",
     "postcss": "^8.5.8",
     "postcss-html": "^1.8.1",

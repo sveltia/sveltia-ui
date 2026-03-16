@@ -7,6 +7,7 @@ import { defineConfig } from 'vite';
 export default defineConfig({
   plugins: [sveltekit()],
   test: {
+    environment: 'happy-dom',
     include: ['src/lib/{components,services}/**/*.test.js'],
     coverage: {
       include: ['src/lib/{components,services}/**/*.js'],
