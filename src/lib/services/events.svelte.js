@@ -2,13 +2,23 @@
  * @import { ActionReturn } from 'svelte/action';
  */
 
+/** @type {boolean | undefined} */
+let _isMac;
+
 /**
  * Check if the user agent is macOS.
  * @returns {boolean} Result.
  */
-export const isMac = () =>
-  /** @type {any} */ (navigator).userAgentData?.platform === 'macOS' ||
-  navigator.platform.startsWith('Mac');
+export const isMac = () => {
+  _isMac ??=
+    /** @type {any} */ (navigator).userAgentData?.platform === 'macOS' ||
+    navigator.platform.startsWith('Mac');
+
+  return _isMac;
+};
+
+const MODIFIER_KEYS = ['Ctrl', 'Meta', 'Alt', 'Shift'];
+const CODE_RE = /^(?:Digit|Key)(.)$/;
 
 /**
  * Whether the event matches the given keyboard shortcuts.
@@ -25,7 +35,7 @@ export const matchShortcuts = (event, shortcuts) => {
     return false;
   }
 
-  const key = code.replace(/^(?:Digit|Key)(.)$/, '$1');
+  const key = code.replace(CODE_RE, '$1');
 
   return shortcuts.split(/\s+/).some((shortcut) => {
     const keys = shortcut.split('+');
@@ -51,7 +61,7 @@ export const matchShortcuts = (event, shortcuts) => {
     }
 
     return keys
-      .filter((_key) => !['Ctrl', 'Meta', 'Alt', 'Shift'].includes(_key))
+      .filter((_key) => !MODIFIER_KEYS.includes(_key))
       .every((_key) => _key.toUpperCase() === key.toUpperCase());
   });
 };
@@ -67,6 +77,12 @@ export const matchShortcuts = (event, shortcuts) => {
 export const activateKeyShortcuts = (element, shortcuts = '') => {
   /** @type {string | undefined} */
   let platformKeyShortcuts;
+  /**
+   * Pre-parsed shortcuts for fast per-event matching without string allocations.
+   * @type {{ ctrl: boolean, meta: boolean, alt: boolean, shift: boolean, nonModifierKeys: string[]
+   * }[] | undefined}
+   */
+  let parsedShortcuts;
 
   /**
    * Handle the event.
@@ -74,12 +90,32 @@ export const activateKeyShortcuts = (element, shortcuts = '') => {
    */
   const handler = (event) => {
     const { disabled, offsetParent } = element;
-    const { top, left } = element.getBoundingClientRect();
 
-    // Check if the element is visible
-    if (!matchShortcuts(event, /** @type {string} */ (platformKeyShortcuts)) || !offsetParent) {
+    // Check shortcut match and visibility first — no layout reflow until needed
+    if (
+      !offsetParent ||
+      !parsedShortcuts?.some(({ ctrl, meta, alt, shift, nonModifierKeys }) => {
+        const { ctrlKey, metaKey, altKey, shiftKey, code } = event;
+
+        if (!code) {
+          return false;
+        }
+
+        const key = code.replace(CODE_RE, '$1').toUpperCase();
+
+        return (
+          ctrl === ctrlKey &&
+          meta === metaKey &&
+          alt === altKey &&
+          shift === shiftKey &&
+          nonModifierKeys.every((k) => k === key)
+        );
+      })
+    ) {
       return;
     }
+
+    const { top, left } = element.getBoundingClientRect();
 
     if (disabled) {
       // Make sure `elementsFromPoint()` works as expected
@@ -119,8 +155,24 @@ export const activateKeyShortcuts = (element, shortcuts = '') => {
       : undefined;
 
     if (platformKeyShortcuts) {
+      parsedShortcuts = platformKeyShortcuts.split(/\s+/).map((shortcut) => {
+        const parts = shortcut.split('+');
+
+        return {
+          ctrl: parts.includes('Ctrl'),
+          meta: parts.includes('Meta'),
+          alt: parts.includes('Alt'),
+          shift: parts.includes('Shift'),
+          nonModifierKeys: parts
+            .filter((k) => !MODIFIER_KEYS.includes(k))
+            .map((k) => k.toUpperCase()),
+        };
+      });
+
       globalThis.addEventListener('keydown', handler, { capture: true });
       element.setAttribute('aria-keyshortcuts', platformKeyShortcuts);
+    } else {
+      parsedShortcuts = undefined;
     }
   };
 

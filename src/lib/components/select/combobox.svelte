@@ -21,6 +21,12 @@
    */
 
   /**
+   * Selector for the currently selected option in the popup. Used to update the selected option
+   * when the value is changed externally.
+   */
+  const SELECTED_SELECTOR = '[role="option"][aria-selected="true"]';
+
+  /**
    * @type {ComboboxProps & TextInputProps & Record<string, any>}
    */
   let {
@@ -43,7 +49,6 @@
   } = $props();
 
   const id = $props.id();
-  const selectedSelector = '[role="option"][aria-selected="true"]';
   let isPopupOpen = $state(false);
 
   /** @type {HTMLElement | undefined} */
@@ -67,17 +72,15 @@
    * Update the {@link label} and selected option when the {@link value} is changed.
    */
   const _onChange = () => {
-    const selected = popupContent?.querySelector(selectedSelector);
-
-    const target = /** @type {HTMLButtonElement} */ (
+    const target = /** @type {HTMLButtonElement | null} */ (
       popupContent?.querySelector(`[role="option"][data-value="${value}"]`)
     );
 
     if (target) {
       label = target.dataset.label || target.dataset.value || target.textContent || '';
 
-      if (selected !== target) {
-        selected?.setAttribute('aria-selected', 'false');
+      if (target.getAttribute('aria-selected') !== 'true') {
+        popupContent?.querySelector(SELECTED_SELECTOR)?.setAttribute('aria-selected', 'false');
         target.setAttribute('aria-selected', 'true');
       }
     }
@@ -99,7 +102,7 @@
   $effect(() => {
     if (popupContent) {
       globalThis.requestAnimationFrame(() => {
-        const selected = popupContent?.querySelector(selectedSelector);
+        const selected = popupContent?.querySelector(SELECTED_SELECTOR);
 
         if (selected) {
           _onSelect(/** @type {HTMLButtonElement} */ (selected));

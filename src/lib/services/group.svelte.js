@@ -9,6 +9,12 @@ import { isRTL } from './i18n.js';
 import { getSelectedItemDetail } from './select.svelte.js';
 
 /**
+ * Diacritic characters regex for normalization. We use a regex instead of `Intl` APIs for better
+ * performance, since `transliterate` is slow and we only need basic normalization.
+ */
+const DIACRITIC_RE = /\p{Diacritic}/gu;
+
+/**
  * Normalize the given string for search value comparison. Since `transliterate` is slow, we only
  * apply basic normalization.
  * @param {string} value Original value.
@@ -22,10 +28,7 @@ const normalize = (value) => {
     return '';
   }
 
-  return value
-    .normalize('NFD')
-    .replace(/\p{Diacritic}/gu, '')
-    .toLocaleLowerCase();
+  return value.normalize('NFD').replace(DIACRITIC_RE, '').toLocaleLowerCase();
 };
 
 /**
@@ -503,8 +506,9 @@ class Group {
   onUpdate({ searchTerms }) {
     const terms = normalize(searchTerms);
     const _terms = terms ? terms.split(/\s+/) : [];
+    const { allMembers, parent } = this;
 
-    const matched = this.allMembers
+    const matched = allMembers
       .map((member) => {
         const searchValue = normalize(
           member.dataset.searchValue ??
@@ -522,8 +526,8 @@ class Group {
       })
       .filter((hidden) => !hidden).length;
 
-    this.parent.dispatchEvent(
-      new CustomEvent('Filter', { detail: { matched, total: this.allMembers.length } }),
+    parent.dispatchEvent(
+      new CustomEvent('Filter', { detail: { matched, total: allMembers.length } }),
     );
   }
 }

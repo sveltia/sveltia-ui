@@ -120,7 +120,15 @@ class Popup {
         height: height ? `${Math.round(height)}px` : 'auto',
       };
 
-      if (JSON.stringify(style) !== JSON.stringify(get(this.style))) {
+      const current = get(this.style);
+
+      if (
+        style.inset !== current.inset ||
+        style.zIndex !== current.zIndex ||
+        style.minWidth !== current.minWidth ||
+        style.maxWidth !== current.maxWidth ||
+        style.height !== current.height
+      ) {
         this.style.set(style);
       }
     });
@@ -212,7 +220,8 @@ class Popup {
 
     // Update the popup width when the base element is resized
     new ResizeObserver(() => {
-      this.checkPosition();
+      cancelAnimationFrame(this._rafId);
+      this._rafId = requestAnimationFrame(() => this.checkPosition());
     }).observe(this.positionBaseElement);
   }
 

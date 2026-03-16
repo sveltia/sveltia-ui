@@ -16,6 +16,14 @@
    */
 
   /**
+   * List of month names for month selector. We use a fixed date to avoid issues with daylight
+   * saving time.
+   */
+  const MONTH_NAMES = Array.from({ length: 12 }, (__, i) =>
+    new Date(2000, i, 10).toLocaleDateString('en', { month: 'short' }),
+  );
+
+  /**
    * @type {Props & Record<string, any>}
    */
   let {
@@ -24,10 +32,6 @@
     /* eslint-enable prefer-const */
   } = $props();
 
-  /** @type {{ day: Date }[]} */
-  const dayList = [];
-  /** @type {{ day: Date }[][]} */
-  const weeks = [];
   const now = new Date();
 
   const date = $derived(value ? new Date(value) : now);
@@ -38,29 +42,21 @@
     firstDay = new Date(firstDayOfMonth);
   });
 
-  /**
-   * Populate {@link weeks} as per the current {@link firstDay}.
-   */
-  const getWeeks = () => {
+  const dayList = $derived.by(() => {
+    if (!firstDay) return [];
+
     const cursor = new Date(firstDay);
 
     // Start from Sunday
     cursor.setDate(1 - cursor.getUTCDay());
 
-    for (let i = 0; i < 42; i += 1) {
-      const week = Math.floor(i / 7);
+    return Array.from({ length: 42 }, () => {
+      const day = new Date(cursor);
 
-      dayList[i] = { day: new Date(cursor) };
-      weeks[week] ||= [];
-      weeks[week][cursor.getUTCDay() % 7] = { day: new Date(cursor) };
       cursor.setUTCDate(cursor.getUTCDate() + 1);
-    }
-  };
 
-  $effect(() => {
-    if (firstDay) {
-      getWeeks();
-    }
+      return { day };
+    });
   });
 </script>
 
@@ -113,13 +109,9 @@
           <Divider orientation="vertical" />
           <div role="group" aria-label={$_('_sui.calendar.month')}>
             <div role="none" class="grid">
-              {#each [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] as month}
+              {#each MONTH_NAMES as monthName}
                 <div role="none">
-                  <Button>
-                    {new Date(date.getUTCFullYear(), month, 10).toLocaleDateString('en', {
-                      month: 'short',
-                    })}
-                  </Button>
+                  <Button>{monthName}</Button>
                 </div>
               {/each}
             </div>

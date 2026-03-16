@@ -212,14 +212,15 @@ const getSelectionTypes = () => {
 /**
  * Listen to changes made on the editor and trigger the Update event.
  * @param {LexicalEditor} editor Editor instance.
+ * @param {any[]} transformers Active transformers for this editor instance.
  */
-const onEditorUpdate = (editor) => {
+const onEditorUpdate = (editor, transformers) => {
   editor.getRootElement()?.dispatchEvent(
     new CustomEvent('Update', {
       detail: {
         value: $convertToMarkdownString(
           // Use underscores for italic text in Markdown instead of asterisks
-          allTransformers.filter((/** @type {any} */ { tag }) => tag !== '*'),
+          transformers.filter((/** @type {any} */ { tag }) => tag !== '*'),
         ) // Remove unnecessary backslash for underscore and backslash characters
           // @see https://github.com/sveltia/sveltia-cms/issues/430
           // @see https://github.com/sveltia/sveltia-cms/issues/512
@@ -245,12 +246,16 @@ export const initEditor = ({
   isCodeEditor = false,
   defaultLanguage = 'plain',
 }) => {
-  components.forEach(({ node, transformer }) => {
-    /** @type {any[]} */ (editorConfig.nodes).unshift(node);
-    allTransformers.unshift(transformer);
-  });
+  // Build per-instance copies to avoid permanently mutating the shared module-level arrays
+  const localNodes = components.length
+    ? [...components.map(({ node }) => node), .../** @type {any[]} */ (editorConfig.nodes)]
+    : editorConfig.nodes;
 
-  const editor = createEditor(editorConfig);
+  const localTransformers = components.length
+    ? [...components.map(({ transformer }) => transformer), ...allTransformers]
+    : allTransformers;
+
+  const editor = createEditor({ ...editorConfig, nodes: localNodes });
 
   registerRichText(editor);
   registerDragonSupport(editor);
@@ -326,7 +331,7 @@ export const initEditor = ({
         }
       }
 
-      onEditorUpdate(editor);
+      onEditorUpdate(editor, localTransformers);
     });
   });
 
