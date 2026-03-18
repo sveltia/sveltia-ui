@@ -59,12 +59,14 @@
    * @param {InputEvent} event The `input` event object.
    */
   const fireInput = (event) => {
-    value = /** @type {HTMLInputElement} */ (event.target).value;
+    value = element?.value;
     oninput?.(event);
   };
 
   /**
-   * Handle the `input` event. If `debounce` is `true`, the event will be debounced by 300ms.
+   * Handle the `input` event. If `debounce` is `true`, the event will be debounced by 300ms. We use
+   * `oninputcapture` to ensure that the event is fired before any `oninput` handlers on parent
+   * elements, including the Lexical editor.
    * @param {InputEvent} event The `input` event object.
    */
   const handleInput = (event) => {
@@ -110,7 +112,7 @@
     aria-readonly={readonly}
     aria-required={required}
     aria-invalid={invalid}
-    oninput={handleInput}
+    oninputcapture={handleInput}
     use:activateKeyShortcuts={keyShortcuts}
   />
   {#if ariaLabel && showInlineLabel}

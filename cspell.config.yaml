@@ -30,6 +30,7 @@ words:
   - infobar
   - jsdoc
   - nocheck
+  - oninputcapture
   - opsz
   - oxlint
   - plusplus
