@@ -155,6 +155,11 @@
   .clone {
     overflow: hidden;
     visibility: hidden;
+  }
+
+  textarea,
+  .clone {
     white-space: pre-wrap;
+    word-break: break-all;
   }
 </style>
