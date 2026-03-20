@@ -5,7 +5,7 @@
   @see https://w3c.github.io/aria/#textbox
 -->
 <script>
-  import { activateKeyShortcuts } from '../../services/events.svelte.js';
+  import { activateKeyShortcuts } from '@sveltia/utils/events';
   import TruncatedText from '../typography/truncated-text.svelte';
 
   /**

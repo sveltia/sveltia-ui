@@ -1,6 +1,7 @@
 <script>
   import { LinkNode, TOGGLE_LINK_COMMAND } from '@lexical/link';
   import { $getNearestNodeOfType as getNearestNodeOfType } from '@lexical/utils';
+  import { isMac, matchShortcuts } from '@sveltia/utils/events';
   import {
     COMMAND_PRIORITY_NORMAL,
     KEY_DOWN_COMMAND,
@@ -15,7 +16,6 @@
   } from 'lexical';
   import { getContext } from 'svelte';
   import { _ } from 'svelte-i18n';
-  import { isMac, matchShortcuts } from '../../../services/events.svelte.js';
   import Button from '../../button/button.svelte';
   import Dialog from '../../dialog/dialog.svelte';
   import Icon from '../../icon/icon.svelte';
