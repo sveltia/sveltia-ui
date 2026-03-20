@@ -22,9 +22,9 @@
     "check:eslint": "eslint .",
     "check:oxlint": "oxlint .",
     "check:stylelint": "stylelint '**/*.{css,scss,svelte}'",
-    "test": "vitest run",
-    "test:coverage": "vitest --coverage",
-    "test:watch": "vitest"
+    "test": "NODE_OPTIONS=--no-experimental-webstorage vitest run",
+    "test:coverage": "NODE_OPTIONS=--no-experimental-webstorage vitest run --coverage",
+    "test:watch": "NODE_OPTIONS=--no-experimental-webstorage vitest"
   },
   "dependencies": {
     "@lexical/code": "^0.41.0",
