@@ -4,9 +4,8 @@ import {
   $isCodeNode,
   CodeHighlightNode,
   CodeNode,
-  PrismTokenizer,
-  registerCodeHighlighting,
 } from '@lexical/code';
+import { PrismTokenizer, registerCodeHighlighting } from '@lexical/code-prism';
 import { registerDragonSupport } from '@lexical/dragon';
 import { HorizontalRuleNode } from '@lexical/extension';
 import { createEmptyHistoryState, registerHistory } from '@lexical/history';
