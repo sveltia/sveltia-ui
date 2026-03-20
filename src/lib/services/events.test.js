@@ -63,6 +63,22 @@ describe('matchShortcuts', () => {
   it('should be case-insensitive for the key', () => {
     expect(matchShortcuts(makeEvent({ code: 'KeyS' }), 's')).toBe(true);
   });
+
+  it('should return false when Meta is required but not pressed', () => {
+    expect(matchShortcuts(makeEvent({ code: 'KeyS', metaKey: false }), 'Meta+S')).toBe(false);
+  });
+
+  it('should return true when Meta is required and pressed', () => {
+    expect(matchShortcuts(makeEvent({ code: 'KeyS', metaKey: true }), 'Meta+S')).toBe(true);
+  });
+
+  it('should return false when Alt is required but not pressed', () => {
+    expect(matchShortcuts(makeEvent({ code: 'KeyF', altKey: false }), 'Alt+F')).toBe(false);
+  });
+
+  it('should return false when Shift is required but not pressed', () => {
+    expect(matchShortcuts(makeEvent({ code: 'KeyA', shiftKey: false }), 'Shift+A')).toBe(false);
+  });
 });
 
 describe('isMac', () => {
@@ -217,5 +233,39 @@ describe('activateKeyShortcuts', () => {
     expect(clickSpy).not.toHaveBeenCalled();
     expect(setPropertySpy).toHaveBeenCalledWith('pointer-events', 'auto');
     expect(removePropertySpy).toHaveBeenCalledWith('pointer-events');
+  });
+});
+
+describe('activateKeyShortcuts - Accel on macOS', () => {
+  it('should replace Accel with Meta when on macOS', async () => {
+    vi.resetModules();
+
+    // Stub navigator.platform to look like macOS so isMac() returns true in a fresh module
+    const origDescriptor = Object.getOwnPropertyDescriptor(globalThis, 'navigator');
+
+    Object.defineProperty(globalThis, 'navigator', {
+      configurable: true,
+      value: {
+        userAgentData: { platform: 'macOS' },
+        platform: 'MacIntel',
+      },
+    });
+
+    try {
+      const { activateKeyShortcuts: freshActivate } = await import('./events.svelte.js');
+      const btn = /** @type {HTMLButtonElement} */ (document.createElement('button'));
+
+      document.body.appendChild(btn);
+
+      const action = freshActivate(btn, 'Accel+S');
+
+      expect(btn.getAttribute('aria-keyshortcuts')).toBe('Meta+S');
+      action.destroy?.();
+      btn.remove();
+    } finally {
+      if (origDescriptor) {
+        Object.defineProperty(globalThis, 'navigator', origDescriptor);
+      }
+    }
   });
 });

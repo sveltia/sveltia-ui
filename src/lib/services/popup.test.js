@@ -123,6 +123,29 @@ describe('Popup', () => {
     expect(get(instance.open)).toBe(false);
   });
 
+  it('should not close popup when clicking a non-menuitem element inside it (branch 35 false)', () => {
+    const instance = activatePopup(anchor, popup, 'bottom-left');
+    const div = document.createElement('div');
+
+    popup.appendChild(div);
+    anchor.click(); // open
+    div.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    // div has no role → neither menuitem nor popup backdrop → popup stays open
+    expect(get(instance.open)).toBe(true);
+    div.remove();
+  });
+
+  it('should not close popup on Escape with modifier key held (branch 38 false)', () => {
+    const instance = activatePopup(anchor, popup, 'bottom-left');
+
+    anchor.click(); // open
+    popup.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Escape', shiftKey: true, bubbles: false }),
+    );
+    // hasModifier=true → condition false → popup stays open
+    expect(get(instance.open)).toBe(true);
+  });
+
   it('should toggle open to true on Enter keydown on anchor', () => {
     const instance = activatePopup(anchor, popup, 'bottom-left');
 
@@ -450,7 +473,7 @@ describe('Popup - IntersectionObserver position callback (lines 35-132)', () => 
   });
 
   it('should normalize RTL position when document.dir is rtl', () => {
-    document.documentElement.setAttribute('dir', 'rtl');
+    Object.defineProperty(document, 'dir', { get: () => 'rtl', configurable: true });
 
     const instance = activatePopup(anchor, popup, 'bottom-left');
 
@@ -459,7 +482,93 @@ describe('Popup - IntersectionObserver position callback (lines 35-132)', () => 
     const style = get(instance.style);
 
     expect(style.inset).not.toBeUndefined();
-    document.documentElement.removeAttribute('dir');
+    Reflect.deleteProperty(document, 'dir');
+  });
+
+  it('should normalize bottom-right to bottom-left in RTL (endsWith -right branch)', () => {
+    Object.defineProperty(document, 'dir', { get: () => 'rtl', configurable: true });
+
+    const instance = activatePopup(anchor, popup, 'bottom-right');
+
+    ioCallbacks[0]([makeEntry()]);
+
+    const style = get(instance.style);
+
+    // After RTL normalization bottom-right → bottom-left; inset should be computed
+    expect(style.inset).not.toBeUndefined();
+    Reflect.deleteProperty(document, 'dir');
+  });
+
+  it('should normalize left-top to right-top in RTL (startsWith left- branch)', () => {
+    Object.defineProperty(document, 'dir', { get: () => 'rtl', configurable: true });
+
+    const instance = activatePopup(anchor, popup, 'left-top');
+
+    ioCallbacks[0]([makeEntry()]);
+
+    const style = get(instance.style);
+
+    // After RTL normalization left-top → right-top; inset should be computed
+    expect(style.inset).not.toBeUndefined();
+    Reflect.deleteProperty(document, 'dir');
+  });
+
+  it('should normalize right-top to left-top in RTL (startsWith right- branch)', () => {
+    Object.defineProperty(document, 'dir', { get: () => 'rtl', configurable: true });
+
+    const instance = activatePopup(anchor, popup, 'right-top');
+
+    ioCallbacks[0]([makeEntry()]);
+
+    const style = get(instance.style);
+
+    // After RTL normalization right-top → left-top; inset should be computed
+    expect(style.inset).not.toBeUndefined();
+    Reflect.deleteProperty(document, 'dir');
+  });
+
+  it('should set height to bottomMargin when content overflows bottom but top is not better', () => {
+    const instance = activatePopup(anchor, popup, 'bottom-left');
+
+    // bottomMargin = 500 - 400 - 8 = 92; topMargin = 50 - 8 = 42; topMargin < bottomMargin
+    // so the else branch runs: height = bottomMargin (92px)
+    Object.defineProperty(content, 'scrollHeight', { configurable: true, get: () => 200 });
+    ioCallbacks[0]([makeEntry({ top: 50, bottom: 400, vw: 800, vh: 500 })]);
+
+    const style = get(instance.style);
+
+    expect(style.height).toBe('92px');
+  });
+
+  it('should compute bottom from rootBounds.height - intersectionRect.bottom for -bottom position (branch 19)', () => {
+    // 'right-bottom' ends with '-bottom' → bottom = Math.round(vh - intersectionRect.bottom)
+    const instance = activatePopup(anchor, popup, 'right-bottom');
+
+    // default: top=100, bottom=150, left=50, right=300, vh=600
+    // bottom = Math.round(600 - 150) = 450
+    ioCallbacks[0]([makeEntry()]);
+
+    const style = get(instance.style);
+
+    expect(style.inset).toContain('450px');
+  });
+
+  it('should not update style when intersection callback fires with identical geometry (branch 25)', () => {
+    const instance = activatePopup(anchor, popup, 'bottom-left');
+    const entry = makeEntry();
+
+    // First call — style is updated (inset differs from initial empty object)
+    ioCallbacks[0]([entry]);
+
+    const styleBefore = get(instance.style);
+
+    // Second call with same entry — all comparisons are equal → style.set not called again
+    ioCallbacks[0]([entry]);
+
+    const styleAfter = get(instance.style);
+
+    expect(styleAfter.inset).toBe(styleBefore.inset);
+    expect(styleAfter.zIndex).toBe(styleBefore.zIndex);
   });
 });
 describe('Popup - ResizeObserver callback (lines 223-224)', () => {

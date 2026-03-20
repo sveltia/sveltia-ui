@@ -515,8 +515,7 @@ class Group {
           member.dataset.searchValue ??
             member.dataset.label ??
             member.querySelector('.label')?.textContent ??
-            member.textContent ??
-            '',
+            /** @type {string} */ (member.textContent),
         );
 
         const hidden = !_terms.every((term) => searchValue.includes(term));

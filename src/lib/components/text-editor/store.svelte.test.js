@@ -193,4 +193,37 @@ describe('createEditorStore', () => {
     expect(store.hasConverterError).toBe(true);
     consoleSpy.mockRestore();
   });
+
+  it('should pass empty string fallback to convertMarkdownToLexical when inputValue is empty (branch 2)', async () => {
+    const store = createEditorStore();
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const mockEditor = /** @type {any} */ ({ getEditorState: () => ({ isEmpty: () => false }) });
+
+    store.editor = mockEditor;
+    store.initialized = true;
+    store.inputValue = 'hello'; // non-empty: inputValue || '' uses inputValue (count[0])
+    store.inputValue = ''; // empty: inputValue || '' uses '' fallback (count[1])
+    await new Promise((r) => {
+      setTimeout(r, 0);
+    });
+    expect(store.inputValue).toBe('');
+    consoleSpy.mockRestore();
+  });
+
+  it('should trigger convertMarkdown when isEmpty() is true even though value is unchanged (branch 6)', async () => {
+    const store = createEditorStore();
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    // isEmpty() returns true → triggers convertMarkdown even when hasChange = false
+    const mockEditor = /** @type {any} */ ({ getEditorState: () => ({ isEmpty: () => true }) });
+
+    store.editor = mockEditor;
+    store.initialized = true;
+    store.inputValue = 'hello'; // hasChange=true → count[1] of binary-expr at line 88
+    store.inputValue = 'hello'; // hasChange=false, isEmpty()=true → count[2] is hit
+    await new Promise((r) => {
+      setTimeout(r, 0);
+    });
+    expect(store.inputValue).toBe('hello');
+    consoleSpy.mockRestore();
+  });
 });

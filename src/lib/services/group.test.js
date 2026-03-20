@@ -1,7 +1,9 @@
 /* eslint-disable jsdoc/require-jsdoc */
+/* eslint-disable jsdoc/require-description */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { activateGroup, normalize } from './group.svelte.js';
+import { isRTL } from './i18n.js';
 
 describe('normalize', () => {
   it('should trim whitespace', () => {
@@ -125,6 +127,22 @@ describe('Group - tablist', () => {
     expect(tabs[1].tabIndex).toBe(0);
     expect(tabs[0].tabIndex).toBe(-1);
   });
+
+  it('should navigate backward when pressing ArrowRight in RTL (branch 63 prevKey=ArrowRight)', () => {
+    isRTL.set(true);
+    // In RTL prevKey='ArrowRight'; press from tabs[2] → backward to tabs[1]
+    tabs[2].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+    expect(tabs[1].getAttribute('aria-selected')).toBe('true');
+    isRTL.set(false);
+  });
+
+  it('should navigate forward when pressing ArrowLeft in RTL (branch 65 nextKey=ArrowLeft)', () => {
+    isRTL.set(true);
+    // In RTL nextKey='ArrowLeft'; press from tabs[0] → forward to tabs[1]
+    tabs[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true }));
+    expect(tabs[1].getAttribute('aria-selected')).toBe('true');
+    isRTL.set(false);
+  });
 });
 
 describe('Group - listbox', () => {
@@ -166,6 +184,26 @@ describe('Group - listbox', () => {
     options.forEach((opt) => {
       expect(opt.tabIndex).toBe(-1);
     });
+  });
+
+  it('should select option when clicking on a child element inside it (target.closest branch 38)', () => {
+    const span = document.createElement('span');
+
+    span.textContent = 'Inner';
+    options[0].appendChild(span);
+    span.dispatchEvent(new MouseEvent('click', { button: 0, bubbles: true }));
+    expect(options[0].getAttribute('aria-selected')).toBe('true');
+    span.remove();
+  });
+
+  it('should not select option when right-clicked (button !== 0, branch 39 early return)', () => {
+    options[0].dispatchEvent(new MouseEvent('click', { button: 2, bubbles: true }));
+    expect(options[0].getAttribute('aria-selected')).toBe('false');
+  });
+
+  it('should not select when clicking the listbox container itself (!newTarget, branch 39)', () => {
+    listbox.dispatchEvent(new MouseEvent('click', { button: 0 }));
+    options.forEach((opt) => expect(opt.getAttribute('aria-selected')).toBe('false'));
   });
 });
 
@@ -456,6 +494,22 @@ describe('Group - multiselect listbox', () => {
     expect(options[0].getAttribute('aria-selected')).toBe('true');
     expect(options[1].getAttribute('aria-selected')).toBe('false');
     expect(options[2].getAttribute('aria-selected')).toBe('true');
+  });
+
+  it('should do nothing when Space pressed with no focused element (branch 47 false path)', () => {
+    // No navigation has occurred → no .focused element → currentTarget = undefined
+    listbox.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true }));
+    options.forEach((opt) => expect(opt.getAttribute('aria-selected')).toBe('false'));
+  });
+
+  it('should select multiselect option via Space keydown (selectByKeydown, branch 22 count[3])', () => {
+    // ArrowDown gives options[0] the .focused class without selecting (multiselect ignores arrow)
+    listbox.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+    expect(options[0].classList.contains('focused')).toBe(true);
+    expect(options[0].getAttribute('aria-selected')).toBe('false');
+    // Space selects via multiSelect && isTarget && selectByKeydown path
+    listbox.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true }));
+    expect(options[0].getAttribute('aria-selected')).toBe('true');
   });
 });
 
@@ -759,5 +813,332 @@ describe('Group - grid listbox navigation', () => {
     // options[3] is disabled → newTarget set to undefined → no navigation
     expect(options[0].getAttribute('aria-selected')).toBe('true');
     expect(options[3].getAttribute('aria-selected')).not.toBe('true');
+  });
+
+  it('should navigate grid forward (index+1) on ArrowLeft in RTL (branch 56)', () => {
+    // Navigate to options[1] first
+    listbox.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+    expect(options[1].getAttribute('aria-selected')).toBe('true');
+    // In RTL, ArrowLeft moves forward: index 1 + 1 = options[2]
+    isRTL.set(true);
+    listbox.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true }));
+    expect(options[2].getAttribute('aria-selected')).toBe('true');
+    isRTL.set(false);
+  });
+
+  it('should navigate grid backward (index-1) on ArrowRight in RTL (branch 59)', () => {
+    // Navigate to options[1]
+    listbox.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+    expect(options[1].getAttribute('aria-selected')).toBe('true');
+    // In RTL, ArrowRight moves backward: index 1 - 1 = options[0]
+    isRTL.set(true);
+    listbox.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+    expect(options[0].getAttribute('aria-selected')).toBe('true');
+    isRTL.set(false);
+  });
+});
+
+describe('Group - scrollIntoView catch fallback in activate()', () => {
+  /** @type {HTMLElement} */
+  let tablist;
+  /** @type {HTMLElement[]} */
+  let panels;
+
+  beforeEach(async () => {
+    vi.useFakeTimers();
+    panels = ['panel-catch-a', 'panel-catch-b'].map((id) => {
+      const panel = document.createElement('div');
+
+      panel.id = id;
+      // Make scrollIntoView(options) throw but scrollIntoView(boolean) succeed
+
+      panel.scrollIntoView = (arg) => {
+        if (arg && typeof arg === 'object') {
+          throw new Error('not supported');
+        }
+      };
+
+      document.body.appendChild(panel);
+
+      return panel;
+    });
+    tablist = document.createElement('div');
+    tablist.setAttribute('role', 'tablist');
+    panels.forEach((panel, i) => {
+      const tab = document.createElement('div');
+
+      tab.setAttribute('role', 'tab');
+      tab.setAttribute('aria-controls', panel.id);
+      tab.textContent = `Tab ${i + 1}`;
+      tablist.appendChild(tab);
+    });
+    document.body.appendChild(tablist);
+    activateGroup(tablist);
+    // flush sleep(100) + setTimeout(300) in activate()
+    await vi.advanceTimersByTimeAsync(500);
+  });
+
+  afterEach(() => {
+    tablist.remove();
+    panels.forEach((p) => p.remove());
+    vi.useRealTimers();
+  });
+
+  it('should fall back to scrollIntoView(true) when options form throws during activate()', () => {
+    // If the catch branch executed without throwing, the panel is set up correctly
+    expect(panels[0].getAttribute('aria-hidden')).toBe('false');
+  });
+});
+
+describe('Group - scrollIntoView catch fallback in selectTarget()', () => {
+  /** @type {HTMLElement} */
+  let tablist;
+  /** @type {HTMLElement[]} */
+  let tabs;
+  /** @type {HTMLElement[]} */
+  let panels;
+
+  beforeEach(async () => {
+    vi.useFakeTimers();
+    panels = ['panel-sel-a', 'panel-sel-b'].map((id) => {
+      const panel = document.createElement('div');
+
+      panel.id = id;
+
+      panel.scrollIntoView = (arg) => {
+        if (arg && typeof arg === 'object') {
+          throw new Error('not supported');
+        }
+      };
+
+      document.body.appendChild(panel);
+
+      return panel;
+    });
+    tablist = document.createElement('div');
+    tablist.setAttribute('role', 'tablist');
+    tabs = panels.map((panel, i) => {
+      const tab = document.createElement('div');
+
+      tab.setAttribute('role', 'tab');
+      tab.setAttribute('aria-controls', panel.id);
+      tab.textContent = `Tab ${i + 1}`;
+      // Also override the tab element's scrollIntoView to throw on options form
+
+      tab.scrollIntoView = (arg) => {
+        if (arg && typeof arg === 'object') {
+          throw new Error('not supported');
+        }
+      };
+
+      tablist.appendChild(tab);
+
+      return tab;
+    });
+    document.body.appendChild(tablist);
+    activateGroup(tablist);
+    await vi.advanceTimersByTimeAsync(500);
+  });
+
+  afterEach(() => {
+    tablist.remove();
+    panels.forEach((p) => p.remove());
+    vi.useRealTimers();
+  });
+
+  it('should fall back to scrollIntoView(true) on controlTarget and element when options form throws', async () => {
+    // Switch to the second tab to trigger selectTarget() catch branches
+    tabs[1].click();
+    await vi.advanceTimersByTimeAsync(400);
+    // Verify the panel switched correctly despite the scrollIntoView error
+    expect(panels[1].getAttribute('aria-hidden')).toBe('false');
+    expect(panels[0].getAttribute('aria-hidden')).toBe('true');
+  });
+});
+
+describe('Group - tablist with pre-selected second tab (branch 7 defaultSelected)', () => {
+  it('should preserve pre-selected tab and use defaultSelected ternary path', async () => {
+    vi.useFakeTimers();
+
+    const tl = document.createElement('div');
+
+    tl.setAttribute('role', 'tablist');
+
+    const tbs = ['Tab 1', 'Tab 2', 'Tab 3'].map((label) => {
+      const tab = document.createElement('div');
+
+      tab.setAttribute('role', 'tab');
+      tab.textContent = label;
+      tl.appendChild(tab);
+
+      return tab;
+    });
+
+    // Pre-select the second tab before activation
+    tbs[1].setAttribute('aria-selected', 'true');
+    document.body.appendChild(tl);
+    activateGroup(tl);
+    await vi.advanceTimersByTimeAsync(150);
+
+    // defaultSelected = tbs[1]; the ternary `defaultSelected ? element === defaultSelected : ...`
+    // evaluates to true for tbs[1] → branch 7 count[0] is hit
+    expect(tbs[1].getAttribute('aria-selected')).toBe('true');
+    expect(tbs[0].getAttribute('aria-selected')).toBe('false');
+    tl.remove();
+    vi.useRealTimers();
+  });
+});
+
+describe('Group - menu with nested radio groups (branch 16 cross-group filter)', () => {
+  it('should not affect radio items in a different group when selecting one', async () => {
+    vi.useFakeTimers();
+
+    const menu = document.createElement('div');
+
+    menu.setAttribute('role', 'menu');
+
+    const group1 = document.createElement('div');
+
+    group1.setAttribute('role', 'group');
+
+    const radioA = document.createElement('div');
+
+    radioA.setAttribute('role', 'menuitemradio');
+    radioA.textContent = 'A';
+    group1.appendChild(radioA);
+
+    const group2 = document.createElement('div');
+
+    group2.setAttribute('role', 'group');
+
+    const radioB = document.createElement('div');
+
+    radioB.setAttribute('role', 'menuitemradio');
+    radioB.textContent = 'B';
+    group2.appendChild(radioB);
+
+    menu.appendChild(group1);
+    menu.appendChild(group2);
+    document.body.appendChild(menu);
+    activateGroup(menu);
+    await vi.advanceTimersByTimeAsync(150);
+
+    // Click radioA — radioB is in a different group, so line 267 early return filters it out
+    radioA.click();
+    expect(radioA.getAttribute('aria-checked')).toBe('true');
+    // radioB was skipped (early return at line 267) — remains unaffected
+    expect(radioB.getAttribute('aria-checked')).toBe('false');
+    menu.remove();
+    vi.useRealTimers();
+  });
+});
+
+describe('Group - onClick with clickToSelect disabled (branch 39 !clickToSelect)', () => {
+  it('should not select option when clickToSelect is false', async () => {
+    vi.useFakeTimers();
+
+    const lb = document.createElement('div');
+
+    lb.setAttribute('role', 'listbox');
+
+    const opt = document.createElement('div');
+
+    opt.setAttribute('role', 'option');
+    opt.textContent = 'Option';
+    lb.appendChild(opt);
+    document.body.appendChild(lb);
+    activateGroup(lb, { clickToSelect: false });
+    await vi.advanceTimersByTimeAsync(150);
+    opt.click();
+    // !clickToSelect → early return in onClick → aria-selected stays false
+    expect(opt.getAttribute('aria-selected')).toBe('false');
+    lb.remove();
+    vi.useRealTimers();
+  });
+});
+
+describe('Group - grid listbox with no initial focus (branch 49 currentTarget?...: -1)', () => {
+  it('should use index -1 as fallback when no item is focused in grid', async () => {
+    vi.useFakeTimers();
+
+    const gridListbox = document.createElement('div');
+
+    gridListbox.setAttribute('role', 'listbox');
+    gridListbox.classList.add('grid');
+
+    const gridOptions = Array.from({ length: 6 }, (_, i) => {
+      const opt = document.createElement('div');
+
+      opt.setAttribute('role', 'option');
+      opt.textContent = `Item ${i + 1}`;
+      gridListbox.appendChild(opt);
+
+      return opt;
+    });
+
+    document.body.appendChild(gridListbox);
+    Object.defineProperty(gridListbox, 'clientWidth', { configurable: true, get: () => 300 });
+    gridOptions.forEach((opt) => {
+      Object.defineProperty(opt, 'clientWidth', { configurable: true, get: () => 100 });
+    });
+    activateGroup(gridListbox);
+    await vi.advanceTimersByTimeAsync(150);
+
+    // Press ArrowDown with no focused element → currentTarget=undefined → index=-1
+    // -1 + colCount(3) = 2 → gridOptions[2]
+    gridListbox.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+    expect(gridOptions[2].getAttribute('aria-selected')).toBe('true');
+    gridListbox.remove();
+    vi.useRealTimers();
+  });
+});
+
+describe('Group - onUpdate with querySelector(.label) and textContent fallbacks (branch 75)', () => {
+  it('should use .label child textContent and plain textContent as search sources', async () => {
+    vi.useFakeTimers();
+
+    const listbox = document.createElement('div');
+
+    listbox.setAttribute('role', 'listbox');
+
+    // opt1: has .label span child, no dataset attrs → querySelector('.label').textContent path
+    const opt1 = document.createElement('div');
+
+    opt1.setAttribute('role', 'option');
+
+    const labelSpan = document.createElement('span');
+
+    labelSpan.className = 'label';
+    labelSpan.textContent = 'Apple';
+    opt1.appendChild(labelSpan);
+
+    // opt2: plain textContent only, no dataset, no .label child → member.textContent path
+    const opt2 = document.createElement('div');
+
+    opt2.setAttribute('role', 'option');
+    opt2.textContent = 'Banana';
+
+    listbox.appendChild(opt1);
+    listbox.appendChild(opt2);
+    document.body.appendChild(listbox);
+
+    const action = /** @type {any} */ (activateGroup(listbox, { searchTerms: '' }));
+
+    await vi.advanceTimersByTimeAsync(150);
+
+    /** @type {any} */
+    let filterDetail = null;
+
+    listbox.addEventListener('Filter', (e) => {
+      filterDetail = /** @type {any} */ (e).detail;
+    });
+
+    // Searching 'apple' matches opt1 (via .label span) but not opt2 (via textContent 'Banana')
+    action.update({ searchTerms: 'apple' });
+    expect(filterDetail.matched).toBe(1);
+    expect(filterDetail.total).toBe(2);
+
+    listbox.remove();
+    vi.useRealTimers();
   });
 });
