@@ -44,6 +44,7 @@
         top: 0;
         z-index: 100;
         display: flex;
+        flex-wrap: wrap;
         gap: 4px;
         border-width: 1px 1px 0;
         border-style: solid;
@@ -53,7 +54,8 @@
         border-end-start-radius: 0;
         border-end-end-radius: 0;
         padding: 0 4px;
-        height: 40px;
+        height: auto;
+        min-height: 40px;
         background-color: var(--sui-tertiary-background-color);
 
         @media (width < 768px) {
