@@ -300,33 +300,35 @@ export const initEditor = ({
     COMMAND_PRIORITY_NORMAL,
   );
 
-  editor.registerUpdateListener(async () => {
+  editor.registerUpdateListener(() => {
     if (editor?.isComposing()) {
       return;
     }
 
-    await sleep(100);
+    (async () => {
+      await sleep(100);
 
-    editor.update(() => {
-      // Prevent CodeNode from being removed
-      if (isCodeEditor) {
-        const root = $getRoot();
-        const children = root.getChildren();
+      editor.update(() => {
+        // Prevent CodeNode from being removed
+        if (isCodeEditor) {
+          const root = $getRoot();
+          const children = root.getChildren();
 
-        if (children.length === 1 && !$isCodeNode(children[0])) {
-          children[0].remove();
+          if (children.length === 1 && !$isCodeNode(children[0])) {
+            children[0].remove();
+          }
+
+          if (children.length === 0) {
+            const node = $createCodeNode();
+
+            node.setLanguage(defaultLanguage);
+            root.append(node);
+          }
         }
 
-        if (children.length === 0) {
-          const node = $createCodeNode();
-
-          node.setLanguage(defaultLanguage);
-          root.append(node);
-        }
-      }
-
-      onEditorUpdate(editor);
-    });
+        onEditorUpdate(editor);
+      });
+    })();
   });
 
   // `editor.registerCommand(KEY_TAB_COMMAND, listener, priority)` doesn’t work for some reason, so
