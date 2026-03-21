@@ -49,8 +49,8 @@ importers:
         specifier: ^0.42.0
         version: 0.42.0
       '@sveltia/utils':
-        specifier: ^0.9.1
-        version: 0.9.1
+        specifier: ^0.9.3
+        version: 0.9.3
       lexical:
         specifier: ^0.42.0
         version: 0.42.0
@@ -1135,8 +1135,8 @@ packages:
       svelte: ^5.46.4
       vite: ^8.0.0-beta.7 || ^8.0.0
 
-  '@sveltia/utils@0.9.1':
-    resolution: {integrity: sha512-FkQti+BFJUU+BYL9mbPFHey6qSxwHKKpjttE03jbmtljbVftw5NGop4ip/TSXLRroWQOOHhVusRCE2HUzYwMSQ==}
+  '@sveltia/utils@0.9.3':
+    resolution: {integrity: sha512-F4dFl4+fe1TqKWbfOZQf4vWbVxKvyTQAfdWICADrCkv7FEOimMsH1D4wV8uZ4Eu0y/BNGbwVzCukuCqyrH/HjQ==}
 
   '@tybys/wasm-util@0.10.1':
     resolution: {integrity: sha512-9tTaPJLSiejZKx+Bmog4uSubteqTvFrVrURwkmHixBo0G4seD0zUxp98E1DzUBJxLQ3NPwXrGKDiVjwx/DpPsg==}
@@ -4031,7 +4031,7 @@ snapshots:
       vite: 8.0.1(@types/node@25.5.0)(esbuild@0.27.4)(sass@1.98.0)(yaml@2.8.2)
       vitefu: 1.1.2(vite@8.0.1(@types/node@25.5.0)(esbuild@0.27.4)(sass@1.98.0)(yaml@2.8.2))
 
-  '@sveltia/utils@0.9.1':
+  '@sveltia/utils@0.9.3':
     dependencies:
       base32-encode: 2.0.0
 

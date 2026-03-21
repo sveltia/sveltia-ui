@@ -1,7 +1,7 @@
 <script>
   import { LinkNode, TOGGLE_LINK_COMMAND } from '@lexical/link';
   import { $getNearestNodeOfType as getNearestNodeOfType } from '@lexical/utils';
-  import { isMac, matchShortcuts } from '@sveltia/utils/events';
+  import { isMac, matchesShortcuts } from '@sveltia/utils/events';
   import {
     COMMAND_PRIORITY_NORMAL,
     KEY_DOWN_COMMAND,
@@ -111,7 +111,7 @@
    * @param {KeyboardEvent} event `keydown` event.
    */
   const onInputKeyDown = (event) => {
-    if (matchShortcuts(event, 'Enter') && anchorURL) {
+    if (matchesShortcuts(event, 'Enter') && anchorURL) {
       openDialog = false;
     }
   };
@@ -168,7 +168,7 @@
     editorStore.editor?.registerCommand(
       KEY_DOWN_COMMAND,
       (event) => {
-        if (matchShortcuts(event, isMac() ? 'Meta+K' : 'Ctrl+K')) {
+        if (matchesShortcuts(event, isMac() ? 'Meta+K' : 'Ctrl+K')) {
           event.preventDefault();
           onButtonClick();
         }
