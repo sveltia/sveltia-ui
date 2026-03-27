@@ -1,3 +1,7 @@
+// Work around the “Prism is not defined” error in consumers
+// @see https://github.com/remix-run/remix/discussions/8182
+import 'prismjs';
+
 import {
   $createCodeNode,
   $isCodeHighlightNode,

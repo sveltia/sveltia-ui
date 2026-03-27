@@ -1,4 +1,8 @@
 <script>
+  // Work around the “Prism is not defined” error in consumers
+  // @see https://github.com/remix-run/remix/discussions/8182
+  import 'prismjs';
+
   import { $isCodeNode as isCodeNode } from '@lexical/code';
   import { $getNodeByKey as getNodeByKey, $getRoot as getRoot } from 'lexical';
   import prismComponents from 'prismjs/components';

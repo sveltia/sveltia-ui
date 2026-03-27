@@ -1,4 +1,8 @@
 <script>
+  // Work around the “Prism is not defined” error in consumers
+  // @see https://github.com/remix-run/remix/discussions/8182
+  import 'prismjs';
+
   import { $createCodeNode as createCodeNode } from '@lexical/code';
   import { INSERT_ORDERED_LIST_COMMAND, INSERT_UNORDERED_LIST_COMMAND } from '@lexical/list';
   import {
