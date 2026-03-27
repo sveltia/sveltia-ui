@@ -9,6 +9,7 @@ minimumReleaseAgeExclude:
   - "@lexical/*"
 
 overrides:
+  "brace-expansion@<5.0.5": ">=5.0.5"
   "cookie@<0.7.0": ">=0.7.0"
   "esbuild@<=0.24.2": ">=0.25.0"
 
