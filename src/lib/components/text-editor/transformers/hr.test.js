@@ -7,12 +7,10 @@ import { HR } from './hr.js';
 vi.mock('@lexical/extension', () => {
   const mockHRNode = {
     __type: 'horizontalrule',
-    // eslint-disable-next-line jsdoc/require-jsdoc
     selectNext: vi.fn(),
   };
 
   return {
-    // eslint-disable-next-line jsdoc/require-jsdoc
     $createHorizontalRuleNode: vi.fn(() => mockHRNode),
     // eslint-disable-next-line jsdoc/require-jsdoc
     $isHorizontalRuleNode: (/** @type {{ __type: string; }} */ node) =>

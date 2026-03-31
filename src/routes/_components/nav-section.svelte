@@ -1,5 +1,5 @@
 <script>
-  // eslint-disable-next-line import/extensions
+  import { resolve } from '$app/paths';
   import { page } from '$app/state';
 
   /**
@@ -28,7 +28,13 @@
         {#if disabled}
           {label}
         {:else}
-          <a href="/{category}/{key}" aria-current={current ? 'page' : undefined}>
+          <a
+            href={resolve(
+              // @ts-ignore
+              `/${category}/${key}`,
+            )}
+            aria-current={current ? 'page' : undefined}
+          >
             {label}
           </a>
         {/if}

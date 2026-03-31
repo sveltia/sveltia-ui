@@ -367,7 +367,7 @@
       ></div>
     {/if}
     {#if optionLabels.length}
-      {#each optionLabels as label, index}
+      {#each optionLabels as label, index (`${index}-${label}`)}
         <span
           role="none"
           class="label"

@@ -187,7 +187,7 @@
     <ul
       style="margin: 8px 0 0; padding: 0; list-style: none; font-size: var(--sui-font-size-small);"
     >
-      {#each eventLog as entry}
+      {#each eventLog as entry, index (`${index}-${entry}`)}
         <li style="padding: 2px 0; color: var(--sui-secondary-foreground-color);">{entry}</li>
       {/each}
     </ul>

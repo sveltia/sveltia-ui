@@ -1,5 +1,4 @@
 /* eslint-disable jsdoc/require-jsdoc */
-/* eslint-disable jsdoc/require-description */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { activateGroup, normalize } from './group.svelte.js';

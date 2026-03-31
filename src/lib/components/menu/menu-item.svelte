@@ -116,6 +116,7 @@
     {#snippet startIcon()}
       {@render _startIcon?.()}
     {/snippet}
+    <!-- eslint-disable-next-line svelte/no-useless-children-snippet -->
     {#snippet children()}
       <div role="none" class="content" class:label={!!label}>
         {#if label}

@@ -4,6 +4,7 @@
 -->
 <script>
   import { _ } from 'svelte-i18n';
+  import { SvelteDate } from 'svelte/reactivity';
   import { isRTL } from '../../services/i18n.js';
   import Button from '../button/button.svelte';
   import Divider from '../divider/divider.svelte';
@@ -26,26 +27,23 @@
   /**
    * @type {Props & Record<string, any>}
    */
-  let {
-    /* eslint-disable prefer-const */
-    value = $bindable(undefined),
-    /* eslint-enable prefer-const */
-  } = $props();
+  let { value = $bindable(undefined) } = $props();
 
   const now = new Date();
 
   const date = $derived(value ? new Date(value) : now);
   const firstDayOfMonth = $derived(new Date(date.getUTCFullYear(), date.getUTCMonth(), 1));
+  // eslint-disable-next-line svelte/prefer-writable-derived
   let firstDay = $state();
 
   $effect(() => {
-    firstDay = new Date(firstDayOfMonth);
+    firstDay = new SvelteDate(firstDayOfMonth);
   });
 
   const dayList = $derived.by(() => {
     if (!firstDay) return [];
 
-    const cursor = new Date(firstDay);
+    const cursor = new SvelteDate(firstDay);
 
     // Start from Sunday
     cursor.setDate(1 - cursor.getUTCDay());
@@ -99,7 +97,7 @@
               </Button>
             </div>
             <div role="none" class="grid">
-              {#each [0, 1, 2, 3, 4, 5, 6, 7, 8, 9] as year}
+              {#each [0, 1, 2, 3, 4, 5, 6, 7, 8, 9] as year (year)}
                 <div role="none">
                   <Button>202{year}</Button>
                 </div>
@@ -109,7 +107,7 @@
           <Divider orientation="vertical" />
           <div role="group" aria-label={$_('_sui.calendar.month')}>
             <div role="none" class="grid">
-              {#each MONTH_NAMES as monthName}
+              {#each MONTH_NAMES as monthName (monthName)}
                 <div role="none">
                   <Button>{monthName}</Button>
                 </div>
@@ -139,12 +137,12 @@
     </Button>
   </div>
   <div role="listbox" class="grid">
-    {#each dayList.slice(0, 7) as { day }}
+    {#each dayList.slice(0, 7) as { day } (day)}
       <div role="none" class="weekday">
         {day.toLocaleDateString('en', { weekday: 'narrow' })}
       </div>
     {/each}
-    {#each dayList as { day }}
+    {#each dayList as { day } (day)}
       <div
         role="none"
         class:other-month={day.getUTCMonth() !== firstDay?.getUTCMonth()}

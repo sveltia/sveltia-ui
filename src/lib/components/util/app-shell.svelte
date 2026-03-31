@@ -36,8 +36,7 @@
     'https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=block',
   ];
 
-  /** @type {HTMLElement | undefined} */
-  let fontLoader = $state();
+  let fontLoaded = $state(false);
 
   onMount(() => {
     const mediaQuery = globalThis.matchMedia('(prefers-color-scheme: dark)');
@@ -60,7 +59,7 @@
     };
 
     globalThis.setTimeout(() => {
-      fontLoader?.remove();
+      fontLoaded = true;
     }, 1000);
   });
 </script>
@@ -82,17 +81,19 @@
   <meta name="google" content="notranslate" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
-  {#each stylesheets as href}
+  {#each stylesheets as href (href)}
     <link rel="preload" {href} as="style" />
     <link rel="stylesheet" {href} />
   {/each}
 </svelte:head>
 
-<!-- Preload fonts, including the icons -->
-<div bind:this={fontLoader} class="font-loader" aria-hidden="true" style:opacity="0">
-  Loading <strong>Sveltia</strong> <em>UI</em>
-  <span role="none" class="material-symbols-outlined">favorite</span>
-</div>
+{#if !fontLoaded}
+  <!-- Preload fonts, including the icons -->
+  <div class="font-loader" aria-hidden="true" style:opacity="0">
+    Loading <strong>Sveltia</strong> <em>UI</em>
+    <span role="none" class="material-symbols-outlined">favorite</span>
+  </div>
+{/if}
 
 <div
   {...restProps}

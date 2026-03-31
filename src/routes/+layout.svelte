@@ -1,5 +1,6 @@
 <script>
   import { isLoading } from 'svelte-i18n';
+  import { resolve } from '$app/paths';
   import { AppShell, initLocales } from '$lib';
   import NavSection from './_components/nav-section.svelte';
 
@@ -25,7 +26,7 @@
 {#if !$isLoading}
   <AppShell style="display: flex; flex-direction: column;">
     <header>
-      <h1><a href="/">Sveltia UI</a></h1>
+      <h1><a href={resolve('/')}>Sveltia UI</a></h1>
     </header>
     <div role="none" class="wrapper">
       <nav class="sidebar">

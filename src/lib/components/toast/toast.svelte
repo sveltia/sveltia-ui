@@ -59,6 +59,7 @@
       /** @type {HTMLElement} */ (document.querySelector('.sui.toast-base.enabled')) ?? undefined;
 
     if (popover) {
+      // eslint-disable-next-line svelte/no-dom-manipulating
       popoverBase?.remove();
     } else {
       popover = popoverBase;
@@ -76,6 +77,7 @@
     }
 
     return () => {
+      // eslint-disable-next-line svelte/no-dom-manipulating
       toast?.remove();
     };
   });

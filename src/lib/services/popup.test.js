@@ -305,7 +305,6 @@ describe('Popup - IntersectionObserver on anchor (lines 179-180)', () => {
     OrigIObserver = globalThis.IntersectionObserver;
 
     // Stub IntersectionObserver to capture callbacks
-    // eslint-disable-next-line jsdoc/require-jsdoc
     globalThis.IntersectionObserver = /** @type {any} */ (
       class {
         /** @param {(entries: any[]) => void} cb */
@@ -375,7 +374,6 @@ describe('Popup - IntersectionObserver position callback (lines 35-132)', () => 
 
     ioCallbacks = [];
     OrigIObserver = globalThis.IntersectionObserver;
-    // eslint-disable-next-line jsdoc/require-jsdoc
     globalThis.IntersectionObserver = /** @type {any} */ (
       class {
         /** @param {(entries: any[]) => void} cb */
@@ -592,7 +590,6 @@ describe('Popup - ResizeObserver callback (lines 223-224)', () => {
     OrigRObs = globalThis.ResizeObserver;
 
     // Stub ResizeObserver to capture its callback
-    // eslint-disable-next-line jsdoc/require-jsdoc
     globalThis.ResizeObserver = /** @type {any} */ (
       class {
         /** @param {any} cb */
@@ -609,7 +606,6 @@ describe('Popup - ResizeObserver callback (lines 223-224)', () => {
     // Also stub IntersectionObserver to avoid errors
     const OrigIO = globalThis.IntersectionObserver;
 
-    // eslint-disable-next-line jsdoc/require-jsdoc
     globalThis.IntersectionObserver = /** @type {any} */ (
       class {
         // eslint-disable-next-line no-useless-constructor, no-empty-function

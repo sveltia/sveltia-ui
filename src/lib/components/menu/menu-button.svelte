@@ -70,9 +70,7 @@
   {#snippet startIcon()}
     {@render _startIcon?.()}
   {/snippet}
-  {#snippet children()}
-    {@render _children?.()}
-  {/snippet}
+  {@render _children?.()}
   {#snippet endIcon()}
     {#if _endIcon}
       {@render _endIcon()}
