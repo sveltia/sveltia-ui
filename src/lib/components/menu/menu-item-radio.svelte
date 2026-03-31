@@ -46,7 +46,10 @@
   {#snippet startIcon()}
     {@render _startIcon?.()}
   {/snippet}
-  {@render _children?.()}
+  <!-- eslint-disable-next-line svelte/no-useless-children-snippet -->
+  {#snippet children()}
+    {@render _children?.()}
+  {/snippet}
   {#snippet endIcon()}
     {#if checked}
       <Icon name="check" />
