@@ -32,3 +32,16 @@ interface HTMLElement {
   popover: 'auto' | 'manual';
   showPopover: Function;
 }
+
+/**
+ * Add support for custom events dispatched by the `Group` class.
+ */
+declare namespace svelteHTML {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  interface HTMLAttributes<T> {
+    onChange?: (event: CustomEvent) => void;
+    onFilter?: (event: CustomEvent) => void;
+    onInitialized?: () => void;
+    onInitializing?: () => void;
+  }
+}

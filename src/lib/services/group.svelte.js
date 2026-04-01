@@ -1,12 +1,12 @@
-/**
- * @import { ActionReturn } from 'svelte/action';
- */
-
 import { generateElementId } from '@sveltia/utils/element';
 import { sleep } from '@sveltia/utils/misc';
 import { get } from 'svelte/store';
 import { isRTL } from './i18n.js';
 import { getSelectedItemDetail } from './select.svelte.js';
+
+/**
+ * @import { Attachment } from 'svelte/attachments';
+ */
 
 /**
  * Diacritic characters regex for normalization. We use a regex instead of `Intl` APIs for better
@@ -89,7 +89,7 @@ const config = {
 /**
  * Implement keyboard and mouse interactions for a grouping composite widget.
  */
-class Group {
+export class Group {
   /**
    * Initialize a new `Group` instance.
    * @param {HTMLElement} parent Parent element.
@@ -106,6 +106,18 @@ class Group {
     this.id = generateElementId(this.role);
     this.parentGroupSelector = `[role="group"], [role="${this.role}"]`;
     this.clickToSelect = clickToSelect;
+
+    // eslint-disable-next-line jsdoc/require-description
+    /** @type {(event: MouseEvent) => void} */
+    this._onClick = (event) => {
+      this.onClick(event);
+    };
+
+    // eslint-disable-next-line jsdoc/require-description
+    /** @type {(event: KeyboardEvent) => void} */
+    this._onKeyDown = (event) => {
+      this.onKeyDown(event);
+    };
 
     const { orientation, childRoles, childSelectedAttr, focusChild, selectFirst } =
       config[this.role];
@@ -169,14 +181,8 @@ class Group {
       }
     });
 
-    parent.addEventListener('click', (event) => {
-      this.onClick(event);
-    });
-
-    parent.addEventListener('keydown', (event) => {
-      this.onKeyDown(event);
-    });
-
+    parent.addEventListener('click', this._onClick);
+    parent.addEventListener('keydown', this._onKeyDown);
     parent.dispatchEvent(new CustomEvent('Initialized'));
   }
 
@@ -501,6 +507,14 @@ class Group {
   }
 
   /**
+   * Clean up event listeners.
+   */
+  destroy() {
+    this.parent.removeEventListener('click', this._onClick);
+    this.parent.removeEventListener('keydown', this._onKeyDown);
+  }
+
+  /**
    * Called whenever the params are updated. Filter the items based on the search terms.
    * @param {{ searchTerms: string }} params Updated params.
    */
@@ -534,20 +548,22 @@ class Group {
 
 /**
  * Activate a new group.
- * @param {HTMLElement} parent Parent element.
- * @param {object} [params] Action params.
- * @returns {ActionReturn} Action.
+ * @param {object | (() => object)} [paramsOrGetter] Params object or a getter function for reactive
+ * params.
+ * @returns {Attachment} Attachment.
  */
-export const activateGroup = (parent, params) => {
-  const group = new Group(parent, params);
+export const activateGroup = (paramsOrGetter) => (parent) => {
+  const isGetter = typeof paramsOrGetter === 'function';
+  const initialParams = isGetter ? paramsOrGetter() : paramsOrGetter;
+  const group = new Group(/** @type {HTMLElement} */ (parent), initialParams);
 
-  return {
-    /**
-     * Called whenever the params are updated.
-     * @param {any} newParams Updated params.
-     */
-    update(newParams) {
-      group.onUpdate(newParams);
-    },
+  if (isGetter) {
+    $effect(() => {
+      group.onUpdate(paramsOrGetter());
+    });
+  }
+
+  return () => {
+    group.destroy();
   };
 };

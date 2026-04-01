@@ -1,7 +1,7 @@
 /* eslint-disable jsdoc/require-jsdoc */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { activateGroup, normalize } from './group.svelte.js';
+import { activateGroup, Group, normalize } from './group.svelte.js';
 import { isRTL } from './i18n.js';
 
 describe('normalize', () => {
@@ -50,7 +50,7 @@ describe('Group - tablist', () => {
       return tab;
     });
     document.body.appendChild(tablist);
-    activateGroup(tablist);
+    activateGroup()(tablist);
     await vi.advanceTimersByTimeAsync(150);
   });
 
@@ -164,7 +164,7 @@ describe('Group - listbox', () => {
       return opt;
     });
     document.body.appendChild(listbox);
-    activateGroup(listbox);
+    activateGroup()(listbox);
     await vi.advanceTimersByTimeAsync(150);
   });
 
@@ -212,7 +212,7 @@ describe('Group - onUpdate (search filter)', () => {
   /** @type {HTMLElement[]} */
   let options;
   /** @type {any} */
-  let action;
+  let group;
 
   beforeEach(async () => {
     vi.useFakeTimers();
@@ -229,7 +229,7 @@ describe('Group - onUpdate (search filter)', () => {
       return opt;
     });
     document.body.appendChild(listbox);
-    action = activateGroup(listbox, { searchTerms: '' });
+    group = new Group(listbox);
     await vi.advanceTimersByTimeAsync(150);
   });
 
@@ -242,7 +242,7 @@ describe('Group - onUpdate (search filter)', () => {
     const filterEvents = /** @type {CustomEvent[]} */ ([]);
 
     listbox.addEventListener('Filter', (e) => filterEvents.push(/** @type {CustomEvent} */ (e)));
-    action.update({ searchTerms: 'an' }); // matches Banana
+    group.onUpdate({ searchTerms: 'an' }); // matches Banana
     expect(filterEvents.length).toBeGreaterThan(0);
     expect(filterEvents[filterEvents.length - 1].detail.matched).toBe(1);
     expect(filterEvents[filterEvents.length - 1].detail.total).toBe(3);
@@ -258,7 +258,7 @@ describe('Group - onUpdate (search filter)', () => {
         }
       });
     });
-    action.update({ searchTerms: 'apple' });
+    group.onUpdate({ searchTerms: 'apple' });
     // Banana and Cherry should be toggled hidden
     expect(toggledItems).toContain('Banana');
     expect(toggledItems).toContain('Cherry');
@@ -266,12 +266,12 @@ describe('Group - onUpdate (search filter)', () => {
   });
 
   it('should show all items when search terms are cleared', () => {
-    action.update({ searchTerms: 'apple' });
+    group.onUpdate({ searchTerms: 'apple' });
 
     const filterEvents = /** @type {CustomEvent[]} */ ([]);
 
     listbox.addEventListener('Filter', (e) => filterEvents.push(/** @type {CustomEvent} */ (e)));
-    action.update({ searchTerms: '' });
+    group.onUpdate({ searchTerms: '' });
     expect(filterEvents[filterEvents.length - 1].detail.matched).toBe(3);
   });
 });
@@ -296,7 +296,7 @@ describe('Group - tablist keyboard (Enter and Space)', () => {
       return tab;
     });
     document.body.appendChild(tablist);
-    activateGroup(tablist);
+    activateGroup()(tablist);
     await vi.advanceTimersByTimeAsync(150);
   });
 
@@ -353,7 +353,7 @@ describe('Group - tablist with aria-controls panels', () => {
       return tab;
     });
     document.body.appendChild(tablist);
-    activateGroup(tablist);
+    activateGroup()(tablist);
     // also covers scrollIntoView setTimeout(300) in activate()
     await vi.advanceTimersByTimeAsync(500);
   });
@@ -424,7 +424,7 @@ describe('Group - disabled and read-only', () => {
       return opt;
     });
     document.body.appendChild(listbox);
-    activateGroup(listbox);
+    activateGroup()(listbox);
     await vi.advanceTimersByTimeAsync(150);
   });
 
@@ -467,7 +467,7 @@ describe('Group - multiselect listbox', () => {
       return opt;
     });
     document.body.appendChild(listbox);
-    activateGroup(listbox);
+    activateGroup()(listbox);
     await vi.advanceTimersByTimeAsync(150);
   });
 
@@ -532,7 +532,7 @@ describe('Group - listbox keyboard navigation', () => {
       return opt;
     });
     document.body.appendChild(listbox);
-    activateGroup(listbox);
+    activateGroup()(listbox);
     await vi.advanceTimersByTimeAsync(150);
   });
 
@@ -609,7 +609,7 @@ describe('Group - menu with menuitemradio', () => {
       return item;
     });
     document.body.appendChild(menu);
-    activateGroup(menu);
+    activateGroup()(menu);
     await vi.advanceTimersByTimeAsync(150);
   });
 
@@ -657,7 +657,7 @@ describe('Group - menu with menuitemcheckbox', () => {
       return item;
     });
     document.body.appendChild(menu);
-    activateGroup(menu);
+    activateGroup()(menu);
     await vi.advanceTimersByTimeAsync(150);
   });
 
@@ -706,7 +706,7 @@ describe('Group - radiogroup keyboard navigation', () => {
       return radio;
     });
     document.body.appendChild(radiogroup);
-    activateGroup(radiogroup);
+    activateGroup()(radiogroup);
     await vi.advanceTimersByTimeAsync(150);
     radios[0].click(); // select first radio
   });
@@ -772,7 +772,7 @@ describe('Group - grid listbox navigation', () => {
         get: () => 100,
       });
     });
-    activateGroup(listbox);
+    activateGroup()(listbox);
     await vi.advanceTimersByTimeAsync(150);
     options[0].click(); // add .focused class to options[0]
   });
@@ -872,7 +872,7 @@ describe('Group - scrollIntoView catch fallback in activate()', () => {
       tablist.appendChild(tab);
     });
     document.body.appendChild(tablist);
-    activateGroup(tablist);
+    activateGroup()(tablist);
     // flush sleep(100) + setTimeout(300) in activate()
     await vi.advanceTimersByTimeAsync(500);
   });
@@ -935,7 +935,7 @@ describe('Group - scrollIntoView catch fallback in selectTarget()', () => {
       return tab;
     });
     document.body.appendChild(tablist);
-    activateGroup(tablist);
+    activateGroup()(tablist);
     await vi.advanceTimersByTimeAsync(500);
   });
 
@@ -976,7 +976,7 @@ describe('Group - tablist with pre-selected second tab (branch 7 defaultSelected
     // Pre-select the second tab before activation
     tbs[1].setAttribute('aria-selected', 'true');
     document.body.appendChild(tl);
-    activateGroup(tl);
+    activateGroup()(tl);
     await vi.advanceTimersByTimeAsync(150);
 
     // defaultSelected = tbs[1]; the ternary `defaultSelected ? element === defaultSelected : ...`
@@ -1019,7 +1019,7 @@ describe('Group - menu with nested radio groups (branch 16 cross-group filter)',
     menu.appendChild(group1);
     menu.appendChild(group2);
     document.body.appendChild(menu);
-    activateGroup(menu);
+    activateGroup()(menu);
     await vi.advanceTimersByTimeAsync(150);
 
     // Click radioA — radioB is in a different group, so line 267 early return filters it out
@@ -1046,7 +1046,7 @@ describe('Group - onClick with clickToSelect disabled (branch 39 !clickToSelect)
     opt.textContent = 'Option';
     lb.appendChild(opt);
     document.body.appendChild(lb);
-    activateGroup(lb, { clickToSelect: false });
+    activateGroup({ clickToSelect: false })(lb);
     await vi.advanceTimersByTimeAsync(150);
     opt.click();
     // !clickToSelect → early return in onClick → aria-selected stays false
@@ -1080,7 +1080,7 @@ describe('Group - grid listbox with no initial focus (branch 49 currentTarget?..
     gridOptions.forEach((opt) => {
       Object.defineProperty(opt, 'clientWidth', { configurable: true, get: () => 100 });
     });
-    activateGroup(gridListbox);
+    activateGroup()(gridListbox);
     await vi.advanceTimersByTimeAsync(150);
 
     // Press ArrowDown with no focused element → currentTarget=undefined → index=-1
@@ -1121,7 +1121,7 @@ describe('Group - onUpdate with querySelector(.label) and textContent fallbacks 
     listbox.appendChild(opt2);
     document.body.appendChild(listbox);
 
-    const action = /** @type {any} */ (activateGroup(listbox, { searchTerms: '' }));
+    const group = new Group(listbox);
 
     await vi.advanceTimersByTimeAsync(150);
 
@@ -1133,9 +1133,81 @@ describe('Group - onUpdate with querySelector(.label) and textContent fallbacks 
     });
 
     // Searching 'apple' matches opt1 (via .label span) but not opt2 (via textContent 'Banana')
-    action.update({ searchTerms: 'apple' });
+    group.onUpdate({ searchTerms: 'apple' });
     expect(filterDetail.matched).toBe(1);
     expect(filterDetail.total).toBe(2);
+
+    listbox.remove();
+    vi.useRealTimers();
+  });
+});
+
+describe('Group - destroy', () => {
+  it('should remove click and keydown listeners after destroy()', async () => {
+    vi.useFakeTimers();
+
+    const listbox = document.createElement('div');
+
+    listbox.setAttribute('role', 'listbox');
+
+    const opt = document.createElement('div');
+
+    opt.setAttribute('role', 'option');
+    opt.textContent = 'Option';
+    listbox.appendChild(opt);
+    document.body.appendChild(listbox);
+
+    const group = new Group(listbox);
+
+    await vi.advanceTimersByTimeAsync(150);
+
+    // Click selects before destroy
+    opt.click();
+    expect(opt.getAttribute('aria-selected')).toBe('true');
+
+    group.destroy();
+
+    // Reset and click again — listener should be gone
+    opt.setAttribute('aria-selected', 'false');
+    opt.click();
+    expect(opt.getAttribute('aria-selected')).toBe('false');
+
+    listbox.remove();
+    vi.useRealTimers();
+  });
+});
+
+describe('activateGroup - attachment cleanup', () => {
+  it('should return a cleanup function that calls destroy()', async () => {
+    vi.useFakeTimers();
+
+    const listbox = document.createElement('div');
+
+    listbox.setAttribute('role', 'listbox');
+
+    const opt = document.createElement('div');
+
+    opt.setAttribute('role', 'option');
+    opt.textContent = 'Option';
+    listbox.appendChild(opt);
+    document.body.appendChild(listbox);
+
+    const cleanup = activateGroup()(listbox);
+
+    await vi.advanceTimersByTimeAsync(150);
+
+    // Click selects before cleanup
+    opt.click();
+    expect(opt.getAttribute('aria-selected')).toBe('true');
+
+    // Run cleanup
+    expect(typeof cleanup).toBe('function');
+    /** @type {() => void} */ (cleanup)();
+
+    // Reset and click again — listener should be gone
+    opt.setAttribute('aria-selected', 'false');
+    opt.click();
+    expect(opt.getAttribute('aria-selected')).toBe('false');
 
     listbox.remove();
     vi.useRealTimers();

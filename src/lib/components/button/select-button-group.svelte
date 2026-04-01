@@ -55,7 +55,7 @@
   aria-readonly={readonly}
   aria-required={required}
   aria-invalid={invalid}
-  use:activateGroup
+  {@attach activateGroup()}
 >
   <div role="none" class="inner" inert={disabled}>
     {@render children?.()}

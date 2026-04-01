@@ -67,20 +67,22 @@
    * Handle the `input` event. If `debounce` is `true`, the event will be debounced by 300ms. We use
    * `oninputcapture` to ensure that the event is fired before any `oninput` handlers on parent
    * elements, including the Lexical editor.
-   * @param {InputEvent} event The `input` event object.
+   * @param {Event} event The `input` event object.
    */
   const handleInput = (event) => {
+    const inputEvent = /** @type {InputEvent} */ (event);
+
     if (debounce) {
       clearTimeout(debounceTimer);
       debounceTimer = /** @type {number} */ (
         /** @type {unknown} */ (
           setTimeout(() => {
-            fireInput(event);
+            fireInput(inputEvent);
           }, timeout)
         )
       );
     } else {
-      fireInput(event);
+      fireInput(inputEvent);
     }
   };
 </script>
@@ -113,7 +115,7 @@
     aria-required={required}
     aria-invalid={invalid}
     oninputcapture={handleInput}
-    use:activateKeyShortcuts={keyShortcuts}
+    {@attach activateKeyShortcuts(keyShortcuts)}
   />
   {#if ariaLabel && showInlineLabel}
     <span id="{id}-label" class="label" class:hidden={!!value} aria-hidden="true">

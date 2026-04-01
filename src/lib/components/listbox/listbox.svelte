@@ -80,7 +80,7 @@
     filtered = matched !== total;
     onFilter?.(event);
   }}
-  use:activateGroup={{ searchTerms }}
+  {@attach activateGroup(() => ({ searchTerms }))}
 >
   <div role="none" class="inner" inert={disabled}>
     {@render children?.()}

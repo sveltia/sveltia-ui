@@ -47,7 +47,7 @@
   onChange={(/** @type {CustomEvent} */ event) => {
     onChange?.(event);
   }}
-  use:activateGroup
+  {@attach activateGroup()}
 >
   {@render children?.()}
 </div>

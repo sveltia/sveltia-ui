@@ -108,7 +108,7 @@
     updateIndicator();
     onChange?.(event);
   }}
-  use:activateGroup
+  {@attach activateGroup()}
 >
   <div role="none" class="inner" inert={disabled}>
     {@render children?.()}

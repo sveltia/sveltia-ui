@@ -70,7 +70,7 @@
   data-name={name}
   data-label={label}
   data-value={value}
-  use:activateKeyShortcuts={keyShortcuts}
+  {@attach activateKeyShortcuts(keyShortcuts)}
 >
   {@render startIcon?.()}
   {#if variant === 'link'}
