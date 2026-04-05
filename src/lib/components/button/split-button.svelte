@@ -6,7 +6,7 @@
   @see https://www.google.com/search?q=split+button&tbm=isch
 -->
 <script>
-  import { _ } from 'svelte-i18n';
+  import { _ } from '@sveltia/i18n';
   import Icon from '../icon/icon.svelte';
   import MenuButton from '../menu/menu-button.svelte';
   import Button from './button.svelte';
@@ -55,7 +55,7 @@
   {hidden}
   aria-hidden={hidden}
   aria-disabled={disabled}
-  aria-label={$_('_sui.split_button.x_options', { values: { name: label } })}
+  aria-label={_('_sui.split_button.x_options', { values: { name: label } })}
 >
   <Button {...restProps} {hidden} {disabled} {label} {variant} {size}></Button>
   <MenuButton
@@ -64,7 +64,7 @@
     {disabled}
     {variant}
     {size}
-    aria-label={$_('_sui.split_button.more_options')}
+    aria-label={_('_sui.split_button.more_options')}
     {popupPosition}
     popupPositionBaseElement={wrapper}
     {showPopupBackdrop}

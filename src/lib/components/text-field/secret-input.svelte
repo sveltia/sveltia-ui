@@ -6,7 +6,7 @@
   @see https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/-webkit-text-security
 -->
 <script>
-  import { _ } from 'svelte-i18n';
+  import { _ } from '@sveltia/i18n';
   import Button from '../button/button.svelte';
   import Icon from '../icon/icon.svelte';
   import TextInput from './text-input.svelte';
@@ -79,7 +79,7 @@
     iconic
     disabled={disabled || readonly}
     pressed={show}
-    aria-label={$_(show ? '_sui.secret_input.hide_secret' : '_sui.secret_input.show_secret')}
+    aria-label={_(show ? '_sui.secret_input.hide_secret' : '_sui.secret_input.show_secret')}
     aria-controls={id}
     onclick={() => {
       show = !show;

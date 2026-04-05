@@ -1,14 +1,12 @@
 <script>
-  import { isLoading } from 'svelte-i18n';
+  import { isLoading } from '@sveltia/i18n';
   import { resolve } from '$app/paths';
-  import { AppShell, initLocales } from '$lib';
+  import { AppShell } from '$lib';
   import NavSection from './_components/nav-section.svelte';
 
   /**
    * @import { Snippet } from 'svelte';
    */
-
-  initLocales();
 
   /**
    * @typedef {object} Props
@@ -23,7 +21,7 @@
   } = $props();
 </script>
 
-{#if !$isLoading}
+{#if !isLoading()}
   <AppShell style="display: flex; flex-direction: column;">
     <header>
       <h1><a href={resolve('/')}>Sveltia UI</a></h1>

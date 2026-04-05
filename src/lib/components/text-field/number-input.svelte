@@ -5,8 +5,8 @@
   @see https://w3c.github.io/aria/#textbox
 -->
 <script>
+  import { _ } from '@sveltia/i18n';
   import { untrack } from 'svelte';
-  import { _ } from 'svelte-i18n';
   import Button from '../button/button.svelte';
   import Icon from '../icon/icon.svelte';
   import TextInput from './text-input.svelte';
@@ -123,7 +123,7 @@
     <Button
       iconic
       disabled={disabled || readonly || Number.isNaN(Number(value)) || isMax}
-      aria-label={$_('_sui.number_input.increase')}
+      aria-label={_('_sui.number_input.increase')}
       aria-controls={id}
       onclick={() => {
         increase();
@@ -140,7 +140,7 @@
     <Button
       iconic
       disabled={disabled || readonly || Number.isNaN(Number(value)) || isMin}
-      aria-label={$_('_sui.number_input.decrease')}
+      aria-label={_('_sui.number_input.decrease')}
       aria-controls={id}
       onclick={() => {
         decrease();

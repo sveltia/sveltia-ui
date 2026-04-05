@@ -1,5 +1,5 @@
 <script>
-  import { _ } from 'svelte-i18n';
+  import { _ } from '@sveltia/i18n';
   import Button from '../button/button.svelte';
   import Icon from '../icon/icon.svelte';
 
@@ -44,7 +44,7 @@
           iconic
           size="small"
           variant="ghost"
-          aria-label={$_('_sui.dismiss')}
+          aria-label={_('_sui.dismiss')}
           onclick={() => {
             show = false;
           }}

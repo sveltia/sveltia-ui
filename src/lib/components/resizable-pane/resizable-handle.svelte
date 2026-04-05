@@ -5,8 +5,8 @@
   @see https://www.w3.org/WAI/ARIA/apg/patterns/windowsplitter/
 -->
 <script>
+  import { isRTL } from '@sveltia/i18n';
   import { getContext } from 'svelte';
-  import { isRTL } from '$lib/services/i18n.js';
 
   /**
    * @import { Snippet } from 'svelte';
@@ -112,7 +112,7 @@
     let percentDelta = (pixelDelta / containerSize) * 100;
 
     // In RTL with a horizontal layout, the visual direction is reversed
-    if (isHorizontal && $isRTL) {
+    if (isHorizontal && isRTL()) {
       percentDelta = -percentDelta;
     }
 
@@ -196,11 +196,13 @@
     }
 
     if (isHorizontal) {
+      const _isRTL = isRTL();
+
       // In RTL, Left/Right directions are visually swapped
       if (key === 'ArrowLeft') {
-        delta = $isRTL ? step : -step;
+        delta = _isRTL ? step : -step;
       } else if (key === 'ArrowRight') {
-        delta = $isRTL ? -step : step;
+        delta = _isRTL ? -step : step;
       } else {
         return;
       }

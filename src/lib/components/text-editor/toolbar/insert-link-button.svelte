@@ -1,6 +1,7 @@
 <script>
   import { LinkNode, TOGGLE_LINK_COMMAND } from '@lexical/link';
   import { $getNearestNodeOfType as getNearestNodeOfType } from '@lexical/utils';
+  import { _ } from '@sveltia/i18n';
   import { isMac, matchesShortcuts } from '@sveltia/utils/events';
   import {
     COMMAND_PRIORITY_NORMAL,
@@ -15,7 +16,6 @@
     $setSelection as setSelection,
   } from 'lexical';
   import { getContext } from 'svelte';
-  import { _ } from 'svelte-i18n';
   import Button from '../../button/button.svelte';
   import Dialog from '../../dialog/dialog.svelte';
   import Icon from '../../icon/icon.svelte';
@@ -188,7 +188,7 @@
 
 <Button
   iconic
-  aria-label={$_(`_sui.text_editor.${AVAILABLE_BUTTONS[type].labelKey}`)}
+  aria-label={_(`_sui.text_editor.${AVAILABLE_BUTTONS[type].labelKey}`)}
   aria-controls="{editorStore.editorId}-lexical-root"
   disabled={!editorStore.useRichText}
   pressed={selectionTypeMatches}
@@ -203,18 +203,18 @@
 
 <Dialog
   title={dialogMode === 'create'
-    ? $_('_sui.text_editor.insert_link')
-    : $_('_sui.text_editor.update_link')}
+    ? _('_sui.text_editor.insert_link')
+    : _('_sui.text_editor.update_link')}
   bind:open={openDialog}
   bind:value={anchorURL}
   okDisabled={!anchorURL}
-  okLabel={dialogMode === 'create' ? $_('_sui.insert') : $_('_sui.update')}
+  okLabel={dialogMode === 'create' ? _('_sui.insert') : _('_sui.update')}
   onClose={(event) => {
     onDialogClose(event);
   }}
 >
   <div role="none">
-    <label for="{id}-url">{$_('_sui.text_editor.url')}</label>
+    <label for="{id}-url">{_('_sui.text_editor.url')}</label>
     <TextInput
       id="{id}-url"
       bind:value={anchorURL}
@@ -227,7 +227,7 @@
   </div>
   {#if !hasAnchor}
     <div role="none">
-      <label for="{id}-text">{$_('_sui.text_editor.text')}</label>
+      <label for="{id}-text">{_('_sui.text_editor.text')}</label>
       <TextInput
         id="{id}-text"
         bind:value={anchorText}
@@ -242,7 +242,7 @@
     {#if dialogMode !== 'create'}
       <Button
         variant="secondary"
-        label={$_('_sui.remove')}
+        label={_('_sui.remove')}
         onclick={() => {
           removeLink();
           dialogMode = 'remove';

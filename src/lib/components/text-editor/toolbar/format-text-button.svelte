@@ -1,7 +1,7 @@
 <script>
+  import { _ } from '@sveltia/i18n';
   import { FORMAT_TEXT_COMMAND } from 'lexical';
   import { getContext } from 'svelte';
-  import { _ } from 'svelte-i18n';
   import Button from '../../button/button.svelte';
   import Icon from '../../icon/icon.svelte';
   import { AVAILABLE_BUTTONS } from '../constants.js';
@@ -32,7 +32,7 @@
 
 <Button
   iconic
-  aria-label={$_(`_sui.text_editor.${AVAILABLE_BUTTONS[type].labelKey}`)}
+  aria-label={_(`_sui.text_editor.${AVAILABLE_BUTTONS[type].labelKey}`)}
   aria-controls="{editorStore.editorId}-lexical-root"
   disabled={!editorStore.useRichText}
   pressed={selectionTypeMatches}

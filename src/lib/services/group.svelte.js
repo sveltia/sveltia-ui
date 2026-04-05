@@ -1,7 +1,6 @@
+import { isRTL } from '@sveltia/i18n';
 import { generateElementId } from '@sveltia/utils/element';
 import { sleep } from '@sveltia/utils/misc';
-import { get } from 'svelte/store';
-import { isRTL } from './i18n.js';
 import { getSelectedItemDetail } from './select.svelte.js';
 
 /**
@@ -440,7 +439,7 @@ export class Group {
 
     if (this.grid) {
       const colCount = Math.floor(this.parent.clientWidth / activeMembers[0].clientWidth);
-      const _isRTL = get(isRTL);
+      const _isRTL = isRTL();
 
       index = currentTarget ? allMembers.indexOf(currentTarget) : -1;
 
@@ -467,7 +466,7 @@ export class Group {
     } else {
       index = currentTarget ? activeMembers.indexOf(currentTarget) : -1;
 
-      const _isRTL = get(isRTL);
+      const _isRTL = isRTL();
 
       // For horizontal orientation in RTL: ArrowLeft moves forward, ArrowRight moves backward
       const prevKey =

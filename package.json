@@ -39,10 +39,11 @@
     "@lexical/selection": "^0.42.0",
     "@lexical/table": "^0.42.0",
     "@lexical/utils": "^0.42.0",
+    "@sveltia/i18n": "^0.1.2",
     "@sveltia/utils": "^0.10.0",
     "lexical": "^0.42.0",
     "prismjs": "^1.30.0",
-    "svelte-i18n": "^4.0.1"
+    "yaml": "^2.8.3"
   },
   "peerDependencies": {
     "svelte": "^5.0.0"

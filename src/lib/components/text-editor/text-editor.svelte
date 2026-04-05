@@ -3,8 +3,8 @@
   A rich text editor based on Lexical.
 -->
 <script>
+  import { _ } from '@sveltia/i18n';
   import { setContext, untrack } from 'svelte';
-  import { _ } from 'svelte-i18n';
   import Alert from '../alert/alert.svelte';
   import TextArea from '../text-field/text-area.svelte';
   import Toast from '../toast/toast.svelte';
@@ -120,7 +120,7 @@
 
 {#if editorStore.showConverterError}
   <Toast bind:show={editorStore.showConverterError}>
-    <Alert status="error">{$_('_sui.text_editor.converter_error')}</Alert>
+    <Alert status="error">{_('_sui.text_editor.converter_error')}</Alert>
   </Toast>
 {/if}
 

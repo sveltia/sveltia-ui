@@ -5,8 +5,8 @@
   @see https://www.w3.org/WAI/ARIA/apg/patterns/dialog-modal/
 -->
 <script>
+  import { _ } from '@sveltia/i18n';
   import { sleep } from '@sveltia/utils/misc';
-  import { _ } from 'svelte-i18n';
   import Button from '../button/button.svelte';
   import Spacer from '../divider/spacer.svelte';
   import Icon from '../icon/icon.svelte';
@@ -108,7 +108,7 @@
             <Button
               variant="ghost"
               iconic
-              aria-label={$_('_sui.close')}
+              aria-label={_('_sui.close')}
               aria-controls={id}
               onclick={() => {
                 modal?.close('close');
@@ -139,7 +139,7 @@
           {#if showOk}
             <Button
               variant="primary"
-              label={okLabel || $_('_sui.ok')}
+              label={okLabel || _('_sui.ok')}
               keyShortcuts={okShortcuts}
               disabled={okDisabled}
               onclick={() => {
@@ -150,7 +150,7 @@
           {#if showCancel}
             <Button
               variant="secondary"
-              label={cancelLabel || $_('_sui.cancel')}
+              label={cancelLabel || _('_sui.cancel')}
               keyShortcuts={cancelShortcuts}
               disabled={cancelDisabled}
               onclick={() => {

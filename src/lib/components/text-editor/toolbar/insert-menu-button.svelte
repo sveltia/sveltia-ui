@@ -1,7 +1,7 @@
 <script>
+  import { _ } from '@sveltia/i18n';
   import { $insertNodes as insertNodes } from 'lexical';
   import { getContext } from 'svelte';
-  import { _ } from 'svelte-i18n';
   import Icon from '../../icon/icon.svelte';
   import MenuButton from '../../menu/menu-button.svelte';
   import MenuItem from '../../menu/menu-item.svelte';
@@ -27,7 +27,7 @@
   const editorStore = getContext('editorStore');
 </script>
 
-<MenuButton disabled={!editorStore.useRichText} label={$_('_sui.insert')}>
+<MenuButton disabled={!editorStore.useRichText} label={_('_sui.insert')}>
   {#snippet endIcon()}
     <Icon name="arrow_drop_down" class="small-arrow" />
   {/snippet}

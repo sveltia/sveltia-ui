@@ -1,7 +1,7 @@
 <script>
+  import { _ } from '@sveltia/i18n';
   import { unique } from '@sveltia/utils/array';
   import { getContext } from 'svelte';
-  import { _ } from 'svelte-i18n';
   import ButtonGroup from '../../button/button-group.svelte';
   import Button from '../../button/button.svelte';
   import Divider from '../../divider/divider.svelte';
@@ -81,10 +81,10 @@
   );
 </script>
 
-<ToolbarWrapper disabled={disabled || readonly} aria-label={$_('_sui.text_editor.text_editor')}>
+<ToolbarWrapper disabled={disabled || readonly} aria-label={_('_sui.text_editor.text_editor')}>
   <MenuButton
     disabled={!editorStore.useRichText}
-    aria-label={$_('_sui.text_editor.show_text_style_options')}
+    aria-label={_('_sui.text_editor.show_text_style_options')}
     aria-controls="{editorStore.editorId}-lexical-root"
   >
     {#snippet startIcon()}
@@ -93,7 +93,7 @@
       />
     {/snippet}
     {#snippet popup()}
-      <Menu aria-label={$_('_sui.text_editor.text_style_options')}>
+      <Menu aria-label={_('_sui.text_editor.text_style_options')}>
         {#each blockLevelButtons as type (type)}
           <ToggleBlockMenuItem {type} />
         {/each}
@@ -132,7 +132,7 @@
       iconic
       disabled={editorStore.hasConverterError}
       pressed={!editorStore.useRichText}
-      aria-label={$_('_sui.text_editor.edit_in_markdown')}
+      aria-label={_('_sui.text_editor.edit_in_markdown')}
       onclick={() => {
         editorStore.useRichText = !editorStore.useRichText;
 

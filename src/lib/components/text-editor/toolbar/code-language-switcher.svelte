@@ -4,10 +4,10 @@
   import 'prismjs';
 
   import { $isCodeNode as isCodeNode } from '@lexical/code';
+  import { _ } from '@sveltia/i18n';
   import { $getNodeByKey as getNodeByKey, $getRoot as getRoot } from 'lexical';
   import prismComponents from 'prismjs/components';
   import { getContext } from 'svelte';
-  import { _ } from 'svelte-i18n';
   import Option from '../../listbox/option.svelte';
   import Select from '../../select/select.svelte';
   import { focusEditor, loadCodeHighlighter } from '../core.js';
@@ -69,7 +69,7 @@
 
 <Select
   {disabled}
-  aria-label={$_('_sui.text_editor.language')}
+  aria-label={_('_sui.text_editor.language')}
   value={selectedLanguage}
   onChange={async ({ detail: { value: lang } }) => {
     if (!editorStore.editor || selectedLanguage === lang) {
@@ -93,7 +93,7 @@
     }
   }}
 >
-  <Option label={$_('_sui.text_editor.plain_text')} value="plain" dir="ltr" />
+  <Option label={_('_sui.text_editor.plain_text')} value="plain" dir="ltr" />
   {#each codeLanguages as { key, label, aliases } (key)}
     <Option
       {label}

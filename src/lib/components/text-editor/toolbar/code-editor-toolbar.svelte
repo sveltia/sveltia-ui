@@ -1,5 +1,5 @@
 <script>
-  import { _ } from 'svelte-i18n';
+  import { _ } from '@sveltia/i18n';
   import CodeLanguageSwitcher from './code-language-switcher.svelte';
   import ToolbarWrapper from './toolbar-wrapper.svelte';
 
@@ -23,6 +23,6 @@
   } = $props();
 </script>
 
-<ToolbarWrapper disabled={disabled || readonly} aria-label={$_('_sui.text_editor.code_editor')}>
+<ToolbarWrapper disabled={disabled || readonly} aria-label={_('_sui.text_editor.code_editor')}>
   <CodeLanguageSwitcher disabled={disabled || readonly} />
 </ToolbarWrapper>

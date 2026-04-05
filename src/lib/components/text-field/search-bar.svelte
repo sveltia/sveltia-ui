@@ -7,7 +7,7 @@
 -->
 
 <script>
-  import { _ } from 'svelte-i18n';
+  import { _ } from '@sveltia/i18n';
   import Button from '../button/button.svelte';
   import Icon from '../icon/icon.svelte';
   import TextInput from './text-input.svelte';
@@ -95,7 +95,7 @@
   {#if value}
     <Button
       iconic
-      aria-label={$_('_sui.clear')}
+      aria-label={_('_sui.clear')}
       aria-controls={id}
       onclick={() => {
         value = '';

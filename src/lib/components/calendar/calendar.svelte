@@ -3,9 +3,8 @@
   A calendar (date picker) widget.
 -->
 <script>
-  import { _ } from 'svelte-i18n';
+  import { _, isRTL } from '@sveltia/i18n';
   import { SvelteDate } from 'svelte/reactivity';
-  import { isRTL } from '../../services/i18n.js';
   import Button from '../button/button.svelte';
   import Divider from '../divider/divider.svelte';
   import Spacer from '../divider/spacer.svelte';
@@ -77,10 +76,10 @@
             event.stopPropagation();
           }}
         >
-          <div role="group" aria-label={$_('_sui.calendar.year')}>
+          <div role="group" aria-label={_('_sui.calendar.year')}>
             <div role="none" class="header">
               <Button
-                aria-label={$_('_sui.calendar.previous_decade')}
+                aria-label={_('_sui.calendar.previous_decade')}
                 onclick={() => {
                   //
                 }}
@@ -88,12 +87,12 @@
                 <Icon name="chevron_left" />
               </Button>
               <Button
-                aria-label={$_('_sui.calendar.next_decade')}
+                aria-label={_('_sui.calendar.next_decade')}
                 onclick={() => {
                   //
                 }}
               >
-                <Icon name={$isRTL ? 'chevron_left' : 'chevron_right'} />
+                <Icon name={isRTL() ? 'chevron_left' : 'chevron_right'} />
               </Button>
             </div>
             <div role="none" class="grid">
@@ -105,7 +104,7 @@
             </div>
           </div>
           <Divider orientation="vertical" />
-          <div role="group" aria-label={$_('_sui.calendar.month')}>
+          <div role="group" aria-label={_('_sui.calendar.month')}>
             <div role="none" class="grid">
               {#each MONTH_NAMES as monthName (monthName)}
                 <div role="none">
@@ -118,7 +117,7 @@
       {/snippet}
     </Button>
     <Button
-      aria-label={$_('_sui.calendar.previous_month')}
+      aria-label={_('_sui.calendar.previous_month')}
       onclick={() => {
         firstDay.setUTCMonth(firstDay.getUTCMonth() - 1);
         firstDay = firstDay;
@@ -127,13 +126,13 @@
       <Icon name="chevron_left" />
     </Button>
     <Button
-      aria-label={$_('_sui.calendar.next_month')}
+      aria-label={_('_sui.calendar.next_month')}
       onclick={() => {
         firstDay.setUTCMonth(firstDay.getUTCMonth() + 1);
         firstDay = firstDay;
       }}
     >
-      <Icon name={$isRTL ? 'chevron_left' : 'chevron_right'} />
+      <Icon name={isRTL() ? 'chevron_left' : 'chevron_right'} />
     </Button>
   </div>
   <div role="listbox" class="grid">
@@ -168,7 +167,7 @@
         value = '';
       }}
     >
-      {$_('_sui.clear')}
+      {_('_sui.clear')}
     </Button>
     <Spacer flex={true} />
     <Button
@@ -176,7 +175,7 @@
         [value] = now.toJSON().split('T');
       }}
     >
-      {$_('_sui.calendar.today')}
+      {_('_sui.calendar.today')}
     </Button>
   </div>
 </div>

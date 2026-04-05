@@ -1,0 +1,66 @@
+ok: OK
+cancel: キャンセル
+close: 閉じる
+clear: クリア
+insert: 挿入
+update: 更新
+remove: 削除
+collapse: 折り畳む
+expand: 広げる
+dismiss: 閉じる
+calendar:
+  year: 年
+  previous_decade: 前の 10 年
+  next_decade: 次の 10 年
+  month: 月
+  previous_month: 前月
+  next_month: 翌月
+  today: 今日
+split_button:
+  x_options: "{$name} オプション"
+  more_options: その他のオプション
+combobox:
+  select_an_option: オプションを選択…
+  filter_options: オプションを絞り込み
+  no_matching_options: 一致するオプションは見つかりませんでした
+number_input:
+  decrease: 減らす
+  increase: 増やす
+password_input:
+  show_password: パスワードを表示
+  hide_password: パスワードを隠す
+secret_input:
+  show_secret: シークレットを表示
+  hide_secret: シークレットを隠す
+select_tags:
+  selected_options: 選択済みのオプション
+  remove_x: "{$name} を削除"
+text_editor:
+  text_editor: テキストエディター
+  code_editor: コードエディター
+  text_style_options: テキストスタイルオプション
+  show_text_style_options: テキストスタイルオプションを表示
+  paragraph: 段落
+  heading_1: 見出し 1
+  heading_2: 見出し 2
+  heading_3: 見出し 3
+  heading_4: 見出し 4
+  heading_5: 見出し 5
+  heading_6: 見出し 6
+  bulleted_list: 番号なしリスト
+  numbered_list: 番号付きリスト
+  blockquote: ブロック引用
+  code_block: コードブロック
+  bold: 太字
+  italic: 斜体
+  strikethrough: 取り消し線
+  code: コード
+  link: リンク
+  insert_link: リンクを挿入
+  update_link: リンクを更新
+  text: テキスト
+  url: URL
+  edit_in_markdown: マークダウンで編集
+  converter_error: リッチテキストモードを有効化中に問題が発生しました。代わりにプレーンテキストエディターを使用してください。
+  language: 言語
+  plain_text: プレーンテキスト

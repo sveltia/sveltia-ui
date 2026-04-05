@@ -8,8 +8,8 @@
   @see https://www.w3.org/WAI/ARIA/apg/patterns/slider-multithumb/
 -->
 <script>
+  import { isRTL } from '@sveltia/i18n';
   import { onMount } from 'svelte';
-  import { isRTL } from '$lib/services/i18n.js';
 
   /**
    * @import { Snippet } from 'svelte';
@@ -88,7 +88,7 @@
     // Convert physical position to logical position (always LTR)
     // In RTL, left side (physicalX=0) maps to max value (logicalX=barWidth)
     // In LTR, left side (physicalX=0) maps to min value (logicalX=0)
-    const logicalX = $isRTL ? barWidth - physicalX : physicalX;
+    const logicalX = isRTL() ? barWidth - physicalX : physicalX;
 
     if (logicalX < 0 || logicalX > barWidth) {
       return;
@@ -132,9 +132,10 @@
 
     const _value = multiThumb ? /** @type {[number, number]} */ (values)[valueIndex] : value;
     let index = -1;
+    const _isRTL = isRTL();
     // In RTL, ArrowLeft increases value, ArrowRight decreases value
-    const decreaseKeys = $isRTL ? ['ArrowDown', 'ArrowRight'] : ['ArrowDown', 'ArrowLeft'];
-    const increaseKeys = $isRTL ? ['ArrowUp', 'ArrowLeft'] : ['ArrowUp', 'ArrowRight'];
+    const decreaseKeys = _isRTL ? ['ArrowDown', 'ArrowRight'] : ['ArrowDown', 'ArrowLeft'];
+    const increaseKeys = _isRTL ? ['ArrowUp', 'ArrowLeft'] : ['ArrowUp', 'ArrowRight'];
 
     if (decreaseKeys.includes(key)) {
       if (_value > min) {

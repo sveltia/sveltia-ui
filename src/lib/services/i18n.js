@@ -1,64 +1,28 @@
-import { addMessages, locale as appLocale, init } from 'svelte-i18n';
-import { writable } from 'svelte/store';
-
-/**
- * Whether the current document is in RTL mode.
- * @type {import('svelte/store').Writable<boolean>}
- */
-export const isRTL = writable(false);
+import { addMessages, init } from '@sveltia/i18n';
+import { parse as parseYaml } from 'yaml';
 
 /**
  * Load strings and initialize the locales.
  * @param {object} [init] Initialize options.
  * @param {string} [init.fallbackLocale] Fallback locale.
  * @param {string} [init.initialLocale] Initial locale.
- * @see https://github.com/kaisermann/svelte-i18n/blob/main/docs/Getting%20Started.md
+ * @see https://github.com/sveltia/sveltia-i18n
  * @see https://vitejs.dev/guide/features.html#glob-import
  */
 export const initLocales = ({ fallbackLocale = 'en', initialLocale = 'en' } = {}) => {
-  /** @type {{ [key: string]: { strings: object }}} */
-  const modules = import.meta.glob('../locales/*.js', { eager: true });
-
-  Object.entries(modules).forEach(([path, { strings }]) => {
-    const [, locale] = /** @type {string[]} */ (path.match(/([a-zA-Z-]+)\.js/));
-
-    // Add `_sui` suffix to avoid collision with app localization
-    addMessages(locale, /** @type {any} */ ({ _sui: strings }));
+  const resources = import.meta.glob('../locales/*.yaml', {
+    eager: true,
+    query: '?raw',
+    import: 'default',
   });
 
-  init({
-    fallbackLocale,
-    initialLocale,
+  Object.entries(resources).forEach(([path, resource]) => {
+    addMessages(
+      /** @type {string} */ (path.match(/.+\/(?<locale>.+?)\.yaml$/)?.groups?.locale),
+      // Add `_sui` suffix to avoid collision with app localization
+      { _sui: parseYaml(/** @type {string} */ (resource)) },
+    );
   });
+
+  init({ fallbackLocale, initialLocale });
 };
-
-/**
- * List of RTL locales: Arabic, Persian, Hebrew, Urdu.
- * @internal
- */
-export const RTL_LOCALES = ['ar', 'fa', 'he', 'ur'];
-
-/**
- * Get the text direction of the given locale.
- * @internal
- * @param {string | null | undefined} locale Locale code.
- * @returns {'rtl' | 'ltr'} Text direction.
- */
-export const getDirection = (locale) =>
-  locale && RTL_LOCALES.includes(locale.split('-')[0]) ? 'rtl' : 'ltr';
-
-if (!import.meta.env.SSR) {
-  // Set the `dir` attribute on the HTML element based on the current locale.
-  // @todo Move this to Sveltia UI and then Sveltia I18N
-  appLocale.subscribe((value) => {
-    document.documentElement.dir = getDirection(value);
-  });
-
-  // Update `isRTL` store based on the current document direction.
-  new MutationObserver(() => {
-    isRTL.set(document.dir === 'rtl');
-  }).observe(document.documentElement, {
-    attributes: true,
-    attributeFilter: ['dir'],
-  });
-}

@@ -1,8 +1,7 @@
 <script>
+  import { _, isRTL } from '@sveltia/i18n';
   import { tick } from 'svelte';
-  import { _ } from 'svelte-i18n';
   import { flip } from 'svelte/animate';
-  import { isRTL } from '../../services/i18n.js';
   import Button from '../button/button.svelte';
   import Icon from '../icon/icon.svelte';
   import Option from '../listbox/option.svelte';
@@ -60,8 +59,8 @@
 
   /** @type {Map<any, { label: string, value: any, searchValue?: string }>} */
   const optionMap = $derived(new Map(options.map((o) => [o.value, o])));
-  const prevKey = $derived($isRTL ? 'ArrowRight' : 'ArrowLeft');
-  const nextKey = $derived($isRTL ? 'ArrowLeft' : 'ArrowRight');
+  const prevKey = $derived(isRTL() ? 'ArrowRight' : 'ArrowLeft');
+  const nextKey = $derived(isRTL() ? 'ArrowLeft' : 'ArrowRight');
 
   /**
    * Reference to the wrapper element.
@@ -128,7 +127,7 @@
   <span
     role="listbox"
     aria-multiselectable="true"
-    aria-label={$_('_sui.select_tags.selected_options')}
+    aria-label={_('_sui.select_tags.selected_options')}
   >
     {#each values as value, index (value)}
       {@const option = optionMap.get(value)}
@@ -159,7 +158,7 @@
           const rect = event.currentTarget.getBoundingClientRect();
           const inFirstHalf = event.clientX < rect.left + rect.width / 2;
 
-          dropIndex = inFirstHalf !== $isRTL ? index : index + 1;
+          dropIndex = inFirstHalf !== isRTL() ? index : index + 1;
         }}
         ondrop={async (event) => {
           event.preventDefault();
@@ -217,7 +216,7 @@
             iconic
             size="small"
             disabled={disabled || readonly}
-            aria-label={$_('_sui.select_tags.remove_x', { values: { name: label } })}
+            aria-label={_('_sui.select_tags.remove_x', { values: { name: label } })}
             onclick={() => {
               values = values.filter((v) => v !== value);
               onRemoveValue?.(new CustomEvent('RemoveValue', { detail: { value } }));

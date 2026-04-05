@@ -4,8 +4,8 @@
   @see https://w3c.github.io/aria/#menuitem
 -->
 <script>
+  import { isRTL } from '@sveltia/i18n';
   import { onMount } from 'svelte';
-  import { isRTL } from '../../services/i18n.js';
   import Button from '../button/button.svelte';
   import Icon from '../icon/icon.svelte';
   import Popup from '../util/popup.svelte';
@@ -130,7 +130,7 @@
           {#if chevronIcon}
             {@render chevronIcon()}
           {:else}
-            <Icon name={$isRTL ? 'chevron_left' : 'chevron_right'} />
+            <Icon name={isRTL() ? 'chevron_left' : 'chevron_right'} />
           {/if}
         </span>
       {/if}

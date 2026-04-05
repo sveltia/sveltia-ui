@@ -6,7 +6,7 @@
   @todo Add DOM API compatibility.
 -->
 <script>
-  import { _ } from 'svelte-i18n';
+  import { _ } from '@sveltia/i18n';
   import { getSelectedItemDetail } from '../../services/select.svelte.js';
   import Button from '../button/button.svelte';
   import Icon from '../icon/icon.svelte';
@@ -137,7 +137,7 @@
     >
       <div role="none" class="label">
         <TruncatedText>
-          {value !== undefined ? label : $_('_sui.combobox.select_an_option')}
+          {value !== undefined ? label : _('_sui.combobox.select_an_option')}
         </TruncatedText>
       </div>
     </div>
@@ -164,7 +164,7 @@
     {hidden}
     {disabled}
     tabindex={!editable || readonly || disabled ? -1 : 0}
-    aria-label={isPopupOpen ? $_('_sui.collapse') : $_('_sui.expand')}
+    aria-label={isPopupOpen ? _('_sui.collapse') : _('_sui.expand')}
     aria-controls="{id}-popup"
     aria-expanded={isPopupOpen}
     onclick={(event) => {
@@ -205,7 +205,7 @@
     {#if showFilter}
       <SearchBar
         flex
-        aria-label={$_('_sui.combobox.filter_options')}
+        aria-label={_('_sui.combobox.filter_options')}
         aria-controls="{id}-listbox"
         bind:value={searchTerms}
         onkeydown={(event) => {
@@ -235,7 +235,7 @@
     </Listbox>
     {#if !hasMatchingOptions}
       <div role="alert" class="no-options">
-        {$_('_sui.combobox.no_matching_options')}
+        {_('_sui.combobox.no_matching_options')}
       </div>
     {/if}
   </div>

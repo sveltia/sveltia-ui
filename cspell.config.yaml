@@ -39,6 +39,7 @@ words:
   - prismjs
   - Shiki
   - singleline
+  - strikethrough
   - stylelint
   - sveltejs
   - Sveltia

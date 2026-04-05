@@ -1,8 +1,8 @@
 /* eslint-disable jsdoc/require-jsdoc */
 
+import { locale } from '@sveltia/i18n';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { activateGroup, Group, normalize } from './group.svelte.js';
-import { isRTL } from './i18n.js';
 
 describe('normalize', () => {
   it('should trim whitespace', () => {
@@ -128,19 +128,19 @@ describe('Group - tablist', () => {
   });
 
   it('should navigate backward when pressing ArrowRight in RTL (branch 63 prevKey=ArrowRight)', () => {
-    isRTL.set(true);
+    locale.set('ar'); // RTL locale to set _isRTL=true in activate()
     // In RTL prevKey='ArrowRight'; press from tabs[2] → backward to tabs[1]
     tabs[2].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
     expect(tabs[1].getAttribute('aria-selected')).toBe('true');
-    isRTL.set(false);
+    locale.set('en'); // Reset locale to LTR
   });
 
   it('should navigate forward when pressing ArrowLeft in RTL (branch 65 nextKey=ArrowLeft)', () => {
-    isRTL.set(true);
+    locale.set('ar'); // RTL locale to set _isRTL=true in activate()
     // In RTL nextKey='ArrowLeft'; press from tabs[0] → forward to tabs[1]
     tabs[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true }));
     expect(tabs[1].getAttribute('aria-selected')).toBe('true');
-    isRTL.set(false);
+    locale.set('en'); // Reset locale to LTR
   });
 });
 
@@ -819,10 +819,10 @@ describe('Group - grid listbox navigation', () => {
     listbox.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
     expect(options[1].getAttribute('aria-selected')).toBe('true');
     // In RTL, ArrowLeft moves forward: index 1 + 1 = options[2]
-    isRTL.set(true);
+    locale.set('ar'); // RTL locale to set _isRTL=true in activate()
     listbox.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true }));
     expect(options[2].getAttribute('aria-selected')).toBe('true');
-    isRTL.set(false);
+    locale.set('en'); // Reset locale to LTR
   });
 
   it('should navigate grid backward (index-1) on ArrowRight in RTL (branch 59)', () => {
@@ -830,10 +830,10 @@ describe('Group - grid listbox navigation', () => {
     listbox.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
     expect(options[1].getAttribute('aria-selected')).toBe('true');
     // In RTL, ArrowRight moves backward: index 1 - 1 = options[0]
-    isRTL.set(true);
+    locale.set('ar'); // RTL locale to set _isRTL=true in activate()
     listbox.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
     expect(options[0].getAttribute('aria-selected')).toBe('true');
-    isRTL.set(false);
+    locale.set('en'); // Reset locale to LTR
   });
 });
 

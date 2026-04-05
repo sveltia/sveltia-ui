@@ -10,12 +10,12 @@
     $createQuoteNode as createQuoteNode,
   } from '@lexical/rich-text';
   import { $setBlocksType as setBlocksType } from '@lexical/selection';
+  import { _ } from '@sveltia/i18n';
   import {
     $createParagraphNode as createParagraphNode,
     $getSelection as getSelection,
   } from 'lexical';
   import { getContext } from 'svelte';
-  import { _ } from 'svelte-i18n';
   import Icon from '../../icon/icon.svelte';
   import MenuItemCheckbox from '../../menu/menu-item-checkbox.svelte';
   import { AVAILABLE_BUTTONS } from '../constants.js';
@@ -94,7 +94,7 @@
 
 {#key selectionTypeMatches}
   <MenuItemCheckbox
-    label={$_(`_sui.text_editor.${AVAILABLE_BUTTONS[type].labelKey}`)}
+    label={_(`_sui.text_editor.${AVAILABLE_BUTTONS[type].labelKey}`)}
     checked={selectionTypeMatches}
     onclick={() => {
       if (!selectionTypeMatches) {

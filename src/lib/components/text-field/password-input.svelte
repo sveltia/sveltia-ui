@@ -6,7 +6,7 @@
   @see https://w3c.github.io/aria/#textbox
 -->
 <script>
-  import { _ } from 'svelte-i18n';
+  import { _ } from '@sveltia/i18n';
   import Button from '../button/button.svelte';
   import Icon from '../icon/icon.svelte';
   import TextInput from './text-input.svelte';
@@ -83,7 +83,7 @@
     iconic
     disabled={disabled || readonly}
     pressed={passwordVisible}
-    aria-label={$_(
+    aria-label={_(
       passwordVisible ? '_sui.password_input.hide_password' : '_sui.password_input.show_password',
     )}
     aria-controls={id}
