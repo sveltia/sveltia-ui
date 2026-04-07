@@ -1,10 +1,7 @@
 import { generateElementId } from '@sveltia/utils/element';
 import { sleep } from '@sveltia/utils/misc';
 import { on } from 'svelte/events';
-import { get, writable } from 'svelte/store';
-
 /**
- * @import { Writable } from 'svelte/store';
  * @import { PopupPosition } from '$lib/typedefs';
  */
 
@@ -12,24 +9,46 @@ import { get, writable } from 'svelte/store';
  * Implement the popup handler.
  */
 class Popup {
-  open = writable(false);
+  #open = $state(false);
 
   /**
-   * @type {Writable<{
-   * inset: string | undefined,
-   * zIndex: number | undefined,
-   * minWidth: string | undefined,
-   * maxWidth: string | undefined,
-   * height: string | undefined,
-   * }>}
+   * Whether the popup is open.
+   * @returns {boolean} `true` if the popup is open.
    */
-  style = writable({
-    inset: undefined,
-    zIndex: undefined,
-    minWidth: undefined,
-    maxWidth: undefined,
-    height: undefined,
-  });
+  get open() {
+    return this.#open;
+  }
+
+  /**
+   * Open or close the popup, running side effects synchronously.
+   * @param {boolean} value `true` to open, `false` to close.
+   */
+  set open(value) {
+    this.#open = value;
+
+    if (value) {
+      this.checkPosition();
+    } else if (this.anchorElement.getAttribute('aria-expanded') === 'true') {
+      this.anchorElement.focus();
+      this.anchorElement.removeAttribute('aria-controls');
+    }
+
+    this.anchorElement.setAttribute('aria-expanded', String(value));
+  }
+
+  style = $state(
+    /**
+     * @type {{ inset: string | undefined, zIndex: number | undefined, minWidth: string | undefined,
+     * maxWidth: string | undefined, height: string | undefined }}
+     */
+    ({
+      inset: undefined,
+      zIndex: undefined,
+      minWidth: undefined,
+      maxWidth: undefined,
+      height: undefined,
+    }),
+  );
 
   observer = new IntersectionObserver((entries) => {
     entries.forEach(({ intersectionRect, rootBounds }) => {
@@ -120,16 +139,14 @@ class Popup {
         height: height ? `${Math.round(height)}px` : 'auto',
       };
 
-      const current = get(this.style);
-
       if (
-        style.inset !== current.inset ||
-        style.zIndex !== current.zIndex ||
-        style.minWidth !== current.minWidth ||
-        style.maxWidth !== current.maxWidth ||
-        style.height !== current.height
+        style.inset !== this.style.inset ||
+        style.zIndex !== this.style.zIndex ||
+        style.minWidth !== this.style.minWidth ||
+        style.maxWidth !== this.style.maxWidth ||
+        style.height !== this.style.height
       ) {
-        this.style.set(style);
+        this.style = style;
       }
     });
   });
@@ -151,10 +168,11 @@ class Popup {
 
     this.anchorElement.setAttribute('aria-controls', this.id);
     this.popupElement.setAttribute('id', this.id);
+    this.anchorElement.setAttribute('aria-expanded', 'false');
 
     on(anchorElement, 'click', () => {
       if (!this.isDisabled && !this.isReadOnly) {
-        this.open.set(!get(this.open));
+        this.open = !this.open;
       }
     });
 
@@ -165,7 +183,7 @@ class Popup {
       if (!this.isDisabled && !this.isReadOnly && ['Enter', ' '].includes(key) && !hasModifier) {
         event.preventDefault();
         event.stopPropagation();
-        this.open.set(!get(this.open));
+        this.open = !this.open;
       }
     });
 
@@ -176,7 +194,7 @@ class Popup {
     });
 
     new IntersectionObserver(([entry]) => {
-      if (!entry.isIntersecting && get(this.open)) {
+      if (!entry.isIntersecting && this.open) {
         this.hideImmediately();
       }
     }).observe(this.anchorElement);
@@ -189,10 +207,10 @@ class Popup {
       const target = /** @type {HTMLElement} */ (event.target);
 
       if (
-        get(this.open) &&
+        this.open &&
         (target === this.popupElement || target.matches('[role^="menuitem"], [role="option"]'))
       ) {
-        this.open.set(false);
+        this.open = false;
       }
     });
 
@@ -203,19 +221,8 @@ class Popup {
       if (key === 'Escape' && !hasModifier) {
         event.preventDefault();
         event.stopPropagation();
-        this.open.set(false);
+        this.open = false;
       }
-    });
-
-    this.open.subscribe((open) => {
-      if (open) {
-        this.checkPosition();
-      } else if (this.anchorElement.getAttribute('aria-expanded') === 'true') {
-        this.anchorElement.focus();
-        this.anchorElement.removeAttribute('aria-controls');
-      }
-
-      this.anchorElement.setAttribute('aria-expanded', String(open));
     });
 
     // Update the popup width when the base element is resized
@@ -254,7 +261,7 @@ class Popup {
    */
   async hideImmediately() {
     this.popupElement.hidden = true;
-    this.open.set(false);
+    this.open = false;
     await sleep(50);
     this.popupElement.hidden = false;
   }

@@ -6,7 +6,6 @@
 /* eslint-disable lines-between-class-members */
 /* eslint-disable max-classes-per-file */
 
-import { get } from 'svelte/store';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { activatePopup } from './popup.svelte.js';
 
@@ -41,7 +40,7 @@ describe('Popup', () => {
   it('should expose the open store defaulting to false', () => {
     const instance = activatePopup(anchor, popup, 'bottom-left');
 
-    expect(get(instance.open)).toBe(false);
+    expect(instance.open).toBe(false);
   });
 
   it('should set aria-expanded to false initially', () => {
@@ -53,7 +52,7 @@ describe('Popup', () => {
     const instance = activatePopup(anchor, popup, 'bottom-left');
 
     anchor.click();
-    expect(get(instance.open)).toBe(true);
+    expect(instance.open).toBe(true);
   });
 
   it('should set aria-expanded to true after anchor click', () => {
@@ -67,7 +66,7 @@ describe('Popup', () => {
 
     anchor.setAttribute('aria-disabled', 'true');
     anchor.click();
-    expect(get(instance.open)).toBe(false);
+    expect(instance.open).toBe(false);
   });
 
   it('should not toggle open when anchor is read-only', () => {
@@ -75,7 +74,7 @@ describe('Popup', () => {
 
     anchor.setAttribute('aria-readonly', 'true');
     anchor.click();
-    expect(get(instance.open)).toBe(false);
+    expect(instance.open).toBe(false);
   });
 
   it('should report isDisabled as false when not disabled', () => {
@@ -109,7 +108,7 @@ describe('Popup', () => {
 
     anchor.click(); // open first
     popup.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: false }));
-    expect(get(instance.open)).toBe(false);
+    expect(instance.open).toBe(false);
   });
 
   it('should close when a menu option inside popup is clicked', () => {
@@ -120,7 +119,7 @@ describe('Popup', () => {
     popup.appendChild(menuItem);
     anchor.click(); // open
     menuItem.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-    expect(get(instance.open)).toBe(false);
+    expect(instance.open).toBe(false);
   });
 
   it('should not close popup when clicking a non-menuitem element inside it (branch 35 false)', () => {
@@ -131,7 +130,7 @@ describe('Popup', () => {
     anchor.click(); // open
     div.dispatchEvent(new MouseEvent('click', { bubbles: true }));
     // div has no role → neither menuitem nor popup backdrop → popup stays open
-    expect(get(instance.open)).toBe(true);
+    expect(instance.open).toBe(true);
     div.remove();
   });
 
@@ -143,21 +142,21 @@ describe('Popup', () => {
       new KeyboardEvent('keydown', { key: 'Escape', shiftKey: true, bubbles: false }),
     );
     // hasModifier=true → condition false → popup stays open
-    expect(get(instance.open)).toBe(true);
+    expect(instance.open).toBe(true);
   });
 
   it('should toggle open to true on Enter keydown on anchor', () => {
     const instance = activatePopup(anchor, popup, 'bottom-left');
 
     anchor.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
-    expect(get(instance.open)).toBe(true);
+    expect(instance.open).toBe(true);
   });
 
   it('should toggle open to true on Space keydown on anchor', () => {
     const instance = activatePopup(anchor, popup, 'bottom-left');
 
     anchor.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true }));
-    expect(get(instance.open)).toBe(true);
+    expect(instance.open).toBe(true);
   });
 
   it('should not toggle open when anchor keydown has a modifier key', () => {
@@ -166,7 +165,7 @@ describe('Popup', () => {
     anchor.dispatchEvent(
       new KeyboardEvent('keydown', { key: 'Enter', ctrlKey: true, bubbles: true }),
     );
-    expect(get(instance.open)).toBe(false);
+    expect(instance.open).toBe(false);
   });
 
   it('should close on click directly on the popup backdrop element', () => {
@@ -174,7 +173,7 @@ describe('Popup', () => {
 
     anchor.click(); // open
     popup.dispatchEvent(new MouseEvent('click', { bubbles: false }));
-    expect(get(instance.open)).toBe(false);
+    expect(instance.open).toBe(false);
   });
 
   it('should remove aria-controls from anchor when popup closes after being open', () => {
@@ -188,6 +187,15 @@ describe('Popup', () => {
     activatePopup(anchor, popup, 'bottom-left');
     anchor.click(); // open
     anchor.click(); // close
+    expect(anchor.getAttribute('aria-expanded')).toBe('false');
+  });
+
+  it('should not remove aria-controls when closing a never-opened popup', () => {
+    const instance = activatePopup(anchor, popup, 'bottom-left');
+
+    // open is false and aria-expanded is 'false' — setting open=false should be a no-op
+    instance.open = false;
+    expect(anchor.getAttribute('aria-controls')).toBe(popup.id);
     expect(anchor.getAttribute('aria-expanded')).toBe('false');
   });
 });
@@ -216,11 +224,11 @@ describe('Popup - hideImmediately', () => {
     const instance = activatePopup(anchor, popup, 'bottom-left');
 
     anchor.click();
-    expect(get(instance.open)).toBe(true);
+    expect(instance.open).toBe(true);
 
     const hidePromise = instance.hideImmediately();
 
-    expect(get(instance.open)).toBe(false);
+    expect(instance.open).toBe(false);
     await vi.advanceTimersByTimeAsync(100);
     await hidePromise;
   });
@@ -267,10 +275,10 @@ describe('Popup - transitionstart', () => {
     const instance = activatePopup(anchor, popup, 'bottom-left');
 
     anchor.click();
-    expect(get(instance.open)).toBe(true);
+    expect(instance.open).toBe(true);
     wrapper.classList.add('hiding');
     anchor.dispatchEvent(new Event('transitionstart'));
-    expect(get(instance.open)).toBe(false);
+    expect(instance.open).toBe(false);
     wrapper.classList.remove('hiding');
     await vi.advanceTimersByTimeAsync(100);
   });
@@ -280,7 +288,7 @@ describe('Popup - transitionstart', () => {
 
     anchor.click();
     anchor.dispatchEvent(new Event('transitionstart'));
-    expect(get(instance.open)).toBe(true);
+    expect(instance.open).toBe(true);
     await vi.advanceTimersByTimeAsync(100);
   });
 });
@@ -331,13 +339,13 @@ describe('Popup - IntersectionObserver on anchor (lines 179-180)', () => {
     const instance = activatePopup(anchor, popup, 'bottom-left');
 
     anchor.click();
-    expect(get(instance.open)).toBe(true);
+    expect(instance.open).toBe(true);
 
     // ioCallbacks[0] = position observer; ioCallbacks[1] = anchor visibility observer
     const anchorVisibilityCallback = ioCallbacks[1];
 
     anchorVisibilityCallback([{ isIntersecting: false }]);
-    expect(get(instance.open)).toBe(false);
+    expect(instance.open).toBe(false);
     await vi.advanceTimersByTimeAsync(100);
   });
 
@@ -347,7 +355,7 @@ describe('Popup - IntersectionObserver on anchor (lines 179-180)', () => {
     const anchorVisibilityCallback = ioCallbacks[1];
 
     anchorVisibilityCallback([{ isIntersecting: false }]);
-    expect(get(instance.open)).toBe(false);
+    expect(instance.open).toBe(false);
   });
 });
 describe('Popup - IntersectionObserver position callback (lines 35-132)', () => {
@@ -416,7 +424,7 @@ describe('Popup - IntersectionObserver position callback (lines 35-132)', () => 
     ioCallbacks[0]([makeEntry()]);
 
     // Style should be updated with computed inset
-    const style = get(instance.style);
+    const { style } = instance;
 
     expect(style.inset).toBeTruthy();
     expect(style.zIndex).toBe(1000);
@@ -428,7 +436,7 @@ describe('Popup - IntersectionObserver position callback (lines 35-132)', () => 
     ioCallbacks[0]([{ intersectionRect: null, rootBounds: null }]);
 
     // Style remains at default (no crash)
-    const style = get(instance.style);
+    const { style } = instance;
 
     expect(style.inset).toBeUndefined();
   });
@@ -440,7 +448,7 @@ describe('Popup - IntersectionObserver position callback (lines 35-132)', () => 
     Object.defineProperty(content, 'scrollHeight', { configurable: true, get: () => 500 });
     ioCallbacks[0]([makeEntry({ top: 400, bottom: 450, left: 50, right: 300, vw: 800, vh: 500 })]);
 
-    const style = get(instance.style);
+    const { style } = instance;
 
     // Position changed to top-left → bottom should be calculated (not auto)
     expect(style.inset).not.toBeUndefined();
@@ -453,7 +461,7 @@ describe('Popup - IntersectionObserver position callback (lines 35-132)', () => 
     Object.defineProperty(content, 'scrollWidth', { configurable: true, get: () => 760 });
     ioCallbacks[0]([makeEntry({ left: 50, right: 300 })]);
 
-    const style = get(instance.style);
+    const { style } = instance;
 
     expect(style.inset).not.toBeUndefined();
   });
@@ -465,7 +473,7 @@ describe('Popup - IntersectionObserver position callback (lines 35-132)', () => 
     Object.defineProperty(content, 'scrollWidth', { configurable: true, get: () => 290 });
     ioCallbacks[0]([makeEntry({ left: 50, right: 100 })]);
 
-    const style = get(instance.style);
+    const { style } = instance;
 
     expect(style.inset).not.toBeUndefined();
   });
@@ -477,7 +485,7 @@ describe('Popup - IntersectionObserver position callback (lines 35-132)', () => 
 
     ioCallbacks[0]([makeEntry()]);
 
-    const style = get(instance.style);
+    const { style } = instance;
 
     expect(style.inset).not.toBeUndefined();
     Reflect.deleteProperty(document, 'dir');
@@ -490,7 +498,7 @@ describe('Popup - IntersectionObserver position callback (lines 35-132)', () => 
 
     ioCallbacks[0]([makeEntry()]);
 
-    const style = get(instance.style);
+    const { style } = instance;
 
     // After RTL normalization bottom-right → bottom-left; inset should be computed
     expect(style.inset).not.toBeUndefined();
@@ -504,7 +512,7 @@ describe('Popup - IntersectionObserver position callback (lines 35-132)', () => 
 
     ioCallbacks[0]([makeEntry()]);
 
-    const style = get(instance.style);
+    const { style } = instance;
 
     // After RTL normalization left-top → right-top; inset should be computed
     expect(style.inset).not.toBeUndefined();
@@ -518,7 +526,7 @@ describe('Popup - IntersectionObserver position callback (lines 35-132)', () => 
 
     ioCallbacks[0]([makeEntry()]);
 
-    const style = get(instance.style);
+    const { style } = instance;
 
     // After RTL normalization right-top → left-top; inset should be computed
     expect(style.inset).not.toBeUndefined();
@@ -533,7 +541,7 @@ describe('Popup - IntersectionObserver position callback (lines 35-132)', () => 
     Object.defineProperty(content, 'scrollHeight', { configurable: true, get: () => 200 });
     ioCallbacks[0]([makeEntry({ top: 50, bottom: 400, vw: 800, vh: 500 })]);
 
-    const style = get(instance.style);
+    const { style } = instance;
 
     expect(style.height).toBe('92px');
   });
@@ -546,7 +554,7 @@ describe('Popup - IntersectionObserver position callback (lines 35-132)', () => 
     // bottom = Math.round(600 - 150) = 450
     ioCallbacks[0]([makeEntry()]);
 
-    const style = get(instance.style);
+    const { style } = instance;
 
     expect(style.inset).toContain('450px');
   });
@@ -558,12 +566,12 @@ describe('Popup - IntersectionObserver position callback (lines 35-132)', () => 
     // First call — style is updated (inset differs from initial empty object)
     ioCallbacks[0]([entry]);
 
-    const styleBefore = get(instance.style);
+    const styleBefore = instance.style;
 
     // Second call with same entry — all comparisons are equal → style.set not called again
     ioCallbacks[0]([entry]);
 
-    const styleAfter = get(instance.style);
+    const styleAfter = instance.style;
 
     expect(styleAfter.inset).toBe(styleBefore.inset);
     expect(styleAfter.zIndex).toBe(styleBefore.zIndex);

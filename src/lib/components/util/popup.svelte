@@ -5,13 +5,11 @@
 <script>
   import { sleep } from '@sveltia/utils/misc';
   import { onMount } from 'svelte';
-  import { writable } from 'svelte/store';
   import { activatePopup } from '../../services/popup.svelte.js';
   import Modal from './modal.svelte';
 
   /**
    * @import { Snippet } from 'svelte';
-   * @import { Writable } from 'svelte/store';
    * @import { ModalProps, PopupPosition } from '$lib/typedefs';
    */
 
@@ -78,23 +76,11 @@
    */
   let contentType = $state();
   /**
-   * Style to be applied to the content.
-   * @type {Writable<Record<string, any>>}
+   * @type {{ style: { inset: string | undefined, zIndex: number | undefined, minWidth: string |
+   * undefined, maxWidth: string | undefined, height: string | undefined }, open: boolean,
+   * checkPosition: () => void } | undefined}
    */
-  let style = $state(
-    writable({
-      inset: undefined,
-      zIndex: undefined,
-      width: undefined,
-      height: undefined,
-    }),
-  );
-
-  /**
-   * @type {{ style: Writable<Record<string, any>>, open: Writable<boolean>, checkPosition:
-   * () => void } | undefined}
-   */
-  let popupInstance = undefined;
+  let popupInstance = $state();
   let hoveredTimeout = 0;
 
   /**
@@ -103,14 +89,15 @@
   const init = () => {
     popupInstance = activatePopup(anchor, dialogElement, position, positionBaseElement);
 
-    style = popupInstance.style;
-    popupInstance.open.subscribe((_open) => {
-      open = _open;
-    });
-
     contentType = anchor?.getAttribute('aria-haspopup') ?? undefined;
     initialized = true;
   };
+
+  $effect(() => {
+    if (popupInstance) {
+      open = popupInstance.open;
+    }
+  });
 
   $effect(() => {
     if (parentDialogElement && !dialogElement && content) {
@@ -145,12 +132,12 @@
     role="none"
     class="content {className} {contentType}"
     class:touch
-    style:inset={$style.inset}
-    style:z-index={$style.zIndex}
-    style:min-width={$style.minWidth}
-    style:max-width={$style.maxWidth}
-    style:max-height={$style.height}
-    style:visibility={$style.inset ? undefined : 'hidden'}
+    style:inset={popupInstance?.style.inset}
+    style:z-index={popupInstance?.style.zIndex}
+    style:min-width={popupInstance?.style.minWidth}
+    style:max-width={popupInstance?.style.maxWidth}
+    style:max-height={popupInstance?.style.height}
+    style:visibility={popupInstance?.style.inset ? undefined : 'hidden'}
     onmouseenter={() => {
       hovered = true;
 
