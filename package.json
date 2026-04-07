@@ -1,27 +1,52 @@
 {
   "name": "@sveltia/ui",
   "version": "0.36.1",
-  "license": "MIT",
-  "type": "module",
+  "description": "A collection of Svelte components and utilities for building user interfaces.",
   "repository": {
     "type": "git",
-    "url": "github:sveltia/sveltia-ui"
+    "url": "git+https://github.com/sveltia/sveltia-ui.git"
   },
+  "license": "MIT",
+  "author": {
+    "name": "Kohei Yoshino",
+    "url": "https://github.com/kyoshino"
+  },
+  "sideEffects": false,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "svelte": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "svelte": "./dist/index.js",
+  "typesVersions": {
+    ">4.0": {
+      "index": [
+        "./dist/index.d.ts"
+      ]
+    }
+  },
+  "files": [
+    "dist",
+    "!dist/**/*.test.*"
+  ],
   "scripts": {
-    "dev": "vite dev",
     "build": "svelte-kit sync && svelte-package",
     "build:watch": "svelte-kit sync && svelte-package --watch",
-    "preview": "vite preview",
-    "prepublishOnly": "npm run build",
-    "format": "prettier --write .",
     "check": "pnpm run '/^check:.*/'",
     "check:audit": "pnpm audit",
     "check:cspell": "cspell --no-progress",
-    "check:svelte": "svelte-kit sync && svelte-check --tsconfig ./jsconfig.json",
-    "check:prettier": "prettier --check .",
     "check:eslint": "eslint .",
     "check:oxlint": "oxlint .",
+    "check:prettier": "prettier --check .",
     "check:stylelint": "stylelint '**/*.{css,scss,svelte}'",
+    "check:svelte": "svelte-kit sync && svelte-check --tsconfig ./jsconfig.json",
+    "dev": "vite dev",
+    "format": "prettier --write .",
+    "prepublishOnly": "npm run build",
+    "preview": "vite preview",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "test:watch": "vitest"
@@ -45,9 +70,6 @@
     "prismjs": "^1.30.0",
     "yaml": "^2.8.3"
   },
-  "peerDependencies": {
-    "svelte": "^5.0.0"
-  },
   "devDependencies": {
     "@sveltejs/adapter-auto": "^7.0.1",
     "@sveltejs/kit": "^2.56.1",
@@ -60,6 +82,7 @@
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-jsdoc": "^62.9.0",
+    "eslint-plugin-package-json": "^0.91.1",
     "eslint-plugin-svelte": "^3.17.0",
     "globals": "^17.4.0",
     "happy-dom": "^20.8.9",
@@ -79,24 +102,8 @@
     "vite": "^8.0.3",
     "vitest": "^4.1.2"
   },
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "svelte": "./dist/index.js",
-      "default": "./dist/index.js"
-    }
-  },
-  "files": [
-    "dist",
-    "!dist/**/*.test.*"
-  ],
-  "svelte": "./dist/index.js",
-  "typesVersions": {
-    ">4.0": {
-      "index": [
-        "./dist/index.d.ts"
-      ]
-    }
+  "peerDependencies": {
+    "svelte": "^5.0.0"
   },
   "publishConfig": {
     "access": "public",

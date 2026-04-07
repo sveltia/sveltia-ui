@@ -2,6 +2,7 @@ import { configs as airbnbConfigs } from 'eslint-config-airbnb-extended/legacy';
 import prettier from 'eslint-config-prettier';
 import importPlugin from 'eslint-plugin-import';
 import jsdocPlugin from 'eslint-plugin-jsdoc';
+import pkgJsonPlugin from 'eslint-plugin-package-json';
 import sveltePlugin from 'eslint-plugin-svelte';
 import globals from 'globals';
 
@@ -22,6 +23,10 @@ export default [
   // Svelte recommended + Prettier overrides
   ...sveltePlugin.configs['flat/recommended'],
   ...sveltePlugin.configs['flat/prettier'],
+
+  // package.json linting
+  pkgJsonPlugin.configs['recommended-publishable'],
+  pkgJsonPlugin.configs.stylistic,
 
   // Custom settings for all JS/Svelte files
   {
