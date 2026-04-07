@@ -87,7 +87,8 @@
     }
   },
   "files": [
-    "dist"
+    "dist",
+    "!dist/**/*.test.*"
   ],
   "svelte": "./dist/index.js",
   "typesVersions": {
