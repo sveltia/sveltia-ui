@@ -7,9 +7,9 @@ minimumReleaseAgeExclude:
   - "@sveltia/*"
   - lexical
   - "@lexical/*"
+  - vite
 
 overrides:
-  "brace-expansion@<5.0.5": ">=5.0.5"
   "cookie@<0.7.0": ">=0.7.0"
 
 onlyBuiltDependencies:
