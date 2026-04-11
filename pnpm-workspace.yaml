@@ -1,3 +1,9 @@
+allowBuilds:
+  "@parcel/watcher": false
+  esbuild: false
+  svelte-preprocess: true
+  unrs-resolver: false
+
 minimumReleaseAge: 1440
 
 minimumReleaseAgeExclude:
@@ -10,7 +16,3 @@ minimumReleaseAgeExclude:
 
 overrides:
   "cookie@<0.7.0": ">=0.7.0"
-
-onlyBuiltDependencies:
-  - esbuild
-  - svelte-preprocess
