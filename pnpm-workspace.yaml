@@ -4,6 +4,8 @@ allowBuilds:
   svelte-preprocess: true
   unrs-resolver: false
 
+engineStrict: true
+
 minimumReleaseAge: 1440
 
 minimumReleaseAgeExclude:
