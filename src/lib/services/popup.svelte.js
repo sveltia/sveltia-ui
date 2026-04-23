@@ -193,11 +193,12 @@ class Popup {
       }
     });
 
-    new IntersectionObserver(([entry]) => {
+    this.intersectionObserver = new IntersectionObserver(([entry]) => {
       if (!entry.isIntersecting && this.open) {
         this.hideImmediately();
       }
-    }).observe(this.anchorElement);
+    });
+    this.intersectionObserver.observe(this.anchorElement);
 
     // Close the popup when the backdrop, a menu item or an option is clicked
     on(this.popupElement, 'click', (event) => {
@@ -226,10 +227,11 @@ class Popup {
     });
 
     // Update the popup width when the base element is resized
-    new ResizeObserver(() => {
+    this.resizeObserver = new ResizeObserver(() => {
       cancelAnimationFrame(this._rafId);
       this._rafId = requestAnimationFrame(() => this.checkPosition());
-    }).observe(this.positionBaseElement);
+    });
+    this.resizeObserver.observe(this.positionBaseElement);
   }
 
   /**
@@ -264,6 +266,19 @@ class Popup {
     this.open = false;
     await sleep(50);
     this.popupElement.hidden = false;
+  }
+
+  /**
+   * Dispose of the popup, disconnecting observers and canceling pending work.
+   */
+  destroy() {
+    this.intersectionObserver?.disconnect();
+    this.resizeObserver?.disconnect();
+    this.observer?.disconnect();
+
+    if (this._rafId) {
+      cancelAnimationFrame(this._rafId);
+    }
   }
 }
 

@@ -78,7 +78,7 @@
   /**
    * @type {{ style: { inset: string | undefined, zIndex: number | undefined, minWidth: string |
    * undefined, maxWidth: string | undefined, height: string | undefined }, open: boolean,
-   * checkPosition: () => void } | undefined}
+   * checkPosition: () => void, destroy: () => void } | undefined}
    */
   let popupInstance = $state();
   let hoveredTimeout = 0;
@@ -122,6 +122,11 @@
 
   onMount(() => {
     touchEnabled = globalThis.matchMedia('(pointer: coarse)').matches;
+
+    return () => {
+      popupInstance?.destroy?.();
+      globalThis.clearTimeout(hoveredTimeout);
+    };
   });
 </script>
 

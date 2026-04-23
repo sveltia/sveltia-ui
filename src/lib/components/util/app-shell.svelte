@@ -52,15 +52,16 @@
     };
 
     applyTheme();
+    mediaQuery.addEventListener('change', applyTheme);
 
-    // eslint-disable-next-line jsdoc/require-jsdoc
-    mediaQuery.onchange = () => {
-      applyTheme();
-    };
-
-    globalThis.setTimeout(() => {
+    const fontTimer = globalThis.setTimeout(() => {
       fontLoaded = true;
     }, 1000);
+
+    return () => {
+      mediaQuery.removeEventListener('change', applyTheme);
+      globalThis.clearTimeout(fontTimer);
+    };
   });
 </script>
 

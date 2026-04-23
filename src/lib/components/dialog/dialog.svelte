@@ -65,8 +65,14 @@
 
   $effect(() => {
     if (open && content) {
+      let cancelled = false;
+
       (async () => {
         await sleep(50);
+
+        if (cancelled) {
+          return;
+        }
 
         if (focusInput) {
           /** @type {HTMLInputElement | HTMLButtonElement} */ (
@@ -77,7 +83,13 @@
           modal?.focus();
         }
       })();
+
+      return () => {
+        cancelled = true;
+      };
     }
+
+    return undefined;
   });
 </script>
 

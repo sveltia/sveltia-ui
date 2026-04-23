@@ -83,19 +83,25 @@
   });
 
   onMount(() => {
-    if (position === 'auto') {
-      const mql = globalThis.matchMedia('(width < 1024px)');
-
-      // eslint-disable-next-line jsdoc/require-jsdoc
-      const setMode = () => {
-        position = mql.matches
-          ? 'bottom-center'
-          : `bottom-${document.dir === 'rtl' ? 'left' : 'right'}`;
-      };
-
-      setMode();
-      mql.addEventListener('change', setMode);
+    if (position !== 'auto') {
+      return undefined;
     }
+
+    const mql = globalThis.matchMedia('(width < 1024px)');
+
+    // eslint-disable-next-line jsdoc/require-jsdoc
+    const setMode = () => {
+      position = mql.matches
+        ? 'bottom-center'
+        : `bottom-${document.dir === 'rtl' ? 'left' : 'right'}`;
+    };
+
+    setMode();
+    mql.addEventListener('change', setMode);
+
+    return () => {
+      mql.removeEventListener('change', setMode);
+    };
   });
 
   $effect(() => {

@@ -647,3 +647,95 @@ describe('Popup - ResizeObserver callback (lines 223-224)', () => {
     expect(true).toBe(true);
   });
 });
+
+describe('Popup - destroy', () => {
+  /** @type {HTMLButtonElement} */
+  let anchor;
+  /** @type {HTMLDialogElement} */
+  let popup;
+  /** @type {typeof globalThis.ResizeObserver} */
+  let OrigRObs;
+  /** @type {typeof globalThis.IntersectionObserver} */
+  let OrigIO;
+  /** @type {{ disconnect: ReturnType<typeof vi.fn> }[]} */
+  let ioInstances;
+  /** @type {{ disconnect: ReturnType<typeof vi.fn> }[]} */
+  let rObsInstances;
+
+  beforeEach(() => {
+    anchor = /** @type {HTMLButtonElement} */ (document.createElement('button'));
+    popup = /** @type {HTMLDialogElement} */ (document.createElement('dialog'));
+    document.body.appendChild(anchor);
+    document.body.appendChild(popup);
+    ioInstances = [];
+    rObsInstances = [];
+    OrigIO = globalThis.IntersectionObserver;
+    OrigRObs = globalThis.ResizeObserver;
+
+    globalThis.IntersectionObserver = /** @type {any} */ (
+      class {
+        constructor() {
+          this.disconnect = vi.fn();
+          ioInstances.push(/** @type {any} */ (this));
+        }
+
+        observe() {}
+        unobserve() {}
+      }
+    );
+
+    globalThis.ResizeObserver = /** @type {any} */ (
+      class {
+        constructor() {
+          this.disconnect = vi.fn();
+          rObsInstances.push(/** @type {any} */ (this));
+        }
+
+        observe() {}
+        unobserve() {}
+      }
+    );
+  });
+
+  afterEach(() => {
+    anchor.remove();
+    popup.remove();
+    globalThis.IntersectionObserver = OrigIO;
+    globalThis.ResizeObserver = OrigRObs;
+  });
+
+  it('should disconnect all observers when destroy is called', () => {
+    const instance = activatePopup(anchor, popup, 'bottom-left');
+
+    instance.destroy();
+
+    // Two IntersectionObservers are created: the position observer and the anchor visibility
+    // observer. Both, plus the ResizeObserver, should be disconnected.
+    expect(ioInstances).toHaveLength(2);
+    expect(ioInstances[0].disconnect).toHaveBeenCalledTimes(1);
+    expect(ioInstances[1].disconnect).toHaveBeenCalledTimes(1);
+    expect(rObsInstances).toHaveLength(1);
+    expect(rObsInstances[0].disconnect).toHaveBeenCalledTimes(1);
+  });
+
+  it('should cancel a pending animation frame on destroy', () => {
+    const instance = activatePopup(anchor, popup, 'bottom-left');
+    const cancelSpy = vi.spyOn(globalThis, 'cancelAnimationFrame');
+
+    /** @type {any} */ (instance)._rafId = 123;
+    instance.destroy();
+
+    expect(cancelSpy).toHaveBeenCalledWith(123);
+    cancelSpy.mockRestore();
+  });
+
+  it('should not call cancelAnimationFrame when no frame is pending', () => {
+    const instance = activatePopup(anchor, popup, 'bottom-left');
+    const cancelSpy = vi.spyOn(globalThis, 'cancelAnimationFrame');
+
+    instance.destroy();
+
+    expect(cancelSpy).not.toHaveBeenCalled();
+    cancelSpy.mockRestore();
+  });
+});
