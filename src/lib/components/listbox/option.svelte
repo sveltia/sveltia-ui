@@ -66,7 +66,7 @@
     }}
     onToggle={(event) => {
       hidden = event.detail.hidden;
-      selected = false;
+      if (hidden) selected = false;
       onToggle?.(event);
     }}
   >
