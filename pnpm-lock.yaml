@@ -48,8 +48,8 @@ importers:
         specifier: ^0.44.0
         version: 0.44.0
       '@sveltia/i18n':
-        specifier: ^1.0.5
-        version: 1.0.5(svelte@5.55.5(@typescript-eslint/types@8.59.2))
+        specifier: ^1.1.0
+        version: 1.1.0(svelte@5.55.5(@typescript-eslint/types@8.59.2))
       '@sveltia/utils':
         specifier: ^0.10.6
         version: 0.10.6
@@ -1222,8 +1222,8 @@ packages:
       svelte: ^5.46.4
       vite: ^8.0.0-beta.7 || ^8.0.0
 
-  '@sveltia/i18n@1.0.5':
-    resolution: {integrity: sha512-Hku3HZZFqXYEOEw3oIX9ts5UxYr8RcuiRwlkcuI4BTdVUjTsBi7sG5Tpko16BpbCHkqiOSkbvv1EqLwonOTb2Q==}
+  '@sveltia/i18n@1.1.0':
+    resolution: {integrity: sha512-IzD0/3d+VW2VGM83iqVvq/r/LAP7uuczFA2dD5kqbgTpd04iPja9H9Hiryhjge8nqlIaXle60UKHwTg9UfYg6A==}
     peerDependencies:
       svelte: ^5.0.0
 
@@ -4648,7 +4648,7 @@ snapshots:
       vite: 8.0.11(@types/node@25.6.2)(esbuild@0.27.4)(sass@1.99.0)(yaml@2.8.4)
       vitefu: 1.1.3(vite@8.0.11(@types/node@25.6.2)(esbuild@0.27.4)(sass@1.99.0)(yaml@2.8.4))
 
-  '@sveltia/i18n@1.0.5(svelte@5.55.5(@typescript-eslint/types@8.59.2))':
+  '@sveltia/i18n@1.1.0(svelte@5.55.5(@typescript-eslint/types@8.59.2))':
     dependencies:
       messageformat: 4.0.0
       svelte: 5.55.5(@typescript-eslint/types@8.59.2)

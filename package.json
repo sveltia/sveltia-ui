@@ -64,7 +64,7 @@
     "@lexical/selection": "^0.44.0",
     "@lexical/table": "^0.44.0",
     "@lexical/utils": "^0.44.0",
-    "@sveltia/i18n": "^1.0.5",
+    "@sveltia/i18n": "^1.1.0",
     "@sveltia/utils": "^0.10.6",
     "lexical": "^0.44.0",
     "prismjs": "^1.30.0",
