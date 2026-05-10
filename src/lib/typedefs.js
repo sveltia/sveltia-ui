@@ -152,6 +152,7 @@
  * @property {string} [keyShortcuts] Keyboard shortcuts. An alias of the `aria-keyshortcuts`
  * attribute. Accepts the special `Accel` key, which will be replaced with `Control` or `Meta`
  * depending on the user’s operating system.
+ * @property {'ltr' | 'rtl' | 'auto'} [dir] The `dir` attribute on the `<input>` element.
  * @property {string} [name] The `name` attribute on the `<input>` element.
  * @property {boolean} [showInlineLabel] Whether to display `aria-label` over the `<input>` element
  * if it’s empty, just like how the HTML `placeholder` attribute works.

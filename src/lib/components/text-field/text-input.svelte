@@ -26,6 +26,7 @@
     element = $bindable(),
     role = 'textbox',
     keyShortcuts = undefined,
+    dir = undefined,
     name = undefined,
     showInlineLabel = false,
     inputmode = 'text',
@@ -102,8 +103,8 @@
     {value}
     type="text"
     {role}
-    dir="auto"
-    name={name || undefined}
+    {dir}
+    {name}
     tabindex={disabled ? -1 : 0}
     disabled={disabled || undefined}
     readonly={readonly || undefined}

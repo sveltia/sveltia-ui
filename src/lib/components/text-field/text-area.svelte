@@ -15,6 +15,7 @@
    * @typedef {object} Props
    * @property {string} [value] Input value.
    * @property {boolean} [flex] Make the text input container flexible.
+   * @property {'ltr' | 'rtl' | 'auto'} [dir] The `dir` attribute on the `<textarea>` element.
    * @property {string} [name] The `name` attribute on the `<textarea>` element.
    * @property {boolean} [autoResize] Whether to automatically resize the `<textarea>` based on the
    * content.
@@ -38,6 +39,7 @@
     /* eslint-disable prefer-const */
     value = $bindable(''),
     flex = false,
+    dir = undefined,
     name = undefined,
     autoResize = false,
     class: className,
@@ -62,9 +64,9 @@
 >
   <textarea
     {...restProps}
+    {dir}
     {name}
     bind:value
-    dir="auto"
     disabled={disabled || undefined}
     readonly={readonly || undefined}
     aria-hidden={hidden}
@@ -75,7 +77,7 @@
     class:auto-resize={autoResize}
   ></textarea>
   {#if autoResize}
-    <div class="clone" aria-hidden="true">{value}</div>
+    <div class="clone" aria-hidden="true" {dir}>{value}</div>
   {/if}
 </div>
 
