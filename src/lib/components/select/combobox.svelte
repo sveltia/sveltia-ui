@@ -144,6 +144,7 @@
   {:else}
     <TextInput
       {...restProps}
+      dir="auto"
       bind:element={inputElement}
       role="combobox"
       {id}

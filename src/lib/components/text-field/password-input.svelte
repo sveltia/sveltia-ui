@@ -65,6 +65,7 @@
   {hidden}
 >
   <TextInput
+    dir="ltr"
     bind:element={inputElement}
     {...restProps}
     {id}

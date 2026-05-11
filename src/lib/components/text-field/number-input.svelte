@@ -156,6 +156,7 @@
     </Button>
   </div>
   <TextInput
+    dir="ltr"
     {...restProps}
     role="spinbutton"
     {id}

@@ -216,6 +216,7 @@
   <div role="none">
     <label for="{id}-url">{_('_sui.text_editor.url')}</label>
     <TextInput
+      dir="ltr"
       id="{id}-url"
       bind:value={anchorURL}
       flex
@@ -229,6 +230,7 @@
     <div role="none">
       <label for="{id}-text">{_('_sui.text_editor.text')}</label>
       <TextInput
+        dir="auto"
         id="{id}-text"
         bind:value={anchorText}
         flex

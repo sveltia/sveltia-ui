@@ -79,6 +79,7 @@
     {/if}
   </span>
   <TextInput
+    dir="auto"
     bind:element={inputElement}
     {...restProps}
     role="searchbox"

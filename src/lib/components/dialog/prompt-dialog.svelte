@@ -55,6 +55,7 @@
       {@render input()}
     {:else}
       <TextInput
+        dir="auto"
         bind:value
         flex
         autofocus
