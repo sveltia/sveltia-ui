@@ -27,6 +27,7 @@
    * @typedef {object} Props
    * @property {string} [value] Input value.
    * @property {boolean} [flex] Make the text input container flexible.
+   * @property {'ltr' | 'rtl' | 'auto'} [dir] The `dir` attribute on the `<textarea>` element.
    * @property {TextEditorMode[]} [modes] Enabled modes.
    * @property {(TextEditorBlockType | TextEditorInlineType)[]} [buttons] Enabled buttons.
    * @property {TextEditorComponent[]} [components] Editor components.
@@ -50,6 +51,7 @@
     /* eslint-disable prefer-const */
     value = $bindable(''),
     flex = false,
+    dir = undefined,
     modes = ['rich-text', 'plain-text'],
     buttons = [...INLINE_BUTTON_TYPES, ...BLOCK_BUTTON_TYPES],
     components = [],
@@ -110,6 +112,7 @@
     autoResize={true}
     bind:value={editorStore.inputValue}
     {flex}
+    {dir}
     hidden={editorStore.useRichText || hidden}
     {disabled}
     {readonly}
