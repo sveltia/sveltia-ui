@@ -59,6 +59,14 @@
   let setOpenClass = $state(false);
   let setActiveClass = $state(false);
   let showContent = $state(false);
+  /**
+   * Monotonically increasing counter used to detect stale async operations. Incremented at the
+   * start of each `openDialog`/`closeDialog` call; any suspended continuation that finds its
+   * captured value no longer matches the current counter knows it has been superseded and exits
+   * without mutating state.
+   * @type {number}
+   */
+  let generation = 0;
 
   /**
    * Resolve once the transition is complete.
@@ -88,13 +96,19 @@
       return;
     }
 
+    generation += 1;
+
+    const gen = generation;
+
     onOpening?.(new CustomEvent('Opening'));
     showContent = true;
     dialog.showModal();
     onOpen?.(new CustomEvent('Open'));
     await sleep(0);
+    if (gen !== generation) return;
     setOpenClass = true;
     await waitForTransition();
+    if (gen !== generation) return;
     setActiveClass = true;
   };
 
@@ -106,6 +120,10 @@
       return;
     }
 
+    generation += 1;
+
+    const gen = generation;
+    const wasOpen = setOpenClass;
     const { returnValue } = dialog;
 
     onClosing?.(new CustomEvent('Closing'));
@@ -115,7 +133,16 @@
     document.body.inert = false;
     setActiveClass = false;
     setOpenClass = false;
-    await waitForTransition();
+
+    // Only wait for the closing transition if the dialog was visually open (i.e. the `.open` CSS
+    // class was set). If the dialog was closed before the opening transition even started, there is
+    // no CSS transition in progress and `transitionend` will never fire.
+    if (wasOpen) {
+      await waitForTransition();
+    }
+
+    if (gen !== generation) return;
+
     showContent = false;
 
     if (returnValue === 'ok') {
