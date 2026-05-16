@@ -27,7 +27,8 @@
   } = $props();
 
   /** @type {number} */
-  let loadedItemSize = $derived(itemChunkSize);
+  // svelte-ignore state_referenced_locally
+  let loadedItemSize = $state(itemChunkSize);
 
   /** @type {HTMLElement | undefined} */
   let spinner = $state(undefined);
