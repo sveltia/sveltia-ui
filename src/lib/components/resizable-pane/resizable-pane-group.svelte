@@ -22,6 +22,15 @@
    */
 
   /**
+   * @typedef {{
+   * id: string,
+   * defaultSize: number | string | undefined,
+   * minSize: number | string,
+   * maxSize: number | string,
+   * }} PaneDef
+   */
+
+  /**
    * @type {Props & Record<string, any>}
    */
   let {
@@ -37,9 +46,12 @@
   /**
    * `ResizablePane` definitions in registration order, populated synchronously by child
    * `<ResizablePane>` components.
-   * @type {{ id: string, defaultSize: number | undefined, minSize: number, maxSize: number }[]}
+   * @type {PaneDef[]}
    */
   const _paneDefs = $state([]);
+
+  /** @type {HTMLDivElement | undefined} */
+  let element = $state();
 
   /**
    * Current pane sizes as percentages.
@@ -56,17 +68,111 @@
   let _handleCount = 0;
 
   /**
+   * Get the pane group container element’s size in pixels for size conversion.
+   * @returns {number} Container size in pixels.
+   */
+  const getContainerSize = () => {
+    if (!element) return 0;
+
+    return direction === 'horizontal' ? element.clientWidth : element.clientHeight;
+  };
+
+  /**
+   * Resolve numeric or CSS string size values to percentage points.
+   * @param {number | string | undefined} value Size as percentage number or CSS size string.
+   * @param {number} fallback Fallback percentage when resolution fails.
+   * @returns {number} Size in percentage points.
+   */
+  const resolveToPercent = (value, fallback) => {
+    if (typeof value === 'number') {
+      return value;
+    }
+
+    if (!value || typeof value !== 'string') {
+      return fallback;
+    }
+
+    const trimmed = value.trim();
+    const matchedPercent = trimmed.match(/^(-?\d+(?:\.\d+)?)%$/);
+
+    if (matchedPercent) {
+      return Number(matchedPercent[1]);
+    }
+
+    const containerSize = getContainerSize();
+
+    if (!containerSize) {
+      return fallback;
+    }
+
+    const matchedPx = trimmed.match(/^(-?\d+(?:\.\d+)?)px$/i);
+
+    if (matchedPx) {
+      return (Number(matchedPx[1]) / containerSize) * 100;
+    }
+
+    const matchedViewport = trimmed.match(/^(-?\d+(?:\.\d+)?)(dvw|vw|dvh|vh)$/i);
+
+    if (matchedViewport) {
+      const viewportValue = Number(matchedViewport[1]);
+      const unit = matchedViewport[2].toLowerCase();
+      const viewportSize = unit.endsWith('w') ? window.innerWidth : window.innerHeight;
+      const pixels = (viewportValue / 100) * viewportSize;
+
+      return (pixels / containerSize) * 100;
+    }
+
+    return fallback;
+  };
+
+  /**
+   * Get pane constraints converted to percentages for the current container size.
+   * @param {number} paneIndex Pane index.
+   * @returns {{ minSize: number, maxSize: number }} Min/max in percentages.
+   */
+  const getPaneConstraints = (paneIndex) => {
+    const paneDef = _paneDefs[paneIndex];
+
+    if (!paneDef) {
+      return { minSize: 0, maxSize: 100 };
+    }
+
+    const minSize = Math.max(0, resolveToPercent(paneDef.minSize, 0));
+    const maxSize = Math.min(100, resolveToPercent(paneDef.maxSize, 100));
+
+    return {
+      minSize,
+      maxSize: Math.max(minSize, maxSize),
+    };
+  };
+
+  /**
    * Initialize pane sizes from `defaultSize` props. Called from `onMount` once all panes have
    * registered. Panes without `defaultSize` share the remaining space equally.
    */
   const initSizes = () => {
     if (!_paneDefs.length) return;
 
-    const totalSpecified = _paneDefs.reduce((sum, p) => sum + (p.defaultSize ?? 0), 0);
-    const unspecifiedCount = _paneDefs.filter((p) => p.defaultSize === undefined).length;
+    // Resolve each pane’s defaultSize to a percentage (NaN if unspecified or unresolvable).
+    // Resolving once ensures totalSpecified and newSizes use the same resolved value.
+    const resolvedDefaults = _paneDefs.map((p) => {
+      if (p.defaultSize === undefined) {
+        return NaN;
+      }
+
+      const resolved = resolveToPercent(p.defaultSize, NaN);
+
+      return resolved;
+    });
+
+    const totalSpecified = resolvedDefaults
+      .filter((v) => !Number.isNaN(v))
+      .reduce((sum, v) => sum + v, 0);
+
+    const unspecifiedCount = resolvedDefaults.filter((v) => Number.isNaN(v)).length;
     const remaining = Math.max(0, 100 - totalSpecified);
     const defaultSize = unspecifiedCount > 0 ? remaining / unspecifiedCount : 0;
-    const newSizes = _paneDefs.map((p) => p.defaultSize ?? defaultSize);
+    const newSizes = resolvedDefaults.map((v) => (Number.isNaN(v) ? defaultSize : v));
 
     sizes.splice(0, sizes.length, ...newSizes);
   };
@@ -82,8 +188,8 @@
 
     if (beforeIdx < 0 || afterIdx >= sizes.length) return;
 
-    const { minSize: minBefore = 0, maxSize: maxBefore = 100 } = _paneDefs[beforeIdx];
-    const { minSize: minAfter = 0, maxSize: maxAfter = 100 } = _paneDefs[afterIdx];
+    const { minSize: minBefore, maxSize: maxBefore } = getPaneConstraints(beforeIdx);
+    const { minSize: minAfter, maxSize: maxAfter } = getPaneConstraints(afterIdx);
     const prevBefore = sizes[beforeIdx];
     const prevAfter = sizes[afterIdx];
     // Clamp delta so neither pane exceeds its min/max constraints
@@ -105,7 +211,7 @@
    * @param {number} handleIndex Index of the resize handle.
    */
   const toggleCollapse = (handleIndex) => {
-    const { minSize: minBefore = 0 } = _paneDefs[handleIndex];
+    const { minSize: minBefore } = getPaneConstraints(handleIndex);
 
     if (_savedSizes[handleIndex] !== undefined) {
       const delta = /** @type {number} */ (_savedSizes[handleIndex]) - sizes[handleIndex];
@@ -142,6 +248,7 @@
       },
       resize,
       toggleCollapse,
+      getPaneConstraints,
       paneDefs: _paneDefs,
     }),
     /* eslint-enable jsdoc/require-jsdoc */
@@ -155,6 +262,7 @@
 </script>
 
 <div
+  bind:this={element}
   {...restProps}
   role="none"
   class="sui resizable-pane-group {direction} {className ?? ''}"

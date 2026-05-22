@@ -53,16 +53,25 @@
   const sizes = $derived(ctx.sizes);
   // The value reported via aria-valuenow is the size of the pane immediately before this handle
   const currentPaneSize = $derived(sizes[handleIndex] ?? 0);
+  const currentPaneConstraints = $derived(ctx.getPaneConstraints(handleIndex));
   const currentPaneMin = $derived(
     Math.max(
-      ctx.paneDefs[handleIndex]?.minSize ?? 0,
-      100 - ctx.paneDefs.reduce((sum, p, i) => sum + (i !== handleIndex ? p.maxSize : 0), 0),
+      currentPaneConstraints.minSize,
+      100 -
+        ctx.paneDefs.reduce(
+          (sum, _pane, i) => sum + (i !== handleIndex ? ctx.getPaneConstraints(i).maxSize : 0),
+          0,
+        ),
     ),
   );
   const currentPaneMax = $derived(
     Math.min(
-      ctx.paneDefs[handleIndex]?.maxSize ?? 100,
-      100 - ctx.paneDefs.reduce((sum, p, i) => sum + (i !== handleIndex ? p.minSize : 0), 0),
+      currentPaneConstraints.maxSize,
+      100 -
+        ctx.paneDefs.reduce(
+          (sum, _pane, i) => sum + (i !== handleIndex ? ctx.getPaneConstraints(i).minSize : 0),
+          0,
+        ),
     ),
   );
 

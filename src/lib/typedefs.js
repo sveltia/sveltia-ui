@@ -307,12 +307,19 @@
  */
 
 /**
+ * @typedef {number | string} ResizablePaneSize
+ */
+
+/**
  * @typedef {object} ResizablePaneDefinition
  * @property {string} id ResizablePane element ID (generated via `$props.id()` in the pane
  * component).
- * @property {number | undefined} defaultSize Default size as a percentage (0–100).
- * @property {number} minSize Minimum size as a percentage.
- * @property {number} maxSize Maximum size as a percentage.
+ * @property {ResizablePaneSize | undefined} defaultSize Default size as percentage number or CSS
+ * length/percentage string.
+ * @property {ResizablePaneSize} minSize Minimum size as percentage number or CSS length/percentage
+ * string.
+ * @property {ResizablePaneSize} maxSize Maximum size as percentage number or CSS length/percentage
+ * string.
  */
 
 /**
@@ -326,6 +333,8 @@
  * handle by the given delta.
  * @property {(handleIndex: number) => void} toggleCollapse Toggle collapse of the primary pane
  * before the given handle.
+ * @property {(paneIndex: number) => { minSize: number, maxSize: number }} getPaneConstraints
+ * Resolve pane constraints to percentages for the current container size.
  * @property {ResizablePaneDefinition[]} paneDefs Registered pane definitions.
  */
 

@@ -147,6 +147,48 @@
 </section>
 
 <section>
+  <h3>String Sizes (px, %, dvw)</h3>
+  <p>
+    You can pass CSS size strings to <code>defaultSize</code>, <code>minSize</code> and
+    <code>maxSize</code>. This example mixes <code>px</code>, <code>%</code> and
+    <code>dvw</code>.
+  </p>
+  <Example>
+    <div role="none" style="height: 220px;">
+      <ResizablePaneGroup direction="horizontal">
+        <ResizablePane
+          defaultSize="240px"
+          minSize="160px"
+          maxSize="45%"
+          style="padding: 12px; background: var(--sui-tertiary-background-color);"
+        >
+          default: 240px<br />
+          min: 160px · max: 45%
+        </ResizablePane>
+        <ResizableHandle aria-label="Left pane size" />
+        <ResizablePane
+          defaultSize="20dvw"
+          minSize="20%"
+          maxSize="60%"
+          style="padding: 12px; background: var(--sui-secondary-background-color);"
+        >
+          default: 20dvw<br />
+          min: 20% · max: 60%
+        </ResizablePane>
+        <ResizableHandle aria-label="Center pane size" />
+        <ResizablePane
+          minSize="120px"
+          style="padding: 12px; background: var(--sui-primary-background-color);"
+        >
+          auto-sized<br />
+          min: 120px
+        </ResizablePane>
+      </ResizablePaneGroup>
+    </div>
+  </Example>
+</section>
+
+<section>
   <h3>Events</h3>
   <p>
     <code>ResizablePane</code> fires <code>onResize(detail)</code> with the pane's current size in

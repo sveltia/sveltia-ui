@@ -13,10 +13,13 @@
 
   /**
    * @typedef {object} Props
-   * @property {number} [defaultSize] Default size as a percentage (0–100). Panes without
+   * @property {number | string} [defaultSize] Default size. Numbers are percentages (0-100);
+   * strings can be any CSS length/percentage such as `240px`, `20%` or `20dvw`. Panes without
    * `defaultSize` share the remaining space equally.
-   * @property {number} [minSize] Minimum size as a percentage. Defaults to `0`.
-   * @property {number} [maxSize] Maximum size as a percentage. Defaults to `100`.
+   * @property {number | string} [minSize] Minimum size. Numbers are percentages, strings are CSS
+   * lengths. Defaults to `0`.
+   * @property {number | string} [maxSize] Maximum size. Numbers are percentages, strings are CSS
+   * lengths. Defaults to `100`.
    * @property {string} [class] The `class` attribute on the wrapper element.
    * @property {Snippet} [children] Primary slot content.
    * @property {(detail: { size: number }) => void} [onResize] Called whenever this pane’s size (in
@@ -52,7 +55,17 @@
 
   const direction = $derived(ctx.direction);
   const size = $derived(ctx.sizes[paneIndex]);
-  const sizeStyle = $derived(size !== undefined ? size : (defaultSize ?? 0));
+  const sizeStyle = $derived.by(() => {
+    if (size !== undefined) {
+      return `${size}%`;
+    }
+
+    if (typeof defaultSize === 'number') {
+      return `${defaultSize}%`;
+    }
+
+    return defaultSize ?? '0%';
+  });
 
   $effect(() => {
     if (size !== undefined) {
@@ -66,7 +79,7 @@
   {id}
   role="none"
   class="sui resizable-pane {className ?? ''}"
-  style:flex-basis="{sizeStyle}%"
+  style:flex-basis={sizeStyle}
   style:flex-grow="0"
   style:flex-shrink="0"
   style:overflow-x={direction === 'horizontal' ? 'auto' : undefined}
