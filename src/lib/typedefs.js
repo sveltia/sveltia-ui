@@ -197,6 +197,23 @@
  */
 
 /**
+ * @typedef {object} PointerEventHandlers
+ * @property {(event: PointerEvent) => void} [onpointerover] `pointerover` event handler.
+ * @property {(event: PointerEvent) => void} [onpointerenter] `pointerenter` event handler.
+ * @property {(event: PointerEvent) => void} [onpointerdown] `pointerdown` event handler.
+ * @property {(event: PointerEvent) => void} [onpointermove] `pointermove` event handler.
+ * @property {(event: PointerEvent) => void} [onpointerrawupdate] `pointerrawupdate` event handler.
+ * @property {(event: PointerEvent) => void} [onpointerup] `pointerup` event handler.
+ * @property {(event: PointerEvent) => void} [onpointercancel] `pointercancel` event handler.
+ * @property {(event: PointerEvent) => void} [onpointerout] `pointerout` event handler.
+ * @property {(event: PointerEvent) => void} [onpointerleave] `pointerleave` event handler.
+ * @property {(event: PointerEvent) => void} [ongotpointercapture] `gotpointercapture` event
+ * handler.
+ * @property {(event: PointerEvent) => void} [onlostpointercapture] `lostpointercapture` event
+ * handler.
+ */
+
+/**
  * @typedef {object} FocusEventHandlers
  * @property {(event: FocusEvent) => void} [onfocus] `focus` event handler.
  * @property {(event: FocusEvent) => void} [onblur] `blur` event handler.
@@ -214,8 +231,8 @@
  */
 
 /**
- * @typedef {KeyboardEventHandlers & MouseEventHandlers & FocusEventHandlers & DragEventHandlers}
- * CommonEventHandlers
+ * @typedef {KeyboardEventHandlers & MouseEventHandlers & PointerEventHandlers & FocusEventHandlers
+ * & DragEventHandlers} CommonEventHandlers
  */
 
 /**

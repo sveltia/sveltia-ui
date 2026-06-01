@@ -32,10 +32,12 @@ words:
   - Kohei
   - nocheck
   - oninputcapture
+  - onpointerrawupdate
   - opsz
   - oxlint
   - plusplus
   - pnpm
+  - pointerrawupdate
   - postcss
   - prismjs
   - Shiki
