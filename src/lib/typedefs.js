@@ -192,6 +192,8 @@
  * @property {(event: MouseEvent) => void} [onmouseover] `mouseover` event handler.
  * @property {(event: MouseEvent) => void} [onmousedown] `mousedown` event handler.
  * @property {(event: MouseEvent) => void} [onmouseup] `mouseup` event handler.
+ * @property {(event: MouseEvent) => void} [onmousemove] `mousemove` event handler.
+ * @property {(event: MouseEvent) => void} [onmouseout] `mouseout` event handler.
  * @property {(event: MouseEvent) => void} [onclick] `click` event handler.
  * @property {(event: MouseEvent) => void} [ondblclick] `dblclick` event handler.
  */
@@ -217,6 +219,8 @@
  * @typedef {object} FocusEventHandlers
  * @property {(event: FocusEvent) => void} [onfocus] `focus` event handler.
  * @property {(event: FocusEvent) => void} [onblur] `blur` event handler.
+ * @property {(event: FocusEvent) => void} [onfocusin] `focusin` event handler.
+ * @property {(event: FocusEvent) => void} [onfocusout] `focusout` event handler.
  */
 
 /**
