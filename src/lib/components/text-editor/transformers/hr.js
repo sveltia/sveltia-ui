@@ -3,9 +3,9 @@
 /* eslint-disable jsdoc/require-jsdoc */
 
 import {
-  $createHorizontalRuleNode,
-  $isHorizontalRuleNode,
+  $createHorizontalRuleNode as createHorizontalRuleNode,
   HorizontalRuleNode,
+  $isHorizontalRuleNode as isHorizontalRuleNode,
 } from '@lexical/extension';
 
 /**
@@ -17,10 +17,10 @@ import {
  */
 export const HR = {
   dependencies: [HorizontalRuleNode],
-  export: (node) => ($isHorizontalRuleNode(node) ? '***' : null),
+  export: (node) => (isHorizontalRuleNode(node) ? '***' : null),
   regExp: /^(---|\*\*\*|___)\s?$/,
   replace: (parentNode, _1, _2, isImport) => {
-    const line = $createHorizontalRuleNode();
+    const line = createHorizontalRuleNode();
 
     if (isImport || parentNode.getNextSibling() !== null) {
       parentNode.replace(line);
