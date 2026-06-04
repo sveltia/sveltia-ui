@@ -88,7 +88,9 @@
   };
 
   onMount(() => {
-    editorStore.editor = initEditor(editorStore.config);
+    const { editor, dispose } = initEditor(editorStore.config);
+
+    editorStore.editor = editor;
 
     lexicalRoot?.addEventListener('Update', onUpdate);
     lexicalRoot?.addEventListener('click', onClick);
@@ -96,6 +98,10 @@
     return () => {
       lexicalRoot?.removeEventListener('Update', onUpdate);
       lexicalRoot?.removeEventListener('click', onClick);
+      dispose();
+      editor.setRootElement(null);
+      editorStore.initialized = false;
+      editorStore.editor = undefined;
     };
   });
 

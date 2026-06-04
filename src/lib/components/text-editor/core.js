@@ -246,7 +246,7 @@ const onEditorUpdate = (editor) => {
 /**
  * Initialize the Lexical editor.
  * @param {TextEditorConfig} config Editor configuration.
- * @returns {LexicalEditor} Editor instance.
+ * @returns {{ editor: LexicalEditor, dispose: () => void }} Editor instance and cleanup.
  */
 export const initEditor = ({
   components = [],
@@ -259,92 +259,124 @@ export const initEditor = ({
   });
 
   const editor = createEditor(editorConfig);
+  /** @type {Array<() => void>} */
+  const unregisters = [];
 
-  registerRichText(editor);
-  registerDragonSupport(editor);
-  registerHistory(editor, createEmptyHistoryState(), 1000);
+  /**
+   * Add a cleanup handler if it is defined.
+   * @param {(() => void) | undefined | null} unregister Cleanup handler.
+   */
+  const addUnregister = (unregister) => {
+    if (typeof unregister === 'function') {
+      unregisters.push(unregister);
+    }
+  };
 
-  registerCodeHighlighting(editor, {
-    defaultLanguage,
-    // eslint-disable-next-line jsdoc/require-jsdoc
-    tokenize: (code, lang = 'plain') =>
-      window.Prism.tokenize(code, window.Prism.languages[lang] ?? window.Prism.languages.plain),
-    $tokenize: PrismTokenizer.$tokenize,
-  });
+  addUnregister(registerRichText(editor));
+  addUnregister(registerDragonSupport(editor));
+  addUnregister(registerHistory(editor, createEmptyHistoryState(), 1000));
 
-  editor.registerCommand(
-    TOGGLE_LINK_COMMAND,
-    (payload) => {
-      toggleLink(typeof payload === 'string' ? payload : null);
-
-      return true;
-    },
-    COMMAND_PRIORITY_NORMAL,
+  addUnregister(
+    registerCodeHighlighting(editor, {
+      defaultLanguage,
+      // eslint-disable-next-line jsdoc/require-jsdoc
+      tokenize: (code, lang = 'plain') =>
+        window.Prism.tokenize(code, window.Prism.languages[lang] ?? window.Prism.languages.plain),
+      $tokenize: PrismTokenizer.$tokenize,
+    }),
   );
 
-  editor.registerCommand(
-    INSERT_UNORDERED_LIST_COMMAND,
-    () => {
-      insertList('bullet');
+  addUnregister(
+    editor.registerCommand(
+      TOGGLE_LINK_COMMAND,
+      (payload) => {
+        toggleLink(typeof payload === 'string' ? payload : null);
 
-      return true;
-    },
-    COMMAND_PRIORITY_NORMAL,
+        return true;
+      },
+      COMMAND_PRIORITY_NORMAL,
+    ),
   );
 
-  editor.registerCommand(
-    INSERT_ORDERED_LIST_COMMAND,
-    () => {
-      insertList('number');
+  addUnregister(
+    editor.registerCommand(
+      INSERT_UNORDERED_LIST_COMMAND,
+      () => {
+        insertList('bullet');
 
-      return true;
-    },
-    COMMAND_PRIORITY_NORMAL,
+        return true;
+      },
+      COMMAND_PRIORITY_NORMAL,
+    ),
+  );
+
+  addUnregister(
+    editor.registerCommand(
+      INSERT_ORDERED_LIST_COMMAND,
+      () => {
+        insertList('number');
+
+        return true;
+      },
+      COMMAND_PRIORITY_NORMAL,
+    ),
   );
 
   // https://github.com/facebook/lexical/blob/main/packages/lexical-react/src/shared/useList.ts
-  editor.registerCommand(
-    INSERT_PARAGRAPH_COMMAND,
-    () => handleListInsertParagraph(),
-    COMMAND_PRIORITY_NORMAL,
+  addUnregister(
+    editor.registerCommand(
+      INSERT_PARAGRAPH_COMMAND,
+      () => handleListInsertParagraph(),
+      COMMAND_PRIORITY_NORMAL,
+    ),
   );
 
-  editor.registerUpdateListener(() => {
-    if (editor?.isComposing()) {
-      return;
-    }
+  addUnregister(
+    editor.registerUpdateListener(() => {
+      if (editor?.isComposing()) {
+        return;
+      }
 
-    (async () => {
-      await sleep(100);
+      (async () => {
+        await sleep(100);
 
-      editor.update(() => {
-        // Prevent CodeNode from being removed
-        if (isCodeEditor) {
-          const root = getRoot();
-          const children = root.getChildren();
+        editor.update(() => {
+          // Prevent CodeNode from being removed
+          if (isCodeEditor) {
+            const root = getRoot();
+            const children = root.getChildren();
 
-          if (children.length === 1 && !isCodeNode(children[0])) {
-            children[0].remove();
+            if (children.length === 1 && !isCodeNode(children[0])) {
+              children[0].remove();
+            }
+
+            if (children.length === 0) {
+              const node = createCodeNode();
+
+              node.setLanguage(defaultLanguage);
+              root.append(node);
+            }
           }
 
-          if (children.length === 0) {
-            const node = createCodeNode();
-
-            node.setLanguage(defaultLanguage);
-            root.append(node);
-          }
-        }
-
-        onEditorUpdate(editor);
-      });
-    })();
-  });
+          onEditorUpdate(editor);
+        });
+      })();
+    }),
+  );
 
   // `editor.registerCommand(KEY_TAB_COMMAND, listener, priority)` doesn’t work for some reason, so
   // use another method
-  editor.registerRootListener((root) => {
-    if (root) {
-      root.addEventListener('keydown', (event) => {
+  addUnregister(
+    editor.registerRootListener((root) => {
+      if (!root) {
+        return undefined;
+      }
+
+      /**
+       * Handle Tab indentation shortcuts.
+       * @param {KeyboardEvent} event Keydown event.
+       */
+      const onKeydown = (event) => {
         editor.update(() => {
           if (event.key === 'Tab') {
             const selection = getSelection();
@@ -369,11 +401,25 @@ export const initEditor = ({
             }
           }
         });
-      });
-    }
-  });
+      };
 
-  return editor;
+      root.addEventListener('keydown', onKeydown);
+
+      return () => {
+        root.removeEventListener('keydown', onKeydown);
+      };
+    }),
+  );
+
+  return {
+    editor,
+    /**
+     * Remove all registered Lexical listeners.
+     */
+    dispose: () => {
+      unregisters.forEach((unregister) => unregister());
+    },
+  };
 };
 
 /**
