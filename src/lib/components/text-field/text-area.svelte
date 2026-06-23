@@ -74,8 +74,7 @@
     aria-readonly={readonly}
     aria-required={required}
     aria-invalid={invalid}
-    class:auto-resize={autoResize}
-  ></textarea>
+    class:auto-resize={autoResize}></textarea>
   {#if autoResize}
     <div class="clone" aria-hidden="true" {dir}>{value}</div>
   {/if}
