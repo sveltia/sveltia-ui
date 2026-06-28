@@ -12,4 +12,5 @@ minimumReleaseAgeExclude:
   - "@sveltia/*"
 
 overrides:
-  "cookie@<0.7.0": ">=0.7.0"
+  # <0.7.0 has a security vulnerability, 2.0.0 causes issues with SvelteKit
+  "cookie@<0.7.0": "^1.0.0"
