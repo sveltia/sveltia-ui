@@ -291,6 +291,8 @@
  * @property {(TextEditorBlockType | TextEditorInlineType)[]} enabledButtons Enabled buttons for the
  * editor.
  * @property {TextEditorComponent[]} components Editor components.
+ * @property {boolean} useMarkdownShortcuts Whether to enable Markdown keyboard shortcuts in the
+ * rich text editor.
  * @property {boolean} isCodeEditor Whether the editor is used as a code editor.
  * @property {string} [defaultLanguage] Default language for the code editor.
  */

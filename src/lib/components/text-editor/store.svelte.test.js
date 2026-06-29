@@ -48,6 +48,7 @@ describe('createEditorStore', () => {
       modes: ['rich-text'],
       enabledButtons: [],
       components: [],
+      useMarkdownShortcuts: true,
       isCodeEditor: false,
     };
     expect(store.useRichText).toBe(true);
@@ -60,6 +61,7 @@ describe('createEditorStore', () => {
       modes: ['plain-text'],
       enabledButtons: [],
       components: [],
+      useMarkdownShortcuts: true,
       isCodeEditor: false,
     };
     expect(store.useRichText).toBe(false);
@@ -68,14 +70,26 @@ describe('createEditorStore', () => {
   it('should set useRichText to true when isCodeEditor is true regardless of modes', () => {
     const store = createEditorStore();
 
-    store.config = { modes: [], enabledButtons: [], components: [], isCodeEditor: true };
+    store.config = {
+      modes: [],
+      enabledButtons: [],
+      components: [],
+      useMarkdownShortcuts: true,
+      isCodeEditor: true,
+    };
     expect(store.useRichText).toBe(true);
   });
 
   it('should set useRichText to false when modes is empty and isCodeEditor is false', () => {
     const store = createEditorStore();
 
-    store.config = { modes: [], enabledButtons: [], components: [], isCodeEditor: false };
+    store.config = {
+      modes: [],
+      enabledButtons: [],
+      components: [],
+      useMarkdownShortcuts: true,
+      isCodeEditor: false,
+    };
     expect(store.useRichText).toBe(false);
   });
 

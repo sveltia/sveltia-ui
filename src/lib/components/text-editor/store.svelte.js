@@ -17,8 +17,16 @@ export const createEditorStore = () => {
   let initialized = $state(false);
   /** @type {LexicalEditor | undefined} */
   let editor = $state();
+
   /** @type {TextEditorConfig} */
-  let config = $state({ modes: [], enabledButtons: [], components: [], isCodeEditor: false });
+  let config = $state({
+    modes: [],
+    enabledButtons: [],
+    components: [],
+    useMarkdownShortcuts: true,
+    isCodeEditor: false,
+  });
+
   /** @type {string} */
   let inputValue = $state('');
   /** @type {TextEditorSelectionState} */

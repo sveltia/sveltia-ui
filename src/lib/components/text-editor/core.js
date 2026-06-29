@@ -32,6 +32,7 @@ import {
 import {
   $convertFromMarkdownString as convertFromMarkdownString,
   $convertToMarkdownString as convertToMarkdownString,
+  registerMarkdownShortcuts,
   TRANSFORMERS,
 } from '@lexical/markdown';
 import {
@@ -250,6 +251,7 @@ const onEditorUpdate = (editor) => {
  */
 export const initEditor = ({
   components = [],
+  useMarkdownShortcuts,
   isCodeEditor = false,
   defaultLanguage = 'plain',
 }) => {
@@ -275,6 +277,10 @@ export const initEditor = ({
   addUnregister(registerRichText(editor));
   addUnregister(registerDragonSupport(editor));
   addUnregister(registerHistory(editor, createEmptyHistoryState(), 1000));
+
+  if (useMarkdownShortcuts) {
+    addUnregister(registerMarkdownShortcuts(editor, allTransformers));
+  }
 
   addUnregister(
     registerCodeHighlighting(editor, {

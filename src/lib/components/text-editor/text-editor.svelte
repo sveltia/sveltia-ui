@@ -31,6 +31,8 @@
    * @property {TextEditorMode[]} [modes] Enabled modes.
    * @property {(TextEditorBlockType | TextEditorInlineType)[]} [buttons] Enabled buttons.
    * @property {TextEditorComponent[]} [components] Editor components.
+   * @property {boolean} [useMarkdownShortcuts] Whether to enable Markdown keyboard shortcuts in the
+   * rich text editor.
    * @property {string} [class] The `class` attribute on the wrapper element.
    * @property {boolean} [hidden] Whether to hide the widget.
    * @property {boolean} [disabled] Whether to disable the widget. An alias of the `aria-disabled`
@@ -55,6 +57,7 @@
     modes = ['rich-text', 'plain-text'],
     buttons = [...INLINE_BUTTON_TYPES, ...BLOCK_BUTTON_TYPES],
     components = [],
+    useMarkdownShortcuts = true,
     hidden = false,
     disabled = false,
     readonly = false,
@@ -68,7 +71,13 @@
   const editorStore = createEditorStore();
 
   // svelte-ignore state_referenced_locally
-  editorStore.config = { ...editorStore.config, modes, enabledButtons: buttons, components };
+  editorStore.config = {
+    ...editorStore.config,
+    modes,
+    enabledButtons: buttons,
+    components,
+    useMarkdownShortcuts,
+  };
 
   setContext('editorStore', editorStore);
 
