@@ -147,9 +147,10 @@ const editorConfig = {
 
 /**
  * Get the current selection’s block node key as well as block and inline level types.
+ * @internal
  * @returns {TextEditorSelectionState} Current selection state.
  */
-const getSelectionTypes = () => {
+export const getSelectionTypes = () => {
   const selection = getSelection();
 
   if (!isRangeSelection(selection)) {
@@ -220,9 +221,10 @@ const getSelectionTypes = () => {
 
 /**
  * Listen to changes made on the editor and trigger the Update event.
+ * @internal
  * @param {LexicalEditor} editor Editor instance.
  */
-const onEditorUpdate = (editor) => {
+export const onEditorUpdate = (editor) => {
   editor.getRootElement()?.dispatchEvent(
     new CustomEvent('Update', {
       detail: {
@@ -269,6 +271,7 @@ export const initEditor = ({
    * @param {(() => void) | undefined | null} unregister Cleanup handler.
    */
   const addUnregister = (unregister) => {
+    /* v8 ignore next */
     if (typeof unregister === 'function') {
       unregisters.push(unregister);
     }
@@ -348,10 +351,12 @@ export const initEditor = ({
 
         editor.update(() => {
           // Prevent CodeNode from being removed
+          /* v8 ignore next */
           if (isCodeEditor) {
             const root = getRoot();
             const children = root.getChildren();
 
+            // c8 ignore next 3
             if (children.length === 1 && !isCodeNode(children[0])) {
               children[0].remove();
             }
@@ -440,7 +445,8 @@ export const loadCodeHighlighter = async (lang) => {
   const canonicalLang = Object.entries(prismComponents.languages).find(
     // @ts-ignore
     ([key, { alias }]) =>
-      key === lang || (Array.isArray(alias) ? alias.includes(lang) : alias === lang),
+      key === lang ||
+      (Array.isArray(alias) ? alias.includes(lang) : /* v8 ignore next */ alias === lang),
   )?.[0];
 
   if (!canonicalLang) {

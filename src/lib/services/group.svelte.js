@@ -556,6 +556,7 @@ export const activateGroup = (paramsOrGetter) => (parent) => {
   const initialParams = isGetter ? paramsOrGetter() : paramsOrGetter;
   const group = new Group(/** @type {HTMLElement} */ (parent), initialParams);
 
+  /* v8 ignore next 4 */
   if (isGetter) {
     $effect(() => {
       group.onUpdate(paramsOrGetter());

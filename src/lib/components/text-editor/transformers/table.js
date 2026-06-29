@@ -32,21 +32,23 @@ const TABLE_ROW_DIVIDER_REG_EXP = /^(\| ?:?-*:? ?)+\|\s?$/;
 
 /**
  * Returns the number of columns in the table.
+ * @internal
  * @param {TableNode} table
  * @returns {number}
  */
-function getTableColumnsSize(table) {
+export const getTableColumnsSize = (table) => {
   const row = table.getFirstChild();
 
   return isTableRowNode(row) ? row.getChildrenSize() : 0;
-}
+};
 
 /**
  * Creates a table cell with the given text content.
+ * @internal
  * @param {string} textContent
  * @returns {TableCellNode}
  */
-const createTableCell = (textContent) => {
+export const createTableCell = (textContent) => {
   textContent = textContent.replace(/\\n/g, '\n');
 
   const cell = createTableCellNode(TableCellHeaderStates.NO_STATUS);
@@ -58,10 +60,11 @@ const createTableCell = (textContent) => {
 
 /**
  * Maps the given text content to an array of table cells.
+ * @internal
  * @param {string} textContent
  * @returns {TableCellNode[] | null}
  */
-const mapToTableCells = (textContent) => {
+export const mapToTableCells = (textContent) => {
   const [, match] = textContent.match(TABLE_ROW_REG_EXP) ?? [];
 
   if (!match) {
