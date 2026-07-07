@@ -168,12 +168,17 @@
     }
 
     :global {
-      :first-child {
-        margin-top: 0;
-      }
+      // Remove the default margin on the first and last child elements of block nodes, including
+      // paragraphs, headings, lists, and code blocks, but keep the default margin on other items,
+      // including UI widgets like radio buttons, checkboxes, and select menus
+      [dir] {
+        &:first-child {
+          margin-top: 0;
+        }
 
-      :last-child {
-        margin-bottom: 0;
+        &:last-child {
+          margin-bottom: 0;
+        }
       }
 
       strong.italic {
