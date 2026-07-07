@@ -271,6 +271,10 @@
  */
 
 /**
+ * @typedef {TextEditorBlockType | TextEditorInlineType} TextEditorNodeType
+ */
+
+/**
  * @typedef {'rich-text' | 'plain-text'} TextEditorMode
  */
 
@@ -288,7 +292,7 @@
 /**
  * @typedef {object} TextEditorConfig
  * @property {TextEditorMode[]} modes Enabled modes.
- * @property {(TextEditorBlockType | TextEditorInlineType)[]} enabledButtons Enabled buttons for the
+ * @property {TextEditorNodeType[]} enabledButtons Enabled buttons for the
  * editor.
  * @property {TextEditorComponent[]} components Editor components.
  * @property {boolean} useMarkdownShortcuts Whether to enable Markdown keyboard shortcuts in the

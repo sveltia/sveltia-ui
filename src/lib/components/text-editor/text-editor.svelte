@@ -15,12 +15,7 @@
 
   /**
    * @import { Snippet } from 'svelte';
-   * @import {
-   * TextEditorBlockType,
-   * TextEditorComponent,
-   * TextEditorInlineType,
-   * TextEditorMode,
-   * } from '$lib/typedefs';
+   * @import { TextEditorComponent, TextEditorMode, TextEditorNodeType } from '$lib/typedefs';
    */
 
   /**
@@ -29,7 +24,7 @@
    * @property {boolean} [flex] Make the text input container flexible.
    * @property {'ltr' | 'rtl' | 'auto'} [dir] The `dir` attribute on the `<textarea>` element.
    * @property {TextEditorMode[]} [modes] Enabled modes.
-   * @property {(TextEditorBlockType | TextEditorInlineType)[]} [buttons] Enabled buttons.
+   * @property {TextEditorNodeType[]} [buttons] Enabled buttons.
    * @property {TextEditorComponent[]} [components] Editor components.
    * @property {boolean} [useMarkdownShortcuts] Whether to enable Markdown keyboard shortcuts in the
    * rich text editor.
