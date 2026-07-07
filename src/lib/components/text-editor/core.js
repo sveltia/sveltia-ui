@@ -57,7 +57,7 @@ import {
   OUTDENT_CONTENT_COMMAND,
 } from 'lexical';
 import prismComponents from 'prismjs/components';
-import { BLOCK_BUTTON_TYPES, TEXT_FORMAT_BUTTON_TYPES } from './constants.js';
+import { BLOCK_BUTTON_TYPES, EDITOR_THEME, TEXT_FORMAT_BUTTON_TYPES } from './constants.js';
 import { increaseListIndentation, splitMultilineFormatting } from './markdown.js';
 import { HR } from './transformers/hr.js';
 import { TABLE } from './transformers/table.js';
@@ -94,55 +94,7 @@ const editorConfig = {
     TableCellNode,
     TableRowNode,
   ],
-  theme: {
-    text: {
-      /**
-       * Enable bold+italic and strikethrough styling.
-       * @see https://github.com/facebook/lexical/discussions/4381
-       */
-      italic: 'italic',
-      strikethrough: 'strikethrough',
-    },
-    list: {
-      nested: {
-        listitem: 'nested',
-      },
-    },
-    code: 'code-block',
-    // https://github.com/facebook/lexical/blob/main/packages/lexical-website/docs/getting-started/theming.md
-    codeHighlight: {
-      atrule: 'token atrule',
-      attr: 'token attr',
-      boolean: 'token boolean',
-      builtin: 'token builtin',
-      cdata: 'token cdata',
-      char: 'token char',
-      class: 'token class',
-      'class-name': 'token class-name',
-      comment: 'token comment',
-      constant: 'token constant',
-      deleted: 'token deleted',
-      doctype: 'token doctype',
-      entity: 'token entity',
-      function: 'token function',
-      important: 'token important',
-      inserted: 'token inserted',
-      keyword: 'token keyword',
-      namespace: 'token namespace',
-      number: 'token number',
-      operator: 'token operator',
-      prolog: 'token prolog',
-      property: 'token property',
-      punctuation: 'token punctuation',
-      regex: 'token regex',
-      selector: 'token selector',
-      string: 'token string',
-      symbol: 'token symbol',
-      tag: 'token tag',
-      url: 'token url',
-      variable: 'token variable',
-    },
-  },
+  theme: EDITOR_THEME,
 };
 
 /**

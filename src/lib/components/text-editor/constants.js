@@ -1,6 +1,60 @@
 /**
+ * @import { EditorThemeClasses } from 'lexical';
  * @import { TextEditorBlockType, TextEditorFormatType, TextEditorInlineType } from '$lib/typedefs';
  */
+
+/**
+ * @type {EditorThemeClasses}
+ */
+export const EDITOR_THEME = {
+  text: {
+    /**
+     * Enable bold+italic and strikethrough styling.
+     * @see https://github.com/facebook/lexical/discussions/4381
+     */
+    italic: 'italic',
+    strikethrough: 'strikethrough',
+  },
+  list: {
+    nested: {
+      listitem: 'nested',
+    },
+  },
+  code: 'code-block',
+  // https://github.com/facebook/lexical/blob/main/packages/lexical-website/docs/getting-started/theming.md
+  codeHighlight: {
+    atrule: 'token atrule',
+    attr: 'token attr',
+    boolean: 'token boolean',
+    builtin: 'token builtin',
+    cdata: 'token cdata',
+    char: 'token char',
+    class: 'token class',
+    'class-name': 'token class-name',
+    comment: 'token comment',
+    constant: 'token constant',
+    deleted: 'token deleted',
+    doctype: 'token doctype',
+    entity: 'token entity',
+    function: 'token function',
+    important: 'token important',
+    inserted: 'token inserted',
+    keyword: 'token keyword',
+    namespace: 'token namespace',
+    number: 'token number',
+    operator: 'token operator',
+    prolog: 'token prolog',
+    property: 'token property',
+    punctuation: 'token punctuation',
+    regex: 'token regex',
+    selector: 'token selector',
+    string: 'token string',
+    symbol: 'token symbol',
+    tag: 'token tag',
+    url: 'token url',
+    variable: 'token variable',
+  },
+};
 
 /**
  * List of available buttons.
