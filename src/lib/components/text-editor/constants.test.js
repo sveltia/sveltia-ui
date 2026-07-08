@@ -1,10 +1,22 @@
+import {
+  BOLD_ITALIC_STAR,
+  BOLD_ITALIC_UNDERSCORE,
+  BOLD_STAR,
+  BOLD_UNDERSCORE,
+  INLINE_CODE,
+  ITALIC_STAR,
+  ITALIC_UNDERSCORE,
+  STRIKETHROUGH,
+} from '@lexical/markdown';
 import { describe, expect, it } from 'vitest';
 import {
   AVAILABLE_BUTTONS,
   BLOCK_BUTTON_TYPES,
+  DISABLED_MARKDOWN_TAGS,
   IMAGE_COMPONENT_IDS,
   INLINE_BUTTON_TYPES,
   TEXT_FORMAT_BUTTON_TYPES,
+  TRANSFORMER_MAP,
 } from './constants.js';
 
 describe('AVAILABLE_BUTTONS', () => {
@@ -94,5 +106,64 @@ describe('IMAGE_COMPONENT_IDS', () => {
   it('should include image and linked-image', () => {
     expect(IMAGE_COMPONENT_IDS).toContain('image');
     expect(IMAGE_COMPONENT_IDS).toContain('linked-image');
+  });
+});
+
+describe('TRANSFORMER_MAP', () => {
+  it('should include all expected transformers for bold', () => {
+    expect(TRANSFORMER_MAP.bold).toEqual([
+      BOLD_STAR,
+      BOLD_UNDERSCORE,
+      BOLD_ITALIC_STAR,
+      BOLD_ITALIC_UNDERSCORE,
+    ]);
+  });
+
+  it('should include all expected transformers for italic', () => {
+    expect(TRANSFORMER_MAP.italic).toEqual([
+      ITALIC_UNDERSCORE,
+      ITALIC_STAR,
+      BOLD_ITALIC_STAR,
+      BOLD_ITALIC_UNDERSCORE,
+    ]);
+  });
+
+  it('should include strikethrough transformer', () => {
+    expect(TRANSFORMER_MAP.strikethrough).toEqual([STRIKETHROUGH]);
+  });
+
+  it('should include code transformer', () => {
+    expect(TRANSFORMER_MAP.code).toEqual([INLINE_CODE]);
+  });
+
+  it('should have entries for all text format button types', () => {
+    TEXT_FORMAT_BUTTON_TYPES.forEach((type) => {
+      expect(TRANSFORMER_MAP).toHaveProperty(type);
+      expect(Array.isArray(TRANSFORMER_MAP[type])).toBe(true);
+      expect(TRANSFORMER_MAP[type].length).toBeGreaterThan(0);
+    });
+  });
+});
+
+describe('DISABLED_MARKDOWN_TAGS', () => {
+  it('should be an array containing all disabled markdown tags', () => {
+    expect(Array.isArray(DISABLED_MARKDOWN_TAGS)).toBe(true);
+    expect(DISABLED_MARKDOWN_TAGS).toEqual(['*', '__', '***', '___']);
+  });
+
+  it('should disable ITALIC_STAR tag for Lexical-to-Markdown conversion', () => {
+    expect(DISABLED_MARKDOWN_TAGS).toContain('*');
+  });
+
+  it('should disable BOLD_UNDERSCORE tag for Lexical-to-Markdown conversion', () => {
+    expect(DISABLED_MARKDOWN_TAGS).toContain('__');
+  });
+
+  it('should disable BOLD_ITALIC_STAR tag for Lexical-to-Markdown conversion', () => {
+    expect(DISABLED_MARKDOWN_TAGS).toContain('***');
+  });
+
+  it('should disable BOLD_ITALIC_UNDERSCORE tag for Lexical-to-Markdown conversion', () => {
+    expect(DISABLED_MARKDOWN_TAGS).toContain('___');
   });
 });

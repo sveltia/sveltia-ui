@@ -5,9 +5,11 @@ import {
   BOLD_ITALIC_STAR,
   BOLD_ITALIC_UNDERSCORE,
   BOLD_STAR,
+  BOLD_UNDERSCORE,
   CODE,
   HEADING,
   INLINE_CODE,
+  ITALIC_STAR,
   ITALIC_UNDERSCORE,
   LINK,
   ORDERED_LIST,
@@ -241,9 +243,31 @@ export const TRANSFORMER_MAP = {
   'code-block': [CODE],
   // TEXT_FORMAT_TRANSFORMERS
   code: [INLINE_CODE],
-  bold: [BOLD_ITALIC_STAR, BOLD_ITALIC_UNDERSCORE, BOLD_STAR], // Exclude BOLD_UNDERSCORE
-  italic: [BOLD_ITALIC_STAR, BOLD_ITALIC_UNDERSCORE, ITALIC_UNDERSCORE], // Exclude ITALIC_STAR
+  bold: [
+    BOLD_STAR,
+    // Disabled for Markdown output in `DISABLED_MARKDOWN_TAGS` below
+    BOLD_UNDERSCORE,
+    BOLD_ITALIC_STAR,
+    BOLD_ITALIC_UNDERSCORE,
+  ],
+  italic: [
+    ITALIC_UNDERSCORE,
+    // Disabled for Markdown output in `DISABLED_MARKDOWN_TAGS` below
+    ITALIC_STAR,
+    BOLD_ITALIC_STAR,
+    BOLD_ITALIC_UNDERSCORE,
+  ],
   strikethrough: [STRIKETHROUGH],
   // TEXT_MATCH_TRANSFORMERS
   link: [LINK],
 };
+
+/**
+ * List of Markdown tags that should be disabled in the editor when converting Lexical nodes to
+ * Markdown (but not when converting Markdown to Lexical nodes because we don’t want to lose any
+ * formatting). Use underscore for italic text in Markdown instead of asterisks, and use double
+ * asterisks for bold text in Markdown instead of underscores. Also, disable triple asterisks and
+ * triple underscores for bold+italic text in Markdown, which can be confusing and is not commonly
+ * used. This is to ensure that the Markdown output is more readable and consistent.
+ */
+export const DISABLED_MARKDOWN_TAGS = ['*', '__', '***', '___'];

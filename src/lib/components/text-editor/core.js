@@ -52,6 +52,7 @@ import {
 import prismComponents from 'prismjs/components';
 import {
   BLOCK_BUTTON_TYPES,
+  DISABLED_MARKDOWN_TAGS,
   EDITOR_THEME,
   NODE_MAP,
   PRISM_BASE_URL,
@@ -162,10 +163,14 @@ export const getSelectionTypes = () => {
  * @param {Transformer[]} enabledTransformers Enabled Markdown transformers.
  */
 export const onEditorUpdate = (editor, enabledTransformers) => {
+  const transformers = enabledTransformers.filter(
+    (/** @type {any} */ { tag }) => !DISABLED_MARKDOWN_TAGS.includes(tag),
+  );
+
   editor.getRootElement()?.dispatchEvent(
     new CustomEvent('Update', {
       detail: {
-        value: convertToMarkdownString(enabledTransformers)
+        value: convertToMarkdownString(transformers)
           // Remove unnecessary backslash for underscore and backslash characters
           // @see https://github.com/sveltia/sveltia-cms/issues/430
           // @see https://github.com/sveltia/sveltia-cms/issues/512

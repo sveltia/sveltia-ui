@@ -152,9 +152,11 @@ vi.mock('@lexical/markdown', () => ({
   BOLD_ITALIC_STAR: { tag: '***' },
   BOLD_ITALIC_UNDERSCORE: { tag: '___' },
   BOLD_STAR: { tag: '**' },
+  BOLD_UNDERSCORE: { tag: '__' },
   CODE: { tag: 'code' },
   HEADING: { tag: '#' },
   INLINE_CODE: { tag: '`' },
+  ITALIC_STAR: { tag: '*' },
   ITALIC_UNDERSCORE: { tag: '_' },
   LINK: { tag: 'link' },
   ORDERED_LIST: { tag: 'ol' },
@@ -236,6 +238,7 @@ import {
   getSelectionTypes,
   initEditor,
   loadCodeHighlighter,
+  onEditorUpdate,
 } from './core.js';
 
 describe('text editor core', () => {
@@ -717,12 +720,59 @@ describe('text editor core', () => {
       getRootElement: vi.fn(() => mockRootElement),
     });
 
-    // Call directly instead of importing
-    const { onEditorUpdate } = /** @type {any} */ (module);
+    onEditorUpdate(mockEditor, []);
+    expect(mockRootElement.dispatchEvent).toHaveBeenCalled();
+  });
 
-    if (onEditorUpdate) {
-      onEditorUpdate(mockEditor, []);
-      expect(mockRootElement.dispatchEvent).toHaveBeenCalled();
+  it('filters out transformers with disabled markdown tags when converting to markdown', async () => {
+    const { $convertToMarkdownString } = await import('@lexical/markdown');
+    const mockConvertFn = vi.mocked($convertToMarkdownString);
+
+    // Clear previous calls and set return value
+    mockConvertFn.mockClear();
+    mockConvertFn.mockReturnValue('converted');
+
+    const mockRootElement = {
+      dispatchEvent: vi.fn(),
+    };
+
+    const mockEditor = /** @type {any} */ ({
+      getRootElement: vi.fn(() => mockRootElement),
+    });
+
+    const transformers = /** @type {any[]} */ ([
+      { tag: '**' }, // BOLD_STAR - should be kept
+      { tag: '__' }, // BOLD_UNDERSCORE - should be filtered out
+      { tag: '*' }, // ITALIC_STAR - should be filtered out
+      { tag: '_' }, // ITALIC_UNDERSCORE - should be kept
+      { tag: '~~' }, // STRIKETHROUGH - should be kept
+      { tag: '***' }, // BOLD_ITALIC_STAR - should be filtered out
+      { tag: '___' }, // BOLD_ITALIC_UNDERSCORE - should be filtered out
+    ]);
+
+    onEditorUpdate(mockEditor, transformers);
+
+    // Verify that convertToMarkdownString was called with filtered transformers
+    expect(mockConvertFn).toHaveBeenCalled();
+
+    const calledWithTransformers = mockConvertFn.mock.calls[0]?.[0];
+
+    expect(calledWithTransformers).toBeDefined();
+
+    if (calledWithTransformers) {
+      // Should include transformers without disabled tags
+      expect(calledWithTransformers).toContainEqual({ tag: '**' });
+      expect(calledWithTransformers).toContainEqual({ tag: '_' });
+      expect(calledWithTransformers).toContainEqual({ tag: '~~' });
+
+      // Should NOT include transformers with disabled tags
+      expect(calledWithTransformers).not.toContainEqual({ tag: '__' });
+      expect(calledWithTransformers).not.toContainEqual({ tag: '*' });
+      expect(calledWithTransformers).not.toContainEqual({ tag: '***' });
+      expect(calledWithTransformers).not.toContainEqual({ tag: '___' });
+
+      // Verify the filtered list has 3 transformers instead of 7
+      expect(calledWithTransformers.length).toBe(3);
     }
   });
 
