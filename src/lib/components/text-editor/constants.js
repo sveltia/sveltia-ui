@@ -1,7 +1,34 @@
+import { CodeHighlightNode, CodeNode } from '@lexical/code';
+import { LinkNode } from '@lexical/link';
+import { ListItemNode, ListNode } from '@lexical/list';
+import {
+  BOLD_ITALIC_STAR,
+  BOLD_ITALIC_UNDERSCORE,
+  BOLD_STAR,
+  CODE,
+  HEADING,
+  INLINE_CODE,
+  ITALIC_UNDERSCORE,
+  LINK,
+  ORDERED_LIST,
+  QUOTE,
+  STRIKETHROUGH,
+  UNORDERED_LIST,
+} from '@lexical/markdown';
+import { HeadingNode, QuoteNode } from '@lexical/rich-text';
+
 /**
  * @import { EditorThemeClasses } from 'lexical';
- * @import { TextEditorBlockType, TextEditorFormatType, TextEditorInlineType } from '$lib/typedefs';
+ * @import { Transformer } from '@lexical/markdown';
+ * @import {
+ * TextEditorBlockType,
+ * TextEditorFormatType,
+ * TextEditorInlineType,
+ * TextEditorNodeType,
+ * } from '$lib/typedefs';
  */
+
+export const PRISM_BASE_URL = `https://unpkg.com/prismjs@1.30.0`;
 
 /**
  * @type {EditorThemeClasses}
@@ -174,3 +201,49 @@ export const BLOCK_BUTTON_TYPES = [
  * Image related components IDs. `linked-image` is used in Sveltia CMS.
  */
 export const IMAGE_COMPONENT_IDS = ['image', 'linked-image'];
+
+/**
+ * Map of Lexical nodes for each block type. The `paragraph` block type is excluded because it is
+ * the default block type.
+ * @type {Record<Exclude<TextEditorBlockType | 'link', 'paragraph'>, any[]>}
+ */
+export const NODE_MAP = {
+  'heading-1': [HeadingNode],
+  'heading-2': [HeadingNode],
+  'heading-3': [HeadingNode],
+  'heading-4': [HeadingNode],
+  'heading-5': [HeadingNode],
+  'heading-6': [HeadingNode],
+  'bulleted-list': [ListNode, ListItemNode],
+  'numbered-list': [ListNode, ListItemNode],
+  blockquote: [QuoteNode],
+  'code-block': [CodeNode, CodeHighlightNode],
+  link: [LinkNode],
+};
+
+/**
+ * Map of Lexical transformers for each block type. The `paragraph` block type is excluded because
+ * it is the default block type.
+ * @type {Record<Exclude<TextEditorNodeType, 'paragraph'>, Transformer[]>}
+ */
+export const TRANSFORMER_MAP = {
+  // ELEMENT_TRANSFORMERS
+  'heading-1': [HEADING],
+  'heading-2': [HEADING],
+  'heading-3': [HEADING],
+  'heading-4': [HEADING],
+  'heading-5': [HEADING],
+  'heading-6': [HEADING],
+  'bulleted-list': [UNORDERED_LIST],
+  'numbered-list': [ORDERED_LIST],
+  blockquote: [QUOTE],
+  // MULTILINE_ELEMENT_TRANSFORMERS
+  'code-block': [CODE],
+  // TEXT_FORMAT_TRANSFORMERS
+  code: [INLINE_CODE],
+  bold: [BOLD_ITALIC_STAR, BOLD_ITALIC_UNDERSCORE, BOLD_STAR], // Exclude BOLD_UNDERSCORE
+  italic: [BOLD_ITALIC_STAR, BOLD_ITALIC_UNDERSCORE, ITALIC_UNDERSCORE], // Exclude ITALIC_STAR
+  strikethrough: [STRIKETHROUGH],
+  // TEXT_MATCH_TRANSFORMERS
+  link: [LINK],
+};

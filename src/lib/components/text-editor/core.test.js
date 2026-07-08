@@ -149,6 +149,18 @@ vi.mock('@lexical/markdown', () => ({
   $convertToMarkdownString: vi.fn(() => 'converted'),
   registerMarkdownShortcuts: vi.fn(() => vi.fn()),
   TRANSFORMERS: [],
+  BOLD_ITALIC_STAR: { tag: '***' },
+  BOLD_ITALIC_UNDERSCORE: { tag: '___' },
+  BOLD_STAR: { tag: '**' },
+  CODE: { tag: 'code' },
+  HEADING: { tag: '#' },
+  INLINE_CODE: { tag: '`' },
+  ITALIC_UNDERSCORE: { tag: '_' },
+  LINK: { tag: 'link' },
+  ORDERED_LIST: { tag: 'ol' },
+  QUOTE: { tag: '>' },
+  STRIKETHROUGH: { tag: '~~' },
+  UNORDERED_LIST: { tag: 'ul' },
 }));
 
 vi.mock('@lexical/rich-text', () => ({
@@ -340,7 +352,7 @@ describe('text editor core', () => {
       isCodeEditor: true,
       defaultLanguage: 'plain',
       modes: [],
-      enabledButtons: [],
+      enabledButtons: ['link', 'bulleted-list', 'numbered-list'],
     });
 
     expect(editor).toBe(editorState);
@@ -395,7 +407,7 @@ describe('text editor core', () => {
       isComposing: () => false,
     });
 
-    await expect(convertMarkdownToLexical(editor, '# Heading')).resolves.toBeUndefined();
+    await expect(convertMarkdownToLexical(editor, '# Heading', [])).resolves.toBeUndefined();
   });
 
   it('focuses the editor by invoking its focus callback', async () => {
@@ -450,7 +462,7 @@ describe('text editor core', () => {
       isCodeEditor: false,
       defaultLanguage: 'plain',
       modes: [],
-      enabledButtons: [],
+      enabledButtons: ['link', 'bulleted-list', 'numbered-list'],
     });
 
     expect(editorState._commands).toHaveLength(4);
@@ -510,7 +522,7 @@ describe('text editor core', () => {
 
     const markdown = '```javascript\nconst x = 1;\n```\n```python\nprint("hello")\n```';
 
-    await expect(convertMarkdownToLexical(editor, markdown)).resolves.toBeUndefined();
+    await expect(convertMarkdownToLexical(editor, markdown, [])).resolves.toBeUndefined();
   });
 
   it('handles disposal of multiple registered listeners', () => {
@@ -519,7 +531,7 @@ describe('text editor core', () => {
       useMarkdownShortcuts: true,
       isCodeEditor: false,
       modes: [],
-      enabledButtons: [],
+      enabledButtons: ['link', 'bulleted-list', 'numbered-list'],
     });
 
     const initialCommandCount = editorState._commands.length;
@@ -683,7 +695,7 @@ describe('text editor core', () => {
 
     // We'll import the function from the module after all mocks are set up
     import('./core.js').then((module) => {
-      module.onEditorUpdate(mockEditor);
+      module.onEditorUpdate(mockEditor, []);
 
       expect(mockRootElement.dispatchEvent).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -709,7 +721,7 @@ describe('text editor core', () => {
     const { onEditorUpdate } = /** @type {any} */ (module);
 
     if (onEditorUpdate) {
-      onEditorUpdate(mockEditor);
+      onEditorUpdate(mockEditor, []);
       expect(mockRootElement.dispatchEvent).toHaveBeenCalled();
     }
   });
@@ -721,7 +733,7 @@ describe('text editor core', () => {
       isComposing: () => false,
     });
 
-    await expect(convertMarkdownToLexical(editor, '')).resolves.toBeUndefined();
+    await expect(convertMarkdownToLexical(editor, '', [])).resolves.toBeUndefined();
     expect(editor.update).toHaveBeenCalled();
   });
 
@@ -734,7 +746,7 @@ describe('text editor core', () => {
 
     const markdown = '```js\nconst x = 1;\n```';
 
-    await expect(convertMarkdownToLexical(editor, markdown)).resolves.toBeUndefined();
+    await expect(convertMarkdownToLexical(editor, markdown, [])).resolves.toBeUndefined();
     expect(editor.update).toHaveBeenCalled();
   });
 
@@ -757,7 +769,7 @@ describe('text editor core', () => {
       useMarkdownShortcuts: false,
       isCodeEditor: false,
       modes: [],
-      enabledButtons: [],
+      enabledButtons: ['link'],
     });
 
     // Find the TOGGLE_LINK_COMMAND listener
@@ -780,7 +792,7 @@ describe('text editor core', () => {
       useMarkdownShortcuts: false,
       isCodeEditor: false,
       modes: [],
-      enabledButtons: [],
+      enabledButtons: ['bulleted-list'],
     });
 
     const unorderedListCommand = editorState._commands.find(
@@ -804,7 +816,7 @@ describe('text editor core', () => {
       useMarkdownShortcuts: false,
       isCodeEditor: false,
       modes: [],
-      enabledButtons: [],
+      enabledButtons: ['numbered-list'],
     });
 
     const orderedListCommand = editorState._commands.find(
@@ -831,7 +843,7 @@ describe('text editor core', () => {
 
     const markdown = '```javascript\ncode\n```\n```python\ncode\n```\n```ruby\ncode\n```';
 
-    await expect(convertMarkdownToLexical(editor, markdown)).resolves.toBeUndefined();
+    await expect(convertMarkdownToLexical(editor, markdown, [])).resolves.toBeUndefined();
     expect(editor.update).toHaveBeenCalled();
   });
 
@@ -841,7 +853,7 @@ describe('text editor core', () => {
       useMarkdownShortcuts: true,
       isCodeEditor: false,
       modes: [],
-      enabledButtons: [],
+      enabledButtons: ['link', 'bulleted-list', 'numbered-list'],
     });
 
     expect(editorState._commands).toHaveLength(4);
@@ -867,7 +879,7 @@ describe('text editor core', () => {
       useMarkdownShortcuts: false,
       isCodeEditor: false,
       modes: [],
-      enabledButtons: [],
+      enabledButtons: ['link', 'bulleted-list', 'numbered-list'],
     });
 
     // Should register 4 commands:
@@ -889,7 +901,7 @@ describe('text editor core', () => {
       isComposing: () => false,
     });
 
-    await expect(convertMarkdownToLexical(editor, '')).resolves.toBeUndefined();
+    await expect(convertMarkdownToLexical(editor, '', [])).resolves.toBeUndefined();
   });
 
   it('loadCodeHighlighter with unknown language', async () => {
@@ -915,7 +927,7 @@ describe('text editor core', () => {
       isComposing: () => false,
     });
 
-    await expect(convertMarkdownToLexical(editor, '# Heading')).rejects.toThrow();
+    await expect(convertMarkdownToLexical(editor, '# Heading', [])).rejects.toThrow();
   });
 
   it('handles TOGGLE_LINK_COMMAND with string payload', () => {
@@ -924,7 +936,7 @@ describe('text editor core', () => {
       useMarkdownShortcuts: false,
       isCodeEditor: false,
       modes: [],
-      enabledButtons: [],
+      enabledButtons: ['link'],
     });
 
     const linkCommand = editorState._commands.find((cmd) => cmd.command === 'toggleLink');
@@ -944,7 +956,7 @@ describe('text editor core', () => {
       useMarkdownShortcuts: true,
       isCodeEditor: false,
       modes: [],
-      enabledButtons: [],
+      enabledButtons: ['bulleted-list', 'numbered-list'],
     });
 
     const paragraphCommand = editorState._commands.find((cmd) => cmd.command === 'insertParagraph');
@@ -978,7 +990,7 @@ describe('text editor core', () => {
       useMarkdownShortcuts: false,
       isCodeEditor: false,
       modes: [],
-      enabledButtons: [],
+      enabledButtons: ['link'],
     });
 
     const linkCommand = editorState._commands.find((cmd) => cmd.command === 'toggleLink');
@@ -998,7 +1010,7 @@ describe('text editor core', () => {
       useMarkdownShortcuts: false,
       isCodeEditor: false,
       modes: [],
-      enabledButtons: [],
+      enabledButtons: ['link'],
     });
 
     const linkCommand = editorState._commands.find((cmd) => cmd.command === 'toggleLink');
@@ -1349,7 +1361,7 @@ describe('text editor core', () => {
       useMarkdownShortcuts: false,
       isCodeEditor: false,
       modes: [],
-      enabledButtons: [],
+      enabledButtons: ['link', 'bulleted-list', 'numbered-list'],
     });
 
     expect(editorState._commands).toHaveLength(4);

@@ -179,6 +179,25 @@ describe('createEditorStore', () => {
     expect(cfg.isCodeEditor).toBe(false);
   });
 
+  it('should allow setting and getting enabledTransformers (covers lines 74-79)', () => {
+    const store = createEditorStore();
+
+    const mockTransformers = /** @type {any} */ ([
+      { type: 'element', tag: 'heading' },
+      { type: 'text-format', tag: '**' },
+    ]);
+
+    // Initially empty array
+    expect(store.enabledTransformers).toEqual([]);
+
+    // Set transformers (line 75: enabledTransformers = newValue)
+    store.enabledTransformers = mockTransformers;
+
+    // Get transformers (line 78: return enabledTransformers)
+    expect(store.enabledTransformers).toEqual(mockTransformers);
+    expect(store.enabledTransformers).toHaveLength(2);
+  });
+
   it('should call convertMarkdown (returns early) when inputValue changes with useRichText=true', async () => {
     const store = createEditorStore();
 

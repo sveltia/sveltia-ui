@@ -3,8 +3,6 @@
 import 'prismjs';
 
 import {
-  CodeHighlightNode,
-  CodeNode,
   $createCodeNode as createCodeNode,
   $isCodeHighlightNode as isCodeHighlightNode,
   $isCodeNode as isCodeNode,
@@ -15,7 +13,6 @@ import { HorizontalRuleNode } from '@lexical/extension';
 import { createEmptyHistoryState, registerHistory } from '@lexical/history';
 import {
   $isLinkNode as isLinkNode,
-  LinkNode,
   TOGGLE_LINK_COMMAND,
   $toggleLink as toggleLink,
 } from '@lexical/link';
@@ -26,20 +23,16 @@ import {
   $insertList as insertList,
   $isListItemNode as isListItemNode,
   $isListNode as isListNode,
-  ListItemNode,
   ListNode,
 } from '@lexical/list';
 import {
   $convertFromMarkdownString as convertFromMarkdownString,
   $convertToMarkdownString as convertToMarkdownString,
   registerMarkdownShortcuts,
-  TRANSFORMERS,
 } from '@lexical/markdown';
 import {
-  HeadingNode,
   $isHeadingNode as isHeadingNode,
   $isQuoteNode as isQuoteNode,
-  QuoteNode,
   registerRichText,
 } from '@lexical/rich-text';
 import { TableCellNode, TableNode, TableRowNode } from '@lexical/table';
@@ -57,45 +50,36 @@ import {
   OUTDENT_CONTENT_COMMAND,
 } from 'lexical';
 import prismComponents from 'prismjs/components';
-import { BLOCK_BUTTON_TYPES, EDITOR_THEME, TEXT_FORMAT_BUTTON_TYPES } from './constants.js';
+import {
+  BLOCK_BUTTON_TYPES,
+  EDITOR_THEME,
+  NODE_MAP,
+  PRISM_BASE_URL,
+  TEXT_FORMAT_BUTTON_TYPES,
+  TRANSFORMER_MAP,
+} from './constants.js';
 import { increaseListIndentation, splitMultilineFormatting } from './markdown.js';
 import { HR } from './transformers/hr.js';
 import { TABLE } from './transformers/table.js';
 
 /**
  * @import { CreateEditorArgs, LexicalEditor } from 'lexical';
+ * @import { Transformer } from '@lexical/markdown';
  * @import {
  * TextEditorBlockType,
  * TextEditorConfig,
  * TextEditorInlineType,
+ * TextEditorNodeType,
  * TextEditorSelectionState,
  * } from '$lib/typedefs';
  */
 
-const allTransformers = [...TRANSFORMERS, HR, TABLE];
-const prismBaseURL = `https://unpkg.com/prismjs@1.30.0`;
-
 /**
- * Lexical editor configuration.
- * @type {CreateEditorArgs}
+ * @typedef {object} InitEditorResult
+ * @property {LexicalEditor} editor Editor instance.
+ * @property {Transformer[]} enabledTransformers List of enabled Markdown transformers.
+ * @property {() => void} dispose Remove all registered Lexical listeners.
  */
-const editorConfig = {
-  namespace: 'editor',
-  nodes: [
-    HeadingNode,
-    QuoteNode,
-    LinkNode,
-    ListNode,
-    ListItemNode,
-    CodeNode,
-    CodeHighlightNode,
-    HorizontalRuleNode,
-    TableNode,
-    TableCellNode,
-    TableRowNode,
-  ],
-  theme: EDITOR_THEME,
-};
 
 /**
  * Get the current selection’s block node key as well as block and inline level types.
@@ -175,15 +159,14 @@ export const getSelectionTypes = () => {
  * Listen to changes made on the editor and trigger the Update event.
  * @internal
  * @param {LexicalEditor} editor Editor instance.
+ * @param {Transformer[]} enabledTransformers Enabled Markdown transformers.
  */
-export const onEditorUpdate = (editor) => {
+export const onEditorUpdate = (editor, enabledTransformers) => {
   editor.getRootElement()?.dispatchEvent(
     new CustomEvent('Update', {
       detail: {
-        value: convertToMarkdownString(
-          // Use underscores for italic text in Markdown instead of asterisks
-          allTransformers.filter((/** @type {any} */ { tag }) => tag !== '*'),
-        ) // Remove unnecessary backslash for underscore and backslash characters
+        value: convertToMarkdownString(enabledTransformers)
+          // Remove unnecessary backslash for underscore and backslash characters
           // @see https://github.com/sveltia/sveltia-cms/issues/430
           // @see https://github.com/sveltia/sveltia-cms/issues/512
           .replace(/\\([_\\])/g, '$1')
@@ -201,18 +184,44 @@ export const onEditorUpdate = (editor) => {
 /**
  * Initialize the Lexical editor.
  * @param {TextEditorConfig} config Editor configuration.
- * @returns {{ editor: LexicalEditor, dispose: () => void }} Editor instance and cleanup.
+ * @returns {InitEditorResult} Editor instance and cleanup.
  */
 export const initEditor = ({
+  enabledButtons = [],
   components = [],
   useMarkdownShortcuts,
   isCodeEditor = false,
   defaultLanguage = 'plain',
 }) => {
-  components.forEach(({ node, transformer }) => {
-    /** @type {any[]} */ (editorConfig.nodes).unshift(node);
-    allTransformers.unshift(transformer);
-  });
+  /** @type {CreateEditorArgs} */
+  const editorConfig = {
+    namespace: 'editor',
+    nodes: [
+      ...components.map(({ node }) => node),
+      ...new Set(
+        Object.entries(NODE_MAP)
+          .filter(([button]) => enabledButtons.includes(/** @type {TextEditorNodeType} */ (button)))
+          .flatMap(([, nodes]) => nodes),
+      ),
+      HorizontalRuleNode,
+      TableNode,
+      TableCellNode,
+      TableRowNode,
+    ],
+    theme: EDITOR_THEME,
+  };
+
+  /** @type {Transformer[]} */
+  const enabledTransformers = [
+    ...components.map(({ transformer }) => transformer),
+    ...new Set(
+      Object.entries(TRANSFORMER_MAP)
+        .filter(([button]) => enabledButtons.includes(/** @type {TextEditorNodeType} */ (button)))
+        .flatMap(([, transformers]) => transformers),
+    ),
+    HR,
+    TABLE,
+  ];
 
   const editor = createEditor(editorConfig);
   /** @type {Array<() => void>} */
@@ -234,63 +243,73 @@ export const initEditor = ({
   addUnregister(registerHistory(editor, createEmptyHistoryState(), 1000));
 
   if (useMarkdownShortcuts) {
-    addUnregister(registerMarkdownShortcuts(editor, allTransformers));
+    addUnregister(registerMarkdownShortcuts(editor, enabledTransformers));
   }
 
-  addUnregister(
-    registerCodeHighlighting(editor, {
-      defaultLanguage,
-      // eslint-disable-next-line jsdoc/require-jsdoc
-      tokenize: (code, lang = 'plain') =>
-        window.Prism.tokenize(code, window.Prism.languages[lang] ?? window.Prism.languages.plain),
-      $tokenize: PrismTokenizer.$tokenize,
-    }),
-  );
+  if (enabledButtons.includes('code-block') || isCodeEditor) {
+    addUnregister(
+      registerCodeHighlighting(editor, {
+        defaultLanguage,
+        // eslint-disable-next-line jsdoc/require-jsdoc
+        tokenize: (code, lang = 'plain') =>
+          window.Prism.tokenize(code, window.Prism.languages[lang] ?? window.Prism.languages.plain),
+        $tokenize: PrismTokenizer.$tokenize,
+      }),
+    );
+  }
 
-  addUnregister(
-    editor.registerCommand(
-      TOGGLE_LINK_COMMAND,
-      (payload) => {
-        toggleLink(typeof payload === 'string' ? payload : null);
+  if (enabledButtons.includes('link')) {
+    addUnregister(
+      editor.registerCommand(
+        TOGGLE_LINK_COMMAND,
+        (payload) => {
+          toggleLink(typeof payload === 'string' ? payload : null);
 
-        return true;
-      },
-      COMMAND_PRIORITY_NORMAL,
-    ),
-  );
+          return true;
+        },
+        COMMAND_PRIORITY_NORMAL,
+      ),
+    );
+  }
 
-  addUnregister(
-    editor.registerCommand(
-      INSERT_UNORDERED_LIST_COMMAND,
-      () => {
-        insertList('bullet');
+  if (enabledButtons.includes('bulleted-list')) {
+    addUnregister(
+      editor.registerCommand(
+        INSERT_UNORDERED_LIST_COMMAND,
+        () => {
+          insertList('bullet');
 
-        return true;
-      },
-      COMMAND_PRIORITY_NORMAL,
-    ),
-  );
+          return true;
+        },
+        COMMAND_PRIORITY_NORMAL,
+      ),
+    );
+  }
 
-  addUnregister(
-    editor.registerCommand(
-      INSERT_ORDERED_LIST_COMMAND,
-      () => {
-        insertList('number');
+  if (enabledButtons.includes('numbered-list')) {
+    addUnregister(
+      editor.registerCommand(
+        INSERT_ORDERED_LIST_COMMAND,
+        () => {
+          insertList('number');
 
-        return true;
-      },
-      COMMAND_PRIORITY_NORMAL,
-    ),
-  );
+          return true;
+        },
+        COMMAND_PRIORITY_NORMAL,
+      ),
+    );
+  }
 
-  // https://github.com/facebook/lexical/blob/main/packages/lexical-react/src/shared/useList.ts
-  addUnregister(
-    editor.registerCommand(
-      INSERT_PARAGRAPH_COMMAND,
-      () => handleListInsertParagraph(),
-      COMMAND_PRIORITY_NORMAL,
-    ),
-  );
+  if (enabledButtons.includes('bulleted-list') || enabledButtons.includes('numbered-list')) {
+    // https://github.com/facebook/lexical/blob/main/packages/lexical-react/src/shared/useList.ts
+    addUnregister(
+      editor.registerCommand(
+        INSERT_PARAGRAPH_COMMAND,
+        () => handleListInsertParagraph(),
+        COMMAND_PRIORITY_NORMAL,
+      ),
+    );
+  }
 
   addUnregister(
     editor.registerUpdateListener(() => {
@@ -321,7 +340,7 @@ export const initEditor = ({
             }
           }
 
-          onEditorUpdate(editor);
+          onEditorUpdate(editor, enabledTransformers);
         });
       })();
     }),
@@ -376,6 +395,7 @@ export const initEditor = ({
 
   return {
     editor,
+    enabledTransformers,
     /**
      * Remove all registered Lexical listeners.
      */
@@ -407,7 +427,7 @@ export const loadCodeHighlighter = async (lang) => {
 
   try {
     // eslint-disable-next-line jsdoc/no-bad-blocks
-    await import(/* @vite-ignore */ `${prismBaseURL}/components/prism-${canonicalLang}.min.js`);
+    await import(/* @vite-ignore */ `${PRISM_BASE_URL}/components/prism-${canonicalLang}.min.js`);
   } catch {
     //
   }
@@ -417,10 +437,11 @@ export const loadCodeHighlighter = async (lang) => {
  * Convert Markdown to Lexical nodes.
  * @param {LexicalEditor} editor Editor instance.
  * @param {string} value Current Markdown value.
+ * @param {Transformer[]} enabledTransformers List of enabled Markdown transformers.
  * @returns {Promise<void>} Nothing.
  * @throws {Error} Failed to convert the value to Lexical nodes.
  */
-export const convertMarkdownToLexical = async (editor, value) => {
+export const convertMarkdownToLexical = async (editor, value, enabledTransformers) => {
   // Load Prism language support on demand; the `loadLanguages` Prism utility method cannot be used
   await Promise.all(
     [...value.matchAll(/^```(?<lang>.+?)\n/gm)].map(async ({ groups: { lang = 'plain' } = {} }) =>
@@ -437,7 +458,7 @@ export const convertMarkdownToLexical = async (editor, value) => {
   return new Promise((resolve, reject) => {
     editor.update(() => {
       try {
-        convertFromMarkdownString(value, allTransformers);
+        convertFromMarkdownString(value, enabledTransformers);
         resolve(undefined);
       } catch (ex) {
         reject(new Error('Failed to convert Markdown', { cause: ex }));

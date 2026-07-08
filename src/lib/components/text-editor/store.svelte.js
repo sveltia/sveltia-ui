@@ -2,8 +2,9 @@ import { generateElementId } from '@sveltia/utils/element';
 import { convertMarkdownToLexical } from './core.js';
 
 /**
- * @import { TextEditorConfig, TextEditorSelectionState, TextEditorStore } from '$lib/typedefs';
  * @import { LexicalEditor } from 'lexical';
+ * @import { Transformer } from '@lexical/markdown';
+ * @import { TextEditorConfig, TextEditorSelectionState, TextEditorStore } from '$lib/typedefs';
  */
 
 /**
@@ -17,6 +18,8 @@ export const createEditorStore = () => {
   let initialized = $state(false);
   /** @type {LexicalEditor | undefined} */
   let editor = $state();
+  /** @type {Transformer[]} */
+  let enabledTransformers = $state([]);
 
   /** @type {TextEditorConfig} */
   let config = $state({
@@ -53,7 +56,7 @@ export const createEditorStore = () => {
       // We should avoid an empty editor; there should be at least one `<p>`, so give it an empty
       // string if the `value` is `undefined`
       // @see https://github.com/facebook/lexical/issues/2308
-      await convertMarkdownToLexical(editor, inputValue || '');
+      await convertMarkdownToLexical(editor, inputValue || '', enabledTransformers);
     } catch (ex) {
       hasConverterError = true;
       inputValue = originalValue;
@@ -69,6 +72,12 @@ export const createEditorStore = () => {
     },
     set editor(newValue) {
       editor = newValue;
+    },
+    set enabledTransformers(newValue) {
+      enabledTransformers = newValue;
+    },
+    get enabledTransformers() {
+      return enabledTransformers;
     },
     get initialized() {
       return initialized;

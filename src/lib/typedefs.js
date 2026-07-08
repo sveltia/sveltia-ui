@@ -311,6 +311,7 @@
 /**
  * @typedef {object} TextEditorStore
  * @property {LexicalEditor | undefined} editor Lexical editor instance.
+ * @property {Transformer[]} enabledTransformers Enabled Lexical transformers.
  * @property {boolean} initialized Whether the Lexical editor is initialized.
  * @property {string} editorId Random ID assigned to the editor.
  * @property {TextEditorConfig} config Editor configuration.

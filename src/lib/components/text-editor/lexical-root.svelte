@@ -88,9 +88,10 @@
   };
 
   onMount(() => {
-    const { editor, dispose } = initEditor(editorStore.config);
+    const { editor, enabledTransformers, dispose } = initEditor(editorStore.config);
 
     editorStore.editor = editor;
+    editorStore.enabledTransformers = enabledTransformers;
 
     lexicalRoot?.addEventListener('Update', onUpdate);
     lexicalRoot?.addEventListener('click', onClick);
