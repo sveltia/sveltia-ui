@@ -82,24 +82,27 @@
 </script>
 
 <ToolbarWrapper disabled={disabled || readonly} aria-label={_('_sui.text_editor.text_editor')}>
-  <MenuButton
-    disabled={!editorStore.useRichText}
-    aria-label={_('_sui.text_editor.show_text_style_options')}
-    aria-controls="{editorStore.editorId}-lexical-root"
-  >
-    {#snippet startIcon()}
-      <Icon
-        name={AVAILABLE_BUTTONS[editorStore.selection.blockType ?? '']?.icon ?? 'format_paragraph'}
-      />
-    {/snippet}
-    {#snippet popup()}
-      <Menu aria-label={_('_sui.text_editor.text_style_options')}>
-        {#each blockLevelButtons as type (type)}
-          <ToggleBlockMenuItem {type} />
-        {/each}
-      </Menu>
-    {/snippet}
-  </MenuButton>
+  {#if blockLevelButtons.length > 1}
+    <MenuButton
+      disabled={!editorStore.useRichText}
+      aria-label={_('_sui.text_editor.show_text_style_options')}
+      aria-controls="{editorStore.editorId}-lexical-root"
+    >
+      {#snippet startIcon()}
+        <Icon
+          name={AVAILABLE_BUTTONS[editorStore.selection.blockType ?? '']?.icon ??
+            'format_paragraph'}
+        />
+      {/snippet}
+      {#snippet popup()}
+        <Menu aria-label={_('_sui.text_editor.text_style_options')}>
+          {#each blockLevelButtons as type (type)}
+            <ToggleBlockMenuItem {type} />
+          {/each}
+        </Menu>
+      {/snippet}
+    </MenuButton>
+  {/if}
   {#if editorStore.selection.blockType === 'code-block'}
     <Divider orientation="vertical" />
     <CodeLanguageSwitcher disabled={!editorStore.useRichText} />

@@ -15,6 +15,15 @@
 </section>
 
 <section>
+  <h3>Limited Buttons</h3>
+  <Example>
+    <div role="none">
+      <TextEditor buttons={['bold', 'italic', 'strikethrough', 'code']} />
+    </div>
+  </Example>
+</section>
+
+<section>
   <h3>Invalid</h3>
   <Example>
     <div role="none">
