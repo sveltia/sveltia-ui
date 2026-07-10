@@ -1,45 +1,85 @@
+# Dialog action button labels
 ok: OK
 cancel: キャンセル
 close: 閉じる
+
+# Button to clear content, e.g. search input or calendar date
 clear: クリア
+
+# Text editor dialog buttons for link/image insertion
 insert: 挿入
 update: 更新
 remove: 削除
+
+# Combobox dropdown toggle button aria-labels
 collapse: 折り畳む
 expand: 広げる
+
+# Infobar/toast dismiss button label
 dismiss: 閉じる
+
+# Calendar component
 calendar:
+  # View switcher group aria-labels and navigation button aria-labels
   year: 年
   previous_decade: 前の 10 年
   next_decade: 次の 10 年
   month: 月
   previous_month: 前月
   next_month: 翌月
+  # "Today" button label in footer
   today: 今日
+
+# Split button component
 split_button:
+  # Wrapper aria-label, e.g. "Save Options" when primary button is "Save"
   x_options: "{$name} オプション"
+  # Dropdown toggle aria-label
   more_options: その他のオプション
+
+# Combobox component
 combobox:
+  # Placeholder when no option is selected
   select_an_option: オプションを選択…
+  # Filter input aria-label
   filter_options: オプションを絞り込み
+  # Empty state message when filter has no matches
   no_matching_options: 一致するオプションは見つかりませんでした
+
+# Number input component
 number_input:
-  decrease: 減らす
+  # Spin button aria-labels for incrementing/decrementing the number value
   increase: 増やす
+  decrease: 減らす
+
+# Password input component
 password_input:
+  # Visibility toggle button aria-labels
   show_password: パスワードを表示
   hide_password: パスワードを隠す
+
+# Secret input component (API keys, tokens, etc.)
 secret_input:
+  # Visibility toggle button aria-labels
   show_secret: シークレットを表示
   hide_secret: シークレットを隠す
+
+# Select tags component (multi-select)
 select_tags:
+  # Listbox aria-label
   selected_options: 選択済みのオプション
+  # Remove button aria-label, e.g. "Remove Option 1"
   remove_x: "{$name} を削除"
+
+# Text editor component
 text_editor:
+  # Toolbar aria-labels
   text_editor: テキストエディター
   code_editor: コードエディター
+  # Block style menu button and menu aria-labels
   text_style_options: テキストスタイルオプション
   show_text_style_options: テキストスタイルオプションを表示
+  # Block style menu items
   paragraph: 段落
   heading_1: 見出し 1
   heading_2: 見出し 2
@@ -51,16 +91,23 @@ text_editor:
   numbered_list: 番号付きリスト
   blockquote: ブロック引用
   code_block: コードブロック
+  # Inline style button aria-labels
   bold: 太字
   italic: 斜体
   strikethrough: 取り消し線
   code: コード
   link: リンク
+  # Link dialog title
   insert_link: リンクを挿入
   update_link: リンクを更新
+  # Link dialog input field labels
   text: テキスト
   url: URL
+  # Markdown mode toggle button aria-label
   edit_in_markdown: マークダウンで編集
-  converter_error: リッチテキストモードを有効化中に問題が発生しました。代わりにプレーンテキストエディターを使用してください。
+  # Error message when rich text conversion fails
+  converter_error: リッチテキストモードを有効にできませんでした。プレーンテキストエディターを使用してください。
+  # Language selector aria-label
   language: 言語
+  # Plain text mode option in language selector
   plain_text: プレーンテキスト

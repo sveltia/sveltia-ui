@@ -1,45 +1,85 @@
+# Dialog action button labels
 ok: OK
 cancel: Cancel
 close: Close
+
+# Button to clear content, e.g. search input or calendar date
 clear: Clear
+
+# Text editor dialog buttons for link/image insertion
 insert: Insert
 update: Update
 remove: Remove
+
+# Combobox dropdown toggle button aria-labels
 collapse: Collapse
 expand: Expand
+
+# Infobar/toast dismiss button label
 dismiss: Dismiss
+
+# Calendar component
 calendar:
+  # View switcher group aria-labels and navigation button aria-labels
   year: Year
   previous_decade: Previous Decade
   next_decade: Next Decade
   month: Month
   previous_month: Previous Month
   next_month: Next Month
+  # “Today” button label in footer
   today: Today
+
+# Split button component
 split_button:
+  # Wrapper aria-label, e.g. “Save Options” when primary button is “Save”
   x_options: "{$name} Options"
+  # Dropdown toggle aria-label
   more_options: More Options
+
+# Combobox component
 combobox:
+  # Placeholder when no option is selected
   select_an_option: Select an option…
+  # Filter input aria-label
   filter_options: Filter Options
+  # Empty state message when filter has no matches
   no_matching_options: No matching options found
+
+# Number input component
 number_input:
-  decrease: Decrease
+  # Spin button aria-labels for incrementing/decrementing the number value
   increase: Increase
+  decrease: Decrease
+
+# Password input component
 password_input:
+  # Visibility toggle button aria-labels
   show_password: Show Password
   hide_password: Hide Password
+
+# Secret input component (API keys, tokens, etc.)
 secret_input:
+  # Visibility toggle button aria-labels
   show_secret: Show Secret
   hide_secret: Hide Secret
+
+# Select tags component (multi-select)
 select_tags:
-  selected_options: Selected options
+  # Listbox aria-label
+  selected_options: Selected Options
+  # Remove button aria-label, e.g. “Remove Option 1”
   remove_x: "Remove {$name}"
+
+# Text editor component
 text_editor:
+  # Toolbar aria-labels
   text_editor: Text Editor
   code_editor: Code Editor
+  # Block style menu button and menu aria-labels
   text_style_options: Text Style Options
   show_text_style_options: Show Text Style Options
+  # Block style menu items
   paragraph: Paragraph
   heading_1: Heading 1
   heading_2: Heading 2
@@ -51,16 +91,23 @@ text_editor:
   numbered_list: Numbered List
   blockquote: Block Quote
   code_block: Code Block
+  # Inline style button aria-labels
   bold: Bold
   italic: Italic
   strikethrough: Strikethrough
   code: Code
   link: Link
+  # Link dialog title
   insert_link: Insert Link
   update_link: Update Link
+  # Link dialog input field labels
   text: Text
   url: URL
+  # Markdown mode toggle button aria-label
   edit_in_markdown: Edit in Markdown
-  converter_error: There was an error while enabling rich text mode. Please use the plain text editor instead.
+  # Error message when rich text conversion fails
+  converter_error: Unable to enable rich text mode. Please use the plain text editor instead.
+  # Language selector aria-label
   language: Language
+  # Plain text mode option in language selector
   plain_text: Plain Text
