@@ -12,6 +12,7 @@
    * @property {boolean} [show] Whether to show the toast.
    * @property {boolean} [dismissible] Whether to show the close button.
    * @property {'error' | 'warning' | 'info' | 'success'} [status] Information status.
+   * @property {'off' | 'polite' | 'assertive'} [ariaLive] ARIA live region politeness.
    * @property {Snippet} [children] Primary slot content.
    * @property {Snippet} [icon] Icon slot content.
    */
@@ -22,6 +23,7 @@
     show = $bindable(true),
     dismissible = true,
     status = 'info',
+    ariaLive = 'polite',
     children = undefined,
     icon = undefined,
     /* eslint-enable prefer-const */
@@ -30,7 +32,7 @@
 
 {#if show}
   <div role="none" class="infobar {status}">
-    <div role="alert" class="message">
+    <div role="alert" class="message" aria-live={ariaLive}>
       {#if icon}
         {@render icon()}
       {:else}

@@ -235,7 +235,7 @@
       {@render children?.()}
     </Listbox>
     {#if !hasMatchingOptions}
-      <div role="alert" class="no-options">
+      <div role="alert" class="no-options" aria-live="assertive">
         {_('_sui.combobox.no_matching_options')}
       </div>
     {/if}

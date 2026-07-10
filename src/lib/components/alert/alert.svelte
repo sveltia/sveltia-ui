@@ -14,6 +14,7 @@
   /**
    * @typedef {object} Props
    * @property {'error' | 'warning' | 'info' | 'success'} status Alert status.
+   * @property {'off' | 'polite' | 'assertive'} [ariaLive] ARIA live region politeness.
    * @property {Snippet} [children] Primary slot content.
    * @property {Snippet} [icon] Icon slot content.
    */
@@ -24,6 +25,7 @@
   let {
     /* eslint-disable prefer-const */
     status,
+    ariaLive = 'assertive',
     children,
     icon,
     ...restProps
@@ -31,7 +33,7 @@
   } = $props();
 </script>
 
-<div {...restProps} role="alert" class="sui alert {status}">
+<div {...restProps} role="alert" class="sui alert {status}" aria-live={ariaLive}>
   {#if icon}
     {@render icon()}
   {:else}
