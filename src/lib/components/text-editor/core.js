@@ -3,6 +3,8 @@
 import 'prismjs';
 
 import {
+  CodeHighlightNode,
+  CodeNode,
   $createCodeNode as createCodeNode,
   $isCodeHighlightNode as isCodeHighlightNode,
   $isCodeNode as isCodeNode,
@@ -208,6 +210,7 @@ export const initEditor = ({
           .filter(([button]) => enabledButtons.includes(/** @type {TextEditorNodeType} */ (button)))
           .flatMap(([, nodes]) => nodes),
       ),
+      ...(isCodeEditor ? [CodeNode, CodeHighlightNode] : []),
       HorizontalRuleNode,
       TableNode,
       TableCellNode,
