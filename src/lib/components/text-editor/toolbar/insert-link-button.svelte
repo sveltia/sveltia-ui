@@ -220,7 +220,7 @@
       id="{id}-url"
       bind:value={anchorURL}
       flex
-      aria-label="URL"
+      aria-label={_('_sui.text_editor.url')}
       onkeydown={(event) => {
         onInputKeyDown(event);
       }}
@@ -234,6 +234,7 @@
         id="{id}-text"
         bind:value={anchorText}
         flex
+        aria-label={_('_sui.text_editor.text')}
         onkeydown={(event) => {
           onInputKeyDown(event);
         }}
