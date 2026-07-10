@@ -139,6 +139,7 @@
  * @property {PopupPosition} [position] Where to show the dropdown menu.
  * @property {number} [filterThreshold] Number of items to start showing the filter. Default: `5`.
  * Use `-1` to always hide the filter.
+ * @property {string} [ariaLabel] The `aria-label` attribute on the wrapper element.
  * @property {Snippet} [children] Primary slot content.
  * @property {Snippet} [chevronIcon] Chevron icon slot content.
  * @property {(event: CustomEvent) => void} [onChange] Custom `change` event handler.
@@ -174,7 +175,7 @@
  * `aria-required` attribute.
  * @property {boolean} [invalid] Whether to mark the widget invalid. An alias of the `aria-invalid`
  * attribute.
- * @property {string} [aria-label] `aria-label` attribute.
+ * @property {string} [ariaLabel] `aria-label` attribute.
  * @property {Snippet} [children] Primary slot content.
  */
 

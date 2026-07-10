@@ -18,6 +18,7 @@
    * `<GridCell>`. An alias of the `aria-multiselectable` attribute.
    * @property {boolean} [clickToSelect] Whether to select a row by clicking on it.
    * @property {HTMLElement} [element] A reference to the wrapper element.
+   * @property {string} [ariaLabel] The `aria-label` attribute on the wrapper element.
    * @property {Snippet} [children] Primary slot content.
    * @property {(event: CustomEvent) => void} [onChange] Custom `Change` event handler.
    */
@@ -31,6 +32,7 @@
     class: className,
     multiple = false,
     clickToSelect = true,
+    ariaLabel = undefined,
     children,
     onChange,
     ...restProps
@@ -44,6 +46,7 @@
   role="grid"
   class="sui grid {className}"
   aria-multiselectable={multiple}
+  aria-label={ariaLabel}
   onChange={(/** @type {CustomEvent} */ event) => {
     onChange?.(event);
   }}

@@ -18,6 +18,7 @@
    * @property {'horizontal' | 'vertical'} [orientation] Orientation of the widget. An alias of the
    * `aria-orientation` attribute.
    * @property {'primary' | 'secondary'} [variant] The style variant of the toolbar.
+   * @property {string} [ariaLabel] The `aria-label` attribute on the wrapper element.
    * @property {Snippet} [children] Primary slot content.
    */
 
@@ -31,6 +32,7 @@
     disabled = false,
     orientation = 'horizontal',
     variant = undefined,
+    ariaLabel = undefined,
     children,
     ...restProps
     /* eslint-enable prefer-const */
@@ -45,6 +47,7 @@
   aria-hidden={hidden}
   aria-disabled={disabled}
   aria-orientation={orientation}
+  aria-label={ariaLabel}
 >
   <div role="none" class="inner" inert={disabled}>
     {@render children?.()}

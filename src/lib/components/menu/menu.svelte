@@ -18,6 +18,7 @@
    * attribute.
    * @property {boolean} [disabled] Whether to disable the widget. An alias of the `aria-disabled`
    * attribute.
+   * @property {string} [ariaLabel] The `aria-label` attribute on the wrapper element.
    * @property {Snippet} [children] Primary slot content.
    * @property {(event: CustomEvent) => void} [onChange] Custom `Change` event handler.
    */
@@ -30,6 +31,7 @@
     class: className,
     hidden = false,
     disabled = false,
+    ariaLabel = undefined,
     children,
     onChange,
     ...restProps
@@ -44,6 +46,7 @@
   {hidden}
   aria-hidden={hidden}
   aria-disabled={disabled}
+  aria-label={ariaLabel}
   onChange={(/** @type {CustomEvent} */ event) => {
     onChange?.(event);
   }}

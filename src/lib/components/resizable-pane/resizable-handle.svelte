@@ -18,6 +18,7 @@
    * @property {boolean} [disabled] Whether to disable the handle.
    * @property {boolean} [showHandleBar] Whether to show the handle bar.
    * @property {string} [class] The `class` attribute on the wrapper element.
+   * @property {string} [ariaLabel] The `aria-label` attribute on the wrapper element.
    * @property {Snippet} [children] Custom handle content. If omitted, a default visual indicator is
    * rendered.
    * @property {() => void} [onResizeStart] Called when a resize interaction begins (pointer down or
@@ -34,6 +35,7 @@
     disabled = false,
     showHandleBar = false,
     class: className,
+    ariaLabel = undefined,
     children,
     onResizeStart,
     onResizeEnd,
@@ -257,6 +259,7 @@
   aria-valuemax={currentPaneMax}
   aria-controls={ctx.paneDefs[handleIndex]?.id}
   aria-disabled={disabled || undefined}
+  aria-label={ariaLabel}
   class="sui resizable-handle {className ?? ''}"
   class:horizontal={isHorizontal}
   class:vertical={!isHorizontal}

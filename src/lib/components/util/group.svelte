@@ -14,6 +14,7 @@
    * @property {boolean} [hidden] Whether to hide the widget.
    * @property {boolean} [disabled] Whether to disable the widget. An alias of the `aria-disabled`
    * attribute.
+   * @property {string} [ariaLabel] The `aria-label` attribute on the wrapper element.
    * @property {Snippet} [children] Primary slot content.
    */
 
@@ -25,6 +26,7 @@
     class: className,
     hidden = false,
     disabled = false,
+    ariaLabel = undefined,
     children,
     ...restProps
     /* eslint-enable prefer-const */
@@ -38,6 +40,7 @@
   {hidden}
   aria-hidden={hidden}
   aria-disabled={disabled}
+  aria-label={ariaLabel}
 >
   <div role="none" class="inner" inert={disabled}>
     {@render children?.()}

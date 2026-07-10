@@ -11,6 +11,7 @@
    * @property {number} [min] The `aria-valuemin` attribute on the wrapper element.
    * @property {number} [max] The `aria-valuemax` attribute on the wrapper element.
    * @property {string} [text] The `aria-valuetext` attribute on the wrapper element.
+   * @property {string} [ariaLabel] The `aria-label` attribute on the wrapper element.
    */
 
   /**
@@ -23,6 +24,7 @@
     min = 0,
     max = 100,
     text,
+    ariaLabel = undefined,
     ...restProps
     /* eslint-enable prefer-const */
   } = $props();
@@ -36,6 +38,7 @@
   aria-valuemin={min}
   aria-valuemax={max}
   aria-valuetext={text}
+  aria-label={ariaLabel}
 >
   <div role="none" style:width="{now}%"></div>
 </div>

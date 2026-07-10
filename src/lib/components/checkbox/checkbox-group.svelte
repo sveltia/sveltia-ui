@@ -15,6 +15,7 @@
    * @property {boolean} [disabled] Whether to disable the widget. An alias of the `aria-disabled`
    * attribute.
    * @property {'horizontal'|'vertical'} [orientation] Orientation of the widget.
+   * @property {string} [ariaLabel] The `aria-label` attribute on the wrapper element.
    * @property {Snippet} [children] Primary slot content.
    */
 
@@ -27,6 +28,7 @@
     hidden = false,
     disabled = false,
     orientation = 'horizontal',
+    ariaLabel = undefined,
     children,
     ...restProps
     /* eslint-enable prefer-const */
@@ -41,6 +43,7 @@
   aria-hidden={hidden}
   aria-disabled={disabled}
   aria-roledescription="checkbox group"
+  aria-label={ariaLabel}
 >
   <div role="none" class="inner" inert={disabled}>
     {@render children?.()}

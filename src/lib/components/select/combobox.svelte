@@ -41,6 +41,7 @@
     editable = true,
     position = 'bottom-left',
     filterThreshold = 5,
+    ariaLabel = undefined,
     children,
     chevronIcon,
     onChange,
@@ -134,6 +135,7 @@
       aria-required={required}
       aria-invalid={invalid}
       aria-haspopup="listbox"
+      aria-label={ariaLabel}
     >
       <div role="none" class="label">
         <TruncatedText>
@@ -157,6 +159,7 @@
       aria-controls="{id}-popup"
       aria-expanded={isPopupOpen}
       aria-haspopup="listbox"
+      aria-label={ariaLabel}
     />
   {/if}
   <Button

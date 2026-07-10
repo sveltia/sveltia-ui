@@ -22,6 +22,7 @@
    * `aria-required` attribute.
    * @property {boolean} [invalid] Whether to mark the widget invalid. An alias of the
    * `aria-invalid` attribute.
+   * @property {string} [ariaLabel] The `aria-label` attribute on the wrapper element.
    * @property {Snippet} [children] Primary slot content.
    * @property {(event: CustomEvent) => void} [onChange] Custom `Change` event handler.
    */
@@ -39,6 +40,7 @@
     readonly = false,
     required = false,
     invalid = false,
+    ariaLabel = undefined,
     children,
     onChange,
     ...restProps
@@ -59,6 +61,7 @@
   aria-readonly={readonly}
   aria-required={required}
   aria-invalid={invalid}
+  aria-label={ariaLabel}
   onclick={() => {
     if (!disabled && !readonly) {
       checked = !checked;

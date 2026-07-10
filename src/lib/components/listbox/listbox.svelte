@@ -29,6 +29,7 @@
    * @property {boolean} [multiple] Whether to allow selecting more than one `<Option>`. An alias of
    * the `aria-multiselectable` attribute.
    * @property {string} [searchTerms] Search terms to be used to filter the items.
+   * @property {string} [ariaLabel] The `aria-label` attribute on the wrapper element.
    * @property {Snippet} [children] Primary slot content.
    * @property {(event: CustomEvent) => void} [onChange] Custom `Change` event handler.
    * @property {(event: CustomEvent) => void} [onFilter] Custom `Filter` event handler.
@@ -47,6 +48,7 @@
     invalid = false,
     multiple = false,
     searchTerms = '',
+    ariaLabel = undefined,
     children,
     onFilter,
     ...restProps
@@ -72,6 +74,7 @@
   aria-required={required}
   aria-invalid={invalid}
   aria-multiselectable={multiple}
+  aria-label={ariaLabel}
   onFilter={(/** @type {CustomEvent} */ event) => {
     const {
       detail: { matched, total },

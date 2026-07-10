@@ -21,6 +21,7 @@
    * @property {'horizontal' | 'vertical'} [orientation] Orientation of the widget. An alias of the
    * `aria-orientation` attribute.
    * @property {string} [name] The `data-name` attribute on the wrapper element.
+   * @property {string} [ariaLabel] The `aria-label` attribute on the wrapper element.
    * @property {Snippet} [children] Primary slot content.
    * @property {(event: CustomEvent) => void} [onChange] Custom `Change` event handler.
    */
@@ -35,6 +36,7 @@
     disabled = false,
     orientation = 'horizontal',
     name = undefined,
+    ariaLabel = undefined,
     children,
     onChange,
     ...restProps
@@ -100,6 +102,7 @@
   aria-hidden={hidden}
   aria-disabled={disabled}
   aria-orientation={orientation}
+  aria-label={ariaLabel}
   data-name={name || undefined}
   onInitialized={() => {
     updateIndicator();

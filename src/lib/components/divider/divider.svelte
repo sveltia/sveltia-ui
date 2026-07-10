@@ -11,6 +11,7 @@
    * attribute.
    * @property {'horizontal'|'vertical'} [orientation] Orientation of the widget. An alias of the
    * `aria-orientation` attribute.
+   * @property {string} [ariaLabel] The `aria-label` attribute on the wrapper element.
    */
 
   /**
@@ -21,6 +22,7 @@
     class: className,
     hidden = false,
     orientation = 'horizontal',
+    ariaLabel = undefined,
     ...restProps
     /* eslint-enable prefer-const */
   } = $props();
@@ -33,6 +35,7 @@
   {hidden}
   aria-hidden={hidden}
   aria-orientation={orientation}
+  aria-label={ariaLabel}
 ></div>
 
 <style lang="scss">

@@ -24,7 +24,7 @@
    * @property {boolean | 'mixed'} [checked] Whether to check the widget. An alias of the
    * `aria-checked` attribute.
    * @property {string} [label] Text label displayed next to the checkbox.
-   * @property {string} [aria-label] `aria-label` attribute.
+   * @property {string} [ariaLabel] `aria-label` attribute.
    * @property {Snippet} [checkIcon] Check icon slot content.
    * @property {string[]} [group] The two-way bound variable to manage the state of a group of
    * checkboxes. It works in the same way as the [`<input
@@ -46,7 +46,7 @@
     required = false,
     invalid = false,
     label = undefined,
-    'aria-label': ariaLabel,
+    ariaLabel = undefined,
     group = $bindable(),
     onChange,
     children,

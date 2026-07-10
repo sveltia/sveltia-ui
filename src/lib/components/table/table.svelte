@@ -12,6 +12,7 @@
   /**
    * @typedef {object} Props
    * @property {string} [class] The `class` attribute on the wrapper element.
+   * @property {string} [ariaLabel] The `aria-label` attribute on the wrapper element.
    * @property {Snippet} [children] Primary slot content.
    */
 
@@ -21,13 +22,14 @@
   let {
     /* eslint-disable prefer-const */
     class: className,
+    ariaLabel = undefined,
     children,
     ...restProps
     /* eslint-enable prefer-const */
   } = $props();
 </script>
 
-<div {...restProps} role="table" class="sui table {className}">
+<div {...restProps} role="table" class="sui table {className}" aria-label={ariaLabel}>
   {@render children?.()}
 </div>
 

@@ -25,6 +25,7 @@
    * `aria-invalid` attribute.
    * @property {'horizontal'|'vertical'} [orientation] Orientation of the widget. An alias of the
    * `aria-orientation` attribute.
+   * @property {string} [ariaLabel] The `aria-label` attribute on the wrapper element.
    * @property {Snippet} [children] Primary slot content.
    * @property {(event: CustomEvent) => void} [onChange] Custom `Change` event handler.
    */
@@ -41,6 +42,7 @@
     required = false,
     invalid = false,
     orientation = 'horizontal',
+    ariaLabel = undefined,
     children,
     onChange,
     ...restProps
@@ -60,6 +62,7 @@
   aria-required={required}
   aria-invalid={invalid}
   aria-orientation={orientation}
+  aria-label={ariaLabel}
   onChange={(/** @type {CustomEvent} */ event) => {
     onChange?.(event);
   }}

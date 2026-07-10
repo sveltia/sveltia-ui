@@ -39,7 +39,7 @@
     readonly = false,
     required = false,
     invalid = false,
-    'aria-label': ariaLabel,
+    ariaLabel = undefined,
     children,
     oninput,
     ...restProps
