@@ -6,7 +6,6 @@
 -->
 <script>
   import { onMount } from 'svelte';
-  import { initLocales } from '../../services/i18n';
 
   /**
    * @import { Snippet } from 'svelte';
@@ -38,10 +37,6 @@
   ];
 
   let fontLoaded = $state(false);
-
-  $effect.pre(() => {
-    initLocales();
-  });
 
   onMount(() => {
     const mediaQuery = globalThis.matchMedia('(prefers-color-scheme: dark)');

@@ -15,8 +15,8 @@ export const resources = Object.fromEntries(
 );
 
 /**
- * Load strings and initialize the locales. Consumers can use this function to load the localized
- * strings for their application. If `<AppShell>` is used, this function is called automatically.
+ * Load strings and initialize the locales. Consumers can use this function or {@link resources} to
+ * load the localized strings for their application.
  * @param {object} [init] Initialize options.
  * @param {string} [init.fallbackLocale] Fallback locale.
  * @param {string} [init.initialLocale] Initial locale.
