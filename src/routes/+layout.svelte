@@ -1,7 +1,7 @@
 <script>
   import { isLoading } from '@sveltia/i18n';
   import { resolve } from '$app/paths';
-  import { AppShell } from '$lib';
+  import { AppShell, initLocales } from '$lib';
   import NavSection from './_components/nav-section.svelte';
 
   /**
@@ -19,6 +19,10 @@
     children,
     /* eslint-enable prefer-const */
   } = $props();
+
+  $effect.pre(() => {
+    initLocales();
+  });
 </script>
 
 {#if !isLoading()}
