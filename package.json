@@ -67,10 +67,10 @@
     "@sveltia/i18n": "^1.1.2",
     "@sveltia/utils": "^0.10.7",
     "lexical": "^0.46.0",
-    "prismjs": "^1.30.0",
-    "yaml": "^2.9.0"
+    "prismjs": "^1.30.0"
   },
   "devDependencies": {
+    "@rollup/plugin-yaml": "^5.0.0",
     "@sveltejs/adapter-auto": "^7.0.1",
     "@sveltejs/kit": "^2.69.2",
     "@sveltejs/package": "^2.5.8",

@@ -1,8 +1,22 @@
 import { addMessages, init } from '@sveltia/i18n';
-import { parse as parseYaml } from 'yaml';
+
+const rawResources = import.meta.glob('../locales/*.yaml', { eager: true, import: 'default' });
 
 /**
- * Load strings and initialize the locales.
+ * Object containing all the locale resources, with the locale names as keys and the corresponding
+ * strings as values.
+ * @type {Record<string, Record<string, string>>}
+ */
+export const resources = Object.fromEntries(
+  Object.entries(rawResources).map(([path, resource]) => [
+    /** @type {string} */ (path.match(/.+\/(?<locale>.+?)\.yaml$/)?.groups?.locale),
+    /** @type {Record<string, string>} */ (resource),
+  ]),
+);
+
+/**
+ * Load strings and initialize the locales. Consumers can use this function to load the localized
+ * strings for their application. If `<AppShell>` is used, this function is called automatically.
  * @param {object} [init] Initialize options.
  * @param {string} [init.fallbackLocale] Fallback locale.
  * @param {string} [init.initialLocale] Initial locale.
@@ -10,18 +24,9 @@ import { parse as parseYaml } from 'yaml';
  * @see https://vitejs.dev/guide/features.html#glob-import
  */
 export const initLocales = ({ fallbackLocale = 'en', initialLocale = 'en' } = {}) => {
-  const resources = import.meta.glob('../locales/*.yaml', {
-    eager: true,
-    query: '?raw',
-    import: 'default',
-  });
-
-  Object.entries(resources).forEach(([path, resource]) => {
-    addMessages(
-      /** @type {string} */ (path.match(/.+\/(?<locale>.+?)\.yaml$/)?.groups?.locale),
-      // Add `_sui` suffix to avoid collision with app localization
-      { _sui: parseYaml(/** @type {string} */ (resource)) },
-    );
+  Object.entries(resources).forEach(([locale, resource]) => {
+    // Add `_sui` suffix to avoid collision with app localization
+    addMessages(locale, { _sui: resource });
   });
 
   init({ fallbackLocale, initialLocale });

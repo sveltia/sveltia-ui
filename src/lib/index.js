@@ -1,7 +1,3 @@
-import { initLocales } from './services/i18n.js';
-
-initLocales();
-
 export { default as Alert } from './components/alert/alert.svelte';
 export { default as Infobar } from './components/alert/infobar.svelte';
 export { default as BottomNavigation } from './components/bottom-navigation/bottom-navigation.svelte';
@@ -81,6 +77,7 @@ export { default as AppShell } from './components/util/app-shell.svelte';
 export { default as EmptyState } from './components/util/empty-state.svelte';
 export { default as Group } from './components/util/group.svelte';
 export { default as Modal } from './components/util/modal.svelte';
+export { initLocales, resources } from './services/i18n.js';
 
 // eslint-disable-next-line import/export
 export * from './typedefs.js';
