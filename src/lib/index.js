@@ -77,7 +77,7 @@ export { default as AppShell } from './components/util/app-shell.svelte';
 export { default as EmptyState } from './components/util/empty-state.svelte';
 export { default as Group } from './components/util/group.svelte';
 export { default as Modal } from './components/util/modal.svelte';
-export { initLocales, resources } from './services/i18n.js';
+export { initLocales, strings } from './services/i18n.js';
 
 // eslint-disable-next-line import/export
 export * from './typedefs.js';

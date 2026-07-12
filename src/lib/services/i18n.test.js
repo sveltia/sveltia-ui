@@ -1,6 +1,6 @@
 import { addMessages, init } from '@sveltia/i18n';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { initLocales, resources } from './i18n.js';
+import { initLocales, strings } from './i18n.js';
 
 vi.mock('@sveltia/i18n', () => ({
   addMessages: vi.fn(),
@@ -15,11 +15,11 @@ describe('initLocales', () => {
   it('registers the loaded translations under the _sui namespace by default', () => {
     initLocales();
 
-    expect(resources.en.cancel).toBe('Cancel');
-    expect(resources.ja.cancel).toBe('キャンセル');
+    expect(strings.en.cancel).toBe('Cancel');
+    expect(strings.ja.cancel).toBe('キャンセル');
     expect(addMessages).toHaveBeenCalledTimes(2);
-    expect(addMessages).toHaveBeenCalledWith('en', { _sui: resources.en });
-    expect(addMessages).toHaveBeenCalledWith('ja', { _sui: resources.ja });
+    expect(addMessages).toHaveBeenCalledWith('en', { _sui: strings.en });
+    expect(addMessages).toHaveBeenCalledWith('ja', { _sui: strings.ja });
     expect(init).toHaveBeenCalledWith({ fallbackLocale: 'en', initialLocale: 'en' });
   });
 
