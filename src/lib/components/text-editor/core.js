@@ -28,6 +28,7 @@ import {
   ListNode,
 } from '@lexical/list';
 import {
+  CODE,
   $convertFromMarkdownString as convertFromMarkdownString,
   $convertToMarkdownString as convertToMarkdownString,
   registerMarkdownShortcuts,
@@ -227,6 +228,7 @@ export const initEditor = ({
         .filter(([button]) => enabledButtons.includes(/** @type {TextEditorNodeType} */ (button)))
         .flatMap(([, transformers]) => transformers),
     ),
+    ...(isCodeEditor ? [CODE] : []),
     HR,
     TABLE,
   ];
