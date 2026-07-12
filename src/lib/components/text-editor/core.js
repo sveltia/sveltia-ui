@@ -211,11 +211,11 @@ export const initEditor = ({
           .filter(([button]) => enabledButtons.includes(/** @type {TextEditorNodeType} */ (button)))
           .flatMap(([, nodes]) => nodes),
       ),
-      ...(isCodeEditor ? [CodeNode, CodeHighlightNode] : []),
-      HorizontalRuleNode,
-      TableNode,
-      TableCellNode,
-      TableRowNode,
+      ...(isCodeEditor
+        ? [CodeNode, CodeHighlightNode]
+        : // We haven’t implemented buttons for horizontal rules and tables yet, but we still want
+          // to support them in Markdown, so always include them in the node list
+          [HorizontalRuleNode, TableNode, TableCellNode, TableRowNode]),
     ],
     theme: EDITOR_THEME,
   };
@@ -228,9 +228,10 @@ export const initEditor = ({
         .filter(([button]) => enabledButtons.includes(/** @type {TextEditorNodeType} */ (button)))
         .flatMap(([, transformers]) => transformers),
     ),
-    ...(isCodeEditor ? [CODE] : []),
-    HR,
-    TABLE,
+    ...(isCodeEditor
+      ? [CODE]
+      : // See the comment above for why we always include horizontal rules and tables
+        [HR, TABLE]),
   ];
 
   const editor = createEditor(editorConfig);
