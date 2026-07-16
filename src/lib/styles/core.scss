@@ -31,7 +31,7 @@
   }
 
   ::selection {
-    background-color: var(--sui-primary-accent-color-translucent);
+    background-color: var(--sui-primary-accent-color-translucent-light);
   }
 
   * {
@@ -44,7 +44,7 @@
   }
 
   :focus-visible {
-    outline-color: var(--sui-primary-accent-color-translucent);
+    outline-color: var(--sui-focus-ring-color);
     z-index: 2;
   }
 

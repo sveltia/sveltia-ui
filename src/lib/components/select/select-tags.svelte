@@ -287,8 +287,7 @@
       outline: none;
 
       &:focus-within {
-        outline: var(--sui-focus-ring-width) solid var(--sui-primary-accent-color-translucent);
-        outline-offset: 1px;
+        outline: var(--sui-focus-ring-width) solid var(--sui-focus-ring-color);
       }
 
       &.drag-source {
@@ -322,6 +321,10 @@
       }
 
       :global {
+        button {
+          outline-offset: -2px;
+        }
+
         .icon {
           font-size: var(--sui-font-size-large);
         }

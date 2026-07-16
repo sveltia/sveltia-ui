@@ -127,7 +127,6 @@
     }
 
     &:focus {
-      border-color: var(--sui-textbox-border-color-focus, var(--sui-primary-accent-color));
       color: var(--sui-textbox-foreground-color-focus, var(--sui-textbox-foreground-color));
       background-color: var(
         --sui-textbox-background-color-focus,

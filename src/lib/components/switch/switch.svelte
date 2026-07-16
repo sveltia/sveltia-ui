@@ -137,7 +137,7 @@
       outline: 0;
 
       span {
-        outline-color: var(--sui-primary-accent-color-translucent);
+        outline-color: var(--sui-focus-ring-color);
       }
     }
 

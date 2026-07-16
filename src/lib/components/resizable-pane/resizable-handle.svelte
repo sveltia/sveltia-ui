@@ -293,7 +293,7 @@
     &.dragging {
       outline: none;
       z-index: 1;
-      background-color: var(--sui-primary-accent-color-translucent);
+      background-color: var(--sui-primary-accent-color-translucent-light);
 
       .handle-bar {
         background-color: var(--sui-primary-accent-color);

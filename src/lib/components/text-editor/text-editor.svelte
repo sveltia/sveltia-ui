@@ -134,7 +134,13 @@
 <style lang="scss">
   .text-editor {
     margin: var(--sui-focus-ring-width);
+    border-radius: var(--sui-textbox-border-radius);
     width: calc(100% - var(--sui-focus-ring-width) * 2);
+    transition: all 200ms;
+
+    &:focus-within {
+      outline: var(--sui-focus-ring-width) solid var(--sui-focus-ring-color);
+    }
 
     &.flex:not([hidden]) {
       display: block; // Avoid Tailwind .flex class collisions
