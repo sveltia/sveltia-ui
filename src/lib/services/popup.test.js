@@ -176,10 +176,17 @@ describe('Popup', () => {
     expect(instance.open).toBe(false);
   });
 
-  it('should remove aria-controls from anchor when popup closes after being open', () => {
+  it('should remove aria-controls from anchor on the next animation frame after closing', async () => {
     activatePopup(anchor, popup, 'bottom-left');
     anchor.click(); // open  → aria-expanded='true'
-    anchor.click(); // close → aria-controls should be removed
+    anchor.click(); // close → aria-controls should be removed on the next frame
+
+    expect(anchor.getAttribute('aria-controls')).toBe(popup.id);
+
+    await new Promise((resolve) => {
+      window.requestAnimationFrame(() => resolve(undefined));
+    });
+
     expect(anchor.getAttribute('aria-controls')).toBeNull();
   });
 

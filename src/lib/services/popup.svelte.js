@@ -29,8 +29,11 @@ class Popup {
     if (value) {
       this.checkPosition();
     } else if (this.anchorElement.getAttribute('aria-expanded') === 'true') {
-      this.anchorElement.focus();
-      this.anchorElement.removeAttribute('aria-controls');
+      // Wait for the popup to close before focusing the anchor, otherwise the focus will be lost
+      window.requestAnimationFrame(() => {
+        this.anchorElement.focus();
+        this.anchorElement.removeAttribute('aria-controls');
+      });
     }
 
     this.anchorElement.setAttribute('aria-expanded', String(value));
