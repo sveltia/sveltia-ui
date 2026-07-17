@@ -24,8 +24,24 @@ export const increaseListIndentation = (value) => {
     return value;
   }
 
-  return value.replace(
-    /^(\s+)(-|\+|\*|\d+\.)/gm,
-    (_match, p1, p2) => `${' '.repeat(p1.length * 2)}${p2}`,
-  );
+  let inCodeBlock = false;
+
+  return value
+    .split('\n')
+    .map((line) => {
+      if (/^(`{3,}|~{3,})/.test(line)) {
+        inCodeBlock = !inCodeBlock;
+        return line;
+      }
+
+      if (inCodeBlock) {
+        return line;
+      }
+
+      return line.replace(
+        /^(\s+)(-|\+|\*|\d+\.)/,
+        (_match, p1, p2) => `${' '.repeat(p1.length * 2)}${p2}`,
+      );
+    })
+    .join('\n');
 };

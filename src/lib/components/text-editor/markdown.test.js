@@ -81,4 +81,25 @@ describe('increaseListIndentation', () => {
   it('should return unchanged string if no matching lists', () => {
     expect(increaseListIndentation('paragraph with - no list')).toBe('paragraph with - no list');
   });
+
+  it('should not modify list items inside a backtick fenced code block', () => {
+    const input = '  - before\n```\n  - inside code\n    - nested\n```\n  - after';
+    const expected = '    - before\n```\n  - inside code\n    - nested\n```\n    - after';
+
+    expect(increaseListIndentation(input)).toBe(expected);
+  });
+
+  it('should not modify list items inside a tilde fenced code block', () => {
+    const input = '  - before\n~~~\n  - inside code\n~~~\n  - after';
+    const expected = '    - before\n~~~\n  - inside code\n~~~\n    - after';
+
+    expect(increaseListIndentation(input)).toBe(expected);
+  });
+
+  it('should handle multiple fenced code blocks', () => {
+    const input = '  - a\n```\n  - x\n```\n  - b\n```\n  - y\n```\n  - c';
+    const expected = '    - a\n```\n  - x\n```\n    - b\n```\n  - y\n```\n    - c';
+
+    expect(increaseListIndentation(input)).toBe(expected);
+  });
 });
