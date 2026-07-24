@@ -23,7 +23,7 @@ export const strings = Object.fromEntries(
  * @see https://github.com/sveltia/sveltia-i18n
  * @see https://vitejs.dev/guide/features.html#glob-import
  */
-export const initLocales = ({ fallbackLocale = 'en', initialLocale = 'en' } = {}) => {
+export const initLocales = ({ fallbackLocale = 'en-US', initialLocale = 'en-US' } = {}) => {
   Object.entries(strings).forEach(([locale, resource]) => {
     // Add `_sui` suffix to avoid collision with app localization
     addMessages(locale, { _sui: resource });

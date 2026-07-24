@@ -15,17 +15,23 @@ describe('initLocales', () => {
   it('registers the loaded translations under the _sui namespace by default', () => {
     initLocales();
 
-    expect(strings.en.cancel).toBe('Cancel');
+    expect(strings['en-CA'].cancel).toBe('Cancel');
+    expect(strings['en-GB'].cancel).toBe('Cancel');
+    expect(strings['en-US'].cancel).toBe('Cancel');
     expect(strings.ja.cancel).toBe('キャンセル');
-    expect(addMessages).toHaveBeenCalledTimes(2);
-    expect(addMessages).toHaveBeenCalledWith('en', { _sui: strings.en });
-    expect(addMessages).toHaveBeenCalledWith('ja', { _sui: strings.ja });
-    expect(init).toHaveBeenCalledWith({ fallbackLocale: 'en', initialLocale: 'en' });
+
+    const expectedLocales = ['en-CA', 'en-GB', 'en-US', 'ja'];
+
+    expect(addMessages).toHaveBeenCalledTimes(expectedLocales.length);
+    expectedLocales.forEach((locale) => {
+      expect(addMessages).toHaveBeenCalledWith(locale, { _sui: strings[locale] });
+    });
+    expect(init).toHaveBeenCalledWith({ fallbackLocale: 'en-US', initialLocale: 'en-US' });
   });
 
   it('passes custom locale options to the i18n initializer', () => {
-    initLocales({ fallbackLocale: 'en', initialLocale: 'ja' });
+    initLocales({ fallbackLocale: 'en-GB', initialLocale: 'ja' });
 
-    expect(init).toHaveBeenCalledWith({ fallbackLocale: 'en', initialLocale: 'ja' });
+    expect(init).toHaveBeenCalledWith({ fallbackLocale: 'en-GB', initialLocale: 'ja' });
   });
 });
