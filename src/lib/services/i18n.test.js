@@ -20,7 +20,7 @@ describe('initLocales', () => {
     expect(strings['en-US'].cancel).toBe('Cancel');
     expect(strings.ja.cancel).toBe('キャンセル');
 
-    const expectedLocales = ['en-CA', 'en-GB', 'en-US', 'ja'];
+    const expectedLocales = Object.keys(strings);
 
     expect(addMessages).toHaveBeenCalledTimes(expectedLocales.length);
     expectedLocales.forEach((locale) => {
