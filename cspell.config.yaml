@@ -1,4 +1,4 @@
-version: "0.2"
+version: '0.2'
 language: en
 dictionaries:
   - css
@@ -10,14 +10,14 @@ enableFiletypes:
   - svelte
   - xml
 files:
-  - "**/.*"
-  - "**/*.{css,js,json,jsonc,html,md,scss,svelte,svg,yaml,yml,xml}"
+  - '**/.*'
+  - '**/*.{css,js,json,jsonc,html,md,scss,svelte,svg,yaml,yml,xml}'
 useGitignore: true
 ignorePaths:
   - pnpm-lock.yaml
   - data/**/*.json
   - src/lib/locales/*.yaml
-  - "!src/lib/locales/en-*.yaml"
+  - '!src/lib/locales/en-*.yaml'
 words:
   - atrule
   - beforeinput

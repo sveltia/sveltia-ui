@@ -33,7 +33,7 @@ calendar:
 # Split button component
 split_button:
   # Wrapper aria-label, e.g. "Save Options" when primary button is "Save"
-  x_options: "{$name} オプション"
+  x_options: '{$name} オプション'
   # Dropdown toggle aria-label
   more_options: その他のオプション
 
@@ -69,7 +69,7 @@ select_tags:
   # Listbox aria-label
   selected_options: 選択済みのオプション
   # Remove button aria-label, e.g. "Remove Option 1"
-  remove_x: "{$name} を削除"
+  remove_x: '{$name} を削除'
 
 # Text editor component
 text_editor:

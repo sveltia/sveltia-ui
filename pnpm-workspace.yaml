@@ -1,5 +1,5 @@
 allowBuilds:
-  "@parcel/watcher": false
+  '@parcel/watcher': false
   esbuild: false
   svelte-preprocess: true
   unrs-resolver: false
@@ -9,8 +9,8 @@ engineStrict: true
 minimumReleaseAge: 1440
 
 minimumReleaseAgeExclude:
-  - "@sveltia/*"
+  - '@sveltia/*'
 
 overrides:
   # <0.7.0 has a security vulnerability, 2.0.0 causes issues with SvelteKit
-  "cookie@<0.7.0": "^1.0.0"
+  'cookie@<0.7.0': '^1.0.0'
