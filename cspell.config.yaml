@@ -16,6 +16,8 @@ useGitignore: true
 ignorePaths:
   - pnpm-lock.yaml
   - data/**/*.json
+  - src/lib/locales/*.yaml
+  - "!src/lib/locales/en-*.yaml"
 words:
   - atrule
   - beforeinput
