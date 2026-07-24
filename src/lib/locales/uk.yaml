@@ -1,0 +1,113 @@
+# Dialog action button labels
+ok: OK
+cancel: Скасувати
+close: Закрити
+
+# Button to clear content, e.g. search input or calendar date
+clear: Очистити
+
+# Text editor dialog buttons for link/image insertion
+insert: Вставити
+update: Оновити
+remove: Видалити
+
+# Combobox dropdown toggle button aria-labels
+collapse: Згорнути
+expand: Розгорнути
+
+# Infobar/toast dismiss button label
+dismiss: Відхилити
+
+# Calendar component
+calendar:
+  # View switcher group aria-labels and navigation button aria-labels
+  year: Рік
+  previous_decade: Попереднє десятиліття
+  next_decade: Наступне десятиліття
+  month: Місяць
+  previous_month: Попередній місяць
+  next_month: Наступний місяць
+  # “Today” button label in footer
+  today: Сьогодні
+
+# Split button component
+split_button:
+  # Wrapper aria-label, e.g. “Save Options” when primary button is “Save”
+  x_options: Параметри «{$name}»
+  # Dropdown toggle aria-label
+  more_options: Інші параметри
+
+# Combobox component
+combobox:
+  # Placeholder when no option is selected
+  select_an_option: Виберіть варіант…
+  # Filter input aria-label
+  filter_options: Фільтрувати варіанти
+  # Empty state message when filter has no matches
+  no_matching_options: Відповідних варіантів не знайдено
+
+# Number input component
+number_input:
+  # Spin button aria-labels for incrementing/decrementing the number value
+  increase: Збільшити
+  decrease: Зменшити
+
+# Password input component
+password_input:
+  # Visibility toggle button aria-labels
+  show_password: Показати пароль
+  hide_password: Сховати пароль
+
+# Secret input component (API keys, tokens, etc.)
+secret_input:
+  # Visibility toggle button aria-labels
+  show_secret: Показати секрет
+  hide_secret: Сховати секрет
+
+# Select tags component (multi-select)
+select_tags:
+  # Listbox aria-label
+  selected_options: Вибрані варіанти
+  # Remove button aria-label, e.g. “Remove Option 1”
+  remove_x: Видалити «{$name}»
+
+# Text editor component
+text_editor:
+  # Toolbar aria-labels
+  text_editor: Текстовий редактор
+  code_editor: Редактор коду
+  # Block style menu button and menu aria-labels
+  text_style_options: Параметри стилю тексту
+  show_text_style_options: Показати параметри стилю тексту
+  # Block style menu items
+  paragraph: Абзац
+  heading_1: Заголовок 1
+  heading_2: Заголовок 2
+  heading_3: Заголовок 3
+  heading_4: Заголовок 4
+  heading_5: Заголовок 5
+  heading_6: Заголовок 6
+  bulleted_list: Маркований список
+  numbered_list: Нумерований список
+  blockquote: Цитата
+  code_block: Блок коду
+  # Inline style button aria-labels
+  bold: Жирний
+  italic: Курсив
+  strikethrough: Закреслений
+  code: Код
+  link: Посилання
+  # Link dialog title
+  insert_link: Вставити посилання
+  update_link: Оновити посилання
+  # Link dialog input field labels
+  text: Текст
+  url: URL
+  # Markdown mode toggle button aria-label
+  edit_in_markdown: Редагувати в Markdown
+  # Error message when rich text conversion fails
+  converter_error: Не вдалося ввімкнути режим форматованого тексту. Натомість скористайтеся редактором звичайного тексту.
+  # Language selector aria-label
+  language: Мова
+  # Plain text mode option in language selector
+  plain_text: Звичайний текст

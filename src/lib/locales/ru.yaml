@@ -1,0 +1,113 @@
+# Dialog action button labels
+ok: OK
+cancel: Отмена
+close: Закрыть
+
+# Button to clear content, e.g. search input or calendar date
+clear: Очистить
+
+# Text editor dialog buttons for link/image insertion
+insert: Вставить
+update: Обновить
+remove: Удалить
+
+# Combobox dropdown toggle button aria-labels
+collapse: Свернуть
+expand: Развернуть
+
+# Infobar/toast dismiss button label
+dismiss: Отклонить
+
+# Calendar component
+calendar:
+  # View switcher group aria-labels and navigation button aria-labels
+  year: Год
+  previous_decade: Предыдущее десятилетие
+  next_decade: Следующее десятилетие
+  month: Месяц
+  previous_month: Предыдущий месяц
+  next_month: Следующий месяц
+  # “Today” button label in footer
+  today: Сегодня
+
+# Split button component
+split_button:
+  # Wrapper aria-label, e.g. “Save Options” when primary button is “Save”
+  x_options: Параметры «{$name}»
+  # Dropdown toggle aria-label
+  more_options: Другие параметры
+
+# Combobox component
+combobox:
+  # Placeholder when no option is selected
+  select_an_option: Выберите вариант…
+  # Filter input aria-label
+  filter_options: Фильтровать варианты
+  # Empty state message when filter has no matches
+  no_matching_options: Подходящих вариантов не найдено
+
+# Number input component
+number_input:
+  # Spin button aria-labels for incrementing/decrementing the number value
+  increase: Увеличить
+  decrease: Уменьшить
+
+# Password input component
+password_input:
+  # Visibility toggle button aria-labels
+  show_password: Показать пароль
+  hide_password: Скрыть пароль
+
+# Secret input component (API keys, tokens, etc.)
+secret_input:
+  # Visibility toggle button aria-labels
+  show_secret: Показать секрет
+  hide_secret: Скрыть секрет
+
+# Select tags component (multi-select)
+select_tags:
+  # Listbox aria-label
+  selected_options: Выбранные варианты
+  # Remove button aria-label, e.g. “Remove Option 1”
+  remove_x: Удалить «{$name}»
+
+# Text editor component
+text_editor:
+  # Toolbar aria-labels
+  text_editor: Текстовый редактор
+  code_editor: Редактор кода
+  # Block style menu button and menu aria-labels
+  text_style_options: Параметры стиля текста
+  show_text_style_options: Показать параметры стиля текста
+  # Block style menu items
+  paragraph: Абзац
+  heading_1: Заголовок 1
+  heading_2: Заголовок 2
+  heading_3: Заголовок 3
+  heading_4: Заголовок 4
+  heading_5: Заголовок 5
+  heading_6: Заголовок 6
+  bulleted_list: Маркированный список
+  numbered_list: Нумерованный список
+  blockquote: Цитата
+  code_block: Блок кода
+  # Inline style button aria-labels
+  bold: Полужирный
+  italic: Курсив
+  strikethrough: Зачёркнутый
+  code: Код
+  link: Ссылка
+  # Link dialog title
+  insert_link: Вставить ссылку
+  update_link: Обновить ссылку
+  # Link dialog input field labels
+  text: Текст
+  url: URL
+  # Markdown mode toggle button aria-label
+  edit_in_markdown: Редактировать в Markdown
+  # Error message when rich text conversion fails
+  converter_error: Не удалось включить режим форматированного текста. Вместо этого используйте редактор обычного текста.
+  # Language selector aria-label
+  language: Язык
+  # Plain text mode option in language selector
+  plain_text: Обычный текст
