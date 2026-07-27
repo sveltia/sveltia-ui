@@ -1,0 +1,113 @@
+# Dialog action button labels
+ok: ΟΚ
+cancel: Άκυρο
+close: Κλείσιμο
+
+# Button to clear content, e.g. search input or calendar date
+clear: Έκκαθάριση
+
+# Text editor dialog buttons for link/image insertion
+insert: Εισαγωγή
+update: Ενημέρωση
+remove: Κατάργηση
+
+# Combobox dropdown toggle button aria-labels
+collapse: Σύμπτυξη
+expand: Ανάπτυξη
+
+# Infobar/toast dismiss button label
+dismiss: Παράβλεψη
+
+# Calendar component
+calendar:
+  # View switcher group aria-labels and navigation button aria-labels
+  year: Έτος
+  previous_decade: Προηγούμενη δεκαετία
+  next_decade: Επόμενη δεκαετία
+  month: Μήνας
+  previous_month: Προηγούμενος μήνας
+  next_month: Επόμενος μήνας
+  # “Today” button label in footer
+  today: Σήμερα
+
+# Split button component
+split_button:
+  # Wrapper aria-label, e.g. “Save Options” when primary button is “Save”
+  x_options: 'Επιλογές για {$name}'
+  # Dropdown toggle aria-label
+  more_options: Περισσότερες επιλογές
+
+# Combobox component
+combobox:
+  # Placeholder when no option is selected
+  select_an_option: Επιλέξτε μία επιλογή…
+  # Filter input aria-label
+  filter_options: Φιλτράρισμα επιλογών
+  # Empty state message when filter has no matches
+  no_matching_options: Δεν βρέθηκαν επιλογές που να ταιριάζουν
+
+# Number input component
+number_input:
+  # Spin button aria-labels for incrementing/decrementing the number value
+  increase: Αύξηση
+  decrease: Μείωση
+
+# Password input component
+password_input:
+  # Visibility toggle button aria-labels
+  show_password: Εμφάνιση κωδικού πρόσβασης
+  hide_password: Απόκρυψη κωδικού πρόσβασης
+
+# Secret input component (API keys, tokens, etc.)
+secret_input:
+  # Visibility toggle button aria-labels
+  show_secret: Εμφάνιση μυστικού
+  hide_secret: Απόκρυψη μυστικού
+
+# Select tags component (multi-select)
+select_tags:
+  # Listbox aria-label
+  selected_options: Επιλεγμένες επιλογές
+  # Remove button aria-label, e.g. “Remove Option 1”
+  remove_x: 'Κατάργηση {$name}'
+
+# Text editor component
+text_editor:
+  # Toolbar aria-labels
+  text_editor: Επεξεργαστής κειμένου
+  code_editor: Επεξεργαστής κώδικα
+  # Block style menu button and menu aria-labels
+  text_style_options: Επιλογές μορφοποίησης κειμένου
+  show_text_style_options: Εμφάνιση επιλογών μορφοποίησης κειμένου
+  # Block style menu items
+  paragraph: Παράγραφος
+  heading_1: Επικεφαλίδα 1
+  heading_2: Επικεφαλίδα 2
+  heading_3: Επικεφαλίδα 3
+  heading_4: Επικεφαλίδα 4
+  heading_5: Επικεφαλίδα 5
+  heading_6: Επικεφαλίδα 6
+  bulleted_list: Λίστα με κουκίδες
+  numbered_list: Αριθμημένη λίστα
+  blockquote: Παράθεση
+  code_block: Μπλόκ κώδικα
+  # Inline style button aria-labels
+  bold: Έντονα
+  italic: Πλάγια
+  strikethrough: Διακριτή διαγραφή
+  code: Κώδικας
+  link: Σύνδεσμος
+  # Link dialog title
+  insert_link: Εισαγωγή συνδέσμου
+  update_link: Ενημέρωση συνδέσμου
+  # Link dialog input field labels
+  text: Κείμενο
+  url: URL
+  # Markdown mode toggle button aria-label
+  edit_in_markdown: Επεξεργασία σε Markdown
+  # Error message when rich text conversion fails
+  converter_error: Δεν ήταν δυνατή η ενεργοποίηση της λειτουργίας εμπλουτισμένου κειμένου. Παρακαλούμε χρησιμοποιήστε τον επεξεργαστή απλού κειμένου.
+  # Language selector aria-label
+  language: Γλώσσα
+  # Plain text mode option in language selector
+  plain_text: Απλό κείμενο
