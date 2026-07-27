@@ -86,6 +86,10 @@ vi.mock('@sveltia/utils/misc', () => ({
   sleep: vi.fn(() => Promise.resolve()),
 }));
 
+vi.mock('@sveltia/utils/string', () => ({
+  isURL: vi.fn((str) => /^https?:\/\//.test(str)),
+}));
+
 vi.mock('prismjs', () => ({}));
 
 vi.mock('prismjs/components', () => ({
@@ -193,40 +197,52 @@ vi.mock('@lexical/utils', () => ({
 
     return node;
   }),
+  objectKlassEquals: vi.fn((obj, klass) => obj instanceof klass),
 }));
 
 const selectionState = vi.hoisted(() => /** @type {{ value: any }} */ ({ value: null }));
 
+const ElementNodeClass = vi.hoisted(
+  () =>
+    class ElementNode {
+      getType() {
+        return 'element';
+      }
+
+      getTag() {
+        return 'div';
+      }
+
+      getKey() {
+        return 'node-key';
+      }
+
+      canIndent() {
+        return !!mockState.listItemNode;
+      }
+
+      getIndent() {
+        return mockState.listIndent ?? 0;
+      }
+    },
+);
+
 vi.mock('lexical', () => ({
   COMMAND_PRIORITY_NORMAL: 0,
+  COMMAND_PRIORITY_LOW: -1,
   createEditor: vi.fn(() => editorState),
-  ElementNode: class ElementNode {
-    getType() {
-      return 'element';
-    }
-
-    getTag() {
-      return 'div';
-    }
-
-    getKey() {
-      return 'node-key';
-    }
-
-    canIndent() {
-      return !!mockState.listItemNode;
-    }
-
-    getIndent() {
-      return mockState.listIndent ?? 0;
-    }
-  },
+  $createTextNode: vi.fn((text) => ({ type: 'text', text })),
+  $insertNodes: vi.fn(),
+  $isElementNode: vi.fn((node) => node?.type === 'element' || node instanceof ElementNodeClass),
+  $isTextNode: vi.fn((node) => node?.type === 'text'),
+  ElementNode: ElementNodeClass,
   $getRoot: vi.fn(() => rootState),
   $getSelection: vi.fn(() => selectionState.value),
   INDENT_CONTENT_COMMAND: 'indent',
   INSERT_PARAGRAPH_COMMAND: 'insertParagraph',
   $isRangeSelection: vi.fn((selection) => selection?.type === 'range'),
   OUTDENT_CONTENT_COMMAND: 'outdent',
+  PASTE_COMMAND: 'paste',
 }));
 
 import { registerCodeHighlighting } from '@lexical/code-prism';
@@ -359,7 +375,7 @@ describe('text editor core', () => {
     });
 
     expect(editor).toBe(editorState);
-    expect(editorState._commands).toHaveLength(4);
+    expect(editorState._commands).toHaveLength(5);
     expect(editorState._updateListeners).toHaveLength(1);
     expect(editorState._rootListeners).toHaveLength(1);
 
@@ -468,7 +484,7 @@ describe('text editor core', () => {
       enabledButtons: ['link', 'bulleted-list', 'numbered-list'],
     });
 
-    expect(editorState._commands).toHaveLength(4);
+    expect(editorState._commands).toHaveLength(5);
     dispose();
   });
 
@@ -906,7 +922,7 @@ describe('text editor core', () => {
       enabledButtons: ['link', 'bulleted-list', 'numbered-list'],
     });
 
-    expect(editorState._commands).toHaveLength(4);
+    expect(editorState._commands).toHaveLength(5);
     expect(editorState._updateListeners).toHaveLength(1);
     expect(editorState._rootListeners).toHaveLength(1);
 
@@ -932,11 +948,12 @@ describe('text editor core', () => {
       enabledButtons: ['link', 'bulleted-list', 'numbered-list'],
     });
 
-    // Should register 4 commands:
-    // toggleLink, insertUnorderedList, insertOrderedList, insertParagraph
+    // Should register 5 commands:
+    // toggleLink, paste, insertUnorderedList, insertOrderedList, insertParagraph
     const commands = editorState._commands.map((cmd) => cmd.command);
 
     expect(commands).toContain('toggleLink');
+    expect(commands).toContain('paste');
     expect(commands).toContain('insertUnorderedList');
     expect(commands).toContain('insertOrderedList');
     expect(commands).toContain('insertParagraph');
@@ -1414,7 +1431,7 @@ describe('text editor core', () => {
       enabledButtons: ['link', 'bulleted-list', 'numbered-list'],
     });
 
-    expect(editorState._commands).toHaveLength(4);
+    expect(editorState._commands).toHaveLength(5);
     dispose();
   });
 
@@ -1537,5 +1554,259 @@ describe('text editor core', () => {
 
     expect(result.blockType).toBe('bulleted-list');
     expect(result.blockNodeKey).toBe('node-key');
+  });
+
+  it('registers PASTE_COMMAND when link button is enabled', () => {
+    const { dispose } = initEditor({
+      components: [],
+      useMarkdownShortcuts: false,
+      isCodeEditor: false,
+      modes: [],
+      enabledButtons: ['link'],
+    });
+
+    const pasteCommand = editorState._commands.find((cmd) => cmd.command === 'paste');
+
+    expect(pasteCommand).toBeDefined();
+    dispose();
+  });
+
+  it('PASTE_COMMAND returns false when selection is not a range', () => {
+    const { dispose } = initEditor({
+      components: [],
+      useMarkdownShortcuts: false,
+      isCodeEditor: false,
+      modes: [],
+      enabledButtons: ['link'],
+    });
+
+    const pasteCommand = editorState._commands.find((cmd) => cmd.command === 'paste');
+
+    selectionState.value = null; // Not a range selection
+
+    const event = new ClipboardEvent('paste', { clipboardData: new DataTransfer() });
+    const result = pasteCommand?.listener(event);
+
+    expect(result).toBe(false);
+    dispose();
+  });
+
+  it('PASTE_COMMAND returns false when event is not a ClipboardEvent', () => {
+    const { dispose } = initEditor({
+      components: [],
+      useMarkdownShortcuts: false,
+      isCodeEditor: false,
+      modes: [],
+      enabledButtons: ['link'],
+    });
+
+    const pasteCommand = editorState._commands.find((cmd) => cmd.command === 'paste');
+
+    selectionState.value = {
+      type: 'range',
+      anchor: { getNode: () => new ElementNode() },
+    };
+
+    const event = new Event('paste'); // Not a ClipboardEvent
+    const result = pasteCommand?.listener(event);
+
+    expect(result).toBe(false);
+    dispose();
+  });
+
+  it('PASTE_COMMAND returns false when target is an input element', () => {
+    const { dispose } = initEditor({
+      components: [],
+      useMarkdownShortcuts: false,
+      isCodeEditor: false,
+      modes: [],
+      enabledButtons: ['link'],
+    });
+
+    const pasteCommand = editorState._commands.find((cmd) => cmd.command === 'paste');
+
+    selectionState.value = {
+      type: 'range',
+      anchor: { getNode: () => new ElementNode() },
+    };
+
+    const input = document.createElement('input');
+    const clipboardData = new DataTransfer();
+
+    clipboardData.setData('text', 'https://example.com');
+
+    const event = new ClipboardEvent('paste', { clipboardData });
+
+    Object.defineProperty(event, 'target', { value: input });
+
+    const result = pasteCommand?.listener(event);
+
+    expect(result).toBe(false);
+    dispose();
+  });
+
+  it('PASTE_COMMAND returns false when clipboard text is not a URL', () => {
+    const { dispose } = initEditor({
+      components: [],
+      useMarkdownShortcuts: false,
+      isCodeEditor: false,
+      modes: [],
+      enabledButtons: ['link'],
+    });
+
+    const pasteCommand = editorState._commands.find((cmd) => cmd.command === 'paste');
+
+    selectionState.value = {
+      type: 'range',
+      anchor: { getNode: () => new ElementNode() },
+      isCollapsed: () => true,
+      getNodes: () => [],
+    };
+
+    const div = document.createElement('div');
+    const clipboardData = new DataTransfer();
+
+    clipboardData.setData('text', 'just some text');
+
+    const event = new ClipboardEvent('paste', { clipboardData });
+
+    Object.defineProperty(event, 'target', { value: div });
+
+    const result = pasteCommand?.listener(event);
+
+    expect(result).toBe(false);
+    dispose();
+  });
+
+  it('PASTE_COMMAND inserts URL as text node and dispatches TOGGLE_LINK_COMMAND when selection is collapsed with no element nodes', () => {
+    const { dispose } = initEditor({
+      components: [],
+      useMarkdownShortcuts: false,
+      isCodeEditor: false,
+      modes: [],
+      enabledButtons: ['link'],
+    });
+
+    const pasteCommand = editorState._commands.find((cmd) => cmd.command === 'paste');
+
+    selectionState.value = {
+      type: 'range',
+      anchor: { getNode: () => new ElementNode() },
+      isCollapsed: () => true,
+      getNodes: () => [],
+    };
+
+    const div = document.createElement('div');
+    const clipboardData = new DataTransfer();
+    const preventDefaultSpy = vi.fn();
+
+    clipboardData.setData('text', 'https://example.com');
+
+    const event = new ClipboardEvent('paste', { clipboardData });
+
+    Object.defineProperty(event, 'target', { value: div });
+    Object.defineProperty(event, 'preventDefault', { value: preventDefaultSpy });
+
+    const result = pasteCommand?.listener(event);
+
+    expect(result).toBe(true);
+    expect(preventDefaultSpy).toHaveBeenCalled();
+    dispose();
+  });
+
+  it('PASTE_COMMAND dispatches TOGGLE_LINK_COMMAND with URL when appropriate', () => {
+    const { dispose } = initEditor({
+      components: [],
+      useMarkdownShortcuts: false,
+      isCodeEditor: false,
+      modes: [],
+      enabledButtons: ['link'],
+    });
+
+    const pasteCommand = editorState._commands.find((cmd) => cmd.command === 'paste');
+
+    selectionState.value = {
+      type: 'range',
+      anchor: { getNode: () => new ElementNode() },
+      isCollapsed: () => false,
+      getNodes: () => [{ type: 'text', isSimpleText: () => true }],
+    };
+
+    const div = document.createElement('div');
+    const clipboardData = new DataTransfer();
+    const preventDefaultSpy = vi.fn();
+
+    clipboardData.setData('text', 'https://example.com');
+
+    const event = new ClipboardEvent('paste', { clipboardData });
+
+    Object.defineProperty(event, 'target', { value: div });
+    Object.defineProperty(event, 'preventDefault', { value: preventDefaultSpy });
+
+    const result = pasteCommand?.listener(event);
+
+    expect(result).toBe(true);
+    expect(preventDefaultSpy).toHaveBeenCalled();
+    dispose();
+  });
+
+  it('PASTE_COMMAND returns false when no text nodes in selection', () => {
+    const { dispose } = initEditor({
+      components: [],
+      useMarkdownShortcuts: false,
+      isCodeEditor: false,
+      modes: [],
+      enabledButtons: ['link'],
+    });
+
+    const pasteCommand = editorState._commands.find((cmd) => cmd.command === 'paste');
+
+    selectionState.value = {
+      type: 'range',
+      anchor: { getNode: () => new ElementNode() },
+      isCollapsed: () => false,
+      getNodes: () => [{ type: 'element' }, { type: 'text', isSimpleText: () => true }],
+    };
+
+    const div = document.createElement('div');
+    const clipboardData = new DataTransfer();
+
+    clipboardData.setData('text', 'https://example.com');
+
+    const event = new ClipboardEvent('paste', { clipboardData });
+
+    Object.defineProperty(event, 'target', { value: div });
+
+    const result = pasteCommand?.listener(event);
+
+    expect(result).toBe(false);
+    dispose();
+  });
+
+  it('PASTE_COMMAND returns false when clipboard data is missing', () => {
+    const { dispose } = initEditor({
+      components: [],
+      useMarkdownShortcuts: false,
+      isCodeEditor: false,
+      modes: [],
+      enabledButtons: ['link'],
+    });
+
+    const pasteCommand = editorState._commands.find((cmd) => cmd.command === 'paste');
+
+    selectionState.value = {
+      type: 'range',
+      anchor: { getNode: () => new ElementNode() },
+    };
+
+    const div = document.createElement('div');
+    const event = new ClipboardEvent('paste');
+
+    Object.defineProperty(event, 'target', { value: div });
+
+    const result = pasteCommand?.listener(event);
+
+    expect(result).toBe(false);
+    dispose();
   });
 });

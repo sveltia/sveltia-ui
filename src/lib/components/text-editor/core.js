@@ -39,18 +39,25 @@ import {
   registerRichText,
 } from '@lexical/rich-text';
 import { TableCellNode, TableNode, TableRowNode } from '@lexical/table';
-import { $getNearestNodeOfType as getNearestNodeOfType } from '@lexical/utils';
+import { $getNearestNodeOfType as getNearestNodeOfType, objectKlassEquals } from '@lexical/utils';
 import { sleep } from '@sveltia/utils/misc';
+import { isURL } from '@sveltia/utils/string';
 import {
+  COMMAND_PRIORITY_LOW,
   COMMAND_PRIORITY_NORMAL,
   createEditor,
+  $createTextNode as createTextNode,
   ElementNode,
   $getRoot as getRoot,
   $getSelection as getSelection,
   INDENT_CONTENT_COMMAND,
   INSERT_PARAGRAPH_COMMAND,
+  $insertNodes as insertNodes,
+  $isElementNode as isElementNode,
   $isRangeSelection as isRangeSelection,
+  $isTextNode as isTextNode,
   OUTDENT_CONTENT_COMMAND,
+  PASTE_COMMAND,
 } from 'lexical';
 import prismComponents from 'prismjs/components';
 import {
@@ -269,6 +276,7 @@ export const initEditor = ({
     );
   }
 
+  // https://github.com/facebook/lexical/blob/main/packages/lexical-link/src/LexicalLinkExtension.ts
   if (enabledButtons.includes('link')) {
     addUnregister(
       editor.registerCommand(
@@ -279,6 +287,47 @@ export const initEditor = ({
           return true;
         },
         COMMAND_PRIORITY_NORMAL,
+      ),
+    );
+
+    addUnregister(
+      editor.registerCommand(
+        PASTE_COMMAND,
+        (event) => {
+          const selection = getSelection();
+
+          if (
+            !isRangeSelection(selection) ||
+            !objectKlassEquals(event, ClipboardEvent) ||
+            !event.clipboardData ||
+            /** @type {HTMLElement} */ (event.target).matches('input, textarea')
+          ) {
+            return false;
+          }
+
+          const clipboardText = event.clipboardData.getData('text').trim();
+
+          if (!isURL(clipboardText)) {
+            return false;
+          }
+
+          if (selection.isCollapsed()) {
+            insertNodes([createTextNode(clipboardText)]);
+          }
+
+          if (
+            !selection
+              .getNodes()
+              .some((node) => isElementNode(node) || (isTextNode(node) && !node.isSimpleText()))
+          ) {
+            editor.dispatchCommand(TOGGLE_LINK_COMMAND, clipboardText);
+            event.preventDefault();
+            return true;
+          }
+
+          return false;
+        },
+        COMMAND_PRIORITY_LOW,
       ),
     );
   }

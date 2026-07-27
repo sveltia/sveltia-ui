@@ -138,14 +138,7 @@
           if (!hasAnchor) {
             anchorText = anchorText.trim();
             anchorText ||= anchorURL;
-
-            const { anchor, focus } = /** @type {RangeSelection} */ (_selection);
-            const node = createTextNode(anchorText);
-            const key = node.getKey();
-
-            insertNodes([node]);
-            anchor.set(key, anchorText.length, 'text');
-            focus.set(key, 0, 'text');
+            insertNodes([createTextNode(anchorText)]);
           }
 
           setSelection(_selection);
