@@ -137,7 +137,7 @@
     border: 1px solid var(--sui-textbox-border-color);
     border-radius: var(--sui-textbox-border-radius) !important;
     padding: var(--sui-textbox-multiline-padding);
-    min-height: 8em;
+    min-height: 120px;
     color: var(--sui-textbox-foreground-color);
     background-color: var(--sui-textbox-background-color);
     font-family: var(--sui-textbox-font-family);

@@ -6,6 +6,7 @@
 -->
 <script>
   import { onMount } from 'svelte';
+  import FontLinks from './font-links.svelte';
 
   /**
    * @import { Snippet } from 'svelte';
@@ -27,14 +28,6 @@
     ...restProps
     /* eslint-enable prefer-const */
   } = $props();
-
-  const stylesheets = [
-    // https://fonts.google.com/share?selection.family=Merriweather+Sans:ital,wght@0,300..800;1,300..800|Noto+Sans+Mono:wght@100..900
-    'https://fonts.googleapis.com/css2?family=Merriweather+Sans:ital,wght@0,300..800;1,300..800&family=Noto+Sans+Mono:wght@100..900&display=swap',
-    // https://fonts.google.com/icons?icon.set=Material+Symbols
-    // Use `font-display: block;` @see https://stackoverflow.com/q/41710834
-    'https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=block',
-  ];
 
   let fontLoaded = $state(false);
 
@@ -80,12 +73,7 @@
     ].join(', ')}
   />
   <meta name="google" content="notranslate" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
-  {#each stylesheets as href (href)}
-    <link rel="preload" {href} as="style" />
-    <link rel="stylesheet" {href} />
-  {/each}
+  <FontLinks />
 </svelte:head>
 
 {#if !fontLoaded}
@@ -147,6 +135,9 @@
     font-size: var(--sui-font-size-default);
     font-weight: var(--sui-font-weight-normal, normal);
     word-spacing: var(--sui-word-spacing-normal);
+    font-size-adjust: 0.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
     -webkit-user-select: none;
     user-select: none;
     touch-action: none;

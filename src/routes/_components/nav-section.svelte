@@ -54,7 +54,7 @@
     margin: 0 0 8px;
     padding: 0 0 4px;
     color: var(--sui-tertiary-foreground-color);
-    font-size: 12px;
+    font-size: 14px;
     font-weight: var(--sui-font-weight-normal, normal);
     text-transform: uppercase;
     letter-spacing: 0.1ex;

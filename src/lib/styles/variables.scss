@@ -154,21 +154,21 @@
     --sui-popup-shadow-color: hsl(var(--sui-shadow-color) / 40%);
     --sui-popup-backdrop-color: hsl(var(--sui-shadow-color) / 40%);
     // Text
-    --sui-font-family-default: "Merriweather Sans", sans-serif;
-    --sui-font-size-xxx-large: 24px;
-    --sui-font-size-xx-large: 20px;
-    --sui-font-size-x-large: 18px;
-    --sui-font-size-large: 16px;
-    --sui-font-size-default: 14px;
-    --sui-font-size-small: 12px;
-    --sui-font-size-x-small: 10px;
-    --sui-font-weight-normal: 300; // Merriweather Sans is a little bit bold, so we need to adjust the weight
-    --sui-font-weight-bold: 600; // ditto
-    --sui-font-family-monospace: "Noto Sans Mono", monospace;
+    --sui-font-family-default: "Source Sans 3", system-ui, sans-serif;
+    --sui-font-size-xxx-large: 26px;
+    --sui-font-size-xx-large: 22px;
+    --sui-font-size-x-large: 20px;
+    --sui-font-size-large: 18px;
+    --sui-font-size-default: 16px;
+    --sui-font-size-small: 14px;
+    --sui-font-size-x-small: 12px;
+    --sui-font-weight-normal: 400;
+    --sui-font-weight-bold: 700;
+    --sui-font-family-monospace: "Noto Sans Mono", ui-monospace, monospace;
     --sui-font-size-monospace: 0.95em;
-    --sui-line-height-default: 1.25;
-    --sui-line-height-compact: 1.5;
-    --sui-line-height-comfortable: 1.75;
+    --sui-line-height-default: 1.2;
+    --sui-line-height-compact: 1.4;
+    --sui-line-height-comfortable: 1.6;
     --sui-word-spacing-normal: 1px;
     --sui-heading-margin: 0;
     --sui-heading-font-family: var(--sui-font-family-default);
