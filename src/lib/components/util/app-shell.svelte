@@ -135,7 +135,6 @@
     font-size: var(--sui-font-size-default);
     font-weight: var(--sui-font-weight-normal, normal);
     word-spacing: var(--sui-word-spacing-normal);
-    font-size-adjust: 0.5;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     -webkit-user-select: none;

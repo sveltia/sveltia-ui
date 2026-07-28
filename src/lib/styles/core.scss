@@ -22,6 +22,7 @@
     border-width: 0;
     border-style: solid;
     vertical-align: top;
+    font-size-adjust: inherit;
 
     @media (prefers-reduced-motion) {
       scroll-behavior: auto;
