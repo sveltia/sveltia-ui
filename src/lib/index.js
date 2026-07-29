@@ -77,6 +77,8 @@ export { default as AppShell } from './components/util/app-shell.svelte';
 export { default as EmptyState } from './components/util/empty-state.svelte';
 export { default as Group } from './components/util/group.svelte';
 export { default as Modal } from './components/util/modal.svelte';
+export { default as Placeholder } from './components/util/placeholder.svelte';
+export { default as VisibilityObserver } from './components/util/visibility-observer.svelte';
 export { initLocales, strings } from './services/i18n.js';
 
 // eslint-disable-next-line import/export
