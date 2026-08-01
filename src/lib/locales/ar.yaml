@@ -1,0 +1,113 @@
+# Dialog action button labels
+ok: موافق
+cancel: إلغاء
+close: إغلاق
+
+# Button to clear content, e.g. search input or calendar date
+clear: مسح
+
+# Text editor dialog buttons for link/image insertion
+insert: إدراج
+update: تحديث
+remove: إزالة
+
+# Combobox dropdown toggle button aria-labels
+collapse: طي
+expand: توسيع
+
+# Infobar/toast dismiss button label
+dismiss: تجاهل
+
+# Calendar component
+calendar:
+  # View switcher group aria-labels and navigation button aria-labels
+  year: سنة
+  previous_decade: العقد السابق
+  next_decade: العقد القادم
+  month: شهر
+  previous_month: الشهر السابق
+  next_month: الشهر القادم
+  # “Today” button label in footer
+  today: اليوم
+
+# Split button component
+split_button:
+  # Wrapper aria-label, e.g. “Save Options” when primary button is “Save”
+  x_options: 'خيارات {$name}'
+  # Dropdown toggle aria-label
+  more_options: خيارات إضافية
+
+# Combobox component
+combobox:
+  # Placeholder when no option is selected
+  select_an_option: اختر خياراً…
+  # Filter input aria-label
+  filter_options: تصفية الخيارات
+  # Empty state message when filter has no matches
+  no_matching_options: لم يتم العثور على خيارات مطابقة
+
+# Number input component
+number_input:
+  # Spin button aria-labels for incrementing/decrementing the number value
+  increase: زيادة
+  decrease: نقصان
+
+# Password input component
+password_input:
+  # Visibility toggle button aria-labels
+  show_password: إظهار كلمة المرور
+  hide_password: إخفاء كلمة المرور
+
+# Secret input component (API keys, tokens, etc.)
+secret_input:
+  # Visibility toggle button aria-labels
+  show_secret: إظهار السر
+  hide_secret: إخفاء السر
+
+# Select tags component (multi-select)
+select_tags:
+  # Listbox aria-label
+  selected_options: الخيارات المحددة
+  # Remove button aria-label, e.g. “Remove Option 1”
+  remove_x: 'إزالة {$name}'
+
+# Text editor component
+text_editor:
+  # Toolbar aria-labels
+  text_editor: محرر النصوص
+  code_editor: محرر الكود
+  # Block style menu button and menu aria-labels
+  text_style_options: خيارات نمط النص
+  show_text_style_options: إظهار خيارات نمط النص
+  # Block style menu items
+  paragraph: فقرة
+  heading_ 1: عنوان 1
+  heading_2: عنوان 2
+  heading_3: عنوان 3
+  heading_4: عنوان 4
+  heading_5: عنوان 5
+  heading_6: عنوان 6
+  bulleted_list: قائمة نقطية
+  numbered_list: قائمة مرقمة
+  blockquote: اقتباس
+  code_block: كتلة برمجية
+  # Inline style button aria-labels
+  bold: عريض
+  italic: مائل
+  strikethrough: يتوسطه خط
+  code: كود
+  link: رابط
+  # Link dialog title
+  insert_link: إدراج رابط
+  update_link: تحديث الرابط
+  # Link dialog input field labels
+  text: نص
+  url: الرابط
+  # Markdown mode toggle button aria-label
+  edit_in_markdown: التحرير بلغة Markdown
+  # Error message when rich text conversion fails
+  converter_error: تعذر تمكين وضع النص الغني. يرجى استخدام محرر النصوص البسيط بدلاً من ذلك.
+  # Language selector aria-label
+  language: اللغة
+  # Plain text mode option in language selector
+  plain_text: نص عادي
