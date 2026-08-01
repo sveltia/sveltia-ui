@@ -1,0 +1,113 @@
+# Dialog action button labels
+ok: OK
+cancel: Отказ
+close: Затвори
+
+# Button to clear content, e.g. search input or calendar date
+clear: Изчисти
+
+# Text editor dialog buttons for link/image insertion
+insert: Вмъкни
+update: Обнови
+remove: Премахни
+
+# Combobox dropdown toggle button aria-labels
+collapse: Свий
+expand: Разгъни
+
+# Infobar/toast dismiss button label
+dismiss: Отхвърли
+
+# Calendar component
+calendar:
+  # View switcher group aria-labels and navigation button aria-labels
+  year: Година
+  previous_decade: Предишно десетилетие
+  next_decade: Следващо десетилетие
+  month: Месец
+  previous_month: Предишен месец
+  next_month: Следващ месец
+  # “Today” button label in footer
+  today: Днес
+
+# Split button component
+split_button:
+  # Wrapper aria-label, e.g. “Save Options” when primary button is “Save”
+  x_options: Опции за {$name}
+  # Dropdown toggle aria-label
+  more_options: Още опции
+
+# Combobox component
+combobox:
+  # Placeholder when no option is selected
+  select_an_option: Изберете опция…
+  # Filter input aria-label
+  filter_options: Филтриране на опциите
+  # Empty state message when filter has no matches
+  no_matching_options: Няма намерени съвпадащи опции
+
+# Number input component
+number_input:
+  # Spin button aria-labels for incrementing/decrementing the number value
+  increase: Увеличаване
+  decrease: Намаляване
+
+# Password input component
+password_input:
+  # Visibility toggle button aria-labels
+  show_password: Показване на паролата
+  hide_password: Скриване на паролата
+
+# Secret input component (API keys, tokens, etc.)
+secret_input:
+  # Visibility toggle button aria-labels
+  show_secret: Показване на тайната стойност
+  hide_secret: Скриване на тайната стойност
+
+# Select tags component (multi-select)
+select_tags:
+  # Listbox aria-label
+  selected_options: Избрани опции
+  # Remove button aria-label, e.g. “Remove Option 1”
+  remove_x: Премахване на {$name}
+
+# Text editor component
+text_editor:
+  # Toolbar aria-labels
+  text_editor: Текстов редактор
+  code_editor: Редактор на код
+  # Block style menu button and menu aria-labels
+  text_style_options: Опции за стил на текста
+  show_text_style_options: Показване на опциите за стил на текста
+  # Block style menu items
+  paragraph: Абзац
+  heading_1: Заглавие 1
+  heading_2: Заглавие 2
+  heading_3: Заглавие 3
+  heading_4: Заглавие 4
+  heading_5: Заглавие 5
+  heading_6: Заглавие 6
+  bulleted_list: Неномериран списък
+  numbered_list: Номериран списък
+  blockquote: Цитат
+  code_block: Блок с код
+  # Inline style button aria-labels
+  bold: Получер
+  italic: Курсив
+  strikethrough: Зачертан
+  code: Код
+  link: Връзка
+  # Link dialog title
+  insert_link: Вмъкване на връзка
+  update_link: Обновяване на връзката
+  # Link dialog input field labels
+  text: Текст
+  url: URL адрес
+  # Markdown mode toggle button aria-label
+  edit_in_markdown: Редактиране в Markdown
+  # Error message when rich text conversion fails
+  converter_error: Режимът за форматиран текст не може да бъде включен. Използвайте редактора за обикновен текст.
+  # Language selector aria-label
+  language: Език
+  # Plain text mode option in language selector
+  plain_text: Обикновен текст
