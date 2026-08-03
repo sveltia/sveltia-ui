@@ -1,0 +1,113 @@
+# Dialog action button labels
+ok: D’acord
+cancel: Cancel·la
+close: Tanca
+
+# Button to clear content, e.g. search input or calendar date
+clear: Neteja
+
+# Text editor dialog buttons for link/image insertion
+insert: Insereix
+update: Actualitza
+remove: Suprimeix
+
+# Combobox dropdown toggle button aria-labels
+collapse: Replega
+expand: Desplega
+
+# Infobar/toast dismiss button label
+dismiss: Descarta
+
+# Calendar component
+calendar:
+  # View switcher group aria-labels and navigation button aria-labels
+  year: Any
+  previous_decade: Dècada anterior
+  next_decade: Dècada següent
+  month: Mes
+  previous_month: Mes anterior
+  next_month: Mes següent
+  # “Today” button label in footer
+  today: Avui
+
+# Split button component
+split_button:
+  # Wrapper aria-label, e.g. “Save Options” when primary button is “Save”
+  x_options: 'Opcions de {$name}'
+  # Dropdown toggle aria-label
+  more_options: Més opcions
+
+# Combobox component
+combobox:
+  # Placeholder when no option is selected
+  select_an_option: Selecciona una opció…
+  # Filter input aria-label
+  filter_options: Filtra les opcions
+  # Empty state message when filter has no matches
+  no_matching_options: No s’ha trobat cap opció coincident
+
+# Number input component
+number_input:
+  # Spin button aria-labels for incrementing/decrementing the number value
+  increase: Augmenta
+  decrease: Redueix
+
+# Password input component
+password_input:
+  # Visibility toggle button aria-labels
+  show_password: Mostra la contrasenya
+  hide_password: Amaga la contrasenya
+
+# Secret input component (API keys, tokens, etc.)
+secret_input:
+  # Visibility toggle button aria-labels
+  show_secret: Mostra el secret
+  hide_secret: Amaga el secret
+
+# Select tags component (multi-select)
+select_tags:
+  # Listbox aria-label
+  selected_options: Opcions seleccionades
+  # Remove button aria-label, e.g. “Remove Option 1”
+  remove_x: 'Suprimeix {$name}'
+
+# Text editor component
+text_editor:
+  # Toolbar aria-labels
+  text_editor: Editor de text
+  code_editor: Editor de codi
+  # Block style menu button and menu aria-labels
+  text_style_options: Opcions d’estil de text
+  show_text_style_options: Mostra les opcions d’estil de text
+  # Block style menu items
+  paragraph: Paràgraf
+  heading_1: Encapçalament 1
+  heading_2: Encapçalament 2
+  heading_3: Encapçalament 3
+  heading_4: Encapçalament 4
+  heading_5: Encapçalament 5
+  heading_6: Encapçalament 6
+  bulleted_list: Llista amb pics
+  numbered_list: Llista numerada
+  blockquote: Bloc de cita
+  code_block: Bloc de codi
+  # Inline style button aria-labels
+  bold: Negreta
+  italic: Cursiva
+  strikethrough: Barrat
+  code: Codi
+  link: Enllaç
+  # Link dialog title
+  insert_link: Insereix un enllaç
+  update_link: Actualitza l’enllaç
+  # Link dialog input field labels
+  text: Text
+  url: URL
+  # Markdown mode toggle button aria-label
+  edit_in_markdown: Edita en Markdown
+  # Error message when rich text conversion fails
+  converter_error: No s’ha pogut habilitar el mode de text enriquit. Useu l’editor de text sense format.
+  # Language selector aria-label
+  language: Llengua
+  # Plain text mode option in language selector
+  plain_text: Text sense format
