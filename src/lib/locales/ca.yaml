@@ -1,5 +1,5 @@
 # Dialog action button labels
-ok: D'acord
+ok: D’acord
 cancel: Cancel·la
 close: Tanca
 
@@ -44,7 +44,7 @@ combobox:
   # Filter input aria-label
   filter_options: Filtra les opcions
   # Empty state message when filter has no matches
-  no_matching_options: No s'ha trobat cap opció coincident
+  no_matching_options: No s’ha trobat cap opció coincident
 
 # Number input component
 number_input:
@@ -77,8 +77,8 @@ text_editor:
   text_editor: Editor de text
   code_editor: Editor de codi
   # Block style menu button and menu aria-labels
-  text_style_options: Opcions d'estil de text
-  show_text_style_options: Mostra les opcions d'estil de text
+  text_style_options: Opcions d’estil de text
+  show_text_style_options: Mostra les opcions d’estil de text
   # Block style menu items
   paragraph: Paràgraf
   heading_1: Encapçalament 1
@@ -99,14 +99,14 @@ text_editor:
   link: Enllaç
   # Link dialog title
   insert_link: Insereix un enllaç
-  update_link: Actualitza l'enllaç
+  update_link: Actualitza l’enllaç
   # Link dialog input field labels
   text: Text
   url: URL
   # Markdown mode toggle button aria-label
   edit_in_markdown: Edita en Markdown
   # Error message when rich text conversion fails
-  converter_error: No s'ha pogut habilitar el mode de text enriquit. Useu l'editor de text sense format.
+  converter_error: No s’ha pogut habilitar el mode de text enriquit. Useu l’editor de text sense format.
   # Language selector aria-label
   language: Llengua
   # Plain text mode option in language selector
