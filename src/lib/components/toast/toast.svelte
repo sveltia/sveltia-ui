@@ -91,9 +91,9 @@
 
     // eslint-disable-next-line jsdoc/require-jsdoc
     const setMode = () => {
-      position = mql.matches
-        ? 'bottom-center'
-        : `bottom-${document.dir === 'rtl' ? 'left' : 'right'}`;
+      // In the RTL layout, a `bottom-right`-positioned toast is actually displayed in the
+      // bottom-left corner thanks to the `inset-inline-start/end` CSS properties
+      position = mql.matches ? 'bottom-center' : 'bottom-right';
     };
 
     setMode();
