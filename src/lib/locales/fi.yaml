@@ -12,8 +12,8 @@ update: Päivitä
 remove: Poista
 
 # Combobox dropdown toggle button aria-labels
-collapse: Supista
-expand: Laajenna
+collapse: Piilota
+expand: Näytä
 
 # Infobar/toast dismiss button label
 dismiss: Hylkää
@@ -49,7 +49,7 @@ combobox:
 # Number input component
 number_input:
   # Spin button aria-labels for incrementing/decrementing the number value
-  increase: Kasvata
+  increase: Lisää
   decrease: Vähennä
 
 # Password input component
@@ -77,8 +77,8 @@ text_editor:
   text_editor: Tekstieditori
   code_editor: Koodieditori
   # Block style menu button and menu aria-labels
-  text_style_options: Tekstityylin valinnat
-  show_text_style_options: Näytä tekstityylin valinnat
+  text_style_options: Tekstimuotoilun valinnat
+  show_text_style_options: Näytä tekstimuotoilun valinnat
   # Block style menu items
   paragraph: Kappale
   heading_1: Otsikko 1
@@ -106,8 +106,8 @@ text_editor:
   # Markdown mode toggle button aria-label
   edit_in_markdown: Muokkaa Markdown-muodossa
   # Error message when rich text conversion fails
-  converter_error: Rikasta tekstimuotoa ei voi ottaa käyttöön. Käytä sen sijaan pelkän tekstin editoria.
+  converter_error: Rikastettua tekstimuotoa ei voi ottaa käyttöön. Käytä sen sijaan muotoilemattoman tekstin editoria.
   # Language selector aria-label
   language: Kieli
   # Plain text mode option in language selector
-  plain_text: Pelkkä teksti
+  plain_text: Muotoilematon teksti
