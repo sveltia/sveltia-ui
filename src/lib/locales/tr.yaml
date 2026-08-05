@@ -1,0 +1,113 @@
+# Dialog action button labels
+ok: Tamam
+cancel: İptal
+close: Kapat
+
+# Button to clear content, e.g. search input or calendar date
+clear: Temizle
+
+# Text editor dialog buttons for link/image insertion
+insert: Ekle
+update: Güncelle
+remove: Kaldır
+
+# Combobox dropdown toggle button aria-labels
+collapse: Daralt
+expand: Genişlet
+
+# Infobar/toast dismiss button label
+dismiss: Kapat
+
+# Calendar component
+calendar:
+  # View switcher group aria-labels and navigation button aria-labels
+  year: Yıl
+  previous_decade: Önceki On Yıl
+  next_decade: Sonraki On Yıl
+  month: Ay
+  previous_month: Önceki Ay
+  next_month: Sonraki Ay
+  # “Today” button label in footer
+  today: Bugün
+
+# Split button component
+split_button:
+  # Wrapper aria-label, e.g. “Save Options” when primary button is “Save”
+  x_options: '{$name} Seçenekleri'
+  # Dropdown toggle aria-label
+  more_options: Diğer Seçenekler
+
+# Combobox component
+combobox:
+  # Placeholder when no option is selected
+  select_an_option: Bir seçenek seçin…
+  # Filter input aria-label
+  filter_options: Seçenekleri Filtrele
+  # Empty state message when filter has no matches
+  no_matching_options: Eşleşen seçenek bulunamadı
+
+# Number input component
+number_input:
+  # Spin button aria-labels for incrementing/decrementing the number value
+  increase: Artır
+  decrease: Azalt
+
+# Password input component
+password_input:
+  # Visibility toggle button aria-labels
+  show_password: Şifreyi Göster
+  hide_password: Şifreyi Gizle
+
+# Secret input component (API keys, tokens, etc.)
+secret_input:
+  # Visibility toggle button aria-labels
+  show_secret: Gizli Bilgiyi Göster
+  hide_secret: Gizli Bilgiyi Gizle
+
+# Select tags component (multi-select)
+select_tags:
+  # Listbox aria-label
+  selected_options: Seçilen Seçenekler
+  # Remove button aria-label, e.g. “Remove Option 1”
+  remove_x: '{$name} Öğesini Kaldır'
+
+# Text editor component
+text_editor:
+  # Toolbar aria-labels
+  text_editor: Metin Düzenleyici
+  code_editor: Kod Düzenleyici
+  # Block style menu button and menu aria-labels
+  text_style_options: Metin Stili Seçenekleri
+  show_text_style_options: Metin Stili Seçeneklerini Göster
+  # Block style menu items
+  paragraph: Paragraf
+  heading_1: Başlık 1
+  heading_2: Başlık 2
+  heading_3: Başlık 3
+  heading_4: Başlık 4
+  heading_5: Başlık 5
+  heading_6: Başlık 6
+  bulleted_list: Madde İşaretli Liste
+  numbered_list: Numaralı Liste
+  blockquote: Alıntı
+  code_block: Kod Bloğu
+  # Inline style button aria-labels
+  bold: Kalın
+  italic: İtalik
+  strikethrough: Üstü Çizili
+  code: Kod
+  link: Bağlantı
+  # Link dialog title
+  insert_link: Bağlantı Ekle
+  update_link: Bağlantıyı Güncelle
+  # Link dialog input field labels
+  text: Metin
+  url: URL
+  # Markdown mode toggle button aria-label
+  edit_in_markdown: Markdown ile Düzenle
+  # Error message when rich text conversion fails
+  converter_error: Zengin metin modu etkinleştirilemedi. Lütfen düz metin düzenleyicisini kullanın.
+  # Language selector aria-label
+  language: Dil
+  # Plain text mode option in language selector
+  plain_text: Düz Metin
