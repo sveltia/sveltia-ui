@@ -1,0 +1,113 @@
+# Dialog action button labels
+ok: OK
+cancel: Peruuta
+close: Sulje
+
+# Button to clear content, e.g. search input or calendar date
+clear: Tyhjennä
+
+# Text editor dialog buttons for link/image insertion
+insert: Lisää
+update: Päivitä
+remove: Poista
+
+# Combobox dropdown toggle button aria-labels
+collapse: Piilota
+expand: Näytä
+
+# Infobar/toast dismiss button label
+dismiss: Hylkää
+
+# Calendar component
+calendar:
+  # View switcher group aria-labels and navigation button aria-labels
+  year: Vuosi
+  previous_decade: Edellinen vuosikymmen
+  next_decade: Seuraava vuosikymmen
+  month: Kuukausi
+  previous_month: Edellinen kuukausi
+  next_month: Seuraava kuukausi
+  # “Today” button label in footer
+  today: Tänään
+
+# Split button component
+split_button:
+  # Wrapper aria-label, e.g. “Save Options” when primary button is “Save”
+  x_options: '{$name}-valinnat'
+  # Dropdown toggle aria-label
+  more_options: Lisävalinnat
+
+# Combobox component
+combobox:
+  # Placeholder when no option is selected
+  select_an_option: Valitse vaihtoehto…
+  # Filter input aria-label
+  filter_options: Suodata vaihtoehtoja
+  # Empty state message when filter has no matches
+  no_matching_options: Vastaavia vaihtoehtoja ei löytynyt
+
+# Number input component
+number_input:
+  # Spin button aria-labels for incrementing/decrementing the number value
+  increase: Lisää
+  decrease: Vähennä
+
+# Password input component
+password_input:
+  # Visibility toggle button aria-labels
+  show_password: Näytä salasana
+  hide_password: Piilota salasana
+
+# Secret input component (API keys, tokens, etc.)
+secret_input:
+  # Visibility toggle button aria-labels
+  show_secret: Näytä salaisuus
+  hide_secret: Piilota salaisuus
+
+# Select tags component (multi-select)
+select_tags:
+  # Listbox aria-label
+  selected_options: Valitut vaihtoehdot
+  # Remove button aria-label, e.g. “Remove Option 1”
+  remove_x: 'Poista {$name}'
+
+# Text editor component
+text_editor:
+  # Toolbar aria-labels
+  text_editor: Tekstieditori
+  code_editor: Koodieditori
+  # Block style menu button and menu aria-labels
+  text_style_options: Tekstimuotoilun valinnat
+  show_text_style_options: Näytä tekstimuotoilun valinnat
+  # Block style menu items
+  paragraph: Kappale
+  heading_1: Otsikko 1
+  heading_2: Otsikko 2
+  heading_3: Otsikko 3
+  heading_4: Otsikko 4
+  heading_5: Otsikko 5
+  heading_6: Otsikko 6
+  bulleted_list: Luettelomerkitty luettelo
+  numbered_list: Numeroitu luettelo
+  blockquote: Lainaus
+  code_block: Koodilohko
+  # Inline style button aria-labels
+  bold: Lihavointi
+  italic: Kursivointi
+  strikethrough: Yliviivaus
+  code: Koodi
+  link: Linkki
+  # Link dialog title
+  insert_link: Lisää linkki
+  update_link: Päivitä linkki
+  # Link dialog input field labels
+  text: Teksti
+  url: URL-osoite
+  # Markdown mode toggle button aria-label
+  edit_in_markdown: Muokkaa Markdown-muodossa
+  # Error message when rich text conversion fails
+  converter_error: Rikastettua tekstimuotoa ei voi ottaa käyttöön. Käytä sen sijaan muotoilemattoman tekstin editoria.
+  # Language selector aria-label
+  language: Kieli
+  # Plain text mode option in language selector
+  plain_text: Muotoilematon teksti
