@@ -136,16 +136,20 @@
    * @param {PointerEvent} event `pointerup` or `pointercancel` event.
    */
   const onPointerUp = (event) => {
-    if (!dragging || event.pointerId !== targetPointerId) return;
+    const { pointerId } = event;
 
+    if (!dragging || pointerId !== targetPointerId) return;
+
+    element?.releasePointerCapture(pointerId);
     dragging = false;
     startScreenPos = 0;
     targetPointerId = 0;
 
+    onResizeEnd?.();
+
     document.removeEventListener('pointermove', onPointerMove);
     document.removeEventListener('pointerup', onPointerUp);
     document.removeEventListener('pointercancel', onPointerUp);
-    onResizeEnd?.();
   };
 
   /**
@@ -158,9 +162,13 @@
     event.preventDefault();
     event.stopPropagation();
 
+    const { screenX, screenY, pointerId } = event;
+
     dragging = true;
-    startScreenPos = isHorizontal ? event.screenX : event.screenY;
-    targetPointerId = event.pointerId;
+    startScreenPos = isHorizontal ? screenX : screenY;
+    targetPointerId = pointerId;
+    element?.setPointerCapture(pointerId);
+
     onResizeStart?.();
 
     document.addEventListener('pointermove', onPointerMove);
