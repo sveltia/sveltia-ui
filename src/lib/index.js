@@ -72,6 +72,8 @@ export { default as TextArea } from './components/text-field/text-area.svelte';
 export { default as TextInput } from './components/text-field/text-input.svelte';
 export { default as Toast } from './components/toast/toast.svelte';
 export { default as Toolbar } from './components/toolbar/toolbar.svelte';
+export { default as TreeItem } from './components/tree/tree-item.svelte';
+export { default as Tree } from './components/tree/tree.svelte';
 export { default as TruncatedText } from './components/typography/truncated-text.svelte';
 export { default as AppShell } from './components/util/app-shell.svelte';
 export { default as EmptyState } from './components/util/empty-state.svelte';

@@ -221,6 +221,14 @@
     --sui-listbox-border-color: var(--sui-control-border-color);
     --sui-listbox-foreground-color: var(--sui-control-foreground-color);
     --sui-listbox-background-color: hsl(var(--sui-background-color-1-hsl));
+    // Tree
+    --sui-tree-border-radius: var(--sui-control-medium-border-radius);
+    --sui-tree-border-color: var(--sui-control-border-color);
+    --sui-tree-foreground-color: var(--sui-control-foreground-color);
+    --sui-tree-background-color: hsl(var(--sui-background-color-1-hsl));
+    --sui-tree-item-border-radius: var(--sui-control-medium-border-radius);
+    --sui-tree-item-height: var(--sui-control-medium-height);
+    --sui-tree-item-indent: 16px;
     // Textbox: singleline & multiline text fields
     --sui-textbox-border-radius: var(--sui-control-medium-border-radius);
     --sui-textbox-height: var(--sui-control-medium-height);

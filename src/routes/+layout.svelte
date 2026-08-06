@@ -115,7 +115,7 @@
               { key: 'table', label: 'Table' },
               { key: 'tag', label: 'Tag', disabled: true },
               { key: 'tooltip', label: 'Tooltip', disabled: true },
-              { key: 'tree', label: 'Tree', disabled: true },
+              { key: 'tree', label: 'Tree' },
               { key: 'tree-grid', label: 'Tree Grid', disabled: true },
               { key: 'truncated-text', label: 'Truncated Text', disabled: true },
             ]}
