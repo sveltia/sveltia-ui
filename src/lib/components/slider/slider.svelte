@@ -88,17 +88,24 @@
     // Convert physical position to logical position (always LTR)
     // In RTL, left side (physicalX=0) maps to max value (logicalX=barWidth)
     // In LTR, left side (physicalX=0) maps to min value (logicalX=0)
-    const logicalX = isRTL() ? barWidth - physicalX : physicalX;
-
-    if (logicalX < 0 || logicalX > barWidth) {
-      return;
-    }
-
+    // Clamp to the track bounds so a fast drag that overshoots the edge still resolves to the
+    // nearest valid position instead of dropping the update.
+    const logicalX = Math.min(barWidth, Math.max(0, isRTL() ? barWidth - physicalX : physicalX));
     const fromIndex = positionList.findLastIndex((s) => s <= logicalX);
     const toIndex = positionList.findIndex((s) => logicalX <= s);
-    const fromDiff = Math.abs(positionList[fromIndex] - logicalX);
-    const toDiff = Math.abs(positionList[toIndex] - logicalX);
-    const index = fromDiff < toDiff ? fromIndex : toIndex;
+    /** @type {number} */
+    let index;
+
+    if (fromIndex === -1) {
+      index = toIndex;
+    } else if (toIndex === -1) {
+      index = fromIndex;
+    } else {
+      const fromDiff = Math.abs(positionList[fromIndex] - logicalX);
+      const toDiff = Math.abs(positionList[toIndex] - logicalX);
+
+      index = fromDiff < toDiff ? fromIndex : toIndex;
+    }
 
     if (
       sliderPositions[targetValueIndex] === positionList[index] ||
@@ -184,6 +191,7 @@
       return;
     }
 
+    event.preventDefault();
     event.stopPropagation();
 
     const screenDiff = screenX - startScreenX;
@@ -198,7 +206,7 @@
    * @param {PointerEvent} event `pointerup` or `pointercancel` event.
    */
   const onPointerUp = (event) => {
-    const { pointerId } = event;
+    const { pointerId, target } = event;
 
     if (disabled || readonly || !dragging || pointerId !== targetPointerId) {
       return;
@@ -206,8 +214,10 @@
 
     event.stopPropagation();
 
+    const slider = /** @type {HTMLElement} */ (target);
+
     // Handle a click on the bars
-    if (/** @type {HTMLElement} */ (event.target).matches('.base-bar, .slider-bar')) {
+    if (slider.matches('.base-bar, .slider-bar')) {
       const rect = /** @type {HTMLElement} */ (base).getBoundingClientRect();
       // Get physical X position from left edge
       const physicalX = /** @type {any} */ (event).clientX - rect.left;
@@ -216,6 +226,7 @@
     }
 
     // Reset everything
+    slider.releasePointerCapture(pointerId);
     dragging = false;
     startX = 0;
     startScreenX = 0;
@@ -233,16 +244,17 @@
    * @param {number} [valueIndex] Index in the {@link values} array to be used to get/set the value.
    */
   const onPointerDown = (event, valueIndex = 0) => {
-    const { clientX, screenX, pointerId } = event;
-
     if (disabled || readonly) {
       return;
     }
 
+    event.preventDefault();
     event.stopPropagation();
 
     dragging = true;
 
+    const { clientX, screenX, pointerId, target } = event;
+    const slider = /** @type {HTMLElement} */ (target);
     const rect = /** @type {HTMLElement} */ (base).getBoundingClientRect();
 
     // Store physical X position from left edge (same in LTR and RTL)
@@ -250,6 +262,7 @@
     startScreenX = screenX;
     targetPointerId = pointerId;
     targetValueIndex = valueIndex;
+    slider.setPointerCapture(pointerId);
 
     document.addEventListener('pointermove', onPointerMove);
     document.addEventListener('pointerup', onPointerUp);
