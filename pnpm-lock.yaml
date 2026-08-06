@@ -98,8 +98,8 @@ importers:
         specifier: ^63.3.3
         version: 63.3.3(eslint@9.39.5(supports-color@10.2.2))(supports-color@10.2.2)
       eslint-plugin-package-json:
-        specifier: ^1.6.2
-        version: 1.6.2(eslint@9.39.5(supports-color@10.2.2))
+        specifier: ^1.6.3
+        version: 1.6.3(eslint@9.39.5(supports-color@10.2.2))
       eslint-plugin-svelte:
         specifier: ^3.22.0
         version: 3.22.0(eslint@9.39.5(supports-color@10.2.2))(svelte@5.56.8(@typescript-eslint/types@8.66.0))
@@ -2028,8 +2028,8 @@ packages:
       typescript:
         optional: true
 
-  eslint-plugin-package-json@1.6.2:
-    resolution: {integrity: sha512-Zp0CdqXKQqB9luUYa/TOwnGq3VlLotx1UDflZOzEt3D5A5kxu3Lj1VFJ087jKudEhc+K3kF20XV/aKZAlDuslw==}
+  eslint-plugin-package-json@1.6.3:
+    resolution: {integrity: sha512-32ZHJFzEtsWeZfFr/YMQzq7amG/9jewUuNIKmnkl7QoT7gwclxUwurqRMrjWK2S9lh4prZkNbymROQ6aDpb06Q==}
     engines: {node: ^22.22.2 || >=24.15.0}
     peerDependencies:
       '@eslint/json': '>=1.0.0'
@@ -2617,8 +2617,8 @@ packages:
     engines: {node: '>=6'}
     hasBin: true
 
-  jsonc-eslint-parser@3.1.0:
-    resolution: {integrity: sha512-75EA7EWZExL/j+MDKQrRbdzcRI2HOkRlmUw8fZJc1ioqFEOvBsq7Rt+A6yCxOt9w/TYNpkt52gC6nm/g5tFIng==}
+  jsonc-eslint-parser@3.2.0:
+    resolution: {integrity: sha512-fjACeZ2chy9tiBakt5nU5SZhzk385pkSSfmhVvS13o4gqGiHVCNJXTNve8kqMeKv7A0L50mdaNUb7T8s+Egrnw==}
     engines: {node: ^20.19.0 || ^22.13.0 || >=24}
 
   jsx-ast-utils@3.3.5:
@@ -3527,6 +3527,10 @@ packages:
   validate-npm-package-name@7.0.2:
     resolution: {integrity: sha512-hVDIBwsRruT73PbK7uP5ebUt+ezEtCmzZz3F59BSr2F6OVFnJ/6h8liuvdLrQ88Xmnk6/+xGGuq+pG9WwTuy3A==}
     engines: {node: ^20.17.0 || >=22.9.0}
+
+  verkit@0.3.2:
+    resolution: {integrity: sha512-zj/ob3UsvJGN0whEAKFp53REA5X66hvffVqoCtVQAakJKnKlH+/PcOfMoFwIG/o4rElqLv/ycAFlx8ZlXUorCg==}
+    engines: {node: '>=18.12.0'}
 
   vite@8.2.0:
     resolution: {integrity: sha512-pn+CFpM0lwDeKwmOq1ZaBK/9sjorZcgqxki6MbY/jPEVd9vichIlmlD4HmQ5wdP5EgqQCFRaACBxMC7uEGc6lQ==}
@@ -5539,11 +5543,11 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-json-compat-utils@0.2.3(eslint@9.39.5(supports-color@10.2.2))(jsonc-eslint-parser@3.1.0):
+  eslint-json-compat-utils@0.2.3(eslint@9.39.5(supports-color@10.2.2))(jsonc-eslint-parser@3.2.0):
     dependencies:
       eslint: 9.39.5(supports-color@10.2.2)
       esquery: 1.7.0
-      jsonc-eslint-parser: 3.1.0
+      jsonc-eslint-parser: 3.2.0
 
   eslint-module-utils@2.14.0(@typescript-eslint/parser@8.66.0(eslint@9.39.5(supports-color@10.2.2))(supports-color@10.2.2)(typescript@5.5.4))(eslint-import-resolver-node@0.3.10(supports-color@10.2.2))(eslint-import-resolver-typescript@4.4.5)(eslint@9.39.5(supports-color@10.2.2))(supports-color@10.2.2):
     dependencies:
@@ -5664,7 +5668,7 @@ snapshots:
       ts-declaration-location: 1.0.7(typescript@5.5.4)
       typescript: 5.5.4
 
-  eslint-plugin-package-json@1.6.2(eslint@9.39.5(supports-color@10.2.2)):
+  eslint-plugin-package-json@1.6.3(eslint@9.39.5(supports-color@10.2.2)):
     dependencies:
       '@altano/repository-tools': 2.0.5
       '@types/estree': 1.0.9
@@ -5673,8 +5677,8 @@ snapshots:
       detect-newline: 4.0.1
       eslint: 9.39.5(supports-color@10.2.2)
       eslint-fix-utils: 0.4.3(@types/estree@1.0.9)(eslint@9.39.5(supports-color@10.2.2))
-      eslint-json-compat-utils: 0.2.3(eslint@9.39.5(supports-color@10.2.2))(jsonc-eslint-parser@3.1.0)
-      jsonc-eslint-parser: 3.1.0
+      eslint-json-compat-utils: 0.2.3(eslint@9.39.5(supports-color@10.2.2))(jsonc-eslint-parser@3.2.0)
+      jsonc-eslint-parser: 3.2.0
       package-json-validator: 1.6.0
       semver: 7.8.5
       sort-object-keys: 2.1.0
@@ -6285,11 +6289,11 @@ snapshots:
 
   json5@2.2.3: {}
 
-  jsonc-eslint-parser@3.1.0:
+  jsonc-eslint-parser@3.2.0:
     dependencies:
       acorn: 8.18.0
       eslint-visitor-keys: 5.0.1
-      semver: 7.8.5
+      verkit: 0.3.2
 
   jsx-ast-utils@3.3.5:
     dependencies:
@@ -7286,6 +7290,8 @@ snapshots:
       spdx-expression-parse: 3.0.1
 
   validate-npm-package-name@7.0.2: {}
+
+  verkit@0.3.2: {}
 
   vite@8.2.0(@types/node@26.1.2)(sass@1.102.0)(yaml@2.9.0):
     dependencies:
