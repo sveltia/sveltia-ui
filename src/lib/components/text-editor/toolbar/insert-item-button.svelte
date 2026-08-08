@@ -13,7 +13,7 @@
 
   /**
    * @typedef {object} Props
-   * @property {TextEditorComponent} component Image editor component.
+   * @property {TextEditorComponent} component Editor component.
    */
 
   /** @type {Props} */
@@ -25,20 +25,27 @@
 
   /** @type {TextEditorStore} */
   const editorStore = getContext('editorStore');
+
+  const { label, icon, createNode } = $derived(component);
 </script>
 
 <Button
-  iconic
-  aria-label={component.label}
+  iconic={!!icon}
+  label={icon ? undefined : label}
+  title={label}
+  aria-label={label}
   aria-controls="{editorStore.editorId}-lexical-root"
   disabled={!editorStore.useRichText}
   onclick={() => {
     editorStore.editor?.update(() => {
-      insertNodes([component.createNode(), createParagraphNode()]);
+      // Add an additional paragraph for easier editing
+      insertNodes([createNode(), createParagraphNode()]);
     });
   }}
 >
   {#snippet startIcon()}
-    <Icon name={component.icon} />
+    {#if icon}
+      <Icon name={icon} />
+    {/if}
   {/snippet}
 </Button>

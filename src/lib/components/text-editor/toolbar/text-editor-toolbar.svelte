@@ -9,15 +9,10 @@
   import Icon from '../../icon/icon.svelte';
   import MenuButton from '../../menu/menu-button.svelte';
   import Menu from '../../menu/menu.svelte';
-  import {
-    AVAILABLE_BUTTONS,
-    BLOCK_BUTTON_TYPES,
-    IMAGE_COMPONENT_IDS,
-    INLINE_BUTTON_TYPES,
-  } from '../constants.js';
+  import { AVAILABLE_BUTTONS, BLOCK_BUTTON_TYPES, INLINE_BUTTON_TYPES } from '../constants.js';
   import CodeLanguageSwitcher from './code-language-switcher.svelte';
   import FormatTextButton from './format-text-button.svelte';
-  import InsertImageButton from './insert-image-button.svelte';
+  import InsertItemButton from './insert-item-button.svelte';
   import InsertLinkButton from './insert-link-button.svelte';
   import InsertMenuButton from './insert-menu-button.svelte';
   import ToggleBlockMenuItem from './toggle-block-menu-item.svelte';
@@ -48,11 +43,12 @@
 
   /** @type {TextEditorStore} */
   const editorStore = getContext('editorStore');
-  const imageComponent = $derived(
-    editorStore.config.components.find(({ id }) => IMAGE_COMPONENT_IDS.includes(id)),
+
+  const buttons = $derived(
+    editorStore.config.components.filter(({ trigger = 'menuitem' }) => trigger === 'button'),
   );
-  const otherComponents = $derived(
-    editorStore.config.components.filter(({ id }) => !IMAGE_COMPONENT_IDS.includes(id)),
+  const menuitems = $derived(
+    editorStore.config.components.filter(({ trigger = 'menuitem' }) => trigger === 'menuitem'),
   );
 
   /**
@@ -121,11 +117,11 @@
     {/if}
     {#if editorStore.config.components.length}
       <Divider orientation="vertical" />
-      {#if imageComponent}
-        <InsertImageButton component={imageComponent} />
-      {/if}
-      {#if otherComponents.length}
-        <InsertMenuButton components={otherComponents} />
+      {#each buttons as button (button.id)}
+        <InsertItemButton component={button} />
+      {/each}
+      {#if menuitems.length}
+        <InsertMenuButton components={menuitems} />
       {/if}
     {/if}
   {/if}

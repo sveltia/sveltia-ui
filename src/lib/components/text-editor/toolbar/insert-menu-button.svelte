@@ -1,6 +1,9 @@
 <script>
   import { _ } from '@sveltia/i18n';
-  import { $insertNodes as insertNodes } from 'lexical';
+  import {
+    $createParagraphNode as createParagraphNode,
+    $insertNodes as insertNodes,
+  } from 'lexical';
   import { getContext } from 'svelte';
   import Icon from '../../icon/icon.svelte';
   import MenuButton from '../../menu/menu-button.svelte';
@@ -38,7 +41,8 @@
           {label}
           onclick={() => {
             editorStore.editor?.update(() => {
-              insertNodes([createNode()]);
+              // Add an additional paragraph for easier editing
+              insertNodes([createNode(), createParagraphNode()]);
             });
           }}
         >

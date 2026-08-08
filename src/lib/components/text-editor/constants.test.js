@@ -13,7 +13,6 @@ import {
   AVAILABLE_BUTTONS,
   BLOCK_BUTTON_TYPES,
   DISABLED_MARKDOWN_TAGS,
-  IMAGE_COMPONENT_IDS,
   INLINE_BUTTON_TYPES,
   TEXT_FORMAT_BUTTON_TYPES,
   TRANSFORMER_MAP,
@@ -99,13 +98,6 @@ describe('BLOCK_BUTTON_TYPES', () => {
     expect(BLOCK_BUTTON_TYPES).toContain('numbered-list');
     expect(BLOCK_BUTTON_TYPES).toContain('blockquote');
     expect(BLOCK_BUTTON_TYPES).toContain('code-block');
-  });
-});
-
-describe('IMAGE_COMPONENT_IDS', () => {
-  it('should include image and linked-image', () => {
-    expect(IMAGE_COMPONENT_IDS).toContain('image');
-    expect(IMAGE_COMPONENT_IDS).toContain('linked-image');
   });
 });
 

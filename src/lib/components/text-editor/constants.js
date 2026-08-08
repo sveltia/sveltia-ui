@@ -200,11 +200,6 @@ export const BLOCK_BUTTON_TYPES = [
 ];
 
 /**
- * Image related components IDs. `linked-image` is used in Sveltia CMS.
- */
-export const IMAGE_COMPONENT_IDS = ['image', 'linked-image'];
-
-/**
  * Map of Lexical nodes for each block type. The `paragraph` block type is excluded because it is
  * the default block type.
  * @type {Record<Exclude<TextEditorBlockType | 'link', 'paragraph'>, any[]>}

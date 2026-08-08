@@ -297,6 +297,8 @@
  * @property {string} id Component ID.
  * @property {string} label Component label.
  * @property {string} [icon] Material Symbols icon name.
+ * @property {'menuitem' | 'button'} [trigger] Trigger UI of the component. Default: `menuitem`. A
+ * menu item is placed under the Insert menu, while a button is placed directly on the toolbar.
  * @property {LexicalNode} node Lexical node class implementation.
  * @property {(props?: Record<string, any>) => LexicalNode} createNode Function to create a new node
  * instance.
