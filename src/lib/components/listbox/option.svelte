@@ -5,6 +5,8 @@
   @see https://w3c.github.io/aria/#option
 -->
 <script>
+  import { onDestroy } from 'svelte';
+  import { getOptionRegistry } from '../../services/select.svelte.js';
   import Button from '../button/button.svelte';
   import Icon from '../icon/icon.svelte';
 
@@ -47,42 +49,114 @@
     ...restProps
     /* eslint-enable prefer-const */
   } = $props();
+
+  /**
+   * The registry provided by an ancestor `<Combobox>`. This is `undefined` when the option is used
+   * standalone within a `<Listbox>`, in which case it always renders itself.
+   */
+  const registry = getOptionRegistry();
+
+  if (registry) {
+    // Expose the props as accessors, so the combobox always reads the current values
+    const unregister = registry.register({
+      /**
+       * Get the option’s value.
+       * @returns {any} Value.
+       */
+      get value() {
+        return value;
+      },
+      /**
+       * Get the option’s text label.
+       * @returns {string} Label.
+       */
+      get label() {
+        return label;
+      },
+      /**
+       * Get the option’s name.
+       * @returns {string | undefined} Name.
+       */
+      get name() {
+        return restProps.name;
+      },
+      /**
+       * Get the data type of the option’s value.
+       * @returns {string} Type.
+       */
+      get type() {
+        return restProps.valueType ?? typeof value;
+      },
+      /**
+       * Get whether the option is selected.
+       * @returns {boolean} Result.
+       */
+      get selected() {
+        return selected;
+      },
+      /**
+       * Select or deselect the option.
+       * @param {boolean} newValue `true` to select.
+       */
+      set selected(newValue) {
+        selected = newValue;
+      },
+      /**
+       * Get whether the option is disabled.
+       * @returns {boolean} Result.
+       */
+      get disabled() {
+        return disabled;
+      },
+    });
+
+    onDestroy(unregister);
+  }
+
+  /**
+   * Whether to render the option. Within a `<Combobox>`, the options are only rendered while the
+   * dropdown is expanded; the registration above is what keeps the collapsed combobox working.
+   * @type {boolean}
+   */
+  const rendered = $derived(!registry || registry.expanded);
 </script>
 
-<div role="none" class="sui option {className}" class:wrap {hidden}>
-  <Button
-    {...restProps}
-    role="option"
-    tabindex="-1"
-    aria-selected={selected}
-    {label}
-    {value}
-    {hidden}
-    {disabled}
-    data-search-value={searchValue}
-    onChange={(event) => {
-      selected = event.detail.selected;
-      onChange?.(event);
-    }}
-    onToggle={(event) => {
-      hidden = event.detail.hidden;
-      if (hidden) selected = false;
-      onToggle?.(event);
-    }}
-  >
-    {#if selected}
-      {#if checkIcon}
-        {@render checkIcon()}
-      {:else}
-        <Icon class="check" name="check" />
+{#if rendered}
+  <div role="none" class="sui option {className}" class:wrap {hidden}>
+    <Button
+      {...restProps}
+      role="option"
+      tabindex="-1"
+      aria-selected={selected}
+      {label}
+      {value}
+      {hidden}
+      {disabled}
+      data-search-value={searchValue}
+      onChange={(event) => {
+        selected = event.detail.selected;
+        onChange?.(event);
+      }}
+      onToggle={(event) => {
+        hidden = event.detail.hidden;
+        if (hidden) selected = false;
+        onToggle?.(event);
+      }}
+    >
+      {#if selected}
+        {#if checkIcon}
+          {@render checkIcon()}
+        {:else}
+          <Icon class="check" name="check" />
+        {/if}
       {/if}
-    {/if}
-    {#snippet startIcon()}
-      {@render _startIcon?.()}
-    {/snippet}
-    {@render children?.()}
-  </Button>
-</div>
+      {#snippet startIcon()}
+        {@render _startIcon?.()}
+      {/snippet}
+      {@render children?.()}
+    </Button>
+  </div>
+{/if}
 
 <style lang="scss">
   .option {

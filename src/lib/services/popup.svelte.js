@@ -31,8 +31,18 @@ class Popup {
     } else if (this.anchorElement.getAttribute('aria-expanded') === 'true') {
       // Wait for the popup to close before focusing the anchor, otherwise the focus will be lost
       window.requestAnimationFrame(() => {
-        this.anchorElement.focus();
-        this.anchorElement.removeAttribute('aria-controls');
+        const { activeElement } = document;
+
+        // Only take focus back if it’s still inside the popup, or nowhere because the popup took it
+        // down with itself. If it has already moved on — the user tabbed out of the menu, say —
+        // pulling it back would undo what they just did.
+        if (
+          !activeElement ||
+          activeElement === document.body ||
+          this.popupElement?.contains(activeElement)
+        ) {
+          this.anchorElement.focus();
+        }
       });
     }
 
@@ -59,7 +69,18 @@ class Popup {
         return;
       }
 
-      const content = /** @type {HTMLElement} */ (this.popupElement.querySelector('.content'));
+      // Use the tracked content element rather than searching the popup element, which for a nested
+      // popup is the shared parent `<dialog>` and would yield the parent’s content
+      const content = /** @type {HTMLElement | null} */ (
+        this.contentElement ?? this.popupElement?.querySelector('.content') ?? null
+      );
+
+      // The content is not in the DOM tree yet; `checkPosition()` will be called again once the
+      // popup element is attached
+      if (!content) {
+        return;
+      }
+
       const { scrollHeight: contentHeight, scrollWidth: contentWidth } = content;
       const topMargin = intersectionRect.top - 8;
       const bottomMargin = rootBounds.height - intersectionRect.bottom - 8;
@@ -155,22 +176,44 @@ class Popup {
   });
 
   /**
-   * Initialize a new `Popup` instance.
+   * A reference to the `<dialog>` element used for the popup, which also serves as the backdrop.
+   * This is `undefined` while the element is not in the DOM tree, which is the case for a closed
+   * popup that doesn’t keep its content.
+   * @type {HTMLDialogElement | undefined}
+   */
+  popupElement = undefined;
+
+  /**
+   * A reference to the element holding the popup content. Unlike {@link popupElement}, which a
+   * nested popup shares with its parent, this element belongs to this popup alone, so it’s the one
+   * that carries the {@link id} and that the anchor’s `aria-controls` points at.
+   * @type {HTMLElement | undefined}
+   */
+  contentElement = undefined;
+
+  /**
+   * Function that removes the event listeners added to the current {@link popupElement}.
+   * @type {(() => void) | undefined}
+   */
+  #removeEventListeners = undefined;
+
+  /**
+   * Initialize a new `Popup` instance. Note that the `popupElement` is optional, because the
+   * element is typically mounted only while the popup is open. Use {@link attachPopupElement} to
+   * provide it later.
    * @param {HTMLButtonElement} anchorElement `<button>` element that triggers the popup.
-   * @param {HTMLDialogElement} popupElement `<dialog>` element to be used for the popup.
+   * @param {HTMLDialogElement | undefined} popupElement `<dialog>` element to be used for the
+   * popup, if it’s already in the DOM tree.
    * @param {PopupPosition} position Where to show the popup content.
    * @param {HTMLElement} [positionBaseElement] The base element of the `position`. If omitted, this
    * will be the `anchorElement`.
    */
   constructor(anchorElement, popupElement, position, positionBaseElement) {
     this.anchorElement = anchorElement;
-    this.popupElement = popupElement; // = backdrop
     this.position = position;
     this.positionBaseElement = positionBaseElement ?? anchorElement;
     this.id = generateElementId('popup');
 
-    this.anchorElement.setAttribute('aria-controls', this.id);
-    this.popupElement.setAttribute('id', this.id);
     this.anchorElement.setAttribute('aria-expanded', 'false');
 
     on(anchorElement, 'click', () => {
@@ -203,8 +246,45 @@ class Popup {
     });
     this.intersectionObserver.observe(this.anchorElement);
 
+    // Update the popup width when the base element is resized
+    this.resizeObserver = new ResizeObserver(() => {
+      cancelAnimationFrame(this._rafId);
+      this._rafId = requestAnimationFrame(() => this.checkPosition());
+    });
+    this.resizeObserver.observe(this.positionBaseElement);
+
+    if (popupElement) {
+      this.attachPopupElement(popupElement);
+    }
+  }
+
+  /**
+   * Attach the `<dialog>` element used for the popup. This is called every time the element is
+   * mounted, which happens on each open.
+   * @param {HTMLDialogElement} popupElement `<dialog>` element to be used for the popup. A nested
+   * popup shares this with its parent, so it must not be labelled as belonging to this popup.
+   * @param {HTMLElement} [contentElement] Element holding this popup’s content. When omitted, the
+   * `popupElement` is assumed to hold the content on its own.
+   */
+  attachPopupElement(popupElement, contentElement) {
+    if (this.popupElement === popupElement && this.contentElement === contentElement) {
+      return;
+    }
+
+    this.detachPopupElement();
+    this.popupElement = popupElement;
+    this.contentElement = contentElement;
+
+    // Identify the popup by the element that actually holds its content. Labelling the `<dialog>`
+    // would be wrong for a nested popup, which shares its parent’s: it would overwrite the parent’s
+    // own `id` and leave the anchor pointing at the parent instead of the submenu.
+    const identifiedElement = contentElement ?? popupElement;
+
+    identifiedElement.id = this.id;
+    this.anchorElement.setAttribute('aria-controls', this.id);
+
     // Close the popup when the backdrop, a menu item or an option is clicked
-    on(this.popupElement, 'click', (event) => {
+    const removeClickListener = on(popupElement, 'click', (event) => {
       event.stopPropagation();
 
       // eslint-disable-next-line prefer-destructuring
@@ -218,7 +298,7 @@ class Popup {
       }
     });
 
-    on(this.popupElement, 'keydown', (event) => {
+    const removeKeyDownListener = on(popupElement, 'keydown', (event) => {
       const { key, ctrlKey, metaKey, shiftKey, altKey } = event;
       const hasModifier = shiftKey || altKey || ctrlKey || metaKey;
 
@@ -229,12 +309,32 @@ class Popup {
       }
     });
 
-    // Update the popup width when the base element is resized
-    this.resizeObserver = new ResizeObserver(() => {
-      cancelAnimationFrame(this._rafId);
-      this._rafId = requestAnimationFrame(() => this.checkPosition());
-    });
-    this.resizeObserver.observe(this.positionBaseElement);
+    /**
+     * Remove the listeners added above.
+     */
+    this.#removeEventListeners = () => {
+      removeClickListener();
+      removeKeyDownListener();
+    };
+  }
+
+  /**
+   * Detach the `<dialog>` element, typically because it’s being unmounted. The `aria-controls`
+   * attribute on the anchor is left to the {@link open} setter, which removes it once the closing
+   * animation is complete.
+   */
+  detachPopupElement() {
+    this.#removeEventListeners?.();
+    this.#removeEventListeners = undefined;
+
+    // The content is leaving the DOM tree, so the anchor must stop referencing it. Only clear a
+    // reference this popup owns; the consumer may have pointed the anchor somewhere else.
+    if (this.anchorElement.getAttribute('aria-controls') === this.id) {
+      this.anchorElement.removeAttribute('aria-controls');
+    }
+
+    this.popupElement = undefined;
+    this.contentElement = undefined;
   }
 
   /**
@@ -254,9 +354,14 @@ class Popup {
   }
 
   /**
-   * Check the position of the anchor element.
+   * Check the position of the anchor element. This is a no-op while the popup element is not in the
+   * DOM tree; the caller is expected to call this again once the element is attached.
    */
   checkPosition() {
+    if (!this.popupElement) {
+      return;
+    }
+
     this.observer.unobserve(this.positionBaseElement);
     this.observer.observe(this.positionBaseElement);
   }
@@ -265,16 +370,24 @@ class Popup {
    * Hide the popup immediately (when the anchor is being hidden).
    */
   async hideImmediately() {
-    this.popupElement.hidden = true;
+    if (this.popupElement) {
+      this.popupElement.hidden = true;
+    }
+
     this.open = false;
     await sleep(50);
-    this.popupElement.hidden = false;
+
+    // The element may have been unmounted in the meantime
+    if (this.popupElement) {
+      this.popupElement.hidden = false;
+    }
   }
 
   /**
    * Dispose of the popup, disconnecting observers and canceling pending work.
    */
   destroy() {
+    this.detachPopupElement();
     this.intersectionObserver?.disconnect();
     this.resizeObserver?.disconnect();
     this.observer?.disconnect();

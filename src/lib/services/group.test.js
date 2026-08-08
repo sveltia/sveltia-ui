@@ -404,6 +404,70 @@ describe('Group - tablist with aria-controls panels', () => {
   });
 });
 
+describe('Group - non-tablist roles must not touch their aria-controls target', () => {
+  // On a menu item, `aria-controls` points at the submenu the item opens, not at a tabpanel the
+  // menu owns. Hiding it would take out the very popup the item controls — and because a nested
+  // popup shares its parent's `<dialog>`, that used to make the whole parent menu inert.
+  /** @type {HTMLElement} */
+  let target;
+
+  /**
+   * Build a group of the given role whose single member points at `target`.
+   * @param {string} role Role of the parent element.
+   * @param {string} childRole Role of the member.
+   */
+  const build = (role, childRole) => {
+    target = document.createElement('div');
+    target.id = 'controlled-target';
+    document.body.appendChild(target);
+
+    const parent = document.createElement('div');
+
+    parent.setAttribute('role', role);
+
+    const member = document.createElement('div');
+
+    member.setAttribute('role', childRole);
+    member.setAttribute('aria-controls', target.id);
+    member.textContent = 'Member';
+    parent.appendChild(member);
+    document.body.appendChild(parent);
+    activateGroup()(parent);
+  };
+
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    document.body.innerHTML = '';
+    vi.useRealTimers();
+  });
+
+  it.each([
+    ['menu', 'menuitem'],
+    ['menubar', 'menuitem'],
+    ['listbox', 'option'],
+    ['radiogroup', 'radio'],
+  ])('should leave the target alone for role=%s', async (role, childRole) => {
+    build(role, childRole);
+    await vi.advanceTimersByTimeAsync(500);
+
+    expect(target.inert).toBe(false);
+    expect(target.getAttribute('aria-hidden')).toBeNull();
+    expect(target.getAttribute('aria-labelledby')).toBeNull();
+  });
+
+  it('should still hide the target for role=tablist', async () => {
+    build('tablist', 'tab');
+    await vi.advanceTimersByTimeAsync(500);
+
+    // The single tab is auto-selected, so its panel stays visible
+    expect(target.getAttribute('aria-hidden')).toBe('false');
+    expect(target.getAttribute('aria-labelledby')).not.toBeNull();
+  });
+});
+
 describe('Group - disabled and read-only', () => {
   /** @type {HTMLElement} */
   let listbox;
@@ -1397,5 +1461,474 @@ describe('Group - non-special key handling (branch 419)', () => {
 
     listbox.remove();
     vi.useRealTimers();
+  });
+});
+
+describe('Group - roving tab stop', () => {
+  afterEach(() => {
+    document.body.innerHTML = '';
+    vi.useRealTimers();
+  });
+
+  /**
+   * Build a group and return its members.
+   * @param {string} role Role of the parent element.
+   * @param {{ role: string, checked?: boolean }[]} defs Member definitions.
+   * @returns {HTMLElement[]} Members.
+   */
+  const build = (role, defs) => {
+    const parent = document.createElement('div');
+
+    parent.setAttribute('role', role);
+
+    const members = defs.map((def, i) => {
+      const el = document.createElement('div');
+
+      el.setAttribute('role', def.role);
+      el.textContent = `Item ${i + 1}`;
+
+      if (def.checked) {
+        el.setAttribute(role === 'tablist' ? 'aria-selected' : 'aria-checked', 'true');
+      }
+
+      parent.appendChild(el);
+
+      return el;
+    });
+
+    document.body.appendChild(parent);
+    activateGroup()(parent);
+
+    return members;
+  };
+
+  it('should give a menu exactly one tab stop even with several checked items', async () => {
+    vi.useFakeTimers();
+
+    const members = build('menu', [
+      { role: 'menuitem' },
+      { role: 'menuitemcheckbox', checked: true },
+      { role: 'menuitemradio', checked: true },
+    ]);
+
+    await vi.advanceTimersByTimeAsync(200);
+
+    expect(members.filter((el) => el.tabIndex === 0)).toHaveLength(1);
+  });
+
+  it('should put the menu tab stop on the first item, not on a checked one', async () => {
+    vi.useFakeTimers();
+
+    const members = build('menu', [
+      { role: 'menuitem' },
+      { role: 'menuitemcheckbox', checked: true },
+    ]);
+
+    await vi.advanceTimersByTimeAsync(200);
+
+    expect(members[0].tabIndex).toBe(0);
+    expect(members[1].tabIndex).toBe(-1);
+  });
+
+  it('should put the radiogroup tab stop on the checked radio', async () => {
+    vi.useFakeTimers();
+
+    const members = build('radiogroup', [
+      { role: 'radio' },
+      { role: 'radio', checked: true },
+      { role: 'radio' },
+    ]);
+
+    await vi.advanceTimersByTimeAsync(200);
+
+    expect(members.map((el) => el.tabIndex)).toEqual([-1, 0, -1]);
+  });
+
+  it('should fall back to the first member when nothing is checked', async () => {
+    vi.useFakeTimers();
+
+    const members = build('radiogroup', [{ role: 'radio' }, { role: 'radio' }]);
+
+    await vi.advanceTimersByTimeAsync(200);
+
+    expect(members.map((el) => el.tabIndex)).toEqual([0, -1]);
+  });
+});
+
+describe('Group - submenu traversal', () => {
+  /** @type {HTMLElement} */
+  let menuButton;
+  /** @type {HTMLElement} */
+  let parentMenu;
+  /** @type {HTMLElement} */
+  let opener;
+  /** @type {HTMLElement} */
+  let submenuContent;
+  /** @type {HTMLElement} */
+  let submenu;
+  /** @type {HTMLElement[]} */
+  let childItems;
+
+  /**
+   * Create a menu item.
+   * @param {string} label Text label.
+   * @returns {HTMLElement} Element.
+   */
+  const makeItem = (label) => {
+    const el = document.createElement('div');
+
+    el.setAttribute('role', 'menuitem');
+    el.tabIndex = -1;
+    el.textContent = label;
+
+    return el;
+  };
+
+  beforeEach(async () => {
+    vi.useFakeTimers();
+
+    // A submenu lives outside its parent menu in the DOM tree, reachable only through the opener’s
+    // `aria-controls` — exactly how the nested popup arranges things
+    submenu = document.createElement('div');
+    submenu.setAttribute('role', 'menu');
+    childItems = [makeItem('Child 1'), makeItem('Child 2')];
+    submenu.append(...childItems);
+    submenuContent = document.createElement('div');
+    submenuContent.id = 'submenu-content';
+    submenuContent.appendChild(submenu);
+
+    opener = makeItem('Opener');
+    opener.setAttribute('aria-haspopup', 'menu');
+    opener.setAttribute('aria-controls', submenuContent.id);
+    opener.setAttribute('aria-expanded', 'false');
+
+    parentMenu = document.createElement('div');
+    parentMenu.setAttribute('role', 'menu');
+    parentMenu.append(makeItem('Plain'), opener);
+
+    // The parent menu is itself opened by a menu button, which also carries
+    // aria-haspopup/aria-controls and must not be mistaken for a parent menu item
+    const parentContent = document.createElement('div');
+
+    parentContent.id = 'parent-content';
+    parentContent.appendChild(parentMenu);
+    menuButton = document.createElement('button');
+    menuButton.setAttribute('aria-haspopup', 'menu');
+    menuButton.setAttribute('aria-controls', parentContent.id);
+
+    document.body.append(menuButton, parentContent, submenuContent);
+    activateGroup()(parentMenu);
+    activateGroup()(submenu);
+    // Let both groups attach their listeners
+    await vi.advanceTimersByTimeAsync(200);
+    vi.useRealTimers();
+  });
+
+  afterEach(() => {
+    document.body.innerHTML = '';
+    vi.useRealTimers();
+  });
+
+  /**
+   * Dispatch a keydown from the given element.
+   * @param {HTMLElement} from Event target.
+   * @param {string} key Key name.
+   */
+  const press = (from, key) => {
+    from.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true }));
+  };
+
+  it('should click the opener when stepping into a collapsed submenu', () => {
+    const clicked = vi.fn();
+
+    opener.addEventListener('click', clicked);
+    opener.focus();
+    press(opener, 'ArrowRight');
+
+    expect(clicked).toHaveBeenCalledTimes(1);
+  });
+
+  it('should not click the opener again when the submenu is already open', () => {
+    const clicked = vi.fn();
+
+    opener.setAttribute('aria-expanded', 'true');
+    opener.addEventListener('click', clicked);
+    opener.focus();
+    press(opener, 'ArrowRight');
+
+    expect(clicked).not.toHaveBeenCalled();
+  });
+
+  it('should move focus to the first submenu item', async () => {
+    opener.setAttribute('aria-expanded', 'true');
+    opener.focus();
+    press(opener, 'ArrowRight');
+    await vi.waitFor(() => expect(document.activeElement).toBe(childItems[0]));
+  });
+
+  it('should skip a disabled first submenu item', async () => {
+    childItems[0].setAttribute('aria-disabled', 'true');
+    opener.setAttribute('aria-expanded', 'true');
+    opener.focus();
+    press(opener, 'ArrowRight');
+    await vi.waitFor(() => expect(document.activeElement).toBe(childItems[1]));
+  });
+
+  it('should do nothing on the inward arrow for an item without a submenu', () => {
+    const plain = /** @type {HTMLElement} */ (parentMenu.firstElementChild);
+
+    plain.focus();
+    press(plain, 'ArrowRight');
+
+    expect(document.activeElement).toBe(plain);
+  });
+
+  it('should still be able to enter the submenu after leaving it', async () => {
+    // Reopening relies on `aria-controls`, so anything that strips it on close makes the submenu
+    // enterable exactly once
+    opener.setAttribute('aria-expanded', 'true');
+    opener.focus();
+    press(opener, 'ArrowRight');
+    await vi.waitFor(() => expect(document.activeElement).toBe(childItems[0]));
+
+    press(childItems[0], 'ArrowLeft');
+    expect(document.activeElement).toBe(opener);
+    expect(opener.getAttribute('aria-controls')).toBe('submenu-content');
+
+    opener.setAttribute('aria-expanded', 'true');
+    press(opener, 'ArrowRight');
+    await vi.waitFor(() => expect(document.activeElement).toBe(childItems[0]));
+  });
+
+  it('should do nothing, and not query for an empty id, without aria-controls', () => {
+    const getById = vi.spyOn(document, 'getElementById');
+
+    opener.removeAttribute('aria-controls');
+    opener.focus();
+    press(opener, 'ArrowRight');
+
+    expect(getById).not.toHaveBeenCalledWith('');
+    expect(document.activeElement).toBe(opener);
+    getById.mockRestore();
+  });
+
+  it('should close the submenu and refocus the opener on the outward arrow', () => {
+    const clicked = vi.fn();
+
+    opener.setAttribute('aria-expanded', 'true');
+    opener.addEventListener('click', clicked);
+    childItems[0].focus();
+    press(childItems[0], 'ArrowLeft');
+
+    expect(clicked).toHaveBeenCalledTimes(1);
+    expect(document.activeElement).toBe(opener);
+  });
+
+  it('should not step out of a top-level menu, whose opener is a menu button', () => {
+    const clicked = vi.fn();
+
+    menuButton.addEventListener('click', clicked);
+    opener.focus();
+    press(opener, 'ArrowLeft');
+
+    expect(clicked).not.toHaveBeenCalled();
+    expect(document.activeElement).toBe(opener);
+  });
+});
+
+describe('Group - leaving a menu', () => {
+  /** @type {HTMLElement} */
+  let before;
+  /** @type {HTMLElement} */
+  let menuButton;
+  /** @type {HTMLElement} */
+  let after;
+  /** @type {HTMLElement} */
+  let parentMenu;
+  /** @type {HTMLElement} */
+  let opener;
+  /** @type {HTMLElement} */
+  let submenu;
+  /** @type {HTMLElement[]} */
+  let childItems;
+
+  /**
+   * Create a menu item.
+   * @param {string} label Text label.
+   * @returns {HTMLElement} Element.
+   */
+  const makeItem = (label) => {
+    const el = document.createElement('div');
+
+    el.setAttribute('role', 'menuitem');
+    el.tabIndex = -1;
+    el.textContent = label;
+
+    return el;
+  };
+
+  beforeEach(async () => {
+    vi.useFakeTimers();
+
+    submenu = document.createElement('div');
+    submenu.setAttribute('role', 'menu');
+    childItems = [makeItem('Child 1'), makeItem('Child 2')];
+    submenu.append(...childItems);
+
+    const submenuContent = document.createElement('div');
+
+    submenuContent.id = 'submenu-content';
+    submenuContent.appendChild(submenu);
+
+    opener = makeItem('Opener');
+    opener.setAttribute('aria-haspopup', 'menu');
+    opener.setAttribute('aria-controls', submenuContent.id);
+    opener.setAttribute('aria-expanded', 'true');
+
+    parentMenu = document.createElement('div');
+    parentMenu.setAttribute('role', 'menu');
+    parentMenu.append(makeItem('Plain'), opener);
+
+    const parentContent = document.createElement('div');
+
+    parentContent.id = 'parent-content';
+    parentContent.appendChild(parentMenu);
+
+    before = document.createElement('button');
+    before.textContent = 'Before';
+    menuButton = document.createElement('button');
+    menuButton.textContent = 'Menu';
+    menuButton.setAttribute('aria-haspopup', 'menu');
+    menuButton.setAttribute('aria-controls', parentContent.id);
+    menuButton.setAttribute('aria-expanded', 'true');
+    after = document.createElement('button');
+    after.textContent = 'After';
+
+    document.body.append(before, menuButton, parentContent, submenuContent, after);
+
+    // Stand in for the popup: closing an opener takes its menu out of view, the way the real one
+    // unmounts it. Without this the menu items stay tabbable and Tab has somewhere wrong to go.
+    [
+      [opener, submenuContent],
+      [menuButton, parentContent],
+    ].forEach(([openerElement, container]) => {
+      openerElement.addEventListener('click', () => {
+        const willOpen = openerElement.getAttribute('aria-expanded') !== 'true';
+
+        openerElement.setAttribute('aria-expanded', String(willOpen));
+        /** @type {HTMLElement} */ (container).hidden = !willOpen;
+      });
+    });
+
+    // jsdom has no layout, so the tabbable filter needs a stand-in for “is this on screen?”
+    document.body.querySelectorAll('*').forEach((el) => {
+      el.getClientRects = () =>
+        /** @type {any} */ (el.closest('[hidden]') ? [] : [{ width: 10, height: 10 }]);
+    });
+    activateGroup()(parentMenu);
+    activateGroup()(submenu);
+    // Let both groups attach their listeners, then hand back to real timers so the asynchronous
+    // focus hand-off in `leaveMenu()` can run
+    await vi.advanceTimersByTimeAsync(200);
+    vi.useRealTimers();
+  });
+
+  afterEach(() => {
+    document.body.innerHTML = '';
+    vi.useRealTimers();
+  });
+
+  /**
+   * Dispatch a keydown from the given element.
+   * @param {HTMLElement} from Event target.
+   * @param {string} key Key name.
+   * @param {boolean} [shiftKey] Whether Shift is held.
+   */
+  const press = (from, key, shiftKey = false) => {
+    from.dispatchEvent(new KeyboardEvent('keydown', { key, shiftKey, bubbles: true }));
+  };
+
+  it('should close every open menu in the chain on Tab', async () => {
+    const openerClicks = vi.fn();
+    const buttonClicks = vi.fn();
+
+    opener.addEventListener('click', openerClicks);
+    menuButton.addEventListener('click', buttonClicks);
+    childItems[0].focus();
+    press(childItems[0], 'Tab');
+
+    expect(openerClicks).toHaveBeenCalledTimes(1);
+    expect(buttonClicks).toHaveBeenCalledTimes(1);
+  });
+
+  it('should move focus to the tab stop after the outermost opener on Tab', async () => {
+    childItems[0].focus();
+    press(childItems[0], 'Tab');
+    await vi.waitFor(() => expect(document.activeElement).toBe(after));
+  });
+
+  it('should move focus to the tab stop before the outermost opener on Shift+Tab', async () => {
+    childItems[0].focus();
+    press(childItems[0], 'Tab', true);
+    await vi.waitFor(() => expect(document.activeElement).toBe(before));
+  });
+
+  it('should prevent the default so the browser does not also move focus', () => {
+    const event = new KeyboardEvent('keydown', { key: 'Tab', bubbles: true, cancelable: true });
+
+    childItems[0].focus();
+    childItems[0].dispatchEvent(event);
+
+    expect(event.defaultPrevented).toBe(true);
+  });
+
+  it('should leave Ctrl+Tab alone, since it switches browser tabs', () => {
+    const event = new KeyboardEvent('keydown', {
+      key: 'Tab',
+      ctrlKey: true,
+      bubbles: true,
+      cancelable: true,
+    });
+
+    childItems[0].focus();
+    childItems[0].dispatchEvent(event);
+
+    expect(event.defaultPrevented).toBe(false);
+  });
+
+  it('should close only the submenu on Escape, leaving the parent menu open', () => {
+    const openerClicks = vi.fn();
+    const buttonClicks = vi.fn();
+
+    opener.addEventListener('click', openerClicks);
+    menuButton.addEventListener('click', buttonClicks);
+    childItems[0].focus();
+    press(childItems[0], 'Escape');
+
+    expect(openerClicks).toHaveBeenCalledTimes(1);
+    expect(buttonClicks).not.toHaveBeenCalled();
+    expect(document.activeElement).toBe(opener);
+  });
+
+  it('should stop Escape propagating, so the popup does not close the whole stack', () => {
+    const onDialogEscape = vi.fn();
+
+    document.body.addEventListener('keydown', onDialogEscape);
+    childItems[0].focus();
+    press(childItems[0], 'Escape');
+    document.body.removeEventListener('keydown', onDialogEscape);
+
+    expect(onDialogEscape).not.toHaveBeenCalled();
+  });
+
+  it('should let Escape through in a top-level menu, so the popup can close it', () => {
+    const onDialogEscape = vi.fn();
+
+    document.body.addEventListener('keydown', onDialogEscape);
+    opener.focus();
+    press(opener, 'Escape');
+    document.body.removeEventListener('keydown', onDialogEscape);
+
+    expect(onDialogEscape).toHaveBeenCalledTimes(1);
   });
 });

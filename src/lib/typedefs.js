@@ -54,8 +54,9 @@
  * @property {boolean} [lightDismiss] Whether to close the modal when the backdrop (outside of the
  * modal) is clicked.
  * @property {boolean} [escapeDismiss] Whether to close the modal when the Escape key is pressed.
- * @property {boolean} [keepContent] Whether to keep the content in the DOM tree when the modal is
- * not displayed.
+ * @property {boolean} [keepContent] Whether to keep the `<dialog>` element and its content in the
+ * DOM tree while the modal is not displayed. By default, these are mounted only while the modal is
+ * open, and unmounted once the closing transition is complete.
  * @property {HTMLDialogElement} [dialog] A reference to the `<dialog>` element.
  * @property {Snippet} [children] Primary slot content.
  * @property {Snippet} [extraContent] Extra slot content.
@@ -120,6 +121,18 @@
  * @property {Snippet} [items] Items slot content.
  * @property {(event: CustomEvent) => void} [onChange] Custom `Change` event handler.
  * @property {(event: CustomEvent) => void} [onSelect] Custom `Select` event handler.
+ */
+
+/**
+ * A live view of an `<Option>`’s props, registered with the ancestor `<Combobox>` so that it can
+ * resolve labels and the initial value while the options are not rendered.
+ * @typedef {object} OptionEntry
+ * @property {any} value The option’s value.
+ * @property {string} label The option’s text label.
+ * @property {string} [name] The option’s name.
+ * @property {string} type Data type of the `value`.
+ * @property {boolean} selected Whether the option is selected. Writable.
+ * @property {boolean} disabled Whether the option is disabled.
  */
 
 /**

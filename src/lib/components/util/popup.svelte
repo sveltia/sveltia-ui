@@ -55,11 +55,8 @@
   } = $props();
 
   /**
-   * @type {boolean}
-   */
-  let initialized = $state(false);
-  /**
-   * A reference to the `<dialog>` element.
+   * A reference to the `<dialog>` element. This is only available while the popup is open, because
+   * the element is mounted on demand.
    * @type {HTMLDialogElement | undefined}
    */
   let dialogElement = $state();
@@ -78,20 +75,11 @@
   /**
    * @type {{ style: { inset: string | undefined, zIndex: number | undefined, minWidth: string |
    * undefined, maxWidth: string | undefined, height: string | undefined }, open: boolean,
-   * checkPosition: () => void, destroy: () => void } | undefined}
+   * attachPopupElement: (popupElement: HTMLDialogElement, contentElement?: HTMLElement) => void,
+   * detachPopupElement: () => void, checkPosition: () => void, destroy: () => void } | undefined}
    */
   let popupInstance = $state();
   let hoveredTimeout = 0;
-
-  /**
-   * Initialize the popup.
-   */
-  const init = () => {
-    popupInstance = activatePopup(anchor, dialogElement, position, positionBaseElement);
-
-    contentType = anchor?.getAttribute('aria-haspopup') ?? undefined;
-    initialized = true;
-  };
 
   $effect(() => {
     if (popupInstance) {
@@ -106,14 +94,35 @@
     }
   });
 
+  // The instance must be created as soon as the anchor is available, without waiting for the
+  // `<dialog>` element, because it’s the instance that listens to the anchor and opens the popup —
+  // and therefore causes the element to be mounted in the first place
   $effect(() => {
-    if (anchor && dialogElement && !initialized) {
-      init();
+    if (anchor && !popupInstance) {
+      popupInstance = activatePopup(anchor, undefined, position, positionBaseElement);
+      contentType = anchor.getAttribute('aria-haspopup') ?? undefined;
     }
   });
 
+  // Attach the `<dialog>` element to the instance whenever it’s mounted, and detach it when it’s
+  // unmounted, which happens on every close. The content element is passed alongside it, because
+  // a nested popup shares the `<dialog>` with its parent and only the content is its own.
   $effect(() => {
-    if (parentDialogElement && open) {
+    if (popupInstance && dialogElement && content) {
+      popupInstance.attachPopupElement(dialogElement, content);
+
+      return () => {
+        popupInstance?.detachPopupElement();
+      };
+    }
+
+    return undefined;
+  });
+
+  // The position can only be calculated once the content is in the DOM tree, so it has to be
+  // (re)checked here rather than in the instance’s `open` setter, which runs before the mount
+  $effect(() => {
+    if (open && dialogElement) {
       popupInstance?.checkPosition();
     }
   });
@@ -175,7 +184,6 @@
     bind:open
     showBackdrop={showBackdrop ?? touch}
     lightDismiss={true}
-    keepContent={true}
     onOpen={async (event) => {
       onOpen?.(event);
 

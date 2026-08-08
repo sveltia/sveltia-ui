@@ -7,7 +7,8 @@
 -->
 <script>
   import { _ } from '@sveltia/i18n';
-  import { getSelectedItemDetail } from '../../services/select.svelte.js';
+  import { onMount } from 'svelte';
+  import { createOptionRegistry, getSelectedItemDetail } from '../../services/select.svelte.js';
   import Button from '../button/button.svelte';
   import Icon from '../icon/icon.svelte';
   import Listbox from '../listbox/listbox.svelte';
@@ -19,12 +20,6 @@
   /**
    * @import { ComboboxProps, TextInputProps } from '$lib/typedefs';
    */
-
-  /**
-   * Selector for the currently selected option in the popup. Used to update the selected option
-   * when the value is changed externally.
-   */
-  const SELECTED_SELECTOR = '[role="option"][aria-selected="true"]';
 
   /**
    * @type {ComboboxProps & TextInputProps & Record<string, any>}
@@ -58,32 +53,61 @@
   let inputElement = $state();
   /** @type {HTMLElement | undefined} */
   let popupContent = $state();
+  /**
+   * Wrapper holding the options while the dropdown is collapsed.
+   * @type {HTMLElement | undefined}
+   */
+  let idleHost = $state();
+  /**
+   * Wrapper holding the options, moved between {@link idleHost} and {@link listboxSlot}.
+   * @type {HTMLElement | undefined}
+   */
+  let optionHost = $state();
+  /**
+   * Where the options go while the dropdown is expanded.
+   * @type {HTMLElement | undefined}
+   */
+  let listboxSlot = $state();
   /** @type {string} */
   let label = $state('');
   /** @type {boolean} */
   let showFilter = $state(false);
   /** @type {string} */
   let searchTerms = $state('');
-  /** @type {boolean} */
-  let hasMatchingOptions = $state(true);
-  /** @type {HTMLElement} */
+  /**
+   * Number of options matching the current search terms, as last reported by the listbox.
+   * @type {number}
+   */
+  let matchedOptions = $state(0);
+
+  /**
+   * Whether to keep the option list free of the “no matching options” notice. That notice is about
+   * filtering, so it’s only meaningful once search terms have been entered — the listbox also
+   * reports zero matches while the options are unrendered, which says nothing about the filter.
+   * @type {boolean}
+   */
+  const hasMatchingOptions = $derived(!searchTerms || matchedOptions > 0);
+  /**
+   * @type {HTMLElement}
+   */
   const anchor = $derived(/** @type {HTMLElement} */ (comboboxElement ?? inputElement));
+
+  /**
+   * The options declared as `<Option>` children. They only render while the dropdown is expanded,
+   * so the label and the initial value below are resolved through the registry rather than the DOM
+   * tree.
+   */
+  const registry = createOptionRegistry();
 
   /**
    * Update the {@link label} and selected option when the {@link value} is changed.
    */
   const _onChange = () => {
-    const target = /** @type {HTMLButtonElement | null} */ (
-      popupContent?.querySelector(`[role="option"][data-value="${value}"]`)
-    );
+    const entry = registry.find(value);
 
-    if (target) {
-      label = target.dataset.label || target.dataset.value || target.textContent || '';
-
-      if (target.getAttribute('aria-selected') !== 'true') {
-        popupContent?.querySelector(SELECTED_SELECTOR)?.setAttribute('aria-selected', 'false');
-        target.setAttribute('aria-selected', 'true');
-      }
+    if (entry) {
+      label = entry.label;
+      registry.selectOnly(value);
     }
   };
 
@@ -100,16 +124,52 @@
     onChange?.(new CustomEvent('Change', { detail }));
   };
 
+  // Let the options know whether they should render themselves
   $effect(() => {
-    if (popupContent) {
-      globalThis.requestAnimationFrame(() => {
-        const selected = popupContent?.querySelector(SELECTED_SELECTOR);
+    registry.expanded = isPopupOpen;
+  });
 
-        if (selected) {
-          _onSelect(/** @type {HTMLButtonElement} */ (selected));
-        }
-      });
+  // Move the options into the popup while it’s expanded, and back out before it’s unmounted. Only
+  // the wrapper is moved, never its children, so Svelte keeps full ownership of the subtree.
+  $effect(() => {
+    if (!optionHost) {
+      return;
     }
+
+    const parent = isPopupOpen ? listboxSlot : idleHost;
+
+    if (parent && optionHost.parentElement !== parent) {
+      parent.append(optionHost);
+    }
+  });
+
+  // Derive the initial value from the `<Option>` that is marked as selected in the markup. This has
+  // to be a one-off read rather than an effect on `registry.selectedEntry`: where the markup marks
+  // nothing as selected, the first entry to become selected is the one the user picks, and
+  // reporting that here would raise a second `Change` for a single choice. The options register
+  // during their own initialization, so they are all present by the time this runs.
+  onMount(() => {
+    const entry = registry.selectedEntry;
+
+    if (!entry) {
+      return;
+    }
+
+    value = entry.value;
+    label = entry.label;
+
+    // There is no element to report while the dropdown has never been expanded
+    onChange?.(
+      new CustomEvent('Change', {
+        detail: {
+          target: undefined,
+          type: entry.type,
+          name: entry.name,
+          label: entry.label,
+          value: entry.value,
+        },
+      }),
+    );
   });
 
   $effect(() => {
@@ -118,6 +178,11 @@
   });
 </script>
 
+<!--
+  `aria-controls` is deliberately absent from the `role="combobox"` element below: the popup is
+  only in the DOM tree while it’s expanded, and a reference to a missing element is worse than no
+  reference at all. The popup service adds it on open and removes it on close.
+-->
 <div {...restProps} role="none" class="sui combobox {className}" class:editable {hidden}>
   {#if !editable}
     <div
@@ -127,7 +192,6 @@
       {id}
       class:selected={value !== undefined}
       tabindex={disabled ? -1 : 0}
-      aria-controls="{id}-popup"
       aria-expanded={isPopupOpen}
       aria-hidden={hidden}
       aria-disabled={disabled}
@@ -156,7 +220,6 @@
       {readonly}
       {required}
       {invalid}
-      aria-controls="{id}-popup"
       aria-expanded={isPopupOpen}
       aria-haspopup="listbox"
       aria-label={ariaLabel}
@@ -169,7 +232,7 @@
     {disabled}
     tabindex={!editable || readonly || disabled ? -1 : 0}
     aria-label={isPopupOpen ? _('_sui.collapse') : _('_sui.expand')}
-    aria-controls="{id}-popup"
+    aria-controls={isPopupOpen ? `${id}-popup` : undefined}
     aria-expanded={isPopupOpen}
     onclick={(event) => {
       event.preventDefault();
@@ -189,6 +252,32 @@
     {/snippet}
   </Button>
 </div>
+<!--
+  The `<Option>`s have to stay instantiated while the dropdown is collapsed, so that the registry
+  above can resolve the current label. They render no DOM of their own in that state, so this host
+  is empty apart from any other markup the consumer interleaved, such as a `<Divider>`. It’s moved
+  into the popup when the dropdown expands, which keeps a single set of component instances and lets
+  Svelte own the rendering order.
+-->
+<div bind:this={idleHost} role="none" class="idle-host" hidden>
+  <div bind:this={optionHost} role="none" class="option-host">
+    <Listbox
+      id="{id}-listbox"
+      class="in-combobox"
+      {searchTerms}
+      onclick={(event) => {
+        if (/** @type {HTMLElement} */ (event.target).matches('[role="option"]')) {
+          _onSelect(/** @type {HTMLButtonElement} */ (event.target));
+        }
+      }}
+      onFilter={(event) => {
+        matchedOptions = /** @type {CustomEvent} */ (event).detail.matched;
+      }}
+    >
+      {@render children?.()}
+    </Listbox>
+  </div>
+</div>
 <Popup
   bind:content={popupContent}
   id="{id}-popup"
@@ -198,10 +287,7 @@
   touchOptimized={true}
   bind:open={isPopupOpen}
   onOpen={() => {
-    showFilter =
-      filterThreshold === -1
-        ? false
-        : (popupContent?.querySelectorAll('[role="option"]')?.length ?? 0) > filterThreshold;
+    showFilter = filterThreshold === -1 ? false : registry.count > filterThreshold;
     searchTerms = '';
   }}
 >
@@ -222,21 +308,7 @@
         }}
       />
     {/if}
-    <Listbox
-      id="{id}-listbox"
-      class="in-combobox"
-      {searchTerms}
-      onclick={(event) => {
-        if (/** @type {HTMLElement} */ (event.target).matches('[role="option"]')) {
-          _onSelect(/** @type {HTMLButtonElement} */ (event.target));
-        }
-      }}
-      onFilter={(event) => {
-        hasMatchingOptions = !!(/** @type {CustomEvent} */ (event).detail.matched);
-      }}
-    >
-      {@render children?.()}
-    </Listbox>
+    <div bind:this={listboxSlot} role="none" class="listbox-slot"></div>
     {#if !hasMatchingOptions}
       <div role="alert" class="no-options" aria-live="assertive">
         {_('_sui.combobox.no_matching_options')}
@@ -246,6 +318,12 @@
 </Popup>
 
 <style lang="scss">
+  // Transparent wrappers, so the `<Listbox>` stays a direct flex child of `.combobox-inner` once
+  // it’s moved into the popup
+  :is(.option-host, .listbox-slot) {
+    display: contents;
+  }
+
   .combobox {
     margin: var(--sui-focus-ring-width);
     display: flex;

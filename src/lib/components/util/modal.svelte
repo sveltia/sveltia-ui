@@ -3,8 +3,7 @@
   A generic modal top-layer helper based on the HTML `<dialog>` element.
 -->
 <script>
-  import { sleep } from '@sveltia/utils/misc';
-  import { mount, onMount, unmount } from 'svelte';
+  import { getAllContexts, mount, onMount, tick, unmount } from 'svelte';
   import Placeholder from './placeholder.svelte';
 
   /**
@@ -58,7 +57,28 @@
 
   let setOpenClass = $state(false);
   let setActiveClass = $state(false);
-  let showContent = $state(false);
+  /**
+   * Whether the modal is being displayed. This is enabled just before the opening transition
+   * starts, and disabled right after the closing transition is complete.
+   * @type {boolean}
+   */
+  let visible = $state(false);
+
+  /**
+   * Whether the `<dialog>` element is in the DOM tree. Unless {@link keepContent} is enabled, the
+   * element is mounted on demand, and unmounted once the closing transition is complete.
+   * @type {boolean}
+   */
+  const mounted = $derived(keepContent || visible);
+
+  /**
+   * Whether the modal has been requested to open. Unlike the {@link open} prop, this is a plain
+   * variable updated synchronously at the very beginning of `openDialog`/`closeDialog`, so either
+   * of them can bail out early when the requested state is already in effect.
+   * @type {boolean}
+   */
+  let requestedOpen = false;
+
   /**
    * Monotonically increasing counter used to detect stale async operations. Incremented at the
    * start of each `openDialog`/`closeDialog` call; any suspended continuation that finds its
@@ -69,43 +89,77 @@
   let generation = 0;
 
   /**
+   * Get the longest time from a computed CSS time list, such as `transition-duration`.
+   * @param {string} value Comma-separated CSS time values in seconds, e.g. `0.4s, 0.15s`.
+   * @returns {number} Time in milliseconds.
+   */
+  const getLongestTime = (value) =>
+    Math.max(0, ...value.split(',').map((time) => Number.parseFloat(time) || 0)) * 1000;
+
+  /**
    * Resolve once the transition is complete.
    * @returns {Promise<void>} Nothing.
    */
-  const waitForTransition = async () =>
-    new Promise((resolve) => {
-      /**
-       * Transition event listener.
-       * @param {TransitionEvent} event `transition` event.
-       */
-      const listener = (event) => {
-        if (event.target === dialog) {
-          dialog.removeEventListener('transitionend', listener);
-          resolve();
-        }
-      };
+  const waitForTransition = async () => {
+    // Let the CSS class change be applied first, so the duration below is read from the new state
+    await tick();
 
-      dialog?.addEventListener('transitionend', listener);
+    if (!dialog) {
+      return;
+    }
+
+    const { transitionDuration, transitionDelay } = getComputedStyle(dialog);
+    // Fall back to a timer, so the modal is never stuck half-open (and, more importantly, never
+    // left mounted) in case `transitionend` is never fired, e.g. when the transition is removed by
+    // the consumer’s CSS or the element is not rendered at all
+    const timeout = getLongestTime(transitionDuration) + getLongestTime(transitionDelay) + 100;
+    const controller = new AbortController();
+    const { signal } = controller;
+
+    dialog.addEventListener(
+      'transitionend',
+      (event) => {
+        if (event.target === dialog) {
+          controller.abort();
+        }
+      },
+      { signal },
+    );
+
+    const timer = window.setTimeout(() => controller.abort(), timeout);
+
+    await new Promise((resolve) => {
+      signal.addEventListener('abort', () => resolve(undefined));
     });
+
+    window.clearTimeout(timer);
+  };
 
   /**
    * Show the modal.
    */
   const openDialog = async () => {
-    if (!dialog || dialog?.open) {
+    if (requestedOpen) {
       return;
     }
 
+    requestedOpen = true;
     generation += 1;
 
     const gen = generation;
 
     onOpening?.(new CustomEvent('Opening'));
-    showContent = true;
+    visible = true;
+    // Wait for the `<dialog>` element to be added to the DOM tree
+    await tick();
+
+    if (gen !== generation || !dialog || dialog.open) return;
+
     dialog.showModal();
     onOpen?.(new CustomEvent('Open'));
-    await sleep(0);
-    if (gen !== generation) return;
+    // Force a style recalculation, so the browser has a state to transition from. This is required
+    // because the element may have just been added to the DOM tree.
+    dialog.getBoundingClientRect();
     setOpenClass = true;
     await waitForTransition();
     if (gen !== generation) return;
@@ -116,21 +170,26 @@
    * Hide the modal.
    */
   const closeDialog = async () => {
-    if (!dialog || !dialog.open) {
+    if (!requestedOpen) {
       return;
     }
 
+    requestedOpen = false;
     generation += 1;
 
     const gen = generation;
     const wasOpen = setOpenClass;
-    const { returnValue } = dialog;
+    const returnValue = dialog?.returnValue ?? '';
 
     onClosing?.(new CustomEvent('Closing'));
-    // Prevent a button behind the `<dialog>` from being clicked erroneously (Svelte bug)
-    document.body.inert = true;
-    dialog.close();
-    document.body.inert = false;
+
+    if (dialog?.open) {
+      // Prevent a button behind the `<dialog>` from being clicked erroneously (Svelte bug)
+      document.body.inert = true;
+      dialog.close();
+      document.body.inert = false;
+    }
+
     setActiveClass = false;
     setOpenClass = false;
 
@@ -143,7 +202,8 @@
 
     if (gen !== generation) return;
 
-    showContent = false;
+    // Unmount the `<dialog>` element unless `keepContent` is enabled
+    visible = false;
 
     if (returnValue === 'ok') {
       onOk?.(new CustomEvent('Ok'));
@@ -154,22 +214,26 @@
     }
 
     onClose?.(new CustomEvent('Close', { detail: { returnValue } }));
-    dialog.returnValue = '';
+
+    if (dialog) {
+      dialog.returnValue = '';
+    }
   };
 
-  $effect(() => {
-    if (open) {
-      openDialog();
-    } else {
-      closeDialog();
-    }
-  });
+  /**
+   * The context available to this component. The `<dialog>` element is rendered in a separate
+   * component tree created with `mount()`, which would otherwise start with an empty context, so
+   * this is forwarded to keep `getContext()` working for the modal content.
+   * @type {Map<any, any>}
+   */
+  const context = getAllContexts();
 
   onMount(() => {
     const placeholder = mount(Placeholder, {
       target: document.querySelector('.sui.app-shell') ?? document.body,
       // eslint-disable-next-line no-use-before-define
       props: { children: dialogSnippet },
+      context,
     });
 
     // onUnmount
@@ -178,43 +242,53 @@
       unmount(placeholder);
     };
   });
+
+  // This must be declared after `onMount()` above, because effects run in declaration order, and
+  // `openDialog()` expects the placeholder holding the `<dialog>` element to be already mounted
+  $effect(() => {
+    if (open) {
+      openDialog();
+    } else {
+      closeDialog();
+    }
+  });
 </script>
 
 {#snippet dialogSnippet()}
-  <dialog
-    bind:this={dialog}
-    {...restProps}
-    inert={!setOpenClass}
-    {role}
-    class="sui modal {className}"
-    class:backdrop={showBackdrop}
-    class:open={setOpenClass}
-    class:active={setActiveClass}
-    onclick={({ target }) => {
-      if (
-        dialog &&
-        lightDismiss &&
-        /** @type {HTMLElement | undefined} */ (target)?.matches('dialog')
-      ) {
-        dialog.returnValue = 'cancel';
-        open = false;
-      }
-    }}
-    oncancel={(event) => {
-      event.preventDefault();
+  {#if mounted}
+    <dialog
+      bind:this={dialog}
+      {...restProps}
+      inert={!setOpenClass}
+      {role}
+      class="sui modal {className}"
+      class:backdrop={showBackdrop}
+      class:open={setOpenClass}
+      class:active={setActiveClass}
+      onclick={({ target }) => {
+        if (
+          dialog &&
+          lightDismiss &&
+          /** @type {HTMLElement | undefined} */ (target)?.matches('dialog')
+        ) {
+          dialog.returnValue = 'cancel';
+          open = false;
+        }
+      }}
+      oncancel={(event) => {
+        event.preventDefault();
 
-      // Escape key is pressed
-      if (dialog && escapeDismiss) {
-        dialog.returnValue = 'cancel';
-        open = false;
-      }
-    }}
-  >
-    {@render extraContent?.()}
-    {#if showContent || keepContent}
+        // Escape key is pressed
+        if (dialog && escapeDismiss) {
+          dialog.returnValue = 'cancel';
+          open = false;
+        }
+      }}
+    >
+      {@render extraContent?.()}
       {@render children?.()}
-    {/if}
-  </dialog>
+    </dialog>
+  {/if}
 {/snippet}
 
 <style lang="scss">

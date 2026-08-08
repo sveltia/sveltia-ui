@@ -38,6 +38,8 @@ export const normalize = (value) => {
  * childSelectedAttr: 'aria-selected' | 'aria-checked',
  * focusChild: boolean
  * selectFirst: boolean
+ * controlsPanel: boolean
+ * rovingTabStop: 'selected' | 'first'
  * } }}
  */
 const config = {
@@ -47,6 +49,8 @@ const config = {
     childSelectedAttr: 'aria-selected',
     focusChild: true,
     selectFirst: true,
+    controlsPanel: false,
+    rovingTabStop: 'selected',
   },
   listbox: {
     orientation: 'vertical',
@@ -54,6 +58,8 @@ const config = {
     childSelectedAttr: 'aria-selected',
     focusChild: false,
     selectFirst: false,
+    controlsPanel: false,
+    rovingTabStop: 'selected',
   },
   menu: {
     orientation: 'vertical',
@@ -61,6 +67,8 @@ const config = {
     childSelectedAttr: 'aria-checked',
     focusChild: true,
     selectFirst: false,
+    controlsPanel: false,
+    rovingTabStop: 'first',
   },
   menubar: {
     orientation: 'horizontal',
@@ -68,6 +76,8 @@ const config = {
     childSelectedAttr: 'aria-checked',
     focusChild: true,
     selectFirst: false,
+    controlsPanel: false,
+    rovingTabStop: 'first',
   },
   radiogroup: {
     orientation: 'horizontal',
@@ -75,6 +85,8 @@ const config = {
     childSelectedAttr: 'aria-checked',
     focusChild: true,
     selectFirst: false,
+    controlsPanel: false,
+    rovingTabStop: 'selected',
   },
   tablist: {
     orientation: 'horizontal',
@@ -82,7 +94,57 @@ const config = {
     childSelectedAttr: 'aria-selected',
     focusChild: true,
     selectFirst: true,
+    controlsPanel: true,
+    rovingTabStop: 'selected',
   },
+};
+
+/**
+ * Selector for the elements that can hold focus.
+ */
+const FOCUSABLE_SELECTOR = 'a[href], button, input, select, textarea, summary, [tabindex]';
+
+/**
+ * List the document’s tab stops in document order. Positive `tabindex` values, which reorder the
+ * sequence, are not accounted for; they’re discouraged and absent from this library.
+ * @internal
+ * @returns {HTMLElement[]} Elements that can be reached with Tab.
+ */
+const getTabStops = () =>
+  /** @type {HTMLElement[]} */ ([...document.querySelectorAll(FOCUSABLE_SELECTOR)]).filter(
+    (element) =>
+      element.tabIndex >= 0 &&
+      !element.matches(':disabled, [aria-disabled="true"], [hidden], [inert], [inert] *') &&
+      !!element.getClientRects().length,
+  );
+
+/**
+ * Find the element that opens the menu the given element belongs to. A menu lives outside its
+ * opener in the DOM tree, so the link runs the other way: the opener points at the menu’s container
+ * with `aria-controls`.
+ * @internal
+ * @param {HTMLElement} element Element within the menu.
+ * @returns {HTMLElement | null} Menu button or parent menu item, if any.
+ */
+const getMenuOpener = (element) => {
+  /** @type {HTMLElement | null} */
+  let current = element;
+
+  while (current) {
+    if (current.id) {
+      const opener = /** @type {HTMLElement | null} */ (
+        document.querySelector(`[aria-haspopup="menu"][aria-controls="${CSS.escape(current.id)}"]`)
+      );
+
+      if (opener) {
+        return opener;
+      }
+    }
+
+    current = current.parentElement;
+  }
+
+  return null;
 };
 
 /**
@@ -118,8 +180,15 @@ export class Group {
       this.onKeyDown(event);
     };
 
-    const { orientation, childRoles, childSelectedAttr, focusChild, selectFirst } =
-      config[this.role];
+    const {
+      orientation,
+      childRoles,
+      childSelectedAttr,
+      focusChild,
+      selectFirst,
+      controlsPanel,
+      rovingTabStop,
+    } = config[this.role];
 
     this.orientation = this.grid
       ? 'horizontal'
@@ -129,6 +198,23 @@ export class Group {
     this.childSelectedProp = childSelectedAttr.replace('aria-', '');
     this.focusChild = focusChild;
     this.selectFirst = selectFirst;
+    /**
+     * Whether a member’s `aria-controls` target is a panel this group owns, as with a tab and its
+     * tabpanel. Only then may the group hide the target when the member isn’t selected. Elsewhere
+     * `aria-controls` means something quite different — on a menu item it points at the submenu the
+     * item opens, and on a toolbar button at the region it acts on — and hiding those would break
+     * the very widget the member controls.
+     * @type {boolean}
+     */
+    this.controlsPanel = controlsPanel;
+    /**
+     * Which member holds the group’s single tab stop. `selected` suits widgets where one member is
+     * the natural entry point, such as the checked radio or the current tab. `first` suits menus,
+     * where any number of items can be checked at once, so the checked state says nothing about
+     * where the keyboard should land.
+     * @type {'selected' | 'first'}
+     */
+    this.rovingTabStop = rovingTabStop;
 
     this.parent.tabIndex = focusChild ? -1 : 0;
 
@@ -151,12 +237,13 @@ export class Group {
         element.getAttribute(this.childSelectedAttr) === 'true' ||
         (defaultSelected ? element === defaultSelected : this.selectFirst && index === 0);
 
-      const controlTarget = /** @type {HTMLElement | null} */ (
-        document.querySelector(`#${element.getAttribute('aria-controls')}`)
-      );
+      const controlTarget = this.controlsPanel
+        ? /** @type {HTMLElement | null} */ (
+            document.querySelector(`#${element.getAttribute('aria-controls')}`)
+          )
+        : null;
 
       element.id ||= `${this.id}-item-${index + 1}`;
-      element.tabIndex = isSelected ? 0 : -1;
       element.setAttribute(this.childSelectedAttr, String(isSelected));
 
       if (controlTarget) {
@@ -180,9 +267,38 @@ export class Group {
       }
     });
 
+    this.updateTabStop();
     parent.addEventListener('click', this._onClick);
     parent.addEventListener('keydown', this._onKeyDown);
     parent.dispatchEvent(new CustomEvent('Initialized'));
+  }
+
+  /**
+   * Put exactly one member in the tab sequence, as a composite widget should. Giving every checked
+   * member `tabindex="0"` would scatter tab stops through the widget — a menu with two checked
+   * items would take three tab presses to step over.
+   */
+  updateTabStop() {
+    const { allMembers, activeMembers } = this;
+
+    // When the group element itself takes focus, as a listbox does, no member is a tab stop
+    if (!this.focusChild) {
+      allMembers.forEach((element) => {
+        element.tabIndex = -1;
+      });
+
+      return;
+    }
+
+    const tabStop =
+      this.rovingTabStop === 'selected'
+        ? (activeMembers.find((element) => element.matches(`[${this.childSelectedAttr}="true"]`)) ??
+          activeMembers[0])
+        : activeMembers[0];
+
+    allMembers.forEach((element) => {
+      element.tabIndex = element === tabStop ? 0 : -1;
+    });
   }
 
   /**
@@ -209,6 +325,129 @@ export class Group {
     return this.allMembers.filter(
       (element) => !element.matches('[aria-disabled="true"], [aria-hidden="true"]'),
     );
+  }
+
+  /**
+   * The element that opens this menu, either a menu button or a menu item in the menu above.
+   * @type {HTMLElement | null}
+   */
+  get opener() {
+    return getMenuOpener(this.parent);
+  }
+
+  /**
+   * The menu item that opens this menu, when this menu is a submenu. A menu button is deliberately
+   * excluded, because closing a top-level menu is not what “back to the parent item” means.
+   * @type {HTMLElement | null}
+   */
+  get parentMenuItem() {
+    const { opener } = this;
+
+    return opener?.matches('[role^="menuitem"]') ? opener : null;
+  }
+
+  /**
+   * Close this menu along with every menu above it.
+   * @returns {HTMLElement | null} The element that opens the outermost menu, so the caller can
+   * hand focus back to it.
+   */
+  closeMenuChain() {
+    const { opener: innermost } = this;
+    /** @type {HTMLElement | null} */
+    let opener = innermost;
+    /** @type {HTMLElement | null} */
+    let outermost = null;
+
+    // Bounded, so a malformed `aria-controls` cycle can’t hang the page
+    for (let i = 0; i < 10 && opener; i += 1) {
+      outermost = opener;
+
+      if (opener.getAttribute('aria-expanded') === 'true') {
+        opener.click();
+      }
+
+      const menu = /** @type {HTMLElement | null} */ (
+        opener.closest('[role="menu"], [role="menubar"]')
+      );
+
+      opener = menu ? getMenuOpener(menu) : null;
+    }
+
+    return outermost;
+  }
+
+  /**
+   * Leave the menu the way Tab should: close it along with every menu above it, then carry focus on
+   * to whatever follows the outermost opener. The browser can’t be left to do this itself, because
+   * a modal `<dialog>` confines Tab to its own contents.
+   * @param {boolean} backwards Whether to move to the previous tab stop instead, as Shift+Tab.
+   */
+  async leaveMenu(backwards) {
+    const opener = this.closeMenuChain();
+
+    if (!opener) {
+      return;
+    }
+
+    // Somewhere to stand while the menu is torn down, and the fallback if there’s nothing beyond
+    opener.focus();
+    await sleep(50);
+
+    const tabStops = getTabStops();
+    const index = tabStops.indexOf(opener);
+
+    if (index > -1) {
+      tabStops[index + (backwards ? -1 : 1)]?.focus();
+    }
+  }
+
+  /**
+   * Open the submenu of the given menu item if needed, and move focus onto its first item.
+   * @param {HTMLElement} item Menu item with `aria-haspopup="menu"`.
+   */
+  async enterSubmenu(item) {
+    const submenuId = item.getAttribute('aria-controls');
+
+    if (!submenuId) {
+      return;
+    }
+
+    if (item.getAttribute('aria-expanded') !== 'true') {
+      item.click();
+    }
+
+    const submenu = document.getElementById(submenuId);
+
+    // The submenu is revealed and positioned asynchronously, and an element that is still hidden
+    // or invisible cannot take focus, so keep trying for a few frames
+    for (let i = 0; i < 20; i += 1) {
+      const first = /** @type {HTMLElement | undefined} */ (
+        [...(submenu?.querySelectorAll(this.selector) ?? [])].find(
+          (element) => !element.matches('[aria-disabled="true"], [aria-hidden="true"]'),
+        )
+      );
+
+      first?.focus();
+
+      if (first && document.activeElement === first) {
+        return;
+      }
+
+      // eslint-disable-next-line no-await-in-loop
+      await sleep(20);
+    }
+  }
+
+  /**
+   * Close this submenu and move focus back onto the menu item that opens it.
+   * @param {HTMLElement} item Menu item with `aria-haspopup="menu"`.
+   */
+  leaveSubmenu(item) {
+    if (item.getAttribute('aria-expanded') === 'true') {
+      item.click();
+    }
+
+    item.focus();
   }
 
   /**
@@ -280,7 +519,7 @@ export class Group {
       const singleSelect = isMenuItemRadio || !multiSelect;
       const isTarget = element === newTarget;
       const isSelected = element.matches(`[${this.childSelectedAttr}="true"]`);
-      const controlTargetId = element.getAttribute('aria-controls');
+      const controlTargetId = this.controlsPanel ? element.getAttribute('aria-controls') : null;
       const controlTarget = controlTargetId ? document.getElementById(controlTargetId) : null;
 
       if (multiSelect && isTarget && (selectByClick || selectByKeydown)) {
@@ -394,6 +633,16 @@ export class Group {
   onKeyDown(event) {
     const { key, ctrlKey, metaKey, shiftKey, altKey } = event;
     const hasModifier = shiftKey || altKey || ctrlKey || metaKey;
+    const isMenu = this.childRoles.includes('menuitem');
+
+    // Tab leaves the menu entirely rather than stepping through it. Shift is allowed through here,
+    // unlike the keys below, because Shift+Tab leaves the menu just the same.
+    if (key === 'Tab' && isMenu && !ctrlKey && !metaKey && !altKey) {
+      event.preventDefault();
+      this.leaveMenu(shiftKey);
+
+      return;
+    }
 
     if (hasModifier) {
       return;
@@ -432,6 +681,44 @@ export class Group {
       }
 
       return;
+    }
+
+    // Escape in a submenu dismisses just that submenu. Propagation is stopped so the popup, whose
+    // own Escape handler sits on the `<dialog>` this submenu shares with its parent, doesn’t go on
+    // to close the whole stack.
+    if (key === 'Escape' && isMenu) {
+      const { parentMenuItem } = this;
+
+      if (parentMenuItem) {
+        event.preventDefault();
+        event.stopPropagation();
+        this.leaveSubmenu(parentMenuItem);
+
+        return;
+      }
+    }
+
+    // Submenu traversal. In a vertical menu the inline arrows are free, so they step into a submenu
+    // and back out again, as the Menu pattern expects. Mirrored for RTL.
+    if (this.orientation === 'vertical' && isMenu) {
+      const intoSubmenuKey = isRTL() ? 'ArrowLeft' : 'ArrowRight';
+      const outOfSubmenuKey = isRTL() ? 'ArrowRight' : 'ArrowLeft';
+
+      if (key === intoSubmenuKey && currentTarget?.getAttribute('aria-haspopup') === 'menu') {
+        this.enterSubmenu(currentTarget);
+
+        return;
+      }
+
+      if (key === outOfSubmenuKey) {
+        const { parentMenuItem } = this;
+
+        if (parentMenuItem) {
+          this.leaveSubmenu(parentMenuItem);
+
+          return;
+        }
+      }
     }
 
     let index;

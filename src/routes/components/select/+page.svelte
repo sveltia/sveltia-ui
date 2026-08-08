@@ -1,6 +1,11 @@
 <script>
   import { Combobox, Divider, Option, Select, SelectTags } from '$lib';
   import Example from '../../_components/example.svelte';
+
+  let selectValue1 = $state();
+
+  // eslint-disable-next-line svelte/no-inspect
+  $inspect(selectValue1);
 </script>
 
 <h2>Select</h2>
@@ -25,7 +30,7 @@
   <h3>Selected</h3>
   <Example>
     <div role="none">
-      <Select>
+      <Select bind:value={selectValue1}>
         <Option label="Banana" selected />
         <Option label="Mango" />
         <Option label="Apple" />

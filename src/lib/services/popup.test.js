@@ -176,17 +176,25 @@ describe('Popup', () => {
     expect(instance.open).toBe(false);
   });
 
-  it('should remove aria-controls from anchor on the next animation frame after closing', async () => {
+  it('should keep aria-controls after closing while the popup is still in the DOM tree', async () => {
+    // The reference stays valid, and a submenu that shares its parent’s `<dialog>` is never
+    // unmounted — dropping the reference there would leave nothing to reopen it by
     activatePopup(anchor, popup, 'bottom-left');
-    anchor.click(); // open  → aria-expanded='true'
-    anchor.click(); // close → aria-controls should be removed on the next frame
-
-    expect(anchor.getAttribute('aria-controls')).toBe(popup.id);
+    anchor.click(); // open
+    anchor.click(); // close
 
     await new Promise((resolve) => {
       window.requestAnimationFrame(() => resolve(undefined));
     });
 
+    expect(anchor.getAttribute('aria-controls')).toBe(popup.id);
+  });
+
+  it('should drop aria-controls once the popup element is detached', () => {
+    const instance = activatePopup(anchor, popup, 'bottom-left');
+
+    expect(anchor.getAttribute('aria-controls')).toBe(popup.id);
+    instance.detachPopupElement();
     expect(anchor.getAttribute('aria-controls')).toBeNull();
   });
 
@@ -744,5 +752,95 @@ describe('Popup - destroy', () => {
 
     expect(cancelSpy).not.toHaveBeenCalled();
     cancelSpy.mockRestore();
+  });
+});
+
+describe('Popup - identity when a nested popup shares its parent’s dialog', () => {
+  /** @type {HTMLButtonElement} */
+  let parentAnchor;
+  /** @type {HTMLButtonElement} */
+  let childAnchor;
+  /** @type {HTMLDialogElement} */
+  let sharedDialog;
+  /** @type {HTMLElement} */
+  let parentContent;
+  /** @type {HTMLElement} */
+  let childContent;
+
+  beforeEach(() => {
+    parentAnchor = /** @type {HTMLButtonElement} */ (document.createElement('button'));
+    childAnchor = /** @type {HTMLButtonElement} */ (document.createElement('button'));
+    sharedDialog = /** @type {HTMLDialogElement} */ (document.createElement('dialog'));
+    parentContent = document.createElement('div');
+    childContent = document.createElement('div');
+    parentContent.className = 'content';
+    childContent.className = 'content';
+    sharedDialog.append(parentContent, childContent);
+    document.body.append(parentAnchor, childAnchor, sharedDialog);
+  });
+
+  afterEach(() => {
+    document.body.innerHTML = '';
+  });
+
+  it('should put the id on the content element, not the dialog', () => {
+    const instance = activatePopup(parentAnchor, undefined, 'bottom-left');
+
+    instance.attachPopupElement(sharedDialog, parentContent);
+
+    expect(parentContent.id).toBe(instance.id);
+    expect(sharedDialog.id).toBe('');
+  });
+
+  it('should point aria-controls at the content element', () => {
+    const instance = activatePopup(parentAnchor, undefined, 'bottom-left');
+
+    instance.attachPopupElement(sharedDialog, parentContent);
+
+    expect(parentAnchor.getAttribute('aria-controls')).toBe(parentContent.id);
+    expect(
+      document.getElementById(/** @type {string} */ (parentAnchor.getAttribute('aria-controls'))),
+    ).toBe(parentContent);
+  });
+
+  it('should not let a nested popup clobber an id already on the dialog', () => {
+    sharedDialog.id = 'combobox-popup';
+
+    const instance = activatePopup(childAnchor, undefined, 'right-top');
+
+    instance.attachPopupElement(sharedDialog, childContent);
+
+    expect(sharedDialog.id).toBe('combobox-popup');
+  });
+
+  it('should give two popups sharing a dialog distinct, resolvable targets', () => {
+    const parent = activatePopup(parentAnchor, undefined, 'bottom-left');
+    const child = activatePopup(childAnchor, undefined, 'right-top');
+
+    parent.attachPopupElement(sharedDialog, parentContent);
+    child.attachPopupElement(sharedDialog, childContent);
+
+    expect(parentContent.id).not.toBe(childContent.id);
+    expect(parentAnchor.getAttribute('aria-controls')).toBe(parentContent.id);
+    expect(childAnchor.getAttribute('aria-controls')).toBe(childContent.id);
+  });
+
+  it('should fall back to the popup element when no content is given', () => {
+    const instance = activatePopup(parentAnchor, undefined, 'bottom-left');
+
+    instance.attachPopupElement(sharedDialog);
+
+    expect(sharedDialog.id).toBe(instance.id);
+    expect(parentAnchor.getAttribute('aria-controls')).toBe(sharedDialog.id);
+  });
+
+  it('should forget the content element on detach', () => {
+    const instance = activatePopup(parentAnchor, undefined, 'bottom-left');
+
+    instance.attachPopupElement(sharedDialog, parentContent);
+    instance.detachPopupElement();
+
+    expect(instance.contentElement).toBeUndefined();
+    expect(instance.popupElement).toBeUndefined();
   });
 });
