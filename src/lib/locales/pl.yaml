@@ -27,12 +27,12 @@ calendar:
   month: Miesiąc
   previous_month: Poprzedni miesiąc
   next_month: Następny miesiąc
-  # "Today" button label in footer
+  # “Today” button label in footer
   today: Dzisiaj
 
 # Split button component
 split_button:
-  # Wrapper aria-label, e.g. "Save Options" when primary button is "Save"
+  # Wrapper aria-label, e.g. “Save Options” when primary button is “Save”
   x_options: 'Opcje {$name}'
   # Dropdown toggle aria-label
   more_options: Więcej opcji
@@ -68,7 +68,7 @@ secret_input:
 select_tags:
   # Listbox aria-label
   selected_options: Wybrane opcje
-  # Remove button aria-label, e.g. "Remove Option 1"
+  # Remove button aria-label, e.g. “Remove Option 1”
   remove_x: 'Usuń {$name}'
 
 # Text editor component
