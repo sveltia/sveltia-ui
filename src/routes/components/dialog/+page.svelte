@@ -1,5 +1,5 @@
 <script>
-  import { Button, Dialog } from '$lib';
+  import { Button, Dialog, Menu, MenuButton, MenuItem } from '$lib';
   import AlertDialog from '$lib/components/dialog/alert-dialog.svelte';
   import ConfirmationDialog from '$lib/components/dialog/confirmation-dialog.svelte';
   import PromptDialog from '$lib/components/dialog/prompt-dialog.svelte';
@@ -13,6 +13,7 @@
   let openMediumDialog = $state(false);
   let openLargeDialog = $state(false);
   let openExtraLargeDialog = $state(false);
+  let openMenuDialog = $state(false);
   let promptValue = $state('');
 </script>
 
@@ -118,6 +119,31 @@
         }}
       />
       <Dialog bind:open={openExtraLargeDialog} title="Greeting" size="x-large">Hello World!</Dialog>
+    </div>
+  </Example>
+</section>
+
+<section>
+  <h3>Opened from a Menu</h3>
+  <Example>
+    <div role="none">
+      <MenuButton variant="tertiary" label="Open Menu">
+        {#snippet popup()}
+          <Menu>
+            <MenuItem
+              label="Show Dialog"
+              onclick={() => {
+                openMenuDialog = true;
+              }}
+            />
+            <MenuItem label="Item" />
+          </Menu>
+          <!-- The dialog lives within the popup content, which is unmounted as soon as the menu is
+          closed. It must stay alive regardless, because the menu item that opens it inevitably goes
+          away with the menu. -->
+          <Dialog bind:open={openMenuDialog} title="Menu Dialog">Opened from a menu item!</Dialog>
+        {/snippet}
+      </MenuButton>
     </div>
   </Example>
 </section>

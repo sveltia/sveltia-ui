@@ -2,8 +2,25 @@
   @component
   A generic modal top-layer helper based on the HTML `<dialog>` element.
 -->
+<script module>
+  /**
+   * Context key used by a modal to keep the modal it’s rendered within mounted.
+   * @type {symbol}
+   */
+  const RETAINER_KEY = Symbol('sui-modal-retainer');
+</script>
+
 <script>
-  import { getAllContexts, mount, onMount, tick, unmount } from 'svelte';
+  import {
+    getAllContexts,
+    getContext,
+    mount,
+    onMount,
+    setContext,
+    tick,
+    unmount,
+    untrack,
+  } from 'svelte';
   import Placeholder from './placeholder.svelte';
 
   /**
@@ -65,11 +82,50 @@
   let visible = $state(false);
 
   /**
+   * The number of descendant modals that are currently being displayed. A popup’s content is
+   * unmounted as soon as the popup closes, which would also destroy any modal declared alongside
+   * it, such as a dialog opened from a menu item. Because the menu item inevitably goes away with
+   * the menu, the dialog has to outlive it, so the content is held until the dialog is done with.
+   * @type {number}
+   */
+  let retainCount = $state(0);
+
+  /**
+   * The retainer of the modal this modal is rendered within, if any. This has to be read before the
+   * `setContext()` call below, which would otherwise shadow it with this modal’s own retainer.
+   * @type {{ retain: () => void, release: () => void } | undefined}
+   */
+  const parentRetainer = getContext(RETAINER_KEY);
+
+  // This has to be set before `getAllContexts()` below, so the content, which is rendered in a
+  // separate component tree, can reach it. The counter is updated within `untrack()`, because
+  // incrementing it reads it first, which would otherwise make it a dependency of the calling
+  // descendant’s effect and send that effect into an endless retain/release loop.
+  setContext(RETAINER_KEY, {
+    /**
+     * Keep this modal mounted on behalf of a descendant modal.
+     */
+    retain: () => {
+      untrack(() => {
+        retainCount += 1;
+      });
+    },
+    /**
+     * Release a hold previously acquired with `retain`.
+     */
+    release: () => {
+      untrack(() => {
+        retainCount -= 1;
+      });
+    },
+  });
+
+  /**
    * Whether the `<dialog>` element is in the DOM tree. Unless {@link keepContent} is enabled, the
    * element is mounted on demand, and unmounted once the closing transition is complete.
    * @type {boolean}
    */
-  const mounted = $derived(keepContent || visible);
+  const mounted = $derived(keepContent || visible || retainCount > 0);
 
   /**
    * Whether the modal has been requested to open. Unlike the {@link open} prop, this is a plain
@@ -251,6 +307,20 @@
     } else {
       closeDialog();
     }
+  });
+
+  // Hold the enclosing modal, if any, for as long as this one is on screen. `visible` is used
+  // rather than `mounted`, so a `keepContent` modal doesn’t pin its ancestor forever
+  $effect(() => {
+    if (!visible) {
+      return undefined;
+    }
+
+    parentRetainer?.retain();
+
+    return () => {
+      parentRetainer?.release();
+    };
   });
 </script>
 
