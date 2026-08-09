@@ -182,4 +182,34 @@ describe('OptionRegistry', () => {
     expect(apple.selected).toBe(false);
     expect(registry.selectedEntry).toBeUndefined();
   });
+
+  it('should not touch the `selected` property when it already matches (no-op branch)', () => {
+    const registry = new OptionRegistry();
+    const apple = makeEntry('a', 'Apple');
+
+    registry.register(apple);
+
+    let assignmentCount = 0;
+
+    Object.defineProperty(apple, 'selected', {
+      configurable: true,
+      /**
+       * Always report as not selected.
+       * @returns {boolean} `false`.
+       */
+      get: () => false,
+      /**
+       * Track how many times the setter is invoked.
+       */
+      set: () => {
+        assignmentCount += 1;
+      },
+    });
+
+    // apple.selected is already false, and 'missing' also resolves to selected=false, so the
+    // assignment inside the `if (entry.selected !== selected)` guard must be skipped
+    registry.selectOnly('missing');
+
+    expect(assignmentCount).toBe(0);
+  });
 });

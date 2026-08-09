@@ -213,6 +213,40 @@ describe('Popup', () => {
     expect(anchor.getAttribute('aria-controls')).toBe(popup.id);
     expect(anchor.getAttribute('aria-expanded')).toBe('false');
   });
+
+  it('should take focus back to the anchor when closing while focus is still inside the popup', async () => {
+    const instance = activatePopup(anchor, popup, 'bottom-left');
+    const child = document.createElement('button');
+
+    popup.appendChild(child);
+    anchor.click(); // open
+    child.focus();
+    instance.open = false;
+
+    await new Promise((resolve) => {
+      window.requestAnimationFrame(() => resolve(undefined));
+    });
+
+    expect(document.activeElement).toBe(anchor);
+    child.remove();
+  });
+
+  it('should not steal focus back when it has already moved outside the popup on close', async () => {
+    const instance = activatePopup(anchor, popup, 'bottom-left');
+    const outside = document.createElement('button');
+
+    document.body.appendChild(outside);
+    anchor.click(); // open
+    outside.focus();
+    instance.open = false;
+
+    await new Promise((resolve) => {
+      window.requestAnimationFrame(() => resolve(undefined));
+    });
+
+    expect(document.activeElement).toBe(outside);
+    outside.remove();
+  });
 });
 
 describe('Popup - hideImmediately', () => {
@@ -259,6 +293,15 @@ describe('Popup - hideImmediately', () => {
     await vi.advanceTimersByTimeAsync(100);
     await hidePromise;
     expect(popup.hidden).toBe(false);
+  });
+
+  it('should be a no-op on the popup element when none is attached', async () => {
+    const instance = activatePopup(anchor, undefined, 'bottom-left');
+    const hidePromise = instance.hideImmediately();
+
+    expect(instance.open).toBe(false);
+    await vi.advanceTimersByTimeAsync(100);
+    await expect(hidePromise).resolves.toBeUndefined();
   });
 });
 
@@ -574,6 +617,20 @@ describe('Popup - IntersectionObserver position callback (lines 35-132)', () => 
     expect(style.inset).toContain('450px');
   });
 
+  it('should skip the update when no `.content` element exists yet (line 81)', () => {
+    // Simulate the popup element being in the DOM tree before its content is mounted
+    content.remove();
+
+    const instance = activatePopup(anchor, popup, 'bottom-left');
+
+    ioCallbacks[0]([makeEntry()]);
+
+    // No content found → early return, style remains at its default, unset state
+    const { style } = instance;
+
+    expect(style.inset).toBeUndefined();
+  });
+
   it('should not update style when intersection callback fires with identical geometry (branch 25)', () => {
     const instance = activatePopup(anchor, popup, 'bottom-left');
     const entry = makeEntry();
@@ -842,5 +899,44 @@ describe('Popup - identity when a nested popup shares its parent’s dialog', ()
 
     expect(instance.contentElement).toBeUndefined();
     expect(instance.popupElement).toBeUndefined();
+  });
+
+  it('should be a no-op when attaching the same popup and content element again (line 271)', () => {
+    const instance = activatePopup(parentAnchor, undefined, 'bottom-left');
+
+    instance.attachPopupElement(sharedDialog, parentContent);
+
+    const idBefore = parentContent.id;
+
+    // Re-attaching the identical pair must not re-run the setup (which would otherwise remove
+    // and re-add the click/keydown listeners)
+    instance.attachPopupElement(sharedDialog, parentContent);
+
+    expect(parentContent.id).toBe(idBefore);
+  });
+});
+
+describe('Popup - checkPosition without a popup element in the DOM tree', () => {
+  /** @type {HTMLButtonElement} */
+  let anchor;
+
+  beforeEach(() => {
+    anchor = /** @type {HTMLButtonElement} */ (document.createElement('button'));
+    document.body.appendChild(anchor);
+  });
+
+  afterEach(() => {
+    anchor.remove();
+  });
+
+  it('should be a no-op when opening before a popup element is attached (line 362)', () => {
+    const instance = activatePopup(anchor, undefined, 'bottom-left');
+
+    // No popupElement was provided, so the `open` setter's call to checkPosition() must return
+    // immediately instead of observing anything
+    expect(() => {
+      instance.open = true;
+    }).not.toThrow();
+    expect(instance.open).toBe(true);
   });
 });

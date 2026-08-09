@@ -1666,6 +1666,27 @@ describe('Group - submenu traversal', () => {
     await vi.waitFor(() => expect(document.activeElement).toBe(childItems[0]));
   });
 
+  it('should retry focusing the first submenu item when the first attempt does not take (line 437)', async () => {
+    // The submenu is revealed asynchronously, so the first focus attempt can land before the
+    // element is actually focusable; simulate that by having the first call be a no-op.
+    let focusCallCount = 0;
+    const realFocus = childItems[0].focus.bind(childItems[0]);
+
+    childItems[0].focus = () => {
+      focusCallCount += 1;
+
+      if (focusCallCount > 1) {
+        realFocus();
+      }
+    };
+
+    opener.setAttribute('aria-expanded', 'true');
+    opener.focus();
+    press(opener, 'ArrowRight');
+    await vi.waitFor(() => expect(document.activeElement).toBe(childItems[0]));
+    expect(focusCallCount).toBeGreaterThan(1);
+  });
+
   it('should skip a disabled first submenu item', async () => {
     childItems[0].setAttribute('aria-disabled', 'true');
     opener.setAttribute('aria-expanded', 'true');
@@ -1730,6 +1751,64 @@ describe('Group - submenu traversal', () => {
     menuButton.addEventListener('click', clicked);
     opener.focus();
     press(opener, 'ArrowLeft');
+
+    expect(clicked).not.toHaveBeenCalled();
+    expect(document.activeElement).toBe(opener);
+  });
+
+  it('should enter the submenu via ArrowLeft, and leave it via ArrowRight, in RTL', async () => {
+    locale.set('ar');
+    opener.setAttribute('aria-expanded', 'true');
+    opener.focus();
+    press(opener, 'ArrowLeft');
+    await vi.waitFor(() => expect(document.activeElement).toBe(childItems[0]));
+
+    press(childItems[0], 'ArrowRight');
+    expect(document.activeElement).toBe(opener);
+    locale.set('en');
+  });
+});
+
+describe('Group - enterSubmenu/leaveSubmenu edge cases', () => {
+  /** @type {HTMLElement} */
+  let menu;
+  /** @type {HTMLElement} */
+  let opener;
+  /** @type {any} */
+  let group;
+
+  beforeEach(() => {
+    menu = document.createElement('div');
+    menu.setAttribute('role', 'menu');
+    opener = document.createElement('div');
+    opener.setAttribute('role', 'menuitem');
+    opener.setAttribute('aria-haspopup', 'menu');
+    opener.tabIndex = -1;
+    opener.textContent = 'Opener';
+    menu.appendChild(opener);
+    document.body.appendChild(menu);
+    group = new Group(menu);
+  });
+
+  afterEach(() => {
+    menu.remove();
+  });
+
+  it('should give up gracefully when aria-controls references a non-existent element', async () => {
+    opener.setAttribute('aria-controls', 'does-not-exist');
+    opener.setAttribute('aria-expanded', 'true');
+
+    // document.getElementById() resolves to null, so the retry loop searches an empty list on
+    // every iteration; it should exhaust without throwing
+    await expect(group.enterSubmenu(opener)).resolves.toBeUndefined();
+  }, 10000);
+
+  it('should not click an already-collapsed item when leaving its submenu', () => {
+    const clicked = vi.fn();
+
+    opener.addEventListener('click', clicked);
+    opener.setAttribute('aria-expanded', 'false');
+    group.leaveSubmenu(opener);
 
     expect(clicked).not.toHaveBeenCalled();
     expect(document.activeElement).toBe(opener);
@@ -1930,5 +2009,62 @@ describe('Group - leaving a menu', () => {
     document.body.removeEventListener('keydown', onDialogEscape);
 
     expect(onDialogEscape).toHaveBeenCalledTimes(1);
+  });
+
+  it('should skip clicking an opener in the chain that is already collapsed', async () => {
+    // The submenu opener is already collapsed (e.g. closed through some other means), but the
+    // chain still reaches it while walking up to the top-level menu button
+    opener.setAttribute('aria-expanded', 'false');
+
+    const openerClicks = vi.fn();
+    const buttonClicks = vi.fn();
+
+    opener.addEventListener('click', openerClicks);
+    menuButton.addEventListener('click', buttonClicks);
+    childItems[0].focus();
+    press(childItems[0], 'Tab');
+
+    // The already-collapsed opener is not clicked, but the chain still continues up to and closes
+    // the top-level menu button
+    expect(openerClicks).not.toHaveBeenCalled();
+    expect(buttonClicks).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('Group - a standalone menu with no opener anywhere in its ancestry', () => {
+  /** @type {HTMLElement} */
+  let menu;
+  /** @type {HTMLElement} */
+  let item;
+
+  beforeEach(async () => {
+    vi.useFakeTimers();
+
+    menu = document.createElement('div');
+    menu.setAttribute('role', 'menu');
+    // Give the menu itself an id that nothing points at, so getMenuOpener() finds an id to check
+    // (the `if (current.id)` branch), fails to resolve an opener for it (the `if (opener)` false
+    // branch), and keeps walking up the ancestry
+    menu.id = 'orphan-menu';
+    item = document.createElement('div');
+    item.setAttribute('role', 'menuitem');
+    item.tabIndex = -1;
+    item.textContent = 'Item';
+    menu.appendChild(item);
+    document.body.appendChild(menu);
+    activateGroup()(menu);
+    await vi.advanceTimersByTimeAsync(150);
+  });
+
+  afterEach(() => {
+    menu.remove();
+    vi.useRealTimers();
+  });
+
+  it('should do nothing on Tab, since walking up the ancestry finds no opener (getMenuOpener returns null)', () => {
+    item.focus();
+    item.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }));
+    // No opener to close or hand focus to; leaveMenu() returns immediately without throwing
+    expect(document.activeElement).toBe(item);
   });
 });
