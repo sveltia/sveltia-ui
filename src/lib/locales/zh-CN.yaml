@@ -1,0 +1,113 @@
+# Dialog action button labels
+ok: 确定
+cancel: 取消
+close: 关闭
+
+# Button to clear content, e.g. search input or calendar date
+clear: 清除
+
+# Text editor dialog buttons for link/image insertion
+insert: 插入
+update: 更新
+remove: 移除
+
+# Combobox dropdown toggle button aria-labels
+collapse: 折叠
+expand: 展开
+
+# Infobar/toast dismiss button label
+dismiss: 关闭
+
+# Calendar component
+calendar:
+  # View switcher group aria-labels and navigation button aria-labels
+  year: 年
+  previous_decade: 前十年
+  next_decade: 后十年
+  month: 月
+  previous_month: 上个月
+  next_month: 下个月
+  # “Today” button label in footer
+  today: 今天
+
+# Split button component
+split_button:
+  # Wrapper aria-label, e.g. “Save Options” when primary button is “Save”
+  x_options: '{$name} 选项'
+  # Dropdown toggle aria-label
+  more_options: 更多选项
+
+# Combobox component
+combobox:
+  # Placeholder when no option is selected
+  select_an_option: 请选择…
+  # Filter input aria-label
+  filter_options: 筛选选项
+  # Empty state message when filter has no matches
+  no_matching_options: 未找到匹配的选项
+
+# Number input component
+number_input:
+  # Spin button aria-labels for incrementing/decrementing the number value
+  increase: 增加
+  decrease: 减少
+
+# Password input component
+password_input:
+  # Visibility toggle button aria-labels
+  show_password: 显示密码
+  hide_password: 隐藏密码
+
+# Secret input component (API keys, tokens, etc.)
+secret_input:
+  # Visibility toggle button aria-labels
+  show_secret: 显示机密
+  hide_secret: 隐藏机密
+
+# Select tags component (multi-select)
+select_tags:
+  # Listbox aria-label
+  selected_options: 已选选项
+  # Remove button aria-label, e.g. “Remove Option 1”
+  remove_x: '移除 {$name}'
+
+# Text editor component
+text_editor:
+  # Toolbar aria-labels
+  text_editor: 文本编辑器
+  code_editor: 代码编辑器
+  # Block style menu button and menu aria-labels
+  text_style_options: 文本样式选项
+  show_text_style_options: 显示文本样式选项
+  # Block style menu items
+  paragraph: 段落
+  heading_1: 一级标题
+  heading_2: 二级标题
+  heading_3: 三级标题
+  heading_4: 四级标题
+  heading_5: 五级标题
+  heading_6: 六级标题
+  bulleted_list: 无序列表
+  numbered_list: 有序列表
+  blockquote: 引用块
+  code_block: 代码块
+  # Inline style button aria-labels
+  bold: 加粗
+  italic: 斜体
+  strikethrough: 删除线
+  code: 代码
+  link: 链接
+  # Link dialog title
+  insert_link: 插入链接
+  update_link: 更新链接
+  # Link dialog input field labels
+  text: 文字
+  url: URL
+  # Markdown mode toggle button aria-label
+  edit_in_markdown: 以 Markdown 编辑
+  # Error message when rich text conversion fails
+  converter_error: 无法启用富文本模式。请改用纯文本编辑器。
+  # Language selector aria-label
+  language: 语言
+  # Plain text mode option in language selector
+  plain_text: 纯文本
