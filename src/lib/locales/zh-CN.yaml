@@ -40,7 +40,7 @@ split_button:
 # Combobox component
 combobox:
   # Placeholder when no option is selected
-  select_an_option: 请选择…
+  select_an_option: 请选择……
   # Filter input aria-label
   filter_options: 筛选选项
   # Empty state message when filter has no matches
