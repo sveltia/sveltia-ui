@@ -1,0 +1,113 @@
+# Dialog action button labels
+ok: OK
+cancel: Zrušit
+close: Zavřít
+
+# Button to clear content, e.g. search input or calendar date
+clear: Vymazat
+
+# Text editor dialog buttons for link/image insertion
+insert: Vložit
+update: Aktualizovat
+remove: Odebrat
+
+# Combobox dropdown toggle button aria-labels
+collapse: Sbalit
+expand: Rozbalit
+
+# Infobar/toast dismiss button label
+dismiss: Zavřít
+
+# Calendar component
+calendar:
+  # View switcher group aria-labels and navigation button aria-labels
+  year: Rok
+  previous_decade: Předchozí desetiletí
+  next_decade: Další desetiletí
+  month: Měsíc
+  previous_month: Předchozí měsíc
+  next_month: Další měsíc
+  # “Today” button label in footer
+  today: Dnes
+
+# Split button component
+split_button:
+  # Wrapper aria-label, e.g. “Save Options” when primary button is “Save”
+  x_options: 'Možnosti pro {$name}'
+  # Dropdown toggle aria-label
+  more_options: Další možnosti
+
+# Combobox component
+combobox:
+  # Placeholder when no option is selected
+  select_an_option: Vyberte možnost…
+  # Filter input aria-label
+  filter_options: Možnosti filtrování
+  # Empty state message when filter has no matches
+  no_matching_options: Nebyly nalezeny žádné odpovídající možnosti
+
+# Number input component
+number_input:
+  # Spin button aria-labels for incrementing/decrementing the number value
+  increase: Zvýšit
+  decrease: Snížit
+
+# Password input component
+password_input:
+  # Visibility toggle button aria-labels
+  show_password: Zobrazit heslo
+  hide_password: Skrýt heslo
+
+# Secret input component (API keys, tokens, etc.)
+secret_input:
+  # Visibility toggle button aria-labels
+  show_secret: Zobrazit tajný klíč
+  hide_secret: Skrýt tajný klíč
+
+# Select tags component (multi-select)
+select_tags:
+  # Listbox aria-label
+  selected_options: Vybrané možnosti
+  # Remove button aria-label, e.g. “Remove Option 1”
+  remove_x: 'Odebrat {$name}'
+
+# Text editor component
+text_editor:
+  # Toolbar aria-labels
+  text_editor: Textový editor
+  code_editor: Editor kódu
+  # Block style menu button and menu aria-labels
+  text_style_options: Možnosti formátování textu
+  show_text_style_options: Zobrazit možnosti formátování textu
+  # Block style menu items
+  paragraph: Odstavec
+  heading_1: Nadpis 1
+  heading_2: Nadpis 2
+  heading_3: Nadpis 3
+  heading_4: Nadpis 4
+  heading_5: Nadpis 5
+  heading_6: Nadpis 6
+  bulleted_list: Seznam s odrážkami
+  numbered_list: Číslovaný seznam
+  blockquote: Citace
+  code_block: Blok kódu
+  # Inline style button aria-labels
+  bold: Tučné
+  italic: Kurzíva
+  strikethrough: Přeškrtnuté
+  code: Kód
+  link: Odkaz
+  # Link dialog title
+  insert_link: Vložit odkaz
+  update_link: Aktualizovat odkaz
+  # Link dialog input field labels
+  text: Text
+  url: URL
+  # Markdown mode toggle button aria-label
+  edit_in_markdown: Upravit v Markdownu
+  # Error message when rich text conversion fails
+  converter_error: Nelze aktivovat režim formátovaného textu. Použijte prosím místo toho editor prostého textu.
+  # Language selector aria-label
+  language: Jazyk
+  # Plain text mode option in language selector
+  plain_text: Prostý text
