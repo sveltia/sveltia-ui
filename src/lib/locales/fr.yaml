@@ -1,0 +1,113 @@
+# Dialog action button labels
+ok: OK
+cancel: Annuler
+close: Fermer
+
+# Button to clear content, e.g. search input or calendar date
+clear: Effacer
+
+# Text editor dialog buttons for link/image insertion
+insert: Insérer
+update: Mettre à jour
+remove: Supprimer
+
+# Combobox dropdown toggle button aria-labels
+collapse: Réduire
+expand: Développer
+
+# Infobar/toast dismiss button label
+dismiss: Ignorer
+
+# Calendar component
+calendar:
+  # View switcher group aria-labels and navigation button aria-labels
+  year: Année
+  previous_decade: Décennie précédente
+  next_decade: Décennie suivante
+  month: Mois
+  previous_month: Mois précédent
+  next_month: Mois suivant
+  # “Today” button label in footer
+  today: Aujourd’hui
+
+# Split button component
+split_button:
+  # Wrapper aria-label, e.g. “Save Options” when primary button is “Save”
+  x_options: 'Options de {$name}'
+  # Dropdown toggle aria-label
+  more_options: Plus d’options
+
+# Combobox component
+combobox:
+  # Placeholder when no option is selected
+  select_an_option: Sélectionnez une option…
+  # Filter input aria-label
+  filter_options: Filtrer les options
+  # Empty state message when filter has no matches
+  no_matching_options: Aucune option correspondante trouvée
+
+# Number input component
+number_input:
+  # Spin button aria-labels for incrementing/decrementing the number value
+  increase: Augmenter
+  decrease: Diminuer
+
+# Password input component
+password_input:
+  # Visibility toggle button aria-labels
+  show_password: Afficher le mot de passe
+  hide_password: Masquer le mot de passe
+
+# Secret input component (API keys, tokens, etc.)
+secret_input:
+  # Visibility toggle button aria-labels
+  show_secret: Afficher le secret
+  hide_secret: Masquer le secret
+
+# Select tags component (multi-select)
+select_tags:
+  # Listbox aria-label
+  selected_options: Options sélectionnées
+  # Remove button aria-label, e.g. “Remove Option 1”
+  remove_x: 'Retirer {$name}'
+
+# Text editor component
+text_editor:
+  # Toolbar aria-labels
+  text_editor: Éditeur de texte
+  code_editor: Éditeur de code
+  # Block style menu button and menu aria-labels
+  text_style_options: Options de style de texte
+  show_text_style_options: Afficher les options de style de texte
+  # Block style menu items
+  paragraph: Paragraphe
+  heading_1: Titre 1
+  heading_2: Titre 2
+  heading_3: Titre 3
+  heading_4: Titre 4
+  heading_5: Titre 5
+  heading_6: Titre 6
+  bulleted_list: Liste à puces
+  numbered_list: Liste numérotée
+  blockquote: Citation
+  code_block: Bloc de code
+  # Inline style button aria-labels
+  bold: Gras
+  italic: Italique
+  strikethrough: Barré
+  code: Code
+  link: Lien
+  # Link dialog title
+  insert_link: Insérer un lien
+  update_link: Mettre à jour le lien
+  # Link dialog input field labels
+  text: Texte
+  url: URL
+  # Markdown mode toggle button aria-label
+  edit_in_markdown: Modifier en Markdown
+  # Error message when rich text conversion fails
+  converter_error: Impossible d’activer le mode texte enrichi. Utilisez l’éditeur de texte brut.
+  # Language selector aria-label
+  language: Langue
+  # Plain text mode option in language selector
+  plain_text: Texte brut
