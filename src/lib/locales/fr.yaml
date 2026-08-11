@@ -35,7 +35,7 @@ split_button:
   # Wrapper aria-label, e.g. “Save Options” when primary button is “Save”
   x_options: 'Options {$name}'
   # Dropdown toggle aria-label
-  more_options: Plus d'options'
+  more_options: Plus d'options
 
 # Combobox component
 combobox:
@@ -69,7 +69,7 @@ select_tags:
   # Listbox aria-label
   selected_options: Options sélectionnées
   # Remove button aria-label, e.g. “Remove Option 1”
-  remove_x: 'Suporimer {$name}'
+  remove_x: 'Supprimer {$name}'
 
 # Text editor component
 text_editor:
@@ -98,7 +98,7 @@ text_editor:
   code: Code
   link: Lien
   # Link dialog title
-  insert_link: Insererun lien
+  insert_link: Inserer un lien
   update_link: Mettre à jour un lien
   # Link dialog input field labels
   text: Texte
