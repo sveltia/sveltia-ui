@@ -1,0 +1,113 @@
+# Dialog action button labels
+ok: 확인
+cancel: 취소
+close: 닫기
+
+# Button to clear content, e.g. search input or calendar date
+clear: 지우기
+
+# Text editor dialog buttons for link/image insertion
+insert: 삽입
+update: 업데이트
+remove: 제거
+
+# Combobox dropdown toggle button aria-labels
+collapse: 접기
+expand: 펼치기
+
+# Infobar/toast dismiss button label
+dismiss: 닫기
+
+# Calendar component
+calendar:
+  # View switcher group aria-labels and navigation button aria-labels
+  year: 연도
+  previous_decade: 이전 10년
+  next_decade: 다음 10년
+  month: 월
+  previous_month: 이전 달
+  next_month: 다음 달
+  # “Today” button label in footer
+  today: 오늘
+
+# Split button component
+split_button:
+  # Wrapper aria-label, e.g. “Save Options” when primary button is “Save”
+  x_options: '{$name} 옵션'
+  # Dropdown toggle aria-label
+  more_options: 옵션 더 보기
+
+# Combobox component
+combobox:
+  # Placeholder when no option is selected
+  select_an_option: 옵션을 선택하세요…
+  # Filter input aria-label
+  filter_options: 옵션 필터
+  # Empty state message when filter has no matches
+  no_matching_options: 일치하는 옵션이 없습니다
+
+# Number input component
+number_input:
+  # Spin button aria-labels for incrementing/decrementing the number value
+  increase: 증가
+  decrease: 감소
+
+# Password input component
+password_input:
+  # Visibility toggle button aria-labels
+  show_password: 비밀번호 표시
+  hide_password: 비밀번호 숨기기
+
+# Secret input component (API keys, tokens, etc.)
+secret_input:
+  # Visibility toggle button aria-labels
+  show_secret: 시크릿 표시
+  hide_secret: 시크릿 숨기기
+
+# Select tags component (multi-select)
+select_tags:
+  # Listbox aria-label
+  selected_options: 선택된 옵션
+  # Remove button aria-label, e.g. “Remove Option 1”
+  remove_x: '{$name} 제거'
+
+# Text editor component
+text_editor:
+  # Toolbar aria-labels
+  text_editor: 텍스트 에디터
+  code_editor: 코드 에디터
+  # Block style menu button and menu aria-labels
+  text_style_options: 텍스트 스타일 옵션
+  show_text_style_options: 텍스트 스타일 옵션 표시
+  # Block style menu items
+  paragraph: 단락
+  heading_1: 제목 1
+  heading_2: 제목 2
+  heading_3: 제목 3
+  heading_4: 제목 4
+  heading_5: 제목 5
+  heading_6: 제목 6
+  bulleted_list: 글머리 기호 목록
+  numbered_list: 번호 매기기 목록
+  blockquote: 인용 블록
+  code_block: 코드 블록
+  # Inline style button aria-labels
+  bold: 굵게
+  italic: 기울임꼴
+  strikethrough: 취소선
+  code: 코드
+  link: 링크
+  # Link dialog title
+  insert_link: 링크 삽입
+  update_link: 링크 업데이트
+  # Link dialog input field labels
+  text: 텍스트
+  url: URL
+  # Markdown mode toggle button aria-label
+  edit_in_markdown: 마크다운으로 편집
+  # Error message when rich text conversion fails
+  converter_error: 리치 텍스트 모드를 사용할 수 없습니다. 일반 텍스트 에디터를 사용하십시오.
+  # Language selector aria-label
+  language: 언어
+  # Plain text mode option in language selector
+  plain_text: 일반 텍스트
