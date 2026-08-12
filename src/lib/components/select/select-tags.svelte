@@ -59,6 +59,13 @@
 
   /** @type {Map<any, { label: string, value: any, searchValue?: string }>} */
   const optionMap = $derived(new Map(options.map((o) => [o.value, o])));
+  /**
+   * The selected values as a set, so the option list below can test membership in constant time.
+   * Calling `values.includes()` once per option instead makes rendering the list quadratic in the
+   * number of options and selected tags.
+   * @type {Set<any>}
+   */
+  const selectedValues = $derived(new Set(values));
   const prevKey = $derived(isRTL() ? 'ArrowRight' : 'ArrowLeft');
   const nextKey = $derived(isRTL() ? 'ArrowLeft' : 'ArrowRight');
 
@@ -248,7 +255,7 @@
       }}
     >
       {#each options as { label, value, searchValue } (value)}
-        {#if !values.includes(value)}
+        {#if !selectedValues.has(value)}
           <Option {label} {value} {searchValue} />
         {/if}
       {/each}

@@ -127,6 +127,17 @@ describe('Group - tablist', () => {
     expect(tabs[0].tabIndex).toBe(-1);
   });
 
+  it('should not hand focus to a disabled tab', async () => {
+    tabs[1].setAttribute('aria-disabled', 'true');
+    tabs[1].click();
+    await vi.advanceTimersByTimeAsync(16); // flush rAF
+
+    // The disabled tab is not among the active members, so there is nothing to focus
+    expect(document.activeElement).not.toBe(tabs[1]);
+    expect(tabs[1].tabIndex).toBe(-1);
+    expect(tabs[1].getAttribute('aria-selected')).toBe('false');
+  });
+
   it('should navigate backward when pressing ArrowRight in RTL (branch 63 prevKey=ArrowRight)', () => {
     locale.set('ar'); // RTL locale to set _isRTL=true in activate()
     // In RTL prevKey='ArrowRight'; press from tabs[2] → backward to tabs[1]

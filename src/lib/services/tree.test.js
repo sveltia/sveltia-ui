@@ -672,5 +672,147 @@ describe('Tree', () => {
       expect(instance.visibleItems).not.toContain(items.q1);
       instance.destroy();
     });
+
+    it('should leave out a hidden item while keeping its expanded siblings', async () => {
+      await setup();
+      items.notes.hidden = true;
+
+      const instance = new Tree(tree);
+
+      await vi.advanceTimersByTimeAsync(150);
+      expect(instance.allItems).toContain(items.notes);
+      expect(instance.visibleItems).not.toContain(items.notes);
+      expect(instance.visibleItems).toContain(items.reports);
+      // Arrow keys step over it, straight from `Reports` to `Pictures`
+      instance.focusItem(items.reports);
+      keyDown(items.reports, 'ArrowDown');
+      expect(document.activeElement).toBe(items.pictures);
+      instance.destroy();
+    });
+  });
+});
+
+describe('Tree - items inside a wrapper element', () => {
+  /** @type {HTMLElement} */
+  let tree;
+  /** @type {() => void} */
+  let cleanup;
+
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    cleanup?.();
+    tree?.remove();
+    vi.useRealTimers();
+  });
+
+  it('should own the items a plain wrapper element holds', async () => {
+    tree = document.createElement('div');
+    tree.setAttribute('role', 'tree');
+
+    // A consumer is free to wrap the items in a layout element, which carries no ARIA role of its
+    // own and therefore does not take ownership of the items away from the group above it
+    const wrapper = document.createElement('div');
+    const first = createItem('First');
+    const second = createItem('Second', { expanded: true });
+    const child = createItem('Child');
+
+    appendChildItems(second, [child]);
+    wrapper.append(first, second);
+    tree.append(wrapper);
+    document.body.append(tree);
+    cleanup = /** @type {() => void} */ (activateTree()(tree));
+    await vi.advanceTimersByTimeAsync(150);
+
+    // Both wrapped items belong to the root level, and the nested one to its own parent
+    expect(first.getAttribute('aria-posinset')).toBe('1');
+    expect(first.getAttribute('aria-setsize')).toBe('2');
+    expect(second.getAttribute('aria-posinset')).toBe('2');
+    expect(second.getAttribute('aria-setsize')).toBe('2');
+    expect(child.getAttribute('aria-posinset')).toBe('1');
+    expect(child.getAttribute('aria-setsize')).toBe('1');
+
+    // And they are navigable, so the wrapper is invisible to the keyboard too
+    keyDown(first, 'ArrowDown');
+    expect(document.activeElement).toBe(second);
+  });
+
+  it('should treat a group no item owns as a level of its own', async () => {
+    tree = document.createElement('div');
+    tree.setAttribute('role', 'tree');
+
+    // A group is allowed to sit directly below the widget root rather than below an item, in which
+    // case the items it holds belong to it, not to the root
+    const group = document.createElement('div');
+    const loose = createItem('Loose');
+    const groupedA = createItem('Grouped A');
+    const groupedB = createItem('Grouped B');
+
+    group.setAttribute('role', 'group');
+    group.append(groupedA, groupedB);
+    tree.append(loose, group);
+    document.body.append(tree);
+
+    const instance = new Tree(tree);
+
+    /**
+     * Dispose of the instance created above.
+     */
+    cleanup = () => {
+      instance.destroy();
+    };
+
+    await vi.advanceTimersByTimeAsync(150);
+
+    // The root level holds the loose item alone; the grouped ones are numbered within their group
+    expect(loose.getAttribute('aria-posinset')).toBe('1');
+    expect(loose.getAttribute('aria-setsize')).toBe('1');
+    expect(groupedA.getAttribute('aria-posinset')).toBe('1');
+    expect(groupedA.getAttribute('aria-setsize')).toBe('2');
+    expect(groupedB.getAttribute('aria-posinset')).toBe('2');
+    expect(groupedB.getAttribute('aria-setsize')).toBe('2');
+
+    // No item is collapsing them, so they are displayed and reachable all the same
+    expect(instance.visibleItems).toEqual([loose, groupedA, groupedB]);
+    instance.focusItem(loose);
+    keyDown(loose, 'ArrowDown');
+    expect(document.activeElement).toBe(groupedA);
+  });
+});
+
+describe('Tree - no focusable item', () => {
+  /** @type {HTMLElement} */
+  let tree;
+  /** @type {() => void} */
+  let cleanup;
+
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    cleanup?.();
+    tree?.remove();
+    vi.useRealTimers();
+  });
+
+  it('should leave no item in the tab order when every item is disabled', async () => {
+    tree = document.createElement('div');
+    tree.setAttribute('role', 'tree');
+
+    const first = createItem('First', { disabled: true });
+    const second = createItem('Second', { disabled: true });
+
+    // Something has to be cleared out of the tab order for the assertion to mean anything
+    second.tabIndex = 0;
+    tree.append(first, second);
+    document.body.append(tree);
+    cleanup = /** @type {() => void} */ (activateTree()(tree));
+    await vi.advanceTimersByTimeAsync(150);
+
+    expect(first.tabIndex).toBe(-1);
+    expect(second.tabIndex).toBe(-1);
   });
 });

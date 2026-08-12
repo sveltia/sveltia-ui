@@ -105,18 +105,44 @@ const config = {
 const FOCUSABLE_SELECTOR = 'a[href], button, input, select, textarea, summary, [tabindex]';
 
 /**
- * List the document’s tab stops in document order. Positive `tabindex` values, which reorder the
- * sequence, are not accounted for; they’re discouraged and absent from this library.
+ * Move focus to the tab stop next to the given element in document order. Positive `tabindex`
+ * values, which reorder the sequence, are not accounted for; they’re discouraged and absent from
+ * this library.
+ *
+ * The candidates are narrowed by attribute alone before any of them is measured, and the measuring
+ * — `getClientRects()`, which forces the browser to lay the page out — then walks outward from the
+ * element and stops at the first candidate that is actually rendered. Measuring every focusable
+ * element in the document up front is what a menu sitting on a large page cannot afford.
  * @internal
- * @returns {HTMLElement[]} Elements that can be reached with Tab.
+ * @param {HTMLElement} element Element to start from.
+ * @param {boolean} backwards Whether to move to the previous tab stop rather than the next.
  */
-const getTabStops = () =>
-  /** @type {HTMLElement[]} */ ([...document.querySelectorAll(FOCUSABLE_SELECTOR)]).filter(
-    (element) =>
-      element.tabIndex >= 0 &&
-      !element.matches(':disabled, [aria-disabled="true"], [hidden], [inert], [inert] *') &&
-      !!element.getClientRects().length,
+const focusAdjacentTabStop = (element, backwards) => {
+  const candidates = /** @type {HTMLElement[]} */ ([
+    ...document.querySelectorAll(FOCUSABLE_SELECTOR),
+  ]).filter(
+    (candidate) =>
+      candidate === element ||
+      (candidate.tabIndex >= 0 &&
+        !candidate.matches(':disabled, [aria-disabled="true"], [hidden], [inert], [inert] *')),
   );
+
+  const index = candidates.indexOf(element);
+
+  if (index === -1) {
+    return;
+  }
+
+  const step = backwards ? -1 : 1;
+
+  for (let i = index + step; i >= 0 && i < candidates.length; i += step) {
+    if (candidates[i].getClientRects().length) {
+      candidates[i].focus();
+
+      return;
+    }
+  }
+};
 
 /**
  * Find the element that opens the menu the given element belongs to. A menu lives outside its
@@ -152,11 +178,59 @@ const getMenuOpener = (element) => {
  */
 export class Group {
   /**
+   * Memoized member lists, discarded whenever the widget’s subtree changes. See {@link #members}.
+   * @type {{ all: HTMLElement[], active: HTMLElement[] } | undefined}
+   */
+  #memberCache = undefined;
+
+  /**
+   * Normalized search value of each member, kept alongside the raw value it was derived from so it
+   * can be reused until the member’s label actually changes. Filtering runs over every member on
+   * every keystroke, and `normalize()` is not free — it decomposes the string and strips the
+   * diacritics.
+   * @type {WeakMap<HTMLElement, { raw: string, normalized: string }>}
+   */
+  #searchValueCache = new WeakMap();
+
+  /**
+   * Hidden state each member was last told about, so the filter can skip the members whose state
+   * hasn’t moved. The DOM is deliberately not consulted for this: the listener updates a component,
+   * which renders asynchronously, so two keystrokes within a frame would read a stale attribute.
+   * @type {WeakMap<HTMLElement, boolean>}
+   */
+  #hiddenState = new WeakMap();
+
+  /**
+   * Get the normalized value a member is searched by, computing it only when the underlying raw
+   * value has changed since the last call.
+   * @param {HTMLElement} member Member element.
+   * @returns {string} Normalized search value.
+   */
+  #getNormalizedSearchValue(member) {
+    const raw =
+      member.dataset.searchValue ??
+      member.dataset.label ??
+      member.querySelector('.label')?.textContent ??
+      /** @type {string} */ (member.textContent);
+
+    const cached = this.#searchValueCache.get(member);
+
+    if (cached?.raw === raw) {
+      return cached.normalized;
+    }
+
+    const normalized = normalize(raw);
+
+    this.#searchValueCache.set(member, { raw, normalized });
+
+    return normalized;
+  }
+
+  /**
    * Initialize a new `Group` instance.
    * @param {HTMLElement} parent Parent element.
    * @param {object} [options] Options.
    * @param {boolean} [options.clickToSelect] Whether to select an item by clicking on it.
-   * @todo Check for added elements probably with `MutationObserver`.
    */
   constructor(parent, { clickToSelect = true } = {}) {
     parent.dispatchEvent(new CustomEvent('Initializing'));
@@ -217,6 +291,20 @@ export class Group {
     this.rovingTabStop = rovingTabStop;
 
     this.parent.tabIndex = focusChild ? -1 : 0;
+
+    // The members can be added, removed, disabled or hidden at any time, which is what invalidates
+    // the cached lists. Only the attributes that decide membership are watched, so the group’s own
+    // writes — the selected state and the roving `tabindex` — don’t needlessly discard the cache.
+    this.observer = new globalThis.MutationObserver(() => {
+      this.#memberCache = undefined;
+    });
+
+    this.observer.observe(parent, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['aria-disabled', 'aria-hidden'],
+    });
 
     // Wait a bit before the relevant components, including the `aria-controls` target are mounted
     (async () => {
@@ -292,8 +380,9 @@ export class Group {
 
     const tabStop =
       this.rovingTabStop === 'selected'
-        ? (activeMembers.find((element) => element.matches(`[${this.childSelectedAttr}="true"]`)) ??
-          activeMembers[0])
+        ? (activeMembers.find(
+            (element) => element.getAttribute(this.childSelectedAttr) === 'true',
+          ) ?? activeMembers[0])
         : activeMembers[0];
 
     allMembers.forEach((element) => {
@@ -310,11 +399,41 @@ export class Group {
   }
 
   /**
+   * The member lists, recomputed only once the widget’s subtree has actually changed. A single
+   * arrow key reaches these several times over, and a composite widget can hold thousands of
+   * members, so the `querySelectorAll` and the `matches()` per member that back them are far too
+   * expensive to repeat on every read.
+   *
+   * The observer’s pending records are drained here rather than left to its callback, which runs a
+   * microtask later — too late for a read that happens synchronously after a mutation, as when a
+   * key is dispatched right after the members are swapped out.
+   * @type {{ all: HTMLElement[], active: HTMLElement[] }}
+   */
+  get #members() {
+    if (this.observer.takeRecords().length) {
+      this.#memberCache = undefined;
+    }
+
+    if (!this.#memberCache) {
+      const all = /** @type {HTMLElement[]} */ ([...this.parent.querySelectorAll(this.selector)]);
+
+      this.#memberCache = {
+        all,
+        active: all.filter(
+          (element) => !element.matches('[aria-disabled="true"], [aria-hidden="true"]'),
+        ),
+      };
+    }
+
+    return this.#memberCache;
+  }
+
+  /**
    * List of all the members.
    * @type {HTMLElement[]}
    */
   get allMembers() {
-    return /** @type {HTMLElement[]} */ ([...this.parent.querySelectorAll(this.selector)]);
+    return this.#members.all;
   }
 
   /**
@@ -322,9 +441,7 @@ export class Group {
    * @type {HTMLElement[]}
    */
   get activeMembers() {
-    return this.allMembers.filter(
-      (element) => !element.matches('[aria-disabled="true"], [aria-hidden="true"]'),
-    );
+    return this.#members.active;
   }
 
   /**
@@ -392,13 +509,7 @@ export class Group {
     // Somewhere to stand while the menu is torn down, and the fallback if there’s nothing beyond
     opener.focus();
     await sleep(50);
-
-    const tabStops = getTabStops();
-    const index = tabStops.indexOf(opener);
-
-    if (index > -1) {
-      tabStops[index + (backwards ? -1 : 1)]?.focus();
-    }
+    focusAdjacentTabStop(opener, backwards);
   }
 
   /**
@@ -455,8 +566,8 @@ export class Group {
    * @type {HTMLElement | undefined}
    */
   get selected() {
-    return this.activeMembers.find((element) =>
-      element.matches(`[${this.childSelectedAttr}="true"]`),
+    return this.activeMembers.find(
+      (element) => element.getAttribute(this.childSelectedAttr) === 'true',
     );
   }
 
@@ -503,14 +614,28 @@ export class Group {
     const selectByKeydown =
       event.type === 'keydown' && /** @type {KeyboardEvent} */ (event).key === ' ';
 
+    /**
+     * Members that took part in this selection, and whose roving `tabindex` therefore has to be
+     * updated. The ones skipped below belong to another menu group and are left alone.
+     * @type {HTMLElement[]}
+     */
+    const affected = [];
+    /**
+     * Whether the target itself took part, meaning it’s the one to receive focus.
+     * @type {boolean}
+     */
+    let targetAffected = false;
+
     this.activeMembers.forEach((element) => {
-      const isMenuItemCheckbox = element.matches('[role="menuitemcheckbox"]');
-      const isMenuItemRadio = element.matches('[role="menuitemradio"]');
+      // Reading the role once and comparing it is markedly cheaper than putting every member
+      // through the selector engine three times over
+      const role = element.getAttribute('role');
+      const isMenuItemCheckbox = role === 'menuitemcheckbox';
+      const isMenuItemRadio = role === 'menuitemradio';
 
       if (
         (isMenuItemCheckbox || isMenuItemRadio) &&
-        (element.getAttribute('role') !== targetRole ||
-          element.closest(this.parentGroupSelector) !== targetParent)
+        (role !== targetRole || element.closest(this.parentGroupSelector) !== targetParent)
       ) {
         return;
       }
@@ -518,9 +643,12 @@ export class Group {
       const multiSelect = isMenuItemCheckbox || this.multi;
       const singleSelect = isMenuItemRadio || !multiSelect;
       const isTarget = element === newTarget;
-      const isSelected = element.matches(`[${this.childSelectedAttr}="true"]`);
+      const isSelected = element.getAttribute(this.childSelectedAttr) === 'true';
       const controlTargetId = this.controlsPanel ? element.getAttribute('aria-controls') : null;
       const controlTarget = controlTargetId ? document.getElementById(controlTargetId) : null;
+
+      affected.push(element);
+      targetAffected ||= isTarget;
 
       if (multiSelect && isTarget && (selectByClick || selectByKeydown)) {
         element.setAttribute(this.childSelectedAttr, String(!isSelected));
@@ -544,7 +672,7 @@ export class Group {
         );
 
         if (isTarget) {
-          if (event.type === 'keydown' && element.matches('[role="radio"]')) {
+          if (event.type === 'keydown' && role === 'radio') {
             element.click();
           }
 
@@ -552,17 +680,7 @@ export class Group {
         }
       }
 
-      if (this.focusChild) {
-        // Wait a bit before the element is rerendered
-        globalThis.requestAnimationFrame(() => {
-          element.tabIndex = isTarget ? 0 : -1;
-
-          if (isTarget) {
-            element.focus();
-            element.dispatchEvent(new CustomEvent('Focus'));
-          }
-        });
-      } else {
+      if (!this.focusChild) {
         element.classList.toggle('focused', isTarget);
 
         if (isTarget) {
@@ -601,6 +719,21 @@ export class Group {
         }, 300);
       }
     });
+
+    if (this.focusChild) {
+      // Wait a bit before the elements are rerendered. A single frame serves the whole group;
+      // scheduling a callback per member would queue thousands of them on a large widget.
+      globalThis.requestAnimationFrame(() => {
+        affected.forEach((element) => {
+          element.tabIndex = element === newTarget ? 0 : -1;
+        });
+
+        if (targetAffected) {
+          newTarget.focus();
+          newTarget.dispatchEvent(new CustomEvent('Focus'));
+        }
+      });
+    }
 
     this.parent.dispatchEvent(
       new CustomEvent('Change', { detail: getSelectedItemDetail(newTarget) }),
@@ -796,6 +929,7 @@ export class Group {
    * Clean up event listeners.
    */
   destroy() {
+    this.observer.disconnect();
     this.parent.removeEventListener('click', this._onClick);
     this.parent.removeEventListener('keydown', this._onKeyDown);
   }
@@ -811,16 +945,15 @@ export class Group {
 
     const matched = allMembers
       .map((member) => {
-        const searchValue = normalize(
-          member.dataset.searchValue ??
-            member.dataset.label ??
-            member.querySelector('.label')?.textContent ??
-            /** @type {string} */ (member.textContent),
-        );
-
+        const searchValue = this.#getNormalizedSearchValue(member);
         const hidden = !_terms.every((term) => searchValue.includes(term));
 
-        member.dispatchEvent(new CustomEvent('Toggle', { detail: { hidden } }));
+        // Only report an actual change. Every keystroke runs this over every member, and the
+        // listener on the other end drives a component update
+        if (this.#hiddenState.get(member) !== hidden) {
+          this.#hiddenState.set(member, hidden);
+          member.dispatchEvent(new CustomEvent('Toggle', { detail: { hidden } }));
+        }
 
         return hidden;
       })

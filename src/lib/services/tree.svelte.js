@@ -16,10 +16,6 @@ const TYPE_AHEAD_TIMEOUT = 500;
  * CSS selector to retrieve the tree items.
  */
 const ITEM_SELECTOR = '[role="treeitem"]';
-/**
- * CSS selector to retrieve the tree item containers, including the widget root.
- */
-const GROUP_SELECTOR = '[role="group"], [role="tree"]';
 
 /**
  * Implement keyboard and mouse interactions for the `tree` composite widget, following the ARIA
@@ -164,9 +160,48 @@ export class Tree {
    * @type {HTMLElement[]}
    */
   get visibleItems() {
-    return this.allItems.filter(
-      (item) => !item.matches('[hidden], [aria-hidden="true"]') && !this.hasCollapsedAncestor(item),
-    );
+    /** @type {HTMLElement[]} */
+    const items = [];
+
+    /**
+     * Collect the items below the given node in document order, descending only into the parents
+     * that are actually expanded. Pruning the collapsed subtrees outright is what keeps this
+     * proportional to the number of displayed items; testing each item in the tree for a collapsed
+     * ancestor instead costs a walk back up per item.
+     * @param {Element} node Node whose children to scan.
+     */
+    const collect = (node) => {
+      [...node.children].forEach((child) => {
+        if (child.getAttribute('role') !== 'treeitem') {
+          // Anything else is a wrapper to see through — including a group that no item owns, whose
+          // items sit at the level of the group itself
+          collect(child);
+
+          return;
+        }
+
+        const item = /** @type {HTMLElement} */ (child);
+
+        if (!item.matches('[hidden], [aria-hidden="true"]')) {
+          items.push(item);
+        }
+
+        // A collapsed parent hides everything below it, so there is nothing to descend into
+        if (this.isParent(item) && !this.isExpanded(item)) {
+          return;
+        }
+
+        const group = this.getGroup(item);
+
+        if (group) {
+          collect(group);
+        }
+      });
+    };
+
+    collect(this.parent);
+
+    return items;
   }
 
   /**
@@ -182,7 +217,9 @@ export class Tree {
    * @type {HTMLElement[]}
    */
   get selectedItems() {
-    return this.allItems.filter((item) => item.matches('[aria-selected="true"]'));
+    return /** @type {HTMLElement[]} */ ([
+      ...this.parent.querySelectorAll(`${ITEM_SELECTOR}[aria-selected="true"]`),
+    ]);
   }
 
   /**
@@ -221,9 +258,31 @@ export class Tree {
    * @returns {HTMLElement[]} Child items.
    */
   getItemsInGroup(group) {
-    return /** @type {HTMLElement[]} */ ([...group.querySelectorAll(ITEM_SELECTOR)]).filter(
-      (item) => item.parentElement?.closest(GROUP_SELECTOR) === group,
-    );
+    /** @type {HTMLElement[]} */
+    const items = [];
+
+    /**
+     * Scan the children of the given node, descending through plain wrapper elements but never into
+     * an item or a nested group — whatever lies below those belongs to the item that owns them.
+     * Querying the whole subtree and then discarding the deeper items with a `closest()` call each
+     * costs `update()`, which runs this once per group, quadratic time overall.
+     * @param {Element} node Node whose children to scan.
+     */
+    const walk = (node) => {
+      [...node.children].forEach((child) => {
+        const role = child.getAttribute('role');
+
+        if (role === 'treeitem') {
+          items.push(/** @type {HTMLElement} */ (child));
+        } else if (role !== 'group' && role !== 'tree') {
+          walk(child);
+        }
+      });
+    };
+
+    walk(group);
+
+    return items;
   }
 
   /**
@@ -253,25 +312,6 @@ export class Tree {
    */
   isExpanded(item) {
     return item.getAttribute('aria-expanded') === 'true';
-  }
-
-  /**
-   * Whether any of the ancestors of the given item is collapsed, meaning the item is not displayed.
-   * @param {HTMLElement} item Item.
-   * @returns {boolean} Result.
-   */
-  hasCollapsedAncestor(item) {
-    let ancestor = this.getParentItem(item);
-
-    while (ancestor) {
-      if (!this.isExpanded(ancestor)) {
-        return true;
-      }
-
-      ancestor = this.getParentItem(ancestor);
-    }
-
-    return false;
   }
 
   /**
@@ -316,12 +356,10 @@ export class Tree {
     const current =
       activeItems.find((item) => item === document.activeElement) ??
       activeItems.find((item) => item.tabIndex === 0) ??
-      activeItems.find((item) => item.matches('[aria-selected="true"]')) ??
+      activeItems.find((item) => item.getAttribute('aria-selected') === 'true') ??
       activeItems[0];
 
-    allItems.forEach((item) => {
-      item.tabIndex = item === current ? 0 : -1;
-    });
+    this.setTabStop(current);
   }
 
   /**
@@ -337,6 +375,27 @@ export class Tree {
   }
 
   /**
+   * Put exactly one item in the tab order. Only the items actually in it are touched: writing a
+   * `tabindex` to every item costs a pass over the whole widget on each arrow key, and all but one
+   * of those writes set the value the item already had.
+   * @param {HTMLElement} [item] Item to become the tab stop. When omitted, no item is left in the
+   * tab order, which is the case for a tree with nothing to focus.
+   */
+  setTabStop(item) {
+    this.parent
+      .querySelectorAll(`${ITEM_SELECTOR}[tabindex]:not([tabindex="-1"])`)
+      .forEach((element) => {
+        if (element !== item) {
+          /** @type {HTMLElement} */ (element).tabIndex = -1;
+        }
+      });
+
+    if (item) {
+      item.tabIndex = 0;
+    }
+  }
+
+  /**
    * Move focus to the given item.
    * @param {HTMLElement} item Item to be focused.
    * @param {object} [options] Options.
@@ -344,10 +403,7 @@ export class Tree {
    * `selectionFollowsFocus` option.
    */
   focusItem(item, { select = this.selectionFollowsFocus } = {}) {
-    this.allItems.forEach((element) => {
-      element.tabIndex = element === item ? 0 : -1;
-    });
-
+    this.setTabStop(item);
     item.focus();
     item.dispatchEvent(new CustomEvent('Focus'));
     this.scrollIntoView(item);
@@ -363,7 +419,7 @@ export class Tree {
    * @param {boolean} selected Whether to select the item.
    */
   setSelected(item, selected) {
-    if (item.matches('[aria-selected="true"]') === selected) {
+    if ((item.getAttribute('aria-selected') === 'true') === selected) {
       return;
     }
 
@@ -402,13 +458,18 @@ export class Tree {
         );
       });
     } else if (multi && additive) {
-      this.setSelected(item, !item.matches('[aria-selected="true"]'));
+      this.setSelected(item, item.getAttribute('aria-selected') !== 'true');
       this.anchor = item;
     } else {
-      this.allItems.forEach((element) => {
-        this.setSelected(element, element === item);
+      // Only the items that are actually selected need clearing; running every item in the tree
+      // through `setSelected()` would leave all but one of them untouched anyway
+      this.selectedItems.forEach((element) => {
+        if (element !== item) {
+          this.setSelected(element, false);
+        }
       });
 
+      this.setSelected(item, true);
       this.anchor = item;
     }
 
@@ -517,9 +578,7 @@ export class Tree {
       return;
     }
 
-    this.allItems.forEach((element) => {
-      element.tabIndex = element === item ? 0 : -1;
-    });
+    this.setTabStop(item);
   }
 
   /**

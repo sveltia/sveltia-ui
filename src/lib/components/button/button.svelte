@@ -49,6 +49,11 @@
   } = $props();
 </script>
 
+<!--
+  The key shortcut handler is attached only when there are shortcuts to bind. A falsy value counts
+  as no attachment at all, which saves an effect per button — and both `<Option>` and `<MenuItem>`
+  wrap one, so a long list would otherwise pay for an effect per item that has nothing to do.
+-->
 <button
   bind:this={element}
   {...restProps}
@@ -70,7 +75,7 @@
   data-name={name}
   data-label={label}
   data-value={value}
-  {@attach activateKeyShortcuts(keyShortcuts)}
+  {@attach keyShortcuts && activateKeyShortcuts(keyShortcuts)}
 >
   {@render startIcon?.()}
   {#if variant === 'link'}

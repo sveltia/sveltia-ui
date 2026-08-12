@@ -91,10 +91,19 @@
   let keyResizing = $state(false);
 
   /**
-   * Get the pane group container element's size in pixels for px→% conversion.
+   * The pane group container's size in pixels, used for px→% conversion. Measured once when a drag
+   * begins rather than on every pointer move: reading `clientWidth` forces the browser to lay the
+   * page out, which is the last thing wanted in the middle of a drag, and the container cannot
+   * change size while the pointer holding it is down.
+   * @type {number}
+   */
+  let containerSize = 0;
+
+  /**
+   * Measure the pane group container element's size in pixels.
    * @returns {number} Container size in pixels.
    */
-  const getContainerSize = () => {
+  const measureContainerSize = () => {
     const container = element?.closest('.resizable-pane-group');
 
     if (!container) return 0;
@@ -116,7 +125,6 @@
 
     const screenPos = isHorizontal ? screenX : screenY;
     const pixelDelta = screenPos - startScreenPos;
-    const containerSize = getContainerSize();
 
     if (!containerSize) return;
 
@@ -167,6 +175,7 @@
     dragging = true;
     startScreenPos = isHorizontal ? screenX : screenY;
     targetPointerId = pointerId;
+    containerSize = measureContainerSize();
     element?.setPointerCapture(pointerId);
 
     onResizeStart?.();
