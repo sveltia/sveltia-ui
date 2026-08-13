@@ -297,9 +297,7 @@
     }
 
     &.link {
-      outline: 0;
       margin: 0;
-      border-radius: 0 !important;
       padding: 0 !important;
       height: auto !important;
       color: var(--sui-button-link-foreground-color, var(--sui-primary-accent-color-text));
@@ -313,12 +311,6 @@
 
         :global(:is(:root, :host)[data-underline-links='true']) & {
           text-decoration: underline;
-        }
-      }
-
-      &:is(:hover, :focus, :active) {
-        .label {
-          text-decoration: var(--sui-button-link-text-decoration-focus, underline);
         }
       }
     }
