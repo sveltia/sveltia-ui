@@ -90,17 +90,7 @@ vi.mock('@sveltia/utils/string', () => ({
   isURL: vi.fn((str) => /^https?:\/\//.test(str)),
 }));
 
-vi.mock('prismjs', () => ({}));
-
-vi.mock('prismjs/components', () => ({
-  default: {
-    languages: {
-      js: { alias: ['javascript'] },
-    },
-  },
-}));
-
-vi.mock('@lexical/code', () => ({
+vi.mock('@lexical/code-core', () => ({
   CodeHighlightNode: class {},
   CodeNode: class {},
   $createCodeNode: vi.fn(() => ({ type: 'code', setLanguage: vi.fn(), remove() {} })),
@@ -108,9 +98,26 @@ vi.mock('@lexical/code', () => ({
   $isCodeNode: vi.fn(() => mockState.codeNode),
 }));
 
-vi.mock('@lexical/code-prism', () => ({
-  PrismTokenizer: { $tokenize: vi.fn() },
+vi.mock('./shiki/highlighter.js', () => ({
   registerCodeHighlighting: vi.fn(() => vi.fn()),
+  shikiTokenizer: {
+    defaultLanguage: 'plain',
+    defaultTheme: 'github-light',
+    tokenize: vi.fn(() => []),
+  },
+}));
+
+vi.mock('./shiki/facade.js', () => ({
+  isPlainLanguage: vi.fn((lang) => ['', 'plain', 'plaintext', 'text', 'txt'].includes(lang ?? '')),
+  loadEngine: vi.fn(() => Promise.resolve()),
+  loadCodeLanguage: vi.fn(() => Promise.resolve()),
+  loadCodeTheme: vi.fn(() => Promise.resolve()),
+  normalizeCodeLanguage: vi.fn((lang) => (lang === 'js' ? 'javascript' : lang)),
+}));
+
+vi.mock('./shiki/theme.js', () => ({
+  getCodeTheme: vi.fn(() => 'github-light'),
+  observeCodeTheme: vi.fn(() => vi.fn()),
 }));
 
 vi.mock('@lexical/dragon', () => ({
@@ -245,9 +252,10 @@ vi.mock('lexical', () => ({
   PASTE_COMMAND: 'paste',
 }));
 
-import { registerCodeHighlighting } from '@lexical/code-prism';
 import { $getNearestNodeOfType as getNearestNodeOfType } from '@lexical/utils';
 import { ElementNode } from 'lexical';
+import { loadCodeLanguage, loadCodeTheme, loadEngine } from './shiki/facade.js';
+import { registerCodeHighlighting } from './shiki/highlighter.js';
 import {
   convertMarkdownToLexical,
   focusEditor,
@@ -272,10 +280,9 @@ describe('text editor core', () => {
     mockState.listNode = false;
     mockState.quoteNode = false;
     mockState.listIndent = 0;
-    window.Prism = {
-      tokenize: vi.fn(() => []),
-      languages: { plain: {}, javascript: {} },
-    };
+    vi.mocked(loadEngine).mockClear();
+    vi.mocked(loadCodeLanguage).mockClear();
+    vi.mocked(loadCodeTheme).mockClear();
   });
 
   it('returns the default selection state when the selection is not a range', () => {
@@ -410,13 +417,22 @@ describe('text editor core', () => {
     dispose();
   });
 
-  it('returns early when the requested Prism language is already loaded', async () => {
+  it('skips loading the highlighter entirely for a plain language', async () => {
     await expect(loadCodeHighlighter('plain')).resolves.toBeUndefined();
+    expect(loadEngine).not.toHaveBeenCalled();
+    expect(loadCodeLanguage).not.toHaveBeenCalled();
   });
 
-  it('loads Prism support for an alias when it is not already present', async () => {
-    window.Prism.languages = {};
-    await expect(loadCodeHighlighter('javascript')).resolves.toBeUndefined();
+  it('loads the engine, grammar and theme for a highlighted language', async () => {
+    await loadCodeHighlighter('javascript');
+    expect(loadEngine).toHaveBeenCalled();
+    expect(loadCodeLanguage).toHaveBeenCalledWith('javascript');
+    expect(loadCodeTheme).toHaveBeenCalledWith('github-light');
+  });
+
+  it('resolves a language alias before loading the grammar', async () => {
+    await loadCodeHighlighter('js');
+    expect(loadCodeLanguage).toHaveBeenCalledWith('javascript');
   });
 
   it('converts markdown into lexical nodes through the editor update callback', async () => {
@@ -527,9 +543,9 @@ describe('text editor core', () => {
     expect(rootState.children[0].remove).toHaveBeenCalled();
   });
 
-  it('loads Prism language that returns no canonical language', async () => {
-    window.Prism.languages = {};
+  it('resolves without throwing for an unsupported language', async () => {
     await expect(loadCodeHighlighter('nonexistent')).resolves.toBeUndefined();
+    expect(loadCodeLanguage).toHaveBeenCalledWith('nonexistent');
   });
 
   it('converts markdown with code blocks in different languages', async () => {
@@ -971,10 +987,10 @@ describe('text editor core', () => {
     await expect(convertMarkdownToLexical(editor, '', [])).resolves.toBeUndefined();
   });
 
-  it('loadCodeHighlighter with unknown language', async () => {
-    window.Prism.languages = {};
+  it('resolves even when the engine cannot be loaded', async () => {
+    vi.mocked(loadEngine).mockRejectedValueOnce(new Error('offline'));
 
-    await expect(loadCodeHighlighter('unknownLang')).resolves.toBeUndefined();
+    await expect(loadCodeHighlighter('javascript')).rejects.toThrow('offline');
   });
 
   it('converts markdown with error handling', async () => {
@@ -1199,15 +1215,8 @@ describe('text editor core', () => {
     expect(result.blockNodeKey).toBe('para-key');
   });
 
-  it('tokenizes code with a language that does not exist in Prism by falling back to plain text', async () => {
-    window.Prism.languages = {
-      plain: { root: /.*/ },
-      javascript: { keyword: /\b(const|let|var)\b/ },
-    };
-
-    const tokenize = vi.fn();
-
-    window.Prism.tokenize = tokenize;
+  it('registers the tokenizer with the configured language and current theme', () => {
+    vi.mocked(registerCodeHighlighting).mockClear();
 
     initEditor({
       modes: [],
@@ -1218,18 +1227,11 @@ describe('text editor core', () => {
       defaultLanguage: 'javascript',
     });
 
-    // Call the command handler to test the tokenize callback
-    const codeHighlightingRegisterCall = vi.mocked(registerCodeHighlighting).mock.calls[0];
+    const tokenizer = /** @type {any} */ (vi.mocked(registerCodeHighlighting).mock.calls[0]?.[1]);
 
-    const tokenizeCallback = /** @type {any} */ (
-      codeHighlightingRegisterCall && codeHighlightingRegisterCall[1]
-    )?.tokenize;
-
-    // Call tokenizeCallback with a language that doesn't exist
-    tokenizeCallback('code here', 'nonexistent');
-
-    // It should fall back to plain text language
-    expect(tokenize).toHaveBeenCalledWith('code here', window.Prism.languages.plain);
+    expect(tokenizer.defaultLanguage).toBe('javascript');
+    expect(tokenizer.defaultTheme).toBe('github-light');
+    expect(typeof tokenizer.tokenize).toBe('function');
   });
 
   it('handles heading tag without digit in the match', () => {
@@ -1459,15 +1461,6 @@ describe('text editor core', () => {
     // Nodes should not be removed when length > 1
     expect(node1Remove).not.toHaveBeenCalled();
     expect(node2Remove).not.toHaveBeenCalled();
-  });
-
-  it('handles code highlighting with non-array language alias', async () => {
-    // Ensure we test the path where alias is a string, not an array
-    window.Prism.languages = {
-      js: 'javascript', // Alias as string instead of array
-    };
-
-    await expect(loadCodeHighlighter('js')).resolves.toBeUndefined();
   });
 
   it('maps numbered list selections to numbered-list block type', () => {

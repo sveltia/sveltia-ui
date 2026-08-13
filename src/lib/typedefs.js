@@ -318,6 +318,35 @@
  */
 
 /**
+ * Loaders used to obtain the Shiki syntax highlighting engine, grammars and themes. Each returns
+ * the loaded ES module, or a falsy value when the requested language or theme is unavailable.
+ * @typedef {object} CodeHighlighterLoaders
+ * @property {() => Promise<any>} loadEngine Load the syntax highlighting engine.
+ * @property {(id: string) => Promise<any>} loadLanguage Load a grammar by canonical language ID.
+ * @property {(id: string) => Promise<any>} loadTheme Load a theme by ID.
+ */
+
+/**
+ * @typedef {object} CodeTokenizer
+ * @property {string | null} defaultLanguage Language to fall back to when a code node doesn’t carry
+ * one. Set to `null` to leave such blocks untouched, so a Markdown round-trip preserves a bare code
+ * fence with no info string.
+ * @property {string} defaultTheme Theme to fall back to when a code node doesn’t carry one.
+ * @property {(codeNode: any, language?: string) => LexicalNode[]} tokenize Convert a code node’s
+ * content into Lexical nodes.
+ */
+
+/**
+ * @typedef {object} CodeTransformState
+ * @property {boolean} didTransform Whether a transform is already scheduled for this update.
+ * @property {Set<string>} nodesCurrentlyHighlighting Keys of code nodes being highlighted. Both
+ * the code node and text node transforms can fire for the same update, and each would otherwise
+ * redo the whole code block.
+ * @property {Set<string>} pendingRefresh Keys of code nodes with a refresh already queued
+ * for after the in-progress pass, so a burst of edits queues one update rather than one each.
+ */
+
+/**
  * @typedef {object} TextEditorSelectionState
  * @property {?string} blockNodeKey Block level node key.
  * @property {TextEditorBlockType} blockType Block level type of the current selection.

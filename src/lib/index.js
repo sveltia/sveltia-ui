@@ -81,6 +81,8 @@ export { default as Group } from './components/util/group.svelte';
 export { default as Modal } from './components/util/modal.svelte';
 export { default as Placeholder } from './components/util/placeholder.svelte';
 export { default as VisibilityObserver } from './components/util/visibility-observer.svelte';
+export { setCodeHighlighterCacheEnabled } from './components/text-editor/shiki/cache.js';
+export { setCodeHighlighterLoaders } from './components/text-editor/shiki/loader.js';
 export { initLocales, strings } from './services/i18n.js';
 
 // eslint-disable-next-line import/export

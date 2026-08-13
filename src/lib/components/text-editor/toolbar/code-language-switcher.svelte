@@ -1,16 +1,12 @@
 <script>
-  // Work around the “Prism is not defined” error in consumers
-  // @see https://github.com/remix-run/remix/discussions/8182
-  import 'prismjs';
-
-  import { $isCodeNode as isCodeNode } from '@lexical/code';
+  import { $isCodeNode as isCodeNode } from '@lexical/code-core';
   import { _ } from '@sveltia/i18n';
   import { $getNodeByKey as getNodeByKey, $getRoot as getRoot } from 'lexical';
-  import prismComponents from 'prismjs/components';
   import { getContext } from 'svelte';
   import Option from '../../listbox/option.svelte';
   import Select from '../../select/select.svelte';
   import { focusEditor, loadCodeHighlighter } from '../core.js';
+  import { LANGUAGES } from '../shiki/generated.js';
 
   /**
    * @import { TextEditorStore } from '$lib/typedefs';
@@ -29,23 +25,11 @@
   } = $props();
 
   /** @type {{ key: string, label: string, aliases: string[] }[]} */
-  const codeLanguages = Object.entries(prismComponents.languages)
-    .filter(([, config]) => 'title' in config)
-    .map(([key, val]) => {
-      const { title: label, aliasTitles, alias } = /** @type {Record<string, any>} */ (val);
-      let aliases = [];
-
-      if (alias && !aliasTitles) {
-        aliases = Array.isArray(alias) ? alias : [alias];
-      }
-
-      return [
-        { key, label, aliases },
-        ...Object.entries(aliasTitles ?? {}).map(([k, v]) => ({ key: k, label: v, aliases: [] })),
-      ];
-    })
-    .flat(1)
-    .sort((a, b) => a.label.localeCompare(b.label));
+  const codeLanguages = LANGUAGES.map(({ id, name, aliases = [] }) => ({
+    key: id,
+    label: name,
+    aliases,
+  }));
 
   /** @type {TextEditorStore} */
   const editorStore = getContext('editorStore');
@@ -77,20 +61,26 @@
     }
 
     await focusEditor(editorStore.editor);
+    await loadCodeHighlighter(lang);
 
-    if (editorStore.selection?.blockNodeKey) {
-      await loadCodeHighlighter(lang);
+    editorStore.editor.update(() => {
+      // Resolve the target the same way the effect above does. A code editor has exactly one code
+      // block, and its `blockNodeKey` is still unset the first time the switcher is used, before
+      // the editor has ever been focused.
+      // https://github.com/facebook/lexical/blob/main/packages/lexical-playground/src/plugins/ToolbarPlugin/index.tsx#L713
+      const { blockNodeKey } = editorStore.selection;
 
-      editorStore.editor.update(() => {
-        // https://github.com/facebook/lexical/blob/main/packages/lexical-playground/src/plugins/ToolbarPlugin/index.tsx#L713
-        const node = getNodeByKey(/** @type {string} */ (editorStore.selection.blockNodeKey));
+      const node = editorStore.config.isCodeEditor
+        ? getRoot().getChildren()[0]
+        : blockNodeKey
+          ? getNodeByKey(blockNodeKey)
+          : null;
 
-        if (isCodeNode(node)) {
-          node.setLanguage(lang);
-          selectedLanguage = lang;
-        }
-      });
-    }
+      if (isCodeNode(node)) {
+        node.setLanguage(lang);
+        selectedLanguage = lang;
+      }
+    });
   }}
 >
   <Option label={_('_sui.text_editor.plain_text')} value="plain" dir="ltr" />

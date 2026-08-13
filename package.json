@@ -19,7 +19,8 @@
       "svelte": "./dist/index.js",
       "default": "./dist/index.js"
     },
-    "./locales/*": "./dist/locales/*"
+    "./locales/*": "./dist/locales/*",
+    "./shiki-engine": "./dist/shiki-engine.js"
   },
   "svelte": "./dist/index.js",
   "typesVersions": {
@@ -34,7 +35,7 @@
     "!dist/**/*.test.*"
   ],
   "scripts": {
-    "build": "svelte-kit sync && svelte-package",
+    "build": "npm run generate:shiki && svelte-kit sync && svelte-package && node scripts/build-shiki-engine.js",
     "build:watch": "svelte-kit sync && svelte-package --watch",
     "check": "pnpm run '/^check:.*/'",
     "check:audit": "pnpm audit",
@@ -46,6 +47,7 @@
     "check:svelte": "svelte-kit sync && svelte-check --tsconfig ./jsconfig.json",
     "dev": "vite dev",
     "format": "prettier --write .",
+    "generate:shiki": "node scripts/generate-shiki-metadata.js",
     "prepublishOnly": "npm run build",
     "preview": "vite preview",
     "test": "vitest run",
@@ -53,8 +55,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@lexical/code": "^0.49.0",
-    "@lexical/code-prism": "^0.49.0",
+    "@lexical/code-core": "^0.49.0",
     "@lexical/dragon": "^0.49.0",
     "@lexical/extension": "^0.49.0",
     "@lexical/history": "^0.49.0",
@@ -67,8 +68,7 @@
     "@lexical/utils": "^0.49.0",
     "@sveltia/i18n": "^1.2.2",
     "@sveltia/utils": "^0.12.1",
-    "lexical": "^0.49.0",
-    "prismjs": "^1.30.0"
+    "lexical": "^0.49.0"
   },
   "devDependencies": {
     "@rollup/plugin-yaml": "^5.0.0",
@@ -92,7 +92,9 @@
     "postcss-html": "^2.0.0",
     "prettier": "^3.9.6",
     "prettier-plugin-svelte": "^4.1.1",
+    "rolldown": "^1.2.3",
     "sass": "^1.102.0",
+    "shiki": "^4.4.3",
     "stylelint": "^17.14.1",
     "stylelint-config-recommended-scss": "^17.0.1",
     "stylelint-scss": "^7.2.0",

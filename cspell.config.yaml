@@ -16,6 +16,7 @@ useGitignore: true
 ignorePaths:
   - pnpm-lock.yaml
   - data/**/*.json
+  - src/lib/components/text-editor/shiki/generated.js
   - src/lib/locales/*.yaml
   - '!src/lib/locales/en-*.yaml'
 words:
@@ -38,20 +39,26 @@ words:
   - onpointerrawupdate
   - opsz
   - oxlint
+  - plainify
   - plusplus
   - pnpm
   - pointerrawupdate
   - postcss
-  - prismjs
   - Shiki
+  - shiki
+  - shikijs
   - singleline
   - strikethrough
   - stylelint
   - sveltejs
   - Sveltia
+  - tokenize
   - typedefs
   - unclickable
+  - unhighlighted
+  - unpkg
   - unrs
+  - unstub
   - Vite
   - Vitest
   - wght

@@ -12,6 +12,12 @@ export default defineConfig({
     include: ['src/lib/{components,services}/**/*.test.js'],
     coverage: {
       include: ['src/lib/{components,services}/**/*.js'],
+      exclude: [
+        // Build-time inputs rather than library runtime code: `engine-entry.js` is bundled into
+        // `dist/shiki-engine.js` by esbuild and never imported, and `generated.js` is generated
+        '**/text-editor/shiki/engine-entry.js',
+        '**/text-editor/shiki/generated.js',
+      ],
       reporter: ['text', 'json-summary', 'json'],
     },
     silent: true,

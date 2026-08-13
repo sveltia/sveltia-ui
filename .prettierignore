@@ -2,3 +2,4 @@ node_modules
 /.svelte-kit
 /dist
 pnpm-lock.yaml
+src/lib/components/text-editor/shiki/generated.js

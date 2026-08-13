@@ -1,8 +1,26 @@
 <script>
   import { isLoading } from '@sveltia/i18n';
   import { resolve } from '$app/paths';
-  import { AppShell, initLocales } from '$lib';
+  import { AppShell, initLocales, setCodeHighlighterLoaders } from '$lib';
   import NavSection from './_components/nav-section.svelte';
+
+  // The default engine loader fetches the prebuilt chunk published with this package, which doesn’t
+  // exist for an unreleased version, so build it from the local Shiki instead. This doubles as an
+  // example of how a consumer can bundle or self-host the engine rather than fetching it.
+  setCodeHighlighterLoaders({
+    /**
+     * Build the syntax highlighting engine from the locally installed Shiki.
+     * @returns {Promise<any>} Engine module.
+     */
+    loadEngine: async () => {
+      const [core, engine] = await Promise.all([
+        import('shiki/core'),
+        import('shiki/engine/javascript'),
+      ]);
+
+      return { ...core, ...engine };
+    },
+  });
 
   /**
    * @import { Snippet } from 'svelte';

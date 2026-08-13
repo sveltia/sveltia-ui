@@ -1,4 +1,4 @@
-import { CodeHighlightNode, CodeNode } from '@lexical/code';
+import { CodeHighlightNode, CodeNode } from '@lexical/code-core';
 import { LinkNode } from '@lexical/link';
 import { ListItemNode, ListNode } from '@lexical/list';
 import {
@@ -30,8 +30,6 @@ import { HeadingNode, QuoteNode } from '@lexical/rich-text';
  * } from '$lib/typedefs';
  */
 
-export const PRISM_BASE_URL = `https://unpkg.com/prismjs@1.30.0`;
-
 /**
  * @type {EditorThemeClasses}
  */
@@ -50,39 +48,6 @@ export const EDITOR_THEME = {
     },
   },
   code: 'code-block',
-  // https://github.com/facebook/lexical/blob/main/packages/lexical-website/docs/getting-started/theming.md
-  codeHighlight: {
-    atrule: 'token atrule',
-    attr: 'token attr',
-    boolean: 'token boolean',
-    builtin: 'token builtin',
-    cdata: 'token cdata',
-    char: 'token char',
-    class: 'token class',
-    'class-name': 'token class-name',
-    comment: 'token comment',
-    constant: 'token constant',
-    deleted: 'token deleted',
-    doctype: 'token doctype',
-    entity: 'token entity',
-    function: 'token function',
-    important: 'token important',
-    inserted: 'token inserted',
-    keyword: 'token keyword',
-    namespace: 'token namespace',
-    number: 'token number',
-    operator: 'token operator',
-    prolog: 'token prolog',
-    property: 'token property',
-    punctuation: 'token punctuation',
-    regex: 'token regex',
-    selector: 'token selector',
-    string: 'token string',
-    symbol: 'token symbol',
-    tag: 'token tag',
-    url: 'token url',
-    variable: 'token variable',
-  },
 };
 
 /**

@@ -1,15 +1,10 @@
-// Work around the “Prism is not defined” error in consumers
-// @see https://github.com/remix-run/remix/discussions/8182
-import 'prismjs';
-
 import {
   CodeHighlightNode,
   CodeNode,
   $createCodeNode as createCodeNode,
   $isCodeHighlightNode as isCodeHighlightNode,
   $isCodeNode as isCodeNode,
-} from '@lexical/code';
-import { PrismTokenizer, registerCodeHighlighting } from '@lexical/code-prism';
+} from '@lexical/code-core';
 import { registerDragonSupport } from '@lexical/dragon';
 import { HorizontalRuleNode } from '@lexical/extension';
 import { createEmptyHistoryState, registerHistory } from '@lexical/history';
@@ -59,17 +54,24 @@ import {
   OUTDENT_CONTENT_COMMAND,
   PASTE_COMMAND,
 } from 'lexical';
-import prismComponents from 'prismjs/components';
 import {
   BLOCK_BUTTON_TYPES,
   DISABLED_MARKDOWN_TAGS,
   EDITOR_THEME,
   NODE_MAP,
-  PRISM_BASE_URL,
   TEXT_FORMAT_BUTTON_TYPES,
   TRANSFORMER_MAP,
 } from './constants.js';
 import { increaseListIndentation, splitMultilineFormatting } from './markdown.js';
+import {
+  isPlainLanguage,
+  loadCodeLanguage,
+  loadCodeTheme,
+  loadEngine,
+  normalizeCodeLanguage,
+} from './shiki/facade.js';
+import { registerCodeHighlighting, shikiTokenizer } from './shiki/highlighter.js';
+import { getCodeTheme, observeCodeTheme } from './shiki/theme.js';
 import { HR } from './transformers/hr.js';
 import { TABLE } from './transformers/table.js';
 
@@ -267,13 +269,13 @@ export const initEditor = ({
   if (enabledButtons.includes('code-block') || isCodeEditor) {
     addUnregister(
       registerCodeHighlighting(editor, {
+        ...shikiTokenizer,
         defaultLanguage,
-        // eslint-disable-next-line jsdoc/require-jsdoc
-        tokenize: (code, lang = 'plain') =>
-          window.Prism.tokenize(code, window.Prism.languages[lang] ?? window.Prism.languages.plain),
-        $tokenize: PrismTokenizer.$tokenize,
+        defaultTheme: getCodeTheme(),
       }),
     );
+
+    addUnregister(observeCodeTheme(editor));
   }
 
   // https://github.com/facebook/lexical/blob/main/packages/lexical-link/src/LexicalLinkExtension.ts
@@ -466,31 +468,21 @@ export const initEditor = ({
 };
 
 /**
- * Load additional Prism syntax highlighter settings for the given programming language.
+ * Preload the syntax highlighter for the given programming language.
+ *
+ * Highlighting also works without this — the transform loads whatever it needs and re-highlights
+ * once it arrives — but preloading avoids a visible flash of unhighlighted code.
  * @param {string} lang Language name, like scss.
  */
 export const loadCodeHighlighter = async (lang) => {
-  if (lang in window.Prism.languages) {
+  if (isPlainLanguage(lang)) {
     return;
   }
 
-  const canonicalLang = Object.entries(prismComponents.languages).find(
-    // @ts-ignore
-    ([key, { alias }]) =>
-      key === lang ||
-      (Array.isArray(alias) ? alias.includes(lang) : /* v8 ignore next */ alias === lang),
-  )?.[0];
+  // The grammar and theme loaders are no-ops until the engine is in place
+  await loadEngine();
 
-  if (!canonicalLang) {
-    return;
-  }
-
-  try {
-    // eslint-disable-next-line jsdoc/no-bad-blocks
-    await import(/* @vite-ignore */ `${PRISM_BASE_URL}/components/prism-${canonicalLang}.min.js`);
-  } catch {
-    //
-  }
+  await Promise.all([loadCodeLanguage(normalizeCodeLanguage(lang)), loadCodeTheme(getCodeTheme())]);
 };
 
 /**
@@ -502,7 +494,8 @@ export const loadCodeHighlighter = async (lang) => {
  * @throws {Error} Failed to convert the value to Lexical nodes.
  */
 export const convertMarkdownToLexical = async (editor, value, enabledTransformers) => {
-  // Load Prism language support on demand; the `loadLanguages` Prism utility method cannot be used
+  // Preload the highlighter for every language used in the document, so code blocks are highlighted
+  // as soon as they appear rather than a moment later
   await Promise.all(
     [...value.matchAll(/^```(?<lang>.+?)\n/gm)].map(async ({ groups: { lang = 'plain' } = {} }) =>
       loadCodeHighlighter(lang),
