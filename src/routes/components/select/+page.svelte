@@ -31,6 +31,26 @@
   <Example>
     <div role="none">
       <Select bind:value={selectValue1}>
+        <Option label="Mango" />
+        <Option label="Apple" />
+        <Option label="Mango" />
+        <Option label="Apple" />
+        <Option label="Mango" />
+        <Option label="Apple" />
+        <Option label="Mango" />
+        <Option label="Apple" />
+        <Option label="Mango" />
+        <Option label="Apple" />
+        <Option label="Mango" />
+        <Option label="Apple" />
+        <Option label="Mango" />
+        <Option label="Apple" />
+        <Option label="Mango" />
+        <Option label="Apple" />
+        <Option label="Mango" />
+        <Option label="Apple" />
+        <Option label="Mango" />
+        <Option label="Apple" />
         <Option label="Banana" selected />
         <Option label="Mango" />
         <Option label="Apple" />

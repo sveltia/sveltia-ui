@@ -256,6 +256,15 @@
       }
     }
 
+    // Hand the scrolling down to the option list rather than doing it here. The popup is capped at
+    // the space available around the anchor, and scrolling it as a whole would carry the combobox’s
+    // filter out of the dropdown along with the options it filters.
+    &.combobox {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
     &.touch {
       position: static;
       border-width: 0 !important;

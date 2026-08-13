@@ -51,6 +51,13 @@
   } = $props();
 
   /**
+   * Fallback `id`, so the option can always be referenced by `aria-activedescendant`. `<Group>`
+   * assigns one to each member as it activates, but within a `<Combobox>` that happens while the
+   * dropdown is still collapsed and no option has rendered yet.
+   */
+  const fallbackId = $props.id();
+
+  /**
    * The registry provided by an ancestor `<Combobox>`. This is `undefined` when the option is used
    * standalone within a `<Listbox>`, in which case it always renders itself.
    */
@@ -126,6 +133,7 @@
     <Button
       {...restProps}
       role="option"
+      id={restProps.id ?? fallbackId}
       tabindex="-1"
       aria-selected={selected}
       {label}

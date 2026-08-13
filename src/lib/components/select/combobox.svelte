@@ -124,9 +124,61 @@
     onChange?.(new CustomEvent('Change', { detail }));
   };
 
+  /**
+   * The `<Listbox>` rendered for this combobox. It’s reached through {@link optionHost}, which owns
+   * it wherever the options currently live, rather than through the popup, which only holds it
+   * while the dropdown is expanded.
+   * @returns {HTMLElement | null | undefined} Listbox element.
+   */
+  const getListbox = () => optionHost?.querySelector('[role="listbox"]');
+
+  /**
+   * Make the selected option the starting point of the expanded dropdown: scroll it into view, and
+   * mark it as the focused member so the arrow keys carry on from there. A long option list is
+   * scrollable, and the dropdown would otherwise open at the top with the current selection nowhere
+   * to be seen — and the first arrow key would jump back up to the first option.
+   */
+  const revealSelectedOption = () => {
+    const listbox = getListbox();
+
+    const option = /** @type {HTMLElement | null | undefined} */ (
+      listbox?.querySelector('[role="option"][aria-selected="true"]')
+    );
+
+    if (!listbox || !option) {
+      return;
+    }
+
+    // `<Group>` tracks the focused member with this class, and moves it on from there
+    option.classList.add('focused');
+    listbox.setAttribute('aria-activedescendant', option.id);
+
+    option.scrollIntoView(true);
+  };
+
   // Let the options know whether they should render themselves
   $effect(() => {
     registry.expanded = isPopupOpen;
+  });
+
+  // Reveal the selected option once the dropdown is expanded. The options are rendered and moved
+  // into the popup by the effects around this one, and the popup is then measured against the space
+  // below the anchor to get its height, so there is nothing to scroll until all of that has
+  // settled. The popup moves focus onto its first tab stop 100ms in, which scrolls that element
+  // into view in turn, so this has to come after it rather than be undone by it.
+  $effect(() => {
+    if (!isPopupOpen) {
+      return undefined;
+    }
+
+    const timer = globalThis.setTimeout(revealSelectedOption, 150);
+
+    return () => {
+      globalThis.clearTimeout(timer);
+      // The options are unmounted along with the popup, so the listbox is about to be pointing at
+      // an element that no longer exists
+      getListbox()?.removeAttribute('aria-activedescendant');
+    };
   });
 
   // Move the options into the popup while it’s expanded, and back out before it’s unmounted. Only
@@ -433,6 +485,9 @@
   }
 
   .combobox-inner {
+    // Fill the popup, so the option list below is the part that gives way once the popup runs out
+    // of room. `overflow: hidden` is what lets this shrink past the height of its own contents.
+    flex: auto;
     display: flex;
     flex-direction: column;
     overflow: hidden;
