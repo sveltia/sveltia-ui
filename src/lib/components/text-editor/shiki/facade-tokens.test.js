@@ -17,6 +17,12 @@ vi.mock('./cache.js', () => ({
   cachePayload: vi.fn(async () => undefined),
 }));
 
+vi.mock('./theme.js', () => ({
+  getCodeTheme: () => 'github-light',
+  CODE_THEME_LIGHT: 'github-light',
+  CODE_THEME_DARK: 'github-dark',
+}));
+
 vi.mock('./loader.js', () => ({
   getCodeHighlighterLoaders: () => ({
     loadEngine: async () => ({
@@ -27,6 +33,8 @@ vi.mock('./loader.js', () => ({
         loadLanguage: async () => undefined,
         loadTheme: async () => undefined,
         codeToTokens: () => ({ tokens: engineState.tokens }),
+        codeToHtml: (/** @type {string} */ code, /** @type {any} */ options) =>
+          `<pre class="shiki ${options.theme}"><code>${code}</code></pre>`,
       }),
       isSpecialLang: () => false,
       isSpecialTheme: () => false,
@@ -43,7 +51,7 @@ vi.mock('./loader.js', () => ({
 }));
 
 // eslint-disable-next-line import/first
-import { getHighlightNodes, loadEngine } from './facade.js';
+import { getHighlightNodes, highlightCodeToHTML, loadEngine } from './facade.js';
 
 /**
  * Tokenize the given text through the facade, inside an editor context.
@@ -174,5 +182,41 @@ describe('facade tokenizing', () => {
 
   it('produces nothing for empty content', () => {
     expect(tokenize('', [[]])).toEqual([]);
+  });
+});
+
+describe('highlightCodeToHTML', () => {
+  it('returns markup once the engine, grammar and theme are ready', async () => {
+    await loadEngine();
+
+    expect(highlightCodeToHTML('const a = 1', 'javascript')).toBe(
+      '<pre class="shiki github-light"><code>const a = 1</code></pre>',
+    );
+  });
+
+  it('resolves an alias to its canonical language', async () => {
+    await loadEngine();
+
+    expect(highlightCodeToHTML('const a = 1', 'js')).toContain('shiki github-light');
+  });
+
+  it('honours an explicit theme', async () => {
+    await loadEngine();
+
+    // Not loaded in this fixture, so it declines rather than rendering with the wrong theme
+    expect(highlightCodeToHTML('a', 'javascript', { theme: 'github-dark' })).toBeUndefined();
+  });
+
+  it('declines a plain language', async () => {
+    await loadEngine();
+
+    expect(highlightCodeToHTML('a', 'plain')).toBeUndefined();
+    expect(highlightCodeToHTML('a', 'text')).toBeUndefined();
+  });
+
+  it('declines an unknown language', async () => {
+    await loadEngine();
+
+    expect(highlightCodeToHTML('a', 'nonexistent')).toBeUndefined();
   });
 });

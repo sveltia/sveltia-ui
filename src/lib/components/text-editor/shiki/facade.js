@@ -24,6 +24,7 @@ import {
 import { cachePayload, getCachedPayload } from './cache.js';
 import { LANGUAGES, THEMES } from './generated.js';
 import { getCodeHighlighterLoaders } from './loader.js';
+import { getCodeTheme } from './theme.js';
 
 /**
  * @import { CodeNode } from '@lexical/code-core';
@@ -415,4 +416,37 @@ export const getHighlightNodes = (codeNode, language) => {
   });
 
   return mapTokensToLexicalStructure(tokens, !!diffedLanguage);
+};
+
+/**
+ * Highlight a snippet of code as an HTML string.
+ *
+ * Unlike the editor, which builds Lexical nodes, this returns markup for rendering elsewhere, such
+ * as a Markdown preview. It is synchronous, so it can be called from a renderer that cannot await:
+ * when the engine, grammar or theme is not loaded yet, it returns `undefined` rather than blocking,
+ * and the caller can render the code unhighlighted. Call {@link loadCodeHighlighter} first and
+ * render again once it resolves to get the highlighted result.
+ * @param {string} code Code to highlight.
+ * @param {string} language Language identifier or alias, like `ts` or `diff-js`.
+ * @param {object} [options] Options.
+ * @param {string} [options.theme] Shiki theme ID. Defaults to the one matching the app’s
+ * appearance.
+ * @returns {string | undefined} HTML string, or `undefined` when the code cannot be highlighted
+ * yet.
+ */
+export const highlightCodeToHTML = (code, language, { theme } = {}) => {
+  const id = normalizeCodeLanguage(getDiffedLanguage(language) ?? language);
+
+  if (!highlighter || isPlainLanguage(id) || !isCodeLanguageLoaded(id)) {
+    return undefined;
+  }
+
+  // Resolved only once the cheap checks pass, so bailing out early costs nothing
+  const resolvedTheme = theme ?? getCodeTheme();
+
+  if (!isCodeThemeLoaded(resolvedTheme)) {
+    return undefined;
+  }
+
+  return highlighter.codeToHtml(code, { lang: id, theme: resolvedTheme });
 };

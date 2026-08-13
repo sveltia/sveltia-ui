@@ -442,6 +442,13 @@ describe('shiki facade', () => {
     expect(facade.isCodeLanguageLoaded('rust')).toBe(false);
   });
 
+  it('declines to produce markup before the engine has loaded', async () => {
+    const facade = await importFacade({ loadEngine: async () => createFakeEngine() });
+
+    // The preview renderer is synchronous, so it must get a definite answer rather than a promise
+    expect(facade.highlightCodeToHTML('const a = 1', 'javascript')).toBeUndefined();
+  });
+
   it('loads a theme on demand and ignores an unknown one', async () => {
     const loadTheme = vi.fn(async () => ({ default: { name: 'github-dark' } }));
 
