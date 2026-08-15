@@ -28,6 +28,7 @@ words:
   - CVEs
   - esbuild
   - espree
+  - esrap
   - GHSA
   - Ghsas
   - infobar
@@ -45,7 +46,6 @@ words:
   - pointerrawupdate
   - postcss
   - Shiki
-  - shiki
   - shikijs
   - singleline
   - strikethrough
