@@ -12,7 +12,7 @@
 <script>
   import { _ } from '@sveltia/i18n';
   import { onMount } from 'svelte';
-  import { loadEmojiList, searchEmojis } from './emoji.js';
+  import { searchEmojis } from './emoji.js';
 
   /**
    * @import { EmojiAnchorRect, EmojiEntry, EmojiTrigger } from '$lib/typedefs';
@@ -84,12 +84,6 @@
    * @type {HTMLElement | undefined}
    */
   let listElement = $state();
-  /**
-   * Monotonically increasing counter used to discard the result of a search that has been
-   * superseded while the emoji list was being loaded.
-   * @type {number}
-   */
-  let searchGeneration = 0;
   /**
    * Identifier of the shortcode the user has dismissed with the Escape key, so the suggestions
    * don’t come back while they keep typing it.
@@ -167,14 +161,13 @@
     candidates = [];
     selectedIndex = 0;
     anchorRect = undefined;
-    searchGeneration += 1;
   };
 
   /**
    * Feed the shortcode being typed into the list, or nothing to close it.
    * @param {EmojiTrigger} [newTrigger] Shortcode state.
    */
-  export const update = async (newTrigger) => {
+  export const update = (newTrigger) => {
     if (!newTrigger) {
       if (trigger || dismissedShortcodeId) {
         close();
@@ -202,17 +195,6 @@
     }
 
     trigger = newTrigger;
-    searchGeneration += 1;
-
-    const generation = searchGeneration;
-
-    await loadEmojiList();
-
-    // Bail out if the user has kept typing in the meantime
-    if (generation !== searchGeneration) {
-      return;
-    }
-
     candidates = searchEmojis(query);
     selectedIndex = 0;
   };
@@ -359,11 +341,6 @@
   });
 
   onMount(() => {
-    // Warm the data up front, so the first shortcode the user types shows suggestions straight away
-    // rather than waiting on the network. The loader memoizes, so this costs one request per page
-    // however many fields are on it, and nothing at all once it’s cached.
-    loadEmojiList();
-
     /**
      * Follow the caret when the page or an ancestor is scrolled or the window is resized.
      */

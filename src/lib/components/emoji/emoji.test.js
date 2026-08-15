@@ -1,9 +1,8 @@
-import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import {
   detectEmojiTrigger,
   getEmojiInsertText,
   getEmojiMatchRank,
-  loadEmojiList,
   MAX_EMOJI_SUGGESTIONS,
   NO_EMOJI_MATCH,
   parseEmojiData,
@@ -175,10 +174,6 @@ describe('getEmojiMatchRank', () => {
 });
 
 describe('searchEmojis', () => {
-  beforeAll(async () => {
-    await loadEmojiList();
-  });
-
   it('should find an emoji by its shortcode', () => {
     expect(searchEmojis('rocket')[0].emoji).toBe('🚀');
     expect(searchEmojis('tada')[0].emoji).toBe('🎉');
@@ -250,73 +245,5 @@ describe('searchEmojis', () => {
   it('should return nothing for an empty or unknown query', () => {
     expect(searchEmojis('')).toEqual([]);
     expect(searchEmojis('zzzzzzzz')).toEqual([]);
-  });
-});
-
-describe('loadEmojiList', () => {
-  /**
-   * Load a fresh copy of the module, since it memoizes the list and the in-flight load.
-   * @returns {Promise<any>} Module exports.
-   */
-  const loadModule = async () => {
-    vi.resetModules();
-
-    return import('./emoji.js');
-  };
-
-  beforeEach(() => {
-    vi.spyOn(console, 'error').mockImplementation(() => {});
-  });
-
-  afterEach(() => {
-    vi.doUnmock('./generated.js');
-    vi.restoreAllMocks();
-  });
-
-  it('should parse the data once, however many callers ask for it', async () => {
-    const emoji = await loadModule();
-
-    const [first, ...rest] = await Promise.all([
-      emoji.loadEmojiList(),
-      emoji.loadEmojiList(),
-      emoji.loadEmojiList(),
-    ]);
-
-    rest.forEach((list) => expect(list).toBe(first));
-  });
-
-  it('should give back an empty list when the data can’t be obtained', async () => {
-    vi.doMock('./generated.js', () => {
-      throw new Error('chunk load failure');
-    });
-
-    const emoji = await loadModule();
-
-    // No suggestions are ever shown; nothing is thrown at the caller
-    expect(await emoji.loadEmojiList()).toEqual([]);
-    expect(emoji.searchEmojis('tada')).toEqual([]);
-    // eslint-disable-next-line no-console
-    expect(console.error).toHaveBeenCalled();
-  });
-
-  it('should retry after a failure, so a hiccup isn’t permanent', async () => {
-    let online = false;
-
-    vi.doMock('./generated.js', () => {
-      if (!online) {
-        throw new Error('chunk load failure');
-      }
-
-      return { EMOJI_DATA: '🎉\ttada' };
-    });
-
-    const emoji = await loadModule();
-
-    expect(await emoji.loadEmojiList()).toEqual([]);
-
-    online = true;
-
-    expect(await emoji.loadEmojiList()).toEqual([{ emoji: '🎉', name: 'tada', aliases: [] }]);
-    expect(emoji.searchEmojis('tada')[0].emoji).toBe('🎉');
   });
 });

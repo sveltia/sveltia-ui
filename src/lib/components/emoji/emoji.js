@@ -1,3 +1,5 @@
+import { EMOJI_DATA } from './generated.js';
+
 /**
  * @import { EmojiEntry } from '$lib/typedefs';
  */
@@ -24,15 +26,11 @@ export const MAX_EMOJI_SUGGESTIONS = 50;
  */
 const WORD_SEPARATOR_REGEX = /[-_]/;
 /**
- * Cached emoji list. This is `undefined` until {@link loadEmojiList} resolves for the first time.
+ * Emoji list, parsed out of the data the first time it’s searched. This is `undefined` until then,
+ * so a page that never sees a shortcode never pays for it.
  * @type {EmojiEntry[] | undefined}
  */
 let emojiList;
-/**
- * In-flight or completed loader for {@link emojiList}, so the data is only parsed once.
- * @type {Promise<EmojiEntry[]> | undefined}
- */
-let loader;
 
 /**
  * Convert the generated emoji data into a searchable list.
@@ -53,34 +51,6 @@ export const parseEmojiData = (data) =>
       aliases: [...otherShortcodes, ...(keywords ? keywords.split(' ') : [])],
     };
   });
-
-/**
- * Load the emoji list.
- *
- * The data is imported on demand rather than up front, so a bundler that can split it out keeps it
- * out of the initial payload — most sessions never type a shortcode. A failure here is not worth
- * surfacing: no suggestions are ever shown, and the shortcode the user typed stays as plain text.
- * @returns {Promise<EmojiEntry[]>} Emoji list, or an empty list if the data can’t be obtained.
- */
-export const loadEmojiList = async () => {
-  loader ??= (async () => {
-    try {
-      const { EMOJI_DATA } = await import('./generated.js');
-
-      emojiList = parseEmojiData(EMOJI_DATA);
-    } catch (ex) {
-      // Allow a later attempt to retry, so a transient chunk load failure isn’t permanent
-      loader = undefined;
-      emojiList = [];
-      // eslint-disable-next-line no-console
-      console.error(ex);
-    }
-
-    return /** @type {EmojiEntry[]} */ (emojiList);
-  })();
-
-  return loader;
-};
 
 /**
  * Rank given when there is no match at all. Higher than any real rank, so an unmatched emoji sorts
@@ -194,8 +164,7 @@ const getMatchCentrality = ({ name, aliases }, query) => {
 };
 
 /**
- * Search the loaded emoji list for the given query. This returns an empty list unless
- * {@link loadEmojiList} has been resolved beforehand.
+ * Search the emoji list for the given query.
  * @param {string} query Search query without the leading colon, e.g. `smi`.
  * @returns {EmojiEntry[]} Matching emojis, best match first, capped at
  * {@link MAX_EMOJI_SUGGESTIONS}.
@@ -203,9 +172,11 @@ const getMatchCentrality = ({ name, aliases }, query) => {
 export const searchEmojis = (query) => {
   const normalizedQuery = query.toLowerCase();
 
-  if (!emojiList || !normalizedQuery) {
+  if (!normalizedQuery) {
     return [];
   }
+
+  emojiList ??= parseEmojiData(EMOJI_DATA);
 
   return (
     emojiList
