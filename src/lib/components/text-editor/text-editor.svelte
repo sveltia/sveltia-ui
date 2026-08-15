@@ -9,6 +9,7 @@
   import TextArea from '../text-field/text-area.svelte';
   import Toast from '../toast/toast.svelte';
   import { BLOCK_BUTTON_TYPES, INLINE_BUTTON_TYPES } from './constants.js';
+  import EmojiAutocomplete from './emoji-autocomplete.svelte';
   import LexicalRoot from './lexical-root.svelte';
   import { createEditorStore } from './store.svelte.js';
   import TextEditorToolbar from './toolbar/text-editor-toolbar.svelte';
@@ -28,6 +29,8 @@
    * @property {TextEditorComponent[]} [components] Editor components.
    * @property {boolean} [useMarkdownShortcuts] Whether to enable Markdown keyboard shortcuts in the
    * rich text editor.
+   * @property {boolean} [useEmojiAutocomplete] Whether to autocomplete emojis when the user
+   * types a shortcode, like `:smi`.
    * @property {string} [class] The `class` attribute on the wrapper element.
    * @property {boolean} [hidden] Whether to hide the widget.
    * @property {boolean} [disabled] Whether to disable the widget. An alias of the `aria-disabled`
@@ -53,6 +56,7 @@
     buttons = [...INLINE_BUTTON_TYPES, ...BLOCK_BUTTON_TYPES],
     components = [],
     useMarkdownShortcuts = true,
+    useEmojiAutocomplete = true,
     hidden = false,
     disabled = false,
     readonly = false,
@@ -72,6 +76,7 @@
     enabledButtons: buttons,
     components,
     useMarkdownShortcuts,
+    useEmojiAutocomplete,
   };
 
   setContext('editorStore', editorStore);
@@ -115,6 +120,7 @@
   <TextArea
     autoResize={true}
     bind:value={editorStore.inputValue}
+    {useEmojiAutocomplete}
     {flex}
     {dir}
     hidden={editorStore.useRichText || hidden}
@@ -123,6 +129,9 @@
     {required}
     {invalid}
   />
+  {#if editorStore.config.useEmojiAutocomplete && !disabled && !readonly}
+    <EmojiAutocomplete />
+  {/if}
 </div>
 
 {#if editorStore.showConverterError}

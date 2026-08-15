@@ -7,6 +7,7 @@
 <script>
   import { activateKeyShortcuts } from '@sveltia/utils/events';
   import TruncatedText from '../typography/truncated-text.svelte';
+  import EmojiAutocomplete from './emoji-autocomplete.svelte';
 
   /**
    * @import { CommonEventHandlers, InputEventHandlers, TextInputProps } from '$lib/typedefs';
@@ -15,6 +16,8 @@
   /**
    * @typedef {object} Props
    * @property {string} [value] Input value.
+   * @property {boolean} [useEmojiAutocomplete] Whether to autocomplete emojis when the user
+   * types a shortcode, like `:smi`.
    */
 
   /**
@@ -33,6 +36,7 @@
     flex = false,
     monospace = false,
     debounce = false,
+    useEmojiAutocomplete = false,
     class: className,
     hidden = false,
     disabled = false,
@@ -118,6 +122,9 @@
     oninputcapture={handleInput}
     {@attach activateKeyShortcuts(keyShortcuts)}
   />
+  {#if useEmojiAutocomplete && !disabled && !readonly}
+    <EmojiAutocomplete {element} />
+  {/if}
   {#if ariaLabel && showInlineLabel}
     <span id="{id}-label" class="label" class:hidden={!!value} aria-hidden="true">
       <TruncatedText>

@@ -24,6 +24,15 @@
 </section>
 
 <section>
+  <h3>Without Emoji Autocomplete</h3>
+  <Example>
+    <div role="none">
+      <TextEditor useEmojiAutocomplete={false} />
+    </div>
+  </Example>
+</section>
+
+<section>
   <h3>Invalid</h3>
   <Example>
     <div role="none">

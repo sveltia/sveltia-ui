@@ -101,6 +101,18 @@
 </section>
 
 <section>
+  <h3>With emoji autocomplete</h3>
+  <Example>
+    <div role="none">
+      <TextInput useEmojiAutocomplete />
+    </div>
+    <div role="none">
+      <TextArea useEmojiAutocomplete autoResize />
+    </div>
+  </Example>
+</section>
+
+<section>
   <h3>Credit Card</h3>
 </section>
 

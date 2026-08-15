@@ -6,6 +6,8 @@
   @see https://css-tricks.com/the-cleanest-trick-for-autogrowing-textareas/
 -->
 <script>
+  import EmojiAutocomplete from './emoji-autocomplete.svelte';
+
   /**
    * @import { Snippet } from 'svelte';
    * @import { CommonEventHandlers, InputEventHandlers } from '$lib/typedefs';
@@ -14,11 +16,14 @@
   /**
    * @typedef {object} Props
    * @property {string} [value] Input value.
+   * @property {HTMLTextAreaElement} [element] A reference to the `<textarea>` element.
    * @property {boolean} [flex] Make the text input container flexible.
    * @property {'ltr' | 'rtl' | 'auto'} [dir] The `dir` attribute on the `<textarea>` element.
    * @property {string} [name] The `name` attribute on the `<textarea>` element.
    * @property {boolean} [autoResize] Whether to automatically resize the `<textarea>` based on the
    * content.
+   * @property {boolean} [useEmojiAutocomplete] Whether to autocomplete emojis when the user
+   * types a shortcode, like `:smi`.
    * @property {string} [class] The `class` attribute on the wrapper element.
    * @property {boolean} [hidden] Whether to hide the widget.
    * @property {boolean} [disabled] Whether to disable the widget. An alias of the `aria-disabled`
@@ -38,10 +43,12 @@
   let {
     /* eslint-disable prefer-const */
     value = $bindable(''),
+    element = $bindable(),
     flex = false,
     dir = undefined,
     name = undefined,
     autoResize = false,
+    useEmojiAutocomplete = false,
     class: className,
     hidden = false,
     disabled = false,
@@ -63,6 +70,7 @@
   {hidden}
 >
   <textarea
+    bind:this={element}
     {...restProps}
     {dir}
     {name}
@@ -77,6 +85,9 @@
     class:auto-resize={autoResize}></textarea>
   {#if autoResize}
     <div class="clone" aria-hidden="true" {dir}>{value}</div>
+  {/if}
+  {#if useEmojiAutocomplete && !disabled && !readonly}
+    <EmojiAutocomplete {element} />
   {/if}
 </div>
 

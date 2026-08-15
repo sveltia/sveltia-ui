@@ -28,6 +28,7 @@ export const createEditorStore = () => {
     components: [],
     useMarkdownShortcuts: true,
     isCodeEditor: false,
+    useEmojiAutocomplete: false,
   });
 
   /** @type {string} */

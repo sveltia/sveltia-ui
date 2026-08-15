@@ -18,6 +18,9 @@ expand: 展开
 # Infobar/toast dismiss button label
 dismiss: 关闭
 
+# Emoji suggestion listbox aria-label, shared by the text fields and the text editor
+emoji_suggestions: 表情符号建议
+
 # Calendar component
 calendar:
   # View switcher group aria-labels and navigation button aria-labels

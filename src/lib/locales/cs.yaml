@@ -18,6 +18,9 @@ expand: Rozbalit
 # Infobar/toast dismiss button label
 dismiss: Zavřít
 
+# Emoji suggestion listbox aria-label, shared by the text fields and the text editor
+emoji_suggestions: Návrhy emodži
+
 # Calendar component
 calendar:
   # View switcher group aria-labels and navigation button aria-labels

@@ -314,7 +314,41 @@
  * @property {boolean} useMarkdownShortcuts Whether to enable Markdown keyboard shortcuts in the
  * rich text editor.
  * @property {boolean} isCodeEditor Whether the editor is used as a code editor.
+ * @property {boolean} [useEmojiAutocomplete] Whether to autocomplete emojis when the user types a
+ * shortcode, like `:smi`. Default: `false`.
  * @property {string} [defaultLanguage] Default language for the code editor.
+ */
+
+/**
+ * Raw emoji data as published by `emojilib`, keyed by emoji character. Each value lists the
+ * canonical name followed by any keywords.
+ * @typedef {Record<string, string[]>} EmojiData
+ */
+
+/**
+ * @typedef {object} EmojiEntry
+ * @property {string} emoji Emoji character, e.g. `🎉`.
+ * @property {string} name Canonical name used as the shortcode, e.g. `party_popper`.
+ * @property {string[]} aliases Lower-cased alternative keywords, e.g. `party`, `tada`.
+ */
+
+/**
+ * A shortcode being typed, as handed to the emoji suggestions. Each host extends this with
+ * whatever it needs to locate the shortcode again when the emoji is inserted.
+ * @typedef {object} EmojiTrigger
+ * @property {string} id Identifier of this shortcode occurrence. It must stay the same while the
+ * query grows, so the list can tell a dismissed shortcode from a new one.
+ * @property {string} query Shortcode being typed, without the leading colon.
+ */
+
+/**
+ * Viewport-relative bounds of the shortcode being typed, which the emoji suggestions are anchored
+ * to.
+ * @typedef {object} EmojiAnchorRect
+ * @property {number} top Distance from the top of the viewport.
+ * @property {number} bottom Distance from the top of the viewport to the bottom of the shortcode.
+ * @property {number} left Distance from the left of the viewport.
+ * @property {number} right Distance from the left of the viewport to the right of the shortcode.
  */
 
 /**
