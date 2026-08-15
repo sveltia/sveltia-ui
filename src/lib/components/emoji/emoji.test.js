@@ -5,6 +5,7 @@ import {
   getEmojiInsertText,
   getEmojiMatchRank,
   loadEmojiList,
+  normalizeEmojiName,
   MAX_EMOJI_SUGGESTIONS,
   NO_EMOJI_MATCH,
   searchEmojis,
@@ -54,6 +55,24 @@ describe('detectEmojiTrigger', () => {
   });
 });
 
+describe('normalizeEmojiName', () => {
+  it('should leave a conventional name alone', () => {
+    expect(normalizeEmojiName('party_popper')).toBe('party_popper');
+    // A hyphen can be typed in a query, so it stays as it is
+    expect(normalizeEmojiName('x-ray')).toBe('x-ray');
+  });
+
+  it('should rewrite the separators a query cannot contain', () => {
+    // Otherwise 🫶 would be unreachable by its own shortcode
+    expect(normalizeEmojiName('heart hands')).toBe('heart_hands');
+    expect(normalizeEmojiName('family adult, adult, child')).toBe('family_adult_adult_child');
+  });
+
+  it('should not leave a stray separator at either end', () => {
+    expect(normalizeEmojiName(' spaced out ')).toBe('spaced_out');
+  });
+});
+
 describe('getEmojiInsertText', () => {
   it('should append a space, so the user can carry straight on typing', () => {
     expect(getEmojiInsertText('🎉', '')).toBe('🎉 ');
@@ -80,30 +99,37 @@ describe('getEmojiMatchRank', () => {
     expect(rank('party_popper')).toBe(0);
   });
 
+  it('should rank the leading word of the name above any other word', () => {
+    expect(rank('party')).toBe(1);
+    expect(rank('popper')).toBe(2);
+  });
+
   it('should rank a whole word of the name above an exact alias match', () => {
-    expect(rank('popper')).toBe(1);
-    expect(rank('tada')).toBe(2);
+    expect(rank('popper')).toBe(2);
+    expect(rank('tada')).toBe(3);
   });
 
-  it('should rank an exact alias match above a name prefix match', () => {
-    expect(rank('tada')).toBe(2);
-    expect(rank('party_p')).toBe(3);
+  it('should rank an exact alias match above a prefix match', () => {
+    expect(rank('tada')).toBe(3);
+    expect(rank('party_p')).toBe(4);
+    expect(rank('pop')).toBe(4);
   });
 
-  it('should rank a prefix of any word of the name above an alias prefix match', () => {
-    expect(rank('pop')).toBe(3);
-    expect(rank('celeb')).toBe(4);
+  it('should rank a name prefix match above an alias prefix match', () => {
+    expect(rank('pop')).toBe(4);
+    expect(rank('celeb')).toBe(5);
   });
 
-  it('should rank an alias prefix match above a name substring match', () => {
-    expect(rank('celeb')).toBe(4);
-    expect(rank('arty')).toBe(5);
+  it('should not match part-way into a word', () => {
+    // `arty` sits inside `party`, but a match has to start at a word boundary
+    expect(rank('arty')).toBe(NO_EMOJI_MATCH);
+    expect(rank('_popper')).toBe(NO_EMOJI_MATCH);
   });
 
   it('should report the name rank separately, so it can break ties', () => {
     // The keyword is the better match, but the name matches too and says so
     expect(getEmojiMatchRank(entry, 'party')).toEqual({ rank: 1, nameRank: 1 });
-    expect(getEmojiMatchRank(entry, 'tada')).toEqual({ rank: 2, nameRank: NO_EMOJI_MATCH });
+    expect(getEmojiMatchRank(entry, 'tada')).toEqual({ rank: 3, nameRank: NO_EMOJI_MATCH });
   });
 
   it('should not match an unrelated query', () => {
@@ -146,6 +172,36 @@ describe('searchEmojis', () => {
     expect(searchEmojis('music')[0].name).toContain('music');
   });
 
+  it('should find an emoji whose name is published with spaces', () => {
+    // `emojilib` writes the newer names as `heart hands` rather than `heart_hands`
+    expect(searchEmojis('heart_hands')[0].emoji).toBe('🫶');
+    expect(searchEmojis('heart_h')[0].emoji).toBe('🫶');
+    expect(searchEmojis('saluting')[0].emoji).toBe('🫡');
+    expect(searchEmojis('polar_bear')[0].emoji).toBe('🐻‍❄️');
+  });
+
+  it('should not turn up coincidental matches from the middle of a word', () => {
+    // `age` sits inside `mage`, `bagel`, `baggage`, `pager` and `package`
+    expect(searchEmojis('age').map(({ name }) => name)).toEqual(['no_one_under_eighteen']);
+    // `ant` sits inside `elephant` and `eggplant`, `ray` inside `crayon` and `prayer_beads`
+    expect(searchEmojis('ant').map(({ emoji }) => emoji)).not.toContain('🐘');
+    expect(searchEmojis('ray').map(({ emoji }) => emoji)).not.toContain('🖍️');
+  });
+
+  it('should prefer the emoji whose name leads with the query', () => {
+    // 🫶 `heart_hands` leads with the word, so it outranks `sparkling_heart` and the rest
+    expect(searchEmojis('heart').map(({ emoji }) => emoji)).toContain('🫶');
+    // …but only on a whole word: `japanese_castle` is not what `:japan` is after
+    expect(searchEmojis('japan')[0].emoji).toBe('🇯🇵');
+    expect(searchEmojis('cry')[0].emoji).toBe('😢');
+  });
+
+  it('should prefer the emoji the matched keyword is most central to', () => {
+    // `love` is the first of 🫶’s three keywords; 💏 `kiss` buries it third among nineteen
+    expect(searchEmojis('love').map(({ emoji }) => emoji)).toContain('🫶');
+    expect(searchEmojis('tada')[0].emoji).toBe('🎉');
+  });
+
   it('should find an emoji by a prefix', () => {
     expect(searchEmojis('thumbs_u')[0].emoji).toBe('👍');
   });
@@ -155,7 +211,9 @@ describe('searchEmojis', () => {
   });
 
   it('should cap the number of results', () => {
+    // A single letter matches over a thousand emojis; the dropdown scrolls through the first few
     expect(searchEmojis('a').length).toBe(MAX_EMOJI_SUGGESTIONS);
+    expect(searchEmojis('c').length).toBe(MAX_EMOJI_SUGGESTIONS);
   });
 
   it('should return nothing for an empty or unknown query', () => {

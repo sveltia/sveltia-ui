@@ -40,11 +40,17 @@
   } = $props();
 
   /**
-   * Estimated size of the dropdown, used to decide whether it fits below the caret. The width is
-   * also enforced in the stylesheet below.
+   * Width of the dropdown, also enforced in the stylesheet below.
    */
   const LIST_WIDTH = 280;
-  const LIST_MAX_HEIGHT = 280;
+  /**
+   * How many suggestions are visible at once. The rest are reached by scrolling.
+   */
+  const VISIBLE_ROWS = 5;
+  /**
+   * Height to assume until a row has been measured, so the first open is positioned sensibly.
+   */
+  const FALLBACK_MAX_HEIGHT = 180;
   /**
    * Gap between the dropdown and the caret, and the minimum margin to the viewport edges.
    */
@@ -94,6 +100,23 @@
   const open = $derived(!!trigger && !!candidates.length);
 
   /**
+   * Height of one suggestion, measured rather than assumed so the dropdown still shows exactly
+   * {@link VISIBLE_ROWS} of them whatever the theme makes a row.
+   * @type {number}
+   */
+  let rowHeight = $state(0);
+  /**
+   * The dropdown’s own vertical padding and border, which sit outside the rows. `box-sizing` is
+   * `border-box`, so `max-height` has to cover them for the rows to get their full share.
+   * @type {number}
+   */
+  let listChrome = $state(0);
+
+  const listMaxHeight = $derived(
+    rowHeight ? rowHeight * VISIBLE_ROWS + listChrome : FALLBACK_MAX_HEIGHT,
+  );
+
+  /**
    * Position of the dropdown, flipped above the caret and clamped to the viewport as needed.
    *
    * The dropdown grows away from the start of the line, so it follows the reading direction rather
@@ -108,7 +131,7 @@
     const { innerWidth, innerHeight } = window;
     const spaceBelow = innerHeight - anchorRect.bottom;
     const spaceAbove = anchorRect.top;
-    const flipped = spaceBelow < LIST_MAX_HEIGHT + VIEWPORT_MARGIN && spaceAbove > spaceBelow;
+    const flipped = spaceBelow < listMaxHeight + VIEWPORT_MARGIN && spaceAbove > spaceBelow;
     const rtl = document.dir === 'rtl';
     const anchorLeft = rtl ? anchorRect.right - LIST_WIDTH : anchorRect.left;
 
@@ -120,7 +143,7 @@
       )}px`,
       maxHeight: `${Math.round(
         Math.min(
-          LIST_MAX_HEIGHT,
+          listMaxHeight,
           (flipped ? spaceAbove : spaceBelow) - LIST_OFFSET - VIEWPORT_MARGIN,
         ),
       )}px`,
@@ -247,10 +270,33 @@
     return true;
   };
 
-  // Move the dropdown to the top layer, so it’s not clipped by anything around the field
+  // Move the dropdown to the top layer, so it’s not clipped by anything around the field, then
+  // measure a row. The measurement has to happen after the popover is shown, because until then the
+  // element isn’t rendered at all and everything measures zero. A row’s height comes from the
+  // theme’s control height plus its padding, so it’s read back rather than assumed.
   $effect(() => {
-    if (listElement && !listElement.matches(':popover-open')) {
+    void candidates;
+
+    if (!listElement) {
+      return;
+    }
+
+    if (!listElement.matches(':popover-open')) {
       listElement.showPopover?.();
+    }
+
+    const row = listElement.querySelector('.option');
+
+    if (row) {
+      const { paddingTop, paddingBottom, borderTopWidth, borderBottomWidth } =
+        getComputedStyle(listElement);
+
+      rowHeight = row.getBoundingClientRect().height;
+      listChrome =
+        Number.parseFloat(paddingTop) +
+        Number.parseFloat(paddingBottom) +
+        Number.parseFloat(borderTopWidth) +
+        Number.parseFloat(borderBottomWidth);
     }
   });
 
@@ -301,11 +347,15 @@
     };
   });
 
-  // Keep the highlighted suggestion visible while the user arrows through a long list
+  // Keep the highlighted suggestion visible while the user arrows through a long list. The scroll
+  // has to be instant: an inherited `scroll-behavior: smooth` otherwise animates it, and the
+  // animation never lands while the list is in the top layer, leaving the highlight off screen.
   $effect(() => {
     void selectedIndex;
 
-    listElement?.querySelector('[aria-selected="true"]')?.scrollIntoView({ block: 'nearest' });
+    listElement
+      ?.querySelector('[aria-selected="true"]')
+      ?.scrollIntoView({ block: 'nearest', behavior: 'instant' });
   });
 
   onMount(() => {
@@ -323,12 +373,35 @@
       }
     };
 
+    /**
+     * Dismiss the list when the user presses somewhere else on the page.
+     *
+     * The popover is `manual` rather than `auto`, so the platform’s own light dismiss is off: an
+     * `auto` popover also closes itself on Escape, which would fight the Escape handling here, and
+     * it would close on a press inside the field the list belongs to, where the caret moving is
+     * what should decide. This covers the one behavior worth borrowing.
+     * @param {PointerEvent} event `pointerdown` event.
+     */
+    const onPointerDown = ({ target }) => {
+      const node = /** @type {Node} */ (target);
+
+      // A press on the list is a choice, not a dismissal, and this runs before the option’s own
+      // handler; a press in the field is left to the caret to sort out
+      if (!open || listElement?.contains(node) || ariaOwner?.contains(node)) {
+        return;
+      }
+
+      close();
+    };
+
     window.addEventListener('scroll', reposition, { capture: true, passive: true });
     window.addEventListener('resize', reposition, { passive: true });
+    document.addEventListener('pointerdown', onPointerDown, { capture: true });
 
     return () => {
       window.removeEventListener('scroll', reposition, { capture: true });
       window.removeEventListener('resize', reposition);
+      document.removeEventListener('pointerdown', onPointerDown, { capture: true });
     };
   });
 </script>
