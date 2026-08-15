@@ -1,16 +1,15 @@
-import { cacheEmojiData, getCachedEmojiData } from './cache.js';
-import { getEmojiDataLoader } from './loader.js';
-
 /**
- * @import { EmojiData, EmojiEntry } from '$lib/typedefs';
+ * @import { EmojiEntry } from '$lib/typedefs';
  */
 
 /**
  * Regular expression that matches an emoji shortcode being typed at the end of a line, like `:smi`.
  * The colon must be at the beginning of the text or preceded by a whitespace or an opening bracket,
  * so a colon in the middle of a word, as in `https://` or `12:34`, doesn’t trigger the suggestions.
+ * The query is bounded to keep a runaway line from being searched for, at a length that still
+ * accommodates the longest published shortcode.
  */
-export const EMOJI_TRIGGER_REGEX = /(?<=^|[\s([{"'«])(?::)(?<query>[a-zA-Z0-9_+-]{1,32})$/;
+export const EMOJI_TRIGGER_REGEX = /(?<=^|[\s([{"'«])(?::)(?<query>[a-zA-Z0-9_+-]{1,64})$/;
 
 /**
  * Maximum number of emoji suggestions offered, matching what Discord shows. The dropdown displays
@@ -20,71 +19,57 @@ export const EMOJI_TRIGGER_REGEX = /(?<=^|[\s([{"'«])(?::)(?<query>[a-zA-Z0-9_+
 export const MAX_EMOJI_SUGGESTIONS = 50;
 
 /**
+ * Separator between the words of a shortcode. Most use an underscore, as in `party_popper`, but the
+ * flags and the compound people use a hyphen, as in `flag-ca` and `man-woman-girl`.
+ */
+const WORD_SEPARATOR_REGEX = /[-_]/;
+/**
  * Cached emoji list. This is `undefined` until {@link loadEmojiList} resolves for the first time.
  * @type {EmojiEntry[] | undefined}
  */
 let emojiList;
 /**
- * In-flight or completed loader for {@link emojiList}, so the data is only fetched once.
+ * In-flight or completed loader for {@link emojiList}, so the data is only parsed once.
  * @type {Promise<EmojiEntry[]> | undefined}
  */
 let loader;
 
 /**
- * Rewrite an emoji name as a shortcode the user can actually type.
- *
- * Most names are already lower case words joined with underscores, but a hundred or so of the newer
- * ones are written with spaces or commas instead, like `heart hands`. A query can contain neither,
- * so those names would be unreachable by their own shortcode and would be shown as something the
- * user can’t type back.
+ * Convert the generated emoji data into a searchable list.
  * @internal
- * @param {string} name Name as published.
- * @returns {string} Name made up of the characters a query can contain.
- */
-export const normalizeEmojiName = (name) =>
-  name
-    .toLowerCase()
-    // Runs of anything a query can’t contain become a single separator
-    .replace(/[^a-z0-9_+-]+/g, '_')
-    .replace(/^_+|_+$/g, '');
-
-/**
- * Convert the raw emoji data into a searchable list.
- * @internal
- * @param {EmojiData} data Emoji data, keyed by emoji character, with each value listing the name
- * followed by any keywords.
+ * @param {string} data Emoji data, one line per emoji. See `generated.js` for the format.
  * @returns {EmojiEntry[]} Emoji list.
  */
 export const parseEmojiData = (data) =>
-  Object.entries(data).map(([emoji, [name, ...aliases]]) => ({
-    emoji,
-    name: normalizeEmojiName(name),
-    // Some of the keywords are capitalized, e.g. `NASA` and `XD`
-    aliases: aliases.map((alias) => alias.toLowerCase()),
-  }));
+  data.split('\n').map((line) => {
+    const [emoji, shortcodes, keywords = ''] = line.split('\t');
+    const [name, ...otherShortcodes] = shortcodes.split(' ');
+
+    return {
+      emoji,
+      name,
+      // The alternative shortcodes come first, because they’re what the user might type, while the
+      // keywords merely describe the emoji
+      aliases: [...otherShortcodes, ...(keywords ? keywords.split(' ') : [])],
+    };
+  });
 
 /**
- * Load the emoji list, from the local cache if it’s there and from the CDN otherwise.
+ * Load the emoji list.
  *
- * The data is a few hundred kilobytes that most sessions never need, so it’s deliberately kept out
- * of the bundle. A failure here is not worth surfacing: no suggestions are ever shown, and the
- * shortcode the user typed stays as plain text.
+ * The data is imported on demand rather than up front, so a bundler that can split it out keeps it
+ * out of the initial payload — most sessions never type a shortcode. A failure here is not worth
+ * surfacing: no suggestions are ever shown, and the shortcode the user typed stays as plain text.
  * @returns {Promise<EmojiEntry[]>} Emoji list, or an empty list if the data can’t be obtained.
  */
 export const loadEmojiList = async () => {
   loader ??= (async () => {
     try {
-      let data = await getCachedEmojiData();
+      const { EMOJI_DATA } = await import('./generated.js');
 
-      if (!data) {
-        data = await getEmojiDataLoader()();
-        // Don’t make the caller wait on the write
-        cacheEmojiData(data);
-      }
-
-      emojiList = parseEmojiData(data);
+      emojiList = parseEmojiData(EMOJI_DATA);
     } catch (ex) {
-      // Allow a later attempt to retry, so a transient network failure isn’t permanent
+      // Allow a later attempt to retry, so a transient chunk load failure isn’t permanent
       loader = undefined;
       emojiList = [];
       // eslint-disable-next-line no-console
@@ -104,29 +89,30 @@ export const loadEmojiList = async () => {
 export const NO_EMOJI_MATCH = 9;
 
 /**
- * Get how well an emoji’s name matches the given query. A lower rank means a better match.
+ * Get how well an emoji’s canonical shortcode matches the given query. A lower rank means a better
+ * match.
  *
- * A match has to start at a word boundary. The name is matched word by word rather than only as a
- * whole, so a partly typed `:cana` reaches `flag_canada`’s second word just as `:canada` does, and
- * the whole name is tested as well, so a query spanning a word boundary like `:flag_can` still
+ * A match has to start at a word boundary. The shortcode is matched word by word rather than only
+ * as a whole, so a partly typed `:polar` reaches `polar_bear` just as `:polar_bear` does, and the
+ * whole shortcode is tested as well, so a query spanning a word boundary like `:polar_b` still
  * matches. What this rules out is a match starting mid-word, which is nearly always coincidental:
  * `:age` would otherwise turn up `mage`, `bagel`, `baggage`, `pager` and `package`.
  * @internal
- * @param {string} name Canonical emoji name.
+ * @param {string} name Canonical shortcode.
  * @param {string} query Lower-cased search query without the leading colon.
  * @returns {number} Rank, or {@link NO_EMOJI_MATCH}.
  */
 export const getEmojiNameMatchRank = (name, query) => {
-  const words = name.split('_');
+  const words = name.split(WORD_SEPARATOR_REGEX);
 
   if (name === query) {
     return 0;
   }
 
-  // What the name leads with is what the emoji mostly is, so `heart_hands` is a better `:heart`
+  // What the shortcode leads with is what the emoji mostly is, so `heart_eyes` is a better `:heart`
   // match than `sparkling_heart`, where the word merely turns up along the way. The whole leading
   // word has to match: `japanese_castle` is not what `:japan` is after, nor `crystal_ball` `:cry`.
-  if (name.startsWith(`${query}_`)) {
+  if (name.startsWith(query) && WORD_SEPARATOR_REGEX.test(name.charAt(query.length))) {
     return 1;
   }
 
@@ -134,7 +120,7 @@ export const getEmojiNameMatchRank = (name, query) => {
     return 2;
   }
 
-  // The whole name is tested too, so a query spanning a word boundary like `:heart_h` still matches
+  // The whole shortcode is tested too, so a query spanning a word boundary like `:polar_b` matches
   if (name.startsWith(query) || words.some((word) => word.startsWith(query))) {
     return 4;
   }
@@ -143,11 +129,11 @@ export const getEmojiNameMatchRank = (name, query) => {
 };
 
 /**
- * Get how well an emoji’s keywords match the given query. A lower rank means a better match. The
- * ranks interleave with {@link getEmojiNameMatchRank}’s: an exact keyword sits between a whole word
- * of the name and a partial one.
+ * Get how well an emoji’s alternative shortcodes and keywords match the given query. A lower rank
+ * means a better match. The ranks interleave with {@link getEmojiNameMatchRank}’s: an exact keyword
+ * sits between a whole word of the shortcode and a partial one.
  * @internal
- * @param {string[]} aliases Lower-cased alternative keywords.
+ * @param {string[]} aliases Lower-cased alternative shortcodes and keywords.
  * @param {string} query Lower-cased search query without the leading colon.
  * @returns {number} Rank, or {@link NO_EMOJI_MATCH}.
  */
@@ -164,17 +150,17 @@ export const getEmojiAliasMatchRank = (aliases, query) => {
 };
 
 /**
- * Get how well an emoji matches the given query, as the best of its name and keyword ranks plus the
- * name rank on its own.
+ * Get how well an emoji matches the given query, as the best of its shortcode and keyword ranks
+ * plus the shortcode rank on its own.
  *
- * The name rank is kept so it can break ties, because the name is what the emoji actually depicts
- * while the keywords are merely associated with it. Many emojis share a keyword — `ca` and `canada`
- * belong to 🍁, 🇨🇦 and 🫎 alike — and the one that also carries the query in its name,
- * `flag_canada`, is the one the user is after.
+ * The shortcode rank is kept so it can break ties, because the shortcode is what the emoji is
+ * called while the keywords are merely associated with it. Many emojis share a keyword — `canada`
+ * belongs to 🇨🇦 and 🍁 alike — and the one that also carries the query in its shortcode,
+ * `flag-ca`, is the one the user is after.
  * @internal
  * @param {EmojiEntry} entry Emoji entry.
  * @param {string} query Lower-cased search query without the leading colon.
- * @returns {{ rank: number, nameRank: number }} Best rank and name rank, either of which is
+ * @returns {{ rank: number, nameRank: number }} Best rank and shortcode rank, either of which is
  * {@link NO_EMOJI_MATCH} when there is nothing to match.
  */
 export const getEmojiMatchRank = ({ name, aliases }, query) => {
@@ -188,11 +174,10 @@ export const getEmojiMatchRank = ({ name, aliases }, query) => {
  * Get how central a match is to the emoji, to separate emojis that match equally well. A lower
  * number means the query is more of what the emoji is about.
  *
- * For a name match, that’s how much of the name the query accounts for: `red_heart` is more of a
- * `:heart` than `smiling_face_with_heart_eyes` is. For a keyword match, it’s how prominent the
- * keyword is — `emojilib` lists them roughly in order of relevance, so a keyword listed first, in a
- * short list, is what the emoji is really for. `love` is the first of 🫶’s three keywords, while
- * 💏 `kiss` buries it third among nineteen.
+ * For a shortcode match, that’s how much of the shortcode the query accounts for: `red_heart` is
+ * more of a `:heart` than `smiling_face_with_heart_eyes` is. For a keyword match, it’s how early
+ * the keyword comes — the alternative shortcodes are listed first, then the words of the Unicode
+ * name in the order it spells them out, which is roughly most to least defining.
  * @internal
  * @param {EmojiEntry} entry Emoji entry.
  * @param {string} query Lower-cased search query without the leading colon.
@@ -200,7 +185,7 @@ export const getEmojiMatchRank = ({ name, aliases }, query) => {
  */
 const getMatchCentrality = ({ name, aliases }, query) => {
   if (getEmojiNameMatchRank(name, query) < NO_EMOJI_MATCH) {
-    return name.split('_').length;
+    return name.split(WORD_SEPARATOR_REGEX).length;
   }
 
   const index = aliases.findIndex((alias) => alias === query || alias.startsWith(query));
@@ -230,12 +215,10 @@ export const searchEmojis = (query) => {
         return { entry, rank, nameRank, centrality: getMatchCentrality(entry, normalizedQuery) };
       })
       .filter(({ rank }) => rank < NO_EMOJI_MATCH)
-      // Equally ranked emojis are settled by the name, then by how central the match is to the
-      // emoji, then by the published order — `Array.prototype.sort()` is stable.
-      //
-      // That last resort is weak: the published order follows the Unicode categories, not how often
-      // an emoji is used, and newer emojis are simply appended. 🫶 `heart_hands` sits at 1826, so
-      // without the two keys before it, it loses every tie to whatever happens to be older.
+      // Equally ranked emojis are settled by the shortcode, then by how central the match is to the
+      // emoji, then by the published order, which is the Unicode order — `Array.prototype.sort()`
+      // is stable. That last resort roughly groups the like with the like, so a tie between two
+      // country flags or two smileys at least comes out in a familiar order.
       .sort((a, b) => a.rank - b.rank || a.nameRank - b.nameRank || a.centrality - b.centrality)
       .slice(0, MAX_EMOJI_SUGGESTIONS)
       .map(({ entry }) => entry)

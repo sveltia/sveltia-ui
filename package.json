@@ -47,6 +47,7 @@
     "check:svelte": "svelte-kit sync && svelte-check --tsconfig ./jsconfig.json",
     "dev": "vite dev",
     "format": "prettier --write .",
+    "generate:emoji": "node scripts/generate-emoji-data.js",
     "generate:shiki": "node scripts/generate-shiki-metadata.js",
     "prepublishOnly": "npm run build",
     "preview": "vite preview",
@@ -68,7 +69,6 @@
     "@lexical/utils": "^0.49.0",
     "@sveltia/i18n": "^1.2.3",
     "@sveltia/utils": "^0.12.1",
-    "emojilib": "^4.0.3",
     "lexical": "^0.49.0"
   },
   "devDependencies": {

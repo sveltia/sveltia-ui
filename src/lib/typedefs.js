@@ -320,16 +320,11 @@
  */
 
 /**
- * Raw emoji data as published by `emojilib`, keyed by emoji character. Each value lists the
- * canonical name followed by any keywords.
- * @typedef {Record<string, string[]>} EmojiData
- */
-
-/**
  * @typedef {object} EmojiEntry
  * @property {string} emoji Emoji character, e.g. `🎉`.
- * @property {string} name Canonical name used as the shortcode, e.g. `party_popper`.
- * @property {string[]} aliases Lower-cased alternative keywords, e.g. `party`, `tada`.
+ * @property {string} name Canonical shortcode, e.g. `tada`.
+ * @property {string[]} aliases Lower-cased alternative shortcodes and keywords, e.g. `party`,
+ * `popper`.
  */
 
 /**

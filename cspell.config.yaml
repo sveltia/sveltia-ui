@@ -16,7 +16,7 @@ useGitignore: true
 ignorePaths:
   - pnpm-lock.yaml
   - data/**/*.json
-  - src/lib/components/text-editor/shiki/generated.js
+  - src/**/generated.js
   - src/lib/locales/*.yaml
   - '!src/lib/locales/en-*.yaml'
 words:
@@ -26,15 +26,16 @@ words:
   - colours
   - cooldown
   - CVEs
-  - emojilib
   - esbuild
   - espree
   - esrap
   - GHSA
   - Ghsas
+  - iamcal
   - infobar
   - jsdoc
   - Klass
+  - moyai
   - Kohei
   - nocheck
   - oninputcapture
@@ -50,9 +51,11 @@ words:
   - shikijs
   - singleline
   - strikethrough
+  - spritesheet
   - stylelint
   - sveltejs
   - Sveltia
+  - thumbsup
   - tokenize
   - typedefs
   - unclickable
