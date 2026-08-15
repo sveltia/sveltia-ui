@@ -1,8 +1,17 @@
-import { version as EMOJILIB_VERSION } from 'emojilib/package.json';
-
 /**
  * @import { EmojiData } from '$lib/typedefs';
  */
+
+/**
+ * Version of `emojilib` the data is fetched from, which also scopes the cache so a bump invalidates
+ * it.
+ *
+ * This is written out rather than read from `emojilib/package.json`, because this package ships
+ * unbundled: a consumer’s test runner may well load these modules through Node, where a JSON import
+ * needs an import attribute and exposes no named exports, and not every bundler understands the
+ * attribute either. A test keeps this in step with the installed version.
+ */
+export const EMOJILIB_VERSION = '4.0.3';
 
 const CDN_BASE_URL = 'https://unpkg.com/emojilib';
 /**
@@ -16,16 +25,11 @@ const FETCH_TIMEOUT = 5000;
  *
  * The data is fetched rather than bundled because it’s a few hundred kilobytes that most sessions
  * never need, and a single-file bundle — our main consumer, Sveltia CMS — would otherwise inline it
- * wholesale. The version comes from the installed `emojilib`, so the URL always matches the
- * package this was developed against.
+ * wholesale. The URL is pinned to {@link EMOJILIB_VERSION}, so the data always matches the package
+ * this was developed against.
  * @returns {string} URL.
  */
 export const getEmojiDataURL = () => `${CDN_BASE_URL}@${EMOJILIB_VERSION}/dist/emoji-en-US.json`;
-
-/**
- * Version of the emoji data, used to scope the cache so a bump invalidates it.
- */
-export { EMOJILIB_VERSION };
 
 /**
  * Fetch the emoji data from the CDN.

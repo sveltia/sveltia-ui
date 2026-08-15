@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   EMOJILIB_VERSION,
@@ -8,8 +9,20 @@ import {
 
 const defaultLoader = getEmojiDataLoader();
 
+describe('EMOJILIB_VERSION', () => {
+  it('should match the installed emojilib, which the version is written out from', () => {
+    // Read rather than imported: a JSON import would need an import attribute under Node, which is
+    // exactly what `loader.js` avoids
+    const { version } = JSON.parse(
+      readFileSync('node_modules/emojilib/package.json', { encoding: 'utf8' }),
+    );
+
+    expect(EMOJILIB_VERSION).toBe(version);
+  });
+});
+
 describe('getEmojiDataURL', () => {
-  it('should point at the installed emojilib version', () => {
+  it('should point at the pinned emojilib version', () => {
     expect(EMOJILIB_VERSION).toMatch(/^\d+\.\d+\.\d+/);
     expect(getEmojiDataURL()).toBe(
       `https://unpkg.com/emojilib@${EMOJILIB_VERSION}/dist/emoji-en-US.json`,
