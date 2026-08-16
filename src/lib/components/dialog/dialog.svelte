@@ -74,12 +74,22 @@
           return;
         }
 
-        if (focusInput) {
-          /** @type {HTMLInputElement | HTMLButtonElement} */ (
-            content?.querySelector('input, button.primary')
-          )?.focus();
-          /** @type {HTMLInputElement} */ (content?.querySelector('input'))?.select();
-        } else {
+        const target = focusInput
+          ? /** @type {HTMLInputElement | HTMLButtonElement | null} */ (
+              content?.querySelector('input, button.primary')
+            )
+          : null;
+
+        if (target) {
+          target.focus();
+
+          if (target instanceof HTMLInputElement) {
+            target.select();
+          }
+        } else if (!focusInput || !content?.contains(document.activeElement)) {
+          // Fall back to the `<dialog>` element itself, so the focus is never left outside the
+          // modal, e.g. when the dialog has no input field or primary button. Content that has
+          // already taken the focus is left alone.
           modal?.focus();
         }
       })();

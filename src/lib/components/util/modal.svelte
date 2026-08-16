@@ -53,7 +53,8 @@
   } = $props();
 
   /**
-   * Focus the `<dialog>` element.
+   * Focus the `<dialog>` element. It has `tabindex="-1"`, so it can receive focus programmatically,
+   * allowing assistive technology to announce the modal’s label and description.
    */
   export const focus = () => {
     dialog?.focus();
@@ -145,6 +146,35 @@
   let generation = 0;
 
   /**
+   * The element that had the focus just before the modal was opened. The focus is moved back to it
+   * once the modal is closed.
+   * @type {HTMLElement | undefined}
+   */
+  let lastActiveElement;
+
+  /**
+   * Move the focus back to the element that had it before the modal was opened. This is done
+   * manually rather than relying on the browser’s own focus restoration, because the modal is
+   * closed while `<body>` is `inert`, which prevents the focus from being restored.
+   */
+  const restoreFocus = () => {
+    const { activeElement } = document;
+    const element = lastActiveElement;
+
+    lastActiveElement = undefined;
+
+    if (!element?.isConnected) {
+      return;
+    }
+
+    // Only take the focus back if it’s still inside the modal, or nowhere because the modal took it
+    // down with itself. If it has already moved on, pulling it back would undo what happened.
+    if (!activeElement || activeElement === document.body || dialog?.contains(activeElement)) {
+      element.focus();
+    }
+  };
+
+  /**
    * Get the longest time from a computed CSS time list, such as `transition-duration`.
    * @param {string} value Comma-separated CSS time values in seconds, e.g. `0.4s, 0.15s`.
    * @returns {number} Time in milliseconds.
@@ -203,6 +233,9 @@
     generation += 1;
 
     const gen = generation;
+    const { activeElement } = document;
+
+    lastActiveElement = activeElement instanceof HTMLElement ? activeElement : undefined;
 
     onOpening?.(new CustomEvent('Opening'));
     visible = true;
@@ -217,6 +250,18 @@
     // because the element may have just been added to the DOM tree.
     dialog.getBoundingClientRect();
     setOpenClass = true;
+    // Wait for the `inert` attribute to be removed, then move the focus into the modal. The
+    // browser’s own dialog focusing steps don’t do this, because the element is still `inert` when
+    // `showModal()` is called above, leaving the focus on `<body>`. A component using this modal,
+    // such as `<Dialog>`, may then move the focus to a specific control, like an input field.
+    await tick();
+
+    if (gen !== generation || !dialog) return;
+
+    if (!dialog.contains(document.activeElement)) {
+      focus();
+    }
+
     await waitForTransition();
     if (gen !== generation) return;
     setActiveClass = true;
@@ -246,6 +291,7 @@
       document.body.inert = false;
     }
 
+    restoreFocus();
     setActiveClass = false;
     setOpenClass = false;
 
@@ -328,6 +374,7 @@
   {#if mounted}
     <dialog
       bind:this={dialog}
+      tabindex="-1"
       {...restProps}
       inert={!setOpenClass}
       {role}

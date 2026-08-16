@@ -13,6 +13,7 @@
   let openMediumDialog = $state(false);
   let openLargeDialog = $state(false);
   let openExtraLargeDialog = $state(false);
+  let openCloseOnlyDialog = $state(false);
   let openMenuDialog = $state(false);
   let promptValue = $state('');
 </script>
@@ -119,6 +120,32 @@
         }}
       />
       <Dialog bind:open={openExtraLargeDialog} title="Greeting" size="x-large">Hello World!</Dialog>
+    </div>
+  </Example>
+</section>
+
+<section>
+  <h3>Close Button Only</h3>
+  <Example>
+    <div role="none">
+      <Button
+        variant="secondary"
+        label="Show Close-Only Dialog"
+        onclick={() => {
+          openCloseOnlyDialog = true;
+        }}
+      />
+      <!-- The dialog has neither an input field nor a primary button to focus, so the `<dialog>`
+      element itself receives the focus when it opens. -->
+      <Dialog
+        bind:open={openCloseOnlyDialog}
+        title="Keyboard Shortcuts"
+        showClose={true}
+        showOk={false}
+        showCancel={false}
+      >
+        Press <kbd>?</kbd> to show this dialog.
+      </Dialog>
     </div>
   </Example>
 </section>
