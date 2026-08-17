@@ -11,7 +11,7 @@
 -->
 <script>
   import { _ } from '@sveltia/i18n';
-  import { onMount } from 'svelte';
+  import { onMount, untrack } from 'svelte';
   import { searchEmojis } from './emoji.js';
 
   /**
@@ -156,11 +156,19 @@
    * closed until they move on to another shortcode.
    */
   export const close = (dismissed = false) => {
-    dismissedShortcodeId = dismissed && trigger ? trigger.id : undefined;
-    trigger = undefined;
-    candidates = [];
-    selectedIndex = 0;
-    anchorRect = undefined;
+    // The state is reset within `untrack()`, because a host closes the list when its field loses
+    // the focus, and the browser fires that `blur` synchronously while it removes the field from
+    // the DOM — which is to say, in the middle of Svelte rendering the block the field lives in,
+    // where a plain assignment would be reported as an unsafe mutation. The same goes for a host
+    // closing the list from an effect teardown. Not tracking the reads is what’s wanted anyway:
+    // whatever happens to be rendering has no business depending on this state.
+    untrack(() => {
+      dismissedShortcodeId = dismissed && trigger ? trigger.id : undefined;
+      trigger = undefined;
+      candidates = [];
+      selectedIndex = 0;
+      anchorRect = undefined;
+    });
   };
 
   /**
