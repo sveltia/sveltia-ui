@@ -1,0 +1,116 @@
+# Dialog action button labels
+ok: OK
+cancel: Annuller
+close: Luk
+
+# Button to clear content, e.g. search input or calendar date
+clear: Ryd
+
+# Text editor dialog buttons for link/image insertion
+insert: Indsæt
+update: Opdater
+remove: Fjern
+
+# Combobox dropdown toggle button aria-labels
+collapse: Fold sammen
+expand: Fold ud
+
+# Infobar/toast dismiss button label
+dismiss: Afvis
+
+# Emoji suggestion listbox aria-label, shared by the text fields and the text editor
+emoji_suggestions: Emojiforslag
+
+# Calendar component
+calendar:
+  # View switcher group aria-labels and navigation button aria-labels
+  year: År
+  previous_decade: Forrige årti
+  next_decade: Næste årti
+  month: Måned
+  previous_month: Forrige måned
+  next_month: Næste måned
+  # “Today” button label in footer
+  today: I dag
+
+# Split button component
+split_button:
+  # Wrapper aria-label, e.g. “Save Options” when primary button is “Save”
+  x_options: 'Muligheder for {$name}'
+  # Dropdown toggle aria-label
+  more_options: Flere muligheder
+
+# Combobox component
+combobox:
+  # Placeholder when no option is selected
+  select_an_option: Vælg en mulighed…
+  # Filter input aria-label
+  filter_options: Filtrér muligheder
+  # Empty state message when filter has no matches
+  no_matching_options: Ingen matchende muligheder fundet
+
+# Number input component
+number_input:
+  # Spin button aria-labels for incrementing/decrementing the number value
+  increase: Forøg
+  decrease: Formindsk
+
+# Password input component
+password_input:
+  # Visibility toggle button aria-labels
+  show_password: Vis adgangskode
+  hide_password: Skjul adgangskode
+
+# Secret input component (API keys, tokens, etc.)
+secret_input:
+  # Visibility toggle button aria-labels
+  show_secret: Vis hemmelighed
+  hide_secret: Skjul hemmelighed
+
+# Select tags component (multi-select)
+select_tags:
+  # Listbox aria-label
+  selected_options: Valgte muligheder
+  # Remove button aria-label, e.g. “Remove Option 1”
+  remove_x: 'Fjern {$name}'
+
+# Text editor component
+text_editor:
+  # Toolbar aria-labels
+  text_editor: Teksteditor
+  code_editor: Kodeeditor
+  # Block style menu button and menu aria-labels
+  text_style_options: Muligheder for tekststil
+  show_text_style_options: Vis muligheder for tekststil
+  # Block style menu items
+  paragraph: Afsnit
+  heading_1: Overskrift 1
+  heading_2: Overskrift 2
+  heading_3: Overskrift 3
+  heading_4: Overskrift 4
+  heading_5: Overskrift 5
+  heading_6: Overskrift 6
+  bulleted_list: Punktopstilling
+  numbered_list: Nummereret liste
+  blockquote: Citat
+  code_block: Kodeblok
+  # Inline style button aria-labels
+  bold: Fed
+  italic: Kursiv
+  strikethrough: Gennemstreget
+  code: Kode
+  link: Link
+  # Link dialog title
+  insert_link: Indsæt link
+  update_link: Opdater link
+  # Link dialog input field labels
+  text: Tekst
+  url: URL
+  # Markdown mode toggle button aria-label
+  edit_in_markdown: Rediger i Markdown
+  # Error message when rich text conversion fails
+  converter_error: Formateret tekst kunne ikke slås til. Brug editoren til ren tekst i stedet.
+  # Language selector aria-label
+  language: Sprog
+  # Plain text mode option in language selector
+  plain_text: Ren tekst
