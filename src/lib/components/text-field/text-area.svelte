@@ -171,6 +171,7 @@
   textarea,
   .clone {
     white-space: pre-wrap;
-    word-break: break-all;
+    word-break: normal;
+    overflow-wrap: anywhere;
   }
 </style>
