@@ -74,21 +74,21 @@
   "devDependencies": {
     "@rollup/plugin-yaml": "^5.0.0",
     "@sveltejs/adapter-auto": "^7.0.1",
-    "@sveltejs/kit": "^2.70.2",
+    "@sveltejs/kit": "^2.70.3",
     "@sveltejs/package": "^2.5.8",
     "@sveltejs/vite-plugin-svelte": "^7.3.0",
-    "@vitest/coverage-v8": "^4.1.10",
+    "@vitest/coverage-v8": "^4.1.11",
     "cspell": "^10.0.1",
     "eslint": "^9.39.5",
     "eslint-config-airbnb-extended": "^3.2.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-import": "^2.32.0",
-    "eslint-plugin-jsdoc": "^64.2.0",
+    "eslint-plugin-jsdoc": "^64.2.1",
     "eslint-plugin-package-json": "^1.7.1",
     "eslint-plugin-svelte": "^3.23.0",
     "globals": "^17.11.0",
     "happy-dom": "^20.11.2",
-    "oxlint": "^1.78.0",
+    "oxlint": "^1.79.0",
     "postcss": "^8.5.26",
     "postcss-html": "^2.0.0",
     "prettier": "^3.9.6",
@@ -104,7 +104,7 @@
     "svelte-preprocess": "^6.0.5",
     "tslib": "^2.8.1",
     "vite": "^8.2.1",
-    "vitest": "^4.1.10"
+    "vitest": "^4.1.11"
   },
   "peerDependencies": {
     "svelte": "^5.0.0"
