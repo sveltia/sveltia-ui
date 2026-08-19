@@ -59,6 +59,14 @@
     ...restProps
     /* eslint-enable prefer-const */
   } = $props();
+
+  /**
+   * Content for the clone element used to measure the auto-resized height. A trailing line break is
+   * added because browsers don’t render the last empty line, which would otherwise make the clone
+   * one line shorter than the `<textarea>`.
+   * @type {string}
+   */
+  const cloneValue = $derived(`${value}\n`);
 </script>
 
 <div
@@ -84,7 +92,7 @@
     aria-invalid={invalid}
     class:auto-resize={autoResize}></textarea>
   {#if autoResize}
-    <div class="clone" aria-hidden="true" {dir}>{value}</div>
+    <div class="clone" aria-hidden="true" {dir}>{cloneValue}</div>
   {/if}
   {#if useEmojiAutocomplete && !disabled && !readonly}
     <EmojiAutocomplete {element} />
