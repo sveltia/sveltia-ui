@@ -35,8 +35,9 @@ words:
   - infobar
   - jsdoc
   - Klass
-  - moyai
   - Kohei
+  - localizers
+  - moyai
   - nocheck
   - oninputcapture
   - onpointerrawupdate
@@ -50,8 +51,8 @@ words:
   - Shiki
   - shikijs
   - singleline
-  - strikethrough
   - spritesheet
+  - strikethrough
   - stylelint
   - sveltejs
   - Sveltia
