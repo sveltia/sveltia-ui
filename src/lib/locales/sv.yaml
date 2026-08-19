@@ -1,0 +1,113 @@
+# Dialog action button labels
+ok: OK
+cancel: Avbryt
+close: Stäng
+
+# Button to clear content, e.g. search input or calendar date
+clear: Rensa
+
+# Text editor dialog buttons for link/image insertion
+insert: Infoga
+update: Uppdatera
+remove: Ta bort
+
+# Combobox dropdown toggle button aria-labels
+collapse: Fäll ihop
+expand: Fäll ut
+
+# Infobar/toast dismiss button label
+dismiss: Avfärda
+
+# Calendar component
+calendar:
+  # View switcher group aria-labels and navigation button aria-labels
+  year: År
+  previous_decade: Föregående årtionde
+  next_decade: Nästa årtionde
+  month: Månad
+  previous_month: Föregående månad
+  next_month: Nästa månad
+  # “Today” button label in footer
+  today: Idag
+
+# Split button component
+split_button:
+  # Wrapper aria-label, e.g. “Save Options” when primary button is “Save”
+  x_options: 'Alternativ för {$name}'
+  # Dropdown toggle aria-label
+  more_options: Fler alternativ
+
+# Combobox component
+combobox:
+  # Placeholder when no option is selected
+  select_an_option: Välj ett alternativ…
+  # Filter input aria-label
+  filter_options: Filtrera alternativ
+  # Empty state message when filter has no matches
+  no_matching_options: Inga matchande alternativ hittades
+
+# Number input component
+number_input:
+  # Spin button aria-labels for incrementing/decrementing the number value
+  increase: Öka
+  decrease: Minska
+
+# Password input component
+password_input:
+  # Visibility toggle button aria-labels
+  show_password: Visa lösenord
+  hide_password: Dölj lösenord
+
+# Secret input component (API keys, tokens, etc.)
+secret_input:
+  # Visibility toggle button aria-labels
+  show_secret: Visa hemlighet
+  hide_secret: Dölj hemlighet
+
+# Select tags component (multi-select)
+select_tags:
+  # Listbox aria-label
+  selected_options: Valda inställningar
+  # Remove button aria-label, e.g. “Remove Option 1”
+  remove_x: 'Ta bort {$name}'
+
+# Text editor component
+text_editor:
+  # Toolbar aria-labels
+  text_editor: Textredigerare
+  code_editor: Kodredigerare
+  # Block style menu button and menu aria-labels
+  text_style_options: Textstilinställningar
+  show_text_style_options: Visa textstilinställningar
+  # Block style menu items
+  paragraph: Paragraf
+  heading_1: Rubrik 1
+  heading_2: Rubrik 2
+  heading_3: Rubrik 3
+  heading_4: Rubrik 4
+  heading_5: Rubrik 5
+  heading_6: Rubrik 6
+  bulleted_list: Punktlista
+  numbered_list: Numrerad lista
+  blockquote: Blockcitat
+  code_block: Kodblock
+  # Inline style button aria-labels
+  bold: Fet
+  italic: Kursiv
+  strikethrough: Genomstruken
+  code: Kod
+  link: Länk
+  # Link dialog title
+  insert_link: Infoga länk
+  update_link: Uppdatera länk
+  # Link dialog input field labels
+  text: Text
+  url: URL
+  # Markdown mode toggle button aria-label
+  edit_in_markdown: Redigera som Markdown
+  # Error message when rich text conversion fails
+  converter_error: Det gick inte att aktivera läget för formaterad text. Använd istället redigeraren för vanlig text.
+  # Language selector aria-label
+  language: Språk
+  # Plain text mode option in language selector
+  plain_text: Vanlig text
