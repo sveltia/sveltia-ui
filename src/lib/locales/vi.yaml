@@ -1,0 +1,116 @@
+# Dialog action button labels
+ok: Đồng ý
+cancel: Hủy
+close: Đóng
+
+# Button to clear content, e.g. search input or calendar date
+clear: Xóa
+
+# Text editor dialog buttons for link/image insertion
+insert: Chèn
+update: Cập nhật
+remove: Xóa
+
+# Combobox dropdown toggle button aria-labels
+collapse: Thu gọn
+expand: Mở rộng
+
+# Infobar/toast dismiss button label
+dismiss: Đóng
+
+# Emoji suggestion listbox aria-label, shared by the text fields and the text editor
+emoji_suggestions: Gợi ý biểu tượng cảm xúc
+
+# Calendar component
+calendar:
+  # View switcher group aria-labels and navigation button aria-labels
+  year: Năm
+  previous_decade: Thập kỷ trước
+  next_decade: Thập kỷ sau
+  month: Tháng
+  previous_month: Tháng trước
+  next_month: Tháng sau
+  # “Today” button label in footer
+  today: Hôm nay
+
+# Split button component
+split_button:
+  # Wrapper aria-label, e.g. “Save Options” when primary button is “Save”
+  x_options: Tùy chọn cho {$name}
+  # Dropdown toggle aria-label
+  more_options: Tùy chọn khác
+
+# Combobox component
+combobox:
+  # Placeholder when no option is selected
+  select_an_option: Chọn một tùy chọn…
+  # Filter input aria-label
+  filter_options: Lọc tùy chọn
+  # Empty state message when filter has no matches
+  no_matching_options: Không tìm thấy tùy chọn phù hợp
+
+# Number input component
+number_input:
+  # Spin button aria-labels for incrementing/decrementing the number value
+  increase: Tăng
+  decrease: Giảm
+
+# Password input component
+password_input:
+  # Visibility toggle button aria-labels
+  show_password: Hiện mật khẩu
+  hide_password: Ẩn mật khẩu
+
+# Secret input component (API keys, tokens, etc.)
+secret_input:
+  # Visibility toggle button aria-labels
+  show_secret: Hiện mã bí mật
+  hide_secret: Ẩn mã bí mật
+
+# Select tags component (multi-select)
+select_tags:
+  # Listbox aria-label
+  selected_options: Các tùy chọn đã chọn
+  # Remove button aria-label, e.g. “Remove Option 1”
+  remove_x: Xóa {$name}
+
+# Text editor component
+text_editor:
+  # Toolbar aria-labels
+  text_editor: Trình soạn thảo văn bản
+  code_editor: Trình soạn thảo mã
+  # Block style menu button and menu aria-labels
+  text_style_options: Tùy chọn kiểu văn bản
+  show_text_style_options: Hiện tùy chọn kiểu văn bản
+  # Block style menu items
+  paragraph: Đoạn văn
+  heading_1: Tiêu đề 1
+  heading_2: Tiêu đề 2
+  heading_3: Tiêu đề 3
+  heading_4: Tiêu đề 4
+  heading_5: Tiêu đề 5
+  heading_6: Tiêu đề 6
+  bulleted_list: Dấu đầu dòng
+  numbered_list: Đánh số
+  blockquote: Trích dẫn
+  code_block: Khối mã
+  # Inline style button aria-labels
+  bold: In đậm
+  italic: In nghiêng
+  strikethrough: Gạch ngang
+  code: Mã
+  link: Liên kết
+  # Link dialog title
+  insert_link: Chèn liên kết
+  update_link: Cập nhật liên kết
+  # Link dialog input field labels
+  text: Văn bản
+  url: URL
+  # Markdown mode toggle button aria-label
+  edit_in_markdown: Chỉnh sửa bằng Markdown
+  # Error message when rich text conversion fails
+  converter_error: Không thể bật chế độ văn bản đa định dạng. Vui lòng sử dụng trình soạn thảo văn bản thuần.
+  # Language selector aria-label
+  language: Ngôn ngữ
+  # Plain text mode option in language selector
+  plain_text: Văn bản thuần
