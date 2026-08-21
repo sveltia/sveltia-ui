@@ -148,6 +148,9 @@
 
       await focusEditor(editorStore.editor);
       editorStore.editor.dispatchCommand(TOGGLE_LINK_COMMAND, anchorURL);
+    } else if (editorStore.editor) {
+      // The dialog leaves the focus alone (see `restoreFocus` below), so bring it back here
+      await focusEditor(editorStore.editor);
     }
 
     anchorURL = '';
@@ -202,6 +205,7 @@
   bind:value={anchorURL}
   okDisabled={!anchorURL}
   okLabel={dialogMode === 'create' ? _('_sui.insert') : _('_sui.update')}
+  restoreFocus={false}
   onClose={(event) => {
     onDialogClose(event);
   }}

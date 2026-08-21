@@ -57,6 +57,10 @@
  * @property {boolean} [keepContent] Whether to keep the `<dialog>` element and its content in the
  * DOM tree while the modal is not displayed. By default, these are mounted only while the modal is
  * open, and unmounted once the closing transition is complete.
+ * @property {boolean} [restoreFocus] Whether to move the focus back to the element that had it
+ * before the modal was opened. Default: `true`. Disable this if the consumer takes care of the
+ * focus itself once the modal is closed, such as when the modal is opened from a rich text editor,
+ * where refocusing the element would reset the caret and discard the user’s selection.
  * @property {HTMLDialogElement} [dialog] A reference to the `<dialog>` element.
  * @property {Snippet} [children] Primary slot content.
  * @property {Snippet} [extraContent] Extra slot content.

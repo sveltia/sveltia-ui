@@ -40,6 +40,7 @@
     lightDismiss = false,
     escapeDismiss = true,
     keepContent = false,
+    restoreFocus = true,
     children,
     extraContent,
     onOpening,
@@ -153,25 +154,43 @@
   let lastActiveElement;
 
   /**
+   * Timer used to defer the focus restoration in {@link moveFocusBack}.
+   * @type {number | undefined}
+   */
+  let restoreFocusTimer;
+
+  /**
    * Move the focus back to the element that had it before the modal was opened. This is done
    * manually rather than relying on the browser’s own focus restoration, because the modal is
    * closed while `<body>` is `inert`, which prevents the focus from being restored.
    */
-  const restoreFocus = () => {
-    const { activeElement } = document;
+  const moveFocusBack = () => {
     const element = lastActiveElement;
 
     lastActiveElement = undefined;
 
-    if (!element?.isConnected) {
+    if (!restoreFocus || !element) {
       return;
     }
 
-    // Only take the focus back if it’s still inside the modal, or nowhere because the modal took it
-    // down with itself. If it has already moved on, pulling it back would undo what happened.
-    if (!activeElement || activeElement === document.body || dialog?.contains(activeElement)) {
-      element.focus();
-    }
+    // Wait for the current task to finish before moving the focus. The modal is typically closed
+    // from within an event handler, and the event that triggered it is still being processed:
+    // Firefox dispatches `keypress` to whatever holds the focus at that point, so restoring it
+    // synchronously would let the Enter key that submitted the modal activate the button that
+    // opened it, immediately reopening the modal.
+    restoreFocusTimer = window.setTimeout(() => {
+      const { activeElement } = document;
+
+      if (!element.isConnected) {
+        return;
+      }
+
+      // Only take the focus back if it’s still inside the modal, or nowhere because the modal took
+      // it down with itself. If it has already moved on, pulling it back would undo what happened.
+      if (!activeElement || activeElement === document.body || dialog?.contains(activeElement)) {
+        element.focus();
+      }
+    });
   };
 
   /**
@@ -235,6 +254,9 @@
     const gen = generation;
     const { activeElement } = document;
 
+    // Cancel a pending restoration from a previous close, which would otherwise pull the focus out
+    // of the modal that’s being opened right now
+    window.clearTimeout(restoreFocusTimer);
     lastActiveElement = activeElement instanceof HTMLElement ? activeElement : undefined;
 
     onOpening?.(new CustomEvent('Opening'));
@@ -291,7 +313,7 @@
       document.body.inert = false;
     }
 
-    restoreFocus();
+    moveFocusBack();
     setActiveClass = false;
     setOpenClass = false;
 
@@ -340,6 +362,7 @@
 
     // onUnmount
     return () => {
+      window.clearTimeout(restoreFocusTimer);
       dialog?.close();
       unmount(placeholder);
     };
