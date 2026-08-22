@@ -15,6 +15,7 @@
    * @property {'off' | 'polite' | 'assertive'} [ariaLive] ARIA live region politeness.
    * @property {Snippet} [children] Primary slot content.
    * @property {Snippet} [icon] Icon slot content.
+   * @property {() => void} [onDismiss] Callback invoked when the close button is clicked.
    */
 
   /** @type {Props} */
@@ -26,6 +27,7 @@
     ariaLive = 'polite',
     children = undefined,
     icon = undefined,
+    onDismiss,
     /* eslint-enable prefer-const */
   } = $props();
 </script>
@@ -49,6 +51,7 @@
           aria-label={_('_sui.dismiss')}
           onclick={() => {
             show = false;
+            onDismiss?.();
           }}
         >
           <Icon name="close" />
