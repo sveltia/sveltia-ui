@@ -18,6 +18,9 @@ expand: Aufklappen
 # Infobar/toast dismiss button label
 dismiss: Ausblenden
 
+# Emoji suggestion listbox aria-label, shared by the text fields and the text editor
+emoji_suggestions: Emoji-Vorschläge
+
 # Calendar component
 calendar:
   # View switcher group aria-labels and navigation button aria-labels

@@ -18,6 +18,9 @@ expand: Fäll ut
 # Infobar/toast dismiss button label
 dismiss: Avfärda
 
+# Emoji suggestion listbox aria-label, shared by the text fields and the text editor
+emoji_suggestions: Emojiförslag
+
 # Calendar component
 calendar:
   # View switcher group aria-labels and navigation button aria-labels
