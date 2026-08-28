@@ -80,6 +80,7 @@ export { default as EmptyState } from './components/util/empty-state.svelte';
 export { default as Group } from './components/util/group.svelte';
 export { default as Modal } from './components/util/modal.svelte';
 export { default as Placeholder } from './components/util/placeholder.svelte';
+export { default as Popup } from './components/util/popup.svelte';
 export { default as VisibilityObserver } from './components/util/visibility-observer.svelte';
 export { loadCodeHighlighter } from './components/text-editor/core.js';
 export { setCodeHighlighterCacheEnabled } from './components/text-editor/shiki/cache.js';
