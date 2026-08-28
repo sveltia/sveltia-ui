@@ -193,8 +193,12 @@
         return;
       }
 
+      // A composite widget keeps exactly one of its items in the tab order and takes its own root
+      // out of it, so the item is what should receive focus. Falling back to any focusable element
+      // covers the popups that hold plain content.
       const target = /** @type {HTMLElement} */ (
-        content.querySelector('[tabindex]:not([aria-disabled="true"])')
+        content.querySelector('[tabindex="0"]:not([aria-disabled="true"])') ??
+          content.querySelector('[tabindex]:not([aria-disabled="true"])')
       );
 
       if (target) {
