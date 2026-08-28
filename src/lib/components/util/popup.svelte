@@ -260,6 +260,24 @@
       }
     }
 
+    &.tree {
+      border-width: var(--sui-tree-border-width, 1px);
+      border-style: var(--sui-tree-border-style, solid);
+      border-color: var(--sui-tree-border-color, var(--sui-secondary-border-color));
+      border-radius: var(--sui-tree-border-radius, 4px);
+      padding: var(--sui-tree-padding, 4px);
+
+      :global {
+        .sui.tree {
+          margin: 0;
+          border-width: 0;
+          border-radius: 0;
+          padding: 0;
+          background-color: transparent;
+        }
+      }
+    }
+
     // Hand the scrolling down to the option list rather than doing it here. The popup is capped at
     // the space available around the anchor, and scrolling it as a whole would carry the combobox’s
     // filter out of the dropdown along with the options it filters.
