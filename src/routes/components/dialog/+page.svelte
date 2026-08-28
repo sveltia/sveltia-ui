@@ -1,5 +1,5 @@
 <script>
-  import { Button, Dialog, Menu, MenuButton, MenuItem } from '$lib';
+  import { Button, Dialog, Menu, MenuButton, MenuItem, Option, Select } from '$lib';
   import AlertDialog from '$lib/components/dialog/alert-dialog.svelte';
   import ConfirmationDialog from '$lib/components/dialog/confirmation-dialog.svelte';
   import PromptDialog from '$lib/components/dialog/prompt-dialog.svelte';
@@ -99,7 +99,16 @@
           openMediumDialog = true;
         }}
       />
-      <Dialog bind:open={openMediumDialog} title="Greeting" size="medium">Hello World!</Dialog>
+      <Dialog bind:open={openMediumDialog} title="Greeting" size="medium">
+        Hello World!
+        <!-- Resize the window vertically while this is open to verify the dropdown position is
+        recalculated as the dialog re-centers. -->
+        <Select>
+          <Option label="Banana" />
+          <Option label="Mango" />
+          <Option label="Apple" />
+        </Select>
+      </Dialog>
     </div>
     <div role="none">
       <Button

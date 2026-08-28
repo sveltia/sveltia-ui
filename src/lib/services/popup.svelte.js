@@ -63,118 +63,6 @@ class Popup {
     }),
   );
 
-  observer = new IntersectionObserver((entries) => {
-    entries.forEach(({ intersectionRect, rootBounds }) => {
-      if (!intersectionRect || !rootBounds) {
-        return;
-      }
-
-      // Use the tracked content element rather than searching the popup element, which for a nested
-      // popup is the shared parent `<dialog>` and would yield the parent’s content
-      const content = /** @type {HTMLElement | null} */ (
-        this.contentElement ?? this.popupElement?.querySelector('.content') ?? null
-      );
-
-      // The content is not in the DOM tree yet; `checkPosition()` will be called again once the
-      // popup element is attached
-      if (!content) {
-        return;
-      }
-
-      const { scrollHeight: contentHeight, scrollWidth: contentWidth } = content;
-      const topMargin = intersectionRect.top - 8;
-      const bottomMargin = rootBounds.height - intersectionRect.bottom - 8;
-      let { position } = this;
-      let height;
-
-      // Normalize RTL-friendly positions to LTR for LTR documents
-      // @todo Rename `PopupPosition` enums to be direction-agnostic
-      if (document.dir === 'rtl') {
-        if (position.endsWith('-left')) {
-          position = /** @type {PopupPosition} */ (position.replace('-left', '-right'));
-        } else if (position.endsWith('-right')) {
-          position = /** @type {PopupPosition} */ (position.replace('-right', '-left'));
-        }
-
-        if (position.startsWith('left-')) {
-          position = /** @type {PopupPosition} */ (position.replace('left-', 'right-'));
-        } else if (position.startsWith('right-')) {
-          position = /** @type {PopupPosition} */ (position.replace('right-', 'left-'));
-        }
-      }
-
-      // Alter the position if the space is limited
-      // @todo Handle more overflow cases
-      if (position.startsWith('bottom-')) {
-        if (contentHeight > bottomMargin) {
-          if (topMargin > bottomMargin) {
-            position = /** @type {PopupPosition} */ (position.replace('bottom-', 'top-'));
-            height = topMargin;
-          } else {
-            height = bottomMargin;
-          }
-        }
-      }
-
-      // If the popup overflows the viewport, change the position
-      if (position.endsWith('-left')) {
-        if (intersectionRect.left + contentWidth > rootBounds.width - 8) {
-          position = /** @type {PopupPosition} */ (position.replace('-left', '-right'));
-        }
-      }
-
-      if (position.endsWith('-right')) {
-        if (intersectionRect.right - contentWidth < 8) {
-          position = /** @type {PopupPosition} */ (position.replace('-right', '-left'));
-        }
-      }
-
-      const top = position.startsWith('bottom-')
-        ? `${Math.round(intersectionRect.bottom)}px`
-        : position.endsWith('-top')
-          ? `${Math.round(intersectionRect.top)}px`
-          : 'auto';
-
-      const right = position.startsWith('left-')
-        ? `${Math.round(rootBounds.width - intersectionRect.left)}px`
-        : position.endsWith('-right')
-          ? `${Math.round(rootBounds.width - intersectionRect.right)}px`
-          : 'auto';
-
-      const bottom = position.startsWith('top-')
-        ? `${Math.round(rootBounds.height - intersectionRect.top)}px`
-        : position.endsWith('-bottom')
-          ? `${Math.round(rootBounds.height - intersectionRect.bottom)}px`
-          : 'auto';
-
-      const left = position.startsWith('right-')
-        ? `${Math.round(intersectionRect.right)}px`
-        : position.endsWith('-left')
-          ? `${Math.round(intersectionRect.left)}px`
-          : 'auto';
-
-      const style = {
-        inset: [top, right, bottom, left].join(' '),
-        zIndex: 1000,
-        minWidth: `${Math.round(intersectionRect.width)}px`,
-        maxWidth: position.endsWith('-left')
-          ? `${Math.round(rootBounds.width - intersectionRect.left - 8)}px`
-          : `${Math.round(intersectionRect.right - 8)}px`,
-        height: height ? `${Math.round(height)}px` : 'auto',
-      };
-
-      if (
-        style.inset !== this.style.inset ||
-        style.zIndex !== this.style.zIndex ||
-        style.minWidth !== this.style.minWidth ||
-        style.maxWidth !== this.style.maxWidth ||
-        style.height !== this.style.height
-      ) {
-        this.style = style;
-      }
-    });
-  });
-
   /**
    * A reference to the `<dialog>` element used for the popup, which also serves as the backdrop.
    * This is `undefined` while the element is not in the DOM tree, which is the case for a closed
@@ -253,6 +141,21 @@ class Popup {
     });
     this.resizeObserver.observe(this.positionBaseElement);
 
+    // Recalculate the position when the viewport is resized. This is needed in addition to the
+    // `ResizeObserver` above, which only reacts to the anchor’s own size changing, not to it
+    // simply moving — which happens, for example, when a dialog containing the anchor is
+    // re-centered as the viewport is resized. This deliberately avoids the `resize` event on
+    // `window`, which isn’t guaranteed to fire for every layout-affecting viewport change across
+    // browsers; observing this popup’s own `<dialog>` element instead is reliable, because that
+    // element is always sized to exactly `100dvw` × `100dvh` (see `Modal.svelte`), so its box
+    // changes precisely when the viewport does — independent of the host app’s own CSS, unlike
+    // watching `document.body` or `document.documentElement` would be.
+    this.viewportResizeObserver = new ResizeObserver(() => {
+      if (this.open) {
+        this.checkPosition();
+      }
+    });
+
     if (popupElement) {
       this.attachPopupElement(popupElement);
     }
@@ -274,6 +177,7 @@ class Popup {
     this.detachPopupElement();
     this.popupElement = popupElement;
     this.contentElement = contentElement;
+    this.viewportResizeObserver.observe(popupElement);
 
     // Identify the popup by the element that actually holds its content. Labelling the `<dialog>`
     // would be wrong for a nested popup, which shares its parent’s: it would overwrite the parent’s
@@ -327,6 +231,10 @@ class Popup {
     this.#removeEventListeners?.();
     this.#removeEventListeners = undefined;
 
+    if (this.popupElement) {
+      this.viewportResizeObserver.unobserve(this.popupElement);
+    }
+
     // The content is leaving the DOM tree, so the anchor must stop referencing it. Only clear a
     // reference this popup owns; the consumer may have pointed the anchor somewhere else.
     if (this.anchorElement.getAttribute('aria-controls') === this.id) {
@@ -354,16 +262,140 @@ class Popup {
   }
 
   /**
-   * Check the position of the anchor element. This is a no-op while the popup element is not in the
-   * DOM tree; the caller is expected to call this again once the element is attached.
+   * Check the position of the anchor element and, if the popup is mounted, recalculate and apply
+   * its inset and size. This is a no-op while the popup element is not in the DOM tree; the caller
+   * is expected to call this again once the element is attached.
+   *
+   * This measures the anchor synchronously with `getBoundingClientRect()` rather than reacting to
+   * an `IntersectionObserver`, whose delivery isn’t guaranteed to be timely or frame-aligned the
+   * way `ResizeObserver`’s is: a stale computation could arrive after a fresher one and silently
+   * overwrite it, occasionally leaving the popup mispositioned after a resize.
    */
   checkPosition() {
     if (!this.popupElement) {
       return;
     }
 
-    this.observer.unobserve(this.positionBaseElement);
-    this.observer.observe(this.positionBaseElement);
+    // Use the tracked content element rather than searching the popup element, which for a nested
+    // popup is the shared parent `<dialog>` and would yield the parent’s content
+    const content = /** @type {HTMLElement | null} */ (
+      this.contentElement ?? this.popupElement?.querySelector('.content') ?? null
+    );
+
+    // The content is not in the DOM tree yet; `checkPosition()` will be called again once the
+    // popup element is attached
+    if (!content) {
+      return;
+    }
+
+    const anchorRect = this.positionBaseElement.getBoundingClientRect();
+    const rootBounds = { width: window.innerWidth, height: window.innerHeight };
+
+    // Clip the anchor’s rect to the viewport, mirroring what `IntersectionObserver` used to report
+    // as `intersectionRect`
+    const intersectionRect = {
+      top: Math.max(anchorRect.top, 0),
+      left: Math.max(anchorRect.left, 0),
+      right: Math.min(anchorRect.right, rootBounds.width),
+      bottom: Math.min(anchorRect.bottom, rootBounds.height),
+      width: 0,
+      height: 0,
+    };
+
+    intersectionRect.width = Math.max(0, intersectionRect.right - intersectionRect.left);
+    intersectionRect.height = Math.max(0, intersectionRect.bottom - intersectionRect.top);
+
+    const { scrollHeight: contentHeight, scrollWidth: contentWidth } = content;
+    const topMargin = intersectionRect.top - 8;
+    const bottomMargin = rootBounds.height - intersectionRect.bottom - 8;
+    let { position } = this;
+    let height;
+
+    // Normalize RTL-friendly positions to LTR for LTR documents
+    // @todo Rename `PopupPosition` enums to be direction-agnostic
+    if (document.dir === 'rtl') {
+      if (position.endsWith('-left')) {
+        position = /** @type {PopupPosition} */ (position.replace('-left', '-right'));
+      } else if (position.endsWith('-right')) {
+        position = /** @type {PopupPosition} */ (position.replace('-right', '-left'));
+      }
+
+      if (position.startsWith('left-')) {
+        position = /** @type {PopupPosition} */ (position.replace('left-', 'right-'));
+      } else if (position.startsWith('right-')) {
+        position = /** @type {PopupPosition} */ (position.replace('right-', 'left-'));
+      }
+    }
+
+    // Alter the position if the space is limited
+    // @todo Handle more overflow cases
+    if (position.startsWith('bottom-')) {
+      if (contentHeight > bottomMargin) {
+        if (topMargin > bottomMargin) {
+          position = /** @type {PopupPosition} */ (position.replace('bottom-', 'top-'));
+          height = topMargin;
+        } else {
+          height = bottomMargin;
+        }
+      }
+    }
+
+    // If the popup overflows the viewport, change the position
+    if (position.endsWith('-left')) {
+      if (intersectionRect.left + contentWidth > rootBounds.width - 8) {
+        position = /** @type {PopupPosition} */ (position.replace('-left', '-right'));
+      }
+    }
+
+    if (position.endsWith('-right')) {
+      if (intersectionRect.right - contentWidth < 8) {
+        position = /** @type {PopupPosition} */ (position.replace('-right', '-left'));
+      }
+    }
+
+    const top = position.startsWith('bottom-')
+      ? `${Math.round(intersectionRect.bottom)}px`
+      : position.endsWith('-top')
+        ? `${Math.round(intersectionRect.top)}px`
+        : 'auto';
+
+    const right = position.startsWith('left-')
+      ? `${Math.round(rootBounds.width - intersectionRect.left)}px`
+      : position.endsWith('-right')
+        ? `${Math.round(rootBounds.width - intersectionRect.right)}px`
+        : 'auto';
+
+    const bottom = position.startsWith('top-')
+      ? `${Math.round(rootBounds.height - intersectionRect.top)}px`
+      : position.endsWith('-bottom')
+        ? `${Math.round(rootBounds.height - intersectionRect.bottom)}px`
+        : 'auto';
+
+    const left = position.startsWith('right-')
+      ? `${Math.round(intersectionRect.right)}px`
+      : position.endsWith('-left')
+        ? `${Math.round(intersectionRect.left)}px`
+        : 'auto';
+
+    const style = {
+      inset: [top, right, bottom, left].join(' '),
+      zIndex: 1000,
+      minWidth: `${Math.round(intersectionRect.width)}px`,
+      maxWidth: position.endsWith('-left')
+        ? `${Math.round(rootBounds.width - intersectionRect.left - 8)}px`
+        : `${Math.round(intersectionRect.right - 8)}px`,
+      height: height ? `${Math.round(height)}px` : 'auto',
+    };
+
+    if (
+      style.inset !== this.style.inset ||
+      style.zIndex !== this.style.zIndex ||
+      style.minWidth !== this.style.minWidth ||
+      style.maxWidth !== this.style.maxWidth ||
+      style.height !== this.style.height
+    ) {
+      this.style = style;
+    }
   }
 
   /**
@@ -390,7 +422,7 @@ class Popup {
     this.detachPopupElement();
     this.intersectionObserver?.disconnect();
     this.resizeObserver?.disconnect();
-    this.observer?.disconnect();
+    this.viewportResizeObserver?.disconnect();
 
     if (this._rafId) {
       cancelAnimationFrame(this._rafId);

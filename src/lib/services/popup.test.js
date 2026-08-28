@@ -2,7 +2,6 @@
 /* eslint-disable jsdoc/require-jsdoc */
 /* eslint-disable jsdoc/require-param */
 /* eslint-disable jsdoc/require-param-description */
-/* eslint-disable jsdoc/require-returns */
 /* eslint-disable lines-between-class-members */
 /* eslint-disable max-classes-per-file */
 
@@ -399,8 +398,8 @@ describe('Popup - IntersectionObserver on anchor (lines 179-180)', () => {
     anchor.click();
     expect(instance.open).toBe(true);
 
-    // ioCallbacks[0] = position observer; ioCallbacks[1] = anchor visibility observer
-    const anchorVisibilityCallback = ioCallbacks[1];
+    // ioCallbacks[0] = anchor visibility observer, the only `IntersectionObserver` the class uses
+    const anchorVisibilityCallback = ioCallbacks[0];
 
     anchorVisibilityCallback([{ isIntersecting: false }]);
     expect(instance.open).toBe(false);
@@ -410,93 +409,96 @@ describe('Popup - IntersectionObserver on anchor (lines 179-180)', () => {
   it('should not hide when anchor leaves viewport but popup is already closed', () => {
     const instance = activatePopup(anchor, popup, 'bottom-left');
     // popup is not opened
-    const anchorVisibilityCallback = ioCallbacks[1];
+    const anchorVisibilityCallback = ioCallbacks[0];
 
     anchorVisibilityCallback([{ isIntersecting: false }]);
     expect(instance.open).toBe(false);
   });
 });
-describe('Popup - IntersectionObserver position callback (lines 35-132)', () => {
+describe('Popup - checkPosition() calculation', () => {
   /** @type {HTMLButtonElement} */
   let anchor;
   /** @type {HTMLDialogElement} */
   let popup;
   /** @type {HTMLDivElement} */
   let content;
-  /** @type {typeof globalThis.IntersectionObserver} */
-  let OrigIObserver;
-  /** @type {((entries: any[]) => void)[]} */
-  let ioCallbacks;
+  /** @type {number} */
+  let origInnerWidth;
+  /** @type {number} */
+  let origInnerHeight;
 
   beforeEach(() => {
     anchor = /** @type {HTMLButtonElement} */ (document.createElement('button'));
     popup = /** @type {HTMLDialogElement} */ (document.createElement('dialog'));
-    // The position callback accesses popup.querySelector('.content')
+    // checkPosition() accesses popup.querySelector('.content')
     content = document.createElement('div');
     content.className = 'content';
     popup.appendChild(content);
     document.body.appendChild(anchor);
     document.body.appendChild(popup);
 
-    ioCallbacks = [];
-    OrigIObserver = globalThis.IntersectionObserver;
-    globalThis.IntersectionObserver = /** @type {any} */ (
-      class {
-        /** @param {(entries: any[]) => void} cb */
-        constructor(cb) {
-          ioCallbacks.push(cb);
-        }
-
-        observe() {}
-        unobserve() {}
-        disconnect() {}
-      }
-    );
+    origInnerWidth = window.innerWidth;
+    origInnerHeight = window.innerHeight;
   });
 
   afterEach(() => {
     anchor.remove();
     popup.remove();
-    globalThis.IntersectionObserver = OrigIObserver;
+    Object.defineProperty(window, 'innerWidth', { configurable: true, value: origInnerWidth });
+    Object.defineProperty(window, 'innerHeight', { configurable: true, value: origInnerHeight });
   });
 
   /**
-   * Helper to create a fake intersection entry.
+   * Stub the anchor’s bounding rect and the viewport size that `checkPosition()` measures
+   * synchronously via `getBoundingClientRect()` and `window.innerWidth`/`innerHeight`.
    */
-  const makeEntry = ({
+  const mockRect = ({
     top = 100,
     bottom = 150,
     left = 50,
     right = 300,
     vw = 800,
     vh = 600,
-  } = {}) => ({
-    intersectionRect: { top, bottom, left, right, width: right - left, height: bottom - top },
-    rootBounds: { width: vw, height: vh },
-  });
+  } = {}) => {
+    anchor.getBoundingClientRect = () =>
+      /** @type {DOMRect} */ ({
+        top,
+        bottom,
+        left,
+        right,
+        width: right - left,
+        height: bottom - top,
+        x: left,
+        y: top,
+        toJSON: () => ({}),
+      });
+    Object.defineProperty(window, 'innerWidth', { configurable: true, value: vw });
+    Object.defineProperty(window, 'innerHeight', { configurable: true, value: vh });
+  };
 
-  it('should set popup style on intersection (bottom-left, normal case)', () => {
+  it('should set popup style when checking position (bottom-left, normal case)', () => {
     const instance = activatePopup(anchor, popup, 'bottom-left');
 
-    // ioCallbacks[0] is the position observer
-    ioCallbacks[0]([makeEntry()]);
+    mockRect();
+    instance.checkPosition();
 
-    // Style should be updated with computed inset
     const { style } = instance;
 
     expect(style.inset).toBeTruthy();
     expect(style.zIndex).toBe(1000);
   });
 
-  it('should skip entry when intersectionRect is null', () => {
+  it('should clip the anchor rect to the viewport when it extends beyond it', () => {
     const instance = activatePopup(anchor, popup, 'bottom-left');
 
-    ioCallbacks[0]([{ intersectionRect: null, rootBounds: null }]);
+    // Anchor extends above/left of and past the right edge of the viewport
+    mockRect({ top: -20, bottom: 100, left: -10, right: 900, vw: 800, vh: 600 });
+    instance.checkPosition();
 
-    // Style remains at default (no crash)
     const { style } = instance;
 
-    expect(style.inset).toBeUndefined();
+    // Clamped: left → 0, right → 800, so the popup spans the full viewport width
+    expect(style.minWidth).toBe('800px');
   });
 
   it('should switch position to top-left when content overflows bottom', () => {
@@ -504,7 +506,8 @@ describe('Popup - IntersectionObserver position callback (lines 35-132)', () => 
 
     // contentHeight > bottomMargin AND topMargin > bottomMargin → switches to top-
     Object.defineProperty(content, 'scrollHeight', { configurable: true, get: () => 500 });
-    ioCallbacks[0]([makeEntry({ top: 400, bottom: 450, left: 50, right: 300, vw: 800, vh: 500 })]);
+    mockRect({ top: 400, bottom: 450, left: 50, right: 300, vw: 800, vh: 500 });
+    instance.checkPosition();
 
     const { style } = instance;
 
@@ -517,7 +520,8 @@ describe('Popup - IntersectionObserver position callback (lines 35-132)', () => 
 
     // contentWidth > remaining right space → switch to bottom-right
     Object.defineProperty(content, 'scrollWidth', { configurable: true, get: () => 760 });
-    ioCallbacks[0]([makeEntry({ left: 50, right: 300 })]);
+    mockRect({ left: 50, right: 300 });
+    instance.checkPosition();
 
     const { style } = instance;
 
@@ -529,7 +533,8 @@ describe('Popup - IntersectionObserver position callback (lines 35-132)', () => 
 
     // contentWidth causes left edge to be < 8 → switch to bottom-left
     Object.defineProperty(content, 'scrollWidth', { configurable: true, get: () => 290 });
-    ioCallbacks[0]([makeEntry({ left: 50, right: 100 })]);
+    mockRect({ left: 50, right: 100 });
+    instance.checkPosition();
 
     const { style } = instance;
 
@@ -541,7 +546,8 @@ describe('Popup - IntersectionObserver position callback (lines 35-132)', () => 
 
     const instance = activatePopup(anchor, popup, 'bottom-left');
 
-    ioCallbacks[0]([makeEntry()]);
+    mockRect();
+    instance.checkPosition();
 
     const { style } = instance;
 
@@ -554,7 +560,8 @@ describe('Popup - IntersectionObserver position callback (lines 35-132)', () => 
 
     const instance = activatePopup(anchor, popup, 'bottom-right');
 
-    ioCallbacks[0]([makeEntry()]);
+    mockRect();
+    instance.checkPosition();
 
     const { style } = instance;
 
@@ -568,7 +575,8 @@ describe('Popup - IntersectionObserver position callback (lines 35-132)', () => 
 
     const instance = activatePopup(anchor, popup, 'left-top');
 
-    ioCallbacks[0]([makeEntry()]);
+    mockRect();
+    instance.checkPosition();
 
     const { style } = instance;
 
@@ -582,7 +590,8 @@ describe('Popup - IntersectionObserver position callback (lines 35-132)', () => 
 
     const instance = activatePopup(anchor, popup, 'right-top');
 
-    ioCallbacks[0]([makeEntry()]);
+    mockRect();
+    instance.checkPosition();
 
     const { style } = instance;
 
@@ -597,33 +606,36 @@ describe('Popup - IntersectionObserver position callback (lines 35-132)', () => 
     // bottomMargin = 500 - 400 - 8 = 92; topMargin = 50 - 8 = 42; topMargin < bottomMargin
     // so the else branch runs: height = bottomMargin (92px)
     Object.defineProperty(content, 'scrollHeight', { configurable: true, get: () => 200 });
-    ioCallbacks[0]([makeEntry({ top: 50, bottom: 400, vw: 800, vh: 500 })]);
+    mockRect({ top: 50, bottom: 400, vw: 800, vh: 500 });
+    instance.checkPosition();
 
     const { style } = instance;
 
     expect(style.height).toBe('92px');
   });
 
-  it('should compute bottom from rootBounds.height - intersectionRect.bottom for -bottom position (branch 19)', () => {
+  it('should compute bottom from rootBounds.height - intersectionRect.bottom for -bottom position', () => {
     // 'right-bottom' ends with '-bottom' → bottom = Math.round(vh - intersectionRect.bottom)
     const instance = activatePopup(anchor, popup, 'right-bottom');
 
     // default: top=100, bottom=150, left=50, right=300, vh=600
     // bottom = Math.round(600 - 150) = 450
-    ioCallbacks[0]([makeEntry()]);
+    mockRect();
+    instance.checkPosition();
 
     const { style } = instance;
 
     expect(style.inset).toContain('450px');
   });
 
-  it('should skip the update when no `.content` element exists yet (line 81)', () => {
+  it('should skip the update when no `.content` element exists yet', () => {
     // Simulate the popup element being in the DOM tree before its content is mounted
     content.remove();
 
     const instance = activatePopup(anchor, popup, 'bottom-left');
 
-    ioCallbacks[0]([makeEntry()]);
+    mockRect();
+    instance.checkPosition();
 
     // No content found → early return, style remains at its default, unset state
     const { style } = instance;
@@ -631,17 +643,17 @@ describe('Popup - IntersectionObserver position callback (lines 35-132)', () => 
     expect(style.inset).toBeUndefined();
   });
 
-  it('should not update style when intersection callback fires with identical geometry (branch 25)', () => {
+  it('should not update style when checkPosition is called again with identical geometry', () => {
     const instance = activatePopup(anchor, popup, 'bottom-left');
-    const entry = makeEntry();
 
-    // First call — style is updated (inset differs from initial empty object)
-    ioCallbacks[0]([entry]);
+    mockRect();
+    instance.checkPosition();
 
     const styleBefore = instance.style;
 
-    // Second call with same entry — all comparisons are equal → style.set not called again
-    ioCallbacks[0]([entry]);
+    // Second call with the same anchor rect and viewport size — all comparisons are equal →
+    // style.set not called again
+    instance.checkPosition();
 
     const styleAfter = instance.style;
 
@@ -649,15 +661,17 @@ describe('Popup - IntersectionObserver position callback (lines 35-132)', () => 
     expect(styleAfter.zIndex).toBe(styleBefore.zIndex);
   });
 });
-describe('Popup - ResizeObserver callback (lines 223-224)', () => {
+describe('Popup - ResizeObserver callbacks', () => {
   /** @type {HTMLButtonElement} */
   let anchor;
   /** @type {HTMLDialogElement} */
   let popup;
   /** @type {typeof globalThis.ResizeObserver} */
   let OrigRObs;
-  /** @type {((entries: any[]) => void) | undefined} */
-  let resizeCallback;
+  /**
+   * @type {{ cb: (entries: any[]) => void, target: any, unobserve: ReturnType<typeof vi.fn> }[]}
+   */
+  let rObsInstances;
   /** @type {typeof globalThis.IntersectionObserver | undefined} */
   let _OrigIO;
 
@@ -667,18 +681,27 @@ describe('Popup - ResizeObserver callback (lines 223-224)', () => {
     popup = /** @type {HTMLDialogElement} */ (document.createElement('dialog'));
     document.body.appendChild(anchor);
     document.body.appendChild(popup);
+    rObsInstances = [];
     OrigRObs = globalThis.ResizeObserver;
 
-    // Stub ResizeObserver to capture its callback
+    // Stub ResizeObserver to capture each instance’s callback and observed target. The class
+    // constructs two of these — `resizeObserver` (anchor) first, then `viewportResizeObserver`
+    // (popupElement) — so `rObsInstances[0]` and `rObsInstances[1]` refer to them in that order.
     globalThis.ResizeObserver = /** @type {any} */ (
       class {
-        /** @param {any} cb */
+        /** @param {(entries: any[]) => void} cb */
         constructor(cb) {
-          resizeCallback = cb;
+          this.cb = cb;
+          this.target = undefined;
+          this.unobserve = vi.fn();
+          rObsInstances.push(/** @type {any} */ (this));
         }
 
-        observe() {}
-        unobserve() {}
+        /** @param {any} target */
+        observe(target) {
+          this.target = target;
+        }
+
         disconnect() {}
       }
     );
@@ -708,15 +731,53 @@ describe('Popup - ResizeObserver callback (lines 223-224)', () => {
     vi.useRealTimers();
   });
 
-  it('should schedule checkPosition via RAF when resize is observed', async () => {
+  it('should schedule checkPosition via RAF when the anchor’s ResizeObserver fires', async () => {
     activatePopup(anchor, popup, 'bottom-left');
 
-    // Trigger the ResizeObserver callback (lines 223-224: cancelAnimationFrame +
-    // requestAnimationFrame)
-    /** @type {any} */ (resizeCallback)?.([]);
+    // rObsInstances[0] is `resizeObserver`, observing the anchor
+    rObsInstances[0].cb([]);
     await vi.advanceTimersByTimeAsync(16); // flush rAF
     // No crash; just verifies these lines execute
     expect(true).toBe(true);
+  });
+
+  it('should recalculate the position directly when the viewport ResizeObserver fires while open', () => {
+    const instance = activatePopup(anchor, popup, 'bottom-left');
+
+    anchor.click(); // open
+
+    const spy = vi.spyOn(instance, 'checkPosition');
+
+    // rObsInstances[1] is `viewportResizeObserver`, observing `popupElement`
+    rObsInstances[1].cb([]);
+
+    // Called directly, not deferred through `requestAnimationFrame` or the `resize` event on
+    // `window` — neither is guaranteed to fire promptly (or at all) for every layout-affecting
+    // viewport change across browsers, which is what left the popup stuck at a stale position
+    expect(spy).toHaveBeenCalled();
+  });
+
+  it('should not recalculate when the viewport ResizeObserver fires while closed', () => {
+    const instance = activatePopup(anchor, popup, 'bottom-left');
+    const spy = vi.spyOn(instance, 'checkPosition');
+
+    rObsInstances[1].cb([]);
+
+    expect(spy).not.toHaveBeenCalled();
+  });
+
+  it('should observe popupElement with the viewport ResizeObserver on attach', () => {
+    activatePopup(anchor, popup, 'bottom-left');
+
+    expect(rObsInstances[1].target).toBe(popup);
+  });
+
+  it('should unobserve popupElement with the viewport ResizeObserver on detach', () => {
+    const instance = activatePopup(anchor, popup, 'bottom-left');
+
+    instance.detachPopupElement();
+
+    expect(rObsInstances[1].unobserve).toHaveBeenCalledWith(popup);
   });
 });
 
@@ -781,13 +842,14 @@ describe('Popup - destroy', () => {
 
     instance.destroy();
 
-    // Two IntersectionObservers are created: the position observer and the anchor visibility
-    // observer. Both, plus the ResizeObserver, should be disconnected.
-    expect(ioInstances).toHaveLength(2);
+    // One IntersectionObserver is created, for anchor visibility. Two ResizeObservers are
+    // created: one for the anchor’s own size, one for the popup’s viewport-sized `<dialog>`. All
+    // should be disconnected.
+    expect(ioInstances).toHaveLength(1);
     expect(ioInstances[0].disconnect).toHaveBeenCalledTimes(1);
-    expect(ioInstances[1].disconnect).toHaveBeenCalledTimes(1);
-    expect(rObsInstances).toHaveLength(1);
+    expect(rObsInstances).toHaveLength(2);
     expect(rObsInstances[0].disconnect).toHaveBeenCalledTimes(1);
+    expect(rObsInstances[1].disconnect).toHaveBeenCalledTimes(1);
   });
 
   it('should cancel a pending animation frame on destroy', () => {
