@@ -644,6 +644,83 @@ describe('Popup - checkPosition() calculation', () => {
     expect(style.height).toBe('92px');
   });
 
+  it('should grow the popup again when the viewport grows', () => {
+    const instance = activatePopup(anchor, popup, 'bottom-left');
+
+    // A popup that hands its scrolling to a child — the combobox gives it to the option list —
+    // reports no more `scrollHeight` than the `max-height` it’s already capped at
+    Object.defineProperty(content, 'scrollHeight', {
+      configurable: true,
+      get: () => (content.style.maxHeight ? Number.parseInt(content.style.maxHeight, 10) : 1000),
+    });
+
+    // bottomMargin = 600 - 150 - 8 = 442; topMargin = 100 - 8 = 92, so the popup stays below
+    mockRect({ top: 100, bottom: 150, vw: 800, vh: 600 });
+    instance.checkPosition();
+    expect(instance.style.height).toBe('442px');
+
+    // The cap the component applies from the style above, which now clips the measurement
+    content.style.maxHeight = /** @type {string} */ (instance.style.height);
+
+    // bottomMargin = 900 - 150 - 8 = 742: the taller viewport has to lift the cap with it
+    mockRect({ top: 100, bottom: 150, vw: 800, vh: 900 });
+    instance.checkPosition();
+    expect(instance.style.height).toBe('742px');
+  });
+
+  it('should drop the height limit once the content fits again', () => {
+    const instance = activatePopup(anchor, popup, 'bottom-left');
+
+    Object.defineProperty(content, 'scrollHeight', {
+      configurable: true,
+      get: () => (content.style.maxHeight ? Number.parseInt(content.style.maxHeight, 10) : 300),
+    });
+
+    // bottomMargin = 400 - 150 - 8 = 242, which the 300px content overflows
+    mockRect({ top: 100, bottom: 150, vw: 800, vh: 400 });
+    instance.checkPosition();
+    expect(instance.style.height).toBe('242px');
+
+    content.style.maxHeight = /** @type {string} */ (instance.style.height);
+
+    // bottomMargin = 742 now leaves the content room to spare, so no limit should be applied.
+    // `auto` wouldn’t do here: it isn’t a valid `max-height`, so the browser would keep the 242px.
+    mockRect({ top: 100, bottom: 150, vw: 800, vh: 900 });
+    instance.checkPosition();
+    expect(instance.style.height).toBeUndefined();
+  });
+
+  it('should measure the content width without the max-width it applied earlier', () => {
+    const instance = activatePopup(anchor, popup, 'bottom-left');
+
+    Object.defineProperty(content, 'scrollWidth', {
+      configurable: true,
+      get: () => (content.style.maxWidth ? Number.parseInt(content.style.maxWidth, 10) : 292),
+    });
+
+    // A cap left over from an earlier, narrower viewport, which the 292px content fits inside
+    content.style.maxWidth = '200px';
+    mockRect({ left: 550, right: 700, vw: 800, vh: 600 });
+    instance.checkPosition();
+
+    // 550 + 292 overflows the 800px viewport, so the popup flips to `bottom-right` and pins to
+    // the anchor’s right edge (800 − 700); the stale 200px cap would have left it at the left
+    expect(instance.style.inset).toBe('150px 100px auto auto');
+  });
+
+  it('should restore the inline size limits it lifts to measure the content', () => {
+    const instance = activatePopup(anchor, popup, 'bottom-left');
+
+    content.style.maxHeight = '200px';
+    content.style.maxWidth = '300px';
+    mockRect();
+    instance.checkPosition();
+
+    // The popup element belongs to the component, which applies the computed style itself
+    expect(content.style.maxHeight).toBe('200px');
+    expect(content.style.maxWidth).toBe('300px');
+  });
+
   it('should compute bottom from rootBounds.height - intersectionRect.bottom for -bottom position', () => {
     // 'right-bottom' ends with '-bottom' → bottom = Math.round(vh - intersectionRect.bottom)
     const instance = activatePopup(anchor, popup, 'right-bottom');

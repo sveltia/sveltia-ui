@@ -306,7 +306,23 @@ class Popup {
     intersectionRect.width = Math.max(0, intersectionRect.right - intersectionRect.left);
     intersectionRect.height = Math.max(0, intersectionRect.bottom - intersectionRect.top);
 
+    // Measure the content at its natural size, with any limit previously applied here taken off
+    // first. A popup that delegates its scrolling to a child — the combobox hands it to the option
+    // list, so the filter stays put — reports a `scrollHeight` no larger than the `max-height` it’s
+    // already capped at, and the same goes for `scrollWidth` against `max-width`. Measuring those
+    // clipped values would make the cap stick: once the popup had shrunk to fit a small viewport,
+    // it could never grow back when the viewport did. The properties are put back synchronously,
+    // before the browser can paint, so nothing flickers.
+    const { maxHeight: appliedMaxHeight, maxWidth: appliedMaxWidth } = content.style;
+
+    content.style.maxHeight = '';
+    content.style.maxWidth = '';
+
     const { scrollHeight: contentHeight, scrollWidth: contentWidth } = content;
+
+    content.style.maxHeight = appliedMaxHeight;
+    content.style.maxWidth = appliedMaxWidth;
+
     const topMargin = intersectionRect.top - 8;
     const bottomMargin = rootBounds.height - intersectionRect.bottom - 8;
     let { position } = this;
@@ -385,7 +401,10 @@ class Popup {
       maxWidth: position.endsWith('-left')
         ? `${Math.round(rootBounds.width - intersectionRect.left - 8)}px`
         : `${Math.round(intersectionRect.right - 8)}px`,
-      height: height ? `${Math.round(height)}px` : 'auto',
+      // `undefined` removes the `max-height` the popup is given, letting it take its natural size
+      // again. `auto` would look equivalent but isn’t a valid `max-height`, so the browser would
+      // drop it and leave whatever limit was applied last in place.
+      height: height ? `${Math.round(height)}px` : undefined,
     };
 
     if (
