@@ -547,7 +547,7 @@ describe('Popup - checkPosition() calculation', () => {
     expect(style.inset).not.toBeUndefined();
   });
 
-  it('should normalize RTL position when the locale is RTL', () => {
+  it('should mirror bottom-left to bottom-right when the locale is RTL', () => {
     vi.mocked(isRTL).mockReturnValue(true);
 
     const instance = activatePopup(anchor, popup, 'bottom-left');
@@ -557,10 +557,14 @@ describe('Popup - checkPosition() calculation', () => {
 
     const { style } = instance;
 
-    expect(style.inset).not.toBeUndefined();
+    // `bottom-left` → `bottom-right`: pinned to the viewport’s right edge (800 − 300) instead
+    // of its left; LTR would give `150px auto auto 50px`
+    expect(style.inset).toBe('150px 500px auto auto');
+    expect(style.maxWidth).toBe('292px');
+    expect(style.minWidth).toBe('250px');
   });
 
-  it('should normalize bottom-right to bottom-left in RTL (endsWith -right branch)', () => {
+  it('should mirror bottom-right to bottom-left when the locale is RTL', () => {
     vi.mocked(isRTL).mockReturnValue(true);
 
     const instance = activatePopup(anchor, popup, 'bottom-right');
@@ -570,11 +574,14 @@ describe('Popup - checkPosition() calculation', () => {
 
     const { style } = instance;
 
-    // After RTL normalization bottom-right → bottom-left; inset should be computed
-    expect(style.inset).not.toBeUndefined();
+    // `bottom-right` → `bottom-left`: pinned to the anchor’s left edge (50); LTR would
+    // give `150px 500px auto auto`
+    expect(style.inset).toBe('150px auto auto 50px');
+    expect(style.maxWidth).toBe('742px');
+    expect(style.minWidth).toBe('250px');
   });
 
-  it('should normalize left-top to right-top in RTL (startsWith left- branch)', () => {
+  it('should mirror left-top to right-top when the locale is RTL', () => {
     vi.mocked(isRTL).mockReturnValue(true);
 
     const instance = activatePopup(anchor, popup, 'left-top');
@@ -584,11 +591,14 @@ describe('Popup - checkPosition() calculation', () => {
 
     const { style } = instance;
 
-    // After RTL normalization left-top → right-top; inset should be computed
-    expect(style.inset).not.toBeUndefined();
+    // `left-top` → `right-top`: opens to the anchor’s right (300); LTR would give
+    // `100px 750px auto auto`
+    expect(style.inset).toBe('100px auto auto 300px');
+    expect(style.maxWidth).toBe('292px');
+    expect(style.minWidth).toBe('250px');
   });
 
-  it('should normalize right-top to left-top in RTL (startsWith right- branch)', () => {
+  it('should mirror right-top to left-top when the locale is RTL', () => {
     vi.mocked(isRTL).mockReturnValue(true);
 
     const instance = activatePopup(anchor, popup, 'right-top');
@@ -598,8 +608,26 @@ describe('Popup - checkPosition() calculation', () => {
 
     const { style } = instance;
 
-    // After RTL normalization right-top → left-top; inset should be computed
-    expect(style.inset).not.toBeUndefined();
+    // `right-top` → `left-top`: opens to the anchor’s left (800 − 50); LTR would give
+    // `100px auto auto 300px`
+    expect(style.inset).toBe('100px 750px auto auto');
+    expect(style.maxWidth).toBe('292px');
+    expect(style.minWidth).toBe('250px');
+  });
+
+  it('should leave the position untouched when the locale is LTR', () => {
+    vi.mocked(isRTL).mockReturnValue(false);
+
+    const instance = activatePopup(anchor, popup, 'bottom-left');
+
+    mockRect();
+    instance.checkPosition();
+
+    const { style } = instance;
+
+    // The LTR counterpart of the first case above, so the two together show the mirroring
+    expect(style.inset).toBe('150px auto auto 50px');
+    expect(style.maxWidth).toBe('742px');
   });
 
   it('should set height to bottomMargin when content overflows bottom but top is not better', () => {
