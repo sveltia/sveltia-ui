@@ -1,4 +1,5 @@
-import { SHIKI_VERSION, UI_VERSION } from './generated.js';
+import { SHIKI_VERSION } from './generated.js';
+import { UI_VERSION } from './version.js';
 
 /**
  * @import { CodeHighlighterLoaders } from '$lib/typedefs';

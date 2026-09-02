@@ -8,11 +8,6 @@
 export const SHIKI_VERSION = "4.4.3";
 
 /**
- * Version of this package, used to resolve the prebuilt Shiki engine chunk from a CDN.
- */
-export const UI_VERSION = "0.69.0";
-
-/**
  * Available syntax highlighting languages, sorted by display name.
  * @type {{ id: string, name: string, aliases?: string[] }[]}
  */

@@ -55,7 +55,7 @@ describe('shiki loader', () => {
 describe('default loader URLs', () => {
   it('pins the engine to this package’s version', async () => {
     const { getEngineURL } = await importLoader();
-    const { UI_VERSION } = await import('./generated.js');
+    const { UI_VERSION } = await import('./version.js');
 
     expect(getEngineURL()).toBe(`https://unpkg.com/@sveltia/ui@${UI_VERSION}/dist/shiki-engine.js`);
   });
