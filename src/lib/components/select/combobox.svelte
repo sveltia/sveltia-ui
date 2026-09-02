@@ -495,6 +495,7 @@
     :global {
       .sui.search-bar {
         flex: none;
+        margin-bottom: calc(8px - var(--sui-focus-ring-width));
       }
 
       .sui.listbox {
