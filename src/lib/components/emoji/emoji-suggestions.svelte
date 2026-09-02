@@ -10,7 +10,7 @@
   @see https://developer.mozilla.org/en-US/docs/Web/API/Popover_API
 -->
 <script>
-  import { _ } from '@sveltia/i18n';
+  import { _, isRTL } from '@sveltia/i18n';
   import { onMount, untrack } from 'svelte';
   import { searchEmojis } from './emoji.js';
 
@@ -126,7 +126,7 @@
     const spaceBelow = innerHeight - anchorRect.bottom;
     const spaceAbove = anchorRect.top;
     const flipped = spaceBelow < listMaxHeight + VIEWPORT_MARGIN && spaceAbove > spaceBelow;
-    const rtl = document.dir === 'rtl';
+    const rtl = isRTL();
     const anchorLeft = rtl ? anchorRect.right - LIST_WIDTH : anchorRect.left;
 
     return {

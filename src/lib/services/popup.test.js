@@ -5,8 +5,13 @@
 /* eslint-disable lines-between-class-members */
 /* eslint-disable max-classes-per-file */
 
+import { isRTL } from '@sveltia/i18n';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { activatePopup } from './popup.svelte.js';
+
+vi.mock('@sveltia/i18n', () => ({
+  isRTL: vi.fn(() => false),
+}));
 
 describe('Popup', () => {
   /** @type {HTMLButtonElement} */
@@ -24,6 +29,7 @@ describe('Popup', () => {
   afterEach(() => {
     anchor.remove();
     popup.remove();
+    vi.mocked(isRTL).mockReturnValue(false);
   });
 
   it('should assign an id to the popup element', () => {
@@ -541,8 +547,8 @@ describe('Popup - checkPosition() calculation', () => {
     expect(style.inset).not.toBeUndefined();
   });
 
-  it('should normalize RTL position when document.dir is rtl', () => {
-    Object.defineProperty(document, 'dir', { get: () => 'rtl', configurable: true });
+  it('should normalize RTL position when the locale is RTL', () => {
+    vi.mocked(isRTL).mockReturnValue(true);
 
     const instance = activatePopup(anchor, popup, 'bottom-left');
 
@@ -552,11 +558,10 @@ describe('Popup - checkPosition() calculation', () => {
     const { style } = instance;
 
     expect(style.inset).not.toBeUndefined();
-    Reflect.deleteProperty(document, 'dir');
   });
 
   it('should normalize bottom-right to bottom-left in RTL (endsWith -right branch)', () => {
-    Object.defineProperty(document, 'dir', { get: () => 'rtl', configurable: true });
+    vi.mocked(isRTL).mockReturnValue(true);
 
     const instance = activatePopup(anchor, popup, 'bottom-right');
 
@@ -567,11 +572,10 @@ describe('Popup - checkPosition() calculation', () => {
 
     // After RTL normalization bottom-right → bottom-left; inset should be computed
     expect(style.inset).not.toBeUndefined();
-    Reflect.deleteProperty(document, 'dir');
   });
 
   it('should normalize left-top to right-top in RTL (startsWith left- branch)', () => {
-    Object.defineProperty(document, 'dir', { get: () => 'rtl', configurable: true });
+    vi.mocked(isRTL).mockReturnValue(true);
 
     const instance = activatePopup(anchor, popup, 'left-top');
 
@@ -582,11 +586,10 @@ describe('Popup - checkPosition() calculation', () => {
 
     // After RTL normalization left-top → right-top; inset should be computed
     expect(style.inset).not.toBeUndefined();
-    Reflect.deleteProperty(document, 'dir');
   });
 
   it('should normalize right-top to left-top in RTL (startsWith right- branch)', () => {
-    Object.defineProperty(document, 'dir', { get: () => 'rtl', configurable: true });
+    vi.mocked(isRTL).mockReturnValue(true);
 
     const instance = activatePopup(anchor, popup, 'right-top');
 
@@ -597,7 +600,6 @@ describe('Popup - checkPosition() calculation', () => {
 
     // After RTL normalization right-top → left-top; inset should be computed
     expect(style.inset).not.toBeUndefined();
-    Reflect.deleteProperty(document, 'dir');
   });
 
   it('should set height to bottomMargin when content overflows bottom but top is not better', () => {

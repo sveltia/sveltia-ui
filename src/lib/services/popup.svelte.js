@@ -1,3 +1,4 @@
+import { isRTL } from '@sveltia/i18n';
 import { generateElementId } from '@sveltia/utils/element';
 import { sleep } from '@sveltia/utils/misc';
 import { on } from 'svelte/events';
@@ -313,7 +314,7 @@ class Popup {
 
     // Normalize RTL-friendly positions to LTR for LTR documents
     // @todo Rename `PopupPosition` enums to be direction-agnostic
-    if (document.dir === 'rtl') {
+    if (isRTL()) {
       if (position.endsWith('-left')) {
         position = /** @type {PopupPosition} */ (position.replace('-left', '-right'));
       } else if (position.endsWith('-right')) {
