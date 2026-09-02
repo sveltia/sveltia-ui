@@ -16,3 +16,5 @@ overrides:
   browserslist@<=4.28.6: ^4.28.7
   # <0.7.0 has a security vulnerability, 2.0.0 causes issues with SvelteKit
   'cookie@<0.7.0': '^1.0.0'
+  # https://github.com/sveltejs/esrap/issues/181
+  esrap: 2.3.4
