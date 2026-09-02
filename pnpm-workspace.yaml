@@ -12,11 +12,7 @@ minimumReleaseAgeExclude:
   - '@sveltia/*'
 
 overrides:
+  # security fix
+  browserslist@<=4.28.6: ^4.28.7
   # <0.7.0 has a security vulnerability, 2.0.0 causes issues with SvelteKit
   'cookie@<0.7.0': '^1.0.0'
-  # esrap 2.3.3 wraps any node carrying a leading `/** @type {...} */` comment in parentheses,
-  # including binding positions (`catch` params, function params, `let` declarators) where
-  # parentheses are syntactically invalid. Svelte uses esrap to print compiled output, so this
-  # breaks the build and tests. Pin to the last good release until the upstream fix lands.
-  # https://github.com/sveltejs/svelte/issues/18643
-  esrap: 2.3.2
