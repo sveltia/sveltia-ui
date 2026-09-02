@@ -308,7 +308,7 @@
         position: absolute;
         top: 0;
         bottom: 0;
-        margin-left: -1px;
+        margin-inline-start: -1px;
         border-radius: 1px;
         width: 4px;
         background-color: var(--sui-primary-accent-color);
