@@ -26,6 +26,9 @@
  * attribute. Accepts the special `Accel` key, which will be replaced with `Control` or `Meta`
  * depending on the user’s operating system.
  * @property {string} [label] Text label displayed on the button.
+ * @property {'ltr' | 'rtl' | 'auto'} [labelDir] The `dir` attribute on the label element.
+ * Use `auto` to isolate a user-authored label whose text direction is unknown, so it cannot
+ * be reordered by the surrounding UI direction.
  * @property {number} [lines] Number of lines to show the label. Overflowing text will be truncated.
  * @property {'primary' | 'secondary' | 'tertiary' | 'ghost' | 'link'} [variant] The style variant
  * of the button.
@@ -119,6 +122,9 @@
  * @property {boolean} [checked] Whether to check the widget. An alias of the `aria-checked`
  * attribute.
  * @property {string} [label] Text label displayed on the item.
+ * @property {'ltr' | 'rtl' | 'auto'} [labelDir] The `dir` attribute on the label element.
+ * Use `auto` to isolate a user-authored label whose text direction is unknown, so it cannot
+ * be reordered by the surrounding UI direction.
  * @property {Snippet} [children] Primary slot content.
  * @property {Snippet} [startIcon] Start icon slot content.
  * @property {Snippet} [endIcon] End icon slot content.

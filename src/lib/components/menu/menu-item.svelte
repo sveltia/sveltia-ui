@@ -35,6 +35,7 @@
     hidden = false,
     disabled = false,
     label = '',
+    labelDir = undefined,
     popupPosition = 'right-top', // @todo Make this auto detect
     children: _children,
     startIcon: _startIcon,
@@ -118,7 +119,7 @@
     {/snippet}
     <!-- eslint-disable-next-line svelte/no-useless-children-snippet -->
     {#snippet children()}
-      <div role="none" class="content" class:label={!!label}>
+      <div role="none" class="content" class:label={!!label} dir={label ? labelDir : undefined}>
         {#if label}
           {label}
         {:else}

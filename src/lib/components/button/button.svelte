@@ -32,6 +32,7 @@
     pressed = undefined,
     keyShortcuts = undefined,
     label = '',
+    labelDir = undefined,
     lines = 1,
     variant = undefined,
     size = 'medium',
@@ -80,7 +81,7 @@
   {@render startIcon?.()}
   {#if variant === 'link'}
     {#if label}
-      <span role="none" class="label">
+      <span role="none" class="label" dir={labelDir}>
         <TruncatedText {lines}>
           {label}
         </TruncatedText>
@@ -92,7 +93,7 @@
     {/if}
   {:else}
     {#if label}
-      <span role="none" class="label">
+      <span role="none" class="label" dir={labelDir}>
         <TruncatedText {lines}>
           {label}
         </TruncatedText>
