@@ -1,0 +1,116 @@
+# Dialog action button labels
+ok: تأیید
+cancel: لغو
+close: بستن
+
+# Button to clear content, e.g. search input or calendar date
+clear: پاک کردن
+
+# Text editor dialog buttons for link/image insertion
+insert: درج
+update: به‌روزرسانی
+remove: حذف
+
+# Combobox dropdown toggle button aria-labels
+collapse: جمع کردن
+expand: باز کردن
+
+# Infobar/toast dismiss button label
+dismiss: بستن
+
+# Emoji suggestion listbox aria-label, shared by the text fields and the text editor
+emoji_suggestions: پیشنهادهای ایموجی
+
+# Calendar component
+calendar:
+  # View switcher group aria-labels and navigation button aria-labels
+  year: سال
+  previous_decade: دهه قبل
+  next_decade: دهه بعد
+  month: ماه
+  previous_month: ماه قبل
+  next_month: ماه بعد
+  # “Today” button label in footer
+  today: امروز
+
+# Split button component
+split_button:
+  # Wrapper aria-label, e.g. “Save Options” when primary button is “Save”
+  x_options: 'گزینه‌های {$name}'
+  # Dropdown toggle aria-label
+  more_options: گزینه‌های بیشتر
+
+# Combobox component
+combobox:
+  # Placeholder when no option is selected
+  select_an_option: یک گزینه را انتخاب کنید…
+  # Filter input aria-label
+  filter_options: فیلتر کردن گزینه‌ها
+  # Empty state message when filter has no matches
+  no_matching_options: هیچ گزینهٔ منطبقی پیدا نشد
+
+# Number input component
+number_input:
+  # Spin button aria-labels for incrementing/decrementing the number value
+  increase: افزایش
+  decrease: کاهش
+
+# Password input component
+password_input:
+  # Visibility toggle button aria-labels
+  show_password: نمایش گذرواژه
+  hide_password: پنهان کردن گذرواژه
+
+# Secret input component (API keys, tokens, etc.)
+secret_input:
+  # Visibility toggle button aria-labels
+  show_secret: نمایش عبارت محرمانه
+  hide_secret: پنهان کردن عبارت محرمانه
+
+# Select tags component (multi-select)
+select_tags:
+  # Listbox aria-label
+  selected_options: گزینه‌های انتخاب‌شده
+  # Remove button aria-label, e.g. “Remove Option 1”
+  remove_x: 'حذف {$name}'
+
+# Text editor component
+text_editor:
+  # Toolbar aria-labels
+  text_editor: ویرایشگر متن
+  code_editor: ویرایشگر کد
+  # Block style menu button and menu aria-labels
+  text_style_options: گزینه‌های سبک متن
+  show_text_style_options: نمایش گزینه‌های سبک متن
+  # Block style menu items
+  paragraph: پاراگراف
+  heading_1: سرتیتر ۱
+  heading_2: سرتیتر ۲
+  heading_3: سرتیتر ۳
+  heading_4: سرتیتر ۴
+  heading_5: سرتیتر ۵
+  heading_6: سرتیتر ۶
+  bulleted_list: فهرست نشانه‌دار
+  numbered_list: فهرست شماره‌دار
+  blockquote: نقل‌قول
+  code_block: بلوک کد
+  # Inline style button aria-labels
+  bold: ضخیم
+  italic: مورب
+  strikethrough: خط‌خورده
+  code: کد
+  link: پیوند
+  # Link dialog title
+  insert_link: درج پیوند
+  update_link: به‌روزرسانی پیوند
+  # Link dialog input field labels
+  text: متن
+  url: آدرس (URL)
+  # Markdown mode toggle button aria-label
+  edit_in_markdown: ویرایش در حالت مارک‌داون
+  # Error message when rich text conversion fails
+  converter_error: امکان فعال‌سازی حالت متن غنی وجود ندارد. لطفاً در عوض از ویرایشگر متن ساده استفاده کنید.
+  # Language selector aria-label
+  language: زبان
+  # Plain text mode option in language selector
+  plain_text: متن ساده
