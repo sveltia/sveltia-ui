@@ -3,4 +3,4 @@
 /**
  * Version of this package, used to resolve the prebuilt Shiki engine chunk from a CDN.
  */
-export const UI_VERSION = '0.69.1';
+export const UI_VERSION = '0.69.2';
