@@ -1,0 +1,116 @@
+# Dialog action button labels
+ok: 確定
+cancel: 取消
+close: 關閉
+
+# Button to clear content, e.g. search input or calendar date
+clear: 清除
+
+# Text editor dialog buttons for link/image insertion
+insert: 插入
+update: 更新
+remove: 移除
+
+# Combobox dropdown toggle button aria-labels
+collapse: 收合
+expand: 展開
+
+# Infobar/toast dismiss button label
+dismiss: 關閉
+
+# Emoji suggestion listbox aria-label, shared by the text fields and the text editor
+emoji_suggestions: 表情符號建議
+
+# Calendar component
+calendar:
+  # View switcher group aria-labels and navigation button aria-labels
+  year: 年
+  previous_decade: 前十年
+  next_decade: 後十年
+  month: 月
+  previous_month: 上個月
+  next_month: 下個月
+  # “Today” button label in footer
+  today: 今天
+
+# Split button component
+split_button:
+  # Wrapper aria-label, e.g. “Save Options” when primary button is “Save”
+  x_options: '{$name} 選項'
+  # Dropdown toggle aria-label
+  more_options: 更多選項
+
+# Combobox component
+combobox:
+  # Placeholder when no option is selected
+  select_an_option: 請選擇……
+  # Filter input aria-label
+  filter_options: 篩選選項
+  # Empty state message when filter has no matches
+  no_matching_options: 找不到符合的選項
+
+# Number input component
+number_input:
+  # Spin button aria-labels for incrementing/decrementing the number value
+  increase: 增加
+  decrease: 減少
+
+# Password input component
+password_input:
+  # Visibility toggle button aria-labels
+  show_password: 顯示密碼
+  hide_password: 隱藏密碼
+
+# Secret input component (API keys, tokens, etc.)
+secret_input:
+  # Visibility toggle button aria-labels
+  show_secret: 顯示金鑰內容
+  hide_secret: 隱藏金鑰內容
+
+# Select tags component (multi-select)
+select_tags:
+  # Listbox aria-label
+  selected_options: 已選取的選項
+  # Remove button aria-label, e.g. “Remove Option 1”
+  remove_x: '移除 {$name}'
+
+# Text editor component
+text_editor:
+  # Toolbar aria-labels
+  text_editor: 文字編輯器
+  code_editor: 程式碼編輯器
+  # Block style menu button and menu aria-labels
+  text_style_options: 文字樣式選項
+  show_text_style_options: 顯示文字樣式選項
+  # Block style menu items
+  paragraph: 段落
+  heading_1: 標題 1
+  heading_2: 標題 2
+  heading_3: 標題 3
+  heading_4: 標題 4
+  heading_5: 標題 5
+  heading_6: 標題 6
+  bulleted_list: 項目符號清單
+  numbered_list: 編號清單
+  blockquote: 引言區塊
+  code_block: 程式碼區塊
+  # Inline style button aria-labels
+  bold: 粗體
+  italic: 斜體
+  strikethrough: 刪除線
+  code: 程式碼
+  link: 連結
+  # Link dialog title
+  insert_link: 插入連結
+  update_link: 更新連結
+  # Link dialog input field labels
+  text: 文字
+  url: URL
+  # Markdown mode toggle button aria-label
+  edit_in_markdown: 以 Markdown 編輯
+  # Error message when rich text conversion fails
+  converter_error: 無法啟用格式化文字模式。請改用純文字編輯器。
+  # Language selector aria-label
+  language: 語言
+  # Plain text mode option in language selector
+  plain_text: 純文字
