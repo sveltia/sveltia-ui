@@ -73,6 +73,7 @@
     :global {
       [role='separator'] {
         margin: var(--sui-menu-divider-margin, 4px);
+        width: auto;
         background-color: var(--sui-menu-divider-color, var(--sui-control-border-color));
       }
     }
