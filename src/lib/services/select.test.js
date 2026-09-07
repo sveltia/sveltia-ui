@@ -1,4 +1,7 @@
+import { mount, unmount } from 'svelte';
 import { describe, expect, it } from 'vitest';
+import Consumer from './option-registry-consumer.test.svelte';
+import Provider from './option-registry-provider.test.svelte';
 import { getSelectedItemDetail, OptionRegistry } from './select.svelte.js';
 
 /**
@@ -211,5 +214,68 @@ describe('OptionRegistry', () => {
     registry.selectOnly('missing');
 
     expect(assignmentCount).toBe(0);
+  });
+});
+
+describe('createOptionRegistry/getOptionRegistry', () => {
+  /**
+   * Mount a component, run the assertions collected during its initialization, then tear it down.
+   * @param {any} Component Component to mount.
+   * @param {Record<string, any>} props Props to pass to it.
+   */
+  const withMounted = (Component, props) => {
+    const target = document.createElement('div');
+
+    document.body.appendChild(target);
+
+    const instance = mount(Component, { target, props });
+
+    unmount(instance);
+    target.remove();
+  };
+
+  it('should provide a new registry to descendants', () => {
+    /** @type {OptionRegistry | undefined} */
+    let provided;
+    /** @type {OptionRegistry | undefined} */
+    let consumed;
+
+    withMounted(Provider, {
+      /**
+       * Capture the registry the provider created.
+       * @param {OptionRegistry} registry Created registry.
+       */
+      reportProvided: (registry) => {
+        provided = registry;
+      },
+      /**
+       * Capture the registry the descendant looked up.
+       * @param {OptionRegistry | undefined} registry Registry found in the context.
+       */
+      reportConsumed: (registry) => {
+        consumed = registry;
+      },
+    });
+
+    expect(provided).toBeInstanceOf(OptionRegistry);
+    // The descendant must see the very same instance, not a copy
+    expect(consumed).toBe(provided);
+  });
+
+  it('should return undefined when no ancestor provided a registry', () => {
+    /** @type {OptionRegistry | undefined} */
+    let consumed;
+
+    withMounted(Consumer, {
+      /**
+       * Capture the registry the standalone component looked up.
+       * @param {OptionRegistry | undefined} registry Registry found in the context, if any.
+       */
+      reportConsumed: (registry) => {
+        consumed = registry;
+      },
+    });
+
+    expect(consumed).toBeUndefined();
   });
 });

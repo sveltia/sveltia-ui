@@ -653,6 +653,22 @@ describe('Popup - checkPosition() calculation', () => {
     expect(style.height).toBe('292px');
   });
 
+  it('should cap the submenu height when neither edge has room for a `-bottom` position', () => {
+    const instance = activatePopup(anchor, popup, 'right-bottom');
+
+    // upwardMargin = 300 - 8 = 292; downwardMargin = 400 - 250 - 8 = 142. Aligning with the other
+    // edge would only make it shorter, so it stays put and scrolls within what’s above
+    Object.defineProperty(content, 'scrollHeight', { configurable: true, get: () => 500 });
+    mockRect({ top: 250, bottom: 300, vh: 400 });
+    instance.checkPosition();
+
+    const { style } = instance;
+
+    // Still pinned to the anchor’s bottom edge (400 - 300), opening to its right (300)
+    expect(style.inset).toBe('auto auto 100px 300px');
+    expect(style.height).toBe('292px');
+  });
+
   it('should leave the submenu unbounded when it fits below', () => {
     const instance = activatePopup(anchor, popup, 'right-top');
 

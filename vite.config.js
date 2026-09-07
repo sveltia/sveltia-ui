@@ -7,6 +7,8 @@ import { defineConfig } from 'vite';
 /** @type {import('vite').UserConfig} */
 export default defineConfig({
   plugins: [sveltekit(), yaml()],
+  // Resolve Svelte to its client build under Vitest so tests can mount components
+  resolve: process.env.VITEST ? { conditions: ['browser'] } : {},
   test: {
     environment: 'happy-dom',
     include: ['src/lib/{components,services}/**/*.test.js'],
