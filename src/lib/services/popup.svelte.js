@@ -325,6 +325,13 @@ class Popup {
 
     const topMargin = intersectionRect.top - 8;
     const bottomMargin = rootBounds.height - intersectionRect.bottom - 8;
+    // A popup that opens beside its anchor is aligned with one of the anchor’s edges and extends
+    // across it, so its room is measured from that edge, not from the opposite one a dropdown
+    // hangs off
+    const leftMargin = intersectionRect.left - 8;
+    const rightMargin = rootBounds.width - intersectionRect.right - 8;
+    const downwardMargin = rootBounds.height - intersectionRect.top - 8;
+    const upwardMargin = intersectionRect.bottom - 8;
     let { position } = this;
     let height;
 
@@ -345,7 +352,6 @@ class Popup {
     }
 
     // Alter the position if the space is limited
-    // @todo Handle more overflow cases
     if (position.startsWith('bottom-')) {
       if (contentHeight > bottomMargin) {
         if (topMargin > bottomMargin) {
@@ -353,6 +359,31 @@ class Popup {
           height = topMargin;
         } else {
           height = bottomMargin;
+        }
+      }
+    }
+
+    // Only a popup that opens beside its anchor carries a `-top`/`-bottom` suffix, and it grows
+    // away from the edge it’s aligned with: down from the anchor’s top, or up from its bottom. It
+    // gets the same treatment as the dropdown above — align with the other edge when the content
+    // doesn’t fit and that edge has more room, and cap it either way, so a long submenu scrolls
+    // instead of running past the viewport
+    if (position.endsWith('-top')) {
+      if (contentHeight > downwardMargin) {
+        if (upwardMargin > downwardMargin) {
+          position = /** @type {PopupPosition} */ (position.replace('-top', '-bottom'));
+          height = upwardMargin;
+        } else {
+          height = downwardMargin;
+        }
+      }
+    } else if (position.endsWith('-bottom')) {
+      if (contentHeight > upwardMargin) {
+        if (downwardMargin > upwardMargin) {
+          position = /** @type {PopupPosition} */ (position.replace('-bottom', '-top'));
+          height = downwardMargin;
+        } else {
+          height = upwardMargin;
         }
       }
     }
@@ -367,6 +398,20 @@ class Popup {
     if (position.endsWith('-right')) {
       if (intersectionRect.right - contentWidth < 8) {
         position = /** @type {PopupPosition} */ (position.replace('-right', '-left'));
+      }
+    }
+
+    // The two checks above align a dropdown that opens below or above its anchor, so neither
+    // covers a popup that opens beside one — a submenu — running off the edge it opens towards.
+    // That gets the same treatment as the vertical flip above: switch to the other side, but only
+    // when it has more room, so a submenu with nowhere to go stays where the caller put it
+    if (position.startsWith('right-')) {
+      if (contentWidth > rightMargin && leftMargin > rightMargin) {
+        position = /** @type {PopupPosition} */ (position.replace('right-', 'left-'));
+      }
+    } else if (position.startsWith('left-')) {
+      if (contentWidth > leftMargin && rightMargin > leftMargin) {
+        position = /** @type {PopupPosition} */ (position.replace('left-', 'right-'));
       }
     }
 
@@ -398,9 +443,15 @@ class Popup {
       inset: [top, right, bottom, left].join(' '),
       zIndex: 1000,
       minWidth: `${Math.round(intersectionRect.width)}px`,
-      maxWidth: position.endsWith('-left')
-        ? `${Math.round(rootBounds.width - intersectionRect.left - 8)}px`
-        : `${Math.round(intersectionRect.right - 8)}px`,
+      // A popup opening beside the anchor is capped by the room on that side, not by the width the
+      // anchor’s own edges leave, which is what the two dropdown cases below measure
+      maxWidth: position.startsWith('right-')
+        ? `${Math.round(rightMargin)}px`
+        : position.startsWith('left-')
+          ? `${Math.round(leftMargin)}px`
+          : position.endsWith('-left')
+            ? `${Math.round(rootBounds.width - intersectionRect.left - 8)}px`
+            : `${Math.round(intersectionRect.right - 8)}px`,
       // `undefined` removes the `max-height` the popup is given, letting it take its natural size
       // again. `auto` would look equivalent but isn’t a valid `max-height`, so the browser would
       // drop it and leave whatever limit was applied last in place.

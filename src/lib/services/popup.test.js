@@ -547,6 +547,126 @@ describe('Popup - checkPosition() calculation', () => {
     expect(style.inset).not.toBeUndefined();
   });
 
+  it('should switch right-top to left-top when the submenu overflows to the right', () => {
+    const instance = activatePopup(anchor, popup, 'right-top');
+
+    // rightMargin = 800 - 700 - 8 = 92; leftMargin = 650 - 8 = 642. The content doesn’t fit on
+    // the right and the left has more room, so the submenu opens inwards instead
+    Object.defineProperty(content, 'scrollWidth', { configurable: true, get: () => 160 });
+    mockRect({ left: 650, right: 700, vw: 800 });
+    instance.checkPosition();
+
+    const { style } = instance;
+
+    // Pinned to the anchor’s left edge (800 - 650) rather than opening from its right edge
+    expect(style.inset).toBe('100px 150px auto auto');
+    expect(style.maxWidth).toBe('642px');
+  });
+
+  it('should switch left-top to right-top when the submenu overflows to the left', () => {
+    const instance = activatePopup(anchor, popup, 'left-top');
+
+    // leftMargin = 50 - 8 = 42; rightMargin = 800 - 100 - 8 = 692
+    Object.defineProperty(content, 'scrollWidth', { configurable: true, get: () => 160 });
+    mockRect({ left: 50, right: 100, vw: 800 });
+    instance.checkPosition();
+
+    const { style } = instance;
+
+    // Pinned to the anchor’s right edge (100) rather than opening from its left edge
+    expect(style.inset).toBe('100px auto auto 100px');
+    expect(style.maxWidth).toBe('692px');
+  });
+
+  it('should keep right-top when the submenu fits on the right', () => {
+    const instance = activatePopup(anchor, popup, 'right-top');
+
+    // rightMargin = 800 - 300 - 8 = 492, which the content fits in
+    Object.defineProperty(content, 'scrollWidth', { configurable: true, get: () => 160 });
+    mockRect();
+    instance.checkPosition();
+
+    const { style } = instance;
+
+    expect(style.inset).toBe('100px auto auto 300px');
+    expect(style.maxWidth).toBe('492px');
+  });
+
+  it('should keep right-top when neither side has room for the submenu', () => {
+    const instance = activatePopup(anchor, popup, 'right-top');
+
+    // rightMargin = 300 - 200 - 8 = 92; leftMargin = 100 - 8 = 92. Flipping would gain nothing,
+    // so the submenu stays where the caller put it instead of bouncing to the other side
+    Object.defineProperty(content, 'scrollWidth', { configurable: true, get: () => 160 });
+    mockRect({ left: 100, right: 200, vw: 300 });
+    instance.checkPosition();
+
+    const { style } = instance;
+
+    expect(style.inset).toBe('100px auto auto 200px');
+    expect(style.maxWidth).toBe('92px');
+  });
+
+  it('should switch right-top to right-bottom when the submenu overflows the bottom', () => {
+    const instance = activatePopup(anchor, popup, 'right-top');
+
+    // downwardMargin = 600 - 500 - 8 = 92; upwardMargin = 550 - 8 = 542. The content doesn’t fit
+    // below the anchor’s top edge and there’s more room above its bottom edge, so it aligns there
+    Object.defineProperty(content, 'scrollHeight', { configurable: true, get: () => 300 });
+    mockRect({ top: 500, bottom: 550, vh: 600 });
+    instance.checkPosition();
+
+    const { style } = instance;
+
+    // Pinned to the anchor’s bottom edge (600 - 550), still opening to its right (300)
+    expect(style.inset).toBe('auto auto 50px 300px');
+    expect(style.height).toBe('542px');
+  });
+
+  it('should switch right-bottom to right-top when the submenu overflows the top', () => {
+    const instance = activatePopup(anchor, popup, 'right-bottom');
+
+    // upwardMargin = 100 - 8 = 92; downwardMargin = 600 - 50 - 8 = 542
+    Object.defineProperty(content, 'scrollHeight', { configurable: true, get: () => 300 });
+    mockRect({ top: 50, bottom: 100, vh: 600 });
+    instance.checkPosition();
+
+    const { style } = instance;
+
+    // Pinned to the anchor’s top edge (50), still opening to its right (300)
+    expect(style.inset).toBe('50px auto auto 300px');
+    expect(style.height).toBe('542px');
+  });
+
+  it('should cap the submenu height when neither edge has room for it', () => {
+    const instance = activatePopup(anchor, popup, 'right-top');
+
+    // downwardMargin = 400 - 100 - 8 = 292; upwardMargin = 150 - 8 = 142. Aligning with the other
+    // edge would only make it shorter, so it stays put and scrolls within what’s below
+    Object.defineProperty(content, 'scrollHeight', { configurable: true, get: () => 500 });
+    mockRect({ vh: 400 });
+    instance.checkPosition();
+
+    const { style } = instance;
+
+    expect(style.inset).toBe('100px auto auto 300px');
+    expect(style.height).toBe('292px');
+  });
+
+  it('should leave the submenu unbounded when it fits below', () => {
+    const instance = activatePopup(anchor, popup, 'right-top');
+
+    // downwardMargin = 600 - 100 - 8 = 492, which the content fits in
+    Object.defineProperty(content, 'scrollHeight', { configurable: true, get: () => 100 });
+    mockRect();
+    instance.checkPosition();
+
+    const { style } = instance;
+
+    expect(style.inset).toBe('100px auto auto 300px');
+    expect(style.height).toBeUndefined();
+  });
+
   it('should mirror bottom-left to bottom-right when the locale is RTL', () => {
     vi.mocked(isRTL).mockReturnValue(true);
 
@@ -594,7 +714,8 @@ describe('Popup - checkPosition() calculation', () => {
     // `left-top` → `right-top`: opens to the anchor’s right (300); LTR would give
     // `100px 750px auto auto`
     expect(style.inset).toBe('100px auto auto 300px');
-    expect(style.maxWidth).toBe('292px');
+    // Capped by the room to the anchor’s right: 800 − 300 − 8
+    expect(style.maxWidth).toBe('492px');
     expect(style.minWidth).toBe('250px');
   });
 
@@ -611,7 +732,8 @@ describe('Popup - checkPosition() calculation', () => {
     // `right-top` → `left-top`: opens to the anchor’s left (800 − 50); LTR would give
     // `100px auto auto 300px`
     expect(style.inset).toBe('100px 750px auto auto');
-    expect(style.maxWidth).toBe('292px');
+    // Capped by the room to the anchor’s left: 50 − 8
+    expect(style.maxWidth).toBe('42px');
     expect(style.minWidth).toBe('250px');
   });
 

@@ -36,7 +36,8 @@
     disabled = false,
     label = '',
     labelDir = undefined,
-    popupPosition = 'right-top', // @todo Make this auto detect
+    // The popup flips to the other side by itself when the submenu wouldn’t fit on this one
+    popupPosition = 'right-top',
     children: _children,
     startIcon: _startIcon,
     endIcon: _endIcon,
