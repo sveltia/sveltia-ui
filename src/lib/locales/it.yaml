@@ -43,7 +43,7 @@ split_button:
 # Combobox component
 combobox:
   # Placeholder when no option is selected
-  select_an_option: "Seleziona un'opzione…"
+  select_an_option: Seleziona un’opzione…
   # Filter input aria-label
   filter_options: Filtra Opzioni
   # Empty state message when filter has no matches
@@ -109,7 +109,7 @@ text_editor:
   # Markdown mode toggle button aria-label
   edit_in_markdown: Modifica in Markdown
   # Error message when rich text conversion fails
-  converter_error: Impossibile abilitare la modalità rich text. Usa l'editor di testo semplice.
+  converter_error: Impossibile abilitare la modalità rich text. Usa l’editor di testo semplice.
   # Language selector aria-label
   language: Lingua
   # Plain text mode option in language selector
