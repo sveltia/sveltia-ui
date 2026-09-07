@@ -14,3 +14,5 @@ minimumReleaseAgeExclude:
 overrides:
   # <0.7.0 has a security vulnerability, 2.0.0 causes issues with SvelteKit
   'cookie@<0.7.0': '^1.0.0'
+  # Work around JSDoc bug
+  esrap: 2.3.4
