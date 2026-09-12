@@ -1,0 +1,116 @@
+# Dialog action button labels
+ok: U redu
+cancel: Odustani
+close: Zatvori
+
+# Button to clear content, e.g. search input or calendar date
+clear: Očisti
+
+# Text editor dialog buttons for link/image insertion
+insert: Umetni
+update: Ažuriraj
+remove: Ukloni
+
+# Combobox dropdown toggle button aria-labels
+collapse: Sažmi
+expand: Proširi
+
+# Infobar/toast dismiss button label
+dismiss: Odbaci
+
+# Emoji suggestion listbox aria-label, shared by the text fields and the text editor
+emoji_suggestions: Prijedlozi emojija
+
+# Calendar component
+calendar:
+  # View switcher group aria-labels and navigation button aria-labels
+  year: Godina
+  previous_decade: Prethodno desetljeće
+  next_decade: Sljedeće desetljeće
+  month: Mjesec
+  previous_month: Prethodni mjesec
+  next_month: Sljedeći mjesec
+  # “Today” button label in footer
+  today: Danas
+
+# Split button component
+split_button:
+  # Wrapper aria-label, e.g. “Save Options” when primary button is “Save”
+  x_options: 'Opcije za {$name}'
+  # Dropdown toggle aria-label
+  more_options: Više opcija
+
+# Combobox component
+combobox:
+  # Placeholder when no option is selected
+  select_an_option: Odaberite opciju…
+  # Filter input aria-label
+  filter_options: Filtriraj opcije
+  # Empty state message when filter has no matches
+  no_matching_options: Nema odgovarajućih opcija
+
+# Number input component
+number_input:
+  # Spin button aria-labels for incrementing/decrementing the number value
+  increase: Povećaj
+  decrease: Smanji
+
+# Password input component
+password_input:
+  # Visibility toggle button aria-labels
+  show_password: Prikaži lozinku
+  hide_password: Sakrij lozinku
+
+# Secret input component (API keys, tokens, etc.)
+secret_input:
+  # Visibility toggle button aria-labels
+  show_secret: Prikaži tajni ključ
+  hide_secret: Sakrij tajni ključ
+
+# Select tags component (multi-select)
+select_tags:
+  # Listbox aria-label
+  selected_options: Odabrane opcije
+  # Remove button aria-label, e.g. “Remove Option 1”
+  remove_x: 'Ukloni {$name}'
+
+# Text editor component
+text_editor:
+  # Toolbar aria-labels
+  text_editor: Uređivač teksta
+  code_editor: Uređivač koda
+  # Block style menu button and menu aria-labels
+  text_style_options: Opcije stila teksta
+  show_text_style_options: Prikaži opcije stila teksta
+  # Block style menu items
+  paragraph: Odlomak
+  heading_1: Naslov 1
+  heading_2: Naslov 2
+  heading_3: Naslov 3
+  heading_4: Naslov 4
+  heading_5: Naslov 5
+  heading_6: Naslov 6
+  bulleted_list: Popis s grafičkim oznakama
+  numbered_list: Numerirani popis
+  blockquote: Citat
+  code_block: Blok koda
+  # Inline style button aria-labels
+  bold: Podebljano
+  italic: Kurziv
+  strikethrough: Precrtano
+  code: Kod
+  link: Poveznica
+  # Link dialog title
+  insert_link: Umetni poveznicu
+  update_link: Ažuriraj poveznicu
+  # Link dialog input field labels
+  text: Tekst
+  url: URL
+  # Markdown mode toggle button aria-label
+  edit_in_markdown: Uredi u Markdownu
+  # Error message when rich text conversion fails
+  converter_error: Nije moguće omogućiti način obogaćenog teksta. Umjesto toga upotrijebite uređivač običnog teksta.
+  # Language selector aria-label
+  language: Jezik
+  # Plain text mode option in language selector
+  plain_text: Običan tekst
