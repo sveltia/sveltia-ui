@@ -147,6 +147,7 @@
     justify-content: flex-end;
     align-items: flex-end;
     gap: 8px;
+    overflow: visible; // For shadow to be visible outside the container
     margin: 0;
     border: 0;
     padding: 0;
@@ -172,7 +173,6 @@
     position: absolute;
     width: max-content;
     max-width: 80dvw;
-    box-shadow: 0 8px 16px var(--sui-popup-shadow-color);
     opacity: 1;
     transition-duration: 250ms;
     will-change: opacity;
@@ -238,6 +238,12 @@
       inset-block-end: 0;
       inset-inline-start: auto;
       inset-inline-end: 0;
+    }
+
+    :global {
+      .alert {
+        box-shadow: 0 8px 16px var(--sui-popup-shadow-color);
+      }
     }
   }
 </style>
