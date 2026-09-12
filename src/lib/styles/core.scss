@@ -110,7 +110,7 @@
       text-decoration: underline;
     }
 
-    :is(:root, :host)[data-underline-links="true"] & {
+    :global(:is(:root, :host)[data-underline-links="true"]) & {
       text-decoration: underline;
     }
   }
