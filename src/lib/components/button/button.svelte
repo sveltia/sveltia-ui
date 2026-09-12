@@ -303,6 +303,11 @@
       height: auto !important;
       color: var(--sui-button-link-foreground-color, var(--sui-primary-accent-color-text));
 
+      &:hover .label {
+        outline: none !important;
+        text-decoration: underline;
+      }
+
       .label {
         padding: 0;
         line-height: var(--sui-line-height-compact);
