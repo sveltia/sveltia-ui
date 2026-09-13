@@ -156,12 +156,9 @@
 
       await focusEditor(editorStore.editor);
       editorStore.editor.dispatchCommand(TOGGLE_LINK_COMMAND, anchorURL);
-    } else {
+    } else /* v8 ignore else */ if (editorStore.editor) {
       // The dialog leaves the focus alone (see `restoreFocus` below), so bring it back here
-      /* v8 ignore else */
-      if (editorStore.editor) {
-        await focusEditor(editorStore.editor);
-      }
+      await focusEditor(editorStore.editor);
     }
 
     anchorURL = '';

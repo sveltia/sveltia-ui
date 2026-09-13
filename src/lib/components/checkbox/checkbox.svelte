@@ -132,11 +132,8 @@
             if (!group.includes(value)) {
               group = [...group, value];
             }
-          } else {
-            /* v8 ignore else */
-            if (group.includes(value)) {
-              group = group.filter((v) => v !== value);
-            }
+          } else /* v8 ignore else */ if (group.includes(value)) {
+            group = group.filter((v) => v !== value);
           }
         }
 
