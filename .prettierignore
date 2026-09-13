@@ -4,3 +4,4 @@ node_modules
 pnpm-lock.yaml
 src/lib/components/emoji/generated.js
 src/lib/components/text-editor/shiki/generated.js
+.claude

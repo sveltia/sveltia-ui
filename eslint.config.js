@@ -9,7 +9,15 @@ import globals from 'globals';
 export default [
   // Ignore files (migrated from .eslintrc.yaml ignorePatterns + .eslintignore)
   {
-    ignores: ['**/*.cjs', '**/*.d.ts', 'node_modules/', '.svelte-kit/', 'dist/', '**/generated.js'],
+    ignores: [
+      '**/*.cjs',
+      '**/*.d.ts',
+      'node_modules/',
+      '.svelte-kit/',
+      'dist/',
+      '.claude/',
+      '**/generated.js',
+    ],
   },
 
   // Airbnb base rules (equivalent to eslint-config-airbnb-base), applied to all
