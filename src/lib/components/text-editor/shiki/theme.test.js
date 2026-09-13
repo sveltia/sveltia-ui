@@ -67,13 +67,17 @@ describe('shiki theme', () => {
     expect(getCodeTheme()).toBe(CODE_THEME_LIGHT);
   });
 
-  it('falls back to the system appearance', () => {
+  it('falls back to a dark system appearance', () => {
     vi.stubGlobal(
       'matchMedia',
       vi.fn(() => ({ matches: true, addEventListener: vi.fn(), removeEventListener: vi.fn() })),
     );
 
     expect(getCodeTheme()).toBe(CODE_THEME_DARK);
+  });
+
+  it('falls back to a light system appearance', () => {
+    expect(getCodeTheme()).toBe(CODE_THEME_LIGHT);
   });
 
   it('re-themes every code block when the appearance changes', async () => {

@@ -3,9 +3,14 @@
 import { CodeHighlightNode, CodeNode, $createCodeNode as createCodeNode } from '@lexical/code-core';
 import {
   $createLineBreakNode as createLineBreakNode,
+  $createParagraphNode as createParagraphNode,
+  $createTabNode as createTabNode,
   createEditor,
   $createTextNode as createTextNode,
+  $getNodeByKey as getNodeByKey,
   $getRoot as getRoot,
+  $getSelection as getSelection,
+  $isRangeSelection as isRangeSelection,
   ParagraphNode,
 } from 'lexical';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -79,9 +84,19 @@ const createTestTokenizer = () => ({
   defaultLanguage: 'plain',
   defaultTheme: 'github-light',
   tokenize: vi.fn((codeNode) =>
-    getHighlightNodes(codeNode, 'javascript').flatMap((node) =>
-      node.getTextContent() === '\n' ? [createLineBreakNode()] : [node],
-    ),
+    getHighlightNodes(codeNode, 'javascript').flatMap((node) => {
+      const text = node.getTextContent();
+
+      if (text === '\n') {
+        return [createLineBreakNode()];
+      }
+
+      if (text === '\t') {
+        return [createTabNode()];
+      }
+
+      return [node];
+    }),
   ),
 });
 
@@ -142,6 +157,53 @@ const readCodeBlock = (editor) => {
   });
 
   return result;
+};
+
+/**
+ * Read the caret position.
+ * @param {any} editor Editor instance.
+ * @returns {{ type: string, text: string, offset: number } | undefined} Anchor’s type, the anchor
+ * node’s text content, and offset, or `undefined` when there is no range selection.
+ */
+const readCaret = (editor) => {
+  /** @type {any} */
+  let result;
+
+  editor.read(() => {
+    const selection = getSelection();
+
+    if (isRangeSelection(selection)) {
+      const { anchor } = selection;
+
+      result = {
+        type: anchor.type,
+        text: anchor.getNode().getTextContent(),
+        offset: anchor.offset,
+      };
+    }
+  });
+
+  return result;
+};
+
+/**
+ * Mount the editor on a detached element so mutation listeners have DOM to work with.
+ * @param {any} editor Editor instance.
+ * @returns {{ element: HTMLElement, unmount: () => void }} Root element and a cleanup function.
+ */
+const mount = (editor) => {
+  const element = document.createElement('div');
+
+  document.body.append(element);
+  editor.setRootElement(element);
+
+  return {
+    element,
+    unmount: () => {
+      editor.setRootElement(null);
+      element.remove();
+    },
+  };
 };
 
 describe('shiki highlighter', () => {
@@ -290,6 +352,84 @@ describe('shiki highlighter', () => {
     expect(readCodeBlock(editor).supported).toBe(false);
   });
 
+  it('withdraws highlighting support when a block is switched to plain text', () => {
+    const editor = createTestEditor();
+
+    registerCodeHighlighting(editor, createTestTokenizer());
+    insertCodeBlock(editor, 'const a');
+
+    expect(readCodeBlock(editor).supported).toBe(true);
+
+    editor.update(
+      () => {
+        firstBlock().setLanguage('plain');
+      },
+      { discrete: true },
+    );
+
+    expect(readCodeBlock(editor).supported).toBe(false);
+  });
+
+  it('withdraws highlighting support when a block is switched to an unsupported language', () => {
+    const editor = createTestEditor();
+
+    registerCodeHighlighting(editor, createTestTokenizer());
+    insertCodeBlock(editor, 'const a');
+
+    expect(readCodeBlock(editor).supported).toBe(true);
+
+    editor.update(
+      () => {
+        firstBlock().setLanguage('nonexistent');
+      },
+      { discrete: true },
+    );
+
+    expect(loadCodeLanguage).toHaveBeenCalledWith(
+      'nonexistent',
+      expect.anything(),
+      expect.any(String),
+    );
+    expect(readCodeBlock(editor).supported).toBe(false);
+  });
+
+  it('highlights several blocks inserted in one update', () => {
+    const editor = createTestEditor();
+
+    registerCodeHighlighting(editor, createTestTokenizer());
+
+    editor.update(
+      () => {
+        getRoot().clear();
+
+        ['const a', 'let b'].forEach((text) => {
+          const code = createCodeNode();
+
+          code.setLanguage('javascript');
+          code.append(createTextNode(text));
+          getRoot().append(code);
+        });
+      },
+      { discrete: true },
+    );
+
+    /** @type {any[]} */
+    let types = [];
+
+    editor.read(() => {
+      types = getRoot()
+        .getChildren()
+        .map((/** @type {any} */ code) =>
+          code.getChildren().map((/** @type {any} */ child) => child.getType()),
+        );
+    });
+
+    expect(types).toEqual([
+      ['code-highlight', 'code-highlight', 'code-highlight'],
+      ['code-highlight', 'code-highlight', 'code-highlight'],
+    ]);
+  });
+
   it('falls back to plain text when the engine could not be fetched', () => {
     facadeState.engineLoaded = false;
     facadeState.engineUnavailable = true;
@@ -390,10 +530,7 @@ describe('shiki highlighter', () => {
     element.remove();
   });
 
-  // The caret restoration inside `updateAndRetainSelection` cannot be exercised here: with no real
-  // browser Selection, `$getSelection()` is null during a transform, so that path always short
-  // circuits. These cover the surrounding behavior instead.
-  it('re-highlights correctly when an edit also moves the selection', () => {
+  it('leaves the caret alone when an edit does not change the tokens', () => {
     const editor = createTestEditor();
 
     registerCodeHighlighting(editor, createTestTokenizer());
@@ -404,6 +541,7 @@ describe('shiki highlighter', () => {
         const code = firstBlock();
         const last = code.getChildren().at(-1);
 
+        // Growing the last token in place yields the same node list, so nothing is replaced
         last.setTextContent(`${last.getTextContent()}bc`);
         last.select(2, 2);
       },
@@ -416,6 +554,212 @@ describe('shiki highlighter', () => {
     expect(block.childTypes.every((/** @type {any} */ type) => type === 'code-highlight')).toBe(
       true,
     );
+    expect(readCaret(editor)).toEqual({ type: 'text', text: 'abc', offset: 2 });
+  });
+
+  it('keeps the caret at the same text offset after the tokens are rebuilt', () => {
+    const editor = createTestEditor();
+
+    registerCodeHighlighting(editor, createTestTokenizer());
+    insertCodeBlock(editor, 'const a');
+
+    editor.update(
+      () => {
+        const code = firstBlock();
+        const last = code.getChildren().at(-1);
+
+        // Splitting the last token into three replaces it, so the caret has to be restored
+        last.setTextContent('a b');
+        last.select(3, 3);
+      },
+      { discrete: true },
+    );
+
+    expect(readCodeBlock(editor).childTypes).toHaveLength(5);
+    expect(readCaret(editor)).toEqual({ type: 'text', text: 'b', offset: 1 });
+  });
+
+  it('keeps the caret at the start of a line after the tokens are rebuilt', () => {
+    const editor = createTestEditor();
+
+    registerCodeHighlighting(editor, createTestTokenizer());
+    insertCodeBlock(editor, 'a\nb');
+
+    editor.update(
+      () => {
+        const code = firstBlock();
+
+        code.getChildren().at(-1).setTextContent('b c');
+        // An element point right after the line break
+        code.select(2, 2);
+      },
+      { discrete: true },
+    );
+
+    expect(readCodeBlock(editor).childTypes).toEqual([
+      'code-highlight',
+      'linebreak',
+      'code-highlight',
+      'code-highlight',
+      'code-highlight',
+    ]);
+    expect(readCaret(editor)).toEqual({ type: 'element', text: 'a\nb c', offset: 2 });
+  });
+
+  it('puts the caret on the block itself when its offset lands on a line break', () => {
+    const editor = createTestEditor();
+
+    registerCodeHighlighting(editor, createTestTokenizer());
+    insertCodeBlock(editor, '\nb');
+
+    editor.update(
+      () => {
+        const code = firstBlock();
+
+        code.getChildren().at(-1).setTextContent('b c');
+        // An element point at the very start, before the leading line break
+        code.select(0, 0);
+      },
+      { discrete: true },
+    );
+
+    expect(readCodeBlock(editor).childTypes).toEqual([
+      'linebreak',
+      'code-highlight',
+      'code-highlight',
+      'code-highlight',
+    ]);
+    // A line break cannot host a text point, so the caret becomes an element point on the block
+    expect(readCaret(editor)).toEqual({ type: 'element', text: '\nb c', offset: 0 });
+  });
+
+  it('falls back to the end of the block when the offset runs past its content', () => {
+    const editor = createTestEditor();
+
+    registerCodeHighlighting(editor, createTestTokenizer());
+
+    editor.update(
+      () => {
+        const paragraph = createParagraphNode();
+        const code = createCodeNode();
+
+        paragraph.append(createTextNode('hello world'));
+        code.setLanguage('javascript');
+        code.append(createTextNode('a'));
+        getRoot().clear();
+        getRoot().append(paragraph, code);
+      },
+      { discrete: true },
+    );
+
+    editor.update(
+      () => {
+        const code = /** @type {any} */ (getRoot().getChildren()[1]);
+
+        code.getChildren().at(-1).setTextContent('a b');
+        // An element point at the end of the block. The offset is measured from the block’s
+        // preceding siblings, which are longer than the block’s content
+        code.select(1, 1);
+      },
+      { discrete: true },
+    );
+
+    expect(readCaret(editor)).toEqual({ type: 'element', text: 'a b', offset: 3 });
+  });
+
+  it('keeps the caret at the same text offset on a later line', () => {
+    const editor = createTestEditor();
+
+    registerCodeHighlighting(editor, createTestTokenizer());
+    insertCodeBlock(editor, 'a\nb');
+
+    editor.update(
+      () => {
+        const code = firstBlock();
+        const last = code.getChildren().at(-1);
+
+        last.setTextContent('b c');
+        last.select(1, 1);
+      },
+      { discrete: true },
+    );
+
+    // The line break before the caret counts for one character on the way there
+    expect(readCaret(editor)).toEqual({ type: 'text', text: 'b', offset: 1 });
+  });
+
+  it('replaces only the tokens that changed', () => {
+    const editor = createTestEditor();
+    const tokenizer = createTestTokenizer();
+
+    registerCodeHighlighting(editor, tokenizer);
+    insertCodeBlock(editor, 'a\tb c');
+
+    /** @type {any[]} */
+    let before = [];
+
+    editor.read(() => {
+      before = firstBlock().getChildren();
+    });
+
+    editor.update(
+      () => {
+        const code = firstBlock();
+        const first = code.getChildren()[0];
+
+        // Changes the first token only; the tab and the rest of the line are kept as they are
+        first.setTextContent('x y');
+        first.select(1, 1);
+      },
+      { discrete: true },
+    );
+
+    /** @type {any[]} */
+    let after = [];
+
+    editor.read(() => {
+      after = firstBlock().getChildren();
+    });
+
+    expect(after.map((node) => node.getType())).toEqual([
+      'code-highlight',
+      'code-highlight',
+      'code-highlight',
+      'tab',
+      'code-highlight',
+      'code-highlight',
+      'code-highlight',
+    ]);
+    // The trailing nodes are the very same instances as before the edit
+    expect(after.slice(-4).map((node) => node.getKey())).toEqual(
+      before.slice(-4).map((node) => node.getKey()),
+    );
+    expect(readCaret(editor)).toEqual({ type: 'text', text: 'x', offset: 1 });
+  });
+
+  it('leaves the caret where it is when it is outside the block', () => {
+    const editor = createTestEditor();
+
+    registerCodeHighlighting(editor, createTestTokenizer());
+    insertCodeBlock(editor, 'const a');
+
+    editor.update(
+      () => {
+        const code = firstBlock();
+        const paragraph = createParagraphNode();
+        const text = createTextNode('elsewhere');
+
+        paragraph.append(text);
+        getRoot().append(paragraph);
+        code.getChildren().at(-1).setTextContent('a b');
+        text.select(4, 4);
+      },
+      { discrete: true },
+    );
+
+    // The block is still re-highlighted, but the caret is not dragged into it
+    expect(readCodeBlock(editor).childTypes).toHaveLength(5);
+    expect(readCaret(editor)).toEqual({ type: 'text', text: 'elsewhere', offset: 4 });
   });
 
   it('re-highlights a multiline block around its line breaks', () => {
@@ -505,6 +849,88 @@ describe('shiki highlighter', () => {
 
     editor.setRootElement(null);
     element.remove();
+  });
+
+  it('numbers an existing block when registered after the fact', () => {
+    const editor = createTestEditor();
+    const { element, unmount } = mount(editor);
+
+    insertCodeBlock(editor, 'a\nb');
+
+    const code = element.querySelector('code');
+
+    expect(code?.hasAttribute('data-gutter')).toBe(false);
+
+    registerCodeHighlighting(editor, createTestTokenizer());
+
+    // The block is still a single text node at this point, as nothing has highlighted it yet
+    expect(code?.getAttribute('data-gutter')).toBe('1');
+
+    unmount();
+  });
+
+  it('skips the gutter of a block that is not rendered', () => {
+    const editor = createTestEditor();
+
+    insertCodeBlock(editor, 'a\nb');
+
+    // Registering reports the existing block as created, but there is no element to write to
+    expect(() => registerCodeHighlighting(editor, createTestTokenizer())).not.toThrow();
+  });
+
+  it('skips the gutter of a block that has been removed', () => {
+    const editor = createTestEditor();
+    const { element, unmount } = mount(editor);
+
+    registerCodeHighlighting(editor, createTestTokenizer());
+    insertCodeBlock(editor, 'a\nb');
+
+    editor.update(
+      () => {
+        getRoot().clear();
+      },
+      { discrete: true },
+    );
+
+    expect(element.querySelector('code')).toBeNull();
+
+    unmount();
+  });
+
+  it('skips the gutter of a block that is gone from the latest state', () => {
+    const editor = createTestEditor();
+    const { unmount } = mount(editor);
+
+    // A listener registered first runs first, and removing the block from within it leaves the
+    // highlighter’s own listener looking at a key that no longer resolves
+    editor.registerMutationListener(CodeNode, (/** @type {Map<string, string>} */ mutations) => {
+      mutations.forEach((type, key) => {
+        if (type === 'created') {
+          editor.update(
+            () => {
+              getNodeByKey(key)?.remove();
+            },
+            { discrete: true },
+          );
+        }
+      });
+    });
+    registerCodeHighlighting(editor, createTestTokenizer());
+
+    expect(() => insertCodeBlock(editor, 'a\nb')).not.toThrow();
+
+    unmount();
+  });
+
+  it('does not track the gutter of a headless editor', () => {
+    const editor = createTestEditor();
+    const registerMutationListener = vi.spyOn(editor, 'registerMutationListener');
+
+    // What `@lexical/headless` sets
+    editor._headless = true;
+    registerCodeHighlighting(editor, createTestTokenizer());
+
+    expect(registerMutationListener).not.toHaveBeenCalled();
   });
 });
 

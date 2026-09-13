@@ -467,4 +467,33 @@ describe('shiki facade', () => {
     expect(facade.loadCodeTheme('nonexistent-theme')).toBeUndefined();
     expect(loadTheme).not.toHaveBeenCalled();
   });
+
+  it('accepts a loader that returns the payload itself rather than a module', async () => {
+    const { cachePayload } = await import('./cache.js');
+    const payload = { name: 'github-dark' };
+
+    const facade = await importFacade({
+      loadEngine: async () => createFakeEngine(),
+      // A consumer’s custom loader may hand over a bare registration, without a `default` export
+      loadTheme: async () => payload,
+    });
+
+    await facade.loadEngine();
+    await facade.loadCodeTheme('github-dark');
+
+    expect(facade.isCodeThemeLoaded('github-dark')).toBe(true);
+    expect(cachePayload).toHaveBeenCalledWith('theme', 'github-dark', payload);
+  });
+
+  it('loads no theme when the loader yields no module', async () => {
+    const facade = await importFacade({
+      loadEngine: async () => createFakeEngine(),
+      loadTheme: async () => undefined,
+    });
+
+    await facade.loadEngine();
+    await facade.loadCodeTheme('github-dark');
+
+    expect(facade.isCodeThemeLoaded('github-dark')).toBe(false);
+  });
 });
