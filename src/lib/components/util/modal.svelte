@@ -21,6 +21,7 @@
     unmount,
     untrack,
   } from 'svelte';
+  import { getTransitionTimeout } from './modal.js';
   import Placeholder from './placeholder.svelte';
 
   /**
@@ -194,14 +195,6 @@
   };
 
   /**
-   * Get the longest time from a computed CSS time list, such as `transition-duration`.
-   * @param {string} value Comma-separated CSS time values in seconds, e.g. `0.4s, 0.15s`.
-   * @returns {number} Time in milliseconds.
-   */
-  const getLongestTime = (value) =>
-    Math.max(0, ...value.split(',').map((time) => Number.parseFloat(time) || 0)) * 1000;
-
-  /**
    * Resolve once the transition is complete.
    * @returns {Promise<void>} Nothing.
    */
@@ -213,11 +206,10 @@
       return;
     }
 
-    const { transitionDuration, transitionDelay } = getComputedStyle(dialog);
     // Fall back to a timer, so the modal is never stuck half-open (and, more importantly, never
     // left mounted) in case `transitionend` is never fired, e.g. when the transition is removed by
     // the consumer’s CSS or the element is not rendered at all
-    const timeout = getLongestTime(transitionDuration) + getLongestTime(transitionDelay) + 100;
+    const timeout = getTransitionTimeout(getComputedStyle(dialog));
     const controller = new AbortController();
     const { signal } = controller;
 
@@ -244,6 +236,8 @@
    * Show the modal.
    */
   const openDialog = async () => {
+    // Only called when the `open` prop changes, so it can’t be requested twice in a row
+    /* v8 ignore next */
     if (requestedOpen) {
       return;
     }
@@ -278,8 +272,11 @@
     // such as `<Dialog>`, may then move the focus to a specific control, like an input field.
     await tick();
 
+    // The focus is on `<body>` at this point, because the element was still `inert` when shown
+    /* v8 ignore next */
     if (gen !== generation || !dialog) return;
 
+    /* v8 ignore else */
     if (!dialog.contains(document.activeElement)) {
       focus();
     }
@@ -302,6 +299,8 @@
 
     const gen = generation;
     const wasOpen = setOpenClass;
+    // The element is mounted by the time a close can be requested; see `openDialog()` above
+    /* v8 ignore next */
     const returnValue = dialog?.returnValue ?? '';
 
     onClosing?.(new CustomEvent('Closing'));

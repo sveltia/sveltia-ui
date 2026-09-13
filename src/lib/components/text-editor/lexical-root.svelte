@@ -107,6 +107,8 @@
   });
 
   $effect(() => {
+    // Both are in place by the time the effect first runs; see `onMount()` above
+    /* v8 ignore else */
     if (editorStore.editor && lexicalRoot) {
       editorStore.editor.setRootElement(lexicalRoot);
       editorStore.initialized = true;
@@ -126,7 +128,7 @@
   aria-invalid={invalid}
   class="lexical-root"
   class:code={editorStore.config.isCodeEditor}
-  id="{editorStore.editorId}-lexical-root"
+  id={`${editorStore.editorId}-lexical-root`}
   contenteditable={editable}
   {hidden}
 ></div>

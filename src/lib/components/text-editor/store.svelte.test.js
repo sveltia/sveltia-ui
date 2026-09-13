@@ -224,6 +224,9 @@ describe('createEditorStore', () => {
       setTimeout(r, 0);
     });
     expect(store.hasConverterError).toBe(true);
+    // The editor falls back to the plain text mode, and the error is shown
+    expect(store.useRichText).toBe(false);
+    expect(store.showConverterError).toBe(true);
     consoleSpy.mockRestore();
   });
 

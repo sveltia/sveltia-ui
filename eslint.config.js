@@ -168,9 +168,10 @@ export default [
     },
   },
 
-  // Allow $state and other Svelte runes as globals in .svelte.js files
+  // Allow $state and other Svelte runes as globals in .svelte.js files, including the component
+  // tests, which use runes to pass reactive props
   {
-    files: ['**/*.svelte.js'],
+    files: ['**/*.svelte.js', '**/*.svelte.test.js'],
     languageOptions: {
       globals: {
         $state: 'readonly',

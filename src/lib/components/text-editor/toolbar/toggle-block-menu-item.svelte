@@ -44,6 +44,8 @@
    * Change the current selection’s type to {@link type}.
    */
   const changeBlockType = async () => {
+    // The item is only clickable while the editor is there
+    /* v8 ignore next */
     if (!editorStore.editor) {
       return;
     }

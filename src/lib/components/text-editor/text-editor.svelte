@@ -82,6 +82,8 @@
   setContext('editorStore', editorStore);
 
   $effect(() => {
+    // The root initializes the editor before these effects first run, and stays initialized
+    /* v8 ignore next */
     if (!editorStore.initialized) {
       return;
     }
@@ -94,6 +96,8 @@
   });
 
   $effect(() => {
+    // The root initializes the editor before these effects first run, and stays initialized
+    /* v8 ignore next */
     if (!editorStore.initialized) {
       return;
     }

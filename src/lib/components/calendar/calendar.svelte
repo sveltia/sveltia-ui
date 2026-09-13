@@ -4,24 +4,23 @@
 -->
 <script>
   import { _, isRTL } from '@sveltia/i18n';
-  import { SvelteDate } from 'svelte/reactivity';
   import Button from '../button/button.svelte';
   import Divider from '../divider/divider.svelte';
   import Spacer from '../divider/spacer.svelte';
   import Icon from '../icon/icon.svelte';
+  import {
+    addMonths,
+    getCalendarDays,
+    getFirstDayOfMonth,
+    isSameDay,
+    MONTH_NAMES,
+    toDateString,
+  } from './calendar.js';
 
   /**
    * @typedef {object} Props
    * @property {string} [value] Date.
    */
-
-  /**
-   * List of month names for month selector. We use a fixed date to avoid issues with daylight
-   * saving time.
-   */
-  const MONTH_NAMES = Array.from({ length: 12 }, (__, i) =>
-    new Date(2000, i, 10).toLocaleDateString('en', { month: 'short' }),
-  );
 
   /**
    * @type {Props & Record<string, any>}
@@ -31,30 +30,13 @@
   const now = new Date();
 
   const date = $derived(value ? new Date(value) : now);
-  const firstDayOfMonth = $derived(new Date(date.getUTCFullYear(), date.getUTCMonth(), 1));
-  // eslint-disable-next-line svelte/prefer-writable-derived
-  let firstDay = $state();
-
-  $effect(() => {
-    firstDay = new SvelteDate(firstDayOfMonth);
-  });
-
-  const dayList = $derived.by(() => {
-    if (!firstDay) return [];
-
-    const cursor = new SvelteDate(firstDay);
-
-    // Start from Sunday
-    cursor.setDate(1 - cursor.getUTCDay());
-
-    return Array.from({ length: 42 }, () => {
-      const day = new Date(cursor);
-
-      cursor.setUTCDate(cursor.getUTCDate() + 1);
-
-      return { day };
-    });
-  });
+  /**
+   * First day of the month being displayed. Follows the {@link value}, and is reassigned by the
+   * month navigation below.
+   * @type {Date}
+   */
+  let firstDay = $derived(getFirstDayOfMonth(date));
+  const dayList = $derived(getCalendarDays(firstDay).map((day) => ({ day })));
 </script>
 
 <div role="group">
@@ -62,7 +44,7 @@
   <div role="none" class="header">
     <Button
       variant="ghost"
-      label={firstDay?.toLocaleDateString('en', { year: 'numeric', month: 'short' })}
+      label={firstDay.toLocaleDateString('en', { year: 'numeric', month: 'short' })}
       aria-haspopup="dialog"
     >
       {#snippet endIcon()}
@@ -98,7 +80,7 @@
             <div role="none" class="grid">
               {#each [0, 1, 2, 3, 4, 5, 6, 7, 8, 9] as year (year)}
                 <div role="none">
-                  <Button>202{year}</Button>
+                  <Button>{`202${year}`}</Button>
                 </div>
               {/each}
             </div>
@@ -119,8 +101,7 @@
     <Button
       aria-label={_('_sui.calendar.previous_month')}
       onclick={() => {
-        firstDay.setUTCMonth(firstDay.getUTCMonth() - 1);
-        firstDay = firstDay;
+        firstDay = addMonths(firstDay, -1);
       }}
     >
       <Icon name="chevron_left" />
@@ -128,8 +109,7 @@
     <Button
       aria-label={_('_sui.calendar.next_month')}
       onclick={() => {
-        firstDay.setUTCMonth(firstDay.getUTCMonth() + 1);
-        firstDay = firstDay;
+        firstDay = addMonths(firstDay, 1);
       }}
     >
       <Icon name={isRTL() ? 'chevron_left' : 'chevron_right'} />
@@ -144,16 +124,14 @@
     {#each dayList as { day } (day)}
       <div
         role="none"
-        class:other-month={day.getUTCMonth() !== firstDay?.getUTCMonth()}
-        class:today={day.getFullYear() === now.getFullYear() &&
-          day.getMonth() === now.getMonth() &&
-          day.getDate() === now.getDate()}
+        class:other-month={day.getUTCMonth() !== firstDay.getUTCMonth()}
+        class:today={isSameDay(day, now)}
       >
         <Button
           role="option"
           aria-selected={false}
           onclick={() => {
-            [value] = day.toJSON().split('T');
+            value = toDateString(day);
           }}
         >
           {day.getUTCDate()}
@@ -172,7 +150,7 @@
     <Spacer flex={true} />
     <Button
       onclick={() => {
-        [value] = now.toJSON().split('T');
+        value = toDateString(now);
       }}
     >
       {_('_sui.calendar.today')}

@@ -52,6 +52,12 @@
 
   const id = $props.id();
   const timeout = $derived(typeof debounce === 'number' ? debounce : 300);
+  /**
+   * Accessible label, whether given as the `ariaLabel` prop or as a plain `aria-label` attribute,
+   * which the wrapper components such as `<SearchBar>` and `<NumberInput>` pass through as is.
+   * @type {string | undefined}
+   */
+  const label = $derived(ariaLabel ?? restProps['aria-label']);
 
   let debounceTimer = 0;
 
@@ -113,7 +119,7 @@
     disabled={disabled || undefined}
     readonly={readonly || undefined}
     {inputmode}
-    aria-label={ariaLabel}
+    aria-label={label}
     aria-hidden={hidden}
     aria-disabled={disabled}
     aria-readonly={readonly}
@@ -125,10 +131,10 @@
   {#if useEmojiAutocomplete && !disabled && !readonly}
     <EmojiAutocomplete {element} />
   {/if}
-  {#if ariaLabel && showInlineLabel}
+  {#if label && showInlineLabel}
     <span id="{id}-label" class="label" class:hidden={!!value} aria-hidden="true">
       <TruncatedText>
-        {ariaLabel}
+        {label}
       </TruncatedText>
     </span>
   {/if}

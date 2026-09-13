@@ -38,7 +38,7 @@
 <div
   {...restProps}
   role="group"
-  class="sui checkbox-group {className} {orientation}"
+  class={['sui', 'checkbox-group', className, orientation]}
   {hidden}
   aria-hidden={hidden}
   aria-disabled={disabled}

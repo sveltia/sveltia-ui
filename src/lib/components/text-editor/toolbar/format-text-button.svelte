@@ -33,10 +33,12 @@
 <Button
   iconic
   aria-label={_(`_sui.text_editor.${AVAILABLE_BUTTONS[type].labelKey}`)}
-  aria-controls="{editorStore.editorId}-lexical-root"
+  aria-controls={`${editorStore.editorId}-lexical-root`}
   disabled={!editorStore.useRichText}
   pressed={selectionTypeMatches}
   onclick={async () => {
+    // The button is only enabled while the editor is there
+    /* v8 ignore else */
     if (editorStore.editor) {
       await focusEditor(editorStore.editor);
       editorStore.editor.dispatchCommand(FORMAT_TEXT_COMMAND, type);

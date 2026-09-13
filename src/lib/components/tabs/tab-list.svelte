@@ -7,6 +7,7 @@
 <script>
   import { onMount } from 'svelte';
   import { activateGroup } from '../../services/group.svelte.js';
+  import { getIndicatorStyle } from './tab-list.js';
 
   /**
    * @import { Snippet } from 'svelte';
@@ -63,20 +64,7 @@
         wrapper?.querySelector('[role="tab"][aria-selected="true"]')
       );
 
-      if (selected) {
-        const { offsetTop, offsetLeft, offsetWidth, offsetHeight } = selected;
-
-        indicatorStyle = Object.entries({
-          top: offsetTop,
-          left: offsetLeft,
-          width: offsetWidth,
-          height: offsetHeight,
-        })
-          .map(([key, value]) => `${key}: ${value}px`)
-          .join('; ');
-      } else {
-        indicatorStyle = undefined;
-      }
+      indicatorStyle = selected ? getIndicatorStyle(selected) : undefined;
     });
   };
 

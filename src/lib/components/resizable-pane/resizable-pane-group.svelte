@@ -6,6 +6,12 @@
 -->
 <script>
   import { setContext } from 'svelte';
+  import {
+    clampResizeDelta,
+    getInitialSizes,
+    resolvePaneConstraints,
+    resolveToPercent,
+  } from './sizing.js';
 
   /**
    * @import { Snippet } from 'svelte';
@@ -68,113 +74,44 @@
   let _handleCount = 0;
 
   /**
-   * Get the pane group container element’s size in pixels for size conversion.
-   * @returns {number} Container size in pixels.
+   * Get the sizes the pane lengths are relative to.
+   * @returns {import('./sizing.js').SizeEnvironment} Environment.
    */
-  const getContainerSize = () => {
-    if (!element) return 0;
-
-    return direction === 'horizontal' ? element.clientWidth : element.clientHeight;
-  };
-
-  /**
-   * Resolve numeric or CSS string size values to percentage points.
-   * @param {number | string | undefined} value Size as percentage number or CSS size string.
-   * @param {number} fallback Fallback percentage when resolution fails.
-   * @returns {number} Size in percentage points.
-   */
-  const resolveToPercent = (value, fallback) => {
-    if (typeof value === 'number') {
-      return value;
-    }
-
-    if (!value || typeof value !== 'string') {
-      return fallback;
-    }
-
-    const trimmed = value.trim();
-    const matchedPercent = trimmed.match(/^(-?\d+(?:\.\d+)?)%$/);
-
-    if (matchedPercent) {
-      return Number(matchedPercent[1]);
-    }
-
-    const containerSize = getContainerSize();
-
-    if (!containerSize) {
-      return fallback;
-    }
-
-    const matchedPx = trimmed.match(/^(-?\d+(?:\.\d+)?)px$/i);
-
-    if (matchedPx) {
-      return (Number(matchedPx[1]) / containerSize) * 100;
-    }
-
-    const matchedViewport = trimmed.match(/^(-?\d+(?:\.\d+)?)(dvw|vw|dvh|vh)$/i);
-
-    if (matchedViewport) {
-      const viewportValue = Number(matchedViewport[1]);
-      const unit = matchedViewport[2].toLowerCase();
-      const viewportSize = unit.endsWith('w') ? window.innerWidth : window.innerHeight;
-      const pixels = (viewportValue / 100) * viewportSize;
-
-      return (pixels / containerSize) * 100;
-    }
-
-    return fallback;
-  };
+  const getSizeEnvironment = () => ({
+    containerSize: element
+      ? direction === 'horizontal'
+        ? element.clientWidth
+        : element.clientHeight
+      : 0,
+    viewportWidth: window.innerWidth,
+    viewportHeight: window.innerHeight,
+  });
 
   /**
    * Get pane constraints converted to percentages for the current container size.
    * @param {number} paneIndex Pane index.
    * @returns {{ minSize: number, maxSize: number }} Min/max in percentages.
    */
-  const getPaneConstraints = (paneIndex) => {
-    const paneDef = _paneDefs[paneIndex];
-
-    if (!paneDef) {
-      return { minSize: 0, maxSize: 100 };
-    }
-
-    const minSize = Math.max(0, resolveToPercent(paneDef.minSize, 0));
-    const maxSize = Math.min(100, resolveToPercent(paneDef.maxSize, 100));
-
-    return {
-      minSize,
-      maxSize: Math.max(minSize, maxSize),
-    };
-  };
+  const getPaneConstraints = (paneIndex) =>
+    resolvePaneConstraints(_paneDefs[paneIndex], getSizeEnvironment());
 
   /**
-   * Initialize pane sizes from `defaultSize` props. Called from `onMount` once all panes have
-   * registered. Panes without `defaultSize` share the remaining space equally.
+   * Initialize pane sizes from `defaultSize` props. Called once all panes have registered. Panes
+   * without `defaultSize` share the remaining space equally.
    */
   const initSizes = () => {
+    // Only called once panes have registered; see the effect below
+    /* v8 ignore next */
     if (!_paneDefs.length) return;
 
-    // Resolve each pane’s defaultSize to a percentage (NaN if unspecified or unresolvable).
-    // Resolving once ensures totalSpecified and newSizes use the same resolved value.
-    const resolvedDefaults = _paneDefs.map((p) => {
-      if (p.defaultSize === undefined) {
-        return NaN;
-      }
+    const env = getSizeEnvironment();
 
-      const resolved = resolveToPercent(p.defaultSize, NaN);
+    // Resolve each pane’s defaultSize to a percentage (NaN if unspecified or unresolvable)
+    const resolvedDefaults = _paneDefs.map((p) =>
+      p.defaultSize === undefined ? NaN : resolveToPercent(p.defaultSize, NaN, env),
+    );
 
-      return resolved;
-    });
-
-    const totalSpecified = resolvedDefaults
-      .filter((v) => !Number.isNaN(v))
-      .reduce((sum, v) => sum + v, 0);
-
-    const unspecifiedCount = resolvedDefaults.filter((v) => Number.isNaN(v)).length;
-    const remaining = Math.max(0, 100 - totalSpecified);
-    const defaultSize = unspecifiedCount > 0 ? remaining / unspecifiedCount : 0;
-    const newSizes = resolvedDefaults.map((v) => (Number.isNaN(v) ? defaultSize : v));
-
-    sizes.splice(0, sizes.length, ...newSizes);
+    sizes.splice(0, sizes.length, ...getInitialSizes(resolvedDefaults));
   };
 
   /**
@@ -188,16 +125,16 @@
 
     if (beforeIdx < 0 || afterIdx >= sizes.length) return;
 
-    const { minSize: minBefore, maxSize: maxBefore } = getPaneConstraints(beforeIdx);
-    const { minSize: minAfter, maxSize: maxAfter } = getPaneConstraints(afterIdx);
     const prevBefore = sizes[beforeIdx];
     const prevAfter = sizes[afterIdx];
-    // Clamp delta so neither pane exceeds its min/max constraints
-    const canGrow = Math.min(maxBefore - prevBefore, prevAfter - minAfter);
-    const canShrink = Math.min(prevBefore - minBefore, maxAfter - prevAfter);
 
-    const delta =
-      deltaPercent > 0 ? Math.min(deltaPercent, canGrow) : -Math.min(-deltaPercent, canShrink);
+    // Clamp delta so neither pane exceeds its min/max constraints
+    const delta = clampResizeDelta(deltaPercent, {
+      sizeBefore: prevBefore,
+      sizeAfter: prevAfter,
+      constraintsBefore: getPaneConstraints(beforeIdx),
+      constraintsAfter: getPaneConstraints(afterIdx),
+    });
 
     sizes[beforeIdx] = prevBefore + delta;
     sizes[afterIdx] = prevAfter - delta;
@@ -265,7 +202,7 @@
   bind:this={element}
   {...restProps}
   role="none"
-  class="sui resizable-pane-group {direction} {className ?? ''}"
+  class={['sui', 'resizable-pane-group', direction, className]}
   data-direction={direction}
 >
   {@render children?.()}

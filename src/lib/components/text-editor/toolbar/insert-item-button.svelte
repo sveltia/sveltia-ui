@@ -34,7 +34,7 @@
   label={icon ? undefined : label}
   title={label}
   aria-label={label}
-  aria-controls="{editorStore.editorId}-lexical-root"
+  aria-controls={`${editorStore.editorId}-lexical-root`}
   disabled={!editorStore.useRichText}
   onclick={() => {
     editorStore.editor?.update(() => {

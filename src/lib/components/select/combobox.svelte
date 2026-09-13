@@ -184,6 +184,8 @@
   // Move the options into the popup while it’s expanded, and back out before it’s unmounted. Only
   // the wrapper is moved, never its children, so Svelte keeps full ownership of the subtree.
   $effect(() => {
+    // The host is bound before any effect runs
+    /* v8 ignore next */
     if (!optionHost) {
       return;
     }
@@ -274,7 +276,7 @@
       {invalid}
       aria-expanded={isPopupOpen}
       aria-haspopup="listbox"
-      aria-label={ariaLabel}
+      {ariaLabel}
     />
   {/if}
   <Button

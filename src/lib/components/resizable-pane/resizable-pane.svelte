@@ -78,7 +78,7 @@
   {...restProps}
   {id}
   role="none"
-  class="sui resizable-pane {className ?? ''}"
+  class="sui resizable-pane {className}"
   style:flex-basis={sizeStyle}
   style:flex-grow="0"
   style:flex-shrink="0"

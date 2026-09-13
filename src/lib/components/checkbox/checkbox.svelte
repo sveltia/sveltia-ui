@@ -91,6 +91,8 @@
     event.preventDefault();
     event.stopPropagation();
 
+    // The button handles its own clicks, and doesn’t let them reach here
+    /* v8 ignore else */
     if (!(/** @type {HTMLElement} */ (event.target).matches('button'))) {
       buttonElement?.click();
     }
@@ -122,13 +124,19 @@
 
         checked = indeterminate ? true : !checked;
 
+        // The effect above keeps `checked` in step with the group, so a newly checked box is never
+        // in the group already, and a newly unchecked one is never missing from it
         if (Array.isArray(group)) {
           if (checked) {
+            /* v8 ignore else */
             if (!group.includes(value)) {
               group = [...group, value];
             }
-          } else if (group.includes(value)) {
-            group = group.filter((v) => v !== value);
+          } else {
+            /* v8 ignore else */
+            if (group.includes(value)) {
+              group = group.filter((v) => v !== value);
+            }
           }
         }
 

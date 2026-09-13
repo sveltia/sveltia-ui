@@ -9,6 +9,14 @@
   import { untrack } from 'svelte';
   import Button from '../button/button.svelte';
   import Icon from '../icon/icon.svelte';
+  import {
+    getMaximumFractionDigits,
+    isAtMax,
+    isAtMin,
+    isInvalidNumber,
+    parseNumber,
+    stepNumber,
+  } from './number-input.js';
   import TextInput from './text-input.svelte';
 
   /**
@@ -56,9 +64,9 @@
   let edited = $state(false);
   let inputValue = $state('');
 
-  const maximumFractionDigits = $derived(String(step).split('.')[1]?.length || 0);
-  const isMin = $derived(typeof min === 'number' && Number(inputValue || 0) <= min);
-  const isMax = $derived(typeof max === 'number' && Number(inputValue || 0) >= max);
+  const maximumFractionDigits = $derived(getMaximumFractionDigits(step));
+  const isMin = $derived(isAtMin(inputValue, min));
+  const isMax = $derived(isAtMax(inputValue, max));
 
   $effect(() => {
     const newInputValue = String(value ?? '');
@@ -71,43 +79,39 @@
   });
 
   $effect(() => {
-    const newValue = inputValue.trim() ? Number(inputValue) : NaN;
-
-    value = !Number.isNaN(newValue) ? newValue : undefined;
+    value = parseNumber(inputValue);
   });
 
   $effect(() => {
     if (edited) {
-      invalid =
-        (required && (value === undefined || inputValue === '')) ||
-        (inputValue !== undefined &&
-          inputValue !== '' &&
-          (Number.isNaN(Number(inputValue)) ||
-            (typeof min === 'number' && Number(inputValue || 0) < min) ||
-            (typeof max === 'number' && Number(inputValue || 0) > max)));
+      invalid = isInvalidNumber(inputValue, { required, min, max });
     }
   });
+
+  /**
+   * Step the number up or down, unless the field holds no number or is already at the limit.
+   * @param {1 | -1} direction `1` to increase, `-1` to decrease.
+   */
+  const stepValue = (direction) => {
+    const newInputValue = stepNumber(inputValue, { step, direction, min, max });
+
+    if (newInputValue !== undefined) {
+      inputValue = newInputValue;
+    }
+  };
 
   /**
    * Decrease the number.
    */
   const decrease = () => {
-    if (isMin || Number.isNaN(Number(inputValue))) {
-      return;
-    }
-
-    inputValue = Number(Number(inputValue || 0) - step).toFixed(maximumFractionDigits);
+    stepValue(-1);
   };
 
   /**
    * Increase the number.
    */
   const increase = () => {
-    if (isMax || Number.isNaN(Number(inputValue))) {
-      return;
-    }
-
-    inputValue = Number(Number(inputValue || 0) + step).toFixed(maximumFractionDigits);
+    stepValue(1);
   };
 </script>
 

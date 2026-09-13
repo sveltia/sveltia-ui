@@ -13,6 +13,7 @@
   import { _, isRTL } from '@sveltia/i18n';
   import { onMount, untrack } from 'svelte';
   import { searchEmojis } from './emoji.js';
+  import { getSuggestionListPosition } from './position.js';
 
   /**
    * @import { EmojiAnchorRect, EmojiEntry, EmojiTrigger } from '$lib/typedefs';
@@ -40,10 +41,6 @@
   } = $props();
 
   /**
-   * Width of the dropdown, also enforced in the stylesheet below.
-   */
-  const LIST_WIDTH = 280;
-  /**
    * How many suggestions are visible at once. The rest are reached by scrolling.
    */
   const VISIBLE_ROWS = 5;
@@ -51,11 +48,6 @@
    * Height to assume until a row has been measured, so the first open is positioned sensibly.
    */
   const FALLBACK_MAX_HEIGHT = 180;
-  /**
-   * Gap between the dropdown and the caret, and the minimum margin to the viewport edges.
-   */
-  const LIST_OFFSET = 4;
-  const VIEWPORT_MARGIN = 8;
 
   const listId = $props.id();
 
@@ -112,37 +104,17 @@
 
   /**
    * Position of the dropdown, flipped above the caret and clamped to the viewport as needed.
-   *
-   * The dropdown grows away from the start of the line, so it follows the reading direction rather
-   * than reaching back across the text: in a right-to-left layout it hangs from the shortcode’s
-   * right edge and extends leftwards, mirroring what `activatePopup()` does for anchored popups.
    */
-  const position = $derived.by(() => {
-    if (!anchorRect) {
-      return undefined;
-    }
-
-    const { innerWidth, innerHeight } = window;
-    const spaceBelow = innerHeight - anchorRect.bottom;
-    const spaceAbove = anchorRect.top;
-    const flipped = spaceBelow < listMaxHeight + VIEWPORT_MARGIN && spaceAbove > spaceBelow;
-    const rtl = isRTL();
-    const anchorLeft = rtl ? anchorRect.right - LIST_WIDTH : anchorRect.left;
-
-    return {
-      top: flipped ? undefined : `${Math.round(anchorRect.bottom + LIST_OFFSET)}px`,
-      bottom: flipped ? `${Math.round(innerHeight - anchorRect.top + LIST_OFFSET)}px` : undefined,
-      left: `${Math.round(
-        Math.max(VIEWPORT_MARGIN, Math.min(anchorLeft, innerWidth - LIST_WIDTH - VIEWPORT_MARGIN)),
-      )}px`,
-      maxHeight: `${Math.round(
-        Math.min(
+  const position = $derived(
+    anchorRect
+      ? getSuggestionListPosition({
+          anchorRect,
           listMaxHeight,
-          (flipped ? spaceAbove : spaceBelow) - LIST_OFFSET - VIEWPORT_MARGIN,
-        ),
-      )}px`,
-    };
-  });
+          viewport: { width: window.innerWidth, height: window.innerHeight },
+          rtl: isRTL(),
+        })
+      : undefined,
+  );
 
   /**
    * Whether any suggestions are currently shown.
@@ -277,6 +249,8 @@
 
     const row = listElement.querySelector('.option');
 
+    // The list is only mounted while there are candidates, so there is always a row
+    /* v8 ignore else */
     if (row) {
       const { paddingTop, paddingBottom, borderTopWidth, borderBottomWidth } =
         getComputedStyle(listElement);
@@ -406,7 +380,7 @@
   >
     {#each candidates as entry, index (entry.emoji)}
       <div
-        id="{listId}-option-{index}"
+        id={`${listId}-option-${index}`}
         role="option"
         class="option"
         tabindex="-1"
@@ -422,7 +396,7 @@
         }}
       >
         <span role="none" class="emoji">{entry.emoji}</span>
-        <span role="none" class="name">:{entry.name}:</span>
+        <span role="none" class="name">{`:${entry.name}:`}</span>
       </div>
     {/each}
   </div>

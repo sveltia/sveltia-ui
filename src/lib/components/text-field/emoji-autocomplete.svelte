@@ -77,6 +77,8 @@
   const getAnchorRect = (trigger) => {
     const { start, end } = /** @type {FieldEmojiTrigger} */ (trigger);
 
+    // The trigger was found in the field, so the field is there
+    /* v8 ignore next */
     return element ? getFieldCaretRect(element, start, end) : undefined;
   };
 

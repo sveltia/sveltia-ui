@@ -84,6 +84,8 @@
   const getAnchorRect = ({ query }) => {
     const domSelection = window.getSelection();
 
+    // A shortcode has just been detected at the caret, so there is a selection
+    /* v8 ignore next */
     if (!domSelection?.rangeCount) {
       return undefined;
     }
@@ -115,7 +117,9 @@
     editor?.update(() => {
       const node = getNodeByKey(nodeKey);
 
-      // Make sure the shortcode is still where it was when the suggestions appeared
+      // Make sure the shortcode is still where it was when the suggestions appeared. The list is
+      // closed as soon as the shortcode changes, so this only guards against a race.
+      /* v8 ignore next */
       if (!isTextNode(node) || node.getTextContent().slice(start, offset) !== `:${query}`) {
         return;
       }
@@ -136,6 +140,8 @@
   const registerCommands = () => {
     const { editor } = editorStore;
 
+    // Only called from the effect below, once the editor is there
+    /* v8 ignore next */
     if (!editor) {
       return [];
     }
@@ -196,6 +202,8 @@
   };
 
   $effect(() => {
+    // The root initializes the editor, and the list is bound, before this first runs
+    /* v8 ignore next */
     if (!editorStore.editor || !list) {
       return undefined;
     }

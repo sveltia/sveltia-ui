@@ -81,9 +81,20 @@
   let popupInstance = $state();
   let hoveredTimeout = 0;
 
+  // Keep the `open` prop and the instance in sync both ways. The instance opens the popup when
+  // the anchor is activated, and closes it when the backdrop or an item is clicked, or Escape is
+  // pressed; the prop is what a consumer such as `<Combobox>` or `<MenuItem>` toggles from its own
+  // controls. The instance has to follow the prop as well, because it’s the instance that handles
+  // the dismissal, and it ignores a popup it doesn’t know to be open.
   $effect(() => {
     if (popupInstance) {
       open = popupInstance.open;
+    }
+  });
+
+  $effect(() => {
+    if (popupInstance && popupInstance.open !== open) {
+      popupInstance.open = open;
     }
   });
 

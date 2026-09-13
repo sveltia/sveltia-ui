@@ -74,11 +74,16 @@
     editorStore.editor?.getEditorState().read(() => {
       const _selection = getSelection();
 
+      // This is only called while the selection is reported to be within a link, so the fallbacks
+      // below are for the unexpected
+      /* v8 ignore else */
       if (isRangeSelection(_selection)) {
         const anchor = _selection.anchor.getNode();
+        /* v8 ignore next */
         const parent = anchor instanceof LinkNode ? anchor : getNearestNodeOfType(anchor, LinkNode);
         const url = parent?.getURL();
 
+        /* v8 ignore else */
         if (url) {
           hasAnchor = true;
           anchorURL = url;
@@ -90,6 +95,7 @@
       }
 
       // Can’t update for some reason; remove it
+      /* v8 ignore next */
       removeLink();
     });
   };
@@ -123,6 +129,8 @@
    */
   const onDialogClose = async (event) => {
     if (event.detail.returnValue !== 'cancel' && dialogMode !== 'remove') {
+      // The dialog can only be opened from the button, which needs the editor
+      /* v8 ignore next */
       if (!editorStore.editor) {
         return;
       }
@@ -148,9 +156,12 @@
 
       await focusEditor(editorStore.editor);
       editorStore.editor.dispatchCommand(TOGGLE_LINK_COMMAND, anchorURL);
-    } else if (editorStore.editor) {
+    } else {
       // The dialog leaves the focus alone (see `restoreFocus` below), so bring it back here
-      await focusEditor(editorStore.editor);
+      /* v8 ignore else */
+      if (editorStore.editor) {
+        await focusEditor(editorStore.editor);
+      }
     }
 
     anchorURL = '';
@@ -185,7 +196,7 @@
 <Button
   iconic
   aria-label={_(`_sui.text_editor.${AVAILABLE_BUTTONS[type].labelKey}`)}
-  aria-controls="{editorStore.editorId}-lexical-root"
+  aria-controls={`${editorStore.editorId}-lexical-root`}
   disabled={!editorStore.useRichText}
   pressed={selectionTypeMatches}
   onclick={() => {
@@ -202,7 +213,6 @@
     ? _('_sui.text_editor.insert_link')
     : _('_sui.text_editor.update_link')}
   bind:open={openDialog}
-  bind:value={anchorURL}
   okDisabled={!anchorURL}
   okLabel={dialogMode === 'create' ? _('_sui.insert') : _('_sui.update')}
   restoreFocus={false}

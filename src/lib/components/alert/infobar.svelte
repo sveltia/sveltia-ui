@@ -33,7 +33,7 @@
 </script>
 
 {#if show}
-  <div role="none" class="infobar {status}">
+  <div role="none" class={['infobar', status]}>
     <div role="alert" class="message" aria-live={ariaLive}>
       {#if icon}
         {@render icon()}

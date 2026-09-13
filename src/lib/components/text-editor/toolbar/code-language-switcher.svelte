@@ -45,6 +45,9 @@
         : getNodeByKey(/** @type {string} */ (editorStore.selection.blockNodeKey));
 
       if (isCodeNode(node)) {
+        // The highlighter gives a block without a language the default one as it’s transformed,
+        // so the fallbacks here are only for the unexpected
+        /* v8 ignore next */
         selectedLanguage = node.getLanguage() ?? editorStore.config.defaultLanguage ?? 'plain';
       }
     });
@@ -53,7 +56,7 @@
 
 <Select
   {disabled}
-  aria-label={_('_sui.text_editor.language')}
+  ariaLabel={_('_sui.text_editor.language')}
   value={selectedLanguage}
   onChange={async ({ detail: { value: lang } }) => {
     if (!editorStore.editor || selectedLanguage === lang) {

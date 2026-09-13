@@ -24,5 +24,8 @@ jobs:
           version: latest
           runtime: node@26
           cache: true
+      - name: Install the browser for the component tests
+        if: matrix.task.name == 'Test'
+        run: pnpm exec playwright install --with-deps chromium
       - name: ${{ matrix.task.name }}
         run: ${{ matrix.task.command }}

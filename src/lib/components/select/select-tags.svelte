@@ -6,6 +6,7 @@
   import Icon from '../icon/icon.svelte';
   import Option from '../listbox/option.svelte';
   import Select from './select.svelte';
+  import { getDropIndex, getDropTarget, getKeyboardMoveTarget, moveItem } from './select-tags.js';
 
   /**
    * @import { Snippet } from 'svelte';
@@ -66,8 +67,6 @@
    * @type {Set<any>}
    */
   const selectedValues = $derived(new Set(values));
-  const prevKey = $derived(isRTL() ? 'ArrowRight' : 'ArrowLeft');
-  const nextKey = $derived(isRTL() ? 'ArrowLeft' : 'ArrowRight');
 
   /**
    * Reference to the wrapper element.
@@ -99,12 +98,12 @@
    * @param {number} to Destination index.
    */
   const moveValue = (from, to) => {
+    // The callers only ask for actual moves
+    /* v8 ignore next */
     if (from === to) return;
 
-    const newValues = [...values];
-    const [item] = newValues.splice(from, 1);
+    const newValues = moveItem(values, from, to);
 
-    newValues.splice(to, 0, item);
     values = newValues;
     onReorder?.(new CustomEvent('Reorder', { detail: { values: newValues } }));
   };
@@ -162,10 +161,12 @@
             event.dataTransfer.dropEffect = 'move';
           }
 
-          const rect = event.currentTarget.getBoundingClientRect();
-          const inFirstHalf = event.clientX < rect.left + rect.width / 2;
-
-          dropIndex = inFirstHalf !== isRTL() ? index : index + 1;
+          dropIndex = getDropIndex({
+            index,
+            clientX: event.clientX,
+            rect: event.currentTarget.getBoundingClientRect(),
+            rtl: isRTL(),
+          });
         }}
         ondrop={async (event) => {
           event.preventDefault();
@@ -176,13 +177,14 @@
           dragIndex = undefined;
           dropIndex = undefined;
 
-          if (
-            fromIndex !== undefined &&
-            toIndex !== undefined &&
-            toIndex !== fromIndex &&
-            toIndex !== fromIndex + 1
-          ) {
-            await moveAndFocus(fromIndex, toIndex > fromIndex ? toIndex - 1 : toIndex);
+          if (fromIndex === undefined || toIndex === undefined) {
+            return;
+          }
+
+          const target = getDropTarget(fromIndex, toIndex);
+
+          if (target !== undefined) {
+            await moveAndFocus(fromIndex, target);
           }
         }}
         ondragend={() => {
@@ -197,18 +199,12 @@
           aria-selected="true"
           tabindex={disabled || readonly ? undefined : 0}
           onkeydown={async (event) => {
-            const { key } = event;
-
-            const targetIndex =
-              key === prevKey && index > 0
-                ? index - 1
-                : key === nextKey && index < values.length - 1
-                  ? index + 1
-                  : key === 'Home' && index > 0
-                    ? 0
-                    : key === 'End' && index < values.length - 1
-                      ? values.length - 1
-                      : -1;
+            const targetIndex = getKeyboardMoveTarget({
+              key: event.key,
+              index,
+              length: values.length,
+              rtl: isRTL(),
+            });
 
             if (targetIndex === -1) return;
 
@@ -246,6 +242,8 @@
       {required}
       {invalid}
       onChange={() => {
+        // The select only reports a change once an option has been picked
+        /* v8 ignore else */
         if (selectedValue) {
           values = [...values, selectedValue];
           onAddValue?.(new CustomEvent('AddValue', { detail: { value: selectedValue } }));

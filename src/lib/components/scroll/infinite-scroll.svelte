@@ -37,6 +37,8 @@
 
   const observer = new IntersectionObserver(([{ isIntersecting }]) => {
     if (isIntersecting) {
+      // The spinner is unmounted as soon as everything is loaded, so it can’t intersect afterwards
+      /* v8 ignore else */
       if (loading) {
         loadedItemSize += itemChunkSize;
       } else {

@@ -115,7 +115,7 @@
   bind:open
   showBackdrop
 >
-  <div bind:this={content} role="none" class="content {className} {size}">
+  <div bind:this={content} role="none" class={['content', className, size]}>
     {#if title || showClose || header || headerExtra}
       <div role="none" class="header">
         {#if header}

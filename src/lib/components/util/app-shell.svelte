@@ -6,6 +6,7 @@
 -->
 <script>
   import { onMount } from 'svelte';
+  import { shouldAllowContextMenu } from './app-shell.js';
   import FontLinks from './font-links.svelte';
 
   /**
@@ -87,28 +88,13 @@
 <div
   {...restProps}
   role="none"
-  class="sui app-shell {orientation}"
+  class={['sui', 'app-shell', orientation]}
   ondragover={(event) => event.preventDefault()}
   ondrop={(event) => event.preventDefault()}
   oncontextmenu={(event) => {
-    // Allow context menu in developer mode
-    if (document.documentElement.matches('[data-env="dev"]')) {
-      return;
+    if (!shouldAllowContextMenu(event.target)) {
+      event.preventDefault();
     }
-
-    // eslint-disable-next-line prefer-destructuring
-    const target = /** @type {HTMLElement} */ (event.target);
-
-    // Allow context menu on text inputs and contentEditable elements
-    if (
-      document.documentElement.matches('[data-env="dev"]') ||
-      (target?.matches('input, textarea') && 'maxLength' in target) ||
-      /** @type {HTMLElement} */ (target?.closest('[role="textbox"]'))?.contentEditable === 'true'
-    ) {
-      return;
-    }
-
-    event.preventDefault();
   }}
 >
   {@render children?.()}

@@ -58,7 +58,7 @@
 <button
   bind:this={element}
   {...restProps}
-  class="sui button {variant} {size} {className}"
+  class={['sui', 'button', variant, size, className]}
   class:iconic
   class:pill
   class:flex

@@ -10,6 +10,13 @@
 <script>
   import { isRTL } from '@sveltia/i18n';
   import { onMount } from 'svelte';
+  import {
+    findNearestStepIndex,
+    getSliderKeyDirection,
+    getSliderSteps,
+    toLogicalX,
+    wouldCrossThumbs,
+  } from './slider.js';
 
   /**
    * @import { Snippet } from 'svelte';
@@ -85,33 +92,16 @@
    * @param {number} physicalX Physical X position in pixels from the left edge.
    */
   const moveThumb = (physicalX) => {
-    // Convert physical position to logical position (always LTR)
-    // In RTL, left side (physicalX=0) maps to max value (logicalX=barWidth)
-    // In LTR, left side (physicalX=0) maps to min value (logicalX=0)
-    // Clamp to the track bounds so a fast drag that overshoots the edge still resolves to the
-    // nearest valid position instead of dropping the update.
-    const logicalX = Math.min(barWidth, Math.max(0, isRTL() ? barWidth - physicalX : physicalX));
-    const fromIndex = positionList.findLastIndex((s) => s <= logicalX);
-    const toIndex = positionList.findIndex((s) => logicalX <= s);
-    /** @type {number} */
-    let index;
-
-    if (fromIndex === -1) {
-      index = toIndex;
-    } else if (toIndex === -1) {
-      index = fromIndex;
-    } else {
-      const fromDiff = Math.abs(positionList[fromIndex] - logicalX);
-      const toDiff = Math.abs(positionList[toIndex] - logicalX);
-
-      index = fromDiff < toDiff ? fromIndex : toIndex;
-    }
+    const index = findNearestStepIndex(positionList, toLogicalX(physicalX, barWidth, isRTL()));
 
     if (
       sliderPositions[targetValueIndex] === positionList[index] ||
       (multiThumb &&
-        ((targetValueIndex === 0 && sliderPositions[1] <= positionList[index]) ||
-          (targetValueIndex === 1 && sliderPositions[0] >= positionList[index])))
+        wouldCrossThumbs({
+          valueIndex: targetValueIndex,
+          targetPosition: positionList[index],
+          sliderPositions,
+        }))
     ) {
       return;
     }
@@ -138,35 +128,24 @@
     }
 
     const _value = multiThumb ? /** @type {[number, number]} */ (values)[valueIndex] : value;
-    let index = -1;
-    const _isRTL = isRTL();
-    // In RTL, ArrowLeft increases value, ArrowRight decreases value
-    const decreaseKeys = _isRTL ? ['ArrowDown', 'ArrowRight'] : ['ArrowDown', 'ArrowLeft'];
-    const increaseKeys = _isRTL ? ['ArrowUp', 'ArrowLeft'] : ['ArrowUp', 'ArrowRight'];
+    const direction = getSliderKeyDirection(key, isRTL());
 
-    if (decreaseKeys.includes(key)) {
-      if (_value > min) {
-        index = valueList.indexOf(_value) - 1;
-      }
-
-      event.preventDefault();
-      event.stopPropagation();
+    if (!direction) {
+      return;
     }
 
-    if (increaseKeys.includes(key)) {
-      if (_value < max) {
-        index = valueList.indexOf(_value) + 1;
-      }
+    event.preventDefault();
+    event.stopPropagation();
 
-      event.preventDefault();
-      event.stopPropagation();
-    }
+    const index =
+      (direction < 0 && _value > min) || (direction > 0 && _value < max)
+        ? valueList.indexOf(_value) + direction
+        : -1;
 
     if (index > -1) {
       if (
         multiThumb &&
-        ((valueIndex === 0 && sliderPositions[1] <= positionList[index]) ||
-          (valueIndex === 1 && sliderPositions[0] >= positionList[index]))
+        wouldCrossThumbs({ valueIndex, targetPosition: positionList[index], sliderPositions })
       ) {
         return;
       }
@@ -289,19 +268,14 @@
    * Initialize the variables.
    */
   const init = () => {
+    // Only called once mounted, when the track is bound
+    /* v8 ignore next */
     if (!base) {
       return;
     }
 
     barWidth = base.clientWidth;
-
-    const stepCount = (max - min) / step + 1;
-    const stepWidth = barWidth / (stepCount - 1);
-    const emptyArray = Array.from({ length: stepCount });
-
-    valueList = emptyArray.map((_, index) => index * step + min, 10);
-    positionList = emptyArray.map((_, index) => index * stepWidth);
-
+    ({ valueList, positionList } = getSliderSteps({ min, max, step, barWidth }));
     onValueChange();
   };
 
@@ -345,8 +319,8 @@
     <div role="none" class="base-bar"></div>
     <div
       class="slider-bar"
-      style:inset-inline-start="{multiThumb ? sliderPositions[0] : 0}px"
-      style:width="{multiThumb ? sliderPositions[1] - sliderPositions[0] : sliderPositions[0]}px"
+      style:inset-inline-start={`${multiThumb ? sliderPositions[0] : 0}px`}
+      style:width={`${multiThumb ? sliderPositions[1] - sliderPositions[0] : sliderPositions[0]}px`}
     ></div>
     <div
       role="slider"
@@ -359,7 +333,7 @@
       aria-valuemin={min}
       aria-valuemax={max}
       aria-valuenow={multiThumb ? values?.[0] : value}
-      style:inset-inline-start="{sliderPositions[0]}px"
+      style:inset-inline-start={`${sliderPositions[0]}px`}
       onpointerdown={(event) => onPointerDown(event, 0)}
       onkeydown={(event) => onKeyDown(event, 0)}
     ></div>
@@ -375,7 +349,7 @@
         aria-valuemin={min}
         aria-valuemax={max}
         aria-valuenow={values?.[1]}
-        style:inset-inline-start="{sliderPositions[1]}px"
+        style:inset-inline-start={`${sliderPositions[1]}px`}
         onpointerdown={(event) => onPointerDown(event, 1)}
         onkeydown={(event) => onKeyDown(event, 1)}
       ></div>

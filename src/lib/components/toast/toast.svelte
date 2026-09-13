@@ -64,11 +64,14 @@
     } else {
       popover = popoverBase;
 
+      // The base is bound by the time the component is mounted
+      /* v8 ignore else */
       if (popover) {
         popover.classList.add('enabled');
         (document.querySelector('.sui.app-shell') ?? document.body).appendChild(popover);
 
-        // Move the element to top layer
+        // Move the element to top layer, unless the browser doesn’t support the Popover API
+        /* v8 ignore else */
         if (popover.showPopover) {
           popover.popover = 'manual';
           popover.showPopover();
@@ -105,6 +108,8 @@
   });
 
   $effect(() => {
+    // Both are in place by the time the effect first runs; see `onMount()` above
+    /* v8 ignore else */
     if (popover && toast) {
       popover.appendChild(toast);
     }
@@ -133,7 +138,7 @@
 
 <div bind:this={popoverBase} role="none" class="sui toast-base"></div>
 
-<div {...restProps} bind:this={toast} class="sui toast {position}" aria-hidden={!show}>
+<div {...restProps} bind:this={toast} class={['sui', 'toast', position]} aria-hidden={!show}>
   {@render children?.()}
 </div>
 

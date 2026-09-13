@@ -7,6 +7,7 @@
 <script>
   import { isRTL } from '@sveltia/i18n';
   import { getContext } from 'svelte';
+  import { getHandleKeyAction } from './sizing.js';
 
   /**
    * @import { Snippet } from 'svelte';
@@ -106,6 +107,8 @@
   const measureContainerSize = () => {
     const container = element?.closest('.resizable-pane-group');
 
+    // The handle can’t be rendered outside a group; see the context check above
+    /* v8 ignore next */
     if (!container) return 0;
 
     return isHorizontal ? container.clientWidth : container.clientHeight;
@@ -126,6 +129,8 @@
     const screenPos = isHorizontal ? screenX : screenY;
     const pixelDelta = screenPos - startScreenPos;
 
+    // A group that has no size, because it isn’t laid out, can’t be resized
+    /* v8 ignore next */
     if (!containerSize) return;
 
     let percentDelta = (pixelDelta / containerSize) * 100;
@@ -194,63 +199,26 @@
     if (disabled) return;
 
     const { key, shiftKey } = event;
-    const step = shiftKey ? 10 : 1;
-    let delta = 0;
+    const action = getHandleKeyAction({ key, shiftKey, isHorizontal, rtl: isRTL() });
 
-    if (key === 'Enter') {
-      event.preventDefault();
-      event.stopPropagation();
+    if (!action) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    if (action.type === 'toggle') {
       ctx.toggleCollapse(handleIndex);
 
       return;
     }
 
-    if (key === 'Home') {
-      event.preventDefault();
-      event.stopPropagation();
-      // Collapse to minimum — clamped internally
-      ctx.resize(handleIndex, -100);
-
-      return;
-    }
-
-    if (key === 'End') {
-      event.preventDefault();
-      event.stopPropagation();
-      // Expand to maximum — clamped internally
-      ctx.resize(handleIndex, 100);
-
-      return;
-    }
-
-    if (isHorizontal) {
-      const _isRTL = isRTL();
-
-      // In RTL, Left/Right directions are visually swapped
-      if (key === 'ArrowLeft') {
-        delta = _isRTL ? step : -step;
-      } else if (key === 'ArrowRight') {
-        delta = _isRTL ? -step : step;
-      } else {
-        return;
-      }
-    } else if (key === 'ArrowUp') {
-      delta = -step;
-    } else if (key === 'ArrowDown') {
-      delta = step;
-    } else {
-      return;
-    }
-
-    event.preventDefault();
-    event.stopPropagation();
-
-    if (!keyResizing) {
+    // Home and End send an oversized delta, which gets clamped to the min/max internally
+    if (key !== 'Home' && key !== 'End' && !keyResizing) {
       keyResizing = true;
       onResizeStart?.();
     }
 
-    ctx.resize(handleIndex, delta);
+    ctx.resize(handleIndex, action.delta);
   };
 
   /**
@@ -277,7 +245,7 @@
   aria-controls={ctx.paneDefs[handleIndex]?.id}
   aria-disabled={disabled || undefined}
   aria-label={ariaLabel}
-  class="sui resizable-handle {className ?? ''}"
+  class="sui resizable-handle {className}"
   class:horizontal={isHorizontal}
   class:vertical={!isHorizontal}
   class:disabled

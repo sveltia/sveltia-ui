@@ -53,7 +53,7 @@
 <div
   {...restProps}
   role="radiogroup"
-  class="sui radio-group {className} {orientation}"
+  class={['sui', 'radio-group', className, orientation]}
   tabindex="-1"
   {hidden}
   aria-hidden={hidden}

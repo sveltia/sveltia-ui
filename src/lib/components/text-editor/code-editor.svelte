@@ -7,6 +7,7 @@
   import { setContext, untrack } from 'svelte';
   import Alert from '../alert/alert.svelte';
   import Toast from '../toast/toast.svelte';
+  import { parseCodeBlock, toCodeBlock } from './code-editor.js';
   import LexicalRoot from './lexical-root.svelte';
   import { createEditorStore } from './store.svelte.js';
   import CodeEditorToolbar from './toolbar/code-editor-toolbar.svelte';
@@ -53,7 +54,6 @@
     /* eslint-enable prefer-const */
   } = $props();
 
-  const backticks = '```';
   const editorStore = createEditorStore();
 
   editorStore.config = {
@@ -66,6 +66,8 @@
   setContext('editorStore', editorStore);
 
   $effect(() => {
+    // The root initializes the editor before these effects first run, and stays initialized
+    /* v8 ignore next */
     if (!editorStore.initialized) {
       return;
     }
@@ -74,15 +76,13 @@
     void lang;
 
     untrack(() => {
-      const newValue = code
-        ? `${backticks}${lang}\n${code}\n${backticks}`
-        : `${backticks}${lang}\n${backticks}`;
-
-      editorStore.inputValue = newValue;
+      editorStore.inputValue = toCodeBlock(lang, code);
     });
   });
 
   $effect(() => {
+    // The root initializes the editor before these effects first run, and stays initialized
+    /* v8 ignore next */
     if (!editorStore.initialized) {
       return;
     }
@@ -90,8 +90,7 @@
     void editorStore.inputValue;
 
     untrack(() => {
-      const { lang: _lang = 'plain', code: _code = '' } =
-        editorStore.inputValue.match(/^```(?<lang>\w+?)?\n(?:(?<code>.*)\n)?```/s)?.groups ?? {};
+      const { lang: _lang, code: _code } = parseCodeBlock(editorStore.inputValue);
 
       if (lang !== _lang) {
         lang = _lang;

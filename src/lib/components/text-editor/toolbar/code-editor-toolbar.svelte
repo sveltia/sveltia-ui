@@ -23,6 +23,6 @@
   } = $props();
 </script>
 
-<ToolbarWrapper disabled={disabled || readonly} aria-label={_('_sui.text_editor.code_editor')}>
+<ToolbarWrapper disabled={disabled || readonly} ariaLabel={_('_sui.text_editor.code_editor')}>
   <CodeLanguageSwitcher disabled={disabled || readonly} />
 </ToolbarWrapper>

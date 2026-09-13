@@ -40,7 +40,7 @@
   aria-valuetext={text}
   aria-label={ariaLabel}
 >
-  <div role="none" style:width="{now}%"></div>
+  <div role="none" style:width={`${now}%`}></div>
 </div>
 
 <style lang="scss">

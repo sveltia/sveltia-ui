@@ -36,7 +36,8 @@
   class="sui select-button {className}"
   aria-checked={selected}
   onChange={(event) => {
-    selected = event.detail.selected;
+    // The radio group reports the state as `checked`, after the `aria-checked` attribute it manages
+    selected = event.detail.checked;
     onChange?.(event);
   }}
 ></Button>

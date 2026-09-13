@@ -21,7 +21,8 @@
 <span
   role="none"
   class="sui truncated-text"
-  style="-webkit-line-clamp: {lines}; line-clamp: {lines};"
+  style:-webkit-line-clamp={lines}
+  style:line-clamp={lines}
 >
   {@render children?.()}
 </span>

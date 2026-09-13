@@ -43,6 +43,20 @@ export const createEditorStore = () => {
   let showConverterError = $state(false);
 
   /**
+   * Flag a conversion error, which takes the editor out of the rich text mode, and shows the error
+   * to the user.
+   * @param {boolean} newValue Whether there is an error.
+   */
+  const setConverterError = (newValue) => {
+    hasConverterError = newValue;
+
+    if (newValue) {
+      useRichText = false;
+      showConverterError = true;
+    }
+  };
+
+  /**
    * Convert the Markdown {@link inputValue} to Lexical nodes. Disable the rich text mode and
    * restore the original value when there is an error while conversion.
    */
@@ -59,7 +73,8 @@ export const createEditorStore = () => {
       // @see https://github.com/facebook/lexical/issues/2308
       await convertMarkdownToLexical(editor, inputValue || '', enabledTransformers);
     } catch (ex) {
-      hasConverterError = true;
+      // Go through the setter, so the editor actually falls back to the plain text mode
+      setConverterError(true);
       inputValue = originalValue;
       // eslint-disable-next-line no-console
       console.error(ex);
@@ -123,12 +138,7 @@ export const createEditorStore = () => {
       return hasConverterError;
     },
     set hasConverterError(newValue) {
-      hasConverterError = newValue;
-
-      if (hasConverterError) {
-        useRichText = false;
-        showConverterError = true;
-      }
+      setConverterError(newValue);
     },
     get showConverterError() {
       return showConverterError;

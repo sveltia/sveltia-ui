@@ -29,7 +29,7 @@
   } = $props();
 </script>
 
-<div {...restProps} role="none" class="sui tab-box {orientation} {className}">
+<div {...restProps} role="none" class={['sui', 'tab-box', orientation, className]}>
   {@render children?.()}
 </div>
 
