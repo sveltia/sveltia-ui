@@ -36,7 +36,7 @@ calendar:
 # Split button component
 split_button:
   # Wrapper aria-label, e.g. “Save Options” when primary button is “Save”
-  x_options: 'Opcje {$name}'
+  x_options: Opcje {$name}
   # Dropdown toggle aria-label
   more_options: Więcej opcji
 
@@ -72,7 +72,7 @@ select_tags:
   # Listbox aria-label
   selected_options: Wybrane opcje
   # Remove button aria-label, e.g. “Remove Option 1”
-  remove_x: 'Usuń {$name}'
+  remove_x: Usuń {$name}
 
 # Text editor component
 text_editor:

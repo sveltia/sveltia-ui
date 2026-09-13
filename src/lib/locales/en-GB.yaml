@@ -72,7 +72,7 @@ select_tags:
   # Listbox aria-label
   selected_options: Selected Options
   # Remove button aria-label, e.g. “Remove Option 1”
-  remove_x: 'Remove {$name}'
+  remove_x: Remove {$name}
 
 # Text editor component
 text_editor:

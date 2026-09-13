@@ -36,7 +36,7 @@ calendar:
 # Split button component
 split_button:
   # Wrapper aria-label, e.g. “Save Options” when primary button is “Save”
-  x_options: 'Optionen für {$name}'
+  x_options: Optionen für {$name}
   # Dropdown toggle aria-label
   more_options: Weitere Optionen
 

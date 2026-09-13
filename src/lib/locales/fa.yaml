@@ -36,7 +36,7 @@ calendar:
 # Split button component
 split_button:
   # Wrapper aria-label, e.g. “Save Options” when primary button is “Save”
-  x_options: 'گزینه‌های {$name}'
+  x_options: گزینه‌های {$name}
   # Dropdown toggle aria-label
   more_options: گزینه‌های بیشتر
 
@@ -72,7 +72,7 @@ select_tags:
   # Listbox aria-label
   selected_options: گزینه‌های انتخاب‌شده
   # Remove button aria-label, e.g. “Remove Option 1”
-  remove_x: 'حذف {$name}'
+  remove_x: حذف {$name}
 
 # Text editor component
 text_editor:

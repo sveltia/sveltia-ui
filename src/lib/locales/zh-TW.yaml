@@ -72,7 +72,7 @@ select_tags:
   # Listbox aria-label
   selected_options: 已選取的選項
   # Remove button aria-label, e.g. “Remove Option 1”
-  remove_x: '移除 {$name}'
+  remove_x: 移除 {$name}
 
 # Text editor component
 text_editor:
