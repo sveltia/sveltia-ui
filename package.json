@@ -38,7 +38,7 @@
   "scripts": {
     "build": "npm run generate:shiki && svelte-kit sync && svelte-package && node scripts/build-shiki-engine.js",
     "build:watch": "svelte-kit sync && svelte-package --watch",
-    "check": "pnpm run '/^check:.*/'",
+    "check": "pnpm run --no-bail '/^check:.*/'",
     "check:audit": "pnpm audit --ignore-registry-errors",
     "check:cspell": "cspell --no-progress",
     "check:eslint": "eslint .",
