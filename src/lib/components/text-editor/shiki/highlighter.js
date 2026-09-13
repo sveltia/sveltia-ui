@@ -4,7 +4,7 @@
  * Adapted from Lexical’s `CodeHighlighterShiki.ts` (MIT licensed). The transform logic is copied
  * as-is; only the highlighting back end differs, because upstream imports its Shiki facade directly
  * and offers no way to substitute one that loads grammars on demand.
- * @see https://github.com/facebook/lexical/blob/v0.49.0/packages/lexical-code-shiki/src/CodeHighlighterShiki.ts
+ * @see https://github.com/facebook/lexical/blob/v0.50.0/packages/lexical-code-shiki/src/CodeHighlighterShiki.ts
  * @see https://github.com/sveltia/sveltia-cms/issues/587
  *
  * The extension APIs (`CodeShikiExtension`, `CodeHighlighterShikiExtension`) are intentionally left
@@ -189,6 +189,8 @@ const getDiffRange = (prevNodes, nextNodes) => {
 const updateAndRetainSelection = (nodeKey, updateFn) => {
   const node = getNodeByKey(nodeKey);
 
+  // Unreachable in practice, since Lexical only runs transforms on attached nodes
+  /* v8 ignore next */
   if (!isCodeNode(node) || !node.isAttached()) {
     return;
   }
@@ -204,6 +206,18 @@ const updateAndRetainSelection = (nodeKey, updateFn) => {
   }
 
   const { anchor } = selection;
+  // The selection is restored by walking this code node’s children, so it can only be retained when
+  // it actually points inside this code node. When the selection lives elsewhere there is nothing
+  // to retain, and restoring would drag the caret into the code block instead of leaving it where
+  // the user put it.
+  const anchorNode = anchor.getNode();
+
+  if (anchorNode !== node && !node.isParentOf(anchorNode)) {
+    updateFn();
+
+    return;
+  }
+
   const anchorOffset = anchor.offset;
 
   const isNewLineAnchor =
@@ -214,8 +228,6 @@ const updateAndRetainSelection = (nodeKey, updateFn) => {
   // Calculate the previous text offset: all text nodes prior to the anchor, plus the anchor’s own
   // text offset
   if (!isNewLineAnchor) {
-    const anchorNode = anchor.getNode();
-
     textOffset =
       anchorOffset +
       anchorNode
@@ -236,24 +248,37 @@ const updateAndRetainSelection = (nodeKey, updateFn) => {
   }
 
   // If it was a non-element anchor, walk through the child nodes looking for the position of the
-  // original text offset
-  node.getChildren().some((node_) => {
-    const isText = isTextNode(node_);
+  // original text offset. A line break node consumes one unit of the offset but cannot host a text
+  // point, so when the offset lands on one, use an element point on the code node instead of
+  // letting the offset go negative and selecting the next text node at an out-of-range position.
+  // A code node holds nothing but text, tab and line break nodes, so there is no third case.
+  const children = node.getChildren();
 
-    if (isText || isLineBreakNode(node_)) {
-      const textContentSize = node_.getTextContentSize();
+  for (let index = 0; index < children.length; index += 1) {
+    const child = children[index];
 
-      if (isText && textContentSize >= textOffset) {
-        node_.select(textOffset, textOffset);
+    if (isTextNode(child)) {
+      const textContentSize = child.getTextContentSize();
 
-        return true;
+      if (textContentSize >= textOffset) {
+        child.select(textOffset, textOffset);
+
+        return;
       }
 
       textOffset -= textContentSize;
-    }
+    } else /* v8 ignore else */ if (isLineBreakNode(child)) {
+      if (textOffset === 0) {
+        node.select(index, index);
 
-    return false;
-  });
+        return;
+      }
+
+      textOffset -= 1;
+    }
+  }
+
+  node.select(children.length, children.length);
 };
 
 /**
@@ -366,6 +391,8 @@ const codeNodeTransform = (editor, tokenizer, transformState, node) => {
   updateAndRetainSelection(nodeKey, () => {
     const currentNode = getNodeByKey(nodeKey);
 
+    // Unreachable in practice, since the update runs synchronously on a node just checked above
+    /* v8 ignore next */
     if (!isCodeNode(currentNode) || !currentNode.isAttached()) {
       return false;
     }
@@ -426,8 +453,6 @@ export const registerCodeHighlighting = (editor, tokenizer = shikiTokenizer) => 
   const registrations = [];
 
   // Only register the mutation listener if not in headless mode
-  /* v8 ignore next 18 */
-  // @ts-ignore Internal field
   if (editor._headless !== true) {
     registrations.push(
       editor.registerMutationListener(

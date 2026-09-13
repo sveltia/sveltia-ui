@@ -6,7 +6,7 @@
  * imported at module scope, so a page that never shows a code block never pays for it. Second,
  * grammar and theme metadata comes from `generated.js` rather than `shiki/langs` and
  * `shiki/themes`, whose lazy `import()` thunks would drag the whole grammar set into a bundle.
- * @see https://github.com/facebook/lexical/tree/v0.49.0/packages/lexical-code-shiki
+ * @see https://github.com/facebook/lexical/tree/v0.50.0/packages/lexical-code-shiki
  * @see https://github.com/sveltia/sveltia-cms/issues/587
  */
 
