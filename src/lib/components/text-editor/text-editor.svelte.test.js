@@ -1,6 +1,7 @@
-import { describe, expect, it, vi } from 'vitest';
+import { beforeAll, describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-svelte';
 import { userEvent } from 'vitest/browser';
+import { setCodeHighlighterLoaders } from './shiki/loader.js';
 import TextEditor from './text-editor.svelte';
 
 /**
@@ -40,6 +41,19 @@ const focusEnd = (root) => {
 };
 
 describe('TextEditor', () => {
+  beforeAll(() => {
+    // Keep the syntax highlighter off the network: without an engine, code stays plain text
+    setCodeHighlighterLoaders({
+      /**
+       * Fail to load the engine.
+       * @throws {Error} Always.
+       */
+      loadEngine: async () => {
+        throw new Error('Not available in tests');
+      },
+    });
+  });
+
   it('renders the toolbar, the rich text editor and a hidden plain text editor', async () => {
     const screen = await render(TextEditor, { value: '# Hello\n\nSome **bold** text', class: 'x' });
     const wrapper = /** @type {HTMLElement} */ (screen.container.querySelector('.sui.text-editor'));

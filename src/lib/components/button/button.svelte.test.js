@@ -154,7 +154,7 @@ describe('Button', () => {
     const screen = await render(Button, { label: 'Go', keyShortcuts: 'Accel+S', onclick });
     const button = screen.getByRole('button');
 
-    expect(button.element().getAttribute('aria-keyshortcuts')).toMatch(/^(Control|Meta)\+S$/);
+    expect(button.element().getAttribute('aria-keyshortcuts')).toMatch(/^(Ctrl|Meta)\+S$/);
 
     const plain = await render(Button, { label: 'Plain' });
 

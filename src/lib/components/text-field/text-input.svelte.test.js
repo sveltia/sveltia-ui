@@ -54,7 +54,7 @@ describe('TextInput', () => {
     await expect.element(input).toHaveAttribute('dir', 'rtl');
     await expect.element(input).toHaveAttribute('inputmode', 'numeric');
     await expect.element(input).toHaveAttribute('data-x', '1');
-    expect(input.element().getAttribute('aria-keyshortcuts')).toMatch(/^(Control|Meta)\+K$/);
+    expect(input.element().getAttribute('aria-keyshortcuts')).toMatch(/^(Ctrl|Meta)\+K$/);
     expect(wrapper.classList.contains('flex')).toBe(true);
     expect(wrapper.classList.contains('monospace')).toBe(true);
   });

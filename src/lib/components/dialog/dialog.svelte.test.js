@@ -278,7 +278,7 @@ describe('Dialog', () => {
       ?.querySelector('button.primary')
       ?.getAttribute('aria-keyshortcuts');
 
-    expect(shortcuts).toMatch(/^(Control|Meta)\+Enter$/);
+    expect(shortcuts).toMatch(/^(Ctrl|Meta)\+Enter$/);
 
     const modifier = shortcuts?.startsWith('Meta') ? 'Meta' : 'Control';
 
