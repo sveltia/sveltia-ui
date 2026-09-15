@@ -219,15 +219,13 @@
     }
   }
 
+  // A row is laid out like an option in a listbox, so a tree and a listbox side by side look alike
   .row {
     display: flex;
     align-items: center;
     gap: 4px;
     border-radius: var(--sui-tree-item-border-radius, var(--sui-option-border-radius, 4px));
-    padding: var(--sui-tree-item-padding, 0 8px 0 4px);
-    padding-inline-start: calc(
-      (var(--sui-tree-item-level, 1) - 1) * var(--sui-tree-item-indent, 16px) + 4px
-    );
+    padding: var(--sui-tree-item-padding, var(--sui-option-padding, 0 8px));
     min-height: var(--sui-tree-item-height, var(--sui-option-height));
     cursor: pointer;
     transition: background-color 200ms;
@@ -238,6 +236,10 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    // The indent goes on the chevron rather than the row, so the row keeps its own padding
+    margin-inline-start: calc(
+      (var(--sui-tree-item-level, 1) - 1) * var(--sui-tree-item-indent, 16px)
+    );
     width: var(--sui-tree-item-chevron-size, 24px);
     height: var(--sui-tree-item-chevron-size, 24px);
     transition: transform 200ms;
@@ -246,6 +248,7 @@
   .label {
     flex: auto;
     overflow: hidden;
+    padding: 0 4px;
     white-space: nowrap;
     text-overflow: ellipsis;
   }
