@@ -12,7 +12,7 @@
   import { onMount } from 'svelte';
   import {
     findNearestStepIndex,
-    getSliderKeyDirection,
+    getSliderKeyTargetIndex,
     getSliderSteps,
     toLogicalX,
     wouldCrossThumbs,
@@ -28,10 +28,13 @@
    * @property {number} [min] Minimum allowed value. An alias of the `aria-valuemin` attribute.
    * @property {number} [max] Maximum allowed value. An alias of the `aria-valuemax` attribute.
    * @property {string} [sliderLabel] `aria-label` on the slider.
+   * @property {string} [ariaLabelledby] `aria-labelledby` on a single-thumb slider, for a visible
+   * label elsewhere on the page.
    * @property {[number, number]} [values] Value list for a multi-thumb slider.
    * @property {[string, string]} [sliderLabels] `aria-label` on a multi-thumb slider.
    * @property {number} [step] Step option like `<input type="range">`.
-   * @property {(string[] | number[])} [optionLabels] Visible labels on the slider.
+   * @property {(string[] | number[])} [optionLabels] Visible labels on the slider. When there is
+   * one per step, the current one is also read out as the value (`aria-valuetext`).
    * @property {boolean} [flex] Make the text input container flexible.
    * @property {string} [class] The `class` attribute on the wrapper element.
    * @property {boolean} [hidden] Whether to hide the widget.
@@ -55,6 +58,7 @@
     min = 0,
     max = 100,
     sliderLabel = '',
+    ariaLabelledby = undefined,
     values = $bindable(undefined),
     sliderLabels = undefined,
     step = 1,
@@ -79,6 +83,21 @@
   let positionList = $state([]);
   /** @type {number[]} */
   let valueList = $state([]);
+
+  /**
+   * Get the text read out for a value, when the visible option labels line up with the steps.
+   * @param {number | undefined} _value Value.
+   * @returns {string | undefined} Matching label, if any.
+   */
+  const getValueText = (_value) => {
+    if (optionLabels.length !== valueList.length || _value === undefined) {
+      return undefined;
+    }
+
+    const index = valueList.indexOf(_value);
+
+    return index === -1 ? undefined : String(optionLabels[index]);
+  };
   let startX = $state(0);
   let startScreenX = $state(0);
   // eslint-disable-next-line prefer-const
@@ -128,19 +147,25 @@
     }
 
     const _value = multiThumb ? /** @type {[number, number]} */ (values)[valueIndex] : value;
-    const direction = getSliderKeyDirection(key, isRTL());
 
-    if (!direction) {
+    const index = getSliderKeyTargetIndex({
+      key,
+      rtl: isRTL(),
+      currentIndex: valueList.indexOf(_value),
+      length: valueList.length,
+    });
+
+    if (index === -1) {
+      // Still swallow the key if it’s one of the slider’s, so Home/End don’t scroll the page
+      if (['Home', 'End', 'PageUp', 'PageDown'].includes(key)) {
+        event.preventDefault();
+      }
+
       return;
     }
 
     event.preventDefault();
     event.stopPropagation();
-
-    const index =
-      (direction < 0 && _value > min) || (direction > 0 && _value < max)
-        ? valueList.indexOf(_value) + direction
-        : -1;
 
     if (index > -1) {
       if (
@@ -325,7 +350,8 @@
     <div
       role="slider"
       tabindex={disabled ? -1 : 0}
-      aria-label={multiThumb ? sliderLabels?.[0] : sliderLabel}
+      aria-label={(multiThumb ? sliderLabels?.[0] : sliderLabel) || undefined}
+      aria-labelledby={multiThumb ? undefined : ariaLabelledby}
       aria-hidden={hidden}
       aria-disabled={disabled}
       aria-readonly={readonly}
@@ -333,6 +359,7 @@
       aria-valuemin={min}
       aria-valuemax={max}
       aria-valuenow={multiThumb ? values?.[0] : value}
+      aria-valuetext={getValueText(multiThumb ? values?.[0] : value)}
       style:inset-inline-start={`${sliderPositions[0]}px`}
       onpointerdown={(event) => onPointerDown(event, 0)}
       onkeydown={(event) => onKeyDown(event, 0)}
@@ -341,7 +368,7 @@
       <div
         role="slider"
         tabindex={disabled ? -1 : 0}
-        aria-label={sliderLabels?.[1]}
+        aria-label={sliderLabels?.[1] || undefined}
         aria-hidden={hidden}
         aria-disabled={disabled}
         aria-readonly={readonly}
@@ -349,6 +376,7 @@
         aria-valuemin={min}
         aria-valuemax={max}
         aria-valuenow={values?.[1]}
+        aria-valuetext={getValueText(values?.[1])}
         style:inset-inline-start={`${sliderPositions[1]}px`}
         onpointerdown={(event) => onPointerDown(event, 1)}
         onkeydown={(event) => onKeyDown(event, 1)}
@@ -428,6 +456,15 @@
     height: calc(var(--sui-checkbox-height) - 2px);
     background-color: var(--sui-primary-accent-color-inverted);
     cursor: pointer;
+
+    // The thumb draws at 18px; this widens the pointer target to 26px without changing the look
+    // (WCAG 2.5.8 asks for 24px)
+    &::before {
+      content: '';
+      position: absolute;
+      inset: -4px;
+      border-radius: inherit;
+    }
 
     &:dir(ltr) {
       transform: translate(

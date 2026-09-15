@@ -18,6 +18,26 @@ expand: Розгорнути
 # Infobar/toast dismiss button label
 dismiss: Відхилити
 
+# Alert & infobar status, read out by screen readers before the message (visually hidden)
+alert:
+  error: Помилка
+  warning: Попередження
+  info: Інформація
+  success: Успішно
+
+# Role descriptions, read out by screen readers in place of the generic “group” role
+role_descriptions:
+  disclosure: розгортаний розділ
+  option_group: група варіантів
+  menu_item_group: група пунктів меню
+  checkbox_group: група прапорців
+  table_head: заголовок таблиці
+  table_body: тіло таблиці
+  table_foot: нижня частина таблиці
+  grid_head: заголовок сітки
+  grid_body: тіло сітки
+  grid_foot: нижня частина сітки
+
 # Emoji suggestion listbox aria-label, shared by the text fields and the text editor
 emoji_suggestions: Пропозиції емодзі
 

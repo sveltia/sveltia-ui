@@ -32,6 +32,11 @@
    * `aria-required` attribute.
    * @property {boolean} [invalid] Whether to mark the widget invalid. An alias of the
    * `aria-invalid` attribute.
+   * @property {string} [ariaLabel] The `aria-label` attribute on the editable text box. Either
+   * this or `ariaLabelledby` is required for the editor to have an accessible name.
+   * @property {string} [ariaLabelledby] The `aria-labelledby` attribute on the editable text box.
+   * @property {string} [ariaDescribedby] The `aria-describedby` attribute on the editable text
+   * box.
    * @property {Snippet} [children] Primary slot content.
    */
 
@@ -49,10 +54,26 @@
     readonly = false,
     required = false,
     invalid = false,
+    ariaLabel = undefined,
+    ariaLabelledby = undefined,
+    ariaDescribedby = undefined,
+    'aria-label': ariaLabelAttr = undefined,
+    'aria-labelledby': ariaLabelledbyAttr = undefined,
+    'aria-describedby': ariaDescribedbyAttr = undefined,
     children,
     ...restProps
     /* eslint-enable prefer-const */
   } = $props();
+
+  /**
+   * Labelling attributes for the editable text box. They’re pulled out of `restProps` because the
+   * rest goes on the presentational wrapper, where ARIA would ignore them.
+   */
+  const labelAttrs = $derived({
+    'aria-label': ariaLabel ?? ariaLabelAttr,
+    'aria-labelledby': ariaLabelledby ?? ariaLabelledbyAttr,
+    'aria-describedby': ariaDescribedby ?? ariaDescribedbyAttr,
+  });
 
   const editorStore = createEditorStore();
 
@@ -107,7 +128,7 @@
   {#if showLanguageSwitcher}
     <CodeEditorToolbar {disabled} {readonly} />
   {/if}
-  <LexicalRoot {hidden} {disabled} {readonly} {required} {invalid} />
+  <LexicalRoot {...labelAttrs} {hidden} {disabled} {readonly} {required} {invalid} />
 </div>
 
 {#if editorStore.showConverterError}

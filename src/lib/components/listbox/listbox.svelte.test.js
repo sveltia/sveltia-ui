@@ -109,6 +109,63 @@ describe('Listbox', () => {
     await expect.element(lemon).toHaveAttribute('aria-selected', 'true');
   });
 
+  it('jumps to either end with Home and End', async () => {
+    const activated = whenActivated();
+    const screen = await render(ListboxFixture);
+
+    await activated;
+
+    const listbox = screen.getByRole('listbox');
+    const apple = screen.getByRole('option', { name: 'Apple' });
+    const lemon = screen.getByRole('option', { name: 'Lemon' });
+
+    /** @type {HTMLElement} */ (listbox.element()).focus();
+    await userEvent.keyboard('{End}');
+    // Orange is disabled, so Lemon is the last active option
+    await expect.element(lemon).toHaveAttribute('aria-selected', 'true');
+    await userEvent.keyboard('{Home}');
+    await expect.element(apple).toHaveAttribute('aria-selected', 'true');
+  });
+
+  it('moves to the option whose label starts with the typed characters', async () => {
+    const activated = whenActivated();
+    const screen = await render(ListboxFixture);
+
+    await activated;
+
+    const listbox = screen.getByRole('listbox');
+    const apple = screen.getByRole('option', { name: 'Apple' });
+    const banana = screen.getByRole('option', { name: 'Banana' });
+    const lemon = screen.getByRole('option', { name: 'Lemon' });
+
+    /**
+     * Quick successive keys make up one prefix, so let each one expire before the next.
+     * @returns {Promise<void>} Resolves once the prefix has expired.
+     */
+    const pause = () =>
+      new Promise((resolve) => {
+        setTimeout(resolve, 600);
+      });
+
+    /** @type {HTMLElement} */ (listbox.element()).focus();
+    await userEvent.keyboard('l');
+    await expect.element(lemon).toHaveAttribute('aria-selected', 'true');
+    await pause();
+    await userEvent.keyboard('a');
+    await expect.element(apple).toHaveAttribute('aria-selected', 'true');
+    await pause();
+    await userEvent.keyboard('ba');
+    await expect.element(banana).toHaveAttribute('aria-selected', 'true');
+
+    // Nothing starts with this, so nothing moves — but the key is still swallowed, so the browser
+    // doesn’t start searching the page (Firefox find-as-you-type)
+    const miss = new KeyboardEvent('keydown', { key: 'z', bubbles: true, cancelable: true });
+
+    listbox.element().dispatchEvent(miss);
+    expect(miss.defaultPrevented).toBe(true);
+    await expect.element(banana).toHaveAttribute('aria-selected', 'true');
+  });
+
   it('filters the options with the search terms', async () => {
     const onFilter = vi.fn();
     /** @type {ComponentProps<typeof ListboxFixture>} */

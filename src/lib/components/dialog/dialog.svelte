@@ -24,6 +24,7 @@
     open = $bindable(false),
     value = $bindable(''),
     title,
+    ariaLabelledby = undefined,
     role = 'dialog',
     size = 'medium',
     class: className,
@@ -53,6 +54,14 @@
    * @type {string}
    */
   const id = $props.id();
+
+  /**
+   * Accessible name for the `<dialog>`. The built-in header renders the title in an element the
+   * dialog can point at; with a custom header the title is only text, so it becomes `aria-label`
+   * unless the consumer names the labelling element.
+   */
+  const labelledby = $derived(ariaLabelledby ?? (!header && title ? `${id}-title` : undefined));
+  const label = $derived(labelledby ? undefined : title || undefined);
   /**
    * A reference to the modal component.
    * @type {Modal | undefined}
@@ -109,8 +118,8 @@
   {role}
   {id}
   class="dialog"
-  aria-label={header ? undefined : title}
-  aria-labelledby={header ? title : `${id}-title`}
+  aria-label={label}
+  aria-labelledby={labelledby}
   aria-describedby="{id}-body"
   bind:open
   showBackdrop

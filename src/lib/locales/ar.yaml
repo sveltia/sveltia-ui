@@ -18,6 +18,26 @@ expand: توسيع
 # Infobar/toast dismiss button label
 dismiss: تجاهل
 
+# Alert & infobar status, read out by screen readers before the message (visually hidden)
+alert:
+  error: خطأ
+  warning: تحذير
+  info: معلومات
+  success: نجاح
+
+# Role descriptions, read out by screen readers in place of the generic “group” role
+role_descriptions:
+  disclosure: قسم قابل للطي
+  option_group: مجموعة خيارات
+  menu_item_group: مجموعة عناصر قائمة
+  checkbox_group: مجموعة خانات اختيار
+  table_head: رأس الجدول
+  table_body: جسم الجدول
+  table_foot: تذييل الجدول
+  grid_head: رأس الشبكة
+  grid_body: جسم الشبكة
+  grid_foot: تذييل الشبكة
+
 # Emoji suggestion listbox aria-label, shared by the text fields and the text editor
 emoji_suggestions: اقتراحات الرموز التعبيرية
 

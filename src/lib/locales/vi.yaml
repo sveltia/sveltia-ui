@@ -18,6 +18,26 @@ expand: Mở rộng
 # Infobar/toast dismiss button label
 dismiss: Đóng
 
+# Alert & infobar status, read out by screen readers before the message (visually hidden)
+alert:
+  error: Lỗi
+  warning: Cảnh báo
+  info: Thông tin
+  success: Thành công
+
+# Role descriptions, read out by screen readers in place of the generic “group” role
+role_descriptions:
+  disclosure: phần có thể mở rộng
+  option_group: nhóm tùy chọn
+  menu_item_group: nhóm mục menu
+  checkbox_group: nhóm hộp kiểm
+  table_head: đầu bảng
+  table_body: thân bảng
+  table_foot: chân bảng
+  grid_head: đầu lưới
+  grid_body: thân lưới
+  grid_foot: chân lưới
+
 # Emoji suggestion listbox aria-label, shared by the text fields and the text editor
 emoji_suggestions: Gợi ý biểu tượng cảm xúc
 

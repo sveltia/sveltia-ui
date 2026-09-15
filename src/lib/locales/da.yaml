@@ -18,6 +18,26 @@ expand: Fold ud
 # Infobar/toast dismiss button label
 dismiss: Afvis
 
+# Alert & infobar status, read out by screen readers before the message (visually hidden)
+alert:
+  error: Fejl
+  warning: Advarsel
+  info: Information
+  success: Succes
+
+# Role descriptions, read out by screen readers in place of the generic “group” role
+role_descriptions:
+  disclosure: udvidelig sektion
+  option_group: gruppe af valgmuligheder
+  menu_item_group: gruppe af menupunkter
+  checkbox_group: gruppe af afkrydsningsfelter
+  table_head: tabelhoved
+  table_body: tabelindhold
+  table_foot: tabelfod
+  grid_head: gitterhoved
+  grid_body: gitterindhold
+  grid_foot: gitterfod
+
 # Emoji suggestion listbox aria-label, shared by the text fields and the text editor
 emoji_suggestions: Emojiforslag
 

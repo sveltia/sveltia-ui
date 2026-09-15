@@ -18,6 +18,26 @@ expand: Разгъни
 # Infobar/toast dismiss button label
 dismiss: Отхвърли
 
+# Alert & infobar status, read out by screen readers before the message (visually hidden)
+alert:
+  error: Грешка
+  warning: Предупреждение
+  info: Информация
+  success: Успех
+
+# Role descriptions, read out by screen readers in place of the generic “group” role
+role_descriptions:
+  disclosure: разгъващ се раздел
+  option_group: група опции
+  menu_item_group: група елементи от меню
+  checkbox_group: група квадратчета за отметка
+  table_head: заглавна част на таблица
+  table_body: основна част на таблица
+  table_foot: долна част на таблица
+  grid_head: заглавна част на мрежа
+  grid_body: основна част на мрежа
+  grid_foot: долна част на мрежа
+
 # Emoji suggestion listbox aria-label, shared by the text fields and the text editor
 emoji_suggestions: Предложения за емоджи
 

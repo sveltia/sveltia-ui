@@ -21,7 +21,9 @@ const options = [
  * @returns {string[]} Labels.
  */
 const getTags = (container) =>
-  [...container.querySelectorAll('[role="option"]')].map((tag) => tag.textContent?.trim() ?? '');
+  [...container.querySelectorAll('[role="gridcell"].label')].map(
+    (tag) => tag.textContent?.trim() ?? '',
+  );
 
 describe('SelectTags', () => {
   afterEach(() => {
@@ -35,17 +37,14 @@ describe('SelectTags', () => {
       class: 'custom',
     });
 
-    const listbox = screen.getByRole('listbox', { name: 'Selected Options' });
-
-    await expect.element(listbox).toHaveAttribute('aria-multiselectable', 'true');
+    await expect.element(screen.getByRole('grid', { name: 'Selected Options' })).toBeVisible();
     expect(screen.container.querySelector('.sui.select-tags')?.classList.contains('custom')).toBe(
       true,
     );
     expect(getTags(screen.container)).toEqual(['Banana', 'Apple']);
     await expect.element(screen.getByRole('button', { name: /Remove.*Banana/ })).toBeVisible();
     await expect.element(screen.getByRole('combobox')).toBeVisible();
-    screen.container.querySelectorAll('[role="option"]').forEach((tag) => {
-      expect(tag.getAttribute('aria-selected')).toBe('true');
+    screen.container.querySelectorAll('[role="gridcell"].label').forEach((tag) => {
       expect(tag.getAttribute('tabindex')).toBe('0');
       expect(/** @type {HTMLElement} */ (tag.parentElement).draggable).toBe(true);
     });
@@ -55,7 +54,7 @@ describe('SelectTags', () => {
     const screen = await render(SelectTags, { options, values: ['unknown'] });
 
     expect(getTags(screen.container)).toEqual(['unknown']);
-    expect(screen.container.querySelector('[role="listbox"] .sui.button')).toBeNull();
+    expect(screen.container.querySelector('[role="grid"] .sui.button')).toBeNull();
   });
 
   it('adds a value picked from the select', async () => {
@@ -119,10 +118,7 @@ describe('SelectTags', () => {
     /** @type {ComponentProps<typeof SelectTags>} */
     const props = $state({ options, values: ['apple', 'banana', 'cherry'], onReorder });
     const screen = await render(SelectTags, props);
-
-    const apple = /** @type {HTMLElement} */ (
-      screen.getByRole('option', { name: 'Apple' }).element()
-    );
+    const apple = /** @type {HTMLElement} */ (screen.getByText('Apple').element());
 
     apple.focus();
     await userEvent.keyboard('{ArrowRight}');
@@ -264,7 +260,7 @@ describe('SelectTags', () => {
       expect(props.values).toEqual(['banana', 'apple']);
     });
 
-    /** @type {HTMLElement} */ (screen.getByRole('option', { name: 'Apple' }).element()).focus();
+    /** @type {HTMLElement} */ (screen.getByText('Apple').element()).focus();
     await userEvent.keyboard('{ArrowRight}');
     await vi.waitFor(() => {
       expect(props.values).toEqual(['apple', 'banana']);
@@ -276,10 +272,10 @@ describe('SelectTags', () => {
     const wrapper = /** @type {HTMLElement} */ (screen.container.querySelector('.sui.select-tags'));
 
     expect(wrapper.classList.contains('disabled')).toBe(true);
-    expect(wrapper.querySelector('[role="option"]')?.hasAttribute('tabindex')).toBe(false);
+    expect(wrapper.querySelector('[role="gridcell"].label')?.hasAttribute('tabindex')).toBe(false);
     expect(/** @type {HTMLElement} */ (wrapper.querySelector('[draggable]')).draggable).toBe(false);
     expect(
-      /** @type {HTMLButtonElement} */ (wrapper.querySelector('[role="listbox"] .sui.button'))
+      /** @type {HTMLButtonElement} */ (wrapper.querySelector('[role="grid"] .sui.button'))
         .disabled,
     ).toBe(true);
     expect(wrapper.querySelector('[role="combobox"]')?.getAttribute('aria-disabled')).toBe('true');

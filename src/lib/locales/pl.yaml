@@ -18,6 +18,26 @@ expand: Rozwiń
 # Infobar/toast dismiss button label
 dismiss: Odrzuć
 
+# Alert & infobar status, read out by screen readers before the message (visually hidden)
+alert:
+  error: Błąd
+  warning: Ostrzeżenie
+  info: Informacja
+  success: Sukces
+
+# Role descriptions, read out by screen readers in place of the generic “group” role
+role_descriptions:
+  disclosure: sekcja rozwijana
+  option_group: grupa opcji
+  menu_item_group: grupa pozycji menu
+  checkbox_group: grupa pól wyboru
+  table_head: nagłówek tabeli
+  table_body: treść tabeli
+  table_foot: stopka tabeli
+  grid_head: nagłówek siatki
+  grid_body: treść siatki
+  grid_foot: stopka siatki
+
 # Emoji suggestion listbox aria-label, shared by the text fields and the text editor
 emoji_suggestions: Propozycje emoji
 

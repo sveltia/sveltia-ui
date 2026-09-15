@@ -20,7 +20,8 @@ describe('Switch', () => {
     await expect.element(button).toHaveAttribute('aria-readonly', 'false');
     await expect.element(button).toHaveAttribute('aria-required', 'false');
     await expect.element(button).toHaveAttribute('aria-invalid', 'false');
-    expect(button.element().hasAttribute('aria-checked')).toBe(false);
+    // `aria-checked` is required on the `switch` role, so it’s rendered even before any change
+    await expect.element(button).toHaveAttribute('aria-checked', 'false');
   });
 
   it('renders children when there is no label, and supports an aria-label', async () => {

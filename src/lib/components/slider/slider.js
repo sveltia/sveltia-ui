@@ -83,6 +83,46 @@ export const getSliderKeyDirection = (key, rtl) => {
 };
 
 /**
+ * Get the step index a key moves the thumb to, per the APG Slider pattern: the arrow keys move by
+ * one step, Page Up/Down by a tenth of the range, and Home/End jump to either end.
+ * @param {object} options Options.
+ * @param {string} options.key The key pressed.
+ * @param {boolean} options.rtl Whether the layout is right-to-left.
+ * @param {number} options.currentIndex Index of the current step.
+ * @param {number} options.length Number of steps.
+ * @returns {number} Target index, clamped to the range, or `-1` if the key doesn’t move the thumb
+ * or the thumb is already where the key would take it.
+ */
+export const getSliderKeyTargetIndex = ({ key, rtl, currentIndex, length }) => {
+  const lastIndex = length - 1;
+  const page = Math.max(1, Math.round(length / 10));
+  /** @type {number} */
+  let index;
+
+  if (key === 'Home') {
+    index = 0;
+  } else if (key === 'End') {
+    index = lastIndex;
+  } else if (key === 'PageUp') {
+    index = currentIndex + page;
+  } else if (key === 'PageDown') {
+    index = currentIndex - page;
+  } else {
+    const direction = getSliderKeyDirection(key, rtl);
+
+    if (!direction) {
+      return -1;
+    }
+
+    index = currentIndex + direction;
+  }
+
+  index = Math.min(lastIndex, Math.max(0, index));
+
+  return index === currentIndex ? -1 : index;
+};
+
+/**
  * Whether moving one thumb of a multi-thumb slider to the given position would make it cross, or
  * land on, the other thumb.
  * @param {object} options Options.

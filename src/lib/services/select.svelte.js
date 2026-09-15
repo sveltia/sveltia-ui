@@ -43,6 +43,14 @@ export class OptionRegistry {
   }
 
   /**
+   * Registered options, in registration order.
+   * @returns {OptionEntry[]} Entries.
+   */
+  get entries() {
+    return this.#entries;
+  }
+
+  /**
    * The option that is currently marked as selected, if any.
    * @returns {OptionEntry | undefined} Matching option.
    */

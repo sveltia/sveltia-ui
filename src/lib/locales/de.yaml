@@ -18,6 +18,26 @@ expand: Aufklappen
 # Infobar/toast dismiss button label
 dismiss: Ausblenden
 
+# Alert & infobar status, read out by screen readers before the message (visually hidden)
+alert:
+  error: Fehler
+  warning: Warnung
+  info: Information
+  success: Erfolg
+
+# Role descriptions, read out by screen readers in place of the generic “group” role
+role_descriptions:
+  disclosure: ausklappbarer Bereich
+  option_group: Optionsgruppe
+  menu_item_group: Menüeintragsgruppe
+  checkbox_group: Kontrollkästchengruppe
+  table_head: Tabellenkopf
+  table_body: Tabellenkörper
+  table_foot: Tabellenfuß
+  grid_head: Rasterkopf
+  grid_body: Rasterkörper
+  grid_foot: Rasterfuß
+
 # Emoji suggestion listbox aria-label, shared by the text fields and the text editor
 emoji_suggestions: Emoji-Vorschläge
 

@@ -106,6 +106,50 @@ describe('Toast', () => {
     });
   });
 
+  it('holds the countdown while hovered or focused, and starts over after', async () => {
+    /** @type {ComponentProps<typeof Toast>} */
+    const props = $state({ show: true, duration: 1000 });
+
+    await render(Toast, props);
+
+    const toast = /** @type {HTMLElement} */ (getBase()?.querySelector('.sui.toast'));
+
+    await vi.advanceTimersByTimeAsync(800);
+    toast.dispatchEvent(new PointerEvent('pointerenter'));
+    await vi.advanceTimersByTimeAsync(5000);
+    expect(props.show).toBe(true);
+    toast.dispatchEvent(new PointerEvent('pointerleave'));
+    await vi.advanceTimersByTimeAsync(999);
+    expect(props.show).toBe(true);
+    await vi.advanceTimersByTimeAsync(1);
+    expect(props.show).toBe(false);
+  });
+
+  it('inserts the content when shown, and removes it once faded out', async () => {
+    /** @type {ComponentProps<typeof Toast>} */
+    const props = $state({ show: false, duration: 0, children: text('Saved') });
+
+    await render(Toast, props);
+
+    const toast = /** @type {HTMLElement} */ (getBase()?.querySelector('.sui.toast'));
+
+    expect(toast.textContent).not.toContain('Saved');
+    props.show = true;
+    await vi.waitFor(() => {
+      expect(toast.textContent).toContain('Saved');
+    });
+    props.show = false;
+    await vi.waitFor(() => {
+      expect(toast.getAttribute('aria-hidden')).toBe('true');
+    });
+    // Still there while fading
+    expect(toast.textContent).toContain('Saved');
+    await vi.advanceTimersByTimeAsync(250);
+    await vi.waitFor(() => {
+      expect(toast.textContent).not.toContain('Saved');
+    });
+  });
+
   it('stays until hidden manually with a zero duration', async () => {
     /** @type {ComponentProps<typeof Toast>} */
     const props = $state({ show: true, duration: 0 });

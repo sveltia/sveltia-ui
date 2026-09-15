@@ -4,12 +4,15 @@
 -->
 <script>
   import { _, isRTL } from '@sveltia/i18n';
+  import { tick } from 'svelte';
+  import { activateGroup } from '../../services/group.svelte.js';
   import Button from '../button/button.svelte';
   import Divider from '../divider/divider.svelte';
   import Spacer from '../divider/spacer.svelte';
   import Icon from '../icon/icon.svelte';
   import {
     addMonths,
+    formatDate,
     getCalendarDays,
     getFirstDayOfMonth,
     isSameDay,
@@ -37,16 +40,48 @@
    */
   let firstDay = $derived(getFirstDayOfMonth(date));
   const dayList = $derived(getCalendarDays(firstDay).map((day) => ({ day })));
+  /**
+   * Month and year being displayed, in the current locale. It’s the caption of the day grid as
+   * well as the label of the month switcher.
+   */
+  const monthLabel = $derived(formatDate(firstDay, { year: 'numeric', month: 'short' }));
+  const id = $props.id();
+  /** @type {HTMLElement | undefined} */
+  let grid = $state();
+
+  // Start the keyboard cursor on the selected day. The group service tracks the cursor with the
+  // `focused` class and `aria-activedescendant`, and keeps it as the selection moves; it only
+  // needs a starting point here, where nothing has been focused yet.
+  $effect(() => {
+    void value;
+
+    // The grid is bound before any effect runs
+    /* v8 ignore next */
+    if (!grid) {
+      return;
+    }
+
+    const listbox = grid;
+
+    tick().then(() => {
+      if (listbox.querySelector('.focused')) {
+        return;
+      }
+
+      const option = listbox.querySelector('[role="option"][aria-selected="true"]');
+
+      if (option) {
+        option.classList.add('focused');
+        listbox.setAttribute('aria-activedescendant', option.id);
+      }
+    });
+  });
 </script>
 
 <div role="group">
   <input type="hidden" bind:value />
   <div role="none" class="header">
-    <Button
-      variant="ghost"
-      label={firstDay.toLocaleDateString('en', { year: 'numeric', month: 'short' })}
-      aria-haspopup="dialog"
-    >
+    <Button variant="ghost" label={monthLabel} aria-haspopup="dialog">
       {#snippet endIcon()}
         <Icon name="arrow_drop_down" class="small-arrow" />
       {/snippet}
@@ -115,13 +150,31 @@
       <Icon name={isRTL() ? 'chevron_left' : 'chevron_right'} />
     </Button>
   </div>
-  <div role="listbox" class="grid">
-    {#each dayList.slice(0, 7) as { day } (day)}
+  <!--
+    The day grid is a listbox laid out as a grid, so the group service moves through it with all
+    four arrow keys. Each day is named by its full date: the digit alone means nothing out of
+    context. The days are UTC-based, like the `value`, so the names are formatted the same way.
+    The cells are keyed by date string rather than by `Date` object, which is recreated on every
+    update: a day that stays on the grid when the month changes — the last days of the previous
+    month, say — keeps its element, and with it the keyboard cursor.
+  -->
+  <div
+    bind:this={grid}
+    role="listbox"
+    class="grid"
+    aria-label={monthLabel}
+    onChange={(/** @type {CustomEvent} */ event) => {
+      value = event.detail.value;
+    }}
+    {@attach activateGroup()}
+  >
+    {#each dayList.slice(0, 7) as { day } (day.getUTCDay())}
       <div role="none" class="weekday">
-        {day.toLocaleDateString('en', { weekday: 'narrow' })}
+        {formatDate(day, { weekday: 'narrow' })}
       </div>
     {/each}
-    {#each dayList as { day } (day)}
+    {#each dayList as { day } (toDateString(day))}
+      {@const dateString = toDateString(day)}
       <div
         role="none"
         class:other-month={day.getUTCMonth() !== firstDay.getUTCMonth()}
@@ -129,9 +182,12 @@
       >
         <Button
           role="option"
-          aria-selected={false}
+          id="{id}-{dateString}"
+          value={dateString}
+          aria-label={formatDate(day, { dateStyle: 'full', timeZone: 'UTC' })}
+          aria-selected={dateString === value}
           onclick={() => {
-            value = toDateString(day);
+            value = dateString;
           }}
         >
           {day.getUTCDate()}

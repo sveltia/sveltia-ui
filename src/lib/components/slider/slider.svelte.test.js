@@ -114,6 +114,49 @@ describe('Slider', () => {
     await expect.element(screen.getByRole('slider')).toHaveAttribute('aria-valuenow', '1');
   });
 
+  it('jumps with Home, End and the Page keys', async () => {
+    /** @type {ComponentProps<typeof Slider>} */
+    const props = $state({ value: 50, min: 0, max: 100, step: 1 });
+    const screen = await renderSlider(props);
+    const slider = /** @type {HTMLElement} */ (screen.container.querySelector('[role="slider"]'));
+
+    await waitForInit(screen.container);
+    slider.focus();
+    await userEvent.keyboard('{PageUp}');
+    expect(props.value).toBe(60);
+    await userEvent.keyboard('{PageDown}{PageDown}');
+    expect(props.value).toBe(40);
+    await userEvent.keyboard('{End}');
+    expect(props.value).toBe(100);
+    await userEvent.keyboard('{Home}');
+    expect(props.value).toBe(0);
+  });
+
+  it('is named only when a label is given, and reads out the option label as the value', async () => {
+    const screen = await renderSlider({
+      value: 1,
+      min: 0,
+      max: 2,
+      optionLabels: ['Low', 'Mid', 'High'],
+    });
+
+    const slider = screen.getByRole('slider');
+
+    await waitForInit(screen.container);
+    expect(slider.element().hasAttribute('aria-label')).toBe(false);
+    await expect.element(slider).toHaveAttribute('aria-valuetext', 'Mid');
+
+    const labelled = await renderSlider({ value: 5, ariaLabelledby: 'volume-label' });
+
+    expect(
+      labelled.container.querySelector('[role="slider"]')?.getAttribute('aria-labelledby'),
+    ).toBe('volume-label');
+    // Labels that don’t line up with the steps aren’t used as value text
+    expect(
+      labelled.container.querySelector('[role="slider"]')?.hasAttribute('aria-valuetext'),
+    ).toBe(false);
+  });
+
   it('ignores the keyboard while disabled or read-only, or with a modifier', async () => {
     /** @type {ComponentProps<typeof Slider>} */
     const props = $state({ value: 2, readonly: true });

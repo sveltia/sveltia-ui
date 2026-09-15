@@ -41,6 +41,38 @@ describe('Drawer', () => {
     expect(content.querySelector('.main')?.textContent).toContain('Body');
     expect(content.querySelector('.footer')).toBeNull();
     expect(content.querySelector('button.close')?.getAttribute('aria-controls')).toBe(dialog.id);
+    // The built-in title labels the dialog
+    expect(dialog.getAttribute('aria-labelledby')).toBe(content.querySelector('.title')?.id);
+    expect(dialog.hasAttribute('aria-label')).toBe(false);
+  });
+
+  it('names the dialog by title text with a custom header', async () => {
+    await render(Drawer, {
+      open: true,
+      title: 'Filters',
+      header: html('<h2 class="custom-header">Custom</h2>'),
+    });
+    await waitForOpen();
+
+    const dialog = /** @type {HTMLDialogElement} */ (getDialog());
+
+    expect(dialog.getAttribute('aria-label')).toBe('Filters');
+    expect(dialog.hasAttribute('aria-labelledby')).toBe(false);
+  });
+
+  it('lets a custom header name the dialog by element ID', async () => {
+    await render(Drawer, {
+      open: true,
+      title: 'Filters',
+      ariaLabelledby: 'custom-title',
+      header: html('<h2 id="custom-title">Custom</h2>'),
+    });
+    await waitForOpen();
+
+    const dialog = /** @type {HTMLDialogElement} */ (getDialog());
+
+    expect(dialog.getAttribute('aria-labelledby')).toBe('custom-title');
+    expect(dialog.hasAttribute('aria-label')).toBe(false);
   });
 
   it('supports other positions, sizes and an inside close button', async () => {

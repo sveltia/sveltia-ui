@@ -9,10 +9,11 @@ import Infobar from './infobar.svelte';
 
 it('renders a polite info message with a dismiss button', async () => {
   const screen = await render(Infobar, { children: text('Heads up') });
-  const message = screen.getByRole('alert');
+  const message = screen.getByRole('status');
 
   await expect.element(message).toHaveAttribute('aria-live', 'polite');
   expect(message.element().textContent).toContain('Heads up');
+  expect(message.element().querySelector('.status-label')?.textContent).toBe('Information');
   expect(screen.container.querySelector('.infobar')?.classList.contains('info')).toBe(true);
   expect(message.element().querySelector('.icon')?.textContent?.trim()).toBe('info');
   await expect.element(screen.getByRole('button', { name: 'Dismiss' })).toBeVisible();
@@ -26,8 +27,16 @@ it('reflects the status and live politeness, and accepts a custom icon', async (
   });
 
   expect(screen.container.querySelector('.infobar')?.classList.contains('success')).toBe(true);
-  await expect.element(screen.getByRole('alert')).toHaveAttribute('aria-live', 'assertive');
+  await expect.element(screen.getByRole('status')).toHaveAttribute('aria-live', 'assertive');
   expect(screen.container.querySelector('.custom')).not.toBeNull();
+});
+
+it('interrupts with an alert for errors and warnings', async () => {
+  const screen = await render(Infobar, { status: 'error', children: text('Failed') });
+  const message = screen.getByRole('alert');
+
+  await expect.element(message).toHaveAttribute('aria-live', 'assertive');
+  expect(message.element().querySelector('.status-label')?.textContent).toBe('Error');
 });
 
 it('uses the check icon for the success status', async () => {

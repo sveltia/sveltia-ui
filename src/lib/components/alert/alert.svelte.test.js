@@ -10,15 +10,24 @@ it('renders an assertive alert with the status icon', async () => {
   await expect.element(alert).toHaveClass('sui', 'alert', 'error');
   await expect.element(alert).toHaveAttribute('aria-live', 'assertive');
   expect(alert.element().textContent).toContain('Failed');
+  // The status is spelled out for screen readers, ahead of the message
+  expect(alert.element().querySelector('.status-label')?.textContent).toBe('Error');
   expect(alert.element().querySelector('.icon')?.textContent?.trim()).toBe('error');
 });
 
-it('uses the check icon for the success status', async () => {
-  const screen = await render(Alert, { status: 'success', ariaLive: 'polite' });
-  const alert = screen.getByRole('alert');
+it('renders a polite status for information and success, unless told otherwise', async () => {
+  const screen = await render(Alert, { status: 'success' });
+  const status = screen.getByRole('status');
 
-  await expect.element(alert).toHaveAttribute('aria-live', 'polite');
-  expect(alert.element().querySelector('.icon')?.textContent?.trim()).toBe('check_circle');
+  await expect.element(status).toHaveAttribute('aria-live', 'polite');
+  expect(status.element().querySelector('.status-label')?.textContent).toBe('Success');
+  expect(status.element().querySelector('.icon')?.textContent?.trim()).toBe('check_circle');
+});
+
+it('lets the politeness be overridden', async () => {
+  const screen = await render(Alert, { status: 'info', ariaLive: 'assertive' });
+
+  await expect.element(screen.getByRole('status')).toHaveAttribute('aria-live', 'assertive');
 });
 
 it('renders a custom icon instead', async () => {

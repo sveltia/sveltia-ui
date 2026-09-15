@@ -18,7 +18,8 @@
    * the toast will be reset, meaning the same toast can be displayed for a longer period of time.
    * @property {boolean} [show] Whether to show the toast.
    * @property {number} [duration] Duration to automatically hide the toast. Use `0` to hide it
-   * manually from the consumer.
+   * manually from the consumer. The countdown is held while the pointer is over the toast or the
+   * focus is inside it, and starts over once it leaves.
    * @property {ToastPosition} [position] Position of the toast.
    * @property {Snippet} [children] Primary slot content.
    */
@@ -53,6 +54,20 @@
    * @type {number}
    */
   let timerId = $state(0);
+  /**
+   * Whether the pointer is over the toast or the focus is inside it. The auto-hide countdown is
+   * held while it is, so a toast with a control in it can’t vanish from under the user (WCAG
+   * 2.2.1).
+   * @type {boolean}
+   */
+  let held = $state(false);
+  /**
+   * Whether the content is in the DOM tree. It lags behind {@link show} on the way out, so the
+   * toast can fade before the content goes. On the way in, the content is inserted rather than
+   * unhidden: a live region is only announced when its content arrives.
+   * @type {boolean}
+   */
+  let rendered = $state(false);
 
   onMount(() => {
     popover =
@@ -116,15 +131,33 @@
   });
 
   $effect(() => {
+    if (show) {
+      rendered = true;
+
+      return undefined;
+    }
+
+    // Matches the opacity transition below
+    const timer = globalThis.setTimeout(() => {
+      rendered = false;
+    }, 250);
+
+    return () => {
+      globalThis.clearTimeout(timer);
+    };
+  });
+
+  $effect(() => {
     void id;
     void show;
     void duration;
+    void held;
 
     untrack(() => {
       globalThis.clearTimeout(timerId);
     });
 
-    if (show && duration) {
+    if (show && duration && !held) {
       timerId = /** @type {number} */ (
         /** @type {unknown} */ (
           globalThis.setTimeout(() => {
@@ -138,8 +171,27 @@
 
 <div bind:this={popoverBase} role="none" class="sui toast-base"></div>
 
-<div {...restProps} bind:this={toast} class={['sui', 'toast', position]} aria-hidden={!show}>
-  {@render children?.()}
+<div
+  {...restProps}
+  bind:this={toast}
+  class={['sui', 'toast', position]}
+  aria-hidden={!show}
+  onpointerenter={() => {
+    held = true;
+  }}
+  onpointerleave={() => {
+    held = false;
+  }}
+  onfocusin={() => {
+    held = true;
+  }}
+  onfocusout={(event) => {
+    held = !!event.relatedTarget && !!toast?.contains(/** @type {Node} */ (event.relatedTarget));
+  }}
+>
+  {#if rendered}
+    {@render children?.()}
+  {/if}
 </div>
 
 <style lang="scss">
@@ -181,10 +233,14 @@
     opacity: 1;
     transition-duration: 250ms;
     will-change: opacity;
+    // The base is click-through; the toast itself takes the pointer, so a button in it works and
+    // hovering it holds the countdown
+    pointer-events: auto;
 
     &[aria-hidden='true'] {
       display: block;
       opacity: 0;
+      pointer-events: none;
     }
 
     &.top-left {

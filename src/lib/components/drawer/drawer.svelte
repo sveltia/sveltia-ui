@@ -20,7 +20,11 @@
    * @typedef {object} Props
    * @property {string} [class] The `class` attribute on the content element.
    * @property {boolean} [open] Whether to open the drawer.
-   * @property {string} [title] Title text displayed on the header.
+   * @property {string} [title] Title text displayed on the header. With a custom `header` snippet,
+   * it’s used as the drawer’s `aria-label` instead.
+   * @property {string} [ariaLabelledby] ID of the element that labels the drawer, typically a
+   * heading inside a custom `header` snippet. Takes precedence over `title` for the accessible
+   * name.
    * @property {'top' | 'right' | 'bottom' | 'left'} [position] Position of the drawer.
    * @property {'small' | 'medium' | 'large' | 'x-large' | 'full'} [size] Width or height of the
    * drawer.
@@ -41,6 +45,7 @@
     open = $bindable(false),
     class: className,
     title = '',
+    ariaLabelledby = undefined,
     position = 'right',
     size = 'small',
     showClose = 'outside',
@@ -68,9 +73,26 @@
   const orientation = $derived(
     position === 'right' || position === 'left' ? 'vertical' : 'horizontal',
   );
+
+  /**
+   * Accessible name for the `<dialog>`, resolved the same way as `<Dialog>`: the built-in header
+   * renders the title in an element the dialog can point at; with a custom header the title is
+   * only text, so it becomes `aria-label` unless the consumer names the labelling element.
+   */
+  const labelledby = $derived(ariaLabelledby ?? (!header && title ? `${id}-title` : undefined));
+  const label = $derived(labelledby ? undefined : title || undefined);
 </script>
 
-<Modal bind:this={modal} {...restProps} bind:open {id} class="drawer" showBackdrop>
+<Modal
+  bind:this={modal}
+  {...restProps}
+  bind:open
+  {id}
+  class="drawer"
+  aria-label={label}
+  aria-labelledby={labelledby}
+  showBackdrop
+>
   <div role="none" class={['content', className, size, position, orientation]}>
     <div role="none" class="extra-control">
       {#if showClose === 'outside'}
@@ -99,7 +121,7 @@
         {@render header()}
       {:else}
         <div role="none" class="header">
-          <div role="none" class="title">
+          <div role="none" id="{id}-title" class="title">
             {title}
           </div>
           <Spacer flex={true} />

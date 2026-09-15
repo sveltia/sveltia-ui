@@ -18,6 +18,26 @@ expand: Uitvouwen
 # Infobar/toast dismiss button label
 dismiss: Sluiten
 
+# Alert & infobar status, read out by screen readers before the message (visually hidden)
+alert:
+  error: Fout
+  warning: Waarschuwing
+  info: Informatie
+  success: Gelukt
+
+# Role descriptions, read out by screen readers in place of the generic “group” role
+role_descriptions:
+  disclosure: uitklapbare sectie
+  option_group: optiegroep
+  menu_item_group: menu-itemgroep
+  checkbox_group: selectievakjesgroep
+  table_head: tabelkop
+  table_body: tabelinhoud
+  table_foot: tabelvoet
+  grid_head: rasterkop
+  grid_body: rasterinhoud
+  grid_foot: rastervoet
+
 # Emoji suggestion listbox aria-label, shared by the text fields and the text editor
 emoji_suggestions: Emoji-suggesties
 

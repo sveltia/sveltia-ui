@@ -1,7 +1,24 @@
+import { date as formatLocaleDate } from '@sveltia/i18n';
+
 /**
  * Date helpers behind `<Calendar>`, kept apart from the component so the grid can be tested without
  * rendering anything.
  */
+
+/**
+ * Format a date in the current locale. Falls back to the browser’s locale if `@sveltia/i18n` has
+ * not been initialized yet, in which case its formatter has no locale to work with and throws.
+ * @param {Date} value Date to format.
+ * @param {Intl.DateTimeFormatOptions} options Formatting options.
+ * @returns {string} Formatted date.
+ */
+export const formatDate = (value, options) => {
+  try {
+    return formatLocaleDate(value, options);
+  } catch {
+    return value.toLocaleDateString(undefined, options);
+  }
+};
 
 /**
  * Number of cells in the day grid: six weeks, enough to show any month in full from the Sunday on

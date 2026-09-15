@@ -3,6 +3,8 @@
   A menu item group.
 -->
 <script>
+  import { _ } from '@sveltia/i18n';
+
   /**
    * @import { CommonEventHandlers } from '$lib/typedefs';
    */
@@ -43,7 +45,7 @@
   aria-hidden={hidden}
   aria-disabled={disabled}
   aria-labelledby={title ? `${id}-title` : undefined}
-  aria-roledescription="menu item group"
+  aria-roledescription={_('_sui.role_descriptions.menu_item_group')}
 >
   {#if title}
     <div role="none" class="title" id="{id}-title">{title}</div>

@@ -5,6 +5,8 @@
   @see https://w3c.github.io/aria/#rowgroup
 -->
 <script>
+  import { _ } from '@sveltia/i18n';
+
   /**
    * @import { Snippet } from 'svelte';
    */
@@ -31,7 +33,7 @@
   {...restProps}
   role="rowgroup"
   class="sui table-foot {className}"
-  aria-roledescription="table foot"
+  aria-roledescription={_('_sui.role_descriptions.table_foot')}
 >
   {@render children?.()}
 </div>

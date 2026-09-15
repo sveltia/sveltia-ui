@@ -115,10 +115,33 @@ class Popup {
       const { key, ctrlKey, metaKey, shiftKey, altKey } = event;
       const hasModifier = shiftKey || altKey || ctrlKey || metaKey;
 
-      if (!this.isDisabled && !this.isReadOnly && ['Enter', ' '].includes(key) && !hasModifier) {
+      if (this.isDisabled || this.isReadOnly) {
+        return;
+      }
+
+      if (['Enter', ' '].includes(key) && !hasModifier) {
         event.preventDefault();
         event.stopPropagation();
         this.open = !this.open;
+
+        return;
+      }
+
+      // The arrow keys open a listbox or menu, the way they do a native `<select>`; Alt+Down is the
+      // combobox convention (APG Select-Only Combobox, Menu Button). They never close one: inside
+      // the popup they belong to the list. A menu item that opens a submenu is left alone: there
+      // the arrows move through the parent menu, and the submenu opens with the inline arrow.
+      if (
+        ['ArrowDown', 'ArrowUp'].includes(key) &&
+        !(shiftKey || ctrlKey || metaKey) &&
+        (!altKey || key === 'ArrowDown') &&
+        ['listbox', 'menu'].includes(anchorElement.getAttribute('aria-haspopup') ?? '') &&
+        !anchorElement.matches('[role^="menuitem"]') &&
+        !this.open
+      ) {
+        event.preventDefault();
+        event.stopPropagation();
+        this.open = true;
       }
     });
 

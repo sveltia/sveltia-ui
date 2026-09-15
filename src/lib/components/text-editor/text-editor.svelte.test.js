@@ -77,6 +77,30 @@ describe('TextEditor', () => {
     ).toBe(root.id);
   });
 
+  it('names both text boxes, not the wrapper', async () => {
+    const screen = await render(TextEditor, {
+      value: 'Hi',
+      ariaLabel: 'Body',
+      'aria-describedby': 'body-hint',
+    });
+
+    const wrapper = /** @type {HTMLElement} */ (screen.container.querySelector('.sui.text-editor'));
+    const root = await waitForContent(screen.container, 'Hi');
+    const textarea = /** @type {HTMLTextAreaElement} */ (wrapper.querySelector('textarea'));
+
+    expect(wrapper.hasAttribute('aria-label')).toBe(false);
+    expect(root.getAttribute('aria-label')).toBe('Body');
+    expect(root.getAttribute('aria-describedby')).toBe('body-hint');
+    expect(textarea.getAttribute('aria-label')).toBe('Body');
+    expect(textarea.getAttribute('aria-describedby')).toBe('body-hint');
+
+    const byId = await render(TextEditor, { value: 'Hi', 'aria-labelledby': 'body-label' });
+    const root2 = /** @type {HTMLElement} */ (byId.container.querySelector('.lexical-root'));
+
+    expect(root2.getAttribute('aria-labelledby')).toBe('body-label');
+    expect(root2.hasAttribute('aria-label')).toBe(false);
+  });
+
   it('renders only the enabled buttons', async () => {
     const screen = await render(TextEditor, { buttons: ['bold', 'italic'] });
 

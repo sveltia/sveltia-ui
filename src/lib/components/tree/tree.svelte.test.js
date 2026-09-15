@@ -165,9 +165,9 @@ describe('Tree', () => {
     const tree = /** @type {HTMLElement} */ (screen.getByRole('tree').element());
     const pictures = screen.getByRole('treeitem', { name: 'Pictures' });
 
-    // The stylesheet takes a read-only widget out of pointer interaction altogether
-    expect(getComputedStyle(tree).pointerEvents).toBe('none');
-    // A click that gets through regardless, e.g. from a script, is ignored as well
+    // A read-only widget stays in pointer interaction, so its content can still be selected and
+    // copied; the click itself is what gets ignored
+    expect(getComputedStyle(tree).pointerEvents).not.toBe('none');
     pictures.element().dispatchEvent(new MouseEvent('click', { bubbles: true }));
     await new Promise((resolve) => {
       setTimeout(resolve, 50);

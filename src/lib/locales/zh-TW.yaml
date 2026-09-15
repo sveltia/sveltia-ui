@@ -18,6 +18,26 @@ expand: 展開
 # Infobar/toast dismiss button label
 dismiss: 關閉
 
+# Alert & infobar status, read out by screen readers before the message (visually hidden)
+alert:
+  error: 錯誤
+  warning: 警告
+  info: 資訊
+  success: 成功
+
+# Role descriptions, read out by screen readers in place of the generic “group” role
+role_descriptions:
+  disclosure: 可展開區塊
+  option_group: 選項群組
+  menu_item_group: 選單項目群組
+  checkbox_group: 核取方塊群組
+  table_head: 表格標頭
+  table_body: 表格內容
+  table_foot: 表格頁尾
+  grid_head: 網格標頭
+  grid_body: 網格內容
+  grid_foot: 網格頁尾
+
 # Emoji suggestion listbox aria-label, shared by the text fields and the text editor
 emoji_suggestions: 表情符號建議
 

@@ -35,7 +35,8 @@ describe('Dialog', () => {
     expect(dialog.getAttribute('role')).toBe('dialog');
     expect(dialog.classList.contains('dialog')).toBe(true);
     expect(dialog.classList.contains('backdrop')).toBe(true);
-    expect(dialog.getAttribute('aria-label')).toBe('Confirm');
+    // The built-in title element names the dialog; `aria-label` would only shadow it
+    expect(dialog.hasAttribute('aria-label')).toBe(false);
     expect(dialog.getAttribute('aria-labelledby')).toBe(title.id);
     expect(dialog.getAttribute('aria-describedby')).toBe(body.id);
     expect(title.textContent?.trim()).toBe('Confirm');
@@ -146,8 +147,25 @@ describe('Dialog', () => {
     expect(dialog.querySelector('.custom-footer')).not.toBeNull();
     expect(dialog.querySelector('button.primary')).toBeNull();
     expect(dialog.querySelector('.extra')).not.toBeNull();
-    // With a custom header, the title is passed as the labelling element ID
-    expect(dialog.getAttribute('aria-labelledby')).toBe('T');
+    // With a custom header, there is no built-in title element to point at, so the title text
+    // becomes the accessible name
+    expect(dialog.getAttribute('aria-label')).toBe('T');
+    expect(dialog.hasAttribute('aria-labelledby')).toBe(false);
+  });
+
+  it('lets a custom header name the dialog by element ID', async () => {
+    await render(Dialog, {
+      open: true,
+      title: 'T',
+      ariaLabelledby: 'custom-title',
+      header: html('<h2 id="custom-title">Custom</h2>'),
+    });
+
+    await waitForOpen();
+
+    const dialog = /** @type {HTMLDialogElement} */ (getDialog());
+
+    expect(dialog.getAttribute('aria-labelledby')).toBe('custom-title');
     expect(dialog.hasAttribute('aria-label')).toBe(false);
   });
 

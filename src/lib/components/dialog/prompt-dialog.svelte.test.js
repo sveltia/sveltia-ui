@@ -50,6 +50,17 @@ it('renders a text input bound to the value', async () => {
   expect(oninput).toHaveBeenCalled();
 });
 
+it('labels the built-in input by the title unless told otherwise', async () => {
+  await render(PromptDialog, { open: true, title: 'Name' });
+  await waitForOpen();
+
+  const dialog = /** @type {HTMLDialogElement} */ (document.querySelector('dialog'));
+  const input = /** @type {HTMLInputElement} */ (dialog.querySelector('.input-outer input'));
+
+  expect(dialog.getAttribute('aria-labelledby')).toBe(dialog.querySelector('.title')?.id);
+  expect(input.getAttribute('aria-label')).toBe('Name');
+});
+
 it('renders a custom input instead', async () => {
   await render(PromptDialog, {
     open: true,

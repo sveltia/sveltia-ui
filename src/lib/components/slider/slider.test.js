@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   findNearestStepIndex,
   getSliderKeyDirection,
+  getSliderKeyTargetIndex,
   getSliderSteps,
   toLogicalX,
   wouldCrossThumbs,
@@ -95,6 +96,34 @@ describe('getSliderKeyDirection', () => {
   it('should ignore other keys', () => {
     expect(getSliderKeyDirection('Enter', false)).toBe(0);
     expect(getSliderKeyDirection('Home', true)).toBe(0);
+  });
+});
+
+describe('getSliderKeyTargetIndex', () => {
+  const options = { rtl: false, currentIndex: 5, length: 101 };
+
+  it('should step by one with the arrows and by a tenth with the Page keys', () => {
+    expect(getSliderKeyTargetIndex({ ...options, key: 'ArrowRight' })).toBe(6);
+    expect(getSliderKeyTargetIndex({ ...options, key: 'ArrowLeft' })).toBe(4);
+    expect(getSliderKeyTargetIndex({ ...options, key: 'PageUp' })).toBe(15);
+    expect(getSliderKeyTargetIndex({ ...options, key: 'PageDown', currentIndex: 50 })).toBe(40);
+  });
+
+  it('should jump to the ends with Home and End, and clamp', () => {
+    expect(getSliderKeyTargetIndex({ ...options, key: 'Home' })).toBe(0);
+    expect(getSliderKeyTargetIndex({ ...options, key: 'End' })).toBe(100);
+    expect(getSliderKeyTargetIndex({ ...options, key: 'PageDown' })).toBe(0);
+    expect(getSliderKeyTargetIndex({ ...options, key: 'ArrowLeft', currentIndex: 0 })).toBe(-1);
+  });
+
+  it('should page by at least one step on a short range', () => {
+    expect(getSliderKeyTargetIndex({ key: 'PageUp', rtl: false, currentIndex: 0, length: 3 })).toBe(
+      1,
+    );
+  });
+
+  it('should ignore other keys', () => {
+    expect(getSliderKeyTargetIndex({ ...options, key: 'Enter' })).toBe(-1);
   });
 });
 

@@ -18,6 +18,26 @@ expand: Proširi
 # Infobar/toast dismiss button label
 dismiss: Odbaci
 
+# Alert & infobar status, read out by screen readers before the message (visually hidden)
+alert:
+  error: Pogreška
+  warning: Upozorenje
+  info: Informacija
+  success: Uspjeh
+
+# Role descriptions, read out by screen readers in place of the generic “group” role
+role_descriptions:
+  disclosure: proširivi odjeljak
+  option_group: grupa opcija
+  menu_item_group: grupa stavki izbornika
+  checkbox_group: grupa potvrdnih okvira
+  table_head: zaglavlje tablice
+  table_body: tijelo tablice
+  table_foot: podnožje tablice
+  grid_head: zaglavlje rešetke
+  grid_body: tijelo rešetke
+  grid_foot: podnožje rešetke
+
 # Emoji suggestion listbox aria-label, shared by the text fields and the text editor
 emoji_suggestions: Prijedlozi emojija
 

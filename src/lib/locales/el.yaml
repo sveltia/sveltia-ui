@@ -18,6 +18,26 @@ expand: Ανάπτυξη
 # Infobar/toast dismiss button label
 dismiss: Παράβλεψη
 
+# Alert & infobar status, read out by screen readers before the message (visually hidden)
+alert:
+  error: Σφάλμα
+  warning: Προειδοποίηση
+  info: Πληροφορίες
+  success: Επιτυχία
+
+# Role descriptions, read out by screen readers in place of the generic “group” role
+role_descriptions:
+  disclosure: αναπτυσσόμενη ενότητα
+  option_group: ομάδα επιλογών
+  menu_item_group: ομάδα στοιχείων μενού
+  checkbox_group: ομάδα πλαισίων ελέγχου
+  table_head: κεφαλίδα πίνακα
+  table_body: σώμα πίνακα
+  table_foot: υποσέλιδο πίνακα
+  grid_head: κεφαλίδα πλέγματος
+  grid_body: σώμα πλέγματος
+  grid_foot: υποσέλιδο πλέγματος
+
 # Emoji suggestion listbox aria-label, shared by the text fields and the text editor
 emoji_suggestions: Προτάσεις emoji
 

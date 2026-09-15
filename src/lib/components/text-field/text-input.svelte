@@ -199,7 +199,7 @@
     }
 
     &:read-only {
-      color: var(--sui-tertiary-foreground-color);
+      color: var(--sui-secondary-foreground-color);
       border-color: var(--sui-textbox-border-color) !important;
     }
 

@@ -96,6 +96,7 @@
   {#if value}
     <Button
       iconic
+      disabled={disabled || readonly}
       aria-label={_('_sui.clear')}
       aria-controls={id}
       onclick={() => {

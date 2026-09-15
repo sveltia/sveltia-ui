@@ -18,6 +18,26 @@ expand: Näytä
 # Infobar/toast dismiss button label
 dismiss: Hylkää
 
+# Alert & infobar status, read out by screen readers before the message (visually hidden)
+alert:
+  error: Virhe
+  warning: Varoitus
+  info: Tiedoksi
+  success: Onnistui
+
+# Role descriptions, read out by screen readers in place of the generic “group” role
+role_descriptions:
+  disclosure: laajennettava osio
+  option_group: vaihtoehtoryhmä
+  menu_item_group: valikkokohtien ryhmä
+  checkbox_group: valintaruuturyhmä
+  table_head: taulukon otsikko
+  table_body: taulukon sisältö
+  table_foot: taulukon alatunniste
+  grid_head: ruudukon otsikko
+  grid_body: ruudukon sisältö
+  grid_foot: ruudukon alatunniste
+
 # Emoji suggestion listbox aria-label, shared by the text fields and the text editor
 emoji_suggestions: Emoji-ehdotukset
 

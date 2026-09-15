@@ -17,7 +17,8 @@ describe('Button', () => {
     await expect.element(button).toHaveClass('sui', 'button', 'medium');
     await expect.element(button).toHaveAttribute('aria-hidden', 'false');
     await expect.element(button).toHaveAttribute('aria-disabled', 'false');
-    await expect.element(button).toHaveAttribute('aria-readonly', 'false');
+    // `aria-readonly` isn’t supported on the `button` role, so it’s left out unless it applies
+    expect(button.element().hasAttribute('aria-readonly')).toBe(false);
     await expect.element(button).toHaveAttribute('data-label', 'Save');
     expect(button.element().hasAttribute('aria-pressed')).toBe(false);
     expect(button.element().querySelector('.label .sui.truncated-text')).not.toBeNull();

@@ -67,6 +67,15 @@ describe('CodeEditor', () => {
     expect(wrapper.querySelector('[role="toolbar"]')).toBeNull();
   });
 
+  it('names the text box, not the wrapper', async () => {
+    const screen = await render(CodeEditor, { code: 'x', ariaLabel: 'Snippet' });
+    const wrapper = /** @type {HTMLElement} */ (screen.container.querySelector('.sui.code-editor'));
+    const root = await waitForContent(screen.container, 'x');
+
+    expect(wrapper.hasAttribute('aria-label')).toBe(false);
+    expect(root.getAttribute('aria-label')).toBe('Snippet');
+  });
+
   it('renders the language switcher on demand', async () => {
     const screen = await render(CodeEditor, {
       code: 'x',

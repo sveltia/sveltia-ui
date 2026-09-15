@@ -2,6 +2,7 @@ import { isRTL } from '@sveltia/i18n';
 import { generateElementId } from '@sveltia/utils/element';
 import { sleep } from '@sveltia/utils/misc';
 import { getSelectedItemDetail } from './select.svelte.js';
+import { findTypeAheadMatch, TypeAhead } from './type-ahead.js';
 
 /**
  * @import { Attachment } from 'svelte/attachments';
@@ -199,6 +200,12 @@ export class Group {
    * @type {WeakMap<HTMLElement, boolean>}
    */
   #hiddenState = new WeakMap();
+
+  /**
+   * Keystroke buffer for type-ahead.
+   * @type {TypeAhead}
+   */
+  #typeAhead = new TypeAhead();
 
   /**
    * Get the normalized value a member is searched by, computing it only when the underlying raw
@@ -802,6 +809,58 @@ export class Group {
       event.preventDefault();
     }
 
+    // Home, End and type-ahead only apply to keystrokes on the group itself or on a member. A text
+    // field nested in a menu, say, keeps them for its own caret and content.
+    const fromMember = target === this.parent || target.matches(this.selector);
+
+    // Home and End jump to the ends of the group, in any layout
+    if (key === 'Home' || key === 'End') {
+      if (!fromMember) {
+        return;
+      }
+
+      event.preventDefault();
+
+      const newTarget = activeMembers[key === 'Home' ? 0 : activeMembers.length - 1];
+
+      if (newTarget && newTarget !== currentTarget) {
+        this.selectTarget(event, newTarget);
+      }
+
+      return;
+    }
+
+    // Type-ahead: a printable character moves to the next member whose label starts with what has
+    // been typed so far, as in a native `<select>` and per the Listbox and Menu patterns. This goes
+    // by the visible label, not the search value, which may hold synonyms for filtering — and by
+    // the label element rather than the whole text, which would take in icon ligature names.
+    if (key.length === 1 && key !== ' ' && fromMember && (this.role === 'listbox' || isMenu)) {
+      // Swallow the key whether or not it matches, as a native `<select>` does. Left to the
+      // browser, a printable key on a non-editable element starts Firefox’s find-as-you-type.
+      event.preventDefault();
+
+      const labels = activeMembers.map((member) =>
+        normalize(
+          member.dataset.label ??
+            member.querySelector('.label')?.textContent ??
+            member.textContent ??
+            '',
+        ),
+      );
+
+      const index = findTypeAheadMatch(
+        labels,
+        this.#typeAhead.push(key),
+        currentTarget ? activeMembers.indexOf(currentTarget) : -1,
+      );
+
+      if (index !== -1 && activeMembers[index] !== currentTarget) {
+        this.selectTarget(event, activeMembers[index]);
+      }
+
+      return;
+    }
+
     if (key === 'Enter') {
       currentTarget?.click(); // Also close the popup if needed
 
@@ -929,6 +988,7 @@ export class Group {
    * Clean up event listeners.
    */
   destroy() {
+    this.#typeAhead.reset();
     this.observer.disconnect();
     this.parent.removeEventListener('click', this._onClick);
     this.parent.removeEventListener('keydown', this._onKeyDown);

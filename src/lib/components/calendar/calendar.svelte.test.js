@@ -1,7 +1,9 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-svelte';
-import Calendar from './calendar.svelte';
+import { userEvent } from 'vitest/browser';
+import { whenActivated } from '../../test-utils/group.js';
 import { setRTL } from '../../test-utils/locale.js';
+import Calendar from './calendar.svelte';
 
 /**
  * @import { ComponentProps } from 'svelte';
@@ -28,6 +30,57 @@ describe('Calendar', () => {
     expect(screen.container.querySelector('input[type="hidden"]')?.getAttribute('value')).toBe(
       '2024-03-15',
     );
+  });
+
+  it('names the day grid and every day, and exposes the selected day', async () => {
+    const screen = await render(Calendar, { value: '2024-03-15' });
+    const grid = screen.getByRole('listbox', { name: 'Mar 2024' });
+    const day = screen.getByRole('option', { name: 'Friday, March 15, 2024' });
+
+    await expect.element(grid).toBeVisible();
+    await expect.element(day).toHaveAttribute('aria-selected', 'true');
+    expect(screen.container.querySelectorAll('[role="option"][aria-selected="true"]')).toHaveLength(
+      1,
+    );
+    // The listbox is the single tab stop; the arrow keys move within it
+    expect(grid.element().getAttribute('tabindex')).toBe('0');
+  });
+
+  it('keeps the keyboard cursor when the arrow keys cross into another month', async () => {
+    /** @type {ComponentProps<typeof Calendar>} */
+    const props = $state({ value: '2024-03-03' });
+    const activated = whenActivated();
+    const screen = await render(Calendar, props);
+
+    await activated;
+
+    const listbox = /** @type {HTMLElement} */ (screen.getByRole('listbox').element());
+    const march3 = screen.getByRole('option', { name: 'Sunday, March 3, 2024' }).element();
+
+    // The cursor starts on the selected day
+    await vi.waitFor(() => {
+      expect(march3.classList.contains('focused')).toBe(true);
+    });
+    expect(listbox.getAttribute('aria-activedescendant')).toBe(march3.id);
+
+    listbox.focus();
+    // A week up lands in February, and the grid moves to that month
+    await userEvent.keyboard('{ArrowUp}');
+    await vi.waitFor(() => {
+      expect(props.value).toBe('2024-02-25');
+    });
+    await expect.element(screen.getByRole('listbox', { name: 'Feb 2024' })).toBeVisible();
+
+    const feb25 = screen.getByRole('option', { name: 'Sunday, February 25, 2024' }).element();
+
+    expect(feb25.classList.contains('focused')).toBe(true);
+    expect(feb25.getAttribute('aria-selected')).toBe('true');
+    expect(listbox.getAttribute('aria-activedescendant')).toBe(feb25.id);
+    // The cursor carries on from there
+    await userEvent.keyboard('{ArrowRight}');
+    await vi.waitFor(() => {
+      expect(props.value).toBe('2024-02-26');
+    });
   });
 
   it('shows the current month by default and marks today', async () => {

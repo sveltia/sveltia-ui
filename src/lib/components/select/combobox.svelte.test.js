@@ -259,6 +259,61 @@ describe('Combobox', () => {
     expect(document.querySelector('dialog.popup .search-bar')).toBeNull();
   });
 
+  it('opens the dropdown with the arrow keys', async () => {
+    const screen = await render(ComboboxFixture, { editable: false });
+    const combobox = screen.getByRole('combobox', { name: 'Fruit' });
+
+    /** @type {HTMLElement} */ (combobox.element()).focus();
+    await userEvent.keyboard('{ArrowDown}');
+    await expect.element(combobox).toHaveAttribute('aria-expanded', 'true');
+    await waitForOptions(3);
+    await userEvent.keyboard('{Escape}');
+    await expect.element(combobox).toHaveAttribute('aria-expanded', 'false');
+    await vi.waitFor(() => {
+      expect(document.activeElement).toBe(combobox.element());
+    });
+    await userEvent.keyboard('{Alt>}{ArrowDown}{/Alt}');
+    await expect.element(combobox).toHaveAttribute('aria-expanded', 'true');
+  });
+
+  it('picks an option by its first letters while collapsed', async () => {
+    const onChange = vi.fn();
+    /** @type {ComponentProps<typeof ComboboxFixture>} */
+    const props = $state({ editable: false, value: undefined, count: 7, onChange });
+    const screen = await render(ComboboxFixture, props);
+    const combobox = screen.getByRole('combobox', { name: 'Fruit' });
+
+    /** @type {HTMLElement} */ (combobox.element()).focus();
+    await userEvent.keyboard('c');
+    await vi.waitFor(() => {
+      expect(props.value).toBe('cherry');
+    });
+    expect(combobox.element().textContent).toContain('Cherry');
+    expect(combobox.element().getAttribute('aria-expanded')).toBe('false');
+    expect(onChange).toHaveBeenCalledOnce();
+    expect(onChange.mock.calls[0][0].detail).toMatchObject({ value: 'cherry', label: 'Cherry' });
+
+    // Quick successive keys make up one prefix, so let the previous one expire first; a match on
+    // the current option is not a change
+    await new Promise((resolve) => {
+      setTimeout(resolve, 600);
+    });
+    await userEvent.keyboard('gr');
+    await vi.waitFor(() => {
+      expect(props.value).toBe('grape');
+    });
+    await userEvent.keyboard('gr');
+    expect(onChange).toHaveBeenCalledTimes(2);
+
+    // A key that matches nothing is still swallowed, so the browser doesn’t start searching the
+    // page (Firefox find-as-you-type)
+    const miss = new KeyboardEvent('keydown', { key: 'z', bubbles: true, cancelable: true });
+
+    combobox.element().dispatchEvent(miss);
+    expect(miss.defaultPrevented).toBe(true);
+    expect(props.value).toBe('grape');
+  });
+
   it('does not open while disabled or read-only', async () => {
     /** @type {ComponentProps<typeof ComboboxFixture>} */
     const props = $state({ editable: false, disabled: true });

@@ -46,6 +46,7 @@
 
   :focus-visible {
     outline-color: var(--sui-focus-ring-color);
+    outline-offset: var(--sui-focus-ring-offset, 0);
     z-index: 2;
   }
 
@@ -158,7 +159,7 @@
     padding-inline-start: 12px;
   }
 
-  :is(.disabled, .readonly, [aria-disabled="true"], [aria-readonly="true"], [inert]):not(body) {
+  :is(.disabled, [aria-disabled="true"], [inert]):not(body) {
     cursor: default;
     pointer-events: none;
     -webkit-user-select: none;
@@ -170,12 +171,22 @@
     }
   }
 
-  :is(.disabled, .readonly, [aria-disabled="true"], [aria-readonly="true"], [inert]) {
+  :is(.disabled, [aria-disabled="true"], [inert]) {
     * {
       cursor: default;
       pointer-events: none;
       -webkit-user-select: none;
       user-select: none;
+    }
+  }
+
+  // A read-only control is not inactive: its value is content the user reads and copies, so it
+  // keeps full contrast and stays selectable (WCAG 1.4.3). Only the cursor changes.
+  :is(.readonly, [aria-readonly="true"]):not(body) {
+    cursor: default;
+
+    * {
+      cursor: default;
     }
   }
 }

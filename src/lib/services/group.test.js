@@ -1459,8 +1459,9 @@ describe('Group - non-special key handling (branch 419)', () => {
     activateGroup()(listbox);
     await vi.advanceTimersByTimeAsync(150);
 
-    // Dispatch a non-special key (e.g., 'a') that should not trigger preventDefault
-    const event = new KeyboardEvent('keydown', { key: 'a', bubbles: true });
+    // Dispatch a key the group has no use for (function keys are neither navigation nor
+    // printable), which should not trigger preventDefault
+    const event = new KeyboardEvent('keydown', { key: 'F5', bubbles: true });
     let preventDefaultCalled = false;
 
     event.preventDefault = () => {
@@ -1469,6 +1470,13 @@ describe('Group - non-special key handling (branch 419)', () => {
 
     listbox.dispatchEvent(event);
     expect(preventDefaultCalled).toBe(false);
+
+    // A printable key is type-ahead, and is swallowed even when nothing matches, so the browser
+    // doesn’t start searching the page
+    const printable = new KeyboardEvent('keydown', { key: 'z', bubbles: true, cancelable: true });
+
+    listbox.dispatchEvent(printable);
+    expect(printable.defaultPrevented).toBe(true);
 
     listbox.remove();
     vi.useRealTimers();

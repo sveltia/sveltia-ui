@@ -3,6 +3,8 @@
   The layout container of `<Checkbox>`es.
 -->
 <script>
+  import { _ } from '@sveltia/i18n';
+
   /**
    * @import { Snippet } from 'svelte';
    */
@@ -42,7 +44,7 @@
   {hidden}
   aria-hidden={hidden}
   aria-disabled={disabled}
-  aria-roledescription="checkbox group"
+  aria-roledescription={_('_sui.role_descriptions.checkbox_group')}
   aria-label={ariaLabel}
 >
   <div role="none" class="inner" inert={disabled}>

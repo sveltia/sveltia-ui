@@ -18,6 +18,26 @@ expand: 펼치기
 # Infobar/toast dismiss button label
 dismiss: 닫기
 
+# Alert & infobar status, read out by screen readers before the message (visually hidden)
+alert:
+  error: 오류
+  warning: 경고
+  info: 정보
+  success: 성공
+
+# Role descriptions, read out by screen readers in place of the generic “group” role
+role_descriptions:
+  disclosure: 펼치기 섹션
+  option_group: 옵션 그룹
+  menu_item_group: 메뉴 항목 그룹
+  checkbox_group: 체크박스 그룹
+  table_head: 표 머리글
+  table_body: 표 본문
+  table_foot: 표 바닥글
+  grid_head: 그리드 머리글
+  grid_body: 그리드 본문
+  grid_foot: 그리드 바닥글
+
 # Emoji suggestion listbox aria-label, shared by the text fields and the text editor
 emoji_suggestions: 이모지 제안
 

@@ -5,6 +5,7 @@
   @see https://www.w3.org/WAI/ARIA/apg/patterns/disclosure/
 -->
 <script>
+  import { _ } from '@sveltia/i18n';
   import Button from '../button/button.svelte';
   import Icon from '../icon/icon.svelte';
 
@@ -56,7 +57,7 @@
   aria-hidden={hidden}
   aria-disabled={disabled}
   aria-labelledby="{id}-header"
-  aria-roledescription="disclosure"
+  aria-roledescription={_('_sui.role_descriptions.disclosure')}
 >
   <div role="none" class="inner" inert={disabled}>
     <Button

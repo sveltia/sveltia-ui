@@ -249,10 +249,12 @@
     }
   }
 
+  // The spin buttons sit side by side, each the full height of the field: stacked in a 32px field
+  // they’d be 16px tall, well under the 24px pointer target minimum (WCAG 2.5.8)
   .buttons {
     display: flex;
-    flex-direction: column;
-    width: 24px;
+    flex-direction: row;
+    width: 48px;
     height: var(--sui-textbox-height);
 
     :global {
@@ -261,27 +263,17 @@
         margin: 0 !important;
         border-width: 1px;
         border-color: var(--sui-textbox-border-color);
-        width: 100%;
-        height: 50%;
+        width: 50%;
+        height: 100%;
+        border-inline-end-width: 0;
 
         &:first-of-type {
-          border-block-start-width: 1px;
-          border-block-end-width: 0;
-          border-inline-end-width: 0;
-          border-inline-start-width: 1px;
           border-start-end-radius: 0;
           border-end-end-radius: 0;
-          border-end-start-radius: 0;
         }
 
         &:last-of-type {
-          border-block-start-width: 0;
-          border-block-end-width: 1px;
-          border-inline-end-width: 0;
-          border-inline-start-width: 1px;
-          border-start-start-radius: 0;
-          border-start-end-radius: 0;
-          border-end-end-radius: 0;
+          border-radius: 0;
         }
 
         .icon {

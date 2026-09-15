@@ -18,6 +18,26 @@ expand: Fäll ut
 # Infobar/toast dismiss button label
 dismiss: Avfärda
 
+# Alert & infobar status, read out by screen readers before the message (visually hidden)
+alert:
+  error: Fel
+  warning: Varning
+  info: Information
+  success: Lyckades
+
+# Role descriptions, read out by screen readers in place of the generic “group” role
+role_descriptions:
+  disclosure: utfällbar sektion
+  option_group: alternativgrupp
+  menu_item_group: grupp med menyalternativ
+  checkbox_group: kryssrutegrupp
+  table_head: tabellhuvud
+  table_body: tabellkropp
+  table_foot: tabellfot
+  grid_head: rutnätshuvud
+  grid_body: rutnätskropp
+  grid_foot: rutnätsfot
+
 # Emoji suggestion listbox aria-label, shared by the text fields and the text editor
 emoji_suggestions: Emojiförslag
 

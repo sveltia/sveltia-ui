@@ -77,7 +77,10 @@
 
 /**
  * @typedef {object} DialogProps
- * @property {string} [title] Text label displayed on the header. Required.
+ * @property {string} [title] Text label displayed on the header. Required. With a custom `header`
+ * snippet, it’s used as the dialog’s `aria-label` instead.
+ * @property {string} [ariaLabelledby] ID of the element that labels the dialog, typically a heading
+ * inside a custom `header` snippet. Takes precedence over `title` for the accessible name.
  * @property {'dialog' | 'alertdialog'} [role] The `role` attribute on the `<dialog>` element.
  * @property {'small' | 'medium' | 'large' | 'x-large'} [size] Width of the dialog.
  * @property {string} [class] The `class` attribute on the `<dialog>` element.

@@ -11,8 +11,11 @@
    * @typedef {object} Props
    * @property {boolean} [show] Whether to show the toast.
    * @property {boolean} [dismissible] Whether to show the close button.
-   * @property {'error' | 'warning' | 'info' | 'success'} [status] Information status.
-   * @property {'off' | 'polite' | 'assertive'} [ariaLive] ARIA live region politeness.
+   * @property {'error' | 'warning' | 'info' | 'success'} [status] Information status. Errors and
+   * warnings are `role="alert"` and interrupt; information and success are `role="status"` and
+   * wait.
+   * @property {'off' | 'polite' | 'assertive'} [ariaLive] ARIA live region politeness. Defaults to
+   * `assertive` for an alert and `polite` for a status.
    * @property {Snippet} [children] Primary slot content.
    * @property {Snippet} [icon] Icon slot content.
    * @property {() => void} [onDismiss] Callback invoked when the close button is clicked.
@@ -24,22 +27,26 @@
     show = $bindable(true),
     dismissible = true,
     status = 'info',
-    ariaLive = 'polite',
+    ariaLive = undefined,
     children = undefined,
     icon = undefined,
     onDismiss,
     /* eslint-enable prefer-const */
   } = $props();
+
+  const role = $derived(status === 'error' || status === 'warning' ? 'alert' : 'status');
 </script>
 
 {#if show}
   <div role="none" class={['infobar', status]}>
-    <div role="alert" class="message" aria-live={ariaLive}>
+    <!-- The status is spelled out off screen for screen readers; see `<Alert>` -->
+    <div {role} class="message" aria-live={ariaLive ?? (role === 'alert' ? 'assertive' : 'polite')}>
       {#if icon}
         {@render icon()}
       {:else}
         <Icon name={status === 'success' ? 'check_circle' : status} />
       {/if}
+      <span class="status-label">{_(`_sui.alert.${status}`)}</span>
       {@render children?.()}
     </div>
     {#if dismissible}
@@ -62,6 +69,15 @@
 {/if}
 
 <style lang="scss">
+  .status-label {
+    position: absolute;
+    overflow: hidden;
+    clip-path: inset(50%);
+    width: 1px;
+    height: 1px;
+    white-space: nowrap;
+  }
+
   .infobar {
     flex: none;
     display: flex;

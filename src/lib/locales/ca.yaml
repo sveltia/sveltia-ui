@@ -18,6 +18,26 @@ expand: Desplega
 # Infobar/toast dismiss button label
 dismiss: Descarta
 
+# Alert & infobar status, read out by screen readers before the message (visually hidden)
+alert:
+  error: Error
+  warning: Advertència
+  info: Informació
+  success: Èxit
+
+# Role descriptions, read out by screen readers in place of the generic “group” role
+role_descriptions:
+  disclosure: secció desplegable
+  option_group: grup d’opcions
+  menu_item_group: grup d’elements de menú
+  checkbox_group: grup de caselles de selecció
+  table_head: capçalera de taula
+  table_body: cos de taula
+  table_foot: peu de taula
+  grid_head: capçalera de graella
+  grid_body: cos de graella
+  grid_foot: peu de graella
+
 # Emoji suggestion listbox aria-label, shared by the text fields and the text editor
 emoji_suggestions: Suggeriments d’emoji
 

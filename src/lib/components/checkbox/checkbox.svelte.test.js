@@ -14,8 +14,8 @@ describe('Checkbox', () => {
     const wrapper = /** @type {HTMLElement} */ (screen.container.querySelector('.sui.checkbox'));
 
     await expect.element(checkbox).toBeVisible();
-    // The attribute is only rendered once the state is known
-    expect(checkbox.element().hasAttribute('aria-checked')).toBe(false);
+    // `aria-checked` is required on the `checkbox` role, so it’s rendered even before any change
+    await expect.element(checkbox).toHaveAttribute('aria-checked', 'false');
     await expect.element(checkbox).toHaveAttribute('aria-invalid', 'false');
     await expect.element(checkbox).toHaveAttribute('data-name', 'agree');
     expect(wrapper.classList.contains('custom')).toBe(true);

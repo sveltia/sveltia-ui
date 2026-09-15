@@ -5,6 +5,8 @@
   @see https://w3c.github.io/aria/#rowgroup
 -->
 <script>
+  import { _ } from '@sveltia/i18n';
+
   /**
    * @import { Snippet } from 'svelte';
    */
@@ -36,7 +38,7 @@
   role="rowgroup"
   class="sui table-body row-group {className}"
   aria-labelledby={label ? `${id}-label` : undefined}
-  aria-roledescription="table body"
+  aria-roledescription={_('_sui.role_descriptions.table_body')}
 >
   {#if label}
     <div role="row" class="row-group-caption">

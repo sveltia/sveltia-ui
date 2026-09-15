@@ -7,6 +7,7 @@
   @see https://www.w3.org/WAI/ARIA/apg/patterns/listbox/examples/listbox-grouped/
 -->
 <script>
+  import { _ } from '@sveltia/i18n';
   import TruncatedText from '../typography/truncated-text.svelte';
 
   /**
@@ -50,7 +51,7 @@
   aria-hidden={hidden}
   aria-disabled={disabled}
   aria-labelledby="{id}-label"
-  aria-roledescription="option group"
+  aria-roledescription={_('_sui.role_descriptions.option_group')}
 >
   <div role="none" id="{id}-label" class="label">
     <TruncatedText>

@@ -18,6 +18,26 @@ expand: 広げる
 # Infobar/toast dismiss button label
 dismiss: 閉じる
 
+# Alert & infobar status, read out by screen readers before the message (visually hidden)
+alert:
+  error: エラー
+  warning: 警告
+  info: 情報
+  success: 成功
+
+# Role descriptions, read out by screen readers in place of the generic “group” role
+role_descriptions:
+  disclosure: 折りたたみセクション
+  option_group: オプショングループ
+  menu_item_group: メニュー項目グループ
+  checkbox_group: チェックボックスグループ
+  table_head: テーブルヘッダー
+  table_body: テーブル本体
+  table_foot: テーブルフッター
+  grid_head: グリッドヘッダー
+  grid_body: グリッド本体
+  grid_foot: グリッドフッター
+
 # Emoji suggestion listbox aria-label, shared by the text fields and the text editor
 emoji_suggestions: 絵文字の候補
 

@@ -8,7 +8,9 @@
 <script>
   import { _ } from '@sveltia/i18n';
   import { onMount } from 'svelte';
+  import { normalize } from '../../services/group.svelte.js';
   import { createOptionRegistry, getSelectedItemDetail } from '../../services/select.svelte.js';
+  import { findTypeAheadMatch, TypeAhead } from '../../services/type-ahead.js';
   import Button from '../button/button.svelte';
   import Icon from '../icon/icon.svelte';
   import Listbox from '../listbox/listbox.svelte';
@@ -122,6 +124,71 @@
 
     _onChange();
     onChange?.(new CustomEvent('Change', { detail }));
+  };
+
+  /**
+   * Keystroke buffer for type-ahead on the collapsed select.
+   */
+  const typeAhead = new TypeAhead();
+
+  /**
+   * Type-ahead on the collapsed, select-only combobox: a printable character picks the next option
+   * whose label starts with what has been typed, without expanding the dropdown — the way a native
+   * `<select>` behaves and the Select-Only Combobox pattern expects. There is no option element to
+   * report while the dropdown is collapsed, so the `Change` event carries the registry entry.
+   * @param {KeyboardEvent} event The `keydown` event.
+   */
+  const onComboboxKeyDown = (event) => {
+    const { key, ctrlKey, metaKey, altKey } = event;
+
+    if (
+      disabled ||
+      readonly ||
+      isPopupOpen ||
+      key.length !== 1 ||
+      key === ' ' ||
+      ctrlKey ||
+      metaKey ||
+      altKey
+    ) {
+      return;
+    }
+
+    // Swallow the key whether or not it matches, as a native `<select>` does. Left to the browser,
+    // a printable key on a non-editable element starts Firefox’s find-as-you-type.
+    event.preventDefault();
+
+    const entries = registry.entries.filter((entry) => !entry.disabled);
+
+    const index = findTypeAheadMatch(
+      entries.map((entry) => normalize(entry.label ?? '')),
+      typeAhead.push(key),
+      entries.findIndex((entry) => entry.value === value),
+    );
+
+    if (index === -1) {
+      return;
+    }
+
+    const entry = entries[index];
+
+    if (entry.value === value) {
+      return;
+    }
+
+    value = entry.value;
+    _onChange();
+    onChange?.(
+      new CustomEvent('Change', {
+        detail: {
+          target: undefined,
+          type: entry.type,
+          name: entry.name,
+          label: entry.label,
+          value: entry.value,
+        },
+      }),
+    );
   };
 
   /**
@@ -254,6 +321,7 @@
       aria-invalid={invalid}
       aria-haspopup="listbox"
       aria-label={ariaLabel}
+      onkeydown={onComboboxKeyDown}
     >
       <div role="none" class="label">
         <TruncatedText>
@@ -364,7 +432,7 @@
     {/if}
     <div bind:this={listboxSlot} role="none" class="listbox-slot"></div>
     {#if !hasMatchingOptions}
-      <div role="alert" class="no-options" aria-live="assertive">
+      <div role="status" class="no-options">
         {_('_sui.combobox.no_matching_options')}
       </div>
     {/if}

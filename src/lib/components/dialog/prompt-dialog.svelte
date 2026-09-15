@@ -23,7 +23,8 @@
   /**
    * @typedef {object} Props
    * @property {string} [value] Value entered on the textbox.
-   * @property {object} [textboxAttrs] Extra attributes for the `<TextInput>`.
+   * @property {object} [textboxAttrs] Extra attributes for the `<TextInput>`. The text box is
+   * labelled by the dialog `title` unless an `aria-label` or `aria-labelledby` is given here.
    * @property {Snippet} [children] Primary slot content.
    * @property {Snippet} [input] Input slot content.
    */
@@ -36,6 +37,7 @@
     /* eslint-disable prefer-const */
     open = $bindable(false),
     value = $bindable(''),
+    title,
     textboxAttrs = {},
     children,
     input,
@@ -48,7 +50,11 @@
   } = $props();
 </script>
 
-<Dialog {...restProps} bind:open role="alertdialog">
+<!--
+  The built-in text box is the point of the dialog, so it takes the dialog title as its name unless
+  the consumer labels it; the dialog itself is still named by the title as usual.
+-->
+<Dialog {...restProps} {title} bind:open role="alertdialog">
   {@render children?.()}
   <div class="input-outer">
     {#if input}
@@ -59,6 +65,7 @@
         bind:value
         flex
         autofocus
+        aria-label={'aria-labelledby' in textboxAttrs ? undefined : title}
         {...textboxAttrs}
         {onkeydown}
         {onkeyup}

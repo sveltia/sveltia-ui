@@ -5,6 +5,8 @@
   @see https://w3c.github.io/aria/#rowgroup
 -->
 <script>
+  import { _ } from '@sveltia/i18n';
+
   /**
    * @import { Snippet } from 'svelte';
    */
@@ -31,7 +33,7 @@
   {...restProps}
   role="rowgroup"
   class="sui grid-head {className}"
-  aria-roledescription="grid head"
+  aria-roledescription={_('_sui.role_descriptions.grid_head')}
 >
   {@render children?.()}
 </div>

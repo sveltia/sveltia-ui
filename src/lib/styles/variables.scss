@@ -130,7 +130,10 @@
     );
     // Outline
     --sui-focus-ring-width: 2px;
-    --sui-focus-ring-color: var(--sui-primary-accent-color-translucent);
+    // Opaque, so the ring reaches 3:1 against the page (WCAG 1.4.11); the offset keeps a sliver of
+    // page background between the ring and a control filled with the same accent colour
+    --sui-focus-ring-color: var(--sui-primary-accent-color);
+    --sui-focus-ring-offset: 1px;
     // Borders
     --sui-primary-border-color: hsl(var(--sui-border-color-2-hsl));
     --sui-secondary-border-color: hsl(var(--sui-border-color-3-hsl));

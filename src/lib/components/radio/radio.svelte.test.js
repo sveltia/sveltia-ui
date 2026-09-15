@@ -36,6 +36,24 @@ describe('Radio', () => {
     const bare = await render(Radio, {});
 
     expect(bare.container.querySelector('label')).toBeNull();
+    // Nothing to point at, so no dangling reference
+    expect(bare.container.querySelector('[role="radio"]')?.hasAttribute('aria-labelledby')).toBe(
+      false,
+    );
+  });
+
+  it('can be named without a visible label', async () => {
+    const screen = await render(Radio, { ariaLabel: 'Red' });
+    const radio = screen.getByRole('radio', { name: 'Red' });
+
+    await expect.element(radio).toHaveAttribute('aria-label', 'Red');
+    expect(radio.element().hasAttribute('aria-labelledby')).toBe(false);
+
+    const attr = await render(Radio, { 'aria-label': 'Blue', label: 'Ignored' });
+    const radio2 = attr.getByRole('radio', { name: 'Blue' });
+
+    await expect.element(radio2).toHaveAttribute('aria-label', 'Blue');
+    expect(radio2.element().hasAttribute('aria-labelledby')).toBe(false);
   });
 
   it('becomes checked when clicked, and stays checked', async () => {

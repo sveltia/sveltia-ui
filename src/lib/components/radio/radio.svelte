@@ -24,7 +24,9 @@
    * @property {any} [value] The `data-value` attribute on the `<button>` element.
    * @property {string} [valueType] Data type of the `value`. Typically `string`, `number` or
    * `boolean`. Default: auto detect.
-   * @property {string} [label] Text label displayed next to the checkbox.
+   * @property {string} [label] Text label displayed next to the radio button.
+   * @property {string} [ariaLabel] `aria-label` attribute on the `<button>` element, for a radio
+   * button without a visible label.
    * @property {string} [group] The two-way bound variable to manage the state of a group of radio
    * buttons. It works in the same way as the [`<input
    * bind:group>`](https://svelte.dev/docs/svelte/bind#input-bind:group) of Svelte.
@@ -47,6 +49,7 @@
     value = undefined,
     valueType = undefined,
     label = undefined,
+    ariaLabel = undefined,
     group = $bindable(),
     children,
     onChange,
@@ -63,6 +66,14 @@
    */
   let buttonElement = $state();
 
+  /**
+   * Accessible name given as a prop or as a plain `aria-label` attribute. It takes the place of the
+   * visible label, which the button otherwise points at — but only when there is one to point at.
+   * @type {string | undefined}
+   */
+  const accessibleLabel = $derived(ariaLabel ?? restProps['aria-label']);
+  const hasVisibleLabel = $derived(!!(children || label));
+
   // Sync `checked` with `group` and `value`
   $effect(() => {
     if (typeof group === 'string') {
@@ -77,8 +88,11 @@
   });
 </script>
 
+<!--
+  `restProps`, including any `aria-*` attribute, go on the `<button>`: ARIA ignores them on the
+  presentational wrapper.
+-->
 <span
-  {...restProps}
   role="none"
   class="sui radio {className}"
   class:disabled
@@ -90,6 +104,7 @@
   }}
 >
   <Button
+    {...restProps}
     bind:element={buttonElement}
     role="radio"
     {id}
@@ -99,7 +114,8 @@
     {value}
     {valueType}
     aria-checked={checked}
-    aria-labelledby="{id}-label"
+    aria-label={accessibleLabel || undefined}
+    aria-labelledby={!accessibleLabel && hasVisibleLabel ? `${id}-label` : undefined}
     onclick={(event) => {
       event.preventDefault();
 
@@ -133,6 +149,10 @@
     align-items: center;
     gap: 8px;
     margin: var(--sui-focus-ring-width);
+    // The wrapper forwards clicks to the 20px control, so it’s the pointer target; keep it at the
+    // 24px minimum (WCAG 2.5.8) even without a label
+    min-width: 24px;
+    min-height: 24px;
     color: var(--sui-control-foreground-color);
     font-family: var(--sui-control-font-family);
     font-size: var(--sui-control-font-size);

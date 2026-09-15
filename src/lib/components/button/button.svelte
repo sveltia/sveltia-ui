@@ -51,6 +51,10 @@
 </script>
 
 <!--
+  `aria-readonly` is only rendered when it applies: the attribute isn’t supported on the `button`
+  role (or `option`, `tab` and `menuitem`, which also wrap this component), and Svelte would
+  otherwise serialize `false` as the literal string "false".
+
   The key shortcut handler is attached only when there are shortcuts to bind. A falsy value counts
   as no attachment at all, which saves an effect per button — and both `<Option>` and `<MenuItem>`
   wrap one, so a long list would otherwise pay for an effect per item that has nothing to do.
@@ -70,7 +74,7 @@
   {role}
   aria-hidden={hidden}
   aria-disabled={disabled}
-  aria-readonly={readonly}
+  aria-readonly={readonly || undefined}
   aria-pressed={pressed}
   data-type={valueType}
   data-name={name}

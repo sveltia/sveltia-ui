@@ -130,16 +130,23 @@
   {hidden}
   bind:this={wrapperElement}
 >
-  <span
-    role="listbox"
-    aria-multiselectable="true"
-    aria-label={_('_sui.select_tags.selected_options')}
-  >
+  <!--
+    The tags follow the APG layout grid pattern rather than a listbox: a listbox may only hold
+    options, and each tag also carries its Remove button. Each tag is a row whose first cell, the
+    label, is the focusable part that the arrow keys reorder.
+    @see https://www.w3.org/WAI/ARIA/apg/patterns/grid/examples/layout-grids/
+  -->
+  <span role="grid" aria-label={_('_sui.select_tags.selected_options')}>
     {#each values as value, index (value)}
       {@const option = optionMap.get(value)}
       {@const label = option?.label || option?.value || value}
+      <!--
+        The drag handlers are the pointer path only; the keyboard path is the focusable label cell
+        below, so the row itself stays out of the tab order
+      -->
+      <!-- svelte-ignore a11y_interactive_supports_focus -->
       <span
-        role="none"
+        role="row"
         draggable={!disabled && !readonly}
         class:drag-source={dragIndex === index}
         class:drop-before={dropIndex === index && dragIndex !== index && dragIndex !== index - 1}
@@ -195,8 +202,7 @@
       >
         <span
           class="label"
-          role="option"
-          aria-selected="true"
+          role="gridcell"
           tabindex={disabled || readonly ? undefined : 0}
           onkeydown={async (event) => {
             const targetIndex = getKeyboardMoveTarget({
@@ -215,20 +221,22 @@
           {label}
         </span>
         {#if option}
-          <Button
-            iconic
-            size="small"
-            disabled={disabled || readonly}
-            aria-label={_('_sui.select_tags.remove_x', { values: { name: label } })}
-            onclick={() => {
-              values = values.filter((v) => v !== value);
-              onRemoveValue?.(new CustomEvent('RemoveValue', { detail: { value } }));
-            }}
-          >
-            {#snippet startIcon()}
-              <Icon name="close" />
-            {/snippet}
-          </Button>
+          <span role="gridcell">
+            <Button
+              iconic
+              size="small"
+              disabled={disabled || readonly}
+              aria-label={_('_sui.select_tags.remove_x', { values: { name: label } })}
+              onclick={() => {
+                values = values.filter((v) => v !== value);
+                onRemoveValue?.(new CustomEvent('RemoveValue', { detail: { value } }));
+              }}
+            >
+              {#snippet startIcon()}
+                <Icon name="close" />
+              {/snippet}
+            </Button>
+          </span>
         {/if}
       </span>
     {/each}
@@ -275,7 +283,7 @@
       }
     }
 
-    span[role='listbox'] {
+    span[role='grid'] {
       display: contents;
     }
 
@@ -323,6 +331,10 @@
 
       .label {
         outline: none;
+      }
+
+      span[role='gridcell']:not(.label) {
+        display: contents;
       }
 
       :global {

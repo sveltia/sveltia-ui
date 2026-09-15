@@ -290,10 +290,23 @@
       opacity: 0.4;
     }
 
+    // The handle draws at 4px, but gets a 24px pointer target across the panes it separates
+    // (WCAG 2.5.8). Pointer events on the pseudo-element are delivered to the handle itself.
+    &::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+    }
+
     &.horizontal {
       width: var(--sui-resizable-handle-size, 4px);
       height: 100%;
       cursor: col-resize;
+
+      &::before {
+        inset-inline: calc((var(--sui-resizable-handle-size, 4px) - 24px) / 2);
+      }
 
       .handle-bar {
         width: 2px;
@@ -306,6 +319,10 @@
       width: 100%;
       height: var(--sui-resizable-handle-size, 4px);
       cursor: row-resize;
+
+      &::before {
+        inset-block: calc((var(--sui-resizable-handle-size, 4px) - 24px) / 2);
+      }
 
       .handle-bar {
         height: 2px;

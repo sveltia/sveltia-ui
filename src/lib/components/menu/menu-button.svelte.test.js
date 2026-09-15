@@ -168,6 +168,31 @@ describe('MenuButton', () => {
     });
   });
 
+  it('moves past a submenu item with the vertical arrows instead of opening it', async () => {
+    const { screen } = await renderOpen();
+    const rename = screen.getByRole('menuitem', { name: 'Rename' }).element();
+    const share = screen.getByRole('menuitem', { name: /Share/ }).element();
+    const pinned = screen.getByRole('menuitemcheckbox', { name: 'Pinned' }).element();
+
+    await vi.waitFor(() => {
+      expect(document.activeElement).toBe(rename);
+    });
+    await userEvent.keyboard('{ArrowDown}');
+    await vi.waitFor(() => {
+      expect(document.activeElement).toBe(share);
+    });
+    await userEvent.keyboard('{ArrowDown}');
+    await vi.waitFor(() => {
+      expect(document.activeElement).toBe(pinned);
+    });
+    expect(share.getAttribute('aria-expanded')).toBe('false');
+    await userEvent.keyboard('{ArrowUp}');
+    await vi.waitFor(() => {
+      expect(document.activeElement).toBe(share);
+    });
+    expect(share.getAttribute('aria-expanded')).toBe('false');
+  });
+
   it('opens a submenu when its item is hovered', async () => {
     const { screen } = await renderOpen();
     const share = screen.getByRole('menuitem', { name: /Share/ }).element();

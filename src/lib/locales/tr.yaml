@@ -18,6 +18,26 @@ expand: Genişlet
 # Infobar/toast dismiss button label
 dismiss: Kapat
 
+# Alert & infobar status, read out by screen readers before the message (visually hidden)
+alert:
+  error: Hata
+  warning: Uyarı
+  info: Bilgi
+  success: Başarılı
+
+# Role descriptions, read out by screen readers in place of the generic “group” role
+role_descriptions:
+  disclosure: genişletilebilir bölüm
+  option_group: seçenek grubu
+  menu_item_group: menü öğesi grubu
+  checkbox_group: onay kutusu grubu
+  table_head: tablo başlığı
+  table_body: tablo gövdesi
+  table_foot: tablo altbilgisi
+  grid_head: ızgara başlığı
+  grid_body: ızgara gövdesi
+  grid_foot: ızgara altbilgisi
+
 # Emoji suggestion listbox aria-label, shared by the text fields and the text editor
 emoji_suggestions: Emoji Önerileri
 
