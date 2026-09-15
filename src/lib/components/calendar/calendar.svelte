@@ -49,9 +49,10 @@
   /** @type {HTMLElement | undefined} */
   let grid = $state();
 
-  // Start the keyboard cursor on the selected day. The group service tracks the cursor with the
-  // `focused` class and `aria-activedescendant`, and keeps it as the selection moves; it only
-  // needs a starting point here, where nothing has been focused yet.
+  // Keep the keyboard cursor on the selected day. The group service tracks the cursor with the
+  // `focused` class and `aria-activedescendant`, and moves both along with the selection it makes
+  // itself; this covers the starting point and a `value` set from outside, which may land in
+  // another month while the cell the cursor was on is still on the grid.
   $effect(() => {
     void value;
 
@@ -64,16 +65,17 @@
     const listbox = grid;
 
     tick().then(() => {
-      if (listbox.querySelector('.focused')) {
+      const option = listbox.querySelector('[role="option"][aria-selected="true"]');
+
+      if (!option || option.classList.contains('focused')) {
         return;
       }
 
-      const option = listbox.querySelector('[role="option"][aria-selected="true"]');
-
-      if (option) {
-        option.classList.add('focused');
-        listbox.setAttribute('aria-activedescendant', option.id);
-      }
+      listbox.querySelectorAll('.focused').forEach((element) => {
+        element.classList.remove('focused');
+      });
+      option.classList.add('focused');
+      listbox.setAttribute('aria-activedescendant', option.id);
     });
   });
 </script>

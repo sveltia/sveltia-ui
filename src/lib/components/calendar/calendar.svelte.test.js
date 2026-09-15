@@ -83,6 +83,35 @@ describe('Calendar', () => {
     });
   });
 
+  it('moves the keyboard cursor to a value set from outside', async () => {
+    /** @type {ComponentProps<typeof Calendar>} */
+    const props = $state({ value: '2024-03-03' });
+    const activated = whenActivated();
+    const screen = await render(Calendar, props);
+
+    await activated;
+
+    const listbox = /** @type {HTMLElement} */ (screen.getByRole('listbox').element());
+    const march3 = screen.getByRole('option', { name: 'Sunday, March 3, 2024' }).element();
+
+    await vi.waitFor(() => {
+      expect(march3.classList.contains('focused')).toBe(true);
+    });
+
+    // February’s grid still shows March 3 as a trailing day, so its cell survives the change
+    props.value = '2024-02-27';
+    await expect.element(screen.getByRole('listbox', { name: 'Feb 2024' })).toBeVisible();
+
+    const feb27 = screen.getByRole('option', { name: 'Tuesday, February 27, 2024' }).element();
+
+    await vi.waitFor(() => {
+      expect(feb27.classList.contains('focused')).toBe(true);
+    });
+    expect(march3.isConnected).toBe(true);
+    expect(march3.classList.contains('focused')).toBe(false);
+    expect(listbox.getAttribute('aria-activedescendant')).toBe(feb27.id);
+  });
+
   it('shows the current month by default and marks today', async () => {
     const screen = await render(Calendar);
     const now = new Date();
