@@ -167,6 +167,10 @@
     flex-direction: column;
     max-width: 100dvw;
     max-height: 100dvh;
+    // No border by default; the high-contrast theme draws one, as the OS does around its windows
+    border-width: var(--sui-drawer-content-border-width, var(--sui-modal-border-width, 0));
+    border-style: solid;
+    border-color: var(--sui-drawer-content-border-color, var(--sui-primary-border-color));
     background-color: var(--sui-secondary-background-color-translucent);
     box-shadow: 0 8px 16px var(--sui-popup-shadow-color);
     -webkit-backdrop-filter: blur(16px);

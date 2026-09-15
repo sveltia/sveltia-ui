@@ -112,7 +112,7 @@
           filter: grayscale(0) opacity(1);
 
           * {
-            filter: grayscale(1) opacity(0.35);
+            filter: grayscale(1) opacity(var(--sui-disabled-opacity, 0.35));
           }
         }
       }

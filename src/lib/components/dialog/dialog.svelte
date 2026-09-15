@@ -201,6 +201,10 @@
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    // No border by default; the high-contrast theme draws one, as the OS does around its windows
+    border-width: var(--sui-dialog-content-border-width, var(--sui-modal-border-width, 0));
+    border-style: solid;
+    border-color: var(--sui-dialog-content-border-color, var(--sui-primary-border-color));
     border-radius: var(--sui-dialog-content-border-radius, 4px);
     max-width: calc(100dvw - var(--sui-dialog-content-margin, 16px) * 2);
     background-color: var(

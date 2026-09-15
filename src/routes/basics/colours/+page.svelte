@@ -98,6 +98,23 @@
   </Example>
 </section>
 
+<section>
+  <h3>Themes and contrast</h3>
+  <p>
+    The palette follows the system appearance by default. Set <code>data-theme="light"</code> or
+    <code>data-theme="dark"</code> on the root element to pin it.
+  </p>
+  <p>
+    A high-contrast variant of each theme is applied when the system asks for it (<code
+      >prefers-contrast: more</code
+    >). It raises every text colour to at least 7:1 and every control boundary to at least 3:1, and
+    replaces the translucent hover, selection and placeholder treatments with solid ones. Set
+    <code>data-contrast="more"</code>
+    on the root element to turn it on regardless of the system setting, or any other value, such as
+    <code>data-contrast="no-preference"</code>, to keep the standard palette.
+  </p>
+</section>
+
 <style lang="scss">
   .color-samples {
     display: flex;

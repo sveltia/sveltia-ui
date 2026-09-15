@@ -72,6 +72,102 @@
   --sui-alert-border-color-lightness: 38%;
 }
 
+// High-contrast variants, layered over the light and dark themes for `prefers-contrast: more` (or
+// `data-contrast="more"`). Every text colour reaches 7:1 and every control boundary 3:1 or better;
+// the translucent and faded treatments the default themes use for hierarchy are made opaque.
+@mixin high-contrast-light {
+  --sui-foreground-color-2-hsl: var(--sui-base-hue) 5% 10%; // primary, 17.5:1
+  --sui-foreground-color-3-hsl: var(--sui-base-hue) 5% 18%; // secondary, 13.7:1
+  --sui-foreground-color-4-hsl: var(--sui-base-hue) 5% 28%; // tertiary, 9.3:1
+  --sui-foreground-color-5-hsl: var(--sui-base-hue) 5% 45%; // disabled, 4.8:1
+  // The surface levels are spread further apart, so panels read as panels without relying on
+  // the faint default steps
+  --sui-background-color-3-hsl: var(--sui-base-hue) 5% 93%; // secondary
+  --sui-background-color-4-hsl: var(--sui-base-hue) 5% 88%; // tertiary/disabled
+  --sui-background-color-5-hsl: var(--sui-base-hue) 5% 70%; // highlight
+  --sui-border-color-1-hsl: var(--sui-base-hue) 5% 40%; // control, 5.8:1
+  --sui-border-color-2-hsl: var(--sui-base-hue) 5% 55%; // primary, 3.4:1
+  --sui-border-color-3-hsl: var(--sui-base-hue) 5% 65%; // secondary
+  // Accents
+  --sui-primary-accent-color-text: hsl(var(--sui-base-hue) 80% 32%); // 8:1
+  --sui-primary-accent-color-light: hsl(var(--sui-base-hue) 80% 37%);
+  --sui-primary-accent-color: hsl(var(--sui-base-hue) 80% 32%);
+  --sui-primary-accent-color-dark: hsl(var(--sui-base-hue) 80% 26%);
+  // Alerts
+  --sui-alert-foreground-color-lightness: 18%;
+  --sui-alert-border-color-saturation: 55%;
+  --sui-alert-border-color-lightness: 40%;
+  @include high-contrast-common;
+}
+
+@mixin high-contrast-dark {
+  --sui-foreground-color-2-hsl: var(--sui-base-hue) 10% 92%; // primary, 15.3:1
+  --sui-foreground-color-3-hsl: var(--sui-base-hue) 10% 85%; // secondary, 12.9:1
+  --sui-foreground-color-4-hsl: var(--sui-base-hue) 10% 75%; // tertiary, 9.9:1
+  --sui-foreground-color-5-hsl: var(--sui-base-hue) 10% 55%; // disabled, 5.4:1
+  // Near-black content and input surfaces with distinctly lighter panels, the way macOS treats
+  // its own windows with Increase Contrast on
+  --sui-background-color-1-hsl: var(--sui-base-hue) 10% 4%; // content/input
+  --sui-background-color-2-hsl: var(--sui-base-hue) 10% 7%; // primary
+  --sui-background-color-3-hsl: var(--sui-base-hue) 10% 12%; // secondary
+  --sui-background-color-4-hsl: var(--sui-base-hue) 10% 18%; // tertiary/disabled
+  --sui-background-color-5-hsl: var(--sui-base-hue) 10% 40%; // highlight
+  --sui-border-color-1-hsl: var(--sui-base-hue) 10% 60%; // control, 6.4:1
+  --sui-border-color-2-hsl: var(--sui-base-hue) 10% 50%; // primary, 4.5:1
+  --sui-border-color-3-hsl: var(--sui-base-hue) 10% 40%; // secondary, 3.1:1
+  // Accents. The fill stays put: lighter would lose the white label on a primary button, darker
+  // would lose the fill against the page. The text accent and the focus ring go lighter instead.
+  --sui-primary-accent-color-text: hsl(var(--sui-base-hue) 100% 70%); // 8.3:1
+  --sui-focus-ring-color: var(--sui-primary-accent-color-text);
+  // Alerts
+  --sui-alert-foreground-color-lightness: 85%;
+  --sui-alert-border-color-saturation: 55%;
+  --sui-alert-border-color-lightness: 55%;
+  @include high-contrast-common;
+}
+
+// Apply the high-contrast variant matching the active theme, however the theme was chosen
+@mixin high-contrast-themes {
+  &[data-theme="light"] {
+    @include high-contrast-light;
+  }
+
+  &[data-theme="dark"] {
+    @include high-contrast-dark;
+  }
+
+  &:not([data-theme]) {
+    @media (prefers-color-scheme: light) {
+      @include high-contrast-light;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      @include high-contrast-dark;
+    }
+  }
+}
+
+// Shared by both high-contrast variants: solid state backgrounds and boundaries in place of the
+// translucent ones, and placeholder text at full strength
+@mixin high-contrast-common {
+  --sui-hover-background-color: hsl(var(--sui-background-color-5-hsl) / 60%);
+  --sui-selected-background-color: hsl(var(--sui-background-color-5-hsl));
+  --sui-active-background-color: hsl(var(--sui-background-color-5-hsl));
+  --sui-primary-background-color-translucent: hsl(var(--sui-background-color-2-hsl));
+  --sui-secondary-background-color-translucent: hsl(var(--sui-background-color-3-hsl));
+  --sui-tertiary-background-color-translucent: hsl(var(--sui-background-color-4-hsl));
+  --sui-popup-shadow-color: hsl(var(--sui-shadow-color) / 70%);
+  --sui-popup-backdrop-color: hsl(var(--sui-shadow-color) / 60%);
+  // A text box shares the page background, so its border is what marks the field
+  --sui-textbox-border-color: hsl(var(--sui-border-color-1-hsl));
+  --sui-textbox-placeholder-foreground-color: var(--sui-tertiary-foreground-color);
+  --sui-textbox-placeholder-opacity: 1;
+  // Disabled controls are dimmed less; the loss of colour still marks them
+  --sui-disabled-opacity: 0.6;
+  // Dialogs and drawers get an outline, as the OS draws around its own windows
+  --sui-modal-border-width: 1px;
+}
+
 :global {
   :root,
   :host {
@@ -128,6 +224,10 @@
       var(--sui-success-color-hue) var(--sui-alert-background-color-saturation)
         var(--sui-alert-background-color-lightness)
     );
+    // Disabled controls: how far they fade (they also lose their colour)
+    --sui-disabled-opacity: 0.35;
+    // Dialog & drawer outline; none by default, drawn by the high-contrast theme
+    --sui-modal-border-width: 0;
     // Outline
     --sui-focus-ring-width: 2px;
     // Opaque, so the ring reaches 3:1 against the page (WCAG 1.4.11); the offset keeps a sliver of
@@ -291,6 +391,20 @@
 
       @media (prefers-color-scheme: dark) {
         @include dark-theme;
+      }
+    }
+
+    // High contrast is a second dimension on top of the light/dark theme, and is resolved the same
+    // way: `data-contrast="more"` turns it on, any other value keeps the standard palette, and
+    // without the attribute the system setting decides. The selectors here are more specific than
+    // the theme blocks above, so these overrides win whichever way the theme was picked.
+    &[data-contrast="more"] {
+      @include high-contrast-themes;
+    }
+
+    &:not([data-contrast]) {
+      @media (prefers-contrast: more) {
+        @include high-contrast-themes;
       }
     }
   }

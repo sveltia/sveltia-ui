@@ -164,7 +164,7 @@
     pointer-events: none;
     -webkit-user-select: none;
     user-select: none;
-    filter: grayscale(1) opacity(0.35);
+    filter: grayscale(1) opacity(var(--sui-disabled-opacity, 0.35));
 
     * {
       filter: grayscale(0) opacity(1); // Maintain the opacity on child nodes
