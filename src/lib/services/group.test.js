@@ -836,16 +836,11 @@ describe('Group - grid listbox navigation', () => {
       return opt;
     });
     document.body.appendChild(listbox);
-    // Mock clientWidths so colCount = Math.floor(300/100) = 3
-    Object.defineProperty(listbox, 'clientWidth', {
-      configurable: true,
-      get: () => 300,
-    });
-    options.forEach((opt) => {
-      Object.defineProperty(opt, 'clientWidth', {
-        configurable: true,
-        get: () => 100,
-      });
+    // Mock the layout: three per visual row, so `columnCount` is 3
+    options.forEach((opt, i) => {
+      opt.getClientRects = () => /** @type {DOMRectList} */ (/** @type {unknown} */ ([{}]));
+      opt.getBoundingClientRect = () =>
+        /** @type {DOMRect} */ ({ top: Math.floor(i / 3) * 100, left: (i % 3) * 100 });
     });
     activateGroup()(listbox);
     await vi.advanceTimersByTimeAsync(150);
@@ -1151,17 +1146,17 @@ describe('Group - grid listbox with no initial focus (branch 49 currentTarget?..
     });
 
     document.body.appendChild(gridListbox);
-    Object.defineProperty(gridListbox, 'clientWidth', { configurable: true, get: () => 300 });
-    gridOptions.forEach((opt) => {
-      Object.defineProperty(opt, 'clientWidth', { configurable: true, get: () => 100 });
+    gridOptions.forEach((opt, i) => {
+      opt.getClientRects = () => /** @type {DOMRectList} */ (/** @type {unknown} */ ([{}]));
+      opt.getBoundingClientRect = () =>
+        /** @type {DOMRect} */ ({ top: Math.floor(i / 3) * 100, left: (i % 3) * 100 });
     });
     activateGroup()(gridListbox);
     await vi.advanceTimersByTimeAsync(150);
 
-    // Press ArrowDown with no focused element → currentTarget=undefined → index=-1
-    // -1 + colCount(3) = 2 → gridOptions[2]
+    // Press ArrowDown with no focused element: the arrows start from the first item, as in a list
     gridListbox.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
-    expect(gridOptions[2].getAttribute('aria-selected')).toBe('true');
+    expect(gridOptions[0].getAttribute('aria-selected')).toBe('true');
     gridListbox.remove();
     vi.useRealTimers();
   });

@@ -12,16 +12,35 @@
    * @type {{
    * multiple?: boolean,
    * clickToSelect?: boolean,
+   * values?: string[],
+   * withButtons?: boolean,
    * onChange?: (event: CustomEvent) => void,
    * }}
    */
-  const { multiple = false, clickToSelect = true, onChange = undefined } = $props();
+  const {
+    multiple = false,
+    clickToSelect = true,
+    values = ['a', 'b', 'c'],
+    withButtons = false,
+    onChange = undefined,
+  } = $props();
+
+  /** @type {Record<string, string>} */
+  const labels = { a: 'Alpha', b: 'Beta', c: 'Gamma', d: 'Delta', e: 'Epsilon' };
 </script>
 
 <Grid ariaLabel="Files" {multiple} {clickToSelect} {onChange}>
   <GridBody>
-    <GridRow data-value="a"><GridCell>Alpha</GridCell></GridRow>
-    <GridRow data-value="b"><GridCell>Beta</GridCell></GridRow>
-    <GridRow data-value="c"><GridCell>Gamma</GridCell></GridRow>
+    {#each values as value (value)}
+      <GridRow data-value={value}>
+        <GridCell>
+          {#if withButtons}
+            <button type="button">{labels[value]}</button>
+          {:else}
+            {labels[value]}
+          {/if}
+        </GridCell>
+      </GridRow>
+    {/each}
   </GridBody>
 </Grid>

@@ -33,6 +33,17 @@ export const normalize = (value) => {
 };
 
 /**
+ * Set an element’s `tabindex` attribute, leaving the DOM alone if it already holds that value.
+ * @param {HTMLElement} element Element.
+ * @param {number} tabIndex New value.
+ */
+const setTabIndex = (element, tabIndex) => {
+  if (element.getAttribute('tabindex') !== String(tabIndex)) {
+    element.tabIndex = tabIndex;
+  }
+};
+
+/**
  * @type {{ [role: string]: {
  * orientation: 'vertical' | 'horizontal',
  * childRoles: string[],
@@ -49,7 +60,9 @@ const config = {
     childRoles: ['row'],
     childSelectedAttr: 'aria-selected',
     focusChild: true,
-    selectFirst: true,
+    // Rows are data, not a choice the widget has to make on the user’s behalf: nothing is
+    // selected until the user selects it. The first row is only the tab stop.
+    selectFirst: false,
     controlsPanel: false,
     rovingTabStop: 'selected',
   },
@@ -179,6 +192,12 @@ const getMenuOpener = (element) => {
  */
 export class Group {
   /**
+   * Whether {@link activate} has run. Until then, members are left as they are rendered.
+   * @type {boolean}
+   */
+  activated = false;
+
+  /**
    * Memoized member lists, discarded whenever the widget’s subtree changes. See {@link #members}.
    * @type {{ all: HTMLElement[], active: HTMLElement[] } | undefined}
    */
@@ -302,8 +321,15 @@ export class Group {
     // The members can be added, removed, disabled or hidden at any time, which is what invalidates
     // the cached lists. Only the attributes that decide membership are watched, so the group’s own
     // writes — the selected state and the roving `tabindex` — don’t needlessly discard the cache.
-    this.observer = new globalThis.MutationObserver(() => {
+    this.observer = new globalThis.MutationObserver((records) => {
       this.#memberCache = undefined;
+
+      // Members rendered after activation — rows that arrive with the data, say — start out with
+      // whatever `tabindex` their component gives them, so the roving tab stop has to be redone
+      // for them to become a single stop
+      if (this.activated && records.some(({ type }) => type === 'childList')) {
+        this.updateTabStop();
+      }
     });
 
     this.observer.observe(parent, {
@@ -325,6 +351,8 @@ export class Group {
    */
   activate() {
     const { parent, allMembers, selected: defaultSelected } = this;
+
+    this.activated = true;
 
     allMembers.forEach((element, index) => {
       // Select the first one if no member has the `selected` attribute
@@ -385,16 +413,53 @@ export class Group {
       return;
     }
 
+    // The stop stays where the user is. This runs again whenever the subtree changes, so a member
+    // the user has moved to must not be handed back to the selected or first one just because a
+    // cell re-rendered or a row arrived. Only when there is no single stop — at activation, where
+    // every member may render as one, or after new members have — is one picked.
+    const { activeElement } = document;
+
+    const focused = activeMembers.find(
+      (element) => element === activeElement || element.contains(activeElement),
+    );
+
+    const holders = activeMembers.filter((element) => element.getAttribute('tabindex') === '0');
+
     const tabStop =
-      this.rovingTabStop === 'selected'
-        ? (activeMembers.find(
-            (element) => element.getAttribute(this.childSelectedAttr) === 'true',
-          ) ?? activeMembers[0])
-        : activeMembers[0];
+      focused ??
+      (holders.length === 1
+        ? holders[0]
+        : ((this.rovingTabStop === 'selected'
+            ? activeMembers.find(
+                (element) => element.getAttribute(this.childSelectedAttr) === 'true',
+              )
+            : undefined) ?? activeMembers[0]));
 
     allMembers.forEach((element) => {
-      element.tabIndex = element === tabStop ? 0 : -1;
+      // Only touch the DOM when it changes; this runs on every mutation of a large widget. The
+      // attribute is what’s compared: a `<button>` reports a `tabIndex` of 0 without one, and the
+      // popup looks the tab stop up by attribute.
+      setTabIndex(element, element === tabStop ? 0 : -1);
     });
+  }
+
+  /**
+   * Count the columns of a grid layout from where the members sit, rather than from their widths:
+   * a row of a data grid spans the full width, a tile in a grid listbox doesn’t, and a header row
+   * may have no box at all.
+   * @returns {number} Number of members per visual row, at least 1.
+   */
+  get columnCount() {
+    // Members without a layout box don’t occupy a column
+    const laidOut = this.allMembers.filter((member) => member.getClientRects().length);
+    const firstTop = laidOut[0]?.getBoundingClientRect().top;
+
+    const count = laidOut.findIndex(
+      (member) => Math.abs(member.getBoundingClientRect().top - firstTop) > 1,
+    );
+
+    // Everything on one visual row when nothing wraps
+    return Math.max(1, count === -1 ? laidOut.length : count);
   }
 
   /**
@@ -728,18 +793,17 @@ export class Group {
     });
 
     if (this.focusChild) {
-      // Wait a bit before the elements are rerendered. A single frame serves the whole group;
-      // scheduling a callback per member would queue thousands of them on a large widget.
-      globalThis.requestAnimationFrame(() => {
-        affected.forEach((element) => {
-          element.tabIndex = element === newTarget ? 0 : -1;
-        });
-
-        if (targetAffected) {
-          newTarget.focus();
-          newTarget.dispatchEvent(new CustomEvent('Focus'));
-        }
+      // Done right away rather than on the next frame: a key that repeats, or a second press
+      // before the frame, has to start from the member that was just reached, which it reads
+      // from the focus
+      affected.forEach((element) => {
+        setTabIndex(element, element === newTarget ? 0 : -1);
       });
+
+      if (targetAffected) {
+        newTarget.focus();
+        newTarget.dispatchEvent(new CustomEvent('Focus'));
+      }
     }
 
     this.parent.dispatchEvent(
@@ -793,16 +857,27 @@ export class Group {
     const { allMembers, activeMembers } = this;
 
     /** @type {HTMLElement | undefined} */
+    // A field the user is typing in keeps its keys: the caret moves, the text changes. Escape and
+    // Tab still reach the group, so a menu holding a field can be left the usual ways.
+    if (
+      target !== this.parent &&
+      target.matches('input, textarea, select, [contenteditable]:not([contenteditable="false"])') &&
+      key !== 'Escape' &&
+      key !== 'Tab'
+    ) {
+      return;
+    }
+
     const currentTarget = (() => {
       if (!this.focusChild) {
         return activeMembers.find((member) => member.matches('.focused'));
       }
 
-      if (target.matches(this.selector)) {
-        return target;
-      }
+      // A key pressed on a control inside a member, such as a checkbox in a grid row, moves from
+      // that member
+      const member = /** @type {HTMLElement | null} */ (target.closest(this.selector));
 
-      return undefined;
+      return member && this.parent.contains(member) ? member : undefined;
     })();
 
     if (['Enter', ' ', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(key)) {
@@ -917,17 +992,31 @@ export class Group {
     let newTarget;
 
     if (this.grid) {
-      const colCount = Math.floor(this.parent.clientWidth / activeMembers[0].clientWidth);
+      const colCount = this.columnCount;
+      const lastIndex = allMembers.length - 1;
       const _isRTL = isRTL();
 
       index = currentTarget ? allMembers.indexOf(currentTarget) : -1;
 
-      if (key === 'ArrowUp' && index > 0) {
-        newTarget = allMembers[index - colCount];
+      // With nothing focused yet, the arrows start from either end, as in a list
+      if (index === -1) {
+        const forward = key === 'ArrowDown' || key === (_isRTL ? 'ArrowLeft' : 'ArrowRight');
+        const backward = key === 'ArrowUp' || key === (_isRTL ? 'ArrowRight' : 'ArrowLeft');
+
+        if (forward) {
+          [newTarget] = activeMembers;
+        } else if (backward) {
+          newTarget = activeMembers[activeMembers.length - 1];
+        }
       }
 
-      if (key === 'ArrowDown' && index < allMembers.length - 1) {
-        newTarget = allMembers[index + colCount];
+      if (key === 'ArrowUp' && index > 0) {
+        newTarget = allMembers[Math.max(index - colCount, 0)];
+      }
+
+      if (key === 'ArrowDown' && index !== -1 && index < lastIndex) {
+        // A partial last row still gets reached
+        newTarget = allMembers[Math.min(index + colCount, lastIndex)];
       }
 
       // In RTL, ArrowLeft moves right (next), ArrowRight moves left (previous)
@@ -935,7 +1024,7 @@ export class Group {
         newTarget = allMembers[index + (_isRTL ? 1 : -1)];
       }
 
-      if (key === 'ArrowRight' && index < allMembers.length - 1) {
+      if (key === 'ArrowRight' && index !== -1 && index < lastIndex) {
         newTarget = allMembers[index + (_isRTL ? -1 : 1)];
       }
 
