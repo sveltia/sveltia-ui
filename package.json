@@ -78,9 +78,9 @@
     "@sveltejs/kit": "^2.70.3",
     "@sveltejs/package": "^2.5.8",
     "@sveltejs/vite-plugin-svelte": "^7.3.0",
-    "@vitest/browser-playwright": "^5.0.0",
-    "@vitest/coverage-v8": "^5.0.0",
-    "cspell": "^10.3.1",
+    "@vitest/browser-playwright": "^5.0.1",
+    "@vitest/coverage-v8": "^5.0.1",
+    "cspell": "^10.3.2",
     "eslint": "^9.39.5",
     "eslint-config-airbnb-extended": "^3.2.0",
     "eslint-config-prettier": "^10.1.8",
@@ -107,7 +107,7 @@
     "svelte-preprocess": "^6.0.5",
     "tslib": "^2.8.1",
     "vite": "^8.3.0",
-    "vitest": "^5.0.0",
+    "vitest": "^5.0.1",
     "vitest-browser-svelte": "^3.1.0"
   },
   "peerDependencies": {
