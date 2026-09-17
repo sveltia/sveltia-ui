@@ -39,9 +39,15 @@
     onResizeStart = undefined,
     onResizeEnd = undefined,
   } = $props();
+
+  /**
+   * The wrapper leaves the panes 500×300 px to share once the 4 px handles have taken their room,
+   * so the pixel sizes in the tests are round.
+   */
+  const handleCount = $derived(1 + Number(third) + Number(trailingHandle));
 </script>
 
-<div class="wrapper" style="width: 500px; height: 300px;">
+<div class="wrapper" style="width: {500 + handleCount * 4}px; height: {300 + handleCount * 4}px;">
   <ResizablePaneGroup {direction} {onResize}>
     <ResizablePane
       class="first"

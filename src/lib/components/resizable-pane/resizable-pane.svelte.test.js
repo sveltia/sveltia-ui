@@ -23,7 +23,8 @@ describe('ResizablePane', () => {
       expect(first.style.flexBasis).toBe('30%');
     });
     expect(first.style.flexGrow).toBe('0');
-    expect(first.style.flexShrink).toBe('0');
+    // Shrinkable, so the handles take their room from the panes rather than overflowing the group
+    expect(first.style.flexShrink).toBe('1');
   });
 
   it('uses the default size as is until the group has measured the panes', async () => {
@@ -33,7 +34,7 @@ describe('ResizablePane', () => {
       screen.container.querySelector('.sui.resizable-pane')
     );
 
-    // Once resolved, the size is a percentage of the 500px group
+    // Once resolved, the size is a percentage of the 500px the panes share
     await vi.waitFor(() => {
       expect(first.style.flexBasis).toBe('24%');
     });

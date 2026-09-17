@@ -33,10 +33,38 @@ describe('ResizablePaneGroup', () => {
 
     expect(first.classList.contains('first')).toBe(true);
     expect(first.style.flexGrow).toBe('0');
-    expect(first.style.flexShrink).toBe('0');
+    expect(first.style.flexShrink).toBe('1');
     expect(first.style.overflowX).toBe('auto');
     expect(first.style.overflowY).toBe('');
     expect(first.getBoundingClientRect().width).toBe(250);
+  });
+
+  it('fits the panes and handles in the group without overflowing it', async () => {
+    const screen = await render(ResizablePaneFixture, { third: true });
+
+    const group = /** @type {HTMLElement} */ (
+      screen.container.querySelector('.sui.resizable-pane-group')
+    );
+
+    await vi.waitFor(() => {
+      expect(getSizes(screen.container)).toEqual(['33.3333%', '33.3333%', '33.3333%']);
+    });
+
+    // The sizes are percentages of the space left by the two 4px handles, so the panes and handles
+    // fill the 508px group exactly. An overflowing group could be scrolled sideways, though its
+    // overflow is hidden, and the panes would shift out of place.
+    const widths = [...group.children].map((child) => child.getBoundingClientRect().width);
+
+    // Layout snaps to 1/64 px
+    expect(widths).toEqual([
+      expect.closeTo(500 / 3, 1),
+      4,
+      expect.closeTo(500 / 3, 1),
+      4,
+      expect.closeTo(500 / 3, 1),
+    ]);
+    expect(widths.reduce((sum, width) => sum + width, 0)).toBe(508);
+    expect(group.scrollWidth).toBe(group.clientWidth);
   });
 
   it('honors the default sizes, in percentages and pixels', async () => {

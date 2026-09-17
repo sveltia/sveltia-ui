@@ -74,15 +74,39 @@
   let _handleCount = 0;
 
   /**
+   * Measure the space the panes share: the group’s size along its direction, less the handles
+   * between them. Every pane size is a percentage of this, so the panes and handles together fill
+   * the group exactly. Were the percentages of the whole group, the handles would push the last
+   * pane past the edge; the overflow is hidden, but the group could still be scrolled by that much
+   * whenever something inside is scrolled into view, and everything would shift out of place.
+   * @returns {number} Space in pixels, or `0` if the group isn’t laid out.
+   */
+  const measurePaneSpace = () => {
+    if (!element) {
+      return 0;
+    }
+
+    const isHorizontal = direction === 'horizontal';
+    const groupSize = isHorizontal ? element.clientWidth : element.clientHeight;
+
+    const handleSize = [...element.querySelectorAll(':scope > .resizable-handle')].reduce(
+      (total, handle) =>
+        total +
+        (isHorizontal
+          ? /** @type {HTMLElement} */ (handle).offsetWidth
+          : /** @type {HTMLElement} */ (handle).offsetHeight),
+      0,
+    );
+
+    return Math.max(groupSize - handleSize, 0);
+  };
+
+  /**
    * Get the sizes the pane lengths are relative to.
    * @returns {import('./sizing.js').SizeEnvironment} Environment.
    */
   const getSizeEnvironment = () => ({
-    containerSize: element
-      ? direction === 'horizontal'
-        ? element.clientWidth
-        : element.clientHeight
-      : 0,
+    containerSize: measurePaneSpace(),
     viewportWidth: window.innerWidth,
     viewportHeight: window.innerHeight,
   });
@@ -186,6 +210,7 @@
       resize,
       toggleCollapse,
       getPaneConstraints,
+      measurePaneSpace,
       paneDefs: _paneDefs,
     }),
     /* eslint-enable jsdoc/require-jsdoc */

@@ -13,9 +13,10 @@
 
   /**
    * @typedef {object} Props
-   * @property {number | string} [defaultSize] Default size. Numbers are percentages (0-100);
-   * strings can be any CSS length/percentage such as `240px`, `20%` or `20dvw`. Panes without
-   * `defaultSize` share the remaining space equally.
+   * @property {number | string} [defaultSize] Default size. Numbers are percentages (0-100) of
+   * the space the panes share, which is the group less its handles; strings can be any CSS
+   * length/percentage such as `240px`, `20%` or `20dvw`. Panes without `defaultSize` share the
+   * remaining space equally.
    * @property {number | string} [minSize] Minimum size. Numbers are percentages, strings are CSS
    * lengths. Defaults to `0`.
    * @property {number | string} [maxSize] Maximum size. Numbers are percentages, strings are CSS
@@ -55,6 +56,12 @@
 
   const direction = $derived(ctx.direction);
   const size = $derived(ctx.sizes[paneIndex]);
+  /**
+   * The size as a flex basis. The percentages are of the space the panes share rather than of the
+   * group, while a flex basis is a percentage of the group, so the panes are made shrinkable: the
+   * handles then take their room from the panes in proportion to their sizes, which works out to
+   * exactly the intended percentages, and the group is never overflowed.
+   */
   const sizeStyle = $derived.by(() => {
     if (size !== undefined) {
       return `${size}%`;
@@ -81,7 +88,7 @@
   class="sui resizable-pane {className}"
   style:flex-basis={sizeStyle}
   style:flex-grow="0"
-  style:flex-shrink="0"
+  style:flex-shrink="1"
   style:overflow-x={direction === 'horizontal' ? 'auto' : undefined}
   style:overflow-y={direction === 'vertical' ? 'auto' : undefined}
 >

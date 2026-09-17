@@ -226,7 +226,7 @@ describe('ResizableHandle', () => {
       expect(handle.classList.contains('dragging')).toBe(true);
     });
     expect(onResizeStart).toHaveBeenCalledOnce();
-    // The group is 500px wide, so 50px is 10%
+    // The panes share 500px, so 50px is 10%
     document.dispatchEvent(at('pointermove', 150));
     await vi.waitFor(() => {
       expect(getSizes(screen.container)).toEqual(['60%', '40%']);
@@ -258,7 +258,7 @@ describe('ResizableHandle', () => {
     handle.dispatchEvent(
       new PointerEvent('pointerdown', { bubbles: true, screenY: 100, pointerId: 1 }),
     );
-    // The group is 300px tall, so 30px is 10%
+    // The panes share 300px, so 30px is 10%
     document.dispatchEvent(
       new PointerEvent('pointermove', { bubbles: true, screenY: 70, pointerId: 1 }),
     );

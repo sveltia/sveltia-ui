@@ -451,6 +451,8 @@
  * before the given handle.
  * @property {(paneIndex: number) => { minSize: number, maxSize: number }} getPaneConstraints
  * Resolve pane constraints to percentages for the current container size.
+ * @property {() => number} measurePaneSpace Measure the space the panes share in pixels: the
+ * group’s size along its direction, less the handles. Pane sizes are percentages of this.
  * @property {ResizablePaneDefinition[]} paneDefs Registered pane definitions.
  */
 
