@@ -214,18 +214,19 @@
         background-color: var(--sui-hover-background-color);
       }
 
-      // The listbox keeps the DOM focus and points at the current option with
-      // `aria-activedescendant`, so this class is the only focus indicator the option gets. The
-      // hover background alone is nowhere near 3:1 (WCAG 1.4.11, 2.4.7); the ring is inset so it
-      // isn’t clipped by the scrolling list.
-      .focused {
-        outline-color: var(--sui-focus-ring-color);
-        outline-offset: calc(var(--sui-focus-ring-width) * -1);
-      }
-
       .icon.check {
         margin: -2px;
       }
     }
+  }
+
+  // The listbox keeps the DOM focus and points at the current option with `aria-activedescendant`,
+  // so the `focused` class is the only focus indicator the option gets. The hover background alone
+  // is nowhere near 3:1 (WCAG 1.4.11, 2.4.7); the ring is inset so it isn’t clipped by the
+  // scrolling list. It follows the listbox’s own `:focus-visible` state, so a click doesn’t paint
+  // it while keyboard navigation does, just like the ring on any other control.
+  :global([role='listbox']:focus-visible) .option :global(.focused) {
+    outline-color: var(--sui-focus-ring-color);
+    outline-offset: calc(var(--sui-focus-ring-width) * -1);
   }
 </style>

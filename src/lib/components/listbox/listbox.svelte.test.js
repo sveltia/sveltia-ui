@@ -69,6 +69,27 @@ describe('Listbox', () => {
     );
   });
 
+  it('keeps the focus on the listbox after a click', async () => {
+    const activated = whenActivated();
+    const screen = await render(ListboxFixture);
+
+    await activated;
+
+    const listbox = screen.getByRole('listbox');
+    const apple = screen.getByRole('option', { name: 'Apple' });
+    const banana = screen.getByRole('option', { name: 'Banana' });
+
+    // The option button takes the focus when clicked, and the listbox has to take it back so the
+    // arrow keys carry on from the clicked option, and the focus ring follows them
+    await apple.click();
+    expect(document.activeElement).toBe(listbox.element());
+    expect(apple.element().classList.contains('focused')).toBe(true);
+    await userEvent.keyboard('{ArrowDown}');
+    await expect.element(banana).toHaveAttribute('aria-selected', 'true');
+    expect(banana.element().classList.contains('focused')).toBe(true);
+    expect(apple.element().classList.contains('focused')).toBe(false);
+  });
+
   it('toggles options when multiple', async () => {
     const activated = whenActivated();
     const screen = await render(ListboxFixture, { multiple: true });

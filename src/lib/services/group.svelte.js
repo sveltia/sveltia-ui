@@ -828,6 +828,18 @@ export class Group {
     }
 
     this.selectTarget(event, newTarget);
+
+    // Where the group itself holds focus, as a listbox does, a click still lands it on the member
+    // clicked. Take it back, so the keys keep moving the cursor from the group and the focus ring
+    // follows the cursor rather than staying on the clicked member. A pointer-driven focus doesn’t
+    // match `:focus-visible`, so no ring appears on the click itself.
+    if (
+      !this.focusChild &&
+      document.activeElement !== this.parent &&
+      newTarget.contains(document.activeElement)
+    ) {
+      this.parent.focus({ preventScroll: true });
+    }
   }
 
   /**
