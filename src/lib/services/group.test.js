@@ -1926,7 +1926,12 @@ describe('Group - leaving a menu', () => {
     vi.useRealTimers();
   });
 
-  afterEach(() => {
+  afterEach(async () => {
+    // A test that presses Tab and returns at once leaves that hand-off pending, and it would
+    // reject once the document is gone if the file finished first. Let it settle before cleanup.
+    await new Promise((resolve) => {
+      setTimeout(resolve, 100);
+    });
     document.body.innerHTML = '';
     vi.useRealTimers();
   });
