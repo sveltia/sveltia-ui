@@ -61,14 +61,14 @@ calendar:
 # Split button component
 split_button:
   # Wrapper aria-label, e.g. “Save Options” when primary button is “Save”
-  x_options: 'אפשרויות {$name}'
+  x_options: אפשרויות {$name}
   # Dropdown toggle aria-label
   more_options: אפשרויות נוספות
 
 # Combobox component
 combobox:
   # Placeholder when no option is selected
-  select_an_option: בחירת אפשרות...
+  select_an_option: בחירת אפשרות…
   # Filter input aria-label
   filter_options: סינון
   # Empty state message when filter has no matches
@@ -134,7 +134,7 @@ text_editor:
   # Markdown mode toggle button aria-label
   edit_in_markdown: עריכה ב-Markdown
   # Error message when rich text conversion fails
-  option_1: לא ניתן להפעיל מצב טקסט עשיר. יש להשתמש בעורך טקסט פשוט במקום.
+  converter_error: לא ניתן להפעיל מצב טקסט עשיר. יש להשתמש בעורך טקסט פשוט במקום.
   # Language selector aria-label
   language: שפה
   # Plain text mode option in language selector
