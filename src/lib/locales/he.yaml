@@ -1,0 +1,141 @@
+# --- NOTES ---
+# 1. Prefer verbal nouns (like סגירה) over imperatives (like סגור)
+# 2. Prefer neologisms (like סמלון) over loanwords (like אימוג'י)
+# 3. Add a hyphen between Hebrew prefixes and English words (like ב-Markdown)
+
+# Dialog action button labels
+ok: אישור
+cancel: ביטול
+close: סגירה
+
+# Button to clear content, e.g. search input or calendar date
+clear: ניקוי
+
+# Text editor dialog buttons for link/image insertion
+insert: הוספה
+update: עדכון
+remove: הסרה
+
+# Combobox dropdown toggle button aria-labels
+collapse: צמצום
+expand: הרחבה
+
+# Infobar/toast dismiss button label
+dismiss: סגירה
+
+# Alert & infobar status, read out by screen readers before the message (visually hidden)
+alert:
+  error: שגיאה
+  warning: אזהרה
+  info: מידע
+  success: הצלחה
+
+# Role descriptions, read out by screen readers in place of the generic “group” role
+role_descriptions:
+  disclosure: קבוצת גילוי
+  option_group: קבוצת אפשרויות
+  menu_item_group: קבוצת פריטי תפריט
+  checkbox_group: קבוצת תיבות סימון
+  table_head: כותרת טבלה
+  table_body: גוף טבלה
+  table_foot: תחתית טבלה
+  grid_head: כותרת רשת
+  grid_body: גוף רשת
+  grid_foot: תחתית רשת
+
+# Emoji suggestion listbox aria-label, shared by the text fields and the text editor
+emoji_suggestions: הצעות סמלונים
+
+# Calendar component
+calendar:
+  # View switcher group aria-labels and navigation button aria-labels
+  year: שנה
+  previous_decade: העשור הקודם
+  next_decade: העשור הבא
+  month: חודש
+  previous_month: החודש הקודם
+  next_month: החודש הבא
+  # “Today” button label in footer
+  today: היום
+
+# Split button component
+split_button:
+  # Wrapper aria-label, e.g. “Save Options” when primary button is “Save”
+  x_options: 'אפשרויות {$name}'
+  # Dropdown toggle aria-label
+  more_options: אפשרויות נוספות
+
+# Combobox component
+combobox:
+  # Placeholder when no option is selected
+  select_an_option: בחירת אפשרות...
+  # Filter input aria-label
+  filter_options: סינון
+  # Empty state message when filter has no matches
+  no_matching_options: לא נמצאו אפשרויות תואמות
+
+# Number input component
+number_input:
+  # Spin button aria-labels for incrementing/decrementing the number value
+  increase: הגדלה
+  decrease: הקטנה
+
+# Password input component
+password_input:
+  # Visibility toggle button aria-labels
+  show_password: הצגת סיסמה
+  hide_password: הסתרת סיסמה
+
+# Secret input component (API keys, tokens, etc.)
+secret_input:
+  # Visibility toggle button aria-labels
+  show_secret: הצגת מפתח סודי
+  hide_secret: הסתרת מפתח סודי
+
+# Select tags component (multi-select)
+select_tags:
+  # Listbox aria-label
+  selected_options: אפשרויות שנבחרו
+  # Remove button aria-label, e.g. “Remove Option 1”
+  remove_x: הסרת {$name}
+
+# Text editor component
+text_editor:
+  # Toolbar aria-labels
+  text_editor: עורך טקסט
+  code_editor: עורך קוד
+  # Block style menu button and menu aria-labels
+  text_style_options: אפשרויות עיצוב טקסט
+  show_text_style_options: הצגת אפשרויות עיצוב טקסט
+  # Block style menu items
+  paragraph: פסקה
+  heading_1: כותרת 1
+  heading_2: כותרת 2
+  heading_3: כותרת 3
+  heading_4: כותרת 4
+  heading_5: כותרת 5
+  heading_6: כותרת 6
+  bulleted_list: רשימת תבליטים
+  numbered_list: רשימה ממוספרת
+  blockquote: ציטוט
+  code_block: קטע קוד
+  # Inline style button aria-labels
+  bold: הדגשה
+  italic: הטיה
+  strikethrough: קו חוצה
+  code: קוד
+  link: קישור
+  # Link dialog title
+  insert_link: הוספת קישור
+  update_link: עדכון קישור
+  # Link dialog input field labels
+  text: טקסט
+  url: כתובת קישור
+  # Markdown mode toggle button aria-label
+  edit_in_markdown: עריכה ב-Markdown
+  # Error message when rich text conversion fails
+  option_1: לא ניתן להפעיל מצב טקסט עשיר. יש להשתמש בעורך טקסט פשוט במקום.
+  # Language selector aria-label
+  language: שפה
+  # Plain text mode option in language selector
+  plain_text: טקסט פשוט
