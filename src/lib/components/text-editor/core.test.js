@@ -445,6 +445,20 @@ describe('text editor core', () => {
     await expect(convertMarkdownToLexical(editor, '# Heading', [])).resolves.toBeUndefined();
   });
 
+  it('pads blank blockquote lines before converting markdown', async () => {
+    const { $convertFromMarkdownString } = await import('@lexical/markdown');
+
+    const editor = /** @type {any} */ ({
+      update: vi.fn((callback) => callback()),
+      focus: vi.fn(),
+      isComposing: () => false,
+    });
+
+    await convertMarkdownToLexical(editor, '> a\n>\n> b', []);
+
+    expect($convertFromMarkdownString).toHaveBeenCalledWith('> a\n> \n> b', []);
+  });
+
   it('focuses the editor by invoking its focus callback', async () => {
     const editor = /** @type {any} */ ({ focus: vi.fn((callback) => callback()) });
 
@@ -754,6 +768,19 @@ describe('text editor core', () => {
 
     onEditorUpdate(mockEditor, []);
     expect(mockRootElement.dispatchEvent).toHaveBeenCalled();
+  });
+
+  it('trims blank blockquote lines in the Update event value', async () => {
+    const { $convertToMarkdownString } = await import('@lexical/markdown');
+
+    vi.mocked($convertToMarkdownString).mockReturnValueOnce('> a\n> \n> b');
+
+    const mockRootElement = { dispatchEvent: vi.fn() };
+    const mockEditor = /** @type {any} */ ({ getRootElement: vi.fn(() => mockRootElement) });
+
+    onEditorUpdate(mockEditor, []);
+
+    expect(mockRootElement.dispatchEvent.mock.calls[0][0].detail.value).toBe('> a\n>\n> b');
   });
 
   it('filters out transformers with disabled markdown tags when converting to markdown', async () => {

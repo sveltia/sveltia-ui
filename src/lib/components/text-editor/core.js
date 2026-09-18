@@ -62,7 +62,12 @@ import {
   TEXT_FORMAT_BUTTON_TYPES,
   TRANSFORMER_MAP,
 } from './constants.js';
-import { increaseListIndentation, splitMultilineFormatting } from './markdown.js';
+import {
+  increaseListIndentation,
+  padBlankBlockquoteLines,
+  splitMultilineFormatting,
+  trimBlankBlockquoteLines,
+} from './markdown.js';
 import {
   isPlainLanguage,
   loadCodeLanguage,
@@ -182,16 +187,18 @@ export const onEditorUpdate = (editor, enabledTransformers) => {
   editor.getRootElement()?.dispatchEvent(
     new CustomEvent('Update', {
       detail: {
-        value: convertToMarkdownString(transformers)
-          // Remove unnecessary backslash for underscore and backslash characters
-          // @see https://github.com/sveltia/sveltia-cms/issues/430
-          // @see https://github.com/sveltia/sveltia-cms/issues/512
-          .replace(/\\([_\\])/g, '$1')
-          // Replace encoded spaces with regular spaces. The HTML entity can appear with a
-          // combination of bold and italic text
-          // @see https://github.com/sveltia/sveltia-cms/issues/511
-          // @see https://github.com/sveltia/sveltia-cms/issues/534
-          .replace(/&#32;/g, ' '),
+        value: trimBlankBlockquoteLines(
+          convertToMarkdownString(transformers)
+            // Remove unnecessary backslash for underscore and backslash characters
+            // @see https://github.com/sveltia/sveltia-cms/issues/430
+            // @see https://github.com/sveltia/sveltia-cms/issues/512
+            .replace(/\\([_\\])/g, '$1')
+            // Replace encoded spaces with regular spaces. The HTML entity can appear with a
+            // combination of bold and italic text
+            // @see https://github.com/sveltia/sveltia-cms/issues/511
+            // @see https://github.com/sveltia/sveltia-cms/issues/534
+            .replace(/&#32;/g, ' '),
+        ),
         selection: getSelectionTypes(),
       },
     }),
@@ -507,6 +514,9 @@ export const convertMarkdownToLexical = async (editor, value, enabledTransformer
 
   // Increase list indentation levels to prevent Markdown parsing issues
   value = increaseListIndentation(value);
+
+  // Pad blank blockquote lines so they are not imported as literal `>` text
+  value = padBlankBlockquoteLines(value);
 
   return new Promise((resolve, reject) => {
     editor.update(() => {

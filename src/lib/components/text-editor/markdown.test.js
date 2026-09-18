@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { increaseListIndentation, splitMultilineFormatting } from './markdown.js';
+import {
+  increaseListIndentation,
+  padBlankBlockquoteLines,
+  splitMultilineFormatting,
+  trimBlankBlockquoteLines,
+} from './markdown.js';
 
 describe('splitMultilineFormatting', () => {
   it('should split italic formatting across lines', () => {
@@ -101,5 +106,73 @@ describe('increaseListIndentation', () => {
     const expected = '    - a\n```\n  - x\n```\n    - b\n```\n  - y\n```\n    - c';
 
     expect(increaseListIndentation(input)).toBe(expected);
+  });
+
+  it('should not modify list items inside an indented fenced code block', () => {
+    const input = '  - before\n  ```\n  - inside code\n  ```\n  - after';
+    const expected = '    - before\n  ```\n  - inside code\n  ```\n    - after';
+
+    expect(increaseListIndentation(input)).toBe(expected);
+  });
+});
+
+describe('padBlankBlockquoteLines', () => {
+  it('should add a trailing space to a blank blockquote line', () => {
+    expect(padBlankBlockquoteLines('> "A quotation."\n>\n> **Attribution**, Title')).toBe(
+      '> "A quotation."\n> \n> **Attribution**, Title',
+    );
+  });
+
+  it('should pad every blank blockquote line', () => {
+    expect(padBlankBlockquoteLines('> a\n>\n>\n> b\n\ntext\n\n>\n> c')).toBe(
+      '> a\n> \n> \n> b\n\ntext\n\n> \n> c',
+    );
+  });
+
+  it('should not affect blockquote lines that already have content or a trailing space', () => {
+    expect(padBlankBlockquoteLines('> a\n> \n> >\n> b')).toBe('> a\n> \n> >\n> b');
+  });
+
+  it('should not affect a `>` that is not at the start of a line', () => {
+    expect(padBlankBlockquoteLines('a > b\n >')).toBe('a > b\n >');
+  });
+
+  it('should return unchanged string if there is no blank blockquote line', () => {
+    expect(padBlankBlockquoteLines('> a\n> b')).toBe('> a\n> b');
+  });
+
+  it('should not modify lines inside a fenced code block', () => {
+    expect(padBlankBlockquoteLines('>\n```\n>\n```\n>')).toBe('> \n```\n>\n```\n> ');
+    expect(padBlankBlockquoteLines('~~~\n>\n~~~')).toBe('~~~\n>\n~~~');
+  });
+
+  it('should not modify lines inside an indented fenced code block', () => {
+    expect(padBlankBlockquoteLines('>\n  ```\n>\n  ```\n>')).toBe('> \n  ```\n>\n  ```\n> ');
+  });
+});
+
+describe('trimBlankBlockquoteLines', () => {
+  it('should remove the trailing space from a blank blockquote line', () => {
+    expect(trimBlankBlockquoteLines('> "A quotation."\n> \n> **Attribution**, Title')).toBe(
+      '> "A quotation."\n>\n> **Attribution**, Title',
+    );
+  });
+
+  it('should trim every blank blockquote line', () => {
+    expect(trimBlankBlockquoteLines('> a\n> \n> \n> b\n\ntext\n\n> \n> c')).toBe(
+      '> a\n>\n>\n> b\n\ntext\n\n>\n> c',
+    );
+  });
+
+  it('should not affect blockquote lines with content', () => {
+    expect(trimBlankBlockquoteLines('> a \n> >\n> b')).toBe('> a \n> >\n> b');
+  });
+
+  it('should return unchanged string if there is no blank blockquote line', () => {
+    expect(trimBlankBlockquoteLines('> a\n> b')).toBe('> a\n> b');
+  });
+
+  it('should not modify lines inside a fenced code block', () => {
+    expect(trimBlankBlockquoteLines('> \n```\n> \n```\n> ')).toBe('>\n```\n> \n```\n>');
   });
 });
