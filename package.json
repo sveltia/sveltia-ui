@@ -57,20 +57,20 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@lexical/code-core": "^0.50.0",
-    "@lexical/dragon": "^0.50.0",
-    "@lexical/extension": "^0.50.0",
-    "@lexical/history": "^0.50.0",
-    "@lexical/link": "^0.50.0",
-    "@lexical/list": "^0.50.0",
-    "@lexical/markdown": "^0.50.0",
-    "@lexical/rich-text": "^0.50.0",
-    "@lexical/selection": "^0.50.0",
-    "@lexical/table": "^0.50.0",
-    "@lexical/utils": "^0.50.0",
+    "@lexical/code-core": "^0.51.0",
+    "@lexical/dragon": "^0.51.0",
+    "@lexical/extension": "^0.51.0",
+    "@lexical/history": "^0.51.0",
+    "@lexical/link": "^0.51.0",
+    "@lexical/list": "^0.51.0",
+    "@lexical/markdown": "^0.51.0",
+    "@lexical/rich-text": "^0.51.0",
+    "@lexical/selection": "^0.51.0",
+    "@lexical/table": "^0.51.0",
+    "@lexical/utils": "^0.51.0",
     "@sveltia/i18n": "^1.4.0",
     "@sveltia/utils": "^0.12.1",
-    "lexical": "^0.50.0"
+    "lexical": "^0.51.0"
   },
   "devDependencies": {
     "@rollup/plugin-yaml": "^5.0.0",
