@@ -61,6 +61,22 @@ it('labels the built-in input by the title unless told otherwise', async () => {
   expect(input.getAttribute('aria-label')).toBe('Name');
 });
 
+it('drops the title label when the input is labelled by an element', async () => {
+  await render(PromptDialog, {
+    open: true,
+    title: 'Name',
+    children: html('<p id="prompt-hint">Enter your full name</p>'),
+    textboxAttrs: { 'aria-labelledby': 'prompt-hint' },
+  });
+  await waitForOpen();
+
+  const dialog = /** @type {HTMLDialogElement} */ (document.querySelector('dialog'));
+  const input = /** @type {HTMLInputElement} */ (dialog.querySelector('.input-outer input'));
+
+  expect(input.hasAttribute('aria-label')).toBe(false);
+  expect(input.getAttribute('aria-labelledby')).toBe('prompt-hint');
+});
+
 it('renders a custom input instead', async () => {
   await render(PromptDialog, {
     open: true,

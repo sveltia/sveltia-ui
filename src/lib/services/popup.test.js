@@ -173,6 +173,110 @@ describe('Popup', () => {
     expect(instance.open).toBe(false);
   });
 
+  it('should ignore keydown on the anchor while disabled or read-only', () => {
+    const instance = activatePopup(anchor, popup, 'bottom-left');
+
+    anchor.setAttribute('aria-disabled', 'true');
+    anchor.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+    expect(instance.open).toBe(false);
+
+    anchor.removeAttribute('aria-disabled');
+    anchor.setAttribute('aria-readonly', 'true');
+    anchor.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true }));
+    expect(instance.open).toBe(false);
+  });
+
+  describe('arrow keys', () => {
+    /**
+     * Dispatch a keydown on the anchor.
+     * @param {string} key Key name.
+     * @param {KeyboardEventInit} [init] Extra event options, such as modifiers.
+     * @returns {KeyboardEvent} The dispatched event.
+     */
+    const press = (key, init = {}) => {
+      const event = new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true, ...init });
+
+      anchor.dispatchEvent(event);
+
+      return event;
+    };
+
+    it('should open a listbox with ArrowDown and ArrowUp, and swallow the key', () => {
+      anchor.setAttribute('aria-haspopup', 'listbox');
+
+      const instance = activatePopup(anchor, popup, 'bottom-left');
+      const down = press('ArrowDown');
+
+      expect(instance.open).toBe(true);
+      expect(down.defaultPrevented).toBe(true);
+
+      instance.open = false;
+      press('ArrowUp');
+      expect(instance.open).toBe(true);
+    });
+
+    it('should open a menu with the arrow keys', () => {
+      anchor.setAttribute('aria-haspopup', 'menu');
+
+      const instance = activatePopup(anchor, popup, 'bottom-left');
+
+      press('ArrowDown');
+      expect(instance.open).toBe(true);
+    });
+
+    it('should open with Alt+ArrowDown but not Alt+ArrowUp', () => {
+      anchor.setAttribute('aria-haspopup', 'listbox');
+
+      const instance = activatePopup(anchor, popup, 'bottom-left');
+
+      press('ArrowUp', { altKey: true });
+      expect(instance.open).toBe(false);
+      press('ArrowDown', { altKey: true });
+      expect(instance.open).toBe(true);
+    });
+
+    it('should leave the arrow keys alone with Shift, Ctrl or Meta', () => {
+      anchor.setAttribute('aria-haspopup', 'listbox');
+
+      const instance = activatePopup(anchor, popup, 'bottom-left');
+
+      expect(press('ArrowDown', { shiftKey: true }).defaultPrevented).toBe(false);
+      expect(press('ArrowDown', { ctrlKey: true }).defaultPrevented).toBe(false);
+      expect(press('ArrowDown', { metaKey: true }).defaultPrevented).toBe(false);
+      expect(instance.open).toBe(false);
+    });
+
+    it('should not open a dialog with the arrow keys', () => {
+      anchor.setAttribute('aria-haspopup', 'dialog');
+
+      const instance = activatePopup(anchor, popup, 'bottom-left');
+
+      expect(press('ArrowDown').defaultPrevented).toBe(false);
+      expect(instance.open).toBe(false);
+    });
+
+    it('should leave the arrow keys to the parent menu on a menu item opening a submenu', () => {
+      anchor.setAttribute('role', 'menuitem');
+      anchor.setAttribute('aria-haspopup', 'menu');
+
+      const instance = activatePopup(anchor, popup, 'right-top');
+
+      expect(press('ArrowDown').defaultPrevented).toBe(false);
+      expect(instance.open).toBe(false);
+    });
+
+    it('should never close an open popup with the arrow keys', () => {
+      anchor.setAttribute('aria-haspopup', 'listbox');
+
+      const instance = activatePopup(anchor, popup, 'bottom-left');
+
+      instance.open = true;
+      expect(press('ArrowDown').defaultPrevented).toBe(false);
+      expect(press('ArrowUp').defaultPrevented).toBe(false);
+      expect(instance.open).toBe(true);
+    });
+  });
+
   it('should close on click directly on the popup backdrop element', () => {
     const instance = activatePopup(anchor, popup, 'bottom-left');
 

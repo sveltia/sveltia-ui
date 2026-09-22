@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-svelte';
-import { text } from '../../test-utils/snippets.js';
+import { html, text } from '../../test-utils/snippets.js';
 import Toast from './toast.svelte';
 
 /**
@@ -119,6 +119,36 @@ describe('Toast', () => {
     await vi.advanceTimersByTimeAsync(5000);
     expect(props.show).toBe(true);
     toast.dispatchEvent(new PointerEvent('pointerleave'));
+    await vi.advanceTimersByTimeAsync(999);
+    expect(props.show).toBe(true);
+    await vi.advanceTimersByTimeAsync(1);
+    expect(props.show).toBe(false);
+  });
+
+  it('holds the countdown while the focus moves between controls inside it', async () => {
+    /** @type {ComponentProps<typeof Toast>} */
+    const props = $state({
+      show: true,
+      duration: 1000,
+      children: html('<span><button class="undo">Undo</button><button class="x">✕</button></span>'),
+    });
+
+    await render(Toast, props);
+
+    const toast = /** @type {HTMLElement} */ (getBase()?.querySelector('.sui.toast'));
+    const undo = /** @type {HTMLButtonElement} */ (toast.querySelector('.undo'));
+    const close = /** @type {HTMLButtonElement} */ (toast.querySelector('.x'));
+
+    await vi.advanceTimersByTimeAsync(800);
+    undo.focus();
+    await vi.advanceTimersByTimeAsync(5000);
+    expect(props.show).toBe(true);
+    // Moving on to the next control is still inside the toast
+    close.focus();
+    await vi.advanceTimersByTimeAsync(5000);
+    expect(props.show).toBe(true);
+    // Leaving it starts the countdown over
+    close.blur();
     await vi.advanceTimersByTimeAsync(999);
     expect(props.show).toBe(true);
     await vi.advanceTimersByTimeAsync(1);

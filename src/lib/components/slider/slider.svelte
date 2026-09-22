@@ -167,20 +167,18 @@
     event.preventDefault();
     event.stopPropagation();
 
-    if (index > -1) {
-      if (
-        multiThumb &&
-        wouldCrossThumbs({ valueIndex, targetPosition: positionList[index], sliderPositions })
-      ) {
-        return;
-      }
+    if (
+      multiThumb &&
+      wouldCrossThumbs({ valueIndex, targetPosition: positionList[index], sliderPositions })
+    ) {
+      return;
+    }
 
-      if (multiThumb) {
-        /** @type {[number, number]} */ (values)[valueIndex] = valueList[index];
-        values = [.../** @type {[number, number]} */ (values)];
-      } else {
-        value = valueList[index];
-      }
+    if (multiThumb) {
+      /** @type {[number, number]} */ (values)[valueIndex] = valueList[index];
+      values = [.../** @type {[number, number]} */ (values)];
+    } else {
+      value = valueList[index];
     }
   };
 

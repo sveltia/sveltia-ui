@@ -106,6 +106,17 @@ describe('OptionRegistry', () => {
     expect(registry.count).toBe(2);
   });
 
+  it('should list the registered options in registration order', () => {
+    const registry = new OptionRegistry();
+    const banana = makeEntry('b', 'Banana');
+    const apple = makeEntry('a', 'Apple');
+
+    expect(registry.entries).toEqual([]);
+    registry.register(banana);
+    registry.register(apple);
+    expect(registry.entries).toEqual([banana, apple]);
+  });
+
   it('should remove an option with the returned function', () => {
     const registry = new OptionRegistry();
     const unregister = registry.register(makeEntry('a', 'Apple'));

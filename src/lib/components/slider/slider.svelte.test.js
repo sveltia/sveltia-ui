@@ -132,6 +132,37 @@ describe('Slider', () => {
     expect(props.value).toBe(0);
   });
 
+  it('swallows the jump keys at either end so the page does not scroll, but nothing else', async () => {
+    /** @type {ComponentProps<typeof Slider>} */
+    const props = $state({ value: 0, min: 0, max: 100, step: 1 });
+    const screen = await renderSlider(props);
+    const slider = /** @type {HTMLElement} */ (screen.container.querySelector('[role="slider"]'));
+
+    /**
+     * Dispatch a cancelable keydown on the slider.
+     * @param {string} key Key name.
+     * @returns {KeyboardEvent} The dispatched event.
+     */
+    const press = (key) => {
+      const event = new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true });
+
+      slider.dispatchEvent(event);
+
+      return event;
+    };
+
+    await waitForInit(screen.container);
+    slider.focus();
+    // Already at the minimum: nothing moves, but the key is still the slider’s
+    expect(press('Home').defaultPrevented).toBe(true);
+    expect(press('PageDown').defaultPrevented).toBe(true);
+    expect(props.value).toBe(0);
+    // An arrow that can’t move is left alone, as is a key the slider has no use for
+    expect(press('ArrowLeft').defaultPrevented).toBe(false);
+    expect(press('a').defaultPrevented).toBe(false);
+    expect(props.value).toBe(0);
+  });
+
   it('is named only when a label is given, and reads out the option label as the value', async () => {
     const screen = await renderSlider({
       value: 1,

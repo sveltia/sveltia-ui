@@ -1,13 +1,44 @@
-import { describe, expect, it } from 'vitest';
+import { date as formatLocaleDate } from '@sveltia/i18n';
+import { describe, expect, it, vi } from 'vitest';
 import {
   addMonths,
   DAY_GRID_SIZE,
+  formatDate,
   getCalendarDays,
   getFirstDayOfMonth,
   isSameDay,
   MONTH_NAMES,
   toDateString,
 } from './calendar.js';
+
+vi.mock('@sveltia/i18n', () => ({
+  date: vi.fn(),
+}));
+
+describe('formatDate', () => {
+  it('should format the date with the localized formatter', () => {
+    const value = new Date(2024, 2, 1);
+    /** @type {Intl.DateTimeFormatOptions} */
+    const options = { year: 'numeric', month: 'short' };
+
+    vi.mocked(formatLocaleDate).mockReturnValueOnce('Mar 2024');
+
+    expect(formatDate(value, options)).toBe('Mar 2024');
+    expect(formatLocaleDate).toHaveBeenCalledWith(value, options);
+  });
+
+  it('should fall back to the browser locale when the formatter is not initialized', () => {
+    const value = new Date(2024, 2, 1);
+    /** @type {Intl.DateTimeFormatOptions} */
+    const options = { year: 'numeric', month: 'short' };
+
+    vi.mocked(formatLocaleDate).mockImplementationOnce(() => {
+      throw new Error('No locale');
+    });
+
+    expect(formatDate(value, options)).toBe(value.toLocaleDateString(undefined, options));
+  });
+});
 
 describe('MONTH_NAMES', () => {
   it('should list the twelve short month names in English', () => {

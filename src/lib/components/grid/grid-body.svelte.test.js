@@ -1,11 +1,16 @@
-import { expect, it, vi } from 'vitest';
+import { afterEach, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-svelte';
+import { setRTL } from '../../test-utils/locale.js';
 import { text } from '../../test-utils/snippets.js';
 import GridBody from './grid-body.svelte';
 
 /**
  * @import { ComponentProps } from 'svelte';
  */
+
+afterEach(() => {
+  setRTL(false);
+});
 
 it('renders a row group with the children', async () => {
   const screen = await render(GridBody, { class: 'custom', children: text('child') });
@@ -72,6 +77,20 @@ it('renders the caption as an expander when collapsible', async () => {
   expect(body.textContent).toContain('child');
   expect(onChange).toHaveBeenCalledTimes(2);
   expect(onChange.mock.calls[1][0].detail).toEqual({ expanded: true });
+});
+
+it('points the expander chevron the other way in a right-to-left locale', async () => {
+  setRTL(true);
+
+  const screen = await render(GridBody, {
+    label: 'Recent',
+    collapsible: true,
+    children: text('child'),
+  });
+
+  const button = screen.getByRole('button', { name: 'Recent' });
+
+  expect(button.element().querySelector('.icon')?.textContent?.trim()).toBe('chevron_left');
 });
 
 it('starts collapsed and follows the bound prop', async () => {

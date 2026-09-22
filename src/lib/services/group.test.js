@@ -656,6 +656,24 @@ describe('Group - listbox keyboard navigation', () => {
     expect(options[0].classList.contains('focused')).toBe(true);
   });
 
+  it('should jump to either end with Home and End, and stay put once there', () => {
+    const onChange = vi.fn();
+
+    listbox.addEventListener('Change', onChange);
+    listbox.dispatchEvent(new KeyboardEvent('keydown', { key: 'End', bubbles: true }));
+    expect(options[2].getAttribute('aria-selected')).toBe('true');
+    expect(onChange).toHaveBeenCalledTimes(1);
+    // Already at the end: nothing to select again
+    listbox.dispatchEvent(new KeyboardEvent('keydown', { key: 'End', bubbles: true }));
+    expect(onChange).toHaveBeenCalledTimes(1);
+    listbox.dispatchEvent(new KeyboardEvent('keydown', { key: 'Home', bubbles: true }));
+    expect(options[0].getAttribute('aria-selected')).toBe('true');
+    expect(options[2].getAttribute('aria-selected')).toBe('false');
+    expect(onChange).toHaveBeenCalledTimes(2);
+    listbox.dispatchEvent(new KeyboardEvent('keydown', { key: 'Home', bubbles: true }));
+    expect(onChange).toHaveBeenCalledTimes(2);
+  });
+
   it('should move focused class when navigating', () => {
     listbox.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
     listbox.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
@@ -872,6 +890,18 @@ describe('Group - grid listbox navigation', () => {
 
   it('should navigate up by colCount on ArrowUp', () => {
     listbox.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+    listbox.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true }));
+    expect(options[0].getAttribute('aria-selected')).toBe('true');
+  });
+
+  it('should count every member as a column when nothing wraps', () => {
+    // Re-mock the layout: all six on one visual row
+    options.forEach((opt, i) => {
+      opt.getBoundingClientRect = () => /** @type {DOMRect} */ ({ top: 0, left: i * 100 });
+    });
+    // A single row: ArrowDown lands on the last member, and ArrowUp goes back to the first
+    listbox.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+    expect(options[5].getAttribute('aria-selected')).toBe('true');
     listbox.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true }));
     expect(options[0].getAttribute('aria-selected')).toBe('true');
   });
@@ -1126,16 +1156,114 @@ describe('Group - onClick with clickToSelect disabled (branch 39 !clickToSelect)
   });
 });
 
-describe('Group - grid listbox with no initial focus (branch 49 currentTarget?...: -1)', () => {
-  it('should use index -1 as fallback when no item is focused in grid', async () => {
+describe('Group - controls nested in a listbox option', () => {
+  /** @type {HTMLElement} */
+  let listbox;
+  /** @type {HTMLElement[]} */
+  let options;
+  /** @type {HTMLButtonElement} */
+  let button;
+  /** @type {HTMLInputElement} */
+  let field;
+  /** @type {HTMLElement} */
+  let span;
+
+  /**
+   * Dispatch a cancelable keydown from the given element.
+   * @param {HTMLElement} from Event target.
+   * @param {string} key Key name.
+   * @returns {KeyboardEvent} The dispatched event.
+   */
+  const press = (from, key) => {
+    const event = new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true });
+
+    from.dispatchEvent(event);
+
+    return event;
+  };
+
+  beforeEach(async () => {
     vi.useFakeTimers();
+    listbox = document.createElement('div');
+    listbox.setAttribute('role', 'listbox');
+    options = ['Option A', 'Option B', 'Option C'].map((label) => {
+      const opt = document.createElement('div');
 
-    const gridListbox = document.createElement('div');
+      opt.setAttribute('role', 'option');
+      opt.textContent = label;
+      listbox.appendChild(opt);
 
+      return opt;
+    });
+    button = document.createElement('button');
+    button.textContent = 'Remove';
+    field = document.createElement('input');
+    span = document.createElement('span');
+    span.textContent = 'Detail';
+    options[1].append(button, field, span);
+    document.body.appendChild(listbox);
+    activateGroup()(listbox);
+    await vi.advanceTimersByTimeAsync(150);
+  });
+
+  afterEach(() => {
+    listbox.remove();
+    vi.useRealTimers();
+  });
+
+  it('should take focus back to the listbox when a control in an option is clicked', () => {
+    button.focus();
+    expect(document.activeElement).toBe(button);
+    button.click();
+    expect(options[1].getAttribute('aria-selected')).toBe('true');
+    expect(document.activeElement).toBe(listbox);
+  });
+
+  it('should leave the keys to a text field, apart from Escape and Tab', () => {
+    press(listbox, 'ArrowDown');
+    expect(options[0].getAttribute('aria-selected')).toBe('true');
+
+    // The field keeps its caret keys: the cursor stays where it was
+    expect(press(field, 'ArrowDown').defaultPrevented).toBe(false);
+    expect(press(field, 'Home').defaultPrevented).toBe(false);
+    expect(options[0].getAttribute('aria-selected')).toBe('true');
+    expect(options[1].getAttribute('aria-selected')).toBe('false');
+
+    // Escape and Tab still reach the group, which has no use for them here and lets them through
+    expect(press(field, 'Escape').defaultPrevented).toBe(false);
+    expect(press(field, 'Tab').defaultPrevented).toBe(false);
+    expect(options[0].getAttribute('aria-selected')).toBe('true');
+  });
+
+  it('should keep Home and End for an element nested in an option', () => {
+    press(listbox, 'ArrowDown');
+    expect(options[0].getAttribute('aria-selected')).toBe('true');
+    expect(press(span, 'End').defaultPrevented).toBe(false);
+    expect(options[2].getAttribute('aria-selected')).toBe('false');
+    expect(options[0].getAttribute('aria-selected')).toBe('true');
+  });
+});
+
+describe('Group - grid listbox with no initial focus', () => {
+  /** @type {HTMLElement} */
+  let gridListbox;
+  /** @type {HTMLElement[]} */
+  let gridOptions;
+
+  /**
+   * Dispatch a keydown on the listbox.
+   * @param {string} key Key name.
+   */
+  const press = (key) => {
+    gridListbox.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true }));
+  };
+
+  beforeEach(async () => {
+    vi.useFakeTimers();
+    gridListbox = document.createElement('div');
     gridListbox.setAttribute('role', 'listbox');
     gridListbox.classList.add('grid');
-
-    const gridOptions = Array.from({ length: 6 }, (_, i) => {
+    gridOptions = Array.from({ length: 6 }, (_, i) => {
       const opt = document.createElement('div');
 
       opt.setAttribute('role', 'option');
@@ -1144,7 +1272,6 @@ describe('Group - grid listbox with no initial focus (branch 49 currentTarget?..
 
       return opt;
     });
-
     document.body.appendChild(gridListbox);
     gridOptions.forEach((opt, i) => {
       opt.getClientRects = () => /** @type {DOMRectList} */ (/** @type {unknown} */ ([{}]));
@@ -1153,12 +1280,49 @@ describe('Group - grid listbox with no initial focus (branch 49 currentTarget?..
     });
     activateGroup()(gridListbox);
     await vi.advanceTimersByTimeAsync(150);
+  });
 
-    // Press ArrowDown with no focused element: the arrows start from the first item, as in a list
-    gridListbox.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
-    expect(gridOptions[0].getAttribute('aria-selected')).toBe('true');
+  afterEach(() => {
     gridListbox.remove();
+    locale.set('en');
     vi.useRealTimers();
+  });
+
+  it('should start from the first item on ArrowDown or ArrowRight, as in a list', () => {
+    press('ArrowDown');
+    expect(gridOptions[0].getAttribute('aria-selected')).toBe('true');
+    gridOptions[0].classList.remove('focused');
+    gridOptions[0].setAttribute('aria-selected', 'false');
+    press('ArrowRight');
+    expect(gridOptions[0].getAttribute('aria-selected')).toBe('true');
+  });
+
+  it('should start from the last item on ArrowUp or ArrowLeft', () => {
+    press('ArrowUp');
+    expect(gridOptions[5].getAttribute('aria-selected')).toBe('true');
+    gridOptions[5].classList.remove('focused');
+    gridOptions[5].setAttribute('aria-selected', 'false');
+    press('ArrowLeft');
+    expect(gridOptions[5].getAttribute('aria-selected')).toBe('true');
+  });
+
+  it('should swap the horizontal arrows in a right-to-left locale', () => {
+    locale.set('ar');
+    press('ArrowLeft');
+    expect(gridOptions[0].getAttribute('aria-selected')).toBe('true');
+    gridOptions[0].classList.remove('focused');
+    gridOptions[0].setAttribute('aria-selected', 'false');
+    press('ArrowRight');
+    expect(gridOptions[5].getAttribute('aria-selected')).toBe('true');
+  });
+
+  it('should do nothing on a key that does not navigate, with no item focused', () => {
+    press('Enter');
+    press(' ');
+    press('Escape');
+    press('Tab');
+    expect(gridListbox.querySelector('[aria-selected="true"]')).toBeNull();
+    expect(gridListbox.hasAttribute('aria-activedescendant')).toBe(false);
   });
 });
 
@@ -2028,6 +2192,56 @@ describe('Group - leaving a menu', () => {
     document.body.removeEventListener('keydown', onDialogEscape);
 
     expect(onDialogEscape).toHaveBeenCalledTimes(1);
+  });
+
+  it('should move through the menu items by their first letter', () => {
+    childItems[0].focus();
+    press(childItems[0], 'c');
+    expect(document.activeElement).toBe(childItems[1]);
+  });
+
+  it('should leave the keys to a text field in the menu, but still close it on Escape', () => {
+    const field = document.createElement('input');
+
+    submenu.appendChild(field);
+    field.focus();
+
+    const down = new KeyboardEvent('keydown', {
+      key: 'ArrowDown',
+      bubbles: true,
+      cancelable: true,
+    });
+
+    field.dispatchEvent(down);
+    expect(down.defaultPrevented).toBe(false);
+    expect(document.activeElement).toBe(field);
+
+    const openerClicks = vi.fn();
+
+    opener.addEventListener('click', openerClicks);
+    press(field, 'Escape');
+    expect(openerClicks).toHaveBeenCalledTimes(1);
+    expect(document.activeElement).toBe(opener);
+  });
+
+  it('should leave focus where it is on Tab when the outermost opener is not a tab stop', async () => {
+    // A menu opened from something that can’t take focus itself, such as a context menu on a
+    // plain element, has no tab sequence position to move on from
+    const plainOpener = document.createElement('div');
+
+    plainOpener.setAttribute('aria-haspopup', 'menu');
+    plainOpener.setAttribute('aria-controls', 'parent-content');
+    plainOpener.setAttribute('aria-expanded', 'true');
+    plainOpener.getClientRects = () => /** @type {any} */ ([{ width: 10, height: 10 }]);
+    menuButton.replaceWith(plainOpener);
+
+    childItems[0].focus();
+    press(childItems[0], 'Tab');
+    await new Promise((resolve) => {
+      setTimeout(resolve, 100);
+    });
+    expect(document.activeElement).not.toBe(before);
+    expect(document.activeElement).not.toBe(after);
   });
 
   it('should skip clicking an opener in the chain that is already collapsed', async () => {
