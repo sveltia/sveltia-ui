@@ -156,7 +156,10 @@
       }
     }
 
-    &.in-combobox:focus-visible {
+    // The focused option draws its own ring, so hide the listbox’s ring to avoid a double ring.
+    // It’s kept when no option is focused, e.g. an empty list, so keyboard focus is still visible.
+    &.in-combobox:focus-visible,
+    &:focus-visible:has(:global(.focused)) {
       outline-color: transparent;
     }
 
