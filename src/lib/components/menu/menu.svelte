@@ -62,7 +62,7 @@
     margin: 0;
     border-width: var(--sui-menu-border-width, 1px);
     border-style: var(--sui-menu-border-style, solid);
-    border-color: var(--sui-menu-border-width, var(--sui-secondary-border-color));
+    border-color: var(--sui-menu-border-color, var(--sui-secondary-border-color));
     border-radius: var(--sui-menu-border-radius, 4px);
     padding: var(--sui-menu-padding, 4px);
 
