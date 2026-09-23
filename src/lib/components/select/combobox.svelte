@@ -529,10 +529,6 @@
         }
       }
 
-      &:not(.editable) > button {
-        background-color: transparent !important;
-      }
-
       .text-input {
         margin: 0 !important;
         width: 100% !important;

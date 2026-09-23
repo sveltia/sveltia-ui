@@ -194,22 +194,6 @@
           background-color: var(--sui-active-background-color);
         }
       }
-
-      &:hover > [role='menu'] {
-        opacity: 1;
-      }
-
-      & > [role='menu'] {
-        position: absolute;
-        inset-block-start: 2px;
-        inset-block-end: auto;
-        inset-inline-start: calc(100% + 4px);
-        inset-inline-end: auto;
-
-        &:hover {
-          opacity: 1;
-        }
-      }
     }
   }
 

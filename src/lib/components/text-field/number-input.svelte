@@ -218,6 +218,15 @@
       min-width: 0;
     }
 
+    // Maintain the border opacity
+    &:not(.disabled) :global(button[aria-disabled='true']) {
+      filter: grayscale(0) opacity(1);
+
+      :global(*) {
+        filter: grayscale(1) opacity(var(--sui-disabled-opacity, 0.35));
+      }
+    }
+
     :global {
       :not(:first-child) input {
         border-start-start-radius: 0;
@@ -227,17 +236,6 @@
       :not(:last-child) input {
         border-start-end-radius: 0;
         border-end-end-radius: 0;
-      }
-
-      // Maintain the border opacity
-      &:not(.disabled) {
-        button[aria-disabled='true'] {
-          filter: grayscale(0) opacity(1);
-
-          * {
-            filter: grayscale(1) opacity(var(--sui-disabled-opacity, 0.35));
-          }
-        }
       }
 
       .text-input {

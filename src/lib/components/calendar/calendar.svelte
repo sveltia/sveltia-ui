@@ -266,12 +266,14 @@
         color: var(--sui-tertiary-foreground-color);
       }
 
-      :global {
-        &.today button {
-          color: var(--sui-highlight-foreground-color);
-          background-color: var(--sui-primary-accent-color);
-        }
+      // Today is marked with a ring so it isn’t mistaken for the selected day, which is filled
+      &.today :global(button) {
+        border-width: 1px;
+        border-color: var(--sui-primary-accent-color);
+        color: var(--sui-primary-accent-color-text);
+      }
 
+      :global {
         button {
           justify-content: center;
           margin: 0 !important;
@@ -286,6 +288,11 @@
           &:focus {
             border-width: 1px;
             border-color: var(--sui-primary-accent-color-light);
+          }
+
+          &[aria-selected='true'] {
+            color: var(--sui-highlight-foreground-color);
+            background-color: var(--sui-primary-accent-color);
           }
         }
       }

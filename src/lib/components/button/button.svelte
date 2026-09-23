@@ -384,10 +384,6 @@
       & > * {
         pointer-events: none;
       }
-
-      &:has([slot='start-icon'] + [slot='end-icon']) {
-        gap: 0;
-      }
     }
   }
 </style>

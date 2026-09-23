@@ -101,20 +101,18 @@
           background-color: var(--sui-selected-background-color);
         }
       }
+    }
 
-      &[aria-invalid='true'] button {
-        border-color: var(--sui-error-border-color);
-      }
+    &[aria-invalid='true'] :global(button) {
+      border-color: var(--sui-error-border-color);
+    }
 
-      // Maintain the border opacity
-      &[aria-disabled='false'] {
-        button[aria-disabled='true'] {
-          filter: grayscale(0) opacity(1);
+    // Maintain the border opacity
+    &[aria-disabled='false'] :global(button[aria-disabled='true']) {
+      filter: grayscale(0) opacity(1);
 
-          * {
-            filter: grayscale(1) opacity(var(--sui-disabled-opacity, 0.35));
-          }
-        }
+      :global(*) {
+        filter: grayscale(1) opacity(var(--sui-disabled-opacity, 0.35));
       }
     }
 

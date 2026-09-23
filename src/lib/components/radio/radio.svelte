@@ -170,33 +170,33 @@
     -webkit-user-select: none;
     user-select: none;
 
+    &:hover :global {
+      button {
+        background-color: var(--sui-hover-background-color);
+
+        &[aria-checked='true'] {
+          border-color: var(--sui-primary-accent-color-light);
+          color: var(--sui-primary-accent-color-text);
+
+          &::before {
+            background-color: var(--sui-primary-accent-color-light);
+          }
+        }
+      }
+    }
+
+    &:active :global {
+      button {
+        background-color: var(--sui-active-background-color);
+
+        &[aria-checked='true'] {
+          border-color: var(--sui-primary-accent-color-dark);
+          color: var(--sui-primary-accent-color-dark);
+        }
+      }
+    }
+
     :global {
-      &:hover {
-        button {
-          background-color: var(--sui-hover-background-color);
-
-          &[aria-checked='true'] {
-            border-color: var(--sui-primary-accent-color-light);
-            color: var(--sui-primary-accent-color-text);
-
-            &::before {
-              background-color: var(--sui-primary-accent-color-light);
-            }
-          }
-        }
-      }
-
-      &:active {
-        button {
-          background-color: var(--sui-active-background-color);
-
-          &[aria-checked='true'] {
-            border-color: var(--sui-primary-accent-color-dark);
-            color: var(--sui-primary-accent-color-dark);
-          }
-        }
-      }
-
       button {
         flex: none;
         justify-content: center;

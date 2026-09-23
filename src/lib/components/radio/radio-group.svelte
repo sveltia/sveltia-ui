@@ -96,8 +96,8 @@
       }
     }
 
-    :global {
-      &[aria-invalid='true'] button {
+    &[aria-invalid='true'] :global {
+      button {
         border-color: var(--sui-error-border-color);
 
         &[aria-checked='true'] {

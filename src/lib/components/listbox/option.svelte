@@ -175,11 +175,11 @@
       outline-width: 0 !important;
     }
 
-    :global {
-      &.wrap button {
-        white-space: normal;
-      }
+    &.wrap :global(button) {
+      white-space: normal;
+    }
 
+    :global {
       button {
         flex: none;
         display: flex;
