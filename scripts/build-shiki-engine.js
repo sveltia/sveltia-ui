@@ -8,7 +8,7 @@
  * @see https://github.com/sveltia/sveltia-cms/issues/587
  */
 
-import { readFileSync } from 'node:fs';
+import { readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { build } from 'rolldown';
 
@@ -37,6 +37,22 @@ if (leftover) {
     `Shiki engine chunk still has unresolved bare imports: ${[...new Set(leftover)].join(', ')}`,
   );
 }
+
+// Declare the exports loosely, so that a type checker following the `@sveltia/ui/shiki-engine`
+// import in `self-hosted/index.js` doesn’t check the minified chunk itself
+writeFileSync(
+  outfile.replace(/\.js$/, '.d.ts'),
+  [
+    'createHighlighterCoreSync',
+    'createJavaScriptRegexEngine',
+    'getTokenStyleObject',
+    'isSpecialLang',
+    'isSpecialTheme',
+    'stringifyTokenStyle',
+  ]
+    .map((name) => `export declare const ${name}: (...args: any[]) => any;\n`)
+    .join(''),
+);
 
 // eslint-disable-next-line no-console
 console.log(`Built dist/shiki-engine.js (${(code.length / 1024).toFixed(1)} KB minified).`);

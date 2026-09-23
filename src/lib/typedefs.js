@@ -370,6 +370,22 @@
  */
 
 /**
+ * Web font used by the components, published on Fontsource.
+ * @typedef {object} FontDefinition
+ * @property {string} family Font family name.
+ * @property {string} packageName Fontsource package name, e.g. `@fontsource/noto-mono`.
+ * @property {string} version Fontsource package version.
+ * @property {string} cdnId Font ID on the Fontsource CDN, e.g. `noto-mono`, with a `:vf` suffix
+ * for a variable font.
+ * @property {string} subset Subset, weight and style of the file, e.g. `latin-400-normal`.
+ * @property {string} format `@font-face` format hint.
+ * @property {string} weight `@font-face` weight, or weight range for a variable font.
+ * @property {string} display `@font-face` display strategy.
+ * @property {string} [unicodeRange] `@font-face` Unicode range.
+ * @property {string} [sizeAdjust] `@font-face` size adjustment.
+ */
+
+/**
  * @typedef {object} CodeTokenizer
  * @property {string | null} defaultLanguage Language to fall back to when a code node doesn’t carry
  * one. Set to `null` to leave such blocks untouched, so a Markdown round-trip preserves a bare code

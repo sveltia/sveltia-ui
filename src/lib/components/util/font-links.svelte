@@ -1,5 +1,11 @@
-<link rel="preconnect" href="https://cdn.jsdelivr.net/" />
-
+<!--
+  @component
+  Load the web fonts used by the components from the Fontsource CDN. The `@font-face` rules are
+  static, so they end up in the app’s stylesheet; fonts set with `setFontURLs()`, e.g. by
+  `@sveltia/ui/self-hosted`, take precedence over them. See `fonts.js` for the definitions, which a
+  test keeps in sync with the rules. There’s no `preconnect` hint: the rules and the text using the
+  fonts are rendered at the same time, so it wouldn’t start the connection any earlier.
+-->
 <style>
   /* https://fontsource.org/fonts/source-sans-3/cdn */
   @font-face {

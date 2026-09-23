@@ -5,3 +5,4 @@ pnpm-lock.yaml
 src/lib/components/emoji/generated.js
 src/lib/components/text-editor/shiki/generated.js
 .claude
+src/lib/self-hosted/generated.js

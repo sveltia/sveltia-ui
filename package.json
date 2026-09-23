@@ -20,7 +20,14 @@
       "default": "./dist/index.js"
     },
     "./locales/*": "./dist/locales/*",
-    "./shiki-engine": "./dist/shiki-engine.js"
+    "./self-hosted": {
+      "types": "./dist/self-hosted/index.d.ts",
+      "default": "./dist/self-hosted/index.js"
+    },
+    "./shiki-engine": {
+      "types": "./dist/shiki-engine.d.ts",
+      "default": "./dist/shiki-engine.js"
+    }
   },
   "svelte": "./dist/index.js",
   "typesVersions": {
@@ -36,7 +43,7 @@
     "!dist/test-utils"
   ],
   "scripts": {
-    "build": "npm run generate:shiki && svelte-kit sync && svelte-package && node scripts/build-shiki-engine.js",
+    "build": "npm run generate:shiki && npm run generate:fonts && svelte-kit sync && svelte-package && node scripts/build-shiki-engine.js",
     "build:watch": "svelte-kit sync && svelte-package --watch",
     "check": "pnpm run --no-bail '/^check:.*/'",
     "check:audit": "pnpm audit --ignore-registry-errors",
@@ -49,6 +56,7 @@
     "dev": "vite dev",
     "format": "prettier --write .",
     "generate:emoji": "node scripts/generate-emoji-data.js",
+    "generate:fonts": "node scripts/copy-fonts.js",
     "generate:shiki": "node scripts/generate-shiki-metadata.js",
     "prepublishOnly": "npm run build",
     "preview": "vite preview",
@@ -68,11 +76,16 @@
     "@lexical/selection": "^0.51.0",
     "@lexical/table": "^0.51.0",
     "@lexical/utils": "^0.51.0",
+    "@shikijs/langs": "4.4.3",
+    "@shikijs/themes": "4.4.3",
     "@sveltia/i18n": "^1.4.0",
     "@sveltia/utils": "^0.12.1",
     "lexical": "^0.51.0"
   },
   "devDependencies": {
+    "@fontsource-variable/material-symbols-outlined": "5.3.1",
+    "@fontsource-variable/source-sans-3": "5.3.0",
+    "@fontsource/noto-mono": "5.3.0",
     "@rollup/plugin-yaml": "^5.0.0",
     "@sveltejs/adapter-auto": "^7.0.1",
     "@sveltejs/kit": "^2.70.3",

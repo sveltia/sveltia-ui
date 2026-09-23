@@ -86,6 +86,7 @@ export { loadCodeHighlighter } from './components/text-editor/core.js';
 export { setCodeHighlighterCacheEnabled } from './components/text-editor/shiki/cache.js';
 export { highlightCodeToHTML } from './components/text-editor/shiki/facade.js';
 export { setCodeHighlighterLoaders } from './components/text-editor/shiki/loader.js';
+export { setFontURLs } from './components/util/fonts.js';
 export { initLocales, strings } from './services/i18n.js';
 
 // eslint-disable-next-line import/export
