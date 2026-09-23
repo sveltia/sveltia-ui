@@ -1,4 +1,5 @@
 import { getContext, setContext } from 'svelte';
+import { castValue } from './value.js';
 
 /**
  * @import { OptionEntry, SelectedItemDetail } from '$lib/typedefs';
@@ -115,20 +116,7 @@ export const getOptionRegistry = () => getContext(CONTEXT_KEY);
  */
 export const getSelectedItemDetail = (target) => {
   const { type = 'string', name, label } = target.dataset;
-  /** @type {any} */
-  let { value } = target.dataset;
-
-  if (type === 'number') {
-    value = Number(value);
-
-    if (Number.isNaN(value)) {
-      value = null;
-    }
-  } else if (type === 'boolean') {
-    value = value === 'true';
-  } else if (type === 'string') {
-    value = value ? String(value) : '';
-  }
+  const value = castValue(target.dataset.value, type);
 
   return { target, type, name, label, value };
 };

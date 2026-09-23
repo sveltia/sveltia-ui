@@ -7,6 +7,7 @@
 <script>
   import { onDestroy } from 'svelte';
   import { getOptionRegistry } from '../../services/select.svelte.js';
+  import { getValueType } from '../../services/value.js';
   import Button from '../button/button.svelte';
   import Icon from '../icon/icon.svelte';
 
@@ -92,7 +93,7 @@
        * @returns {string} Type.
        */
       get type() {
-        return restProps.valueType ?? typeof value;
+        return restProps.valueType ?? getValueType(value);
       },
       /**
        * Get whether the option is selected.

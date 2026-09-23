@@ -8,6 +8,7 @@
 <script>
   import { isRTL } from '@sveltia/i18n';
   import { getContext, setContext } from 'svelte';
+  import { getValueType } from '../../services/value.js';
   import Icon from '../icon/icon.svelte';
 
   /**
@@ -29,8 +30,8 @@
    * attribute. Ignored if the item has no `items` slot content.
    * @property {string} [label] Text label displayed on the item.
    * @property {any} [value] The `data-value` attribute on the item. Default: the `label`.
-   * @property {string} [valueType] Data type of the `value`. Typically `string`, `number` or
-   * `boolean`. Default: auto detect.
+   * @property {string} [valueType] Data type of the `value`. Typically `string`, `number`,
+   * `boolean` or `null`. Default: auto detect.
    * @property {Snippet} [children] Primary slot content, used instead of the `label`.
    * @property {Snippet} [items] Child items slot content, which makes the item a parent node.
    * @property {Snippet} [startIcon] Start icon slot content.
@@ -57,7 +58,7 @@
     // svelte-ignore state_referenced_locally
     value = label,
     // svelte-ignore state_referenced_locally
-    valueType = typeof value,
+    valueType = getValueType(value),
     children,
     items,
     startIcon,

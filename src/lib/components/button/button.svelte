@@ -6,6 +6,7 @@
 -->
 <script>
   import { activateKeyShortcuts } from '@sveltia/utils/events';
+  import { getValueType } from '../../services/value.js';
   import TruncatedText from '../typography/truncated-text.svelte';
   import Popup from '../util/popup.svelte';
 
@@ -25,7 +26,7 @@
     name = undefined,
     value = undefined,
     // svelte-ignore state_referenced_locally
-    valueType = typeof value,
+    valueType = getValueType(value),
     hidden = false,
     disabled = false,
     readonly = false,

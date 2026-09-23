@@ -77,6 +77,33 @@ describe('SelectTags', () => {
     expect(getTags(screen.container)).toEqual(['Apple', 'Cherry']);
   });
 
+  it('adds boolean and `null` values as they are', async () => {
+    /** @type {ComponentProps<typeof SelectTags>} */
+    const props = $state({
+      options: [
+        { label: 'Yes', value: true },
+        { label: 'No', value: false },
+        { label: 'Not relevant', value: null },
+      ],
+      values: [],
+    });
+
+    const screen = await render(SelectTags, props);
+
+    await screen.getByRole('combobox').click();
+    await screen.getByRole('option', { name: 'Not relevant' }).click();
+    await vi.waitFor(() => {
+      expect(props.values).toEqual([null]);
+    });
+
+    await screen.getByRole('combobox').click();
+    await screen.getByRole('option', { name: 'No' }).click();
+    await vi.waitFor(() => {
+      expect(props.values).toEqual([null, false]);
+    });
+    expect(getTags(screen.container)).toEqual(['Not relevant', 'No']);
+  });
+
   it('removes a value with its button', async () => {
     const onRemoveValue = vi.fn();
     /** @type {ComponentProps<typeof SelectTags>} */

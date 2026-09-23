@@ -29,6 +29,14 @@ const makeEntry = (value, label, selected = false) => ({
 const makeElement = (dataset) => /** @type {HTMLElement} */ (/** @type {unknown} */ ({ dataset }));
 
 describe('getSelectedItemDetail', () => {
+  it('should return null when type is null', () => {
+    const el = makeElement({ type: 'null' });
+    const detail = getSelectedItemDetail(el);
+
+    expect(detail.type).toBe('null');
+    expect(detail.value).toBeNull();
+  });
+
   it('should return a string value by default', () => {
     const el = makeElement({ value: 'hello', name: 'field', label: 'Hello' });
     const detail = getSelectedItemDetail(el);

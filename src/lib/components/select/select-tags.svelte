@@ -250,9 +250,10 @@
       {required}
       {invalid}
       onChange={() => {
-        // The select only reports a change once an option has been picked
+        // The select only reports a change once an option has been picked. Check for `undefined`
+        // rather than a falsy value, as `null`, `false`, `0` and an empty string are valid values
         /* v8 ignore else */
-        if (selectedValue) {
+        if (selectedValue !== undefined) {
           values = [...values, selectedValue];
           onAddValue?.(new CustomEvent('AddValue', { detail: { value: selectedValue } }));
           // Reset the combobox

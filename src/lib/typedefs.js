@@ -12,8 +12,8 @@
  * @property {string} [role] The `role` attribute on the `<button>` element.
  * @property {string} [name] The `data-name` attribute on the `<button>` element.
  * @property {any} [value] The `data-value` attribute on the `<button>` element.
- * @property {string} [valueType] Data type of the `value`. Typically `string`, `number` or
- * `boolean`. Default: auto detect.
+ * @property {string} [valueType] Data type of the `value`. Typically `string`, `number`, `boolean`
+ * or `null`. Default: auto detect.
  * @property {boolean} [hidden] Whether to hide the widget. An alias of the `aria-hidden` attribute.
  * @property {boolean} [disabled] Whether to disable the widget. An alias of the `aria-disabled`
  * attribute.

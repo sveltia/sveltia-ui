@@ -22,8 +22,8 @@
    * attribute.
    * @property {string} [name] The `data-name` attribute on the `<button>` element.
    * @property {any} [value] The `data-value` attribute on the `<button>` element.
-   * @property {string} [valueType] Data type of the `value`. Typically `string`, `number` or
-   * `boolean`. Default: auto detect.
+   * @property {string} [valueType] Data type of the `value`. Typically `string`, `number`,
+   * `boolean` or `null`. Default: auto detect.
    * @property {string} [label] Text label displayed next to the radio button.
    * @property {string} [ariaLabel] `aria-label` attribute on the `<button>` element, for a radio
    * button without a visible label.
