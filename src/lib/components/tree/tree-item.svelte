@@ -209,6 +209,28 @@
       background-color: var(--sui-active-background-color);
     }
 
+    // Pointing at an item in a read-only tree gives no feedback, as it can’t be selected. A parent
+    // item still expands and collapses, which the chevron keeps pointing out.
+    :global([role='tree'][aria-readonly='true']) & > .row {
+      cursor: default;
+
+      &:is(:hover, :active) {
+        color: var(--sui-tree-foreground-color);
+        background-color: transparent;
+      }
+
+      & > .chevron:not(.placeholder) {
+        cursor: pointer;
+      }
+    }
+
+    :global([role='tree'][aria-readonly='true'])
+      &[aria-selected='true']
+      > .row:is(:hover, :active) {
+      color: var(--sui-highlight-foreground-color);
+      background-color: var(--sui-selected-background-color);
+    }
+
     &[aria-expanded='true'] > .row > .chevron {
       &:dir(ltr) {
         transform: rotate(90deg);

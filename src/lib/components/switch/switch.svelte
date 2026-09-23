@@ -165,6 +165,28 @@
         }
       }
     }
+
+    // The checked state is drawn in a neutral colour and pointing at a read-only switch gives no
+    // feedback, so it doesn’t look editable
+    &[aria-readonly='true'] {
+      cursor: default;
+
+      &,
+      &:is(:hover, :active) {
+        &[aria-checked='false'] span {
+          background-color: var(--sui-control-background-color);
+        }
+
+        &[aria-checked='true'] span {
+          background-color: var(--sui-readonly-accent-color);
+
+          &::before {
+            border-color: var(--sui-readonly-accent-color);
+            background-color: var(--sui-readonly-accent-color-inverted);
+          }
+        }
+      }
+    }
   }
 
   span {

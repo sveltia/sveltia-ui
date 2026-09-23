@@ -230,4 +230,23 @@
     outline-color: var(--sui-focus-ring-color);
     outline-offset: calc(var(--sui-focus-ring-width) * -1);
   }
+
+  // In a read-only listbox, the check mark is drawn in a neutral colour and pointing at an option
+  // gives no feedback, so it doesn’t look editable. The keyboard cursor keeps its highlight.
+  :global([role='listbox'][aria-readonly='true']) .option {
+    :global {
+      button {
+        cursor: default;
+
+        &:not(.focused):is(:hover, :active) {
+          color: var(--sui-control-foreground-color);
+          background-color: transparent;
+        }
+
+        &[aria-selected='true'] .icon.check {
+          color: var(--sui-readonly-accent-color);
+        }
+      }
+    }
+  }
 </style>

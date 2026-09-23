@@ -117,6 +117,13 @@
         }
       }
     }
+
+    // Pointing at a button in a read-only group gives no feedback, so it doesn’t look editable.
+    // Each button variant has its own hover and active colours, so the pointer is turned away
+    // instead of undoing them one by one; the labels aren’t selectable text anyway.
+    &[aria-readonly='true'] :global(button) {
+      pointer-events: none;
+    }
   }
 
   .inner {

@@ -10,6 +10,7 @@
    * @type {{
    * group?: string,
    * disabled?: boolean,
+   * readonly?: boolean,
    * onChange?: (event: CustomEvent) => void,
    * }}
    */
@@ -17,12 +18,13 @@
     /* eslint-disable prefer-const */
     group = $bindable('red'),
     disabled = false,
+    readonly = false,
     onChange = undefined,
     /* eslint-enable prefer-const */
   } = $props();
 </script>
 
-<RadioGroup ariaLabel="Color" {disabled} {onChange}>
+<RadioGroup ariaLabel="Color" {disabled} {readonly} {onChange}>
   <Radio label="Red" value="red" bind:group />
   <Radio label="Green" value="green" bind:group />
   <Radio label="Blue" value="blue" bind:group />

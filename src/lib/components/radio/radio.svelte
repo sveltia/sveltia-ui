@@ -74,6 +74,13 @@
   const accessibleLabel = $derived(ariaLabel ?? restProps['aria-label']);
   const hasVisibleLabel = $derived(!!(children || label));
 
+  /**
+   * Check if the radio button belongs to a read-only `<RadioGroup>`.
+   * @returns {boolean} Result.
+   */
+  const isGroupReadOnly = () =>
+    !!buttonElement?.closest('[role="radiogroup"]')?.matches('[aria-readonly="true"]');
+
   // Sync `checked` with `group` and `value`
   $effect(() => {
     if (typeof group === 'string') {
@@ -119,7 +126,9 @@
     onclick={(event) => {
       event.preventDefault();
 
-      if (disabled || checked) {
+      // A read-only group turns the selection down too, but only once this handler has run, so it
+      // has to be checked here as well
+      if (disabled || checked || isGroupReadOnly()) {
         return;
       }
 
@@ -225,6 +234,27 @@
 
     label {
       cursor: inherit;
+    }
+  }
+
+  // In a read-only group, the checked state is drawn in a neutral colour and pointing at a radio
+  // button gives no feedback, so it doesn’t look editable
+  :global([role='radiogroup'][aria-readonly='true']) .radio {
+    cursor: default;
+
+    &,
+    &:is(:hover, :active) {
+      :global(button) {
+        background-color: var(--sui-checkbox-background-color);
+      }
+
+      :global(button[aria-checked='true']) {
+        border-color: var(--sui-readonly-accent-color);
+      }
+
+      :global(button[aria-checked='true']::before) {
+        background-color: var(--sui-readonly-accent-color);
+      }
     }
   }
 </style>

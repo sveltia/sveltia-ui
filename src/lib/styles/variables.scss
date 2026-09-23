@@ -314,6 +314,10 @@
     --sui-checkbox-height: 20px;
     --sui-checkbox-border-color: hsl(var(--sui-border-color-1-hsl));
     --sui-checkbox-background-color: var(--sui-control-background-color);
+    // Read-only choice controls draw their checked or selected state in a neutral colour instead
+    // of the accent, so they don’t look editable while keeping full contrast
+    --sui-readonly-accent-color: var(--sui-tertiary-foreground-color);
+    --sui-readonly-accent-color-inverted: var(--sui-primary-background-color);
     // Option & menu item
     --sui-option-border-radius: var(--sui-control-medium-border-radius);
     --sui-option-padding: calc((var(--sui-control-medium-height) / 6))

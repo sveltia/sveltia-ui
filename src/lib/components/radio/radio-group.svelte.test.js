@@ -82,3 +82,31 @@ it('moves the selection with the arrow keys', async () => {
   });
   expect(props.group).toBe('green');
 });
+
+it('keeps the selection when read-only', async () => {
+  const onChange = vi.fn();
+  /** @type {ComponentProps<typeof RadioGroupFixture>} */
+  const props = $state({ group: 'red', readonly: true, onChange });
+  const activated = whenActivated();
+  const screen = await render(RadioGroupFixture, props);
+
+  await activated;
+
+  const red = screen.getByRole('radio', { name: 'Red' });
+  const green = screen.getByRole('radio', { name: 'Green' });
+  const blue = screen.getByRole('radio', { name: 'Blue' });
+
+  await green.click();
+  await screen.getByText('Blue').click();
+  /** @type {HTMLElement} */ (red.element()).focus();
+  await userEvent.keyboard('{ArrowRight}');
+  await userEvent.keyboard(' ');
+
+  // Only the original radio is checked: a click used to check the target as well, while the group
+  // left the others alone
+  await expect.element(red).toHaveAttribute('aria-checked', 'true');
+  await expect.element(green).toHaveAttribute('aria-checked', 'false');
+  await expect.element(blue).toHaveAttribute('aria-checked', 'false');
+  expect(props.group).toBe('red');
+  expect(onChange).not.toHaveBeenCalled();
+});

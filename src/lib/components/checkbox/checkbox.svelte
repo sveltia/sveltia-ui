@@ -251,6 +251,26 @@
     label {
       cursor: inherit;
     }
+
+    // The checked state is drawn in a neutral colour and pointing at a read-only checkbox gives no
+    // feedback, so it doesn’t look editable
+    &.readonly {
+      cursor: default;
+
+      &,
+      &:is(:hover, :active) {
+        :global(button) {
+          background-color: var(--sui-checkbox-background-color);
+        }
+
+        // An error still shows in its own colour
+        :global(button[aria-checked='true']:not([aria-invalid='true'])) {
+          border-color: var(--sui-readonly-accent-color);
+          color: var(--sui-readonly-accent-color-inverted);
+          background-color: var(--sui-readonly-accent-color);
+        }
+      }
+    }
   }
 
   .inner {

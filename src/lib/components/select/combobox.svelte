@@ -482,6 +482,16 @@
         background-color: var(--sui-hover-background-color);
       }
 
+      // Pointing at or clicking a read-only combobox gives no feedback, as it can’t be opened. The
+      // keyboard focus keeps its highlight.
+      &[aria-readonly='true'] {
+        cursor: default;
+
+        &:is(:hover, :focus):not(:focus-visible) {
+          background-color: var(--sui-disabled-background-color);
+        }
+      }
+
       &[aria-invalid='true'] {
         border-color: var(--sui-error-border-color);
       }

@@ -150,6 +150,10 @@
           }
         }
       }
+
+      &[aria-readonly='true'] :global(.option button[aria-selected='true']) {
+        border-color: var(--sui-readonly-accent-color);
+      }
     }
 
     &.in-combobox:focus-visible {

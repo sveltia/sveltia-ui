@@ -413,6 +413,36 @@
         background-color: var(--sui-active-background-color);
       }
     }
+
+    // The value is drawn in a neutral colour and pointing at a read-only slider gives no feedback,
+    // so it doesn’t look editable
+    &.readonly {
+      &,
+      &:is(:hover, :active) {
+        .base-bar {
+          background-color: var(
+            --sui-slider-background-color,
+            var(--sui-secondary-background-color)
+          );
+        }
+      }
+
+      .base,
+      [role='slider'] {
+        cursor: default;
+      }
+
+      // An error still shows in its own colour
+      &:not(.invalid) {
+        .slider-bar {
+          background-color: var(--sui-readonly-accent-color);
+        }
+
+        [role='slider'] {
+          border-color: var(--sui-readonly-accent-color);
+        }
+      }
+    }
   }
 
   .base {
