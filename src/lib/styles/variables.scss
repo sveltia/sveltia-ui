@@ -11,8 +11,8 @@
   --sui-background-color-4-hsl: var(--sui-base-hue) 5% 92%; // tertiary/disabled
   --sui-background-color-5-hsl: var(--sui-base-hue) 5% 84%; // highlight
   --sui-border-color-1-hsl: var(--sui-base-hue) 5% 60%; // control
-  --sui-border-color-2-hsl: var(--sui-base-hue) 5% 86%; // primary
-  --sui-border-color-3-hsl: var(--sui-base-hue) 5% 90%; // secondary
+  --sui-border-color-2-hsl: var(--sui-base-hue) 5% 72%; // primary
+  --sui-border-color-3-hsl: var(--sui-base-hue) 5% 80%; // secondary
   --sui-shadow-color: var(--sui-base-hue) 10% 0%;
   // Accents
   --sui-primary-accent-color-text: hsl(var(--sui-base-hue) 80% 40%);
@@ -33,6 +33,8 @@
   --sui-alert-background-color-lightness: 90%;
   --sui-alert-border-color-saturation: 48%;
   --sui-alert-border-color-lightness: 68%;
+  // Darker than the other alert borders, as it also marks invalid controls (3:1, WCAG 1.4.11)
+  --sui-error-border-color-lightness: 60%;
 }
 
 @mixin dark-theme {
@@ -97,6 +99,7 @@
   --sui-alert-foreground-color-lightness: 18%;
   --sui-alert-border-color-saturation: 55%;
   --sui-alert-border-color-lightness: 40%;
+  --sui-error-border-color-lightness: 40%;
   @include high-contrast-common;
 }
 
@@ -239,7 +242,7 @@
     --sui-secondary-border-color: hsl(var(--sui-border-color-3-hsl));
     --sui-error-border-color: hsl(
       var(--sui-error-color-hue) var(--sui-alert-border-color-saturation)
-        var(--sui-alert-border-color-lightness)
+        var(--sui-error-border-color-lightness, var(--sui-alert-border-color-lightness))
     );
     --sui-warning-border-color: hsl(
       var(--sui-warning-color-hue) var(--sui-alert-border-color-saturation)
