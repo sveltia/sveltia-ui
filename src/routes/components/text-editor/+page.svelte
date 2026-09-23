@@ -3,6 +3,10 @@
   import Example from '../../_components/example.svelte';
 </script>
 
+<svelte:head>
+  <title>Text Editor – Sveltia UI</title>
+</svelte:head>
+
 <h2>Text Editor</h2>
 
 <section>

@@ -8,6 +8,10 @@
   $inspect(selectValue1);
 </script>
 
+<svelte:head>
+  <title>Select – Sveltia UI</title>
+</svelte:head>
+
 <h2>Select</h2>
 
 <section>

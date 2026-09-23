@@ -2,6 +2,10 @@
   import Example from '../../_components/example.svelte';
 </script>
 
+<svelte:head>
+  <title>Colours – Sveltia UI</title>
+</svelte:head>
+
 <h2>Colours</h2>
 
 <section>

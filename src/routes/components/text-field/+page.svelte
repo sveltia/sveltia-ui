@@ -10,6 +10,10 @@
   });
 </script>
 
+<svelte:head>
+  <title>Text Field – Sveltia UI</title>
+</svelte:head>
+
 <h2>Text Field</h2>
 
 <section>

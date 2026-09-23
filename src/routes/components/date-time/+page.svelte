@@ -3,6 +3,10 @@
   import Example from '../../_components/example.svelte';
 </script>
 
+<svelte:head>
+  <title>Date/Time – Sveltia UI</title>
+</svelte:head>
+
 <h2>Date/Time</h2>
 
 <section>

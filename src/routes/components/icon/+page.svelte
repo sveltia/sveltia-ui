@@ -3,6 +3,10 @@
   import Example from '../../_components/example.svelte';
 </script>
 
+<svelte:head>
+  <title>Icon – Sveltia UI</title>
+</svelte:head>
+
 <h2>Icon</h2>
 
 <section>

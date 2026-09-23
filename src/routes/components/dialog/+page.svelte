@@ -18,6 +18,10 @@
   let promptValue = $state('');
 </script>
 
+<svelte:head>
+  <title>Dialog – Sveltia UI</title>
+</svelte:head>
+
 <h2>Dialog</h2>
 
 <section>

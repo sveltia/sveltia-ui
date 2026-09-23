@@ -39,6 +39,10 @@
   let selectedLabel = $state();
 </script>
 
+<svelte:head>
+  <title>Tree – Sveltia UI</title>
+</svelte:head>
+
 <h2>Tree</h2>
 
 <section>

@@ -11,6 +11,10 @@
   import Example from '../../_components/example.svelte';
 </script>
 
+<svelte:head>
+  <title>Table – Sveltia UI</title>
+</svelte:head>
+
 <h2>Table</h2>
 
 <section>

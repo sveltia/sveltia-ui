@@ -6,6 +6,10 @@
   let ingredients = $state([]);
 </script>
 
+<svelte:head>
+  <title>Checkbox – Sveltia UI</title>
+</svelte:head>
+
 <h2>Checkbox</h2>
 
 <section>

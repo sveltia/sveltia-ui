@@ -5,6 +5,10 @@
   let fruit = $state('');
 </script>
 
+<svelte:head>
+  <title>Radio – Sveltia UI</title>
+</svelte:head>
+
 <h2>Radio</h2>
 
 <section>

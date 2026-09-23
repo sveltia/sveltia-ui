@@ -3,6 +3,10 @@
   import Example from '../../_components/example.svelte';
 </script>
 
+<svelte:head>
+  <title>Progressbar – Sveltia UI</title>
+</svelte:head>
+
 <h2>Progressbar</h2>
 
 <section>

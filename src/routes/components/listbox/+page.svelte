@@ -3,6 +3,10 @@
   import Example from '../../_components/example.svelte';
 </script>
 
+<svelte:head>
+  <title>Listbox – Sveltia UI</title>
+</svelte:head>
+
 <h2>Listbox</h2>
 
 <section>

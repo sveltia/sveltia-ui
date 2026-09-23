@@ -17,6 +17,10 @@
   let showManualToast = $state(false);
 </script>
 
+<svelte:head>
+  <title>Toast – Sveltia UI</title>
+</svelte:head>
+
 <h2>Toast</h2>
 
 <section>

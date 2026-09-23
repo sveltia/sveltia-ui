@@ -5,6 +5,10 @@
   const openStandardDrawer = $state({ top: false, right: false, bottom: false, left: false });
 </script>
 
+<svelte:head>
+  <title>Drawer – Sveltia UI</title>
+</svelte:head>
+
 <h2>Drawer</h2>
 
 <section>

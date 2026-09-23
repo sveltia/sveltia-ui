@@ -4,6 +4,10 @@
   import Example from '../../_components/example.svelte';
 </script>
 
+<svelte:head>
+  <title>Toolbar – Sveltia UI</title>
+</svelte:head>
+
 <h2>Toolbar</h2>
 
 <section>

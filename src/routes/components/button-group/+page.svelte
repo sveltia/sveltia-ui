@@ -5,6 +5,10 @@
   import Example from '../../_components/example.svelte';
 </script>
 
+<svelte:head>
+  <title>Button Group – Sveltia UI</title>
+</svelte:head>
+
 <h2>Button Group</h2>
 
 <section>

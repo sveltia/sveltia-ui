@@ -14,6 +14,10 @@
   };
 </script>
 
+<svelte:head>
+  <title>Resizable Pane – Sveltia UI</title>
+</svelte:head>
+
 <h2>Resizable Pane</h2>
 
 <section>

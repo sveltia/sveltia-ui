@@ -5,6 +5,10 @@
   import Example from '../../_components/example.svelte';
 </script>
 
+<svelte:head>
+  <title>Split Button – Sveltia UI</title>
+</svelte:head>
+
 <h2>Split Button</h2>
 
 <section>
