@@ -3,7 +3,181 @@
   Toast/snackbar notification. Use the Popover API if possible to acquire a non-modal top layer.
   @see https://w3c.github.io/aria/#alert
   @see https://developer.chrome.com/blog/introducing-popover-api/
+  @see https://github.com/whatwg/html/issues/9936
 -->
+<script module>
+  /**
+   * Modal dialogs currently open, the topmost last. While a modal dialog is open, the rest of the
+   * document is inert, including a popover stacked on top of the dialog, so the toast base has to
+   * live inside the topmost dialog to stay interactive and be announced by screen readers.
+   * @type {HTMLDialogElement[]}
+   */
+  const modals = [];
+
+  /**
+   * Get the element the toast base should be placed in.
+   * @returns {HTMLElement} Topmost modal dialog, the app shell, or the `<body>`.
+   */
+  const getHost = () => {
+    // Drop the dialogs that have been closed or removed without us noticing
+    modals.splice(
+      0,
+      modals.length,
+      ...modals.filter((dialog) => dialog.isConnected && dialog.matches(':modal')),
+    );
+
+    return modals.at(-1) ?? document.querySelector('.sui.app-shell') ?? document.body;
+  };
+
+  /**
+   * Move the toast base to the top of the top layer if it has any toast, or close it otherwise.
+   * It has to be reopened, because a modal dialog opened after the base is stacked on top of it.
+   * @param {HTMLElement} base Toast base.
+   */
+  const raiseBase = (base) => {
+    // Skip if the browser doesn’t support the Popover API
+    /* v8 ignore next */
+    if (!base.showPopover) {
+      return;
+    }
+
+    if (base.matches(':popover-open')) {
+      base.hidePopover();
+    }
+
+    if (base.querySelector('.toast')) {
+      base.showPopover();
+    }
+  };
+
+  /**
+   * Move the toast base to the host returned by {@link getHost}, if it’s not there yet. Use
+   * `moveBefore()` where supported, so the base stays open and the focus stays in a toast.
+   * @param {HTMLElement} base Toast base.
+   * @returns {boolean} Whether the base has been moved.
+   */
+  const moveBase = (base) => {
+    const host = getHost();
+
+    if (base.parentElement === host) {
+      return false;
+    }
+
+    const { moveBefore } = /** @type {any} */ (host);
+
+    if (typeof moveBefore === 'function' && base.isConnected) {
+      moveBefore.call(host, base, null);
+    } else {
+      host.appendChild(base);
+    }
+
+    return true;
+  };
+
+  /**
+   * Toast base shared by all the toasts. It’s created by the first toast mounted and removed with
+   * the last one unmounted, rather than rendered by a component, so it doesn’t go away with the
+   * toast that happened to create it.
+   * @type {HTMLElement | undefined}
+   */
+  let base;
+  /**
+   * Number of the toasts currently mounted.
+   */
+  let mountCount = 0;
+
+  /**
+   * Move the base into a modal dialog that has just been opened.
+   * @param {Event} event `toggle` event.
+   */
+  const onToggle = (event) => {
+    const { target, newState } = /** @type {ToggleEvent} */ (event);
+
+    if (
+      base &&
+      target instanceof HTMLDialogElement &&
+      newState === 'open' &&
+      target.matches(':modal') &&
+      !modals.includes(target)
+    ) {
+      modals.push(target);
+      moveBase(base);
+      raiseBase(base);
+    }
+  };
+
+  /**
+   * Move the base out of a modal dialog that is being closed, before the dialog is possibly
+   * removed from the DOM tree along with the base. `beforetoggle` is fired synchronously when the
+   * dialog is closed; `close` is a fallback for browsers that don’t fire it on a dialog.
+   * @param {Event} event `beforetoggle` or `close` event.
+   */
+  const onClose = (event) => {
+    const { target } = event;
+
+    if (
+      !base ||
+      !(target instanceof HTMLDialogElement) ||
+      (event.type === 'beforetoggle' && /** @type {ToggleEvent} */ (event).newState !== 'closed')
+    ) {
+      return;
+    }
+
+    const index = modals.indexOf(target);
+
+    if (index > -1) {
+      modals.splice(index, 1);
+    }
+
+    if (target.contains(base) && moveBase(base) && !base.matches(':popover-open')) {
+      raiseBase(base);
+    }
+  };
+
+  /**
+   * Get the toast base, creating it if needed, and start keeping it in the topmost modal dialog.
+   * Call {@link releaseBase} once done.
+   * @returns {HTMLElement} Toast base.
+   */
+  const acquireBase = () => {
+    mountCount += 1;
+
+    if (!base) {
+      base = document.createElement('div');
+      base.setAttribute('role', 'none');
+      base.className = 'sui toast-base enabled';
+      base.popover = 'manual';
+      modals.push(...document.querySelectorAll(/** @type {'dialog'} */ ('dialog:modal')));
+      // These events don’t bubble, so listen in the capture phase
+      document.addEventListener('toggle', onToggle, true);
+      document.addEventListener('beforetoggle', onClose, true);
+      document.addEventListener('close', onClose, true);
+    }
+
+    moveBase(base);
+
+    return base;
+  };
+
+  /**
+   * Release the toast base, removing it once no toast uses it.
+   */
+  const releaseBase = () => {
+    mountCount -= 1;
+
+    if (mountCount > 0 || !base) {
+      return;
+    }
+
+    document.removeEventListener('toggle', onToggle, true);
+    document.removeEventListener('beforetoggle', onClose, true);
+    document.removeEventListener('close', onClose, true);
+    base.remove();
+    base = undefined;
+    modals.length = 0;
+  };
+</script>
+
 <script>
   import { onMount, untrack } from 'svelte';
 
@@ -41,10 +215,6 @@
   /**
    * @type {HTMLElement | undefined}
    */
-  let popoverBase = $state();
-  /**
-   * @type {HTMLElement | undefined}
-   */
   let popover = $state();
   /**
    * @type {HTMLElement | undefined}
@@ -70,33 +240,12 @@
   let rendered = $state(false);
 
   onMount(() => {
-    popover =
-      /** @type {HTMLElement} */ (document.querySelector('.sui.toast-base.enabled')) ?? undefined;
-
-    if (popover) {
-      // eslint-disable-next-line svelte/no-dom-manipulating
-      popoverBase?.remove();
-    } else {
-      popover = popoverBase;
-
-      // The base is bound by the time the component is mounted
-      /* v8 ignore else */
-      if (popover) {
-        popover.classList.add('enabled');
-        (document.querySelector('.sui.app-shell') ?? document.body).appendChild(popover);
-
-        // Move the element to top layer, unless the browser doesn’t support the Popover API
-        /* v8 ignore else */
-        if (popover.showPopover) {
-          popover.popover = 'manual';
-          popover.showPopover();
-        }
-      }
-    }
+    popover = acquireBase();
 
     return () => {
       // eslint-disable-next-line svelte/no-dom-manipulating
       toast?.remove();
+      releaseBase();
     };
   });
 
@@ -124,10 +273,31 @@
 
   $effect(() => {
     // Both are in place by the time the effect first runs; see `onMount()` above
-    /* v8 ignore else */
-    if (popover && toast) {
-      popover.appendChild(toast);
+    /* v8 ignore next */
+    if (!popover || !toast) {
+      return;
     }
+
+    // Keep the toast out of the base while it’s hidden, so faded-out toasts don’t pile up there
+    if (!rendered) {
+      // eslint-disable-next-line svelte/no-dom-manipulating
+      toast.remove();
+      // A detached element gets no `pointerleave` or `focusout`, so release the hold here, or the
+      // countdown would never start the next time the toast is shown
+      held = false;
+
+      // Close the base once the last toast is gone
+      if (!popover.querySelector('.toast') && popover.matches(':popover-open')) {
+        popover.hidePopover();
+      }
+
+      return;
+    }
+
+    // Make sure the base is in the topmost modal dialog, in case a dialog event has been missed
+    moveBase(popover);
+    popover.appendChild(toast);
+    raiseBase(popover);
   });
 
   $effect(() => {
@@ -169,8 +339,6 @@
   });
 </script>
 
-<div bind:this={popoverBase} role="none" class="sui toast-base"></div>
-
 <div
   {...restProps}
   bind:this={toast}
@@ -195,7 +363,8 @@
 </div>
 
 <style lang="scss">
-  .toast-base {
+  // The base is created outside of the component, so the styles have to be global
+  :global(.sui.toast-base) {
     position: fixed;
     inset: 16px;
     z-index: 99999;
@@ -233,6 +402,11 @@
     opacity: 1;
     transition-duration: 250ms;
     will-change: opacity;
+
+    // The toast is inserted into the base when shown; fade it in from there
+    @starting-style {
+      opacity: 0;
+    }
     // The base is click-through; the toast itself takes the pointer, so a button in it works and
     // hovering it holds the countdown
     pointer-events: auto;

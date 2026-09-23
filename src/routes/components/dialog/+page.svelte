@@ -1,5 +1,6 @@
 <script>
-  import { Button, Dialog, Menu, MenuButton, MenuItem, Option, Select } from '$lib';
+  import { Button, Dialog, Menu, MenuButton, MenuItem, Option, Select, Toast } from '$lib';
+  import Alert from '$lib/components/alert/alert.svelte';
   import AlertDialog from '$lib/components/dialog/alert-dialog.svelte';
   import ConfirmationDialog from '$lib/components/dialog/confirmation-dialog.svelte';
   import PromptDialog from '$lib/components/dialog/prompt-dialog.svelte';
@@ -16,6 +17,10 @@
   let openCloseOnlyDialog = $state(false);
   let openMenuDialog = $state(false);
   let promptValue = $state('');
+  let openToastDialog = $state(false);
+  let openNestedToastDialog = $state(false);
+  let showDialogToast = $state(false);
+  let dialogToastMessage = $state('');
 </script>
 
 <svelte:head>
@@ -159,6 +164,65 @@
       >
         Press <kbd>?</kbd> to show this dialog.
       </Dialog>
+    </div>
+  </Example>
+</section>
+
+<section>
+  <h3>With a Toast</h3>
+  <Example>
+    <div role="none">
+      <Button
+        variant="secondary"
+        label="Show Dialog with Toast"
+        onclick={() => {
+          openToastDialog = true;
+        }}
+      />
+      <!-- The toast is displayed above the dialog, and its button can be clicked, because the toast
+      base is moved into the topmost modal dialog while one is open. Hovering over the toast holds
+      the countdown. See https://github.com/whatwg/html/issues/9936 for the background. -->
+      <Dialog bind:open={openToastDialog} title="Settings" showCancel={false}>
+        <div role="none">
+          <Button
+            variant="secondary"
+            label="Remove API Key"
+            onclick={() => {
+              dialogToastMessage = 'API key removed.';
+              showDialogToast = true;
+            }}
+          />
+          <Button
+            variant="secondary"
+            label="Open Nested Dialog"
+            onclick={() => {
+              openNestedToastDialog = true;
+            }}
+          />
+        </div>
+      </Dialog>
+      <Dialog bind:open={openNestedToastDialog} title="Nested Dialog" showCancel={false}>
+        <Button
+          variant="secondary"
+          label="Show Toast"
+          onclick={() => {
+            dialogToastMessage = 'Shown from the nested dialog.';
+            showDialogToast = true;
+          }}
+        />
+      </Dialog>
+      <Toast bind:show={showDialogToast}>
+        <Alert status="success">
+          {dialogToastMessage}
+          <Button
+            variant="link"
+            label="Undo"
+            onclick={() => {
+              dialogToastMessage = 'Undone.';
+            }}
+          />
+        </Alert>
+      </Toast>
     </div>
   </Example>
 </section>

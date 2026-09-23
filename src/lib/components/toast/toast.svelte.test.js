@@ -125,6 +125,24 @@ describe('Toast', () => {
     expect(props.show).toBe(false);
   });
 
+  it('releases the hold when removed while hovered', async () => {
+    /** @type {ComponentProps<typeof Toast>} */
+    const props = $state({ show: true, duration: 1000 });
+
+    await render(Toast, props);
+
+    const toast = /** @type {HTMLElement} */ (getBase()?.querySelector('.sui.toast'));
+
+    toast.dispatchEvent(new PointerEvent('pointerenter'));
+    // Hidden, e.g. with a dismiss button in it, while the pointer is still over it
+    props.show = false;
+    await vi.advanceTimersByTimeAsync(250);
+    expect(toast.isConnected).toBe(false);
+    props.show = true;
+    await vi.advanceTimersByTimeAsync(1000);
+    expect(props.show).toBe(false);
+  });
+
   it('holds the countdown while the focus moves between controls inside it', async () => {
     /** @type {ComponentProps<typeof Toast>} */
     const props = $state({
@@ -155,28 +173,239 @@ describe('Toast', () => {
     expect(props.show).toBe(false);
   });
 
-  it('inserts the content when shown, and removes it once faded out', async () => {
+  it('inserts the toast when shown, and removes it once faded out', async () => {
     /** @type {ComponentProps<typeof Toast>} */
     const props = $state({ show: false, duration: 0, children: text('Saved') });
 
     await render(Toast, props);
 
-    const toast = /** @type {HTMLElement} */ (getBase()?.querySelector('.sui.toast'));
+    const base = /** @type {HTMLElement} */ (getBase());
 
-    expect(toast.textContent).not.toContain('Saved');
+    expect(base.querySelector('.sui.toast')).toBeNull();
+    expect(base.matches(':popover-open')).toBe(false);
     props.show = true;
+
     await vi.waitFor(() => {
-      expect(toast.textContent).toContain('Saved');
+      expect(base.querySelector('.sui.toast')?.textContent).toContain('Saved');
     });
+
+    const toast = /** @type {HTMLElement} */ (base.querySelector('.sui.toast'));
+
+    expect(base.matches(':popover-open')).toBe(true);
     props.show = false;
     await vi.waitFor(() => {
       expect(toast.getAttribute('aria-hidden')).toBe('true');
     });
     // Still there while fading
     expect(toast.textContent).toContain('Saved');
+    expect(toast.parentElement).toBe(base);
     await vi.advanceTimersByTimeAsync(250);
     await vi.waitFor(() => {
-      expect(toast.textContent).not.toContain('Saved');
+      expect(toast.isConnected).toBe(false);
+    });
+    expect(toast.textContent).not.toContain('Saved');
+    expect(base.matches(':popover-open')).toBe(false);
+  });
+
+  it('keeps the base open while another toast is still shown', async () => {
+    /** @type {ComponentProps<typeof Toast>} */
+    const props = $state({ show: true, duration: 0, children: text('One') });
+
+    await render(Toast, props);
+    await render(Toast, { show: true, duration: 0, children: text('Two') });
+
+    const base = /** @type {HTMLElement} */ (getBase());
+
+    props.show = false;
+    await vi.advanceTimersByTimeAsync(250);
+    await vi.waitFor(() => {
+      expect(base.querySelectorAll('.sui.toast')).toHaveLength(1);
+    });
+    expect(base.matches(':popover-open')).toBe(true);
+  });
+
+  describe('with a modal dialog', () => {
+    /** @type {HTMLDialogElement} */
+    let dialog;
+
+    beforeEach(() => {
+      dialog = document.createElement('dialog');
+      document.body.appendChild(dialog);
+    });
+
+    afterEach(() => {
+      dialog.close();
+      dialog.remove();
+    });
+
+    it('renders the base within a modal dialog open from the start', async () => {
+      dialog.showModal();
+      await render(Toast, { show: true, duration: 0, children: text('Saved') });
+
+      const base = /** @type {HTMLElement} */ (getBase());
+
+      expect(base.parentElement).toBe(dialog);
+      expect(base.matches(':popover-open')).toBe(true);
+    });
+
+    it('moves the base into a modal dialog once opened, and back out once closed', async () => {
+      await render(Toast, { show: true, duration: 0, children: text('Saved') });
+
+      const base = /** @type {HTMLElement} */ (getBase());
+
+      expect(base.parentElement).toBe(document.body);
+      dialog.showModal();
+      await vi.waitFor(() => {
+        expect(base.parentElement).toBe(dialog);
+      });
+      expect(base.matches(':popover-open')).toBe(true);
+      expect(base.querySelector('.sui.toast')?.textContent).toContain('Saved');
+      dialog.close();
+      // Moved out synchronously, before the dialog could be removed
+      expect(base.parentElement).toBe(document.body);
+      await vi.waitFor(() => {
+        expect(base.matches(':popover-open')).toBe(true);
+      });
+    });
+
+    it('keeps the toast interactive over a modal dialog', async () => {
+      await render(Toast, {
+        show: true,
+        duration: 0,
+        children: html('<button class="undo">Undo</button>'),
+      });
+      dialog.showModal();
+
+      const undo = /** @type {HTMLButtonElement} */ (getBase()?.querySelector('.undo'));
+
+      await vi.waitFor(() => {
+        const { x, y, width, height } = undo.getBoundingClientRect();
+
+        expect(document.elementFromPoint(x + width / 2, y + height / 2)).toBe(undo);
+      });
+      undo.focus();
+      expect(document.activeElement).toBe(undo);
+    });
+
+    it('reopens the base after moving it in a browser without `moveBefore()`', async () => {
+      const descriptor = Object.getOwnPropertyDescriptor(Element.prototype, 'moveBefore');
+
+      // Hide the method, so the base is moved with `appendChild()`, which closes the popover
+      Object.defineProperty(Element.prototype, 'moveBefore', {
+        configurable: true,
+        value: undefined,
+      });
+
+      try {
+        await render(Toast, { show: true, duration: 0 });
+
+        const base = /** @type {HTMLElement} */ (getBase());
+
+        dialog.showModal();
+        await vi.waitFor(() => {
+          expect(base.parentElement).toBe(dialog);
+        });
+        expect(base.matches(':popover-open')).toBe(true);
+        dialog.close();
+        expect(base.parentElement).toBe(document.body);
+        expect(base.matches(':popover-open')).toBe(true);
+      } finally {
+        if (descriptor) {
+          Object.defineProperty(Element.prototype, 'moveBefore', descriptor);
+        } else {
+          // @ts-ignore
+          delete Element.prototype.moveBefore;
+        }
+      }
+    });
+
+    it('moves the base into a modal dialog without opening it while no toast is shown', async () => {
+      await render(Toast, { show: false });
+
+      const base = /** @type {HTMLElement} */ (getBase());
+
+      dialog.showModal();
+      await vi.waitFor(() => {
+        expect(base.parentElement).toBe(dialog);
+      });
+      expect(base.matches(':popover-open')).toBe(false);
+    });
+
+    it('ignores a non-modal dialog', async () => {
+      await render(Toast, { show: true, duration: 0 });
+
+      const base = /** @type {HTMLElement} */ (getBase());
+
+      dialog.show();
+      dialog.close();
+      await vi.advanceTimersByTimeAsync(0);
+      expect(base.parentElement).toBe(document.body);
+      expect(base.matches(':popover-open')).toBe(true);
+    });
+
+    it('follows the topmost of nested modal dialogs', async () => {
+      const inner = document.createElement('dialog');
+
+      // Placed before the outer dialog in the DOM tree, but opened after it
+      document.body.prepend(inner);
+      await render(Toast, { show: true, duration: 0 });
+
+      const base = /** @type {HTMLElement} */ (getBase());
+
+      dialog.showModal();
+      await vi.waitFor(() => {
+        expect(base.parentElement).toBe(dialog);
+      });
+      inner.showModal();
+      await vi.waitFor(() => {
+        expect(base.parentElement).toBe(inner);
+      });
+      inner.close();
+      expect(base.parentElement).toBe(dialog);
+      inner.remove();
+    });
+
+    it('keeps following modal dialogs after the toast that created the base is gone', async () => {
+      const first = await render(Toast, { show: false });
+      /** @type {ComponentProps<typeof Toast>} */
+      const props = $state({ show: true, duration: 0, children: text('Two') });
+
+      await render(Toast, props);
+
+      const base = /** @type {HTMLElement} */ (getBase());
+
+      await first.unmount();
+      // Still in place for the remaining toast
+      expect(base.isConnected).toBe(true);
+      expect(base.querySelector('.sui.toast')?.textContent).toContain('Two');
+      dialog.showModal();
+      await vi.waitFor(() => {
+        expect(base.parentElement).toBe(dialog);
+      });
+      dialog.close();
+      expect(base.parentElement).toBe(document.body);
+    });
+
+    it('recovers when the dialog is removed without being closed first', async () => {
+      /** @type {ComponentProps<typeof Toast>} */
+      const props = $state({ show: true, duration: 0 });
+
+      await render(Toast, props);
+
+      const base = /** @type {HTMLElement} */ (getBase());
+
+      dialog.showModal();
+      await vi.waitFor(() => {
+        expect(base.parentElement).toBe(dialog);
+      });
+      dialog.remove();
+      props.show = false;
+      await vi.advanceTimersByTimeAsync(250);
+      props.show = true;
+      await vi.waitFor(() => {
+        expect(base.parentElement).toBe(document.body);
+      });
+      expect(base.matches(':popover-open')).toBe(true);
     });
   });
 
