@@ -33,7 +33,10 @@ export const setupSelfHostedAssets = () => {
 
   setCodeHighlighterLoaders({
     // eslint-disable-next-line jsdoc/require-jsdoc
-    loadEngine: () => import('@sveltia/ui/shiki-engine'),
+    loadEngine: () =>
+      // @ts-ignore The engine is built into `dist` by `scripts/build-shiki-engine.js`, so it can’t
+      // be resolved before a build, e.g. when the types are checked in CI
+      import('@sveltia/ui/shiki-engine'),
     // eslint-disable-next-line jsdoc/require-jsdoc
     loadLanguage: (id) => LANGUAGE_LOADERS[id]?.(),
     // eslint-disable-next-line jsdoc/require-jsdoc
