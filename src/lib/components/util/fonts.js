@@ -39,8 +39,8 @@ const getLatinUnicodeRange = (extra = []) =>
   ].join(', ');
 
 /**
- * Web fonts used by the components. Each version must match the Fontsource package in
- * `devDependencies`, from which `scripts/copy-fonts.js` copies the file for self-hosting.
+ * Web fonts used by the components. Each version is kept in sync with the Fontsource package in
+ * `devDependencies` by `scripts/copy-fonts.js`, which also copies the file for self-hosting.
  * @type {FontDefinition[]}
  */
 export const FONTS = [
@@ -69,7 +69,7 @@ export const FONTS = [
   {
     family: 'Material Symbols Outlined',
     packageName: '@fontsource-variable/material-symbols-outlined',
-    version: '5.3.1',
+    version: '5.3.7',
     cdnId: 'material-symbols-outlined:vf',
     subset: 'latin-wght-normal',
     format: 'woff2-variations',

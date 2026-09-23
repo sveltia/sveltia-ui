@@ -61,11 +61,13 @@ describe('fonts', () => {
 
   it('builds the CDN URL of each file', async () => {
     const { FONTS, getCDNFontURL } = await importFonts();
+    // The versions are updated by `scripts/copy-fonts.js`
+    const [sans, mono, symbols] = FONTS.map(({ version }) => version);
 
     expect(FONTS.map(getCDNFontURL)).toEqual([
-      'https://cdn.jsdelivr.net/fontsource/fonts/source-sans-3:vf@5.3.0/latin-wght-normal.woff2',
-      'https://cdn.jsdelivr.net/fontsource/fonts/noto-mono@5.3.0/latin-400-normal.woff2',
-      'https://cdn.jsdelivr.net/fontsource/fonts/material-symbols-outlined:vf@5.3.1/latin-wght-normal.woff2',
+      `https://cdn.jsdelivr.net/fontsource/fonts/source-sans-3:vf@${sans}/latin-wght-normal.woff2`,
+      `https://cdn.jsdelivr.net/fontsource/fonts/noto-mono@${mono}/latin-400-normal.woff2`,
+      `https://cdn.jsdelivr.net/fontsource/fonts/material-symbols-outlined:vf@${symbols}/latin-wght-normal.woff2`,
     ]);
   });
 

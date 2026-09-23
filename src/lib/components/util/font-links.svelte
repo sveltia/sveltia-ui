@@ -37,7 +37,7 @@
     font-style: normal;
     font-display: block;
     font-weight: 400;
-    src: url(https://cdn.jsdelivr.net/fontsource/fonts/material-symbols-outlined:vf@5.3.1/latin-wght-normal.woff2)
+    src: url(https://cdn.jsdelivr.net/fontsource/fonts/material-symbols-outlined:vf@5.3.7/latin-wght-normal.woff2)
       format('woff2-variations');
     unicode-range:
       U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
