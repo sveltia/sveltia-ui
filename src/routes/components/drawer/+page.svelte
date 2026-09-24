@@ -3,6 +3,8 @@
   import Example from '../../_components/example.svelte';
 
   const openStandardDrawer = $state({ top: false, right: false, bottom: false, left: false });
+  const openSwipeDismissDrawer = $state({ top: false, right: false, bottom: false, left: false });
+  const positions = /** @type {const} */ (['bottom', 'top', 'right', 'left']);
 </script>
 
 <svelte:head>
@@ -60,5 +62,32 @@
         Hello World!
       </Drawer>
     </div>
+  </Example>
+</section>
+
+<section>
+  <h3>Swipe to Dismiss</h3>
+  <Example>
+    {#each positions as position (position)}
+      <div role="none">
+        <Button
+          variant="secondary"
+          label="Show Drawer with Swipe to Dismiss: {position}"
+          onclick={() => {
+            openSwipeDismissDrawer[position] = true;
+          }}
+        />
+        <Drawer
+          bind:open={openSwipeDismissDrawer[position]}
+          title="Drawer"
+          {position}
+          size="medium"
+          swipeDismiss
+        >
+          Drag the {position === 'top' || position === 'bottom' ? 'handle or the ' : ''}header
+          towards the edge to dismiss the drawer.
+        </Drawer>
+      </div>
+    {/each}
   </Example>
 </section>

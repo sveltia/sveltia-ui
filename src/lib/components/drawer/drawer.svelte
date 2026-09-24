@@ -6,14 +6,23 @@
 -->
 <script>
   import { _ } from '@sveltia/i18n';
+  import { untrack } from 'svelte';
   import Button from '../button/button.svelte';
   import Spacer from '../divider/spacer.svelte';
   import Icon from '../icon/icon.svelte';
   import Modal from '../util/modal.svelte';
+  import {
+    addSwipeSample,
+    getSwipeDirection,
+    getSwipeOffset,
+    getSwipeVelocity,
+    shouldDismissSwipe,
+  } from './drawer.js';
 
   /**
    * @import { Snippet } from 'svelte';
    * @import { ModalProps } from '$lib/typedefs';
+   * @import { SwipeState } from './drawer.js';
    */
 
   /**
@@ -29,6 +38,11 @@
    * @property {'small' | 'medium' | 'large' | 'x-large' | 'full'} [size] Width or height of the
    * drawer.
    * @property {'inside' | 'outside' | false} [showClose] Whether to show the Close button.
+   * @property {boolean} [swipeDismiss] Whether the drawer can be dismissed by dragging it towards
+   * the edge it’s attached to, as a bottom sheet on a mobile device is. The drag starts from the
+   * header, or from a grab handle shown on a top or bottom drawer; the main content and the footer
+   * are left alone, so they can be scrolled and interacted with. The Close button and the Escape
+   * key still work, as the gesture isn’t available to everyone.
    * @property {Snippet} [children] Primary slot content.
    * @property {Snippet} [header] Header slot content.
    * @property {Snippet} [headerExtra] Header extra slot content.
@@ -49,6 +63,7 @@
     position = 'right',
     size = 'small',
     showClose = 'outside',
+    swipeDismiss = false,
     children,
     header,
     headerExtra,
@@ -57,6 +72,23 @@
     ...restProps
     /* eslint-enable prefer-const */
   } = $props();
+
+  /**
+   * Elements a drag can’t start from: the parts of the drawer that can scroll or hold text to
+   * select, and anything interactive.
+   */
+  const EXCLUDED_SWIPE_TARGETS = [
+    '.main',
+    '.footer',
+    '.extra-control',
+    'a',
+    'button',
+    'input',
+    'select',
+    'textarea',
+    '[contenteditable]',
+    '[tabindex]',
+  ].join(', ');
 
   /**
    * The ID of the drawer.
@@ -73,6 +105,109 @@
   const orientation = $derived(
     position === 'right' || position === 'left' ? 'vertical' : 'horizontal',
   );
+
+  /**
+   * A reference to the content element.
+   * @type {HTMLElement | undefined}
+   */
+  let content = $state();
+  /**
+   * The drag in progress, if any. The object is replaced rather than updated, except for the
+   * samples, which only feed the speed calculation on release, so nothing needs to track them.
+   * @type {SwipeState | undefined}
+   */
+  let swipe = $state.raw();
+  /**
+   * Distance the drawer has been dragged towards its edge, in pixels.
+   * @type {number}
+   */
+  let swipeOffset = $state(0);
+
+  /**
+   * Handle the `pointerdown` event on the content, starting a drag from anywhere but the main
+   * content, the footer and the controls.
+   * @param {PointerEvent} event `pointerdown` event.
+   */
+  const onPointerDown = (event) => {
+    const { button, isPrimary, pointerId, target, clientX, clientY } = event;
+
+    if (!swipeDismiss || !content || swipe || button !== 0 || !isPrimary) {
+      return;
+    }
+
+    // The dialog around the content is focusable too, so only look inside the content
+    const excluded = /** @type {Element} */ (target).closest(EXCLUDED_SWIPE_TARGETS);
+
+    if (excluded && content.contains(excluded)) {
+      return;
+    }
+
+    const { axis, sign } = getSwipeDirection(position, content.matches(':dir(rtl)'));
+
+    swipe = { pointerId, axis, sign, start: axis === 'Y' ? clientY : clientX, samples: [] };
+    swipeOffset = 0;
+    content.setPointerCapture(pointerId);
+  };
+
+  /**
+   * Handle the `pointermove` event on the content while dragging.
+   * @param {PointerEvent} event `pointermove` event.
+   */
+  const onPointerMove = (event) => {
+    const { pointerId, clientX, clientY, timeStamp } = event;
+
+    if (!swipe || pointerId !== swipe.pointerId) {
+      return;
+    }
+
+    swipeOffset = getSwipeOffset(
+      (swipe.axis === 'Y' ? clientY : clientX) - swipe.start,
+      swipe.sign,
+    );
+    swipe.samples = addSwipeSample(swipe.samples, { offset: swipeOffset, time: timeStamp });
+  };
+
+  /**
+   * Handle the `pointerup` and `pointercancel` events on the content, ending the drag. The drawer
+   * is dismissed if it has been dragged far enough or flicked, or goes back into place otherwise.
+   * Either way, the transition picks up from where the drag has left the drawer.
+   * @param {PointerEvent} event `pointerup` or `pointercancel` event.
+   */
+  const onPointerUp = (event) => {
+    if (!swipe || !content || event.pointerId !== swipe.pointerId) {
+      return;
+    }
+
+    const { width, height } = content.getBoundingClientRect();
+    // The pointer may have been held still since it last moved, which ends any flick
+    const samples = addSwipeSample(swipe.samples, { offset: swipeOffset, time: event.timeStamp });
+
+    const dismiss =
+      event.type === 'pointerup' &&
+      shouldDismissSwipe({
+        offset: swipeOffset,
+        size: swipe.axis === 'Y' ? height : width,
+        velocity: getSwipeVelocity(samples),
+      });
+
+    swipe = undefined;
+    swipeOffset = 0;
+
+    if (dismiss) {
+      modal?.close('close');
+    }
+  };
+
+  $effect(() => {
+    if (!open) {
+      // The drawer can be closed in the middle of a drag, e.g. with the Escape key, and should
+      // then slide away rather than stay where the drag has left it
+      untrack(() => {
+        swipe = undefined;
+        swipeOffset = 0;
+      });
+    }
+  });
 
   /**
    * Accessible name for the `<dialog>`, resolved the same way as `<Dialog>`: the built-in header
@@ -93,7 +228,27 @@
   aria-labelledby={labelledby}
   showBackdrop
 >
-  <div role="none" class={['content', className, size, position, orientation]}>
+  <div
+    bind:this={content}
+    role="none"
+    class={[
+      'content',
+      className,
+      size,
+      position,
+      orientation,
+      { 'swipe-dismiss': swipeDismiss, swiping: !!swipe },
+    ]}
+    style:transform={swipe ? `translate${swipe.axis}(${swipe.sign * swipeOffset}px)` : undefined}
+    style:transition-duration={swipe ? '0s' : undefined}
+    onpointerdown={onPointerDown}
+    onpointermove={onPointerMove}
+    onpointerup={onPointerUp}
+    onpointercancel={onPointerUp}
+  >
+    {#if swipeDismiss && position === 'bottom'}
+      <div role="none" class="handle"></div>
+    {/if}
     <div role="none" class="extra-control">
       {#if showClose === 'outside'}
         <Button
@@ -156,6 +311,9 @@
       <div role="none" class="footer">
         {@render footer?.()}
       </div>
+    {/if}
+    {#if swipeDismiss && position === 'top'}
+      <div role="none" class="handle"></div>
     {/if}
   </div>
 </Modal>
@@ -472,6 +630,39 @@
         height: 100dvh;
         max-height: 100dvh;
       }
+    }
+  }
+
+  .content.swipe-dismiss {
+    // A drag can start from these. The browser would otherwise take a touch drag over to pan the
+    // page, cancelling the pointer. Something scrollable inside them, like a long tab list in a
+    // custom header, can still be scrolled: the browser only looks up to the nearest scroll
+    // container for the touch behavior allowed
+    & > :global(:not(.main, .footer, .extra-control)) {
+      touch-action: none;
+      user-select: none;
+    }
+
+    &.swiping,
+    &.swiping .handle {
+      cursor: grabbing;
+    }
+  }
+
+  .handle {
+    flex: none;
+    display: flex;
+    justify-content: center;
+    padding: 8px 0;
+    cursor: grab;
+
+    &::before {
+      content: '';
+      border-radius: 2px;
+      width: 32px;
+      height: 4px;
+      background-color: var(--sui-drawer-handle-color, var(--sui-secondary-foreground-color));
+      opacity: 0.5;
     }
   }
 
