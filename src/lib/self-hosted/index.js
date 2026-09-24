@@ -4,7 +4,9 @@ import { LANGUAGE_LOADERS, THEME_LOADERS } from './generated.js';
 
 /**
  * Serve the fonts and the syntax highlighting engine, grammars and themes from the app itself
- * rather than the CDNs, so the components don’t contact any third party. Every file becomes a
+ * rather than the CDNs, so the components don’t contact any third party. Only the light and dark
+ * themes the code editor uses are included; add loaders with `setCodeHighlighterLoaders()` to pass
+ * another theme to `highlightCodeToHTML()`. Every file becomes a
  * separate asset or chunk of the consumer’s bundle, only loaded when needed. Call this before the
  * `AppShell` component is mounted.
  *

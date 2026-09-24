@@ -19,6 +19,10 @@ vi.mock('lexical', () => ({
 }));
 
 // eslint-disable-next-line import/first
+import { THEME_LOADERS } from '../../../self-hosted/generated.js';
+// eslint-disable-next-line import/first
+import { THEMES } from './generated.js';
+// eslint-disable-next-line import/first
 import { CODE_THEME_DARK, CODE_THEME_LIGHT, getCodeTheme, observeCodeTheme } from './theme.js';
 
 /**
@@ -141,5 +145,13 @@ describe('shiki theme', () => {
     });
 
     expect(node.setTheme).not.toHaveBeenCalled();
+  });
+
+  it('is bundled by `@sveltia/ui/self-hosted`, which only includes the themes in use', () => {
+    // `scripts/generate-shiki-metadata.js` lists them itself, as it can’t import this module
+    expect(Object.keys(THEME_LOADERS).sort()).toEqual([CODE_THEME_DARK, CODE_THEME_LIGHT].sort());
+    expect(THEMES.map(({ id }) => id)).toEqual(
+      expect.arrayContaining([CODE_THEME_LIGHT, CODE_THEME_DARK]),
+    );
   });
 });

@@ -78,6 +78,13 @@ export const UI_VERSION = '${uiVersion}';
 `;
 
 /**
+ * Themes bundled by `@sveltia/ui/self-hosted`: the ones the code editor uses, `CODE_THEME_LIGHT`
+ * and `CODE_THEME_DARK` in `theme.js`, which a test keeps in sync. That module isn’t imported here,
+ * as it depends on Lexical.
+ */
+const SELF_HOSTED_THEMES = ['github-light', 'github-dark'];
+
+/**
  * Build a map of lazy `import()` calls, one per module. A bundler can’t resolve an `import()` with
  * a variable specifier, so each one has to be spelled out.
  * @param {string} packageName Package name.
@@ -99,13 +106,12 @@ export const LANGUAGE_LOADERS = ${getLoaderMap(
 )};
 
 /**
- * Loaders of the syntax highlighting themes, keyed with the theme ID.
+ * Loaders of the syntax highlighting themes, keyed with the theme ID. Only the themes the code
+ * editor uses are included, so the other themes aren’t published with the consumer’s app; a theme
+ * without a loader leaves code as plain text.
  * @type {Record<string, () => Promise<any>>}
  */
-export const THEME_LOADERS = ${getLoaderMap(
-  '@shikijs/themes',
-  themes.map(({ id }) => id),
-)};
+export const THEME_LOADERS = ${getLoaderMap('@shikijs/themes', SELF_HOSTED_THEMES)};
 `;
 
 const baseURL = '../src/lib/components/text-editor/shiki/';
