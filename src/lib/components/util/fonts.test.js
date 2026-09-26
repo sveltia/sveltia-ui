@@ -103,7 +103,7 @@ describe('fonts', () => {
     });
   });
 
-  it('warns when a font fails to load, as the CDN is used instead', async () => {
+  it('warns when a font fails to load', async () => {
     // eslint-disable-next-line jsdoc/require-jsdoc
     stubFontLoadingAPI({ getLoaded: () => Promise.reject(new Error('NetworkError')) });
 
@@ -114,7 +114,7 @@ describe('fonts', () => {
     await vi.waitFor(() => expect(warn).toHaveBeenCalledOnce());
 
     expect(warn).toHaveBeenCalledWith(
-      'Failed to load the Noto Mono font from /missing.woff2. It’s loaded from the CDN instead.',
+      'Failed to load the Noto Mono font from /missing.woff2. A fallback font is used instead.',
     );
   });
 

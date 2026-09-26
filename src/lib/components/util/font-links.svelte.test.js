@@ -104,9 +104,7 @@ it('warns when a self-hosted font fails to load', async () => {
 
   await expect
     .poll(() => warn.mock.calls)
-    .toEqual([
-      [`Failed to load the Noto Mono font from ${url}. It’s loaded from the CDN instead.`],
-    ]);
+    .toEqual([[`Failed to load the Noto Mono font from ${url}. A fallback font is used instead.`]]);
 
   span.remove();
   screen.unmount();

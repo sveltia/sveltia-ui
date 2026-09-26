@@ -129,7 +129,8 @@ export const getFontFaceDescriptors = ({ weight, display, unicodeRange, sizeAdju
  * Call it before the `AppShell` component is mounted, so no font is fetched from the CDN first.
  * @param {Record<string, string>} urls URLs keyed with the Fontsource file name, e.g.
  * `source-sans-3-latin-wght-normal.woff2`. Any font omitted, or whose file fails to load, is still
- * loaded from the CDN; a failure is reported in the console.
+ * loaded from the CDN, unless the app has removed the `@font-face` rules for it; a failure is
+ * reported in the console.
  */
 export const setFontURLs = (urls) => {
   if (typeof document === 'undefined' || !document.fonts) {
@@ -153,13 +154,13 @@ export const setFontURLs = (urls) => {
 
     document.fonts.add(fontFace);
 
-    // The browser falls back to the `@font-face` rule for the CDN if the file can’t be loaded,
-    // which goes unnoticed otherwise. `loaded` settles once the font is used, without forcing a
-    // download
+    // The browser falls back to the `@font-face` rule for the CDN if the file can’t be loaded, or
+    // to another font if the app has removed the rule, which goes unnoticed otherwise. `loaded`
+    // settles once the font is used, without forcing a download
     fontFace.loaded.catch(() => {
       // eslint-disable-next-line no-console
       console.warn(
-        `Failed to load the ${font.family} font from ${url}. It’s loaded from the CDN instead.`,
+        `Failed to load the ${font.family} font from ${url}. A fallback font is used instead.`,
       );
     });
 
