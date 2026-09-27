@@ -79,7 +79,11 @@
       (async () => {
         await sleep(50);
 
-        if (cancelled) {
+        // Leave the focus alone if it has already moved into the content in the meantime, e.g. the
+        // user has clicked an input field or started typing in it, or the content has taken the
+        // focus on its own. Moving it now would pull it away, and selecting the input value would
+        // cause the next keystrokes to replace it.
+        if (cancelled || content?.contains(document.activeElement)) {
           return;
         }
 
@@ -95,10 +99,9 @@
           if (target instanceof HTMLInputElement) {
             target.select();
           }
-        } else if (!focusInput || !content?.contains(document.activeElement)) {
+        } else {
           // Fall back to the `<dialog>` element itself, so the focus is never left outside the
-          // modal, e.g. when the dialog has no input field or primary button. Content that has
-          // already taken the focus is left alone.
+          // modal, e.g. when the dialog has no input field or primary button
           modal?.focus();
         }
       })();

@@ -100,7 +100,8 @@
  * @property {boolean} [cancelDisabled] Whether to disable the Cancel button.
  * @property {boolean} [focusInput] Whether to automatically focus the first input field or primary
  * action button. Default: `true`. If `false`, or if the dialog has neither, the `<dialog>` element
- * gets focused instead, so the focus is always moved into the modal.
+ * gets focused instead, so the focus is always moved into the modal. The focus is left alone if it
+ * has already moved into the dialog content by then, like when the user has clicked an input field.
  * @property {boolean} [lightDismiss] Whether to close the modal when the backdrop (outside of the
  * modal) is clicked.
  * @property {string} [value] Value entered on the textbox.

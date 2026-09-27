@@ -251,6 +251,37 @@ describe('Dialog', () => {
     expect(document.activeElement).toBe(getDialog()?.querySelector('.own'));
   });
 
+  it('leaves the focus on an input the user has focused before the first one gets it', async () => {
+    await render(Dialog, {
+      open: true,
+      title: 'T',
+      children: html('<div><input class="first" value="hello"><input class="second"></div>'),
+      /**
+       * Focus the second input as soon as the dialog is interactive, before the dialog focuses the
+       * first one, as if the user clicked it right away.
+       */
+      onOpen: () => {
+        setTimeout(() => {
+          /** @type {HTMLElement} */ (
+            /** @type {HTMLDialogElement} */ (getDialog()).querySelector('.second')
+          ).focus();
+        }, 10);
+      },
+    });
+
+    await waitForOpen();
+    // Give the dialog’s own focus management a chance to run as well
+    await new Promise((resolve) => {
+      setTimeout(resolve, 100);
+    });
+
+    const first = /** @type {HTMLInputElement} */ (getDialog()?.querySelector('.first'));
+
+    expect(document.activeElement).toBe(getDialog()?.querySelector('.second'));
+    // The value of the first input is not selected either
+    expect(first.selectionEnd).toBe(first.selectionStart);
+  });
+
   it('omits the header and footer when there is nothing to show', async () => {
     await render(Dialog, { open: true, title: '', showOk: false, showCancel: false });
     await waitForOpen();
