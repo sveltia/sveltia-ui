@@ -9,6 +9,11 @@ import TextEditor from './text-editor.svelte';
  */
 
 /**
+ * Markdown with a paragraph in Arabic, “Hello”, followed by one in English.
+ */
+const MIXED_TEXT = 'مرحبا\n\nHello'; // cspell:disable-line
+
+/**
  * Wait until the rich text editor has rendered the given HTML.
  * @param {HTMLElement} container Container.
  * @param {string} html HTML to look for.
@@ -75,6 +80,68 @@ describe('TextEditor', () => {
     expect(
       screen.getByRole('button', { name: 'Bold' }).element().getAttribute('aria-controls'),
     ).toBe(root.id);
+  });
+
+  it('applies the text direction to both text boxes, not the toolbar', async () => {
+    const screen = await render(TextEditor, { value: MIXED_TEXT, dir: 'rtl', lang: 'ar' });
+    const wrapper = /** @type {HTMLElement} */ (screen.container.querySelector('.sui.text-editor'));
+    const root = await waitForContent(screen.container, 'Hello');
+    const textarea = /** @type {HTMLTextAreaElement} */ (wrapper.querySelector('textarea'));
+    const toolbar = screen.getByRole('toolbar', { name: 'Text Editor' }).element();
+
+    /**
+     * Get the direction of each paragraph as laid out.
+     * @returns {string[]} Directions.
+     */
+    const getDirections = () =>
+      [...root.querySelectorAll('p')].map((p) => getComputedStyle(p).direction);
+
+    await vi.waitFor(() => {
+      expect(root.getAttribute('dir')).toBe('rtl');
+    });
+    expect(textarea.getAttribute('dir')).toBe('rtl');
+    // Every paragraph follows the editor, including a new one, like the lines of a text area
+    expect(getDirections()).toEqual(['rtl', 'rtl']);
+    focusEnd(root);
+    await userEvent.keyboard('{Enter}');
+    await vi.waitFor(() => {
+      expect(getDirections()).toEqual(['rtl', 'rtl', 'rtl']);
+    });
+
+    // The toolbar is part of the user interface, so it keeps the interface’s direction
+    expect(getComputedStyle(toolbar).direction).toBe('ltr');
+    // The language goes on the wrapper, which both text boxes inherit it from
+    expect(wrapper.getAttribute('lang')).toBe('ar');
+  });
+
+  it('lets each paragraph take the direction of its own text by default', async () => {
+    const screen = await render(TextEditor, { value: MIXED_TEXT });
+    const root = await waitForContent(screen.container, 'Hello');
+
+    expect(root.hasAttribute('dir')).toBe(false);
+    expect([...root.querySelectorAll('p')].map((p) => p.getAttribute('dir'))).toEqual([
+      'auto',
+      'auto',
+    ]);
+    expect([...root.querySelectorAll('p')].map((p) => getComputedStyle(p).direction)).toEqual([
+      'rtl',
+      'ltr',
+    ]);
+  });
+
+  it('follows a change to the direction', async () => {
+    const screen = await render(TextEditor, { value: 'Hello', dir: 'rtl' });
+    const root = await waitForContent(screen.container, 'Hello');
+
+    await vi.waitFor(() => {
+      expect(root.getAttribute('dir')).toBe('rtl');
+    });
+
+    await screen.rerender({ dir: 'auto' });
+    await vi.waitFor(() => {
+      expect(root.hasAttribute('dir')).toBe(false);
+    });
+    expect(root.querySelector('p')?.getAttribute('dir')).toBe('auto');
   });
 
   it('names both text boxes, not the wrapper', async () => {

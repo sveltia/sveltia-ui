@@ -23,7 +23,8 @@
    * @typedef {object} Props
    * @property {string} [value] Input value.
    * @property {boolean} [flex] Make the text input container flexible.
-   * @property {'ltr' | 'rtl' | 'auto'} [dir] The `dir` attribute on the `<textarea>` element.
+   * @property {'ltr' | 'rtl' | 'auto'} [dir] The `dir` attribute on the editable text box, both
+   * the rich text editor and the `<textarea>` element of the plain text mode.
    * @property {TextEditorMode[]} [modes] Enabled modes.
    * @property {TextEditorNodeType[]} [buttons] Enabled buttons.
    * @property {TextEditorComponent[]} [components] Editor components.
@@ -137,6 +138,7 @@
   <TextEditorToolbar {disabled} {readonly} />
   <LexicalRoot
     {...labelAttrs}
+    {dir}
     hidden={!editorStore.useRichText || hidden}
     {disabled}
     {readonly}

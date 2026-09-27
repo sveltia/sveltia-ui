@@ -1,4 +1,5 @@
 <script>
+  import { $getRoot as getRoot } from 'lexical';
   import { getContext, onMount } from 'svelte';
   import { initEditor } from './core.js';
 
@@ -10,6 +11,8 @@
   /**
    * @typedef {object} Props
    * @property {string} [class] The `class` attribute on the wrapper element.
+   * @property {'ltr' | 'rtl' | 'auto'} [dir] Direction of the text. With `auto` or no value, each
+   * paragraph takes the direction of its own text.
    * @property {boolean} [hidden] Whether to hide the widget.
    * @property {boolean} [disabled] Whether to disable the widget. An alias of the `aria-disabled`
    * attribute.
@@ -28,6 +31,7 @@
   let {
     /* eslint-disable prefer-const */
     class: className,
+    dir = undefined,
     hidden = false,
     disabled = false,
     readonly = false,
@@ -51,6 +55,26 @@
 
   $effect(() => {
     editorStore.editor?.setEditable(editable);
+  });
+
+  $effect(() => {
+    // Lexical owns the root element’s `dir` attribute, so set the direction on the root node, which
+    // the paragraphs then follow. Without one, each paragraph gets `dir="auto"`
+    const { editor } = editorStore;
+    const direction = dir === 'ltr' || dir === 'rtl' ? dir : null;
+
+    // Check first, as even an update that changes nothing makes the editor convert its content
+    if (!editor || editor.getEditorState().read(() => getRoot().getDirection()) === direction) {
+      return;
+    }
+
+    editor.update(
+      () => {
+        getRoot().setDirection(direction);
+      },
+      // Keep the change out of the undo history
+      { tag: 'history-merge' },
+    );
   });
 
   /**
