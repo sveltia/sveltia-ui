@@ -29,11 +29,38 @@ export class OptionRegistry {
   expanded = $state(false);
 
   /**
-   * Registered options. This is a raw state so that the entries, which expose their properties as
-   * getters onto the `<Option>`’s props, are not wrapped in a reactive proxy.
-   * @type {OptionEntry[]}
+   * Registered options. This is a plain set rather than a state, so that registering an option
+   * doesn’t copy the whole list, which would make mounting many options quadratic. The entries,
+   * which expose their properties as getters onto the `<Option>`’s props, are not wrapped in a
+   * reactive proxy either. Changes are signalled through {@link #version}.
+   * @type {Set<OptionEntry>}
    */
-  #entries = $state.raw([]);
+  // eslint-disable-next-line svelte/prefer-svelte-reactivity -- Signalled manually, see above
+  #entrySet = new Set();
+
+  /**
+   * Incremented whenever an option is registered or unregistered, to notify the readers.
+   * @type {number}
+   */
+  #version = $state(0);
+
+  /**
+   * Array snapshot of {@link #entrySet}, rebuilt lazily after a change.
+   * @type {OptionEntry[] | undefined}
+   */
+  #snapshot = undefined;
+
+  /**
+   * Registered options, in registration order. The returned array must not be mutated.
+   * @returns {OptionEntry[]} Entries.
+   */
+  get #entries() {
+    // eslint-disable-next-line no-unused-expressions
+    this.#version;
+    this.#snapshot ??= [...this.#entrySet];
+
+    return this.#snapshot;
+  }
 
   /**
    * Number of registered options.
@@ -65,10 +92,14 @@ export class OptionRegistry {
    * @returns {() => void} Function to unregister the option.
    */
   register(entry) {
-    this.#entries = [...this.#entries, entry];
+    this.#entrySet.add(entry);
+    this.#snapshot = undefined;
+    this.#version += 1;
 
     return () => {
-      this.#entries = this.#entries.filter((item) => item !== entry);
+      this.#entrySet.delete(entry);
+      this.#snapshot = undefined;
+      this.#version += 1;
     };
   }
 

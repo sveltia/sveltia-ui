@@ -59,6 +59,25 @@ describe('Group - tablist', () => {
     vi.useRealTimers();
   });
 
+  it('should only scroll to the latest tab when the selection moves quickly', async () => {
+    const scrolled = tabs.map((tab) => {
+      const spy = vi.fn();
+
+      tab.scrollIntoView = spy;
+
+      return spy;
+    });
+
+    tabs[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+    await vi.advanceTimersByTimeAsync(100);
+    tabs[1].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+    await vi.advanceTimersByTimeAsync(300);
+
+    expect(tabs[2].getAttribute('aria-selected')).toBe('true');
+    expect(scrolled[1]).not.toHaveBeenCalled();
+    expect(scrolled[2]).toHaveBeenCalledTimes(1);
+  });
+
   it('should select the first tab by default', () => {
     expect(tabs[0].getAttribute('aria-selected')).toBe('true');
     expect(tabs[1].getAttribute('aria-selected')).toBe('false');

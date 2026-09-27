@@ -1,6 +1,7 @@
 import { isRTL } from '@sveltia/i18n';
 import { generateElementId } from '@sveltia/utils/element';
 import { sleep } from '@sveltia/utils/misc';
+import { untrack } from 'svelte';
 import { getSelectedItemDetail } from './select.svelte.js';
 import { findTypeAheadMatch, TypeAhead } from './type-ahead.js';
 
@@ -202,6 +203,12 @@ export class Group {
    * @type {boolean}
    */
   #destroyed = false;
+
+  /**
+   * Timer for the pending {@link scrollIntoViewLater} call, if any.
+   * @type {ReturnType<typeof setTimeout> | undefined}
+   */
+  #scrollTimer = undefined;
 
   /**
    * Memoized member lists, discarded whenever the widget’s subtree changes. See {@link #members}.
@@ -707,6 +714,11 @@ export class Group {
      * @type {boolean}
      */
     let targetAffected = false;
+    /**
+     * Elements to be scrolled into view: the target and the panel it controls, if any.
+     * @type {HTMLElement[]}
+     */
+    const scrollTargets = [];
 
     this.activeMembers.forEach((element) => {
       // Reading the role once and comparing it is markedly cheaper than putting every member
@@ -775,32 +787,19 @@ export class Group {
         controlTarget.setAttribute('aria-hidden', String(!isTarget));
 
         if (isTarget) {
-          globalThis.setTimeout(() => {
-            try {
-              controlTarget.scrollIntoView({
-                block: 'nearest',
-                inline: 'nearest',
-                behavior: 'auto',
-              });
-            } catch {
-              controlTarget.scrollIntoView(true);
-            }
-          }, 300);
+          scrollTargets.push(controlTarget);
         }
       }
 
       if (isTarget) {
         this.parent.setAttribute('aria-activedescendant', element.id);
-
-        globalThis.setTimeout(() => {
-          try {
-            element.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'auto' });
-          } catch {
-            element.scrollIntoView(true);
-          }
-        }, 300);
+        scrollTargets.push(element);
       }
     });
+
+    if (scrollTargets.length) {
+      this.scrollIntoViewLater(scrollTargets);
+    }
 
     if (this.focusChild) {
       // Done right away rather than on the next frame: a key that repeats, or a second press
@@ -819,6 +818,27 @@ export class Group {
     this.parent.dispatchEvent(
       new CustomEvent('Change', { detail: getSelectedItemDetail(newTarget) }),
     );
+  }
+
+  /**
+   * Scroll the given elements into view after a short delay, replacing any pending scroll, so a
+   * key held down doesn’t queue a scroll for every member it passes and jump back to an old one.
+   * @param {HTMLElement[]} elements Elements to scroll into view.
+   */
+  scrollIntoViewLater(elements) {
+    globalThis.clearTimeout(this.#scrollTimer);
+
+    this.#scrollTimer = globalThis.setTimeout(() => {
+      this.#scrollTimer = undefined;
+
+      elements.forEach((element) => {
+        try {
+          element.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'auto' });
+        } catch {
+          element.scrollIntoView(true);
+        }
+      });
+    }, 300);
   }
 
   /**
@@ -1103,6 +1123,7 @@ export class Group {
    */
   destroy() {
     this.#destroyed = true;
+    globalThis.clearTimeout(this.#scrollTimer);
     this.#typeAhead.reset();
     this.observer.disconnect();
     this.parent.removeEventListener('click', this._onClick);
@@ -1148,7 +1169,10 @@ export class Group {
  */
 export const activateGroup = (paramsOrGetter) => (parent) => {
   const isGetter = typeof paramsOrGetter === 'function';
-  const initialParams = isGetter ? paramsOrGetter() : paramsOrGetter;
+  // Read the params without tracking them: attachments run in an effect, so a tracked read would
+  // destroy and recreate the whole group whenever they change, e.g. on every search keystroke.
+  // Changes are handled by `onUpdate()` below instead.
+  const initialParams = isGetter ? untrack(() => paramsOrGetter()) : paramsOrGetter;
   const group = new Group(/** @type {HTMLElement} */ (parent), initialParams);
 
   /* v8 ignore next 4 */

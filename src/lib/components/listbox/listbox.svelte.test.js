@@ -227,4 +227,40 @@ describe('Listbox', () => {
       expect(listbox.classList.contains('filtered')).toBe(false);
     });
   });
+
+  it('keeps the same group while the search terms change', async () => {
+    /** @type {ComponentProps<typeof ListboxFixture>} */
+    const props = $state({ searchTerms: '' });
+    const activated = whenActivated();
+    const screen = await render(ListboxFixture, props);
+
+    await activated;
+
+    const onInitialized = vi.fn();
+
+    document.addEventListener('Initialized', onInitialized, { capture: true });
+
+    try {
+      const listbox = screen.getByRole('listbox');
+
+      props.searchTerms = 'an';
+      await vi.waitFor(() => {
+        expect(listbox.element().classList.contains('filtered')).toBe(true);
+      });
+
+      // The group still handles the keyboard right away, rather than being torn down and set up
+      // again after a delay
+      /** @type {HTMLElement} */ (listbox.element()).focus();
+      await userEvent.keyboard('{ArrowDown}');
+      await expect
+        .element(screen.getByRole('option', { name: 'Banana' }))
+        .toHaveAttribute('aria-selected', 'true');
+      await new Promise((resolve) => {
+        setTimeout(resolve, 200);
+      });
+      expect(onInitialized).not.toHaveBeenCalled();
+    } finally {
+      document.removeEventListener('Initialized', onInitialized, { capture: true });
+    }
+  });
 });

@@ -100,6 +100,11 @@ import { TABLE } from './transformers/table.js';
  */
 
 /**
+ * Maximum number of entries in the undo stack.
+ */
+const HISTORY_MAX_DEPTH = 200;
+
+/**
  * Get the current selection’s block node key as well as block and inline level types.
  * @internal
  * @returns {TextEditorSelectionState} Current selection state.
@@ -180,31 +185,40 @@ export const getSelectionTypes = () => {
  * @internal
  * @param {LexicalEditor} editor Editor instance.
  * @param {Transformer[]} enabledTransformers Enabled Markdown transformers.
+ * @param {string} [cachedValue] Markdown value from a previous call, to be reused instead of
+ * converting the whole document again when only the selection has changed.
+ * @returns {string} Markdown value.
  */
-export const onEditorUpdate = (editor, enabledTransformers) => {
+export const onEditorUpdate = (editor, enabledTransformers, cachedValue) => {
   const transformers = enabledTransformers.filter(
     (/** @type {any} */ { tag }) => !DISABLED_MARKDOWN_TAGS.includes(tag),
   );
 
+  const value =
+    cachedValue ??
+    trimBlankBlockquoteLines(
+      convertToMarkdownString(transformers)
+        // Remove unnecessary backslash for underscore and backslash characters
+        // @see https://github.com/sveltia/sveltia-cms/issues/430
+        // @see https://github.com/sveltia/sveltia-cms/issues/512
+        .replace(/\\([_\\])/g, '$1')
+        // Replace encoded spaces with regular spaces. The HTML entity can appear with a
+        // combination of bold and italic text
+        // @see https://github.com/sveltia/sveltia-cms/issues/511
+        // @see https://github.com/sveltia/sveltia-cms/issues/534
+        .replace(/&#32;/g, ' '),
+    );
+
   editor.getRootElement()?.dispatchEvent(
     new CustomEvent('Update', {
       detail: {
-        value: trimBlankBlockquoteLines(
-          convertToMarkdownString(transformers)
-            // Remove unnecessary backslash for underscore and backslash characters
-            // @see https://github.com/sveltia/sveltia-cms/issues/430
-            // @see https://github.com/sveltia/sveltia-cms/issues/512
-            .replace(/\\([_\\])/g, '$1')
-            // Replace encoded spaces with regular spaces. The HTML entity can appear with a
-            // combination of bold and italic text
-            // @see https://github.com/sveltia/sveltia-cms/issues/511
-            // @see https://github.com/sveltia/sveltia-cms/issues/534
-            .replace(/&#32;/g, ' '),
-        ),
+        value,
         selection: getSelectionTypes(),
       },
     }),
   );
+
+  return value;
 };
 
 /**
@@ -269,7 +283,17 @@ export const initEditor = ({
 
   addUnregister(registerRichText(editor));
   addUnregister(registerDragonSupport(editor));
-  addUnregister(registerHistory(editor, createEmptyHistoryState(), 1000));
+  // Cap the undo stack, as each entry holds a snapshot of the whole document
+  addUnregister(
+    registerHistory(
+      editor,
+      createEmptyHistoryState(),
+      1000,
+      undefined,
+      undefined,
+      HISTORY_MAX_DEPTH,
+    ),
+  );
 
   if (useMarkdownShortcuts) {
     addUnregister(registerMarkdownShortcuts(editor, enabledTransformers));
@@ -382,14 +406,40 @@ export const initEditor = ({
     );
   }
 
+  /** Incremented on every update, so only the latest one in a burst triggers the Update event. */
+  let updateCount = 0;
+  /** Whether the content has changed since the Update event was last triggered. */
+  let contentChanged = true;
+  /** @type {string | undefined} */
+  let lastValue = undefined;
+  let disposed = false;
+
+  addUnregister(() => {
+    disposed = true;
+  });
+
   addUnregister(
-    editor.registerUpdateListener(() => {
+    editor.registerUpdateListener(({ dirtyElements, dirtyLeaves } = /** @type {any} */ ({})) => {
+      // An update that only moves the selection leaves no dirty nodes. Remember whether any update
+      // in the burst changed the content, so the document is only converted again when needed.
+      // This includes the updates made while composing, which are otherwise skipped.
+      contentChanged ||= !dirtyElements || dirtyElements.size > 0 || dirtyLeaves.size > 0;
+
       if (editor?.isComposing()) {
         return;
       }
 
+      updateCount += 1;
+
+      const currentCount = updateCount;
+
       (async () => {
         await sleep(100);
+
+        // Skip if a newer update has been made in the meantime, or the editor has been disposed
+        if (currentCount !== updateCount || disposed) {
+          return;
+        }
 
         editor.update(() => {
           // Prevent CodeNode from being removed
@@ -411,7 +461,12 @@ export const initEditor = ({
             }
           }
 
-          onEditorUpdate(editor, enabledTransformers);
+          lastValue = onEditorUpdate(
+            editor,
+            enabledTransformers,
+            contentChanged ? undefined : lastValue,
+          );
+          contentChanged = false;
         });
       })();
     }),

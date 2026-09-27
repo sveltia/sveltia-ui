@@ -634,6 +634,146 @@ describe('text editor core', () => {
     dispose();
   });
 
+  it('only triggers the Update event for the latest update in a burst', async () => {
+    const { $convertToMarkdownString } = await import('@lexical/markdown');
+    const originalUpdate = editorState.update;
+    const update = vi.fn((/** @type {any} */ callback) => callback());
+    /** @type {any} */
+    const dirty = { dirtyElements: new Map([['root', true]]), dirtyLeaves: new Set() };
+
+    editorState.isComposing = () => false;
+    editorState.update = update;
+    vi.mocked($convertToMarkdownString).mockClear();
+
+    try {
+      const { dispose } = initEditor({
+        components: [],
+        useMarkdownShortcuts: false,
+        isCodeEditor: false,
+        modes: [],
+        enabledButtons: [],
+      });
+
+      editorState._updateListeners[0](dirty);
+      editorState._updateListeners[0](dirty);
+      editorState._updateListeners[0](dirty);
+      await Promise.resolve();
+
+      expect(update).toHaveBeenCalledTimes(1);
+      expect($convertToMarkdownString).toHaveBeenCalledTimes(1);
+      dispose();
+    } finally {
+      editorState.update = originalUpdate;
+    }
+  });
+
+  it('reuses the Markdown value when only the selection has changed', async () => {
+    const { $convertToMarkdownString } = await import('@lexical/markdown');
+    const dispatchEvent = vi.fn();
+    const originalGetRootElement = editorState.getRootElement;
+
+    editorState.isComposing = () => false;
+    editorState.getRootElement = () => ({ dispatchEvent });
+    vi.mocked($convertToMarkdownString).mockClear();
+
+    try {
+      const { dispose } = initEditor({
+        components: [],
+        useMarkdownShortcuts: false,
+        isCodeEditor: false,
+        modes: [],
+        enabledButtons: [],
+      });
+
+      editorState._updateListeners[0]({
+        dirtyElements: new Map([['root', true]]),
+        dirtyLeaves: new Set(),
+      });
+      await Promise.resolve();
+      editorState._updateListeners[0]({ dirtyElements: new Map(), dirtyLeaves: new Set() });
+      await Promise.resolve();
+
+      expect($convertToMarkdownString).toHaveBeenCalledTimes(1);
+      expect(dispatchEvent).toHaveBeenCalledTimes(2);
+      expect(dispatchEvent.mock.calls[1][0].detail.value).toBe('converted');
+      dispose();
+    } finally {
+      editorState.getRootElement = originalGetRootElement;
+    }
+  });
+
+  it('converts the document again after a composition that changed it', async () => {
+    const { $convertToMarkdownString } = await import('@lexical/markdown');
+    let composing = false;
+
+    editorState.isComposing = () => composing;
+    vi.mocked($convertToMarkdownString).mockClear();
+
+    const { dispose } = initEditor({
+      components: [],
+      useMarkdownShortcuts: false,
+      isCodeEditor: false,
+      modes: [],
+      enabledButtons: [],
+    });
+
+    editorState._updateListeners[0]();
+    await Promise.resolve();
+    // The text changes while composing, then the composition ends without dirty nodes
+    composing = true;
+    editorState._updateListeners[0]({
+      dirtyElements: new Map([['root', true]]),
+      dirtyLeaves: new Set(),
+    });
+    composing = false;
+    editorState._updateListeners[0]({ dirtyElements: new Map(), dirtyLeaves: new Set() });
+    await Promise.resolve();
+
+    expect($convertToMarkdownString).toHaveBeenCalledTimes(2);
+    dispose();
+  });
+
+  it('skips the pending Update event once disposed', async () => {
+    const originalUpdate = editorState.update;
+    const update = vi.fn();
+
+    editorState.isComposing = () => false;
+    editorState.update = update;
+
+    try {
+      const { dispose } = initEditor({
+        components: [],
+        useMarkdownShortcuts: false,
+        isCodeEditor: false,
+        modes: [],
+        enabledButtons: [],
+      });
+
+      editorState._updateListeners[0]();
+      dispose();
+      await Promise.resolve();
+
+      expect(update).not.toHaveBeenCalled();
+    } finally {
+      editorState.update = originalUpdate;
+    }
+  });
+
+  it('caps the undo history', async () => {
+    const { registerHistory } = await import('@lexical/history');
+
+    vi.mocked(registerHistory).mockClear();
+    initEditor({
+      components: [],
+      useMarkdownShortcuts: false,
+      isCodeEditor: false,
+      modes: [],
+      enabledButtons: [],
+    });
+
+    expect(vi.mocked(registerHistory).mock.calls[0][5]).toBeGreaterThan(0);
+  });
+
   it('skips update listener when editor is composing', async () => {
     editorState.isComposing = vi.fn(() => true);
 
