@@ -435,6 +435,10 @@
  * @property {TextEditorSelectionState} selection Current selection state.
  * @property {boolean} useRichText Whether to use rich text mode. If `false`, the editor shows the
  * plain text editor.
+ * @property {HTMLTextAreaElement | undefined} textArea The `<textarea>` element of the plain text
+ * mode.
+ * @property {string} controlId ID of the editable element currently shown: the Lexical root in the
+ * rich text mode, or the `<textarea>` in the plain text mode.
  * @property {boolean} hasConverterError Whether there was an error while converting Markdown to
  * Lexical nodes.
  * @property {boolean} showConverterError Whether to show a converter error in the UI.

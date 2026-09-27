@@ -252,10 +252,61 @@ describe('InsertLinkButton', () => {
     expect(screen.container).toBeDefined();
   });
 
-  it('is disabled in plain text mode', async () => {
-    const { screen, store } = await renderButton();
+  it('inserts a Markdown link in plain text mode', async () => {
+    /** @type {ComponentProps<typeof EditorFixture>} */
+    const props = $state({ store: undefined, component: InsertLinkButton, withTextArea: true });
+    const screen = await render(EditorFixture, props);
+    const store = getEditorStore(props);
+    const button = screen.getByRole('button', { name: 'Link' });
+
+    const textarea = /** @type {HTMLTextAreaElement} */ (
+      screen.container.querySelector('textarea')
+    );
 
     store.useRichText = false;
-    await expect.element(screen.getByRole('button', { name: 'Link' })).toBeDisabled();
+    await expect.element(button).toHaveAttribute('aria-controls', `${store.editorId}-plain-text`);
+
+    // With the selected text as the link text
+    textarea.value = 'See the docs';
+    textarea.focus();
+    textarea.setSelectionRange(8, 12);
+    await button.click();
+    await expect.element(screen.getByRole('dialog')).toBeVisible();
+    // The text field is only shown when nothing is selected
+    expect(getDialog()?.querySelectorAll('input')).toHaveLength(1);
+    await vi.waitFor(() => {
+      expect(document.activeElement).toBe(screen.getByRole('textbox', { name: 'URL' }).element());
+    });
+    await userEvent.keyboard('https://example.com{Enter}');
+    await vi.waitFor(() => {
+      expect(textarea.value).toBe('See the [docs](https://example.com)');
+    });
+    expect(document.activeElement).toBe(textarea);
+
+    // Without a selection, with the given link text, opened with the shortcut
+    await userEvent.keyboard(
+      navigator.platform.startsWith('Mac') ? '{Meta>}k{/Meta}' : '{Control>}k{/Control}',
+    );
+    await vi.waitFor(() => {
+      expect(document.activeElement).toBe(screen.getByRole('textbox', { name: 'URL' }).element());
+    });
+    await userEvent.keyboard('https://sveltia.dev');
+    await screen.getByRole('textbox', { name: 'Text' }).fill('Sveltia');
+    await screen.getByRole('button', { name: 'Insert' }).click();
+    await vi.waitFor(() => {
+      expect(textarea.value).toBe(
+        'See the [docs](https://example.com)[Sveltia](https://sveltia.dev)',
+      );
+    });
+
+    // Cancelling leaves the text alone, and brings the focus back
+    await button.click();
+    await screen.getByRole('button', { name: 'Cancel' }).click();
+    await vi.waitFor(() => {
+      expect(document.activeElement).toBe(textarea);
+    });
+    expect(textarea.value).toBe(
+      'See the [docs](https://example.com)[Sveltia](https://sveltia.dev)',
+    );
   });
 });

@@ -37,6 +37,8 @@ export const createEditorStore = () => {
   let selection = $state({ blockNodeKey: null, blockType: 'paragraph', inlineTypes: [] });
   /** @type {boolean} */
   let useRichText = $state(true);
+  /** @type {HTMLTextAreaElement | undefined} */
+  let textArea = $state();
   /** @type {boolean} */
   let hasConverterError = $state(false);
   /** @type {boolean} */
@@ -127,6 +129,15 @@ export const createEditorStore = () => {
     },
     set selection(newValue) {
       selection = newValue;
+    },
+    get controlId() {
+      return useRichText ? `${editorId}-lexical-root` : `${editorId}-plain-text`;
+    },
+    get textArea() {
+      return textArea;
+    },
+    set textArea(newValue) {
+      textArea = newValue;
     },
     get useRichText() {
       return useRichText;

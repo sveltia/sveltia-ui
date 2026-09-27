@@ -16,6 +16,7 @@
   import MenuItemCheckbox from '../../menu/menu-item-checkbox.svelte';
   import { AVAILABLE_BUTTONS } from '../constants.js';
   import { focusEditor } from '../core.js';
+  import { applyRawTextEdit, getRawTextState, setBlockType } from '../raw-markdown.js';
 
   /**
    * @import { TextEditorBlockType, TextEditorStore } from '$lib/typedefs';
@@ -44,6 +45,18 @@
    * Change the current selection’s type to {@link type}.
    */
   const changeBlockType = async () => {
+    if (!editorStore.useRichText) {
+      const { textArea } = editorStore;
+
+      // The item is only clickable while the `<textarea>` is there
+      /* v8 ignore else */
+      if (textArea) {
+        applyRawTextEdit(textArea, setBlockType(getRawTextState(textArea), type));
+      }
+
+      return;
+    }
+
     // The item is only clickable while the editor is there
     /* v8 ignore next */
     if (!editorStore.editor) {

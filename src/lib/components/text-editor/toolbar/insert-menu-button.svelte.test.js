@@ -6,7 +6,7 @@ import { expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-svelte';
 import EditorFixture from '../editor-fixture.test.svelte';
 import InsertMenuButton from './insert-menu-button.svelte';
-import { getEditorStore } from '../../../test-utils/editor.js';
+import { createTestComponent, getEditorStore } from '../../../test-utils/editor.js';
 
 /**
  * @import { ComponentProps } from 'svelte';
@@ -72,17 +72,48 @@ it('lists the components in a menu and inserts the chosen one', async () => {
   });
 });
 
-it('is disabled in plain text mode', async () => {
+it('inserts the chosen component’s Markdown through a dialog in plain text mode', async () => {
   /** @type {ComponentProps<typeof EditorFixture>} */
   const props = $state({
     store: undefined,
     component: InsertMenuButton,
-    componentProps: { components },
+    componentProps: {
+      components: [
+        createTestComponent({ id: 'badge', label: 'Badge', markdown: '[badge]', inline: true }),
+      ],
+    },
+    withTextArea: true,
   });
 
   const screen = await render(EditorFixture, props);
   const store = getEditorStore(props);
+  const textarea = /** @type {HTMLTextAreaElement} */ (screen.container.querySelector('textarea'));
 
   store.useRichText = false;
-  await expect.element(screen.getByRole('button', { name: 'Insert' })).toBeDisabled();
+  textarea.value = 'A  B';
+  textarea.focus();
+  textarea.setSelectionRange(2, 2);
+  await screen.getByRole('button', { name: 'Insert' }).click();
+  await screen.getByRole('menuitem', { name: 'Badge' }).click();
+
+  const dialog = screen.getByRole('dialog', { name: 'Badge' });
+
+  await expect.element(dialog).toBeVisible();
+  await dialog.getByRole('button', { name: 'Insert' }).click();
+  // An inline component is inserted as is
+  await vi.waitFor(() => {
+    expect(textarea.value).toBe('A [badge] B');
+  });
+
+  // Cancelling inserts nothing
+  await screen.getByRole('button', { name: 'Insert' }).click();
+  await screen.getByRole('menuitem', { name: 'Badge' }).click();
+  await screen
+    .getByRole('dialog', { name: 'Badge' })
+    .getByRole('button', { name: 'Cancel' })
+    .click();
+  await vi.waitFor(() => {
+    expect(document.activeElement).toBe(textarea);
+  });
+  expect(textarea.value).toBe('A [badge] B');
 });

@@ -6,7 +6,7 @@ import { expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-svelte';
 import EditorFixture from '../editor-fixture.test.svelte';
 import InsertItemButton from './insert-item-button.svelte';
-import { getEditorStore } from '../../../test-utils/editor.js';
+import { createTestComponent, getEditorStore } from '../../../test-utils/editor.js';
 
 /**
  * @import { ComponentProps } from 'svelte';
@@ -61,7 +61,7 @@ it('renders a labelled button for a component without an icon', async () => {
   expect(button.element().querySelector('.label')?.textContent?.trim()).toBe('Greeting');
 });
 
-it('inserts the node into the editor when clicked, unless in plain text mode', async () => {
+it('inserts the node into the editor when clicked', async () => {
   /** @type {ComponentProps<typeof EditorFixture>} */
   const props = $state({
     store: undefined,
@@ -80,7 +80,76 @@ it('inserts the node into the editor when clicked, unless in plain text mode', a
   await vi.waitFor(() => {
     expect(screen.container.querySelector('.lexical-root')?.textContent).toContain('Hello there');
   });
+});
+
+it('inserts the component’s Markdown through a dialog in plain text mode', async () => {
+  /** @type {ComponentProps<typeof EditorFixture>} */
+  const props = $state({
+    store: undefined,
+    component: InsertItemButton,
+    componentProps: {
+      component: createTestComponent({ id: 'figure', label: 'Figure', markdown: '<figure>' }),
+    },
+    withTextArea: true,
+  });
+
+  const screen = await render(EditorFixture, props);
+  const store = getEditorStore(props);
+  const textarea = /** @type {HTMLTextAreaElement} */ (screen.container.querySelector('textarea'));
 
   store.useRichText = false;
-  await expect.element(button).toBeDisabled();
+  textarea.value = 'Before After';
+  textarea.focus();
+  textarea.setSelectionRange(6, 7);
+  await screen.getByRole('button', { name: 'Figure' }).click();
+
+  const dialog = screen.getByRole('dialog', { name: 'Figure' });
+
+  await expect.element(dialog).toBeVisible();
+  // The component is rendered in a separate editor within the dialog
+  await expect.element(dialog.getByRole('textbox', { name: 'Figure' })).toHaveTextContent('Figure');
+  await expect.element(dialog.getByRole('button', { name: 'Insert' })).toBeEnabled();
+  await dialog.getByRole('button', { name: 'Insert' }).click();
+  // A block is inserted between blank lines
+  await vi.waitFor(() => {
+    expect(textarea.value).toBe('Before\n\n<figure>\n\nAfter');
+  });
+  expect(document.activeElement).toBe(textarea);
+});
+
+it('inserts the latest Markdown even if the component has just changed', async () => {
+  let markdown = '<old>';
+  /**
+   * Get the current Markdown output of the component.
+   * @returns {string} Markdown.
+   */
+  const getMarkdown = () => markdown;
+
+  /** @type {ComponentProps<typeof EditorFixture>} */
+  const props = $state({
+    store: undefined,
+    component: InsertItemButton,
+    componentProps: {
+      component: createTestComponent({ id: 'note', label: 'Note', markdown: getMarkdown }),
+    },
+    withTextArea: true,
+  });
+
+  const screen = await render(EditorFixture, props);
+  const store = getEditorStore(props);
+  const textarea = /** @type {HTMLTextAreaElement} */ (screen.container.querySelector('textarea'));
+
+  store.useRichText = false;
+  textarea.focus();
+  await screen.getByRole('button', { name: 'Note' }).click();
+
+  const dialog = screen.getByRole('dialog', { name: 'Note' });
+
+  await expect.element(dialog.getByRole('button', { name: 'Insert' })).toBeEnabled();
+  // Change the output without an editor update, like a field changed right before submitting
+  markdown = '<new>';
+  await dialog.getByRole('button', { name: 'Insert' }).click();
+  await vi.waitFor(() => {
+    expect(textarea.value).toBe('<new>\n\n');
+  });
 });

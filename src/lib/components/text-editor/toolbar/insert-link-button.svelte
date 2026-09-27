@@ -23,6 +23,12 @@
   import TextInput from '../../text-field/text-input.svelte';
   import { AVAILABLE_BUTTONS } from '../constants.js';
   import { focusEditor, isSafeLinkURL } from '../core.js';
+  import {
+    applyRawTextEdit,
+    getRawTextState,
+    insertLink,
+    isRawTextEditable,
+  } from '../raw-markdown.js';
 
   /**
    * @import { TextEditorStore } from '$lib/typedefs';
@@ -52,18 +58,38 @@
   const isValidURL = $derived(!!anchorURL.trim() && isSafeLinkURL(anchorURL));
 
   /**
+   * Open the dialog to create a new link from the given selected text.
+   * @param {string} textContent Selected text.
+   */
+  const openCreateDialog = (textContent) => {
+    // Prefill the URL field with the selected text only if it’s a URL that can be linked to.
+    // Otherwise, it’s just the link text, like a word or phrase.
+    anchorURL = isURL(textContent) && isSafeLinkURL(textContent) ? textContent : '';
+    hasAnchor = !!textContent;
+    dialogMode = 'create';
+    openDialog = true;
+  };
+
+  /**
    * Create a new link by showing a dialog to accept a URL and optionally text.
    */
   const createLink = () => {
-    editorStore.editor?.getEditorState().read(() => {
-      const textContent = getTextContent().trim();
+    const { textArea, useRichText } = editorStore;
 
-      // Prefill the URL field with the selected text only if it’s a URL that can be linked to.
-      // Otherwise, it’s just the link text, like a word or phrase.
-      anchorURL = isURL(textContent) && isSafeLinkURL(textContent) ? textContent : '';
-      hasAnchor = !!textContent;
-      dialogMode = 'create';
-      openDialog = true;
+    if (!useRichText) {
+      // The button is only enabled while the `<textarea>` is there
+      /* v8 ignore else */
+      if (textArea) {
+        const { value, start, end } = getRawTextState(textArea);
+
+        openCreateDialog(value.slice(start, end).trim());
+      }
+
+      return;
+    }
+
+    editorStore.editor?.getEditorState().read(() => {
+      openCreateDialog(getTextContent().trim());
     });
   };
 
@@ -112,7 +138,8 @@
    * create a new link.
    */
   const onButtonClick = () => {
-    if (selectionTypeMatches) {
+    // Links are not detected in the plain text mode, so a new one is always created there
+    if (selectionTypeMatches && editorStore.useRichText) {
       updateLink();
     } else {
       createLink();
@@ -135,6 +162,31 @@
    * @see https://github.com/facebook/lexical/discussions/3013
    */
   const onDialogClose = async (event) => {
+    const { textArea, useRichText } = editorStore;
+
+    if (!useRichText) {
+      // The dialog can only be opened from the button, which needs the `<textarea>`
+      /* v8 ignore else */
+      if (textArea) {
+        if (event.detail.returnValue !== 'cancel') {
+          applyRawTextEdit(
+            textArea,
+            insertLink(getRawTextState(textArea), {
+              url: anchorURL.trim(),
+              text: hasAnchor ? undefined : anchorText,
+            }),
+          );
+        } else {
+          textArea.focus();
+        }
+      }
+
+      anchorURL = '';
+      anchorText = '';
+
+      return;
+    }
+
     if (event.detail.returnValue !== 'cancel' && dialogMode !== 'remove') {
       // The dialog can only be opened from the button, which needs the editor
       /* v8 ignore next */
@@ -191,6 +243,31 @@
     );
 
   $effect(() => {
+    const { textArea } = editorStore;
+
+    if (!textArea) {
+      return undefined;
+    }
+
+    /**
+     * Handle the keyboard shortcut in the plain text mode.
+     * @param {KeyboardEvent} event `keydown` event.
+     */
+    const onKeyDown = (event) => {
+      if (isRawTextEditable(textArea) && matchesShortcuts(event, isMac() ? 'Meta+K' : 'Ctrl+K')) {
+        event.preventDefault();
+        onButtonClick();
+      }
+    };
+
+    textArea.addEventListener('keydown', onKeyDown);
+
+    return () => {
+      textArea.removeEventListener('keydown', onKeyDown);
+    };
+  });
+
+  $effect(() => {
     if (editorStore.editor) {
       // Unregister on unmount, e.g. when the toolbar swaps the button out while the caret is in a
       // code block, so the shortcut isn’t handled by a stale instance
@@ -204,9 +281,8 @@
 <Button
   iconic
   aria-label={_(`_sui.text_editor.${AVAILABLE_BUTTONS[type].labelKey}`)}
-  aria-controls={`${editorStore.editorId}-lexical-root`}
-  disabled={!editorStore.useRichText}
-  pressed={selectionTypeMatches}
+  aria-controls={editorStore.controlId}
+  pressed={selectionTypeMatches && editorStore.useRichText}
   onclick={() => {
     onButtonClick();
   }}

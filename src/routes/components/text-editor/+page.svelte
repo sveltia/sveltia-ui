@@ -1,6 +1,17 @@
 <script>
   import { TextEditor } from '$lib';
   import Example from '../../_components/example.svelte';
+  import { calloutComponent, imageComponent, youtubeComponent } from './demo-components.js';
+
+  const components = [imageComponent, calloutComponent, youtubeComponent];
+
+  const componentMarkdown = [
+    'Some text with an image: ![Sveltia](https://github.com/sveltia.png)',
+    '',
+    ':::tip',
+    'Try the Insert menu in both modes.',
+    ':::',
+  ].join('\n');
 
   const markdown = [
     '# Heading',
@@ -52,10 +63,19 @@
 </section>
 
 <section>
+  <h3>With Components</h3>
+  <Example>
+    <div role="none">
+      <TextEditor {components} value={componentMarkdown} />
+    </div>
+  </Example>
+</section>
+
+<section>
   <h3>Plain Text Mode by Default</h3>
   <Example>
     <div role="none">
-      <TextEditor modes={['plain-text', 'rich-text']} value={markdown} />
+      <TextEditor modes={['plain-text', 'rich-text']} value={markdown} {components} />
     </div>
   </Example>
 </section>
@@ -86,3 +106,40 @@
     </div>
   </Example>
 </section>
+
+<style lang="scss">
+  :global(.demo-component) {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin: 4px 0;
+    border: 1px solid var(--sui-secondary-border-color);
+    border-radius: 4px;
+    padding: 4px 8px;
+    background-color: var(--sui-secondary-background-color);
+
+    &:global(.block) {
+      display: flex;
+    }
+
+    :global(.title) {
+      font-weight: var(--sui-font-weight-bold, bold);
+    }
+
+    :global(label) {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    :global(:is(input, select, textarea)) {
+      border: 1px solid var(--sui-textbox-border-color);
+      border-radius: 4px;
+      padding: 2px 4px;
+      color: inherit;
+      background-color: var(--sui-textbox-background-color);
+      font: inherit;
+    }
+  }
+</style>

@@ -211,8 +211,13 @@ describe('TextEditor', () => {
       expect(textarea.checkVisibility()).toBe(true);
       expect(root.checkVisibility()).toBe(false);
     });
-    // The formatting buttons only work in rich text mode
-    await expect.element(screen.getByRole('button', { name: 'Bold' })).toBeDisabled();
+    // The formatting buttons edit the Markdown in plain text mode
+    textarea.focus();
+    textarea.select();
+    await screen.getByRole('button', { name: 'Bold' }).click();
+    await vi.waitFor(() => {
+      expect(props.value).toBe('**Hello**');
+    });
 
     await screen.getByRole('textbox', { name: '' }).nth(0).fill('Changed **here**');
     await vi.waitFor(() => {
@@ -224,6 +229,43 @@ describe('TextEditor', () => {
       expect(root.checkVisibility()).toBe(true);
     });
     await waitForContent(screen.container, '<strong');
+  });
+
+  it('follows the block type of the caret line in plain text mode', async () => {
+    const screen = await render(TextEditor, {
+      value: '# Title\n\n```js\ncode\n```',
+      modes: ['plain-text', 'rich-text'],
+    });
+
+    const textarea = /** @type {HTMLTextAreaElement} */ (
+      screen.container.querySelector('textarea')
+    );
+
+    const menuButton = screen.getByRole('button', { name: 'Show Text Style Options' });
+    /**
+     * Get the icon name of the block type menu button.
+     * @returns {string | undefined} Icon name.
+     */
+    const getIcon = () => menuButton.element().querySelector('.icon')?.textContent?.trim();
+
+    // The caret of an unfocused `<textarea>` is not where the user expects, so it’s not followed
+    await vi.waitFor(() => {
+      expect(getIcon()).toBe('format_paragraph');
+    });
+
+    textarea.focus();
+    textarea.setSelectionRange(3, 3);
+    await vi.waitFor(() => {
+      expect(getIcon()).toBe('format_h1');
+    });
+
+    // The language switcher only works in rich text mode, so the formatting buttons stay
+    textarea.setSelectionRange(15, 15);
+    textarea.dispatchEvent(new Event('select'));
+    await vi.waitFor(() => {
+      expect(getIcon()).toBe('code_blocks');
+    });
+    await expect.element(screen.getByRole('button', { name: 'Bold' })).toBeVisible();
   });
 
   it('starts in plain text mode without the mode toggle when only that mode is enabled', async () => {

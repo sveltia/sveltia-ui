@@ -6,6 +6,7 @@
   import { getContext } from 'svelte';
   import Button from '../../button/button.svelte';
   import Icon from '../../icon/icon.svelte';
+  import InsertComponentDialog from './insert-component-dialog.svelte';
 
   /**
    * @import { TextEditorComponent, TextEditorStore } from '$lib/typedefs';
@@ -27,6 +28,8 @@
   const editorStore = getContext('editorStore');
 
   const { label, icon, createNode } = $derived(component);
+
+  let openDialog = $state(false);
 </script>
 
 <Button
@@ -34,9 +37,15 @@
   label={icon ? undefined : label}
   title={label}
   aria-label={label}
-  aria-controls={`${editorStore.editorId}-lexical-root`}
-  disabled={!editorStore.useRichText}
+  aria-controls={editorStore.controlId}
   onclick={() => {
+    // The plain text mode needs a dialog to fill in the component’s fields
+    if (!editorStore.useRichText) {
+      openDialog = true;
+
+      return;
+    }
+
     editorStore.editor?.update(() => {
       // Add an additional paragraph for easier editing
       insertNodes([createNode(), createParagraphNode()]);
@@ -49,3 +58,5 @@
     {/if}
   {/snippet}
 </Button>
+
+<InsertComponentDialog {component} bind:open={openDialog} />

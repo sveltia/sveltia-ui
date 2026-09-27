@@ -21,6 +21,7 @@
    * component?: Component<any>,
    * componentProps?: Record<string, any>,
    * withRoot?: boolean,
+   * withTextArea?: boolean,
    * }}
    */
   let {
@@ -30,6 +31,7 @@
     component = undefined,
     componentProps = {},
     withRoot = true,
+    withTextArea = false,
     /* eslint-enable prefer-const */
   } = $props();
 
@@ -52,6 +54,9 @@
 
 {#if withRoot}
   <LexicalRoot />
+{/if}
+{#if withTextArea}
+  <textarea bind:this={_store.textArea} aria-label="Markdown"></textarea>
 {/if}
 {#if Component}
   <Component {...componentProps} />

@@ -80,9 +80,8 @@
 <ToolbarWrapper disabled={disabled || readonly} ariaLabel={_('_sui.text_editor.text_editor')}>
   {#if blockLevelButtons.length > 1}
     <MenuButton
-      disabled={!editorStore.useRichText}
       aria-label={_('_sui.text_editor.show_text_style_options')}
-      aria-controls={`${editorStore.editorId}-lexical-root`}
+      aria-controls={editorStore.controlId}
     >
       {#snippet startIcon()}
         <Icon
@@ -98,9 +97,10 @@
       {/snippet}
     </MenuButton>
   {/if}
-  {#if editorStore.selection.blockType === 'code-block'}
+  <!-- The language switcher only works with the rich text editor -->
+  {#if editorStore.useRichText && editorStore.selection.blockType === 'code-block'}
     <Divider orientation="vertical" />
-    <CodeLanguageSwitcher disabled={!editorStore.useRichText} />
+    <CodeLanguageSwitcher />
   {:else}
     {#if inlineLevelButtons.length}
       <Divider orientation="vertical" />

@@ -103,3 +103,28 @@ it('turns a heading back into a paragraph', async () => {
     expect(store.inputValue).toBe('Hello');
   });
 });
+
+it('changes the block type of the Markdown lines in plain text mode', async () => {
+  /** @type {ComponentProps<typeof EditorFixture>} */
+  const props = $state({
+    store: undefined,
+    component: ToggleBlockMenuItem,
+    componentProps: { type: 'heading-2' },
+    withTextArea: true,
+  });
+
+  const screen = await render(EditorFixture, props);
+  const store = getEditorStore(props);
+  const textarea = /** @type {HTMLTextAreaElement} */ (screen.container.querySelector('textarea'));
+
+  store.useRichText = false;
+  textarea.value = 'Hello\nWorld';
+  textarea.focus();
+  textarea.setSelectionRange(2, 2);
+  await screen.getByRole('menuitemcheckbox', { name: /Heading 2/ }).click();
+  await vi.waitFor(() => {
+    expect(textarea.value).toBe('## Hello\nWorld');
+  });
+  expect(document.activeElement).toBe(textarea);
+  expect(textarea.selectionStart).toBe(5);
+});

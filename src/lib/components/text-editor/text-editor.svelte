@@ -12,6 +12,7 @@
   import { loadCodeHighlighter } from './core.js';
   import EmojiAutocomplete from './emoji-autocomplete.svelte';
   import LexicalRoot from './lexical-root.svelte';
+  import { getBlockType, getRawTextState } from './raw-markdown.js';
   import { highlightCodeToTokens } from './shiki/facade.js';
   import { getCodeTheme, onCodeThemeChange } from './shiki/theme.js';
   import { createEditorStore } from './store.svelte.js';
@@ -192,6 +193,40 @@
   });
 
   $effect(() => {
+    // Keep the block type of the selection up to date in the plain text mode, so the toolbar can
+    // reflect it like in the rich text mode
+    const { textArea, useRichText } = editorStore;
+
+    if (!textArea || useRichText) {
+      return undefined;
+    }
+
+    /**
+     * Update the selection state. Until the `<textarea>` gets the focus, its caret is at the end of
+     * the value rather than where the user would expect, so the block type is not detected yet.
+     */
+    const update = () => {
+      editorStore.selection = {
+        blockNodeKey: null,
+        blockType:
+          document.activeElement === textArea
+            ? getBlockType(getRawTextState(textArea))
+            : 'paragraph',
+        inlineTypes: [],
+      };
+    };
+
+    const events = ['selectionchange', 'select', 'input', 'keyup', 'mouseup', 'focus'];
+
+    untrack(update);
+    events.forEach((type) => textArea.addEventListener(type, update));
+
+    return () => {
+      events.forEach((type) => textArea.removeEventListener(type, update));
+    };
+  });
+
+  $effect(() => {
     // The root initializes the editor before these effects first run, and stays initialized
     /* v8 ignore next */
     if (!editorStore.initialized) {
@@ -235,6 +270,8 @@
   />
   <TextArea
     {...labelAttrs}
+    bind:element={editorStore.textArea}
+    id="{editorStore.editorId}-plain-text"
     autoResize={true}
     bind:value={editorStore.inputValue}
     {useEmojiAutocomplete}
