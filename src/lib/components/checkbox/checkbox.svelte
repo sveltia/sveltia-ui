@@ -109,7 +109,7 @@
       {hidden}
       {disabled}
       {readonly}
-      {required}
+      aria-required={required}
       aria-invalid={invalid}
       aria-checked={checked}
       aria-label={ariaLabel || undefined}

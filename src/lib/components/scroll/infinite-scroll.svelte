@@ -47,10 +47,23 @@
     }
   });
 
+  // Observe the spinner anew once each chunk is rendered: the observer only reports changes, so a
+  // spinner that stays in view because the chunk didn’t fill the viewport would stall the loading.
+  // Observing an element always reports its current state first. Stop observing on unmount too.
   $effect(() => {
+    void loadedItemSize;
+
     if (spinner) {
-      observer.observe(spinner);
+      const target = spinner;
+
+      observer.observe(target);
+
+      return () => {
+        observer.unobserve(target);
+      };
     }
+
+    return undefined;
   });
 </script>
 

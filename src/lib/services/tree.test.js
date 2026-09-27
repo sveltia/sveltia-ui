@@ -657,6 +657,19 @@ describe('Tree', () => {
       click(items.readme);
       expect(items.readme.getAttribute('aria-selected')).toBe('false');
     });
+
+    it('should not set anything up when destroyed before the activation', async () => {
+      await setup();
+
+      const instance = new Tree(tree);
+      const initialized = vi.fn();
+
+      tree.addEventListener('Initialized', initialized);
+      instance.destroy();
+      await vi.advanceTimersByTimeAsync(150);
+      expect(initialized).not.toHaveBeenCalled();
+      tree.removeEventListener('Initialized', initialized);
+    });
   });
 
   describe('instance', () => {

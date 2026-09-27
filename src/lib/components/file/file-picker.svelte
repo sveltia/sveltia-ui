@@ -37,8 +37,11 @@
   {multiple}
   bind:this={filePicker}
   onchange={({ target }) => {
-    const files = [.../** @type {FileList} */ (/** @type {HTMLInputElement} */ (target).files)];
+    const input = /** @type {HTMLInputElement} */ (target);
+    const files = [.../** @type {FileList} */ (input.files)];
 
+    // Clear the selection, so picking the same file again still fires the `change` event
+    input.value = '';
     onSelect?.({ files, file: files[0] });
   }}
   oncancel={(event) => {

@@ -198,6 +198,12 @@ export class Group {
   activated = false;
 
   /**
+   * Whether {@link destroy} has run, so a pending {@link activate} must not attach the listeners.
+   * @type {boolean}
+   */
+  #destroyed = false;
+
+  /**
    * Memoized member lists, discarded whenever the widget’s subtree changes. See {@link #members}.
    * @type {{ all: HTMLElement[], active: HTMLElement[] } | undefined}
    */
@@ -342,7 +348,12 @@ export class Group {
     // Wait a bit before the relevant components, including the `aria-controls` target are mounted
     (async () => {
       await sleep(100);
-      this.activate();
+
+      // The widget may have been unmounted in the meantime, and the listeners added by `activate()`
+      // would then never be removed
+      if (!this.#destroyed) {
+        this.activate();
+      }
     })();
   }
 
@@ -360,11 +371,10 @@ export class Group {
         element.getAttribute(this.childSelectedAttr) === 'true' ||
         (defaultSelected ? element === defaultSelected : this.selectFirst && index === 0);
 
-      const controlTarget = this.controlsPanel
-        ? /** @type {HTMLElement | null} */ (
-            document.querySelector(`#${element.getAttribute('aria-controls')}`)
-          )
-        : null;
+      const controlTargetId = this.controlsPanel ? element.getAttribute('aria-controls') : null;
+      // Looked up by ID rather than with a selector, which would throw on an ID that isn’t a valid
+      // CSS identifier, such as one starting with a digit
+      const controlTarget = controlTargetId ? document.getElementById(controlTargetId) : null;
 
       element.id ||= `${this.id}-item-${index + 1}`;
       element.setAttribute(this.childSelectedAttr, String(isSelected));
@@ -1031,13 +1041,16 @@ export class Group {
         newTarget = allMembers[Math.min(index + colCount, lastIndex)];
       }
 
-      // In RTL, ArrowLeft moves right (next), ArrowRight moves left (previous)
-      if (key === 'ArrowLeft' && index > 0) {
-        newTarget = allMembers[index + (_isRTL ? 1 : -1)];
+      // In RTL, ArrowLeft moves to the next member, ArrowRight to the previous one
+      const prevKey = _isRTL ? 'ArrowRight' : 'ArrowLeft';
+      const nextKey = _isRTL ? 'ArrowLeft' : 'ArrowRight';
+
+      if (key === prevKey && index > 0) {
+        newTarget = allMembers[index - 1];
       }
 
-      if (key === 'ArrowRight' && index !== -1 && index < lastIndex) {
-        newTarget = allMembers[index + (_isRTL ? -1 : 1)];
+      if (key === nextKey && index !== -1 && index < lastIndex) {
+        newTarget = allMembers[index + 1];
       }
 
       if (newTarget?.matches('[aria-disabled="true"], [aria-hidden="true"]')) {
@@ -1089,6 +1102,7 @@ export class Group {
    * Clean up event listeners.
    */
   destroy() {
+    this.#destroyed = true;
     this.#typeAhead.reset();
     this.observer.disconnect();
     this.parent.removeEventListener('click', this._onClick);

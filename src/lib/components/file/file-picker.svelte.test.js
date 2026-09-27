@@ -37,6 +37,8 @@ it('reports the selected files', async () => {
   expect(onSelect).toHaveBeenCalledOnce();
   expect(onSelect.mock.calls[0][0].files).toEqual([first, second]);
   expect(onSelect.mock.calls[0][0].file).toBe(first);
+  // The input is cleared, so the same file can be picked again
+  expect(input.files).toHaveLength(0);
 });
 
 it('reports a cancelled picker without letting the event escape', async () => {

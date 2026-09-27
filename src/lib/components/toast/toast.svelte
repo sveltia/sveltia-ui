@@ -336,6 +336,11 @@
         )
       );
     }
+
+    // Stop the countdown when the toast is destroyed, or it would still hide the toast later
+    return () => {
+      globalThis.clearTimeout(timerId);
+    };
   });
 </script>
 

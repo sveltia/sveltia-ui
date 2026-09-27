@@ -38,11 +38,12 @@ export const MONTH_NAMES = Array.from({ length: 12 }, (__, i) =>
 /**
  * Get the first day of the month the given date is in.
  * @param {Date} date Any date within the month.
- * @returns {Date} Local midnight on the first day of the month, using the UTC year and month of
- * the given date, so a date parsed from a `YYYY-MM-DD` string lands in the right month regardless
- * of the time zone.
+ * @returns {Date} UTC midnight on the first day of the month, using the UTC year and month of the
+ * given date, so a date parsed from a `YYYY-MM-DD` string lands in the right month regardless of
+ * the time zone. The whole grid is UTC-based, like the `value`.
  */
-export const getFirstDayOfMonth = (date) => new Date(date.getUTCFullYear(), date.getUTCMonth(), 1);
+export const getFirstDayOfMonth = (date) =>
+  new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), 1));
 
 /**
  * Get the first day of another month, relative to the given one.
@@ -68,7 +69,7 @@ export const getCalendarDays = (firstDay) => {
   const cursor = new Date(firstDay);
 
   // Start from Sunday
-  cursor.setDate(1 - cursor.getUTCDay());
+  cursor.setUTCDate(1 - cursor.getUTCDay());
 
   return Array.from({ length: DAY_GRID_SIZE }, () => {
     const day = new Date(cursor);
@@ -87,12 +88,10 @@ export const getCalendarDays = (firstDay) => {
 export const toDateString = (date) => date.toJSON().split('T')[0];
 
 /**
- * Whether two dates fall on the same local calendar day.
- * @param {Date} a A date.
- * @param {Date} b Another date.
- * @returns {boolean} Result.
+ * Get today’s local calendar day as a UTC-based date, so it can be compared with the days on the
+ * grid and turned into a `value` with {@link toDateString}.
+ * @param {Date} [now] Current date and time.
+ * @returns {Date} UTC midnight on today’s local date.
  */
-export const isSameDay = (a, b) =>
-  a.getFullYear() === b.getFullYear() &&
-  a.getMonth() === b.getMonth() &&
-  a.getDate() === b.getDate();
+export const getToday = (now = new Date()) =>
+  new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));

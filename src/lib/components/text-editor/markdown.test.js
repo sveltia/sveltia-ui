@@ -108,6 +108,20 @@ describe('increaseListIndentation', () => {
     expect(increaseListIndentation(input)).toBe(expected);
   });
 
+  it('should not end a code block at a shorter or different fence within it', () => {
+    const input = '````\n```\n  - inside code\n~~~\n  - inside code\n````\n  - after';
+    const expected = '````\n```\n  - inside code\n~~~\n  - inside code\n````\n    - after';
+
+    expect(increaseListIndentation(input)).toBe(expected);
+  });
+
+  it('should not end a code block at a fence followed by an info string', () => {
+    const input = '```\n```js\n  - inside code\n```\n  - after';
+    const expected = '```\n```js\n  - inside code\n```\n    - after';
+
+    expect(increaseListIndentation(input)).toBe(expected);
+  });
+
   it('should not modify list items inside an indented fenced code block', () => {
     const input = '  - before\n  ```\n  - inside code\n  ```\n  - after';
     const expected = '    - before\n  ```\n  - inside code\n  ```\n    - after';

@@ -1212,6 +1212,17 @@ describe('Popup - destroy', () => {
     cancelSpy.mockRestore();
   });
 
+  it('should remove the listeners from the anchor on destroy', () => {
+    const instance = activatePopup(anchor, popup, 'bottom-left');
+
+    instance.destroy();
+    anchor.click();
+    anchor.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+
+    expect(instance.open).toBe(false);
+    expect(anchor.getAttribute('aria-expanded')).toBe('false');
+  });
+
   it('should not call cancelAnimationFrame when no frame is pending', () => {
     const instance = activatePopup(anchor, popup, 'bottom-left');
     const cancelSpy = vi.spyOn(globalThis, 'cancelAnimationFrame');

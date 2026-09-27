@@ -21,4 +21,18 @@ it('accepts a custom range and text', async () => {
   await expect.element(bar).toHaveAttribute('aria-valuemin', '1');
   await expect.element(bar).toHaveAttribute('aria-valuemax', '10');
   await expect.element(bar).toHaveAttribute('aria-valuetext', 'Step 5 of 10');
+  // The bar is filled relative to the range, not to 100
+  expect(
+    parseFloat(/** @type {HTMLElement} */ (bar.element().firstElementChild).style.width),
+  ).toBeCloseTo((4 / 9) * 100, 2);
+});
+
+it('keeps the bar within the range', async () => {
+  const screen = await render(Progressbar, { now: 150 });
+
+  const fill = /** @type {HTMLElement} */ (
+    screen.getByRole('progressbar').element().firstElementChild
+  );
+
+  expect(fill.style.width).toBe('100%');
 });

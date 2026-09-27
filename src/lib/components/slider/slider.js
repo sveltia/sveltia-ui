@@ -4,6 +4,18 @@
  */
 
 /**
+ * Count the fraction digits of a number, including one written in exponential notation, such as
+ * `1e-7`.
+ * @param {number} num Number.
+ * @returns {number} Number of fraction digits, `0` for an integer.
+ */
+const countFractionDigits = (num) => {
+  const [mantissa, exponent = '0'] = String(num).split('e');
+
+  return Math.min(Math.max((mantissa.split('.')[1] ?? '').length - Number(exponent), 0), 100);
+};
+
+/**
  * Get the values a thumb can take and where each of them sits along the track.
  * @param {object} options Options.
  * @param {number} options.min Minimum value.
@@ -14,12 +26,18 @@
  * increments, and the matching pixel offsets from the logical start of the track.
  */
 export const getSliderSteps = ({ min, max, step, barWidth }) => {
-  const stepCount = (max - min) / step + 1;
-  const stepWidth = barWidth / (stepCount - 1);
+  const stepRatio = (max - min) / step;
+  // Tolerate floating point errors, e.g. `0.3 / 0.1` is `2.9999999999999996`, which would otherwise
+  // drop the maximum
+  const stepCount = Math.floor(stepRatio + 1e-9) + 1;
+  const stepWidth = barWidth / stepRatio;
   const emptyArray = Array.from({ length: stepCount });
+  // Round the values to the precision of the minimum and the step, e.g. `3 * 0.1` is
+  // `0.30000000000000004`, which would otherwise never match the `0.3` value
+  const decimals = Math.max(countFractionDigits(min), countFractionDigits(step));
 
   return {
-    valueList: emptyArray.map((_, index) => index * step + min),
+    valueList: emptyArray.map((_, index) => Number((index * step + min).toFixed(decimals))),
     positionList: emptyArray.map((_, index) => index * stepWidth),
   };
 };

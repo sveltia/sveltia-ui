@@ -87,6 +87,13 @@ class Popup {
   #removeEventListeners = undefined;
 
   /**
+   * Functions that remove the event listeners added to the {@link anchorElement}, which may outlive
+   * this instance.
+   * @type {(() => void)[]}
+   */
+  #removeAnchorListeners = [];
+
+  /**
    * Initialize a new `Popup` instance. Note that the `popupElement` is optional, because the
    * element is typically mounted only while the popup is open. Use {@link attachPopupElement} to
    * provide it later.
@@ -105,13 +112,13 @@ class Popup {
 
     this.anchorElement.setAttribute('aria-expanded', 'false');
 
-    on(anchorElement, 'click', () => {
+    const removeClickListener = on(anchorElement, 'click', () => {
       if (!this.isDisabled && !this.isReadOnly) {
         this.open = !this.open;
       }
     });
 
-    on(anchorElement, 'keydown', (event) => {
+    const removeKeyDownListener = on(anchorElement, 'keydown', (event) => {
       const { key, ctrlKey, metaKey, shiftKey, altKey } = event;
       const hasModifier = shiftKey || altKey || ctrlKey || metaKey;
 
@@ -145,11 +152,17 @@ class Popup {
       }
     });
 
-    on(anchorElement, 'transitionstart', () => {
+    const removeTransitionStartListener = on(anchorElement, 'transitionstart', () => {
       if (this.anchorElement.closest('.hiding, .hidden, [hidden]')) {
         this.hideImmediately();
       }
     });
+
+    this.#removeAnchorListeners = [
+      removeClickListener,
+      removeKeyDownListener,
+      removeTransitionStartListener,
+    ];
 
     this.intersectionObserver = new IntersectionObserver(([entry]) => {
       if (!entry.isIntersecting && this.open) {
@@ -514,6 +527,8 @@ class Popup {
    */
   destroy() {
     this.detachPopupElement();
+    this.#removeAnchorListeners.forEach((removeListener) => removeListener());
+    this.#removeAnchorListeners = [];
     this.intersectionObserver?.disconnect();
     this.resizeObserver?.disconnect();
     this.viewportResizeObserver?.disconnect();

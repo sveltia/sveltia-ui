@@ -22,7 +22,7 @@ export const toCodeBlock = (lang, code) =>
  */
 export const parseCodeBlock = (markdown) => {
   const { lang = 'plain', code = '' } =
-    markdown.match(/^```(?<lang>\w+?)?\n(?:(?<code>.*)\n)?```/s)?.groups ?? {};
+    markdown.match(/^```(?<lang>[^\s`]+)?\n(?:(?<code>.*)\n)?```/s)?.groups ?? {};
 
   return { lang, code };
 };

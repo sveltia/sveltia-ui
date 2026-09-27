@@ -28,6 +28,11 @@
     ...restProps
     /* eslint-enable prefer-const */
   } = $props();
+
+  /** Position of `now` within the range, as a percentage, clamped to the range. */
+  const percentage = $derived(
+    max > min ? Math.min(Math.max(((now - min) / (max - min)) * 100, 0), 100) : 0,
+  );
 </script>
 
 <div
@@ -40,7 +45,7 @@
   aria-valuetext={text}
   aria-label={ariaLabel}
 >
-  <div role="none" style:width={`${now}%`}></div>
+  <div role="none" style:width={`${percentage}%`}></div>
 </div>
 
 <style lang="scss">

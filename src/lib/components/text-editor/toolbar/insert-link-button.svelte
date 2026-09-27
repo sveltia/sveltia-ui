@@ -167,8 +167,9 @@
 
   /**
    * Open the dialog with a keyboard shortcut: Accel+K.
+   * @returns {(() => void) | undefined} Function to unregister the command.
    */
-  const _registerCommand = () => {
+  const _registerCommand = () =>
     editorStore.editor?.registerCommand(
       KEY_DOWN_COMMAND,
       (event) => {
@@ -181,12 +182,15 @@
       },
       COMMAND_PRIORITY_NORMAL,
     );
-  };
 
   $effect(() => {
     if (editorStore.editor) {
-      _registerCommand();
+      // Unregister on unmount, e.g. when the toolbar swaps the button out while the caret is in a
+      // code block, so the shortcut isn’t handled by a stale instance
+      return _registerCommand();
     }
+
+    return undefined;
   });
 </script>
 

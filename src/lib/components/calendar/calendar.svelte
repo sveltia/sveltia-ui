@@ -15,7 +15,7 @@
     formatDate,
     getCalendarDays,
     getFirstDayOfMonth,
-    isSameDay,
+    getToday,
     MONTH_NAMES,
     toDateString,
   } from './calendar.js';
@@ -30,9 +30,11 @@
    */
   let { value = $bindable(undefined) } = $props();
 
-  const now = new Date();
+  /** Today’s local date, UTC-based like the days on the grid. */
+  const today = getToday();
+  const todayString = toDateString(today);
 
-  const date = $derived(value ? new Date(value) : now);
+  const date = $derived(value ? new Date(value) : today);
   /**
    * First day of the month being displayed. Follows the {@link value}, and is reassigned by the
    * month navigation below.
@@ -44,7 +46,9 @@
    * Month and year being displayed, in the current locale. It’s the caption of the day grid as
    * well as the label of the month switcher.
    */
-  const monthLabel = $derived(formatDate(firstDay, { year: 'numeric', month: 'short' }));
+  const monthLabel = $derived(
+    formatDate(firstDay, { year: 'numeric', month: 'short', timeZone: 'UTC' }),
+  );
   const id = $props.id();
   /** @type {HTMLElement | undefined} */
   let grid = $state();
@@ -172,7 +176,7 @@
   >
     {#each dayList.slice(0, 7) as { day } (day.getUTCDay())}
       <div role="none" class="weekday">
-        {formatDate(day, { weekday: 'narrow' })}
+        {formatDate(day, { weekday: 'narrow', timeZone: 'UTC' })}
       </div>
     {/each}
     {#each dayList as { day } (toDateString(day))}
@@ -180,7 +184,7 @@
       <div
         role="none"
         class:other-month={day.getUTCMonth() !== firstDay.getUTCMonth()}
-        class:today={isSameDay(day, now)}
+        class:today={dateString === todayString}
       >
         <Button
           role="option"
@@ -208,7 +212,7 @@
     <Spacer flex={true} />
     <Button
       onclick={() => {
-        value = toDateString(now);
+        value = todayString;
       }}
     >
       {_('_sui.calendar.today')}

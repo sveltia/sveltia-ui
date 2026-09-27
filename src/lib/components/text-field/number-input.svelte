@@ -69,11 +69,13 @@
   const isMax = $derived(isAtMax(inputValue, max));
 
   $effect(() => {
-    const newInputValue = String(value ?? '');
+    const newValue = value;
 
+    // Only overwrite the field when it doesn’t already hold the value, so text that is still being
+    // typed, like `1.` or `-`, isn’t wiped out when it parses to the same number or no number
     untrack(() => {
-      if (inputValue !== newInputValue) {
-        inputValue = newInputValue;
+      if (parseNumber(inputValue) !== newValue) {
+        inputValue = String(newValue ?? '');
       }
     });
   });
@@ -126,7 +128,7 @@
   <div role="none" class="buttons">
     <Button
       iconic
-      disabled={disabled || readonly || Number.isNaN(Number(value)) || isMax}
+      disabled={disabled || readonly || Number.isNaN(Number(inputValue)) || isMax}
       aria-label={_('_sui.number_input.increase')}
       aria-controls={id}
       onclick={() => {
@@ -143,7 +145,7 @@
     </Button>
     <Button
       iconic
-      disabled={disabled || readonly || Number.isNaN(Number(value)) || isMin}
+      disabled={disabled || readonly || Number.isNaN(Number(inputValue)) || isMin}
       aria-label={_('_sui.number_input.decrease')}
       aria-controls={id}
       onclick={() => {

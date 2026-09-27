@@ -9,6 +9,12 @@ import {
 } from './slider.js';
 
 describe('getSliderSteps', () => {
+  it('should keep the precision of a step written in exponential notation', () => {
+    const { valueList } = getSliderSteps({ min: 0, max: 3e-7, step: 1e-7, barWidth: 300 });
+
+    expect(valueList).toEqual([0, 1e-7, 2e-7, 3e-7]);
+  });
+
   it('should list every value from min to max and spread them over the track', () => {
     const { valueList, positionList } = getSliderSteps({ min: 0, max: 4, step: 1, barWidth: 400 });
 
@@ -32,6 +38,19 @@ describe('getSliderSteps', () => {
     const { valueList } = getSliderSteps({ min: 0, max: 1, step: 0.5, barWidth: 100 });
 
     expect(valueList).toEqual([0, 0.5, 1]);
+  });
+
+  it('should not lose or distort values to floating point errors', () => {
+    const { valueList, positionList } = getSliderSteps({
+      min: 0,
+      max: 0.3,
+      step: 0.1,
+      barWidth: 300,
+    });
+
+    expect(valueList).toEqual([0, 0.1, 0.2, 0.3]);
+    expect(positionList).toHaveLength(4);
+    expect(positionList[3]).toBeCloseTo(300);
   });
 });
 

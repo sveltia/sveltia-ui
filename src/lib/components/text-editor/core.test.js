@@ -315,8 +315,11 @@ describe('text editor core', () => {
 
   it('adds link formatting and falls back to a paragraph block type for link selections', () => {
     const anchor = new ElementNode();
+    const block = new ElementNode();
 
     anchor.getType = () => 'text';
+    Object.defineProperty(anchor, 'getParent', { value: () => block });
+    Object.defineProperty(block, 'getKey', { value: () => 'block-key' });
 
     mockState.linkNode = true;
     selectionState.value = {
@@ -326,8 +329,32 @@ describe('text editor core', () => {
     };
 
     expect(getSelectionTypes()).toEqual({
-      blockNodeKey: 'node-key',
+      blockNodeKey: 'block-key',
       blockType: 'paragraph',
+      inlineTypes: ['link'],
+    });
+  });
+
+  it('uses the block containing a link rather than the link itself', () => {
+    const anchor = new ElementNode();
+    const block = new ElementNode();
+
+    anchor.getType = () => 'text';
+    Object.defineProperty(anchor, 'getParent', { value: () => block });
+    Object.defineProperty(block, 'getKey', { value: () => 'block-key' });
+    Object.defineProperty(block, 'getTag', { value: () => 'h3' });
+
+    mockState.linkNode = true;
+    mockState.headingNode = true;
+    selectionState.value = {
+      type: 'range',
+      anchor: { getNode: () => anchor },
+      hasFormat: () => false,
+    };
+
+    expect(getSelectionTypes()).toEqual({
+      blockNodeKey: 'block-key',
+      blockType: 'heading-3',
       inlineTypes: ['link'],
     });
   });

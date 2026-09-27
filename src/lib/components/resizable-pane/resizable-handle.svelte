@@ -216,6 +216,13 @@
       onResizeEnd?.();
     }
   };
+
+  $effect(() => () => {
+    // Stop listening if the handle is removed in the middle of a drag
+    document.removeEventListener('pointermove', onPointerMove);
+    document.removeEventListener('pointerup', onPointerUp);
+    document.removeEventListener('pointercancel', onPointerUp);
+  });
 </script>
 
 <!-- svelte-ignore a11y_no_noninteractive_tabindex -->

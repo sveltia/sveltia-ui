@@ -25,6 +25,26 @@ describe('shouldAllowContextMenu', () => {
     expect(shouldAllowContextMenu(textarea)).toBe(true);
   });
 
+  it('should block the menu on inputs that hold no text', () => {
+    ['checkbox', 'radio', 'button', 'submit', 'range', 'color', 'file'].forEach((type) => {
+      const input = document.createElement('input');
+
+      input.type = type;
+      expect(shouldAllowContextMenu(input)).toBe(false);
+    });
+  });
+
+  it('should allow the menu on every text input type', () => {
+    ['text', 'search', 'url', 'tel', 'email', 'password', 'number', 'TEXT', 'unknown'].forEach(
+      (type) => {
+        const input = document.createElement('input');
+
+        input.setAttribute('type', type);
+        expect(shouldAllowContextMenu(input)).toBe(true);
+      },
+    );
+  });
+
   it('should allow the menu within a rich text editor', () => {
     document.body.innerHTML =
       '<div role="textbox" contenteditable="true"><p><strong>text</strong></p></div>';

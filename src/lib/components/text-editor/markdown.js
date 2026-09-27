@@ -19,22 +19,39 @@ export const splitMultilineFormatting = (value) =>
  * @returns {string} Processed Markdown string.
  */
 const mapLinesOutsideCodeBlocks = (value, callback) => {
-  let inCodeBlock = false;
+  /**
+   * Opening fence of the code block being processed, like ```` ``` ````, or an empty string when
+   * outside a code block.
+   */
+  let openingFence = '';
 
   return value
     .split('\n')
     .map((line) => {
       // Like Lexical's `CODE_START_REGEX`, allow an indented fence
-      if (/^[ \t]*(`{3,}|~{3,})/.test(line)) {
-        inCodeBlock = !inCodeBlock;
-        return line;
+      const fence = line.match(/^[ \t]*(`{3,}|~{3,})/)?.[1];
+
+      if (!openingFence) {
+        if (fence) {
+          openingFence = fence;
+          return line;
+        }
+
+        return callback(line);
       }
 
-      if (inCodeBlock) {
-        return line;
+      // Like Lexical's `CODE_END_REGEX`, a code block is only closed by a bare fence of the same
+      // character that is at least as long as the opening one, so a shorter fence within the block,
+      // like ```` ``` ```` within ```` ```` ````, is part of the code
+      if (
+        fence?.[0] === openingFence[0] &&
+        fence.length >= openingFence.length &&
+        !line.trim().slice(fence.length)
+      ) {
+        openingFence = '';
       }
 
-      return callback(line);
+      return line;
     })
     .join('\n');
 };

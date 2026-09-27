@@ -78,11 +78,12 @@
   };
 
   /**
-   * Listen to `click` events on the editor. Ignore a click on a link.
+   * Listen to `click` events on the editor. Ignore a click on a link, including one on the text
+   * within it, which Lexical renders as a child element of the `<a>`.
    * @param {MouseEvent} event `click` event.
    */
   const onClick = (event) => {
-    if (/** @type {HTMLElement} */ (event.target)?.matches('a')) {
+    if (/** @type {HTMLElement} */ (event.target)?.closest('a')) {
       event.preventDefault();
     }
   };

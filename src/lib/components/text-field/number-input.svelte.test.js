@@ -91,8 +91,40 @@ describe('NumberInput', () => {
     expect(props.value).toBe(42);
     await input.fill('abc');
     expect(props.value).toBeUndefined();
-    // Once the value is gone, the field is reset along with it
-    await expect.element(input).toHaveValue('');
+    // The text is left for the user to correct rather than wiped out
+    await expect.element(input).toHaveValue('abc');
+  });
+
+  it('keeps text that is still being typed', async () => {
+    /** @type {ComponentProps<typeof NumberInput>} */
+    const props = $state({ value: 1.5 });
+    const screen = await render(NumberInput, props);
+    const input = screen.getByRole('spinbutton');
+
+    // Deleting the fraction digit leaves the decimal point in place
+    await input.click();
+    await userEvent.keyboard('{End}{Backspace}');
+    await expect.element(input).toHaveValue('1.');
+    expect(props.value).toBe(1);
+    await userEvent.keyboard('7');
+    expect(props.value).toBe(1.7);
+    // Replacing the value with a minus sign to start a negative number
+    await input.fill('-');
+    await expect.element(input).toHaveValue('-');
+    expect(props.value).toBeUndefined();
+    await userEvent.keyboard('3');
+    expect(props.value).toBe(-3);
+  });
+
+  it('steps an empty field from zero with the buttons', async () => {
+    /** @type {ComponentProps<typeof NumberInput>} */
+    const props = $state({ value: undefined });
+    const screen = await render(NumberInput, props);
+    const increase = screen.getByRole('button', { name: 'Increase' });
+
+    await expect.element(increase).toBeEnabled();
+    await increase.click();
+    expect(props.value).toBe(1);
   });
 
   it('follows a value set from outside', async () => {

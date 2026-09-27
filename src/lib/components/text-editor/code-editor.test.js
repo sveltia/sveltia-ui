@@ -43,6 +43,15 @@ describe('parseCodeBlock', () => {
     expect(parseCodeBlock('')).toEqual({ lang: 'plain', code: '' });
   });
 
+  it('should accept a language identifier with non-word characters', () => {
+    expect(parseCodeBlock('```objective-c\nint a;\n```')).toEqual({
+      lang: 'objective-c',
+      code: 'int a;',
+    });
+    expect(parseCodeBlock(toCodeBlock('diff-js', '+a'))).toEqual({ lang: 'diff-js', code: '+a' });
+    expect(parseCodeBlock(toCodeBlock('c++', 'int a;'))).toEqual({ lang: 'c++', code: 'int a;' });
+  });
+
   it('should round-trip with toCodeBlock', () => {
     const code = 'line 1\n\nline 3';
 

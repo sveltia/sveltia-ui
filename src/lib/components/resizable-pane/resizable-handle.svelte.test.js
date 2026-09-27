@@ -79,6 +79,21 @@ describe('ResizableHandle', () => {
     expect(handle.element().classList.contains('dragging')).toBe(false);
   });
 
+  it('stops listening to the pointer when unmounted in the middle of a drag', async () => {
+    const onResize = vi.fn();
+    const screen = await render(ResizablePaneFixture, { onResize });
+    const handle = /** @type {HTMLElement} */ (screen.getByRole('separator').element());
+
+    handle.dispatchEvent(
+      new PointerEvent('pointerdown', { bubbles: true, screenX: 100, pointerId: 1 }),
+    );
+    await screen.unmount();
+    document.dispatchEvent(
+      new PointerEvent('pointermove', { bubbles: true, screenX: 150, pointerId: 1 }),
+    );
+    expect(onResize).not.toHaveBeenCalled();
+  });
+
   it('reverses the drag direction in a right-to-left locale', async () => {
     setRTL(true);
 

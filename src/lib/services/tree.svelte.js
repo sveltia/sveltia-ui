@@ -67,6 +67,12 @@ export class Tree {
      */
     this.typeAheadTimer = undefined;
 
+    /**
+     * Whether {@link destroy} has run, so a pending {@link activate} must not set anything up.
+     * @type {boolean}
+     */
+    this.destroyed = false;
+
     // eslint-disable-next-line jsdoc/require-description
     /** @type {(event: MouseEvent) => void} */
     this._onClick = (event) => {
@@ -96,7 +102,12 @@ export class Tree {
     // Wait a bit before the child components are mounted
     (async () => {
       await sleep(100);
-      this.activate();
+
+      // The widget may have been unmounted in the meantime, and the listeners and the observer set
+      // up by `activate()` would then never be removed
+      if (!this.destroyed) {
+        this.activate();
+      }
     })();
   }
 
@@ -759,6 +770,7 @@ export class Tree {
    * Clean up event listeners.
    */
   destroy() {
+    this.destroyed = true;
     globalThis.clearTimeout(this.typeAheadTimer);
     this.observer.disconnect();
     this.parent.removeEventListener('click', this._onClick);

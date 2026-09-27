@@ -431,6 +431,17 @@ describe('Toast', () => {
     expect(props.show).toBe(false);
   });
 
+  it('cancels the countdown when unmounted', async () => {
+    /** @type {ComponentProps<typeof Toast>} */
+    const props = $state({ show: true, duration: 1000 });
+    const screen = await render(Toast, props);
+
+    await vi.advanceTimersByTimeAsync(500);
+    await screen.unmount();
+    await vi.advanceTimersByTimeAsync(1000);
+    expect(props.show).toBe(true);
+  });
+
   it('removes the toast when unmounted', async () => {
     const first = await render(Toast, { show: true, children: text('One') });
     const second = await render(Toast, { show: true, children: text('Two') });

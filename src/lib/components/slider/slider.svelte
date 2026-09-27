@@ -313,6 +313,10 @@
     return () => {
       observer.disconnect();
       query.removeEventListener('change', init);
+      // Stop listening if the slider is removed in the middle of a drag
+      document.removeEventListener('pointermove', onPointerMove);
+      document.removeEventListener('pointerup', onPointerUp);
+      document.removeEventListener('pointercancel', onPointerUp);
     };
   });
 

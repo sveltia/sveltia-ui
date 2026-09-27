@@ -54,8 +54,9 @@ export const isAtMax = (inputValue, max) => typeof max === 'number' && toNumber(
  * @param {1 | -1} options.direction `1` to increase, `-1` to decrease.
  * @param {number} [options.min] Minimum allowed value.
  * @param {number} [options.max] Maximum allowed value.
- * @returns {string | undefined} New text for the field, or `undefined` if the field holds no
- * number or is already at the limit in that direction, in which case it’s left as is.
+ * @returns {string | undefined} New text for the field, clamped to the range, or `undefined` if
+ * the field holds no number or is already at the limit in that direction, in which case it’s left
+ * as is.
  */
 export const stepNumber = (inputValue, { step, direction, min, max }) => {
   if (Number.isNaN(Number(inputValue))) {
@@ -66,7 +67,19 @@ export const stepNumber = (inputValue, { step, direction, min, max }) => {
     return undefined;
   }
 
-  return Number(toNumber(inputValue) + step * direction).toFixed(getMaximumFractionDigits(step));
+  const maximumFractionDigits = getMaximumFractionDigits(step);
+  const newValue = Number((toNumber(inputValue) + step * direction).toFixed(maximumFractionDigits));
+
+  // Stop at the limit rather than stepping past it, as the native `<input type="number">` does
+  if (typeof max === 'number' && newValue > max) {
+    return String(max);
+  }
+
+  if (typeof min === 'number' && newValue < min) {
+    return String(min);
+  }
+
+  return newValue.toFixed(maximumFractionDigits);
 };
 
 /**

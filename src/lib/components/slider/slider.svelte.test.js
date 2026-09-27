@@ -335,6 +335,37 @@ describe('Slider', () => {
     expect(props.value).toBe(6);
   });
 
+  it('stops listening to the pointer when unmounted in the middle of a drag', async () => {
+    /** @type {ComponentProps<typeof Slider>} */
+    const props = $state({ value: 0, min: 0, max: 10, step: 1 });
+    const screen = await renderSlider(props);
+
+    await waitForInit(screen.container);
+
+    const base = /** @type {HTMLElement} */ (screen.container.querySelector('.base'));
+    const thumb = /** @type {HTMLElement} */ (base.querySelector('[role="slider"]'));
+    const { left, width } = base.getBoundingClientRect();
+
+    thumb.dispatchEvent(
+      new PointerEvent('pointerdown', {
+        bubbles: true,
+        clientX: left,
+        screenX: left,
+        pointerId: 1,
+      }),
+    );
+    await screen.unmount();
+    document.dispatchEvent(
+      new PointerEvent('pointermove', {
+        bubbles: true,
+        clientX: left + width / 2,
+        screenX: left + width / 2,
+        pointerId: 1,
+      }),
+    );
+    expect(props.value).toBe(0);
+  });
+
   it('supports two thumbs that cannot cross each other', async () => {
     const onChange = vi.fn();
 

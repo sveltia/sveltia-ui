@@ -112,7 +112,9 @@ describe('Checkbox', () => {
     const checkbox = screen.getByRole('checkbox');
 
     await expect.element(checkbox).toHaveAttribute('aria-checked', 'false');
-    await expect.element(checkbox).toHaveAttribute('required');
+    // `required` isn’t valid on a `<button>`, so the state is only exposed through ARIA
+    await expect.element(checkbox).toHaveAttribute('aria-required', 'true');
+    await expect.element(checkbox).not.toHaveAttribute('required');
     await expect.element(checkbox).toHaveAttribute('aria-invalid', 'true');
   });
 

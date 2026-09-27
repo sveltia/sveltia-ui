@@ -153,7 +153,15 @@ describe('Calendar', () => {
     await screen.getByRole('button', { name: 'Clear' }).click();
     expect(props.value).toBe('');
     await screen.getByRole('button', { name: 'Today' }).click();
-    expect(props.value).toBe(new Date().toJSON().split('T')[0]);
+
+    const now = new Date();
+
+    // Today’s local date, not the UTC one, which may be a day off
+    expect(props.value).toBe(
+      [now.getFullYear(), now.getMonth() + 1, now.getDate()]
+        .map((n) => String(n).padStart(2, '0'))
+        .join('-'),
+    );
   });
 
   it('opens the year and month picker from the header', async () => {

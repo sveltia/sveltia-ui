@@ -41,3 +41,12 @@ it('renders everything at once when the list fits in a chunk', async () => {
   expect(screen.container.querySelectorAll('.item')).toHaveLength(3);
   expect(screen.container.querySelector('.spinner')).toBeNull();
 });
+
+it('keeps loading while the spinner stays in view after a chunk is rendered', async () => {
+  // Two 20px items don’t fill the 100px scroller, so the spinner never leaves the view
+  const screen = await render(InfiniteScrollFixture, { items, itemChunkSize: 2 });
+
+  await vi.waitFor(() => {
+    expect(screen.container.querySelectorAll('.item').length).toBeGreaterThanOrEqual(6);
+  });
+});

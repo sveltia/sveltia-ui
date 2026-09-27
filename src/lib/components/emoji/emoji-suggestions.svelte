@@ -413,7 +413,7 @@
     margin: 0;
     border-width: var(--sui-listbox-border-width, 1px);
     border-style: var(--sui-listbox-border-style, solid);
-    border-color: var(--sui-listbox-border-width, var(--sui-secondary-border-color));
+    border-color: var(--sui-listbox-border-color, var(--sui-secondary-border-color));
     border-radius: var(--sui-listbox-border-radius, 4px);
     padding: var(--sui-listbox-padding, 4px);
     width: 280px;

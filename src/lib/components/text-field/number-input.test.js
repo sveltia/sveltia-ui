@@ -84,6 +84,13 @@ describe('stepNumber', () => {
     expect(stepNumber('9', { step: 1, direction: 1, max: 10 })).toBe('10');
   });
 
+  it('should stop at the limit rather than overshoot it', () => {
+    expect(stepNumber('9.5', { step: 1, direction: 1, max: 10 })).toBe('10');
+    expect(stepNumber('0.5', { step: 1, direction: -1, min: 0 })).toBe('0');
+    expect(stepNumber('10', { step: 1, direction: 1, max: 10.5 })).toBe('10.5');
+    expect(stepNumber('15', { step: 1, direction: -1, max: 10 })).toBe('10');
+  });
+
   it('should leave a non-numeric field alone', () => {
     expect(stepNumber('abc', { step: 1, direction: 1 })).toBeUndefined();
   });

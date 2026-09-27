@@ -126,7 +126,9 @@ export const getSelectionTypes = () => {
 
     if (isLinkNode(parent)) {
       inlineTypes.push('link');
-      parent = getNearestNodeOfType(parent, ElementNode);
+      // `getNearestNodeOfType()` would return the link itself, so start from its parent to find the
+      // block the link is in
+      parent = parent.getParent();
     }
 
     if (isListItemNode(parent)) {

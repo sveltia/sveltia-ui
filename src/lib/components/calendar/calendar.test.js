@@ -1,12 +1,12 @@
 import { date as formatLocaleDate } from '@sveltia/i18n';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   addMonths,
   DAY_GRID_SIZE,
   formatDate,
   getCalendarDays,
   getFirstDayOfMonth,
-  isSameDay,
+  getToday,
   MONTH_NAMES,
   toDateString,
 } from './calendar.js';
@@ -49,26 +49,23 @@ describe('MONTH_NAMES', () => {
 });
 
 describe('getFirstDayOfMonth', () => {
-  it('should return the first day of the month in local time', () => {
+  it('should return UTC midnight on the first day of the month', () => {
     const first = getFirstDayOfMonth(new Date('2024-03-15T12:00:00Z'));
 
-    expect(first.getFullYear()).toBe(2024);
-    expect(first.getMonth()).toBe(2);
-    expect(first.getDate()).toBe(1);
-    expect(first.getHours()).toBe(0);
+    expect(first.toISOString()).toBe('2024-03-01T00:00:00.000Z');
   });
 
   it('should use the UTC month, so a date-only value lands in the right month', () => {
     // Parsed as UTC midnight, which is still the previous day in time zones behind UTC
     const first = getFirstDayOfMonth(new Date('2024-03-01'));
 
-    expect(first.getMonth()).toBe(2);
+    expect(first.getUTCMonth()).toBe(2);
   });
 });
 
 describe('addMonths', () => {
   it('should move to the first day of another month', () => {
-    const march = new Date(2024, 2, 1);
+    const march = new Date('2024-03-01T00:00:00Z');
     const february = addMonths(march, -1);
     const may = addMonths(march, 2);
 
@@ -78,8 +75,8 @@ describe('addMonths', () => {
   });
 
   it('should cross year boundaries', () => {
-    expect(addMonths(new Date(2024, 0, 1), -1).getUTCFullYear()).toBe(2023);
-    expect(addMonths(new Date(2024, 11, 1), 1).getUTCFullYear()).toBe(2025);
+    expect(addMonths(new Date('2024-01-01T00:00:00Z'), -1).getUTCFullYear()).toBe(2023);
+    expect(addMonths(new Date('2024-12-01T00:00:00Z'), 1).getUTCFullYear()).toBe(2025);
   });
 
   it('should not modify the given date', () => {
@@ -92,17 +89,17 @@ describe('addMonths', () => {
 
 describe('getCalendarDays', () => {
   it('should return six weeks of days starting from a Sunday', () => {
-    const days = getCalendarDays(new Date(2024, 2, 1)); // March 2024 starts on a Friday
+    // March 2024 starts on a Friday
+    const days = getCalendarDays(new Date('2024-03-01T00:00:00Z'));
 
     expect(days).toHaveLength(DAY_GRID_SIZE);
-    expect(days[0].getDay()).toBe(0);
-    expect(days[0].getDate()).toBe(25); // February 25
-    expect(days[5].getDate()).toBe(1);
-    expect(days[5].getMonth()).toBe(2);
+    expect(days[0].getUTCDay()).toBe(0);
+    expect(toDateString(days[0])).toBe('2024-02-25');
+    expect(toDateString(days[5])).toBe('2024-03-01');
   });
 
   it('should produce consecutive days', () => {
-    const days = getCalendarDays(new Date(2024, 0, 1));
+    const days = getCalendarDays(new Date('2024-01-01T00:00:00Z'));
 
     days.slice(1).forEach((day, index) => {
       expect(day.getTime() - days[index].getTime()).toBe(24 * 60 * 60 * 1000);
@@ -110,18 +107,47 @@ describe('getCalendarDays', () => {
   });
 
   it('should start on the first day itself when the month begins on a Sunday', () => {
-    const days = getCalendarDays(new Date(2023, 9, 1)); // October 1, 2023 was a Sunday
+    // October 1, 2023 was a Sunday
+    const days = getCalendarDays(new Date('2023-10-01T00:00:00Z'));
 
-    expect(days[0].getDate()).toBe(1);
-    expect(days[0].getMonth()).toBe(9);
+    expect(toDateString(days[0])).toBe('2023-10-01');
   });
 
   it('should not modify the given date', () => {
-    const firstDay = new Date(2024, 2, 1);
+    const firstDay = new Date('2024-03-01T00:00:00Z');
 
     getCalendarDays(firstDay);
-    expect(firstDay.getDate()).toBe(1);
+    expect(firstDay.toISOString()).toBe('2024-03-01T00:00:00.000Z');
   });
+});
+
+describe('time zones', () => {
+  const originalTZ = process.env.TZ;
+
+  afterEach(() => {
+    // Assigning `undefined` to an environment variable stores the string `'undefined'`
+    if (originalTZ === undefined) {
+      delete process.env.TZ;
+    } else {
+      process.env.TZ = originalTZ;
+    }
+  });
+
+  it.each(['Asia/Tokyo', 'America/Los_Angeles', 'Pacific/Kiritimati', 'UTC'])(
+    'should lay out the same grid in %s',
+    (timeZone) => {
+      process.env.TZ = timeZone;
+
+      let firstDay = getFirstDayOfMonth(new Date('2026-09-15'));
+
+      expect(toDateString(firstDay)).toBe('2026-09-01');
+      expect(toDateString(getCalendarDays(firstDay)[0])).toBe('2026-08-30');
+
+      firstDay = addMonths(firstDay, 1);
+      expect(toDateString(firstDay)).toBe('2026-10-01');
+      expect(toDateString(getCalendarDays(firstDay)[0])).toBe('2026-09-27');
+    },
+  );
 });
 
 describe('toDateString', () => {
@@ -131,11 +157,16 @@ describe('toDateString', () => {
   });
 });
 
-describe('isSameDay', () => {
-  it('should compare the local calendar day only', () => {
-    expect(isSameDay(new Date(2024, 2, 5, 1), new Date(2024, 2, 5, 23))).toBe(true);
-    expect(isSameDay(new Date(2024, 2, 5), new Date(2024, 2, 6))).toBe(false);
-    expect(isSameDay(new Date(2024, 2, 5), new Date(2024, 3, 5))).toBe(false);
-    expect(isSameDay(new Date(2024, 2, 5), new Date(2023, 2, 5))).toBe(false);
+describe('getToday', () => {
+  it('should return the local calendar day as UTC midnight', () => {
+    // Early morning and late evening, local time: the UTC date may differ, the result must not
+    expect(toDateString(getToday(new Date(2024, 2, 5, 1)))).toBe('2024-03-05');
+    expect(toDateString(getToday(new Date(2024, 2, 5, 23)))).toBe('2024-03-05');
+  });
+
+  it('should default to the current date', () => {
+    const now = new Date();
+
+    expect(getToday().getUTCDate()).toBe(now.getDate());
   });
 });

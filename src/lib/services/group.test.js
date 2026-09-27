@@ -925,6 +925,22 @@ describe('Group - grid listbox navigation', () => {
     locale.set('en'); // Reset locale to LTR
   });
 
+  it('should navigate grid forward from the first member on ArrowLeft in RTL', () => {
+    // options[0] is focused; in RTL, ArrowLeft moves to the next member
+    locale.set('ar');
+    listbox.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true }));
+    expect(options[1].getAttribute('aria-selected')).toBe('true');
+    locale.set('en');
+  });
+
+  it('should navigate grid backward from the last member on ArrowRight in RTL', () => {
+    options[5].click();
+    locale.set('ar');
+    listbox.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+    expect(options[4].getAttribute('aria-selected')).toBe('true');
+    locale.set('en');
+  });
+
   it('should navigate grid backward (index-1) on ArrowRight in RTL (branch 59)', () => {
     // Navigate to options[1]
     listbox.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
@@ -1407,6 +1423,64 @@ describe('Group - destroy', () => {
     expect(opt.getAttribute('aria-selected')).toBe('false');
 
     listbox.remove();
+    vi.useRealTimers();
+  });
+});
+
+describe('Group - destroyed before activation', () => {
+  it('should not add the listeners once the pending activation runs', async () => {
+    vi.useFakeTimers();
+
+    const listbox = document.createElement('div');
+
+    listbox.setAttribute('role', 'listbox');
+
+    const opt = document.createElement('div');
+
+    opt.setAttribute('role', 'option');
+    listbox.appendChild(opt);
+    document.body.appendChild(listbox);
+
+    const group = new Group(listbox);
+
+    group.destroy();
+    await vi.advanceTimersByTimeAsync(150);
+
+    expect(group.activated).toBe(false);
+    opt.click();
+    expect(opt.getAttribute('aria-selected')).not.toBe('true');
+
+    listbox.remove();
+    vi.useRealTimers();
+  });
+});
+
+describe('Group - tab panel with an ID that is not a valid CSS identifier', () => {
+  it('should find the panel without throwing', async () => {
+    vi.useFakeTimers();
+
+    const tablist = document.createElement('div');
+    const tab = document.createElement('div');
+    const panel = document.createElement('div');
+
+    tablist.setAttribute('role', 'tablist');
+    tab.setAttribute('role', 'tab');
+    tab.setAttribute('aria-controls', '1-panel');
+    panel.id = '1-panel';
+    tablist.appendChild(tab);
+    document.body.append(tablist, panel);
+
+    const group = new Group(tablist);
+
+    await vi.advanceTimersByTimeAsync(150);
+
+    expect(group.activated).toBe(true);
+    expect(panel.getAttribute('aria-labelledby')).toBe(tab.id);
+    expect(panel.getAttribute('aria-hidden')).toBe('false');
+
+    group.destroy();
+    tablist.remove();
+    panel.remove();
     vi.useRealTimers();
   });
 });

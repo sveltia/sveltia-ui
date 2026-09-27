@@ -116,6 +116,16 @@ describe('LexicalRoot', () => {
     link.dispatchEvent(event);
     expect(event.defaultPrevented).toBe(true);
 
+    // Lexical renders the link text as a child element, which is what actually gets clicked
+    const text = document.createElement('span');
+
+    link.appendChild(text);
+
+    const textEvent = new MouseEvent('click', { bubbles: true, cancelable: true });
+
+    text.dispatchEvent(textEvent);
+    expect(textEvent.defaultPrevented).toBe(true);
+
     const other = new MouseEvent('click', { bubbles: true, cancelable: true });
 
     root.dispatchEvent(other);
