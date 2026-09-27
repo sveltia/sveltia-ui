@@ -64,7 +64,7 @@ export const createTestComponent = ({ id, label, markdown, inline = false }) => 
      * @returns {HTMLElement} Element.
      */
     createDOM() {
-      const element = document.createElement('span');
+      const element = document.createElement(inline ? 'span' : 'div');
 
       element.textContent = label;
 

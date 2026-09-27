@@ -1,8 +1,9 @@
 import { describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-svelte';
+import { $getRoot as getRoot, $getSelection as getSelection } from 'lexical';
 import EditorFixture from './editor-fixture.test.svelte';
 import LexicalRoot from './lexical-root.svelte';
-import { getEditorStore } from '../../test-utils/editor.js';
+import { createTestComponent, getEditorStore } from '../../test-utils/editor.js';
 
 /**
  * @import { ComponentProps } from 'svelte';
@@ -132,27 +133,134 @@ describe('LexicalRoot', () => {
     expect(other.defaultPrevented).toBe(false);
   });
 
-  it('keeps the caret out of the static content of a decorator', async () => {
+  it('places the caret after a decorator or at the end of a block when there’s no text to click', async () => {
+    const component = createTestComponent({ id: 'box', label: 'Box', markdown: '<box>' });
     /** @type {ComponentProps<typeof EditorFixture>} */
-    const props = $state({ store: undefined });
+    const props = $state({ store: undefined, config: { components: [component] } });
     const screen = await render(EditorFixture, props);
+    const store = getEditorStore(props);
     const root = /** @type {HTMLElement} */ (screen.container.querySelector('.lexical-root'));
-    const decorator = document.createElement('div');
 
-    decorator.dataset.lexicalDecorator = 'true';
-    decorator.innerHTML = '<span>Label</span><input>';
-    root.append(decorator);
+    await vi.waitFor(() => {
+      expect(store.initialized).toBe(true);
+    });
+
+    const { editor } = /** @type {{ editor: import('lexical').LexicalEditor }} */ (store);
 
     /**
-     * Dispatch a `mousedown` event on the given element.
+     * Get the types of the root children, and the type of the node with the caret.
+     * @returns {{ types: string[], caret: string | undefined }} Result.
+     */
+    const getState = () =>
+      editor.getEditorState().read(() => ({
+        types: getRoot()
+          .getChildren()
+          .map((node) => node.getType()),
+        caret: getSelection()?.getNodes()[0]?.getType(),
+      }));
+
+    /**
+     * Press the mouse button on the given element.
      * @param {Element} target Target.
+     * @param {MouseEventInit} [init] Event options.
      * @returns {boolean} Whether the default action has been prevented.
      */
-    const mouseDown = (target) =>
-      !target.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
+    const mouseDown = (target, init = {}) =>
+      !target.dispatchEvent(
+        new MouseEvent('mousedown', { bubbles: true, cancelable: true, button: 0, ...init }),
+      );
 
-    expect(mouseDown(/** @type {Element} */ (decorator.querySelector('span')))).toBe(true);
-    expect(mouseDown(/** @type {Element} */ (decorator.querySelector('input')))).toBe(false);
-    decorator.remove();
+    editor.update(
+      () => {
+        getRoot().clear().append(component.createNode(), component.createNode());
+      },
+      { discrete: true },
+    );
+
+    /**
+     * Get the decorator elements.
+     * @returns {Element[]} Elements.
+     */
+    const getDecorators = () => [...root.querySelectorAll('[data-lexical-decorator]')];
+
+    // The static content of the last decorator: a new paragraph is added after it
+    expect(mouseDown(getDecorators()[1])).toBe(true);
+    await vi.waitFor(() => {
+      expect(getState()).toEqual({ types: ['box', 'box', 'paragraph'], caret: 'paragraph' });
+    });
+    expect(document.activeElement).toBe(root);
+
+    // The empty area beside the first decorator: a new paragraph is added between them
+    expect(mouseDown(root, { clientY: getDecorators()[0].getBoundingClientRect().top + 1 })).toBe(
+      true,
+    );
+    await vi.waitFor(() => {
+      expect(getState().types).toEqual(['box', 'paragraph', 'box', 'paragraph']);
+    });
+
+    // The empty area below the last paragraph: the caret moves to its end
+    editor.update(
+      () => {
+        getRoot().getFirstChildOrThrow().selectStart();
+      },
+      { discrete: true },
+    );
+    expect(mouseDown(root, { clientY: root.getBoundingClientRect().bottom - 1 })).toBe(true);
+    await vi.waitFor(() => {
+      expect(getState()).toEqual({
+        types: ['box', 'paragraph', 'box', 'paragraph'],
+        caret: 'paragraph',
+      });
+    });
+
+    // Anything else is left to the browser
+    const paragraph = /** @type {HTMLElement} */ (root.querySelector('p'));
+    const input = document.createElement('input');
+
+    getDecorators()[0].append(input);
+    expect(mouseDown(paragraph)).toBe(false);
+    expect(mouseDown(input)).toBe(false);
+    expect(mouseDown(getDecorators()[0], { shiftKey: true })).toBe(false);
+    expect(mouseDown(getDecorators()[0], { button: 2 })).toBe(false);
+    expect(mouseDown(root, { clientY: root.getBoundingClientRect().top - 10 })).toBe(false);
+    expect(mouseDown(root, { clientY: paragraph.getBoundingClientRect().top + 1 })).toBe(false);
+    input.remove();
+
+    // A decorator of a nested editor is left to that editor
+    const nested = document.createElement('div');
+    const nestedDecorator = document.createElement('div');
+
+    nested.dataset.lexicalEditor = 'true';
+    nestedDecorator.dataset.lexicalDecorator = 'true';
+    nested.append(nestedDecorator);
+    getDecorators()[0].append(nested);
+    expect(mouseDown(nestedDecorator)).toBe(false);
+    nested.remove();
+
+    // An event already handled is left alone
+    const handled = new MouseEvent('mousedown', { bubbles: true, cancelable: true, button: 0 });
+
+    /**
+     * Get the key of the node with the caret.
+     * @returns {string | undefined} Key.
+     */
+    const getCaretKey = () =>
+      editor.getEditorState().read(() => getSelection()?.getNodes()[0]?.getKey());
+
+    const caretKey = getCaretKey();
+
+    handled.preventDefault();
+    getDecorators()[0].dispatchEvent(handled);
+    await new Promise((resolve) => {
+      setTimeout(resolve, 50);
+    });
+    expect(getCaretKey()).toBe(caretKey);
+
+    // A read-only editor is left alone, so nothing is added
+    editor.setEditable(false);
+    expect(mouseDown(getDecorators()[1])).toBe(false);
+    expect(mouseDown(root, { clientY: root.getBoundingClientRect().bottom - 1 })).toBe(false);
+    expect(getState().types).toEqual(['box', 'paragraph', 'box', 'paragraph']);
+    editor.setEditable(true);
   });
 });

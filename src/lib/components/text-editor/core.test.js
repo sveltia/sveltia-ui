@@ -931,6 +931,19 @@ describe('text editor core', () => {
     expect(mockRootElement.dispatchEvent.mock.calls[0][0].detail.value).toBe('> a\n>\n> b');
   });
 
+  it('removes the line breaks left by empty paragraphs at the end', async () => {
+    const { $convertToMarkdownString } = await import('@lexical/markdown');
+
+    vi.mocked($convertToMarkdownString).mockReturnValueOnce(':::note\nHi\n:::\n\n\n');
+
+    const mockRootElement = { dispatchEvent: vi.fn() };
+    const mockEditor = /** @type {any} */ ({ getRootElement: vi.fn(() => mockRootElement) });
+
+    onEditorUpdate(mockEditor, []);
+
+    expect(mockRootElement.dispatchEvent.mock.calls[0][0].detail.value).toBe(':::note\nHi\n:::');
+  });
+
   it('filters out transformers with disabled markdown tags when converting to markdown', async () => {
     const { $convertToMarkdownString } = await import('@lexical/markdown');
     const mockConvertFn = vi.mocked($convertToMarkdownString);
@@ -2196,14 +2209,15 @@ describe('isStaticDecoratorContent', () => {
 
     expect(isStaticDecoratorContent(root.querySelector('[data-lexical-decorator]'))).toBe(true);
     expect(isStaticDecoratorContent(root.querySelector('.label'))).toBe(true);
-    expect(isStaticDecoratorContent(root.querySelector('label'))).toBe(true);
-    expect(isStaticDecoratorContent(root.querySelector('.hint'))).toBe(true);
   });
 
   it('leaves the interactive elements of a decorator alone', () => {
     const root = createRoot();
 
     expect(isStaticDecoratorContent(root.querySelector('input'))).toBe(false);
+    // A label moves the focus to its control
+    expect(isStaticDecoratorContent(root.querySelector('label'))).toBe(false);
+    expect(isStaticDecoratorContent(root.querySelector('.hint'))).toBe(false);
     expect(isStaticDecoratorContent(root.querySelector('textarea'))).toBe(false);
     expect(isStaticDecoratorContent(root.querySelector('.inner'))).toBe(false);
     expect(isStaticDecoratorContent(root.querySelector('.nested'))).toBe(false);

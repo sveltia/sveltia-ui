@@ -1,7 +1,7 @@
 <script>
   import { $getRoot as getRoot } from 'lexical';
   import { getContext, onMount } from 'svelte';
-  import { initEditor, isStaticDecoratorContent } from './core.js';
+  import { handleEditorMouseDown, initEditor } from './core.js';
 
   /**
    * @import { Snippet } from 'svelte';
@@ -113,14 +113,13 @@
   };
 
   /**
-   * Listen to `mousedown` events on the editor. Keep the caret out of the static content of a
-   * decorator node, like the label of an editor component, where typing would do nothing. A label
-   * still moves the focus to its control, as that happens on `click`.
+   * Listen to `mousedown` events on the editor to place the caret where the user expects when the
+   * pointer is not on any editable text, like on an editor component.
    * @param {MouseEvent} event `mousedown` event.
    */
   const onMouseDown = (event) => {
-    if (isStaticDecoratorContent(event.target)) {
-      event.preventDefault();
+    if (editorStore.editor) {
+      handleEditorMouseDown(editorStore.editor, event);
     }
   };
 
