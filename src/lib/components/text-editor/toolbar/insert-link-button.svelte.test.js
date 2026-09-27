@@ -77,6 +77,11 @@ describe('InsertLinkButton', () => {
 
     await expect.element(url).toBeVisible();
     await expect.element(text).toBeVisible();
+    // Wait for the dialog to move the focus to the URL field, which also selects its value, so it
+    // doesn’t happen while the Text field below is being filled, sending the text to the URL field
+    await vi.waitFor(() => {
+      expect(document.activeElement).toBe(url.element());
+    });
     // An unsafe URL can’t be inserted
     await url.fill(['javascript', 'alert(1)'].join(':'));
     await expect.element(screen.getByRole('button', { name: 'Insert' })).toBeDisabled();
