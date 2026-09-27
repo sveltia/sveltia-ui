@@ -21,6 +21,9 @@ describe('SecretInput', () => {
     await expect.element(input).toHaveAttribute('type', 'text');
     await expect.element(input).toHaveAttribute('dir', 'ltr');
     await expect.element(input).toHaveAttribute('spellcheck', 'false');
+    await expect.element(input).toHaveAttribute('autocomplete', 'off');
+    await expect.element(input).toHaveAttribute('autocapitalize', 'off');
+    await expect.element(input).toHaveAttribute('autocorrect', 'off');
     expect(input.element().closest('.text-input')?.classList.contains('monospace')).toBe(true);
     expect(button.element().getAttribute('aria-controls')).toBe(input.element().id);
     await expect.element(button).toHaveAttribute('aria-pressed', 'false');

@@ -21,7 +21,7 @@
   import Icon from '../../icon/icon.svelte';
   import TextInput from '../../text-field/text-input.svelte';
   import { AVAILABLE_BUTTONS } from '../constants.js';
-  import { focusEditor } from '../core.js';
+  import { focusEditor, isSafeLinkURL } from '../core.js';
 
   /**
    * @import { TextEditorStore } from '$lib/typedefs';
@@ -45,6 +45,10 @@
   let hasAnchor = $state(false);
   let anchorURL = $state('');
   let anchorText = $state('');
+  /**
+   * Whether the URL can be inserted: not empty, and safe to link to.
+   */
+  const isValidURL = $derived(!!anchorURL.trim() && isSafeLinkURL(anchorURL));
 
   /**
    * Create a new link by showing a dialog to accept a URL and optionally text.
@@ -117,7 +121,7 @@
    * @param {KeyboardEvent} event `keydown` event.
    */
   const onInputKeyDown = (event) => {
-    if (matchesShortcuts(event, 'Enter') && anchorURL) {
+    if (matchesShortcuts(event, 'Enter') && isValidURL) {
       openDialog = false;
     }
   };
@@ -214,7 +218,7 @@
     ? _('_sui.text_editor.insert_link')
     : _('_sui.text_editor.update_link')}
   bind:open={openDialog}
-  okDisabled={!anchorURL}
+  okDisabled={!isValidURL}
   okLabel={dialogMode === 'create' ? _('_sui.insert') : _('_sui.update')}
   restoreFocus={false}
   onClose={(event) => {
@@ -228,6 +232,7 @@
       id="{id}-url"
       bind:value={anchorURL}
       flex
+      invalid={!!anchorURL.trim() && !isSafeLinkURL(anchorURL)}
       aria-label={_('_sui.text_editor.url')}
       onkeydown={(event) => {
         onInputKeyDown(event);

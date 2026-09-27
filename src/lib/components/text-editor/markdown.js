@@ -6,10 +6,12 @@
  */
 export const splitMultilineFormatting = (value) =>
   value
-    .replace(/(\s+)_([^_\n]+?)\n([^_\n]+?)_(\s+)/gm, '$1_$2_\n_$3_$4')
-    .replace(/(\s+)\*\*([^*\n]+?)\n([^*\n]+?)\*\*(\s+)/gm, '$1**$2**\n**$3**$4')
-    .replace(/(\s+)~~([^~\n]+?)\n([^~\n]+?)~~(\s+)/gm, '$1~~$2~~\n~~$3~~$4')
-    .replace(/(\s+)`([^`\n]+?)\n([^`\n]+?)`(\s+)/gm, '$1`$2`\n`$3`$4');
+    // The surrounding whitespace is checked with lookarounds rather than matched with `\s+`, which
+    // would take quadratic time on a long run of whitespace not followed by a formatting marker
+    .replace(/(?<=\s)_([^_\n]+?)\n([^_\n]+?)_(?=\s)/g, '_$1_\n_$2_')
+    .replace(/(?<=\s)\*\*([^*\n]+?)\n([^*\n]+?)\*\*(?=\s)/g, '**$1**\n**$2**')
+    .replace(/(?<=\s)~~([^~\n]+?)\n([^~\n]+?)~~(?=\s)/g, '~~$1~~\n~~$2~~')
+    .replace(/(?<=\s)`([^`\n]+?)\n([^`\n]+?)`(?=\s)/g, '`$1`\n`$2`');
 
 /**
  * Apply a function to each line of a Markdown string, leaving the lines inside fenced code blocks

@@ -261,9 +261,13 @@ import {
   focusEditor,
   getSelectionTypes,
   initEditor,
+  isSafeLinkURL,
   loadCodeHighlighter,
   onEditorUpdate,
 } from './core.js';
+
+// eslint-disable-next-line no-script-url -- Testing that it’s rejected
+const SCRIPT_URL = 'javascript:alert(1)';
 
 describe('text editor core', () => {
   beforeEach(() => {
@@ -1227,6 +1231,26 @@ describe('text editor core', () => {
     dispose();
   });
 
+  it('ignores TOGGLE_LINK_COMMAND with an unsafe URL', async () => {
+    const { $toggleLink } = await import('@lexical/link');
+
+    const { dispose } = initEditor({
+      components: [],
+      useMarkdownShortcuts: false,
+      isCodeEditor: false,
+      modes: [],
+      enabledButtons: ['link'],
+    });
+
+    const linkCommand = editorState._commands.find((cmd) => cmd.command === 'toggleLink');
+
+    vi.mocked($toggleLink).mockClear();
+
+    expect(linkCommand?.listener(SCRIPT_URL)).toBe(true);
+    expect($toggleLink).not.toHaveBeenCalled();
+    dispose();
+  });
+
   it('handles INSERT_PARAGRAPH_COMMAND', () => {
     const { dispose } = initEditor({
       components: [],
@@ -1865,6 +1889,41 @@ describe('text editor core', () => {
     dispose();
   });
 
+  it('PASTE_COMMAND pastes an unsafe URL as plain text', async () => {
+    const { isURL } = await import('@sveltia/utils/string');
+
+    const { dispose } = initEditor({
+      components: [],
+      useMarkdownShortcuts: false,
+      isCodeEditor: false,
+      modes: [],
+      enabledButtons: ['link'],
+    });
+
+    const pasteCommand = editorState._commands.find((cmd) => cmd.command === 'paste');
+
+    selectionState.value = {
+      type: 'range',
+      anchor: { getNode: () => new ElementNode() },
+      isCollapsed: () => true,
+      getNodes: () => [],
+    };
+
+    const clipboardData = new DataTransfer();
+
+    clipboardData.setData('text', SCRIPT_URL);
+
+    const event = new ClipboardEvent('paste', { clipboardData });
+
+    Object.defineProperty(event, 'target', { value: document.createElement('div') });
+    // A `javascript:` URL is a valid URL
+    vi.mocked(isURL).mockReturnValueOnce(true);
+
+    expect(pasteCommand?.listener(event)).toBe(false);
+    expect(event.defaultPrevented).toBe(false);
+    dispose();
+  });
+
   it('PASTE_COMMAND inserts URL as text node and dispatches TOGGLE_LINK_COMMAND when selection is collapsed with no element nodes', () => {
     const { dispose } = initEditor({
       components: [],
@@ -1995,5 +2054,36 @@ describe('text editor core', () => {
 
     expect(result).toBe(false);
     dispose();
+  });
+});
+
+describe('isSafeLinkURL', () => {
+  it.each([
+    'https://example.com',
+    'http://example.com',
+    'mailto:a@example.com',
+    'tel:123',
+    '/about',
+    '#top',
+    'page.html',
+    '?q=1',
+    '/search?a=1&b=2',
+    '#a&b',
+  ])('should allow %s', (url) => {
+    expect(isSafeLinkURL(url)).toBe(true);
+  });
+
+  it.each([
+    SCRIPT_URL,
+    ' JavaScript:alert(1)',
+    'java\tscript:alert(1)',
+    '\u0001javascript:alert(1)',
+    'data:text/html,x',
+    'vbscript:x',
+    '&#106;avascript:alert(1)',
+    'javascript&colon;alert(1)',
+    'javascript\\:alert(1)',
+  ])('should reject %j', (url) => {
+    expect(isSafeLinkURL(url)).toBe(false);
   });
 });

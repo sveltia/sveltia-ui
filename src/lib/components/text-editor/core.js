@@ -103,6 +103,35 @@ import { TABLE } from './transformers/table.js';
  * Maximum number of entries in the undo stack.
  */
 const HISTORY_MAX_DEPTH = 200;
+/**
+ * URL schemes allowed in a link, the same as the ones Lexical renders as is.
+ */
+const SAFE_LINK_URL_SCHEMES = ['http', 'https', 'mailto', 'sms', 'tel'];
+
+/**
+ * Whether the given URL is safe to be used as a link, meaning it’s either relative or uses one of
+ * the {@link SAFE_LINK_URL_SCHEMES}. This keeps a URL like `javascript:alert(1)` out of the
+ * Markdown, where the site that renders it may not sanitize it.
+ * @param {string} url URL.
+ * @returns {boolean} Result.
+ */
+export const isSafeLinkURL = (url) => {
+  // Browsers ignore control characters and spaces around a URL as well as tabs and newlines within
+  // it, e.g. `java\tscript:`, so strip them all before looking for the scheme
+  // eslint-disable-next-line no-control-regex
+  const normalizedURL = url.replace(/[\u0000-\u0020]/g, '');
+
+  // Markdown decodes character references and backslash escapes in a link destination, so a scheme
+  // can be hidden with them, e.g. `&#106;avascript:`, `javascript&colon;` or `javascript\:`. Reject
+  // any of them before the path, query or fragment.
+  if (/^[^/?#]*[&\\]/.test(normalizedURL)) {
+    return false;
+  }
+
+  const scheme = /^([a-z][a-z\d+.-]*):/i.exec(normalizedURL)?.[1];
+
+  return !scheme || SAFE_LINK_URL_SCHEMES.includes(scheme.toLowerCase());
+};
 
 /**
  * Get the current selection’s block node key as well as block and inline level types.
@@ -317,6 +346,11 @@ export const initEditor = ({
       editor.registerCommand(
         TOGGLE_LINK_COMMAND,
         (payload) => {
+          // Ignore an unsafe URL rather than linking to it
+          if (typeof payload === 'string' && !isSafeLinkURL(payload)) {
+            return true;
+          }
+
           toggleLink(typeof payload === 'string' ? payload : null);
 
           return true;
@@ -342,7 +376,8 @@ export const initEditor = ({
 
           const clipboardText = event.clipboardData.getData('text').trim();
 
-          if (!isURL(clipboardText)) {
+          // Paste an unsafe URL as plain text rather than as a link
+          if (!isURL(clipboardText) || !isSafeLinkURL(clipboardText)) {
             return false;
           }
 

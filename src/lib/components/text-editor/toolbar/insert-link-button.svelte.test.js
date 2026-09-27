@@ -77,6 +77,10 @@ describe('InsertLinkButton', () => {
 
     await expect.element(url).toBeVisible();
     await expect.element(text).toBeVisible();
+    // An unsafe URL can’t be inserted
+    await url.fill(['javascript', 'alert(1)'].join(':'));
+    await expect.element(screen.getByRole('button', { name: 'Insert' })).toBeDisabled();
+    await expect.element(url).toHaveAttribute('aria-invalid', 'true');
     await url.fill('https://example.com/');
     await expect.element(screen.getByRole('button', { name: 'Insert' })).toBeEnabled();
     await text.fill('Example');

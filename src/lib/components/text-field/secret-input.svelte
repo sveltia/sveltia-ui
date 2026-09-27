@@ -61,8 +61,13 @@
   class:show
   {hidden}
 >
+  <!-- The field is masked with CSS rather than `type="password"`, so opt out of the features that
+  would remember the secret, like autofill history and the keyboard’s learned words -->
   <TextInput
     dir="ltr"
+    autocomplete="off"
+    autocapitalize="off"
+    autocorrect="off"
     bind:element={inputElement}
     {...restProps}
     {id}

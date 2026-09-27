@@ -42,6 +42,15 @@ describe('splitMultilineFormatting', () => {
   it('should handle formatting at different indentation levels', () => {
     expect(splitMultilineFormatting('    _foo\nbar_    ')).toBe('    _foo_\n_bar_    ');
   });
+
+  it('should process a long run of whitespace in linear time', () => {
+    const value = `${' \n'.repeat(100_000)}x`;
+    const start = performance.now();
+
+    expect(splitMultilineFormatting(value)).toBe(value);
+    // The previous regexes took several seconds on this input
+    expect(performance.now() - start).toBeLessThan(500);
+  });
 });
 
 describe('increaseListIndentation', () => {
