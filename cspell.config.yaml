@@ -22,10 +22,11 @@ ignorePaths:
   - pnpm-lock.yaml
   - data/**/*.json
   - src/**/generated.js
-  - src/lib/locales/*.yaml
-  - '!src/lib/locales/en-*.yaml'
+  # Non-English locales; negative globs are not supported, so match everything but `en-*.yaml`
+  - src/lib/locales/{[^e]*,e[^n]*}.yaml
 words:
   - atrule
+  - avascript
   - beforeinput
   - browserslist
   - colour
@@ -40,9 +41,11 @@ words:
   - iamcal
   - infobar
   - jsdoc
+  - Kiritimati
   - Klass
   - Kohei
   - localizers
+  - lookarounds
   - moyai
   - nocheck
   - noto

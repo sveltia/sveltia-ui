@@ -46,18 +46,26 @@ export class OptionRegistry {
 
   /**
    * Array snapshot of {@link #entrySet}, rebuilt lazily after a change.
-   * @type {OptionEntry[] | undefined}
+   * @type {OptionEntry[]}
    */
-  #snapshot = undefined;
+  #snapshot = [];
+
+  /**
+   * Value of {@link #version} when {@link #snapshot} was last rebuilt.
+   * @type {number}
+   */
+  #snapshotVersion = -1;
 
   /**
    * Registered options, in registration order. The returned array must not be mutated.
    * @returns {OptionEntry[]} Entries.
    */
   get #entries() {
-    // eslint-disable-next-line no-unused-expressions
-    this.#version;
-    this.#snapshot ??= [...this.#entrySet];
+    // Reading `#version` also subscribes the caller to changes
+    if (this.#snapshotVersion !== this.#version) {
+      this.#snapshot = [...this.#entrySet];
+      this.#snapshotVersion = this.#version;
+    }
 
     return this.#snapshot;
   }
@@ -93,12 +101,10 @@ export class OptionRegistry {
    */
   register(entry) {
     this.#entrySet.add(entry);
-    this.#snapshot = undefined;
     this.#version += 1;
 
     return () => {
       this.#entrySet.delete(entry);
-      this.#snapshot = undefined;
       this.#version += 1;
     };
   }
