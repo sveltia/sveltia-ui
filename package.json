@@ -79,7 +79,7 @@
     "@shikijs/langs": "4.4.3",
     "@shikijs/themes": "4.4.3",
     "@sveltia/i18n": "^1.4.0",
-    "@sveltia/utils": "^0.12.1",
+    "@sveltia/utils": "^0.12.2",
     "lexical": "^0.51.0"
   },
   "devDependencies": {
