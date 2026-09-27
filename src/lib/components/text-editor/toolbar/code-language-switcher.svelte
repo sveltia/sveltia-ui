@@ -36,6 +36,16 @@
 
   let selectedLanguage = $state('plain');
 
+  // A code block can carry an alias, e.g. `js`, while the options are keyed by the canonical ID,
+  // e.g. `javascript`, so resolve the alias for the selector to find its option. A language that
+  // isn’t listed, e.g. `txt`, is shown as plain text; otherwise the selector would keep the label
+  // of the previous block, as it only updates the label when an option matches
+  const selectedKey = $derived(
+    codeLanguages.find(
+      ({ key, aliases }) => key === selectedLanguage || aliases.includes(selectedLanguage),
+    )?.key ?? 'plain',
+  );
+
   $effect(() => {
     void editorStore.selection.blockNodeKey;
 
@@ -57,9 +67,9 @@
 <Select
   {disabled}
   ariaLabel={_('_sui.text_editor.language')}
-  value={selectedLanguage}
+  value={selectedKey}
   onChange={async ({ detail: { value: lang } }) => {
-    if (!editorStore.editor || selectedLanguage === lang) {
+    if (!editorStore.editor || selectedKey === lang) {
       return;
     }
 
@@ -87,12 +97,7 @@
   }}
 >
   <Option label={_('_sui.text_editor.plain_text')} value="plain" dir="ltr" />
-  {#each codeLanguages as { key, label, aliases } (key)}
-    <Option
-      {label}
-      value={key}
-      selected={key === selectedLanguage || aliases.includes(selectedLanguage)}
-      dir="ltr"
-    />
+  {#each codeLanguages as { key, label } (key)}
+    <Option {label} value={key} selected={key === selectedKey} dir="ltr" />
   {/each}
 </Select>

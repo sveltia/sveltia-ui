@@ -72,6 +72,56 @@ it('follows the language of the code block at the selection', async () => {
   });
 });
 
+it('shows the language of a code block that uses an alias', async () => {
+  /** @type {ComponentProps<typeof EditorFixture>} */
+  const props = $state({
+    store: undefined,
+    config: { isCodeEditor: true, defaultLanguage: 'plain' },
+    component: CodeLanguageSwitcher,
+  });
+
+  const screen = await render(EditorFixture, props);
+  const store = getEditorStore(props);
+
+  await vi.waitFor(() => {
+    expect(store.initialized).toBe(true);
+  });
+  store.inputValue = '```js\nlet x = 1;\n```';
+  await vi.waitFor(() => {
+    expect(screen.container.querySelector('.lexical-root code')).not.toBeNull();
+  });
+  store.selection = { ...store.selection, blockNodeKey: 'x' };
+  await vi.waitFor(() => {
+    expect(screen.getByRole('combobox').element().textContent).toContain('JavaScript');
+  });
+});
+
+it('shows plain text for a code block in a language it doesn’t list', async () => {
+  /** @type {ComponentProps<typeof EditorFixture>} */
+  const props = $state({
+    store: undefined,
+    config: { isCodeEditor: true, defaultLanguage: 'plain' },
+    component: CodeLanguageSwitcher,
+  });
+
+  const screen = await render(EditorFixture, props);
+  const store = getEditorStore(props);
+
+  await vi.waitFor(() => {
+    expect(store.initialized).toBe(true);
+  });
+  store.inputValue = '```js\nlet x = 1;\n```';
+  store.selection = { ...store.selection, blockNodeKey: 'x' };
+  await vi.waitFor(() => {
+    expect(screen.getByRole('combobox').element().textContent).toContain('JavaScript');
+  });
+  store.inputValue = '```txt\nhello\n```';
+  store.selection = { ...store.selection, blockNodeKey: 'y' };
+  await vi.waitFor(() => {
+    expect(screen.getByRole('combobox').element().textContent).toContain('Plain Text');
+  });
+});
+
 it('changes the language of the code block', async () => {
   /** @type {ComponentProps<typeof EditorFixture>} */
   const props = $state({
