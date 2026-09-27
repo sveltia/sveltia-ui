@@ -274,6 +274,7 @@ import {
   isSafeLinkURL,
   loadCodeHighlighter,
   onEditorUpdate,
+  isStaticDecoratorContent,
 } from './core.js';
 
 // eslint-disable-next-line no-script-url -- Testing that it’s rejected
@@ -2161,5 +2162,62 @@ describe('isSafeLinkURL', () => {
       };
       expect(listener(true)).toBe(false);
     });
+  });
+});
+
+describe('isStaticDecoratorContent', () => {
+  /**
+   * Build an editor root holding a decorator with some content.
+   * @returns {HTMLElement} Editor root.
+   */
+  const createRoot = () => {
+    const root = document.createElement('div');
+
+    root.contentEditable = 'true';
+    root.innerHTML = `
+      <p><span class="text">Text</span></p>
+      <div data-lexical-decorator="true" contenteditable="false">
+        <span class="label">Label</span>
+        <label>Field <input><span class="hint">Hint</span></label>
+        <textarea></textarea>
+        <div role="button" tabindex="0"><span class="inner">Button</span></div>
+        <div contenteditable="true"><p class="nested">Nested</p></div>
+        <div contenteditable="plaintext-only"><span class="plain">Plain</span></div>
+        <video controls></video>
+        <details><summary><span class="summary">Summary</span></summary></details>
+      </div>
+    `;
+
+    return root;
+  };
+
+  it('detects the static content of a decorator', () => {
+    const root = createRoot();
+
+    expect(isStaticDecoratorContent(root.querySelector('[data-lexical-decorator]'))).toBe(true);
+    expect(isStaticDecoratorContent(root.querySelector('.label'))).toBe(true);
+    expect(isStaticDecoratorContent(root.querySelector('label'))).toBe(true);
+    expect(isStaticDecoratorContent(root.querySelector('.hint'))).toBe(true);
+  });
+
+  it('leaves the interactive elements of a decorator alone', () => {
+    const root = createRoot();
+
+    expect(isStaticDecoratorContent(root.querySelector('input'))).toBe(false);
+    expect(isStaticDecoratorContent(root.querySelector('textarea'))).toBe(false);
+    expect(isStaticDecoratorContent(root.querySelector('.inner'))).toBe(false);
+    expect(isStaticDecoratorContent(root.querySelector('.nested'))).toBe(false);
+    expect(isStaticDecoratorContent(root.querySelector('.plain'))).toBe(false);
+    expect(isStaticDecoratorContent(root.querySelector('video'))).toBe(false);
+    expect(isStaticDecoratorContent(root.querySelector('.summary'))).toBe(false);
+  });
+
+  it('leaves the editable content and other targets alone', () => {
+    const root = createRoot();
+
+    expect(isStaticDecoratorContent(root.querySelector('.text'))).toBe(false);
+    expect(isStaticDecoratorContent(root)).toBe(false);
+    expect(isStaticDecoratorContent(null)).toBe(false);
+    expect(isStaticDecoratorContent(document)).toBe(false);
   });
 });

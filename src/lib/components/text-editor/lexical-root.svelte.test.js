@@ -131,4 +131,28 @@ describe('LexicalRoot', () => {
     root.dispatchEvent(other);
     expect(other.defaultPrevented).toBe(false);
   });
+
+  it('keeps the caret out of the static content of a decorator', async () => {
+    /** @type {ComponentProps<typeof EditorFixture>} */
+    const props = $state({ store: undefined });
+    const screen = await render(EditorFixture, props);
+    const root = /** @type {HTMLElement} */ (screen.container.querySelector('.lexical-root'));
+    const decorator = document.createElement('div');
+
+    decorator.dataset.lexicalDecorator = 'true';
+    decorator.innerHTML = '<span>Label</span><input>';
+    root.append(decorator);
+
+    /**
+     * Dispatch a `mousedown` event on the given element.
+     * @param {Element} target Target.
+     * @returns {boolean} Whether the default action has been prevented.
+     */
+    const mouseDown = (target) =>
+      !target.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
+
+    expect(mouseDown(/** @type {Element} */ (decorator.querySelector('span')))).toBe(true);
+    expect(mouseDown(/** @type {Element} */ (decorator.querySelector('input')))).toBe(false);
+    decorator.remove();
+  });
 });

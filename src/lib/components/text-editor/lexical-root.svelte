@@ -1,7 +1,7 @@
 <script>
   import { $getRoot as getRoot } from 'lexical';
   import { getContext, onMount } from 'svelte';
-  import { initEditor } from './core.js';
+  import { initEditor, isStaticDecoratorContent } from './core.js';
 
   /**
    * @import { Snippet } from 'svelte';
@@ -112,6 +112,18 @@
     }
   };
 
+  /**
+   * Listen to `mousedown` events on the editor. Keep the caret out of the static content of a
+   * decorator node, like the label of an editor component, where typing would do nothing. A label
+   * still moves the focus to its control, as that happens on `click`.
+   * @param {MouseEvent} event `mousedown` event.
+   */
+  const onMouseDown = (event) => {
+    if (isStaticDecoratorContent(event.target)) {
+      event.preventDefault();
+    }
+  };
+
   onMount(() => {
     const { editor, enabledTransformers, dispose } = initEditor(editorStore.config);
 
@@ -120,10 +132,12 @@
 
     lexicalRoot?.addEventListener('Update', onUpdate);
     lexicalRoot?.addEventListener('click', onClick);
+    lexicalRoot?.addEventListener('mousedown', onMouseDown);
 
     return () => {
       lexicalRoot?.removeEventListener('Update', onUpdate);
       lexicalRoot?.removeEventListener('click', onClick);
+      lexicalRoot?.removeEventListener('mousedown', onMouseDown);
       dispose();
       editor.setRootElement(null);
       editorStore.initialized = false;

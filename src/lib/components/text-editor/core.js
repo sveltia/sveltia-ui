@@ -104,6 +104,49 @@ import { TABLE } from './transformers/table.js';
  * Maximum number of entries in the undo stack.
  */
 const HISTORY_MAX_DEPTH = 200;
+
+/**
+ * Selector for the elements in a decorator node, like an editor component, that handle a click on
+ * their own.
+ */
+const DECORATOR_INTERACTIVE_SELECTOR = [
+  'input',
+  'textarea',
+  'select',
+  'button',
+  'a[href]',
+  'summary',
+  'video[controls]',
+  'audio[controls]',
+  '[tabindex]',
+  '[draggable="true"]',
+  '[contenteditable]:not([contenteditable="false"])',
+].join(', ');
+
+/**
+ * Whether a click on the given element would put the caret on the static content of a decorator
+ * node, like the label or padding of an editor component. The editor cannot map such a position to
+ * a node, so the caret appears there but typing does nothing.
+ * @param {EventTarget | null} target Event target.
+ * @returns {boolean} Result.
+ */
+export const isStaticDecoratorContent = (target) => {
+  if (!(target instanceof Element)) {
+    return false;
+  }
+
+  const decorator = target.closest('[data-lexical-decorator]');
+
+  if (!decorator) {
+    return false;
+  }
+
+  const interactive = target.closest(DECORATOR_INTERACTIVE_SELECTOR);
+
+  // An interactive element outside the decorator is the editor root or one of its ancestors
+  return !interactive || !decorator.contains(interactive);
+};
+
 /**
  * URL schemes allowed in a link, the same as the ones Lexical renders as is.
  */
