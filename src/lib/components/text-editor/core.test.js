@@ -30,6 +30,14 @@ const { editorState, mockState, rootState } = vi.hoisted(() => {
     _commands: /** @type {any[]} */ ([]),
     _rootListeners: /** @type {any[]} */ ([]),
     _updateListeners: /** @type {any[]} */ ([]),
+    _transforms: /** @type {any[]} */ ([]),
+    registerNodeTransform(/** @type {any} */ klass, /** @type {any} */ listener) {
+      this._transforms.push({ klass, listener });
+
+      return () => {
+        this._transforms = this._transforms.filter((entry) => entry.listener !== listener);
+      };
+    },
     registerCommand(/** @type {any} */ command, /** @type {any} */ listener) {
       this._commands.push({ command, listener });
 
@@ -93,9 +101,9 @@ vi.mock('@sveltia/utils/string', () => ({
 vi.mock('@lexical/code-core', () => ({
   CodeHighlightNode: class {},
   CodeNode: class {},
-  $createCodeNode: vi.fn(() => ({ type: 'code', setLanguage: vi.fn(), remove() {} })),
+  $createCodeNode: vi.fn((language) => ({ type: 'code', language, selectStart: vi.fn() })),
   $isCodeHighlightNode: vi.fn(() => mockState.codeHighlightNode),
-  $isCodeNode: vi.fn(() => mockState.codeNode),
+  $isCodeNode: vi.fn((node) => node?.type === 'code' || mockState.codeNode),
 }));
 
 vi.mock('./shiki/highlighter.js', () => ({
@@ -238,6 +246,7 @@ vi.mock('lexical', () => ({
   COMMAND_PRIORITY_NORMAL: 0,
   COMMAND_PRIORITY_LOW: -1,
   createEditor: vi.fn(() => editorState),
+  DELETE_CHARACTER_COMMAND: 'deleteCharacter',
   $createTextNode: vi.fn((text) => ({ type: 'text', text })),
   $insertNodes: vi.fn(),
   $isElementNode: vi.fn((node) => node?.type === 'element' || node instanceof ElementNodeClass),
@@ -250,6 +259,7 @@ vi.mock('lexical', () => ({
   $isRangeSelection: vi.fn((selection) => selection?.type === 'range'),
   OUTDENT_CONTENT_COMMAND: 'outdent',
   PASTE_COMMAND: 'paste',
+  RootNode: class {},
 }));
 
 import { $getNearestNodeOfType as getNearestNodeOfType } from '@lexical/utils';
@@ -274,6 +284,7 @@ describe('text editor core', () => {
     editorState._commands = [];
     editorState._rootListeners = [];
     editorState._updateListeners = [];
+    editorState._transforms = [];
     selectionState.value = null;
     rootState.children = [];
     mockState.codeNode = false;
@@ -413,7 +424,8 @@ describe('text editor core', () => {
     });
 
     expect(editor).toBe(editorState);
-    expect(editorState._commands).toHaveLength(5);
+    expect(editorState._commands).toHaveLength(6);
+    expect(editorState._transforms).toHaveLength(1);
     expect(editorState._updateListeners).toHaveLength(1);
     expect(editorState._rootListeners).toHaveLength(1);
 
@@ -428,24 +440,6 @@ describe('text editor core', () => {
     cleanup();
     dispose();
     expect(root.removeEventListener).toHaveBeenCalledWith('keydown', expect.any(Function));
-  });
-
-  it('creates a code node when the code editor update listener runs on an empty root', async () => {
-    const { dispose } = initEditor({
-      components: [],
-      useMarkdownShortcuts: false,
-      isCodeEditor: true,
-      defaultLanguage: 'javascript',
-      modes: [],
-      enabledButtons: [],
-    });
-
-    editorState._updateListeners[0]();
-    await Promise.resolve();
-
-    expect(rootState.children).toHaveLength(1);
-    expect(rootState.children[0].type).toBe('code');
-    dispose();
   });
 
   it('skips loading the highlighter entirely for a plain language', async () => {
@@ -568,24 +562,6 @@ describe('text editor core', () => {
 
     expect(editor).toBe(editorState);
     dispose();
-  });
-
-  it('removes non-code nodes from code editor when update listener runs', async () => {
-    rootState.children = [{ type: 'paragraph', remove: vi.fn() }];
-
-    initEditor({
-      components: [],
-      useMarkdownShortcuts: false,
-      isCodeEditor: true,
-      defaultLanguage: 'javascript',
-      modes: [],
-      enabledButtons: [],
-    });
-
-    editorState._updateListeners[0]();
-    await Promise.resolve();
-
-    expect(rootState.children[0].remove).toHaveBeenCalled();
   });
 
   it('resolves without throwing for an unsupported language', async () => {
@@ -1655,32 +1631,6 @@ describe('text editor core', () => {
     dispose();
   });
 
-  it('does not remove non-code node when children.length > 1', async () => {
-    const node1Remove = vi.fn();
-    const node2Remove = vi.fn();
-
-    rootState.children = [
-      { type: 'paragraph', remove: node1Remove },
-      { type: 'text', remove: node2Remove },
-    ]; // More than 1 child
-
-    initEditor({
-      modes: [],
-      enabledButtons: [],
-      components: [],
-      useMarkdownShortcuts: false,
-      isCodeEditor: true,
-      defaultLanguage: 'javascript',
-    });
-
-    editorState._updateListeners[0]();
-    await Promise.resolve();
-
-    // Nodes should not be removed when length > 1
-    expect(node1Remove).not.toHaveBeenCalled();
-    expect(node2Remove).not.toHaveBeenCalled();
-  });
-
   it('maps numbered list selections to numbered-list block type', () => {
     const anchor = new ElementNode();
 
@@ -1729,22 +1679,6 @@ describe('text editor core', () => {
     const result = getSelectionTypes();
 
     expect(result.blockType).toBe('code-block');
-  });
-
-  it('does not create code node when children already exist', async () => {
-    rootState.children = [{ type: 'text', remove: vi.fn() }]; // Has 1 child
-
-    initEditor({
-      modes: [],
-      enabledButtons: [],
-      components: [],
-      useMarkdownShortcuts: false,
-      isCodeEditor: true,
-      defaultLanguage: 'javascript',
-    });
-
-    // Don't trigger update, just check initialization doesn't create nodes
-    expect(rootState.children).toHaveLength(1);
   });
 
   it('handles list selection when anchor is ElementNode instance', () => {
@@ -2085,5 +2019,147 @@ describe('isSafeLinkURL', () => {
     'javascript\\:alert(1)',
   ])('should reject %j', (url) => {
     expect(isSafeLinkURL(url)).toBe(false);
+  });
+
+  describe('code editor', () => {
+    const initCodeEditor = () =>
+      initEditor({
+        components: [],
+        useMarkdownShortcuts: false,
+        isCodeEditor: true,
+        defaultLanguage: 'javascript',
+        modes: [],
+        enabledButtons: [],
+      });
+
+    const getDeleteCharacterListener = () =>
+      editorState._commands.find(({ command }) => command === 'deleteCharacter').listener;
+
+    it('creates a code node when the root becomes empty', () => {
+      initCodeEditor();
+      editorState._transforms[0].listener(rootState);
+
+      expect(rootState.children).toHaveLength(1);
+      expect(rootState.children[0].type).toBe('code');
+      expect(rootState.children[0].language).toBe('javascript');
+      expect(rootState.children[0].selectStart).toHaveBeenCalled();
+    });
+
+    it('turns a lone non-code block back into a code node, keeping its content', () => {
+      const paragraph = new ElementNode();
+
+      /** @type {any} */ (paragraph).replace = vi.fn();
+      rootState.children = [paragraph];
+      initCodeEditor();
+      editorState._transforms[0].listener(rootState);
+
+      expect(/** @type {any} */ (paragraph).replace).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'code', language: 'javascript' }),
+        true,
+      );
+    });
+
+    it('leaves a lone code node alone', () => {
+      const codeNode = { type: 'code', replace: vi.fn() };
+
+      rootState.children = [codeNode];
+      initCodeEditor();
+      editorState._transforms[0].listener(rootState);
+
+      expect(rootState.children).toEqual([codeNode]);
+      expect(codeNode.replace).not.toHaveBeenCalled();
+    });
+
+    it('does not touch the root when it has multiple children', () => {
+      const children = [
+        { type: 'paragraph', replace: vi.fn() },
+        { type: 'text', replace: vi.fn() },
+      ];
+
+      rootState.children = [...children];
+      initCodeEditor();
+      editorState._transforms[0].listener(rootState);
+
+      expect(rootState.children).toEqual(children);
+      expect(children[0].replace).not.toHaveBeenCalled();
+    });
+
+    it('ignores Backspace at the beginning of the code block', () => {
+      const codeNode = { type: 'code', is: (/** @type {any} */ node) => node === codeNode };
+
+      initCodeEditor();
+
+      selectionState.value = {
+        type: 'range',
+        isCollapsed: () => true,
+        anchor: { offset: 0, getNode: () => codeNode },
+      };
+
+      expect(getDeleteCharacterListener()(true)).toBe(true);
+    });
+
+    it('ignores Backspace at the beginning of the first line of code', () => {
+      const textNode = { type: 'text', is: (/** @type {any} */ node) => node === textNode };
+      const codeNode = { type: 'code', getFirstDescendant: () => textNode, is: () => false };
+
+      vi.mocked(getNearestNodeOfType).mockReturnValueOnce(/** @type {any} */ (codeNode));
+      initCodeEditor();
+
+      selectionState.value = {
+        type: 'range',
+        isCollapsed: () => true,
+        anchor: { offset: 0, getNode: () => textNode },
+      };
+
+      expect(getDeleteCharacterListener()(true)).toBe(true);
+    });
+
+    it('lets other deletions through', () => {
+      const textNode = { type: 'text', is: (/** @type {any} */ node) => node === textNode };
+      const otherNode = { type: 'text', is: () => false };
+      const codeNode = { type: 'code', getFirstDescendant: () => otherNode, is: () => false };
+
+      initCodeEditor();
+
+      const listener = getDeleteCharacterListener();
+
+      // Forward deletion
+      expect(listener(false)).toBe(false);
+
+      // Not a range selection
+      selectionState.value = null;
+      expect(listener(true)).toBe(false);
+
+      // Non-collapsed selection
+      selectionState.value = { type: 'range', isCollapsed: () => false };
+      expect(listener(true)).toBe(false);
+
+      // Not at the beginning of the text node
+      vi.mocked(getNearestNodeOfType).mockReturnValueOnce(/** @type {any} */ (codeNode));
+      selectionState.value = {
+        type: 'range',
+        isCollapsed: () => true,
+        anchor: { offset: 1, getNode: () => textNode },
+      };
+      expect(listener(true)).toBe(false);
+
+      // At the beginning of a line other than the first one
+      vi.mocked(getNearestNodeOfType).mockReturnValueOnce(/** @type {any} */ (codeNode));
+      selectionState.value = {
+        type: 'range',
+        isCollapsed: () => true,
+        anchor: { offset: 0, getNode: () => textNode },
+      };
+      expect(listener(true)).toBe(false);
+
+      // Outside of a code block
+      vi.mocked(getNearestNodeOfType).mockReturnValueOnce(null);
+      selectionState.value = {
+        type: 'range',
+        isCollapsed: () => true,
+        anchor: { offset: 0, getNode: () => textNode },
+      };
+      expect(listener(true)).toBe(false);
+    });
   });
 });

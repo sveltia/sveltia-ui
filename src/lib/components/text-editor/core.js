@@ -41,9 +41,9 @@ import {
   COMMAND_PRIORITY_LOW,
   COMMAND_PRIORITY_NORMAL,
   createEditor,
+  DELETE_CHARACTER_COMMAND,
   $createTextNode as createTextNode,
   ElementNode,
-  $getRoot as getRoot,
   $getSelection as getSelection,
   INDENT_CONTENT_COMMAND,
   INSERT_PARAGRAPH_COMMAND,
@@ -53,6 +53,7 @@ import {
   $isTextNode as isTextNode,
   OUTDENT_CONTENT_COMMAND,
   PASTE_COMMAND,
+  RootNode,
 } from 'lexical';
 import {
   BLOCK_BUTTON_TYPES,
@@ -324,6 +325,61 @@ export const initEditor = ({
     ),
   );
 
+  if (isCodeEditor) {
+    // Pressing Backspace at the very beginning of a code block converts it to a paragraph by
+    // default (`CodeNode.collapseAtStart()`), which makes no sense when the editor only holds a
+    // single code block, so ignore it
+    addUnregister(
+      editor.registerCommand(
+        DELETE_CHARACTER_COMMAND,
+        (isBackward) => {
+          const selection = getSelection();
+
+          if (!isBackward || !isRangeSelection(selection) || !selection.isCollapsed()) {
+            return false;
+          }
+
+          const { offset } = selection.anchor;
+          const node = selection.anchor.getNode();
+          const codeNode = isCodeNode(node) ? node : getNearestNodeOfType(node, CodeNode);
+
+          return (
+            !!codeNode &&
+            offset === 0 &&
+            (node.is(codeNode) || !!codeNode.getFirstDescendant()?.is(node))
+          );
+        },
+        COMMAND_PRIORITY_LOW,
+      ),
+    );
+
+    // Make sure the editor always has a single code block. This runs within the same update that
+    // made the change, so the user never gets a chance to type in anything else
+    addUnregister(
+      editor.registerNodeTransform(RootNode, (root) => {
+        const children = root.getChildren();
+
+        if (children.length === 1 && isCodeNode(children[0])) {
+          return;
+        }
+
+        const [firstChild] = children;
+
+        if (children.length === 1 && isElementNode(firstChild)) {
+          const node = createCodeNode(defaultLanguage);
+
+          // Keep the content and the selection
+          firstChild.replace(node, true);
+        } else if (children.length === 0) {
+          const node = createCodeNode(defaultLanguage);
+
+          root.append(node);
+          node.selectStart();
+        }
+      }),
+    );
+  }
+
   if (useMarkdownShortcuts) {
     addUnregister(registerMarkdownShortcuts(editor, enabledTransformers));
   }
@@ -477,25 +533,6 @@ export const initEditor = ({
         }
 
         editor.update(() => {
-          // Prevent CodeNode from being removed
-          /* v8 ignore next */
-          if (isCodeEditor) {
-            const root = getRoot();
-            const children = root.getChildren();
-
-            // c8 ignore next 3
-            if (children.length === 1 && !isCodeNode(children[0])) {
-              children[0].remove();
-            }
-
-            if (children.length === 0) {
-              const node = createCodeNode();
-
-              node.setLanguage(defaultLanguage);
-              root.append(node);
-            }
-          }
-
           lastValue = onEditorUpdate(
             editor,
             enabledTransformers,
