@@ -3,6 +3,7 @@
   import { $getNearestNodeOfType as getNearestNodeOfType } from '@lexical/utils';
   import { _ } from '@sveltia/i18n';
   import { isMac, matchesShortcuts } from '@sveltia/utils/events';
+  import { isURL } from '@sveltia/utils/string';
   import {
     COMMAND_PRIORITY_NORMAL,
     KEY_DOWN_COMMAND,
@@ -57,7 +58,9 @@
     editorStore.editor?.getEditorState().read(() => {
       const textContent = getTextContent().trim();
 
-      anchorURL = textContent;
+      // Prefill the URL field with the selected text only if it’s a URL that can be linked to.
+      // Otherwise, it’s just the link text, like a word or phrase.
+      anchorURL = isURL(textContent) && isSafeLinkURL(textContent) ? textContent : '';
       hasAnchor = !!textContent;
       dialogMode = 'create';
       openDialog = true;

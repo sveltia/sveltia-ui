@@ -151,6 +151,41 @@ describe('InsertLinkButton', () => {
     });
   });
 
+  it('links the selected text without prefilling the URL field when it’s not a URL', async () => {
+    const { screen, store, root } = await renderButton('whatever');
+
+    root.focus();
+    document.execCommand('selectAll');
+    await screen.getByRole('button', { name: 'Link' }).click();
+    await vi.waitFor(() => {
+      expect(getDialog()?.open).toBe(true);
+    });
+
+    const url = screen.getByRole('textbox', { name: 'URL' });
+
+    await expect.element(url).toHaveValue('');
+    await expect.element(screen.getByRole('button', { name: 'Insert' })).toBeDisabled();
+    // The text field is still left out, since the selection provides the text
+    expect(getDialog()?.querySelector('[aria-label="Text"]')).toBeNull();
+    await url.fill('https://example.com/');
+    await screen.getByRole('button', { name: 'Insert' }).click();
+    await vi.waitFor(() => {
+      expect(store.inputValue).toBe('[whatever](https://example.com/)');
+    });
+  });
+
+  it('does not prefill the URL field with a selected URL that can’t be linked to', async () => {
+    const { screen, root } = await renderButton(['javascript', 'alert(1)'].join(':'));
+
+    root.focus();
+    document.execCommand('selectAll');
+    await screen.getByRole('button', { name: 'Link' }).click();
+    await vi.waitFor(() => {
+      expect(getDialog()?.open).toBe(true);
+    });
+    await expect.element(screen.getByRole('textbox', { name: 'URL' })).toHaveValue('');
+  });
+
   it('does nothing when the dialog is cancelled', async () => {
     const { screen, store, root } = await renderButton('Hello');
 
