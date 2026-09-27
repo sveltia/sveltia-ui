@@ -371,6 +371,17 @@
  */
 
 /**
+ * Syntax-highlighted fragment of text, as painted behind a `<textarea>`.
+ * @typedef {object} HighlightedToken
+ * @property {string} content Text content.
+ * @property {string} [color] CSS colour. The text’s default colour is used when omitted.
+ * @property {boolean} [bold] Whether to embolden the text. It’s rendered with a stroke, so the text
+ * width doesn’t change.
+ * @property {boolean} [underline] Whether to underline the text.
+ * @property {boolean} [strikethrough] Whether to strike through the text.
+ */
+
+/**
  * Web font used by the components, published on Fontsource.
  * @typedef {object} FontDefinition
  * @property {string} family Font family name.

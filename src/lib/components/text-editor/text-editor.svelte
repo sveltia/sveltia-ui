@@ -9,14 +9,18 @@
   import TextArea from '../text-field/text-area.svelte';
   import Toast from '../toast/toast.svelte';
   import { BLOCK_BUTTON_TYPES, INLINE_BUTTON_TYPES } from './constants.js';
+  import { loadCodeHighlighter } from './core.js';
   import EmojiAutocomplete from './emoji-autocomplete.svelte';
   import LexicalRoot from './lexical-root.svelte';
+  import { highlightCodeToTokens } from './shiki/facade.js';
+  import { getCodeTheme, onCodeThemeChange } from './shiki/theme.js';
   import { createEditorStore } from './store.svelte.js';
   import TextEditorToolbar from './toolbar/text-editor-toolbar.svelte';
 
   /**
    * @import { Snippet } from 'svelte';
    * @import { TextEditorComponent, TextEditorMode, TextEditorNodeType } from '$lib/typedefs';
+   * @import { HighlightedToken } from '$lib/typedefs';
    */
 
   /**
@@ -103,6 +107,90 @@
 
   setContext('editorStore', editorStore);
 
+  /**
+   * Maximum length of the Markdown source to highlight in the plain text mode. The whole source is
+   * tokenized on every keystroke, so highlighting a longer one would make typing sluggish.
+   */
+  const MAX_HIGHLIGHT_LENGTH = 20_000;
+
+  /** Syntax highlighting theme matching the app’s appearance. */
+  let codeTheme = $state(getCodeTheme());
+  /** Incremented whenever the highlighter has loaded something, to highlight the text again. */
+  let highlighterLoadCount = $state(0);
+
+  const usePlainText = $derived(!editorStore.useRichText && !hidden);
+  /**
+   * Comma-separated languages used in the fenced code blocks, which are highlighted as well. It’s a
+   * string rather than an array, so the highlighter isn’t reloaded on every keystroke.
+   */
+  const codeLanguages = $derived.by(() => {
+    if (!usePlainText || editorStore.inputValue.length > MAX_HIGHLIGHT_LENGTH) {
+      return '';
+    }
+
+    return [
+      ...new Set(
+        [...editorStore.inputValue.matchAll(/^[ \t]*(?:```|~~~)[ \t]*(?<lang>[\w+#-]+)/gm)].map(
+          ({ groups }) => groups?.lang,
+        ),
+      ),
+    ].join(',');
+  });
+
+  /**
+   * Highlight the Markdown source in the plain text mode.
+   * @param {string} source Markdown source.
+   * @returns {HighlightedToken[][] | undefined} Tokens, or `undefined` while the highlighter is
+   * still loading.
+   */
+  const highlightMarkdown = (source) => {
+    void highlighterLoadCount;
+
+    // Don’t waste time on tokenizing the source while the rich text mode is shown
+    if (!usePlainText || source.length > MAX_HIGHLIGHT_LENGTH) {
+      return undefined;
+    }
+
+    return highlightCodeToTokens(source, 'markdown', { theme: codeTheme });
+  };
+
+  $effect(() =>
+    onCodeThemeChange(async () => {
+      const theme = getCodeTheme();
+
+      // Keep the current highlighting until the new theme is ready, so the text doesn’t flash
+      if (usePlainText) {
+        await loadCodeHighlighter('markdown');
+      }
+
+      // Ignore an outdated change, in case the appearance has changed again while loading
+      if (theme === getCodeTheme()) {
+        codeTheme = theme;
+      }
+    }),
+  );
+
+  $effect(() => {
+    // Load the highlighter only when the plain text mode is actually shown
+    if (!usePlainText) {
+      return;
+    }
+
+    const languages = codeLanguages ? codeLanguages.split(',') : [];
+
+    void codeTheme;
+
+    untrack(() => {
+      // The Markdown grammar is loaded first, because the engine has to be in place before
+      // anything else can be loaded
+      loadCodeHighlighter('markdown').then(async () => {
+        highlighterLoadCount += 1;
+        await Promise.all(languages.map((lang) => loadCodeHighlighter(lang)));
+        highlighterLoadCount += 1;
+      });
+    });
+  });
+
   $effect(() => {
     // The root initializes the editor before these effects first run, and stays initialized
     /* v8 ignore next */
@@ -150,6 +238,7 @@
     autoResize={true}
     bind:value={editorStore.inputValue}
     {useEmojiAutocomplete}
+    highlight={highlightMarkdown}
     {flex}
     {dir}
     hidden={editorStore.useRichText || hidden}

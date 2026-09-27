@@ -449,6 +449,12 @@ describe('shiki facade', () => {
     expect(facade.highlightCodeToHTML('const a = 1', 'javascript')).toBeUndefined();
   });
 
+  it('declines to produce tokens before the engine has loaded', async () => {
+    const facade = await importFacade({ loadEngine: async () => createFakeEngine() });
+
+    expect(facade.highlightCodeToTokens('# Title', 'markdown')).toBeUndefined();
+  });
+
   it('loads a theme on demand and ignores an unknown one', async () => {
     const loadTheme = vi.fn(async () => ({ default: { name: 'github-dark' } }));
 

@@ -10,6 +10,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const engineState = vi.hoisted(() => ({
   /** @type {any[][]} */ tokens: [],
+  /** @type {string | undefined} */ fg: undefined,
 }));
 
 vi.mock('./cache.js', () => ({
@@ -32,7 +33,7 @@ vi.mock('./loader.js', () => ({
         getLoadedThemes: () => ['github-light'],
         loadLanguage: async () => undefined,
         loadTheme: async () => undefined,
-        codeToTokens: () => ({ tokens: engineState.tokens }),
+        codeToTokens: () => ({ tokens: engineState.tokens, fg: engineState.fg }),
         codeToHtml: (/** @type {string} */ code, /** @type {any} */ options) =>
           `<pre class="shiki ${options.theme}"><code>${code}</code></pre>`,
       }),
@@ -51,7 +52,12 @@ vi.mock('./loader.js', () => ({
 }));
 
 // eslint-disable-next-line import/first
-import { getHighlightNodes, highlightCodeToHTML, loadEngine } from './facade.js';
+import {
+  getHighlightNodes,
+  highlightCodeToHTML,
+  highlightCodeToTokens,
+  loadEngine,
+} from './facade.js';
 
 /**
  * Tokenize the given text through the facade, inside an editor context.
@@ -218,5 +224,64 @@ describe('highlightCodeToHTML', () => {
     await loadEngine();
 
     expect(highlightCodeToHTML('a', 'nonexistent')).toBeUndefined();
+  });
+});
+
+describe('highlightCodeToTokens', () => {
+  beforeEach(() => {
+    engineState.fg = undefined;
+  });
+
+  it('returns tokens with their colour, omitting the default foreground colour', async () => {
+    await loadEngine();
+    engineState.fg = '#24292E';
+    engineState.tokens = [
+      [
+        { content: '# ', color: '#005CC5' },
+        { content: 'Title', color: '#005cc5' },
+      ],
+      [{ content: 'Body', color: '#24292e' }],
+      [{ content: 'Plain' }],
+    ];
+
+    expect(highlightCodeToTokens('# Title\nBody\nPlain', 'javascript')).toEqual([
+      [
+        { content: '# ', color: '#005CC5' },
+        { content: 'Title', color: '#005cc5' },
+      ],
+      [{ content: 'Body' }],
+      [{ content: 'Plain' }],
+    ]);
+  });
+
+  it('keeps only the font styles that don’t change the text width', async () => {
+    await loadEngine();
+    engineState.tokens = [
+      [
+        { content: 'italic', fontStyle: 1 },
+        { content: 'bold', fontStyle: 2 },
+        { content: 'underline', fontStyle: 4 },
+        { content: 'strikethrough', fontStyle: 8 },
+        { content: 'all', fontStyle: 15 },
+      ],
+    ];
+
+    expect(highlightCodeToTokens('italic bold underline strikethrough all', 'javascript')).toEqual([
+      [
+        { content: 'italic' },
+        { content: 'bold', bold: true },
+        { content: 'underline', underline: true },
+        { content: 'strikethrough', strikethrough: true },
+        { content: 'all', bold: true, underline: true, strikethrough: true },
+      ],
+    ]);
+  });
+
+  it('declines a plain or unknown language, or a theme that is not loaded', async () => {
+    await loadEngine();
+
+    expect(highlightCodeToTokens('a', 'plain')).toBeUndefined();
+    expect(highlightCodeToTokens('a', 'nonexistent')).toBeUndefined();
+    expect(highlightCodeToTokens('a', 'javascript', { theme: 'github-dark' })).toBeUndefined();
   });
 });

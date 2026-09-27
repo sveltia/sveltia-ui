@@ -34,6 +34,35 @@ export const getCodeTheme = () => {
 };
 
 /**
+ * Call the given function whenever the app’s appearance, and therefore the matching syntax
+ * highlighting theme, may have changed.
+ * @param {() => void} callback Function to call.
+ * @returns {() => void} Cleanup function.
+ */
+export const onCodeThemeChange = (callback) => {
+  /* v8 ignore next 3 */
+  if (typeof document === 'undefined') {
+    return () => undefined;
+  }
+
+  const observer = new MutationObserver(callback);
+
+  observer.observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ['data-theme'],
+  });
+
+  const media = window.matchMedia('(prefers-color-scheme: dark)');
+
+  media.addEventListener('change', callback);
+
+  return () => {
+    observer.disconnect();
+    media.removeEventListener('change', callback);
+  };
+};
+
+/**
  * Keep code blocks in sync with the app’s appearance.
  *
  * Unlike Prism, Shiki bakes token colours into inline styles, so a theme change cannot be handled
@@ -41,16 +70,8 @@ export const getCodeTheme = () => {
  * @param {LexicalEditor} editor Editor instance.
  * @returns {() => void} Cleanup function.
  */
-export const observeCodeTheme = (editor) => {
-  /* v8 ignore next 3 */
-  if (typeof document === 'undefined') {
-    return () => undefined;
-  }
-
-  /**
-   * Apply the current theme to every code block in the editor.
-   */
-  const update = () => {
+export const observeCodeTheme = (editor) =>
+  onCodeThemeChange(() => {
     const theme = getCodeTheme();
 
     editor.update(
@@ -66,21 +87,4 @@ export const observeCodeTheme = (editor) => {
       },
       { tag: HISTORY_MERGE_TAG },
     );
-  };
-
-  const observer = new MutationObserver(update);
-
-  observer.observe(document.documentElement, {
-    attributes: true,
-    attributeFilter: ['data-theme'],
   });
-
-  const media = window.matchMedia('(prefers-color-scheme: dark)');
-
-  media.addEventListener('change', update);
-
-  return () => {
-    observer.disconnect();
-    media.removeEventListener('change', update);
-  };
-};

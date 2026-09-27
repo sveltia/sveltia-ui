@@ -1,6 +1,21 @@
 <script>
   import { TextEditor } from '$lib';
   import Example from '../../_components/example.svelte';
+
+  const markdown = [
+    '# Heading',
+    '',
+    'Some **bold**, _italic_ and `code` text with a [link](https://example.com).',
+    '',
+    '- List item',
+    '- Another item',
+    '',
+    '> Quote',
+    '',
+    '```js',
+    'const answer = 42;',
+    '```',
+  ].join('\n');
 </script>
 
 <svelte:head>
@@ -32,6 +47,15 @@
   <Example>
     <div role="none">
       <TextEditor useEmojiAutocomplete={false} />
+    </div>
+  </Example>
+</section>
+
+<section>
+  <h3>Plain Text Mode by Default</h3>
+  <Example>
+    <div role="none">
+      <TextEditor modes={['plain-text', 'rich-text']} value={markdown} />
     </div>
   </Example>
 </section>

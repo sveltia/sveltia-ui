@@ -92,6 +92,91 @@ describe('TextArea', () => {
     });
   });
 
+  /**
+   * Tokenize the value by painting each `#` heading line, and emboldening `**` runs.
+   * @param {string} value Value.
+   * @returns {import('$lib/typedefs').HighlightedToken[][]} Tokens.
+   */
+  const highlight = (value) =>
+    value
+      .split('\n')
+      .map((line) =>
+        line.startsWith('#')
+          ? [{ content: line, color: 'rgb(0, 0, 255)' }]
+          : [{ content: line, bold: line.includes('**'), underline: true, strikethrough: true }],
+      );
+
+  it('paints the highlighted value behind the transparent text', async () => {
+    /** @type {ComponentProps<typeof TextArea>} */
+    const props = $state({ value: '# Title\nSome **bold**', autoResize: true, highlight });
+    const screen = await render(TextArea, props);
+    const wrapper = /** @type {HTMLElement} */ (screen.container.querySelector('.sui.text-area'));
+    const textarea = /** @type {HTMLTextAreaElement} */ (wrapper.querySelector('textarea'));
+    const clone = /** @type {HTMLElement} */ (wrapper.querySelector('.clone'));
+
+    expect(wrapper.classList.contains('highlighted')).toBe(true);
+    expect(clone.classList.contains('auto-resize')).toBe(true);
+    expect(clone.textContent).toBe('# Title\nSome **bold**\n');
+    expect(getComputedStyle(clone).visibility).toBe('visible');
+    expect(getComputedStyle(textarea).color).toBe('rgba(0, 0, 0, 0)');
+
+    // The one in between is the line break
+    const [heading, , body] = clone.querySelectorAll('span');
+
+    expect(heading.style.color).toBe('rgb(0, 0, 255)');
+    expect(body.classList.contains('bold')).toBe(true);
+    expect(getComputedStyle(body).textDecorationLine).toBe('underline line-through');
+
+    await screen.getByRole('textbox').click();
+    await userEvent.keyboard('{Control>}{End}{/Control}!');
+    await vi.waitFor(() => {
+      expect(clone.textContent).toBe('# Title\nSome **bold**!\n');
+    });
+  });
+
+  it('shows the text as is when the tokens are unavailable or out of date', async () => {
+    /** @type {ComponentProps<typeof TextArea>} */
+    const props = $state({
+      value: 'One',
+      autoResize: true,
+      /**
+       * Return tokens for another value.
+       * @returns {import('$lib/typedefs').HighlightedToken[][]} Tokens.
+       */
+      highlight: () => [[{ content: 'Stale', color: 'red' }]],
+    });
+
+    const screen = await render(TextArea, props);
+    const wrapper = /** @type {HTMLElement} */ (screen.container.querySelector('.sui.text-area'));
+
+    expect(wrapper.classList.contains('highlighted')).toBe(false);
+    expect(wrapper.querySelector('.clone')?.textContent).toBe('One\n');
+    /**
+     * Return no tokens, as if the grammar is still loading.
+     * @returns {undefined} Nothing.
+     */
+    props.highlight = () => undefined;
+    await vi.waitFor(() => {
+      expect(wrapper.querySelector('.clone span')).toBeNull();
+    });
+    expect(wrapper.classList.contains('highlighted')).toBe(false);
+  });
+
+  it('scrolls the highlighted text along with a text area that is not auto-resized', async () => {
+    const value = Array.from({ length: 50 }, (_, index) => `# Line ${index}`).join('\n');
+    const screen = await render(TextArea, { value, highlight });
+    const wrapper = /** @type {HTMLElement} */ (screen.container.querySelector('.sui.text-area'));
+    const textarea = /** @type {HTMLTextAreaElement} */ (wrapper.querySelector('textarea'));
+    const clone = /** @type {HTMLElement} */ (wrapper.querySelector('.clone'));
+
+    expect(clone.classList.contains('auto-resize')).toBe(false);
+    expect(getComputedStyle(clone).position).toBe('absolute');
+    textarea.scrollTop = 100;
+    await vi.waitFor(() => {
+      expect(clone.scrollTop).toBe(100);
+    });
+  });
+
   it('suggests emojis while typing a shortcode', async () => {
     /** @type {ComponentProps<typeof TextArea>} */
     const props = $state({ value: '', useEmojiAutocomplete: true });

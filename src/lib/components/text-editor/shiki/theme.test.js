@@ -23,7 +23,13 @@ import { THEME_LOADERS } from '../../../self-hosted/generated.js';
 // eslint-disable-next-line import/first
 import { THEMES } from './generated.js';
 // eslint-disable-next-line import/first
-import { CODE_THEME_DARK, CODE_THEME_LIGHT, getCodeTheme, observeCodeTheme } from './theme.js';
+import {
+  CODE_THEME_DARK,
+  CODE_THEME_LIGHT,
+  getCodeTheme,
+  observeCodeTheme,
+  onCodeThemeChange,
+} from './theme.js';
 
 /**
  * Build a fake code node.
@@ -145,6 +151,45 @@ describe('shiki theme', () => {
     });
 
     expect(node.setTheme).not.toHaveBeenCalled();
+  });
+
+  it('calls back when the app or the system appearance changes, until disposed', async () => {
+    /** @type {any} */
+    let systemListener;
+
+    vi.stubGlobal(
+      'matchMedia',
+      vi.fn(() => ({
+        matches: false,
+        addEventListener: vi.fn((_type, listener) => {
+          systemListener = listener;
+        }),
+        removeEventListener: vi.fn(),
+      })),
+    );
+
+    const callback = vi.fn();
+    const dispose = onCodeThemeChange(callback);
+
+    document.documentElement.dataset.theme = 'dark';
+
+    await new Promise((resolve) => {
+      setTimeout(resolve, 50);
+    });
+
+    expect(callback).toHaveBeenCalledTimes(1);
+
+    systemListener();
+    expect(callback).toHaveBeenCalledTimes(2);
+
+    dispose();
+    document.documentElement.dataset.theme = 'light';
+
+    await new Promise((resolve) => {
+      setTimeout(resolve, 50);
+    });
+
+    expect(callback).toHaveBeenCalledTimes(2);
   });
 
   it('is bundled by `@sveltia/ui/self-hosted`, which only includes the themes in use', () => {

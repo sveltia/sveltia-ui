@@ -29,6 +29,7 @@ import { getCodeTheme } from './theme.js';
 /**
  * @import { CodeNode } from '@lexical/code-core';
  * @import { LexicalEditor, LexicalNode, NodeKey } from 'lexical';
+ * @import { HighlightedToken } from '$lib/typedefs';
  */
 
 /**
@@ -449,4 +450,65 @@ export const highlightCodeToHTML = (code, language, { theme } = {}) => {
   }
 
   return highlighter.codeToHtml(code, { lang: id, theme: resolvedTheme });
+};
+
+/**
+ * Highlight a snippet of code as plain tokens.
+ *
+ * Meant for painting the highlighting behind a `<textarea>`, where the highlighted text has to line
+ * up with the editable text glyph by glyph. Only the styles that don’t change the text width are
+ * kept: colours, bold, which is rendered as a stroke rather than with a bolder font, underline and
+ * strikethrough. Italic is dropped. Tokens in the theme’s default foreground colour have no colour,
+ * so they can follow the app’s theme instead. Like {@link highlightCodeToHTML}, this is synchronous
+ * and returns `undefined` when the engine, grammar or theme is not loaded yet.
+ * @param {string} code Code to highlight.
+ * @param {string} language Language identifier or alias, like `md`.
+ * @param {object} [options] Options.
+ * @param {string} [options.theme] Shiki theme ID. Defaults to the one matching the app’s
+ * appearance.
+ * @returns {HighlightedToken[][] | undefined} Tokens, one array per line, or `undefined` when the
+ * code cannot be highlighted yet.
+ */
+export const highlightCodeToTokens = (code, language, { theme } = {}) => {
+  const id = normalizeCodeLanguage(language);
+
+  if (!highlighter || isPlainLanguage(id) || !isCodeLanguageLoaded(id)) {
+    return undefined;
+  }
+
+  const resolvedTheme = theme ?? getCodeTheme();
+
+  if (!isCodeThemeLoaded(resolvedTheme)) {
+    return undefined;
+  }
+
+  const { tokens, fg = '' } = highlighter.codeToTokens(code, { lang: id, theme: resolvedTheme });
+
+  return tokens.map((/** @type {any[]} */ line) =>
+    line.map(({ content, color, fontStyle = 0 }) => {
+      /** @type {HighlightedToken} */
+      const token = { content };
+
+      if (color && color.toLowerCase() !== fg.toLowerCase()) {
+        token.color = color;
+      }
+
+      /* eslint-disable no-bitwise */
+      // Shiki’s `FontStyle` flags
+      if (fontStyle & 2) {
+        token.bold = true;
+      }
+
+      if (fontStyle & 4) {
+        token.underline = true;
+      }
+
+      if (fontStyle & 8) {
+        token.strikethrough = true;
+      }
+      /* eslint-enable no-bitwise */
+
+      return token;
+    }),
+  );
 };
