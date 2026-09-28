@@ -199,7 +199,7 @@ export class Group {
   activated = false;
 
   /**
-   * Whether {@link destroy} has run, so a pending {@link activate} must not attach the listeners.
+   * Whether {@link destroy} has run, so a pending {@link activate} must not run.
    * @type {boolean}
    */
   #destroyed = false;
@@ -284,12 +284,14 @@ export class Group {
     // eslint-disable-next-line jsdoc/require-description
     /** @type {(event: MouseEvent) => void} */
     this._onClick = (event) => {
+      this.activate();
       this.onClick(event);
     };
 
     // eslint-disable-next-line jsdoc/require-description
     /** @type {(event: KeyboardEvent) => void} */
     this._onKeyDown = (event) => {
+      this.activate();
       this.onKeyDown(event);
     };
 
@@ -352,12 +354,16 @@ export class Group {
       attributeFilter: ['aria-disabled', 'aria-hidden'],
     });
 
+    // Listen right away: a click or a key press that comes before the activation below activates
+    // the members first, rather than being lost
+    parent.addEventListener('click', this._onClick);
+    parent.addEventListener('keydown', this._onKeyDown);
+
     // Wait a bit before the relevant components, including the `aria-controls` target are mounted
     (async () => {
       await sleep(100);
 
-      // The widget may have been unmounted in the meantime, and the listeners added by `activate()`
-      // would then never be removed
+      // The widget may have been unmounted in the meantime
       if (!this.#destroyed) {
         this.activate();
       }
@@ -365,9 +371,13 @@ export class Group {
   }
 
   /**
-   * Activate the members.
+   * Activate the members, unless they already are.
    */
   activate() {
+    if (this.activated) {
+      return;
+    }
+
     const { parent, allMembers, selected: defaultSelected } = this;
 
     this.activated = true;
@@ -408,8 +418,6 @@ export class Group {
     });
 
     this.updateTabStop();
-    parent.addEventListener('click', this._onClick);
-    parent.addEventListener('keydown', this._onKeyDown);
     parent.dispatchEvent(new CustomEvent('Initialized'));
   }
 

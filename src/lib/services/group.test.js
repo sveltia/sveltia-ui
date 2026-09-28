@@ -236,6 +236,66 @@ describe('Group - listbox', () => {
   });
 });
 
+describe('Group - input before activation', () => {
+  /** @type {HTMLElement} */
+  let listbox;
+  /** @type {HTMLElement[]} */
+  let options;
+
+  beforeEach(() => {
+    vi.useFakeTimers();
+    listbox = document.createElement('div');
+    listbox.setAttribute('role', 'listbox');
+    options = ['Option A', 'Option B', 'Option C'].map((label) => {
+      const opt = document.createElement('div');
+
+      opt.setAttribute('role', 'option');
+      opt.textContent = label;
+      listbox.appendChild(opt);
+
+      return opt;
+    });
+    document.body.appendChild(listbox);
+  });
+
+  afterEach(() => {
+    listbox.remove();
+    vi.useRealTimers();
+  });
+
+  it('should activate on a click that comes before the delayed activation, and handle it', async () => {
+    const onInitialized = vi.fn();
+
+    listbox.addEventListener('Initialized', onInitialized);
+    activateGroup()(listbox);
+    options[1].dispatchEvent(new MouseEvent('click', { button: 0, bubbles: true }));
+    expect(onInitialized).toHaveBeenCalledOnce();
+    expect(options[1].getAttribute('aria-selected')).toBe('true');
+
+    // The delayed activation doesn’t run again, which would reset the selection
+    await vi.advanceTimersByTimeAsync(150);
+    expect(onInitialized).toHaveBeenCalledOnce();
+    expect(options[1].getAttribute('aria-selected')).toBe('true');
+  });
+
+  it('should activate on a key press that comes before the delayed activation, and handle it', () => {
+    activateGroup()(listbox);
+    listbox.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+    expect(options[0].getAttribute('aria-selected')).toBe('true');
+  });
+
+  it('should stop listening once destroyed, even before the delayed activation', async () => {
+    const onInitialized = vi.fn();
+
+    listbox.addEventListener('Initialized', onInitialized);
+    activateGroup()(listbox)?.();
+    options[1].dispatchEvent(new MouseEvent('click', { button: 0, bubbles: true }));
+    await vi.advanceTimersByTimeAsync(150);
+    expect(onInitialized).not.toHaveBeenCalled();
+    expect(options[1].getAttribute('aria-selected')).not.toBe('true');
+  });
+});
+
 describe('Group - onUpdate (search filter)', () => {
   /** @type {HTMLElement} */
   let listbox;

@@ -68,6 +68,12 @@ export class Tree {
     this.typeAheadTimer = undefined;
 
     /**
+     * Whether {@link activate} has run.
+     * @type {boolean}
+     */
+    this.activated = false;
+
+    /**
      * Whether {@link destroy} has run, so a pending {@link activate} must not set anything up.
      * @type {boolean}
      */
@@ -76,18 +82,21 @@ export class Tree {
     // eslint-disable-next-line jsdoc/require-description
     /** @type {(event: MouseEvent) => void} */
     this._onClick = (event) => {
+      this.activate();
       this.onClick(event);
     };
 
     // eslint-disable-next-line jsdoc/require-description
     /** @type {(event: KeyboardEvent) => void} */
     this._onKeyDown = (event) => {
+      this.activate();
       this.onKeyDown(event);
     };
 
     // eslint-disable-next-line jsdoc/require-description
     /** @type {(event: FocusEvent) => void} */
     this._onFocusIn = (event) => {
+      this.activate();
       this.onFocusIn(event);
     };
 
@@ -99,12 +108,18 @@ export class Tree {
     // The widget root itself is never part of the tab order; one of the items always is
     this.parent.tabIndex = -1;
 
+    // Listen right away: a click, a key press or a focus that comes before the activation below
+    // activates the items first, rather than being lost
+    parent.addEventListener('click', this._onClick);
+    parent.addEventListener('keydown', this._onKeyDown);
+    parent.addEventListener('focusin', this._onFocusIn);
+
     // Wait a bit before the child components are mounted
     (async () => {
       await sleep(100);
 
-      // The widget may have been unmounted in the meantime, and the listeners and the observer set
-      // up by `activate()` would then never be removed
+      // The widget may have been unmounted in the meantime, and the observer set up by
+      // `activate()` would then never be disconnected
       if (!this.destroyed) {
         this.activate();
       }
@@ -112,16 +127,17 @@ export class Tree {
   }
 
   /**
-   * Activate the items.
+   * Activate the items, unless they already are.
    */
   activate() {
+    if (this.activated) {
+      return;
+    }
+
     const { parent } = this;
 
+    this.activated = true;
     this.update();
-
-    parent.addEventListener('click', this._onClick);
-    parent.addEventListener('keydown', this._onKeyDown);
-    parent.addEventListener('focusin', this._onFocusIn);
     this.observer.observe(parent, { childList: true, subtree: true });
     parent.dispatchEvent(new CustomEvent('Initialized'));
   }

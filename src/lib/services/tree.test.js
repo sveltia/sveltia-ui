@@ -188,6 +188,48 @@ describe('Tree', () => {
     });
   });
 
+  describe('input before activation', () => {
+    /** @type {() => void} */
+    let onInitialized;
+
+    beforeEach(() => {
+      onInitialized = vi.fn();
+      tree = document.createElement('div');
+      tree.setAttribute('role', 'tree');
+      tree.addEventListener('Initialized', onInitialized);
+      items = { one: createItem('One'), two: createItem('Two') };
+      tree.append(items.one, items.two);
+      document.body.append(tree);
+      cleanup = /** @type {() => void} */ (activateTree()(tree));
+    });
+
+    it('should activate on a click that comes before the delayed activation, and handle it', async () => {
+      click(items.two);
+      expect(onInitialized).toHaveBeenCalledOnce();
+      expect(items.two.getAttribute('aria-selected')).toBe('true');
+
+      // The delayed activation doesn’t run again
+      await vi.advanceTimersByTimeAsync(150);
+      expect(onInitialized).toHaveBeenCalledOnce();
+      expect(items.two.getAttribute('aria-selected')).toBe('true');
+    });
+
+    it('should activate on a key press that comes before the delayed activation', () => {
+      items.one.focus();
+      keyDown(items.one, 'ArrowDown');
+      expect(onInitialized).toHaveBeenCalledOnce();
+      expect(document.activeElement).toBe(items.two);
+    });
+
+    it('should stop listening once destroyed, even before the delayed activation', async () => {
+      cleanup();
+      click(items.two);
+      await vi.advanceTimersByTimeAsync(150);
+      expect(onInitialized).not.toHaveBeenCalled();
+      expect(items.two.getAttribute('aria-selected')).not.toBe('true');
+    });
+  });
+
   describe('navigation', () => {
     beforeEach(async () => {
       await setup();
