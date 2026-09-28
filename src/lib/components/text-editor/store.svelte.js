@@ -179,13 +179,12 @@ export const createEditorStore = () => {
     editorId,
     convertMarkdown,
     /**
-     * Check if the given value, exported by the editor, is only the value last imported, written in
-     * the editor’s own Markdown style.
+     * Get the value last imported if the given value, exported by the editor, is only that value
+     * written in the editor’s own Markdown style.
      * @param {string} value Exported value.
-     * @returns {boolean} Result.
+     * @returns {string | undefined} Imported value, or `undefined` if the content has changed.
      */
-    isRestyledImport: (value) =>
-      !!lastImport && lastImport.source === inputValue && lastImport.exported === value,
+    getImportedValue: (value) => (lastImport?.exported === value ? lastImport.source : undefined),
     /* eslint-enable jsdoc/require-jsdoc */
   };
 };

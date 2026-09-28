@@ -445,9 +445,9 @@
  * @property {boolean} pending Whether the user has changed the rich text content, and the editor
  * has yet to convert it to Markdown and update {@link TextEditorStore.inputValue}.
  * @property {() => Promise<void>} convertMarkdown Function to trigger the Lexical converter.
- * @property {(value: string) => boolean} isRestyledImport Function to check if the given value,
- * exported by the editor, is only the {@link TextEditorStore.inputValue} last imported, written in
- * the editor’s own Markdown style, e.g. `_text_` for `*text*`, rather than a change.
+ * @property {(value: string) => string | undefined} getImportedValue Function to get the
+ * {@link TextEditorStore.inputValue} last imported if the given value, exported by the editor, is
+ * only that value written in the editor’s own Markdown style, e.g. `_text_` for `*text*`.
  */
 
 /**

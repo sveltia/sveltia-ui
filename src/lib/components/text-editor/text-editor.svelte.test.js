@@ -206,16 +206,22 @@ describe('TextEditor', () => {
     await sleep(300);
     expect(props.value).toBe('*Hello*');
 
-    props.value = '**Bye**';
+    props.value = '__Bye__';
     await waitForContent(screen.container, '<strong');
     await sleep(300);
-    expect(props.value).toBe('**Bye**');
+    expect(props.value).toBe('__Bye__');
 
     // Once the user changes the content, the value is written in the editor’s style
     focusEnd(root);
     await userEvent.keyboard('!');
     await vi.waitFor(() => {
       expect(props.value).toBe('**Bye!**');
+    });
+
+    // Undoing the change brings the value back as it was given
+    await userEvent.keyboard('{Backspace}');
+    await vi.waitFor(() => {
+      expect(props.value).toBe('__Bye__');
     });
   });
 

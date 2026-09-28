@@ -92,12 +92,13 @@
       return;
     }
 
-    const { value: newValue, selection } = /** @type {CustomEvent} */ (event).detail;
+    const { value: exportedValue, selection } = /** @type {CustomEvent} */ (event).detail;
+    // Keep the value as given when the content is the one last imported, which the editor only
+    // writes in its own Markdown style, e.g. `_text_` for `*text*`: that’s not a change, whether
+    // the content is untouched or the user has undone their changes to it
+    const newValue = editorStore.getImportedValue(exportedValue) ?? exportedValue;
 
-    // Keep the value as given when the editor has only rewritten it in its own Markdown style, e.g.
-    // `_text_` for `*text*`: that’s not a change, and the value would otherwise change as soon as
-    // it’s set
-    if (inputValue !== newValue && !editorStore.isRestyledImport(newValue)) {
+    if (inputValue !== newValue) {
       // Temporarily disable rich text to prevent unnecessary Markdown conversion that resets
       // Lexical nodes and selection, then restore the state
       editorStore.useRichText = false;
