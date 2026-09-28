@@ -69,7 +69,7 @@ export const FONTS = [
   {
     family: 'Material Symbols Outlined',
     packageName: '@fontsource-variable/material-symbols-outlined',
-    version: '5.3.7',
+    version: '5.3.8',
     cdnId: 'material-symbols-outlined:vf',
     subset: 'latin-wght-normal',
     format: 'woff2-variations',
