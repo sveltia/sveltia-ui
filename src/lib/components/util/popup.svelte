@@ -4,7 +4,7 @@
 -->
 <script>
   import { sleep } from '@sveltia/utils/misc';
-  import { onMount } from 'svelte';
+  import { onMount, tick } from 'svelte';
   import { activatePopup } from '../../services/popup.svelte.js';
   import Modal from './modal.svelte';
 
@@ -80,6 +80,36 @@
    */
   let popupInstance = $state();
   let hoveredTimeout = 0;
+
+  /**
+   * Move the focus into the content. A composite widget keeps exactly one of its items in the tab
+   * order and takes its own root out of it, so the item is what should receive focus. Falling back
+   * to any focusable element covers the popups that hold plain content.
+   * @param {object} [options] Options.
+   * @param {boolean} [options.tabStopOnly] Whether to only focus an element in the tab order,
+   * without falling back to any other element.
+   * @returns {boolean} Whether an element has been focused.
+   */
+  const focusContent = ({ tabStopOnly = false } = {}) => {
+    /* v8 ignore next 3 -- the callers check the content first */
+    if (!content) {
+      return false;
+    }
+
+    const target = /** @type {HTMLElement | null} */ (
+      content.querySelector('[tabindex="0"]:not([aria-disabled="true"])') ??
+        (tabStopOnly ? null : content.querySelector('[tabindex]:not([aria-disabled="true"])'))
+    );
+
+    if (target) {
+      target.focus();
+    } else if (!tabStopOnly) {
+      content.tabIndex = -1;
+      content.focus();
+    }
+
+    return !!target;
+  };
 
   // Keep the `open` prop and the instance in sync both ways. The instance opens the popup when
   // the anchor is activated, and closes it when the backdrop or an item is clicked, or Escape is
@@ -198,25 +228,22 @@
     onOpen={async (event) => {
       onOpen?.(event);
 
-      await sleep(100);
+      // Move the focus into the content as soon as it’s rendered, if it holds a control that’s
+      // already in the tab order, like the search box of a dropdown list: a key typed right after
+      // the popup opens would otherwise be lost
+      await tick();
 
-      if (!content) {
+      if (!content || focusContent({ tabStopOnly: true })) {
         return;
       }
 
-      // A composite widget keeps exactly one of its items in the tab order and takes its own root
-      // out of it, so the item is what should receive focus. Falling back to any focusable element
-      // covers the popups that hold plain content.
-      const target = /** @type {HTMLElement} */ (
-        content.querySelector('[tabindex="0"]:not([aria-disabled="true"])') ??
-          content.querySelector('[tabindex]:not([aria-disabled="true"])')
-      );
+      // Otherwise wait for a composite widget, such as a menu, to put one of its items in the tab
+      // order, which it does a moment later
+      await sleep(100);
 
-      if (target) {
-        target.focus();
-      } else {
-        content.tabIndex = -1;
-        content.focus();
+      // Leave the focus alone if the user has already moved it within the content
+      if (content && !content.contains(document.activeElement)) {
+        focusContent();
       }
     }}
   >

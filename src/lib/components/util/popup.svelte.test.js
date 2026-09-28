@@ -1,5 +1,7 @@
+import { sleep } from '@sveltia/utils/misc';
 import { describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-svelte';
+import { userEvent } from 'vitest/browser';
 import PopupFixture from './popup-fixture.test.svelte';
 
 /**
@@ -95,6 +97,45 @@ describe('Popup', () => {
     await vi.waitFor(() => {
       expect(document.activeElement?.classList.contains('item')).toBe(true);
     });
+  });
+
+  it('focuses a control in the tab order right away, so the keys typed next reach it', async () => {
+    const onOpen = vi.fn();
+    const screen = await render(PopupFixture, { onOpen, withSearch: true });
+
+    await screen.getByRole('button', { name: 'Anchor' }).click();
+    await vi.waitFor(() => {
+      expect(onOpen).toHaveBeenCalledOnce();
+    });
+    // Type straight away, as a user can within the 100 ms a composite widget takes to set up
+    await userEvent.keyboard('abc');
+    expect(document.activeElement?.classList.contains('search')).toBe(true);
+    expect(/** @type {HTMLInputElement} */ (document.activeElement).value).toBe('abc');
+  });
+
+  it('waits for a composite widget to put an item in the tab order', async () => {
+    const screen = await render(PopupFixture, { lateTabStop: true });
+
+    await screen.getByRole('button', { name: 'Anchor' }).click();
+    await vi.waitFor(() => {
+      expect(document.activeElement?.classList.contains('item')).toBe(true);
+    });
+  });
+
+  it('leaves the focus where the user has moved it within the content meanwhile', async () => {
+    const onOpen = vi.fn();
+    const screen = await render(PopupFixture, { onOpen, lateTabStop: true });
+
+    await screen.getByRole('button', { name: 'Anchor' }).click();
+    await vi.waitFor(() => {
+      expect(onOpen).toHaveBeenCalledOnce();
+    });
+
+    const other = /** @type {HTMLElement} */ (document.querySelector('dialog.popup .other'));
+
+    other.focus();
+    await sleep(200);
+    expect(document.activeElement).toBe(other);
   });
 
   it('focuses the content itself when it has no focusable element', async () => {
