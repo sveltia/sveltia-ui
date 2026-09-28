@@ -215,10 +215,16 @@ describe('Tree', () => {
     });
 
     it('should activate on a key press that comes before the delayed activation', () => {
-      items.one.focus();
-      keyDown(items.one, 'ArrowDown');
+      // A key that doesn’t move the focus, which would activate the tree on its own
+      keyDown(items.one, 'ArrowUp');
       expect(onInitialized).toHaveBeenCalledOnce();
-      expect(document.activeElement).toBe(items.two);
+      expect(items.one.tabIndex).toBe(0);
+    });
+
+    it('should activate on a focus that comes before the delayed activation', () => {
+      items.two.focus();
+      expect(onInitialized).toHaveBeenCalledOnce();
+      expect(items.two.tabIndex).toBe(0);
     });
 
     it('should stop listening once destroyed, even before the delayed activation', async () => {

@@ -464,13 +464,17 @@ describe('text editor core', () => {
   it('converts markdown into lexical nodes through the editor update callback', async () => {
     const editor = /** @type {any} */ ({
       update: vi.fn((callback) => callback()),
+      read: vi.fn((callback) => callback()),
       focus: vi.fn(),
       isComposing: () => false,
     });
 
     // The value is returned as the editor exports it, from an update tagged as an import
     await expect(convertMarkdownToLexical(editor, '# Heading', [])).resolves.toBe('converted');
-    expect(editor.update).toHaveBeenCalledWith(expect.any(Function), { tag: 'sui-import' });
+    expect(editor.update).toHaveBeenCalledWith(expect.any(Function), {
+      tag: 'sui-import',
+      discrete: true,
+    });
   });
 
   it('pads blank blockquote lines before converting markdown', async () => {
@@ -478,6 +482,7 @@ describe('text editor core', () => {
 
     const editor = /** @type {any} */ ({
       update: vi.fn((callback) => callback()),
+      read: vi.fn((callback) => callback()),
       focus: vi.fn(),
       isComposing: () => false,
     });
@@ -575,6 +580,7 @@ describe('text editor core', () => {
   it('converts markdown with code blocks in different languages', async () => {
     const editor = /** @type {any} */ ({
       update: vi.fn((callback) => callback()),
+      read: vi.fn((callback) => callback()),
       focus: vi.fn(),
       isComposing: () => false,
     });
@@ -1001,6 +1007,7 @@ describe('text editor core', () => {
   it('handles convertMarkdownToLexical with empty markdown', async () => {
     const editor = /** @type {any} */ ({
       update: vi.fn((callback) => callback()),
+      read: vi.fn((callback) => callback()),
       focus: vi.fn(),
       isComposing: () => false,
     });
@@ -1012,6 +1019,7 @@ describe('text editor core', () => {
   it('handles convertMarkdownToLexical with code blocks', async () => {
     const editor = /** @type {any} */ ({
       update: vi.fn((callback) => callback()),
+      read: vi.fn((callback) => callback()),
       focus: vi.fn(),
       isComposing: () => false,
     });
@@ -1109,6 +1117,7 @@ describe('text editor core', () => {
   it('convertMarkdownToLexical with multiple code block languages', async () => {
     const editor = /** @type {any} */ ({
       update: vi.fn((callback) => callback()),
+      read: vi.fn((callback) => callback()),
       focus: vi.fn(),
       isComposing: () => false,
     });
@@ -1170,6 +1179,7 @@ describe('text editor core', () => {
   it('handles convertMarkdownToLexical with empty value', async () => {
     const editor = /** @type {any} */ ({
       update: vi.fn((callback) => callback()),
+      read: vi.fn((callback) => callback()),
       focus: vi.fn(),
       isComposing: () => false,
     });

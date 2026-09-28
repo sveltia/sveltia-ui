@@ -88,7 +88,7 @@
    * @param {object} [options] Options.
    * @param {boolean} [options.tabStopOnly] Whether to only focus an element in the tab order,
    * without falling back to any other element.
-   * @returns {boolean} Whether an element has been focused.
+   * @returns {boolean} Whether an element has taken the focus.
    */
   const focusContent = ({ tabStopOnly = false } = {}) => {
     /* v8 ignore next 3 -- the callers check the content first */
@@ -96,19 +96,24 @@
       return false;
     }
 
-    const target = /** @type {HTMLElement | null} */ (
-      content.querySelector('[tabindex="0"]:not([aria-disabled="true"])') ??
-        (tabStopOnly ? null : content.querySelector('[tabindex]:not([aria-disabled="true"])'))
-    );
+    const candidates = /** @type {HTMLElement[]} */ ([
+      ...content.querySelectorAll('[tabindex="0"]:not([aria-disabled="true"])'),
+      ...(tabStopOnly ? [] : content.querySelectorAll('[tabindex]:not([aria-disabled="true"])')),
+    ]);
 
-    if (target) {
-      target.focus();
-    } else if (!tabStopOnly) {
+    // Skip an element that can’t take the focus, e.g. a hidden one
+    const focused = candidates.some((element) => {
+      element.focus();
+
+      return document.activeElement === element;
+    });
+
+    if (!focused && !tabStopOnly) {
       content.tabIndex = -1;
       content.focus();
     }
 
-    return !!target;
+    return focused;
   };
 
   // Keep the `open` prop and the instance in sync both ways. The instance opens the popup when

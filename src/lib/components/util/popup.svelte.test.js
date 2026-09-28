@@ -122,6 +122,15 @@ describe('Popup', () => {
     });
   });
 
+  it('waits for a tab stop that can take the focus, skipping one that can’t', async () => {
+    const screen = await render(PopupFixture, { hiddenTabStop: true });
+
+    await screen.getByRole('button', { name: 'Anchor' }).click();
+    await vi.waitFor(() => {
+      expect(document.activeElement?.classList.contains('item')).toBe(true);
+    });
+  });
+
   it('leaves the focus where the user has moved it within the content meanwhile', async () => {
     const onOpen = vi.fn();
     const screen = await render(PopupFixture, { onOpen, lateTabStop: true });

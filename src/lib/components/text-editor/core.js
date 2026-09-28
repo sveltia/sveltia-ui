@@ -876,20 +876,28 @@ export const convertMarkdownToLexical = async (editor, value, enabledTransformer
   // Pad blank blockquote lines so they are not imported as literal `>` text
   value = padBlankBlockquoteLines(value);
 
-  return new Promise((resolve, reject) => {
-    editor.update(
-      () => {
-        try {
-          convertFromMarkdownString(value, enabledTransformers);
-          resolve(exportMarkdown(enabledTransformers));
-        } catch (ex) {
-          reject(new Error('Failed to convert Markdown', { cause: ex }));
-        }
-      },
-      // Tell the import from a change made by the user
-      { tag: IMPORT_UPDATE_TAG },
-    );
-  });
+  /** @type {unknown} */
+  let error;
+
+  editor.update(
+    () => {
+      try {
+        convertFromMarkdownString(value, enabledTransformers);
+      } catch (ex) {
+        error = ex;
+      }
+    },
+    // Tell the import from a change made by the user, and commit it right away, so the node
+    // transforms, e.g. the one giving a code block its default language, have run by the time the
+    // content is exported below
+    { tag: IMPORT_UPDATE_TAG, discrete: true },
+  );
+
+  if (error) {
+    throw new Error('Failed to convert Markdown', { cause: error });
+  }
+
+  return editor.read(() => exportMarkdown(enabledTransformers));
 };
 
 /**

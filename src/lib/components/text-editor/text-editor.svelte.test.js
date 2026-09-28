@@ -225,6 +225,32 @@ describe('TextEditor', () => {
     });
   });
 
+  it('clears the pending state when the editor is removed before converting a change', async () => {
+    /** @type {ComponentProps<typeof TextEditor>} */
+    const props = $state({ value: 'Hello', pending: false });
+    const screen = await render(TextEditor, props);
+    const root = await waitForContent(screen.container, 'Hello');
+
+    focusEnd(root);
+    await userEvent.keyboard('!');
+    await vi.waitFor(() => {
+      expect(props.pending).toBe(true);
+    });
+    screen.unmount();
+    expect(props.pending).toBe(false);
+  });
+
+  it('keeps a code block without a language as is', async () => {
+    /** @type {ComponentProps<typeof TextEditor>} */
+    const props = $state({ value: '```\ncode\n```\n\n*Hello*' });
+    const screen = await render(TextEditor, props);
+
+    // The editor gives the code block a default language as it loads it, which isn’t a change
+    await waitForContent(screen.container, '<em');
+    await sleep(300);
+    expect(props.value).toBe('```\ncode\n```\n\n*Hello*');
+  });
+
   it('reports a change made by the user as pending until the value is updated', async () => {
     /** @type {ComponentProps<typeof TextEditor>} */
     const props = $state({ value: 'Hello', pending: false });

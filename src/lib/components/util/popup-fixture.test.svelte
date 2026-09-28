@@ -21,6 +21,7 @@
    * withTabStop?: boolean,
    * withSearch?: boolean,
    * lateTabStop?: boolean,
+   * hiddenTabStop?: boolean,
    * hasPopup?: boolean,
    * }}
    */
@@ -35,6 +36,7 @@
     withTabStop = true,
     withSearch = false,
     lateTabStop = false,
+    hiddenTabStop = false,
     hasPopup = true,
     /* eslint-enable prefer-const */
   } = $props();
@@ -48,7 +50,11 @@
   {#if withSearch}
     <input type="search" tabindex="0" aria-label="Search" class="search" />
     <div role="listbox" tabindex="0" class="list" aria-label="Options"></div>
-  {:else if lateTabStop}
+  {:else if lateTabStop || hiddenTabStop}
+    {#if hiddenTabStop}
+      <!-- A widget that isn’t shown, but still renders a tab stop -->
+      <div hidden role="listbox" tabindex="0" aria-label="Hidden" class="hidden-stop"></div>
+    {/if}
     <!-- Like a menu, whose items only get their tab stop once the group has been activated -->
     <div
       role="menu"

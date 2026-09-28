@@ -236,6 +236,12 @@
     pending = editorStore.pending;
   });
 
+  // An editor removed right after a change never converts it, so don’t leave a bound `pending` set
+  // for good, which would hold up anything waiting for the change
+  $effect(() => () => {
+    pending = false;
+  });
+
   $effect(() => {
     // The root initializes the editor before these effects first run, and stays initialized
     /* v8 ignore next */
