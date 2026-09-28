@@ -63,6 +63,7 @@ import {
   BLOCK_BUTTON_TYPES,
   DISABLED_MARKDOWN_TAGS,
   EDITOR_THEME,
+  IMPORT_UPDATE_TAG,
   NODE_MAP,
   TEXT_FORMAT_BUTTON_TYPES,
   TRANSFORMER_MAP,
@@ -427,6 +428,34 @@ export const getSelectionTypes = () => {
 };
 
 /**
+ * Convert the editor content to Markdown. Call this within an editor update or read.
+ * @internal
+ * @param {Transformer[]} enabledTransformers Enabled Markdown transformers.
+ * @returns {string} Markdown value.
+ */
+export const exportMarkdown = (enabledTransformers) => {
+  const transformers = enabledTransformers.filter(
+    (/** @type {any} */ { tag }) => !DISABLED_MARKDOWN_TAGS.includes(tag),
+  );
+
+  return trimBlankBlockquoteLines(
+    convertToMarkdownString(transformers)
+      // Remove unnecessary backslash for underscore and backslash characters
+      // @see https://github.com/sveltia/sveltia-cms/issues/430
+      // @see https://github.com/sveltia/sveltia-cms/issues/512
+      .replace(/\\([_\\])/g, '$1')
+      // Replace encoded spaces with regular spaces. The HTML entity can appear with a
+      // combination of bold and italic text
+      // @see https://github.com/sveltia/sveltia-cms/issues/511
+      // @see https://github.com/sveltia/sveltia-cms/issues/534
+      .replace(/&#32;/g, ' ')
+      // Remove the line breaks left by empty paragraphs at the end, which have no content. One
+      // may be added just by clicking below a block decorator; see `$moveCaretIntoBlock()`
+      .replace(/\n+$/, ''),
+  );
+};
+
+/**
  * Listen to changes made on the editor and trigger the Update event.
  * @internal
  * @param {LexicalEditor} editor Editor instance.
@@ -436,27 +465,7 @@ export const getSelectionTypes = () => {
  * @returns {string} Markdown value.
  */
 export const onEditorUpdate = (editor, enabledTransformers, cachedValue) => {
-  const transformers = enabledTransformers.filter(
-    (/** @type {any} */ { tag }) => !DISABLED_MARKDOWN_TAGS.includes(tag),
-  );
-
-  const value =
-    cachedValue ??
-    trimBlankBlockquoteLines(
-      convertToMarkdownString(transformers)
-        // Remove unnecessary backslash for underscore and backslash characters
-        // @see https://github.com/sveltia/sveltia-cms/issues/430
-        // @see https://github.com/sveltia/sveltia-cms/issues/512
-        .replace(/\\([_\\])/g, '$1')
-        // Replace encoded spaces with regular spaces. The HTML entity can appear with a
-        // combination of bold and italic text
-        // @see https://github.com/sveltia/sveltia-cms/issues/511
-        // @see https://github.com/sveltia/sveltia-cms/issues/534
-        .replace(/&#32;/g, ' ')
-        // Remove the line breaks left by empty paragraphs at the end, which have no content. One
-        // may be added just by clicking below a block decorator; see `$moveCaretIntoBlock()`
-        .replace(/\n+$/, ''),
-    );
+  const value = cachedValue ?? exportMarkdown(enabledTransformers);
 
   editor.getRootElement()?.dispatchEvent(
     new CustomEvent('Update', {
@@ -845,7 +854,8 @@ export const loadCodeHighlighter = async (lang) => {
  * @param {LexicalEditor} editor Editor instance.
  * @param {string} value Current Markdown value.
  * @param {Transformer[]} enabledTransformers List of enabled Markdown transformers.
- * @returns {Promise<void>} Nothing.
+ * @returns {Promise<string>} The value as the editor exports it once imported, which can differ in
+ * style from the given value, e.g. `_text_` for `*text*`.
  * @throws {Error} Failed to convert the value to Lexical nodes.
  */
 export const convertMarkdownToLexical = async (editor, value, enabledTransformers) => {
@@ -867,14 +877,18 @@ export const convertMarkdownToLexical = async (editor, value, enabledTransformer
   value = padBlankBlockquoteLines(value);
 
   return new Promise((resolve, reject) => {
-    editor.update(() => {
-      try {
-        convertFromMarkdownString(value, enabledTransformers);
-        resolve(undefined);
-      } catch (ex) {
-        reject(new Error('Failed to convert Markdown', { cause: ex }));
-      }
-    });
+    editor.update(
+      () => {
+        try {
+          convertFromMarkdownString(value, enabledTransformers);
+          resolve(exportMarkdown(enabledTransformers));
+        } catch (ex) {
+          reject(new Error('Failed to convert Markdown', { cause: ex }));
+        }
+      },
+      // Tell the import from a change made by the user
+      { tag: IMPORT_UPDATE_TAG },
+    );
   });
 };
 

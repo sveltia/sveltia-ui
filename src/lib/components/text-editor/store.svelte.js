@@ -43,6 +43,13 @@ export const createEditorStore = () => {
   let hasConverterError = $state(false);
   /** @type {boolean} */
   let showConverterError = $state(false);
+  /** @type {boolean} */
+  let pending = $state(false);
+  /**
+   * Value last imported to the Lexical editor, and the Markdown the editor exports for it.
+   * @type {{ source: string, exported: string } | undefined}
+   */
+  let lastImport = undefined;
 
   /**
    * Flag a conversion error, which takes the editor out of the rich text mode, and shows the error
@@ -73,7 +80,13 @@ export const createEditorStore = () => {
       // We should avoid an empty editor; there should be at least one `<p>`, so give it an empty
       // string if the `value` is `undefined`
       // @see https://github.com/facebook/lexical/issues/2308
-      await convertMarkdownToLexical(editor, inputValue || '', enabledTransformers);
+      const exported = await convertMarkdownToLexical(
+        editor,
+        inputValue || '',
+        enabledTransformers,
+      );
+
+      lastImport = { source: originalValue, exported };
     } catch (ex) {
       // Go through the setter, so the editor actually falls back to the plain text mode
       setConverterError(true);
@@ -157,8 +170,22 @@ export const createEditorStore = () => {
     set showConverterError(newValue) {
       showConverterError = newValue;
     },
+    get pending() {
+      return pending;
+    },
+    set pending(newValue) {
+      pending = newValue;
+    },
     editorId,
     convertMarkdown,
+    /**
+     * Check if the given value, exported by the editor, is only the value last imported, written in
+     * the editor’s own Markdown style.
+     * @param {string} value Exported value.
+     * @returns {boolean} Result.
+     */
+    isRestyledImport: (value) =>
+      !!lastImport && lastImport.source === inputValue && lastImport.exported === value,
     /* eslint-enable jsdoc/require-jsdoc */
   };
 };

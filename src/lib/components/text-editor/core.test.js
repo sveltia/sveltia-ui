@@ -468,7 +468,9 @@ describe('text editor core', () => {
       isComposing: () => false,
     });
 
-    await expect(convertMarkdownToLexical(editor, '# Heading', [])).resolves.toBeUndefined();
+    // The value is returned as the editor exports it, from an update tagged as an import
+    await expect(convertMarkdownToLexical(editor, '# Heading', [])).resolves.toBe('converted');
+    expect(editor.update).toHaveBeenCalledWith(expect.any(Function), { tag: 'sui-import' });
   });
 
   it('pads blank blockquote lines before converting markdown', async () => {
@@ -579,7 +581,7 @@ describe('text editor core', () => {
 
     const markdown = '```javascript\nconst x = 1;\n```\n```python\nprint("hello")\n```';
 
-    await expect(convertMarkdownToLexical(editor, markdown, [])).resolves.toBeUndefined();
+    await expect(convertMarkdownToLexical(editor, markdown, [])).resolves.toBe('converted');
   });
 
   it('handles disposal of multiple registered listeners', () => {
@@ -1003,7 +1005,7 @@ describe('text editor core', () => {
       isComposing: () => false,
     });
 
-    await expect(convertMarkdownToLexical(editor, '', [])).resolves.toBeUndefined();
+    await expect(convertMarkdownToLexical(editor, '', [])).resolves.toBe('converted');
     expect(editor.update).toHaveBeenCalled();
   });
 
@@ -1016,7 +1018,7 @@ describe('text editor core', () => {
 
     const markdown = '```js\nconst x = 1;\n```';
 
-    await expect(convertMarkdownToLexical(editor, markdown, [])).resolves.toBeUndefined();
+    await expect(convertMarkdownToLexical(editor, markdown, [])).resolves.toBe('converted');
     expect(editor.update).toHaveBeenCalled();
   });
 
@@ -1113,7 +1115,7 @@ describe('text editor core', () => {
 
     const markdown = '```javascript\ncode\n```\n```python\ncode\n```\n```ruby\ncode\n```';
 
-    await expect(convertMarkdownToLexical(editor, markdown, [])).resolves.toBeUndefined();
+    await expect(convertMarkdownToLexical(editor, markdown, [])).resolves.toBe('converted');
     expect(editor.update).toHaveBeenCalled();
   });
 
@@ -1172,7 +1174,7 @@ describe('text editor core', () => {
       isComposing: () => false,
     });
 
-    await expect(convertMarkdownToLexical(editor, '', [])).resolves.toBeUndefined();
+    await expect(convertMarkdownToLexical(editor, '', [])).resolves.toBe('converted');
   });
 
   it('resolves even when the engine cannot be loaded', async () => {

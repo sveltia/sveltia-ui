@@ -26,7 +26,12 @@
 
   /**
    * @typedef {object} Props
-   * @property {string} [value] Input value.
+   * @property {string} [value] Input value. A value set from outside is kept as is until the user
+   * changes the content, although the rich text editor writes Markdown in its own style, such as
+   * `_text_` for `*text*`.
+   * @property {boolean} [pending] Whether the user has changed the rich text content, and the
+   * editor has yet to update {@link value}, which it does a moment later. Bind it to wait for the
+   * change before reading the value, for example to save it. Read-only.
    * @property {boolean} [flex] Make the text input container flexible.
    * @property {'ltr' | 'rtl' | 'auto'} [dir] The `dir` attribute on the editable text box, both
    * the rich text editor and the `<textarea>` element of the plain text mode.
@@ -61,6 +66,7 @@
   let {
     /* eslint-disable prefer-const */
     value = $bindable(''),
+    pending = $bindable(false),
     flex = false,
     dir = undefined,
     modes = ['rich-text', 'plain-text'],
@@ -224,6 +230,10 @@
     return () => {
       events.forEach((type) => textArea.removeEventListener(type, update));
     };
+  });
+
+  $effect(() => {
+    pending = editorStore.pending;
   });
 
   $effect(() => {

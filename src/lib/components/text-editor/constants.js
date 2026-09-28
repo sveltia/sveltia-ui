@@ -231,3 +231,9 @@ export const TRANSFORMER_MAP = {
  * used. This is to ensure that the Markdown output is more readable and consistent.
  */
 export const DISABLED_MARKDOWN_TAGS = ['*', '__', '***', '___'];
+
+/**
+ * Tag of the Lexical update that imports a value set from outside, so the editor can tell it from a
+ * change made by the user.
+ */
+export const IMPORT_UPDATE_TAG = 'sui-import';

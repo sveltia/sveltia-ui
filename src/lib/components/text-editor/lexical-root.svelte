@@ -1,6 +1,7 @@
 <script>
-  import { $getRoot as getRoot } from 'lexical';
+  import { $getRoot as getRoot, HISTORY_MERGE_TAG } from 'lexical';
   import { getContext, onMount } from 'svelte';
+  import { IMPORT_UPDATE_TAG } from './constants.js';
   import { handleEditorMouseDown, initEditor } from './core.js';
 
   /**
@@ -84,13 +85,19 @@
   const onUpdate = (event) => {
     const { hasConverterError, useRichText, inputValue } = editorStore;
 
+    // The content has been converted, if it has changed at all
+    editorStore.pending = false;
+
     if (hasConverterError || !useRichText) {
       return;
     }
 
     const { value: newValue, selection } = /** @type {CustomEvent} */ (event).detail;
 
-    if (inputValue !== newValue) {
+    // Keep the value as given when the editor has only rewritten it in its own Markdown style, e.g.
+    // `_text_` for `*text*`: that’s not a change, and the value would otherwise change as soon as
+    // it’s set
+    if (inputValue !== newValue && !editorStore.isRestyledImport(newValue)) {
       // Temporarily disable rich text to prevent unnecessary Markdown conversion that resets
       // Lexical nodes and selection, then restore the state
       editorStore.useRichText = false;
@@ -133,7 +140,23 @@
     lexicalRoot?.addEventListener('click', onClick);
     lexicalRoot?.addEventListener('mousedown', onMouseDown);
 
+    // A change made by the user is converted to Markdown a moment later, so report it as pending
+    // until then. An import, or an update that only changes how the content looks, e.g. the code
+    // highlighting, isn’t a change
+    const unregisterUpdateListener = editor.registerUpdateListener(
+      ({ dirtyElements, dirtyLeaves, tags }) => {
+        if (
+          (dirtyElements.size || dirtyLeaves.size) &&
+          !tags.has(IMPORT_UPDATE_TAG) &&
+          !tags.has(HISTORY_MERGE_TAG)
+        ) {
+          editorStore.pending = true;
+        }
+      },
+    );
+
     return () => {
+      unregisterUpdateListener();
       lexicalRoot?.removeEventListener('Update', onUpdate);
       lexicalRoot?.removeEventListener('click', onClick);
       lexicalRoot?.removeEventListener('mousedown', onMouseDown);

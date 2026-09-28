@@ -1,3 +1,4 @@
+import { sleep } from '@sveltia/utils/misc';
 import { beforeAll, describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-svelte';
 import { userEvent } from 'vitest/browser';
@@ -192,6 +193,60 @@ describe('TextEditor', () => {
 
     props.value = 'Replaced';
     await waitForContent(screen.container, 'Replaced');
+  });
+
+  it('keeps a value set from outside as is until the user changes the content', async () => {
+    /** @type {ComponentProps<typeof TextEditor>} */
+    const props = $state({ value: '*Hello*' });
+    const screen = await render(TextEditor, props);
+    const root = await waitForContent(screen.container, '<em');
+
+    // The editor writes italics as `_Hello_`, which is only a matter of style, so give it time to
+    // convert the content, and check the value is left alone
+    await sleep(300);
+    expect(props.value).toBe('*Hello*');
+
+    props.value = '**Bye**';
+    await waitForContent(screen.container, '<strong');
+    await sleep(300);
+    expect(props.value).toBe('**Bye**');
+
+    // Once the user changes the content, the value is written in the editor’s style
+    focusEnd(root);
+    await userEvent.keyboard('!');
+    await vi.waitFor(() => {
+      expect(props.value).toBe('**Bye!**');
+    });
+  });
+
+  it('reports a change made by the user as pending until the value is updated', async () => {
+    /** @type {ComponentProps<typeof TextEditor>} */
+    const props = $state({ value: 'Hello', pending: false });
+    const screen = await render(TextEditor, props);
+    const root = await waitForContent(screen.container, 'Hello');
+    /** @type {boolean[]} */
+    const states = [];
+
+    // Sample the state often enough to catch the 100 ms or so the conversion takes
+    const timer = setInterval(() => {
+      states.push(/** @type {boolean} */ (props.pending));
+    }, 5);
+
+    // Loading a value set from outside isn’t a change
+    props.value = 'Hi';
+    await waitForContent(screen.container, 'Hi');
+    await sleep(300);
+    expect(states).not.toContain(true);
+
+    focusEnd(root);
+    await userEvent.keyboard('!');
+    await vi.waitFor(() => {
+      expect(props.value).toBe('Hi!');
+    });
+    // The value is updated in the same flush the pending state is cleared in
+    expect(states).toContain(true);
+    expect(props.pending).toBe(false);
+    clearInterval(timer);
   });
 
   it('switches to the plain text editor and back', async () => {
