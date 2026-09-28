@@ -82,74 +82,69 @@ it('inserts the node into the editor when clicked', async () => {
   });
 });
 
-it('inserts the component’s Markdown through a dialog in plain text mode', async () => {
+/**
+ * Render the button for the given component in plain text mode.
+ * @param {import('$lib/typedefs').TextEditorComponent} editorComponent Component.
+ * @returns {Promise<{ screen: any, textarea: HTMLTextAreaElement }>} Rendered fixture and the
+ * `<textarea>`.
+ */
+const renderPlainText = async (editorComponent) => {
   /** @type {ComponentProps<typeof EditorFixture>} */
   const props = $state({
     store: undefined,
     component: InsertItemButton,
-    componentProps: {
-      component: createTestComponent({ id: 'figure', label: 'Figure', markdown: '<figure>' }),
-    },
+    componentProps: { component: editorComponent },
     withTextArea: true,
   });
 
   const screen = await render(EditorFixture, props);
-  const store = getEditorStore(props);
   const textarea = /** @type {HTMLTextAreaElement} */ (screen.container.querySelector('textarea'));
 
-  store.useRichText = false;
+  getEditorStore(props).useRichText = false;
   textarea.value = 'Before After';
   textarea.focus();
   textarea.setSelectionRange(6, 7);
+
+  return { screen, textarea };
+};
+
+it('inserts the component’s Markdown as a block in plain text mode', async () => {
+  const { screen, textarea } = await renderPlainText(
+    createTestComponent({ id: 'figure', label: 'Figure', markdown: '<figure>' }),
+  );
+
   await screen.getByRole('button', { name: 'Figure' }).click();
-
-  const dialog = screen.getByRole('dialog', { name: 'Figure' });
-
-  await expect.element(dialog).toBeVisible();
-  // The component is rendered in a separate editor within the dialog
-  await expect.element(dialog.getByRole('textbox', { name: 'Figure' })).toHaveTextContent('Figure');
-  await expect.element(dialog.getByRole('button', { name: 'Insert' })).toBeEnabled();
-  await dialog.getByRole('button', { name: 'Insert' }).click();
-  // A block is inserted between blank lines
   await vi.waitFor(() => {
     expect(textarea.value).toBe('Before\n\n<figure>\n\nAfter');
   });
   expect(document.activeElement).toBe(textarea);
+  expect(document.querySelector('dialog')).toBeNull();
 });
 
-it('inserts the latest Markdown even if the component has just changed', async () => {
-  let markdown = '<old>';
-  /**
-   * Get the current Markdown output of the component.
-   * @returns {string} Markdown.
-   */
-  const getMarkdown = () => markdown;
+it('inserts nothing in plain text mode if the component has no Markdown', async () => {
+  const { screen, textarea } = await renderPlainText(
+    createTestComponent({ id: 'image', label: 'Image', markdown: '' }),
+  );
 
-  /** @type {ComponentProps<typeof EditorFixture>} */
-  const props = $state({
-    store: undefined,
-    component: InsertItemButton,
-    componentProps: {
-      component: createTestComponent({ id: 'note', label: 'Note', markdown: getMarkdown }),
-    },
-    withTextArea: true,
+  await screen.getByRole('button', { name: 'Image' }).click();
+  await vi.waitFor(() => {
+    expect(document.activeElement).toBe(textarea);
+  });
+  expect(textarea.value).toBe('Before After');
+});
+
+it('prefers the component’s own Markdown in plain text mode', async () => {
+  const { screen, textarea } = await renderPlainText({
+    ...createTestComponent({ id: 'image', label: 'Image', markdown: '' }),
+    /**
+     * Create the Markdown of an empty image.
+     * @returns {string} Markdown.
+     */
+    createMarkdown: () => '![]()',
   });
 
-  const screen = await render(EditorFixture, props);
-  const store = getEditorStore(props);
-  const textarea = /** @type {HTMLTextAreaElement} */ (screen.container.querySelector('textarea'));
-
-  store.useRichText = false;
-  textarea.focus();
-  await screen.getByRole('button', { name: 'Note' }).click();
-
-  const dialog = screen.getByRole('dialog', { name: 'Note' });
-
-  await expect.element(dialog.getByRole('button', { name: 'Insert' })).toBeEnabled();
-  // Change the output without an editor update, like a field changed right before submitting
-  markdown = '<new>';
-  await dialog.getByRole('button', { name: 'Insert' }).click();
+  await screen.getByRole('button', { name: 'Image' }).click();
   await vi.waitFor(() => {
-    expect(textarea.value).toBe('<new>\n\n');
+    expect(textarea.value).toBe('Before\n\n![]()\n\nAfter');
   });
 });

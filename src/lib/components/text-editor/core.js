@@ -91,6 +91,7 @@ import { TABLE } from './transformers/table.js';
  * @import { Transformer } from '@lexical/markdown';
  * @import {
  * TextEditorBlockType,
+ * TextEditorComponent,
  * TextEditorConfig,
  * TextEditorInlineType,
  * TextEditorNodeType,
@@ -477,6 +478,54 @@ export const onEditorUpdate = (editor, enabledTransformers, cachedValue) => {
   );
 
   return value;
+};
+
+/**
+ * Get the Markdown of a new instance of the given editor component, to insert it in the plain text
+ * mode. The component’s own `createMarkdown` function is used if any. Otherwise, a new node is
+ * created in a temporary editor and exported with the component’s transformer, just like the rich
+ * text editor does.
+ * @param {TextEditorComponent} component Editor component.
+ * @returns {string} Markdown. It can be empty, for example if the component’s output depends on a
+ * field value that is not set yet.
+ */
+export const getComponentMarkdown = ({ node, createNode, transformer, createMarkdown }) => {
+  if (createMarkdown) {
+    return createMarkdown().trim();
+  }
+
+  const editor = createEditor({
+    namespace: 'component',
+    nodes: node ? [/** @type {any} */ (node)] : [],
+    /**
+     * Throw an error, so the export below fails as a whole.
+     * @param {Error} error Error.
+     * @throws {Error} Always.
+     */
+    onError: (error) => {
+      throw error;
+    },
+  });
+
+  let markdown = '';
+
+  try {
+    editor.update(
+      () => {
+        const newNode = createNode();
+
+        // An inline node needs a paragraph to live in
+        getRoot().append(newNode.isInline() ? createParagraphNode().append(newNode) : newNode);
+
+        markdown = onEditorUpdate(editor, [transformer]);
+      },
+      { discrete: true },
+    );
+  } catch {
+    // The component cannot be created or exported outside the rich text editor
+  }
+
+  return markdown.trim();
 };
 
 /**

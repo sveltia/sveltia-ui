@@ -9,7 +9,7 @@
   import MenuButton from '../../menu/menu-button.svelte';
   import MenuItem from '../../menu/menu-item.svelte';
   import Menu from '../../menu/menu.svelte';
-  import InsertComponentDialog from './insert-component-dialog.svelte';
+  import { insertComponent } from '../raw-markdown.js';
 
   /**
    * @import { TextEditorComponent, TextEditorStore } from '$lib/typedefs';
@@ -29,13 +29,6 @@
 
   /** @type {TextEditorStore} */
   const editorStore = getContext('editorStore');
-
-  /**
-   * Component to insert with the dialog in the plain text mode.
-   * @type {TextEditorComponent | undefined}
-   */
-  let dialogComponent = $state();
-  let openDialog = $state(false);
 </script>
 
 <MenuButton label={_('_sui.insert')}>
@@ -49,10 +42,15 @@
         <MenuItem
           {label}
           onclick={() => {
-            // The plain text mode needs a dialog to fill in the component’s fields
-            if (!editorStore.useRichText) {
-              dialogComponent = component;
-              openDialog = true;
+            const { textArea, useRichText } = editorStore;
+
+            // Insert the component’s Markdown in the plain text mode
+            if (!useRichText) {
+              // The item is only clickable while the `<textarea>` is there
+              /* v8 ignore else */
+              if (textArea) {
+                insertComponent(textArea, component);
+              }
 
               return;
             }
@@ -73,5 +71,3 @@
     </Menu>
   {/snippet}
 </MenuButton>
-
-<InsertComponentDialog component={dialogComponent} bind:open={openDialog} />

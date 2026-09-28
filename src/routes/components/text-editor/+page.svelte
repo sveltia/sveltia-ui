@@ -1,12 +1,19 @@
 <script>
   import { TextEditor } from '$lib';
   import Example from '../../_components/example.svelte';
-  import { calloutComponent, imageComponent, youtubeComponent } from './demo-components.js';
+  import {
+    calloutComponent,
+    figureComponent,
+    imageComponent,
+    youtubeComponent,
+  } from './demo-components.js';
 
-  const components = [imageComponent, calloutComponent, youtubeComponent];
+  const components = [imageComponent, figureComponent, calloutComponent, youtubeComponent];
 
   const componentMarkdown = [
     'Some text with an image: ![Sveltia](https://github.com/sveltia.png)',
+    '',
+    '{{< image src="https://github.com/sveltia.png" caption="An image with a caption" >}}',
     '',
     ':::tip',
     'Try the Insert menu in both modes.',

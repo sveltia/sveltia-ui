@@ -72,7 +72,7 @@ it('lists the components in a menu and inserts the chosen one', async () => {
   });
 });
 
-it('inserts the chosen component’s Markdown through a dialog in plain text mode', async () => {
+it('inserts the chosen component’s Markdown in plain text mode', async () => {
   /** @type {ComponentProps<typeof EditorFixture>} */
   const props = $state({
     store: undefined,
@@ -95,25 +95,9 @@ it('inserts the chosen component’s Markdown through a dialog in plain text mod
   textarea.setSelectionRange(2, 2);
   await screen.getByRole('button', { name: 'Insert' }).click();
   await screen.getByRole('menuitem', { name: 'Badge' }).click();
-
-  const dialog = screen.getByRole('dialog', { name: 'Badge' });
-
-  await expect.element(dialog).toBeVisible();
-  await dialog.getByRole('button', { name: 'Insert' }).click();
   // An inline component is inserted as is
   await vi.waitFor(() => {
     expect(textarea.value).toBe('A [badge] B');
   });
-
-  // Cancelling inserts nothing
-  await screen.getByRole('button', { name: 'Insert' }).click();
-  await screen.getByRole('menuitem', { name: 'Badge' }).click();
-  await screen
-    .getByRole('dialog', { name: 'Badge' })
-    .getByRole('button', { name: 'Cancel' })
-    .click();
-  await vi.waitFor(() => {
-    expect(document.activeElement).toBe(textarea);
-  });
-  expect(textarea.value).toBe('A [badge] B');
+  expect(document.activeElement).toBe(textarea);
 });

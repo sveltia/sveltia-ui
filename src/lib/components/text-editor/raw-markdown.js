@@ -1,12 +1,18 @@
 /**
  * Markdown editing helpers for the plain text mode of the text editor, where the toolbar buttons
  * edit the Markdown source in the `<textarea>` instead of Lexical nodes. Apart from
- * {@link getRawTextState} and {@link applyRawTextEdit}, everything here is pure: a function takes
- * the current value and selection, and returns the edit to apply.
+ * {@link getRawTextState}, {@link applyRawTextEdit} and {@link insertComponent}, everything here is
+ * pure: a function takes the current value and selection, and returns the edit to apply.
  */
 
+import { getComponentMarkdown } from './core.js';
+
 /**
- * @import { TextEditorBlockType, TextEditorFormatType } from '$lib/typedefs';
+ * @import {
+ * TextEditorBlockType,
+ * TextEditorComponent,
+ * TextEditorFormatType,
+ * } from '$lib/typedefs';
  */
 
 /**
@@ -468,4 +474,27 @@ export const applyRawTextEdit = async (
   }
 
   textArea.setSelectionRange(selectionStart, selectionEnd);
+};
+
+/**
+ * Insert the Markdown of a new instance of the given editor component into the `<textarea>`. A
+ * component matched by a single-line pattern is inserted inline at the caret; anything else is
+ * inserted as a separate block. If the component has no Markdown to insert, the focus just moves
+ * back to the `<textarea>`.
+ * @param {HTMLTextAreaElement} textArea `<textarea>` element.
+ * @param {TextEditorComponent} component Editor component.
+ * @returns {Promise<void>} Nothing.
+ */
+export const insertComponent = async (textArea, component) => {
+  const markdown = getComponentMarkdown(component);
+
+  if (!markdown) {
+    textArea.focus();
+
+    return;
+  }
+
+  const block = component.transformer?.type !== 'text-match';
+
+  await applyRawTextEdit(textArea, insertMarkdown(getRawTextState(textArea), markdown, { block }));
 };

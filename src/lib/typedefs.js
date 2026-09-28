@@ -318,6 +318,10 @@
  * @property {(props?: Record<string, any>) => LexicalNode} createNode Function to create a new node
  * instance.
  * @property {Transformer} transformer Node transformer.
+ * @property {() => string} [createMarkdown] Function to create the Markdown inserted when the
+ * component is chosen in the plain text mode. By default, a new node created with `createNode` is
+ * exported with `transformer`, which may result in an empty string, for example if the output
+ * depends on a field value that is not set yet.
  */
 
 /**

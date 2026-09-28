@@ -32,6 +32,8 @@ import { DecoratorNode } from 'lexical';
  * @property {Record<string, string>} defaults Default field values.
  * @property {(props: Record<string, string>) => string} toBlock Convert the field values to
  * Markdown.
+ * @property {(groups: Record<string, string>) => Record<string, string>} [fromBlock] Convert the
+ * named groups matched in Markdown to field values. Defaults to using them as is.
  */
 
 /**
@@ -96,7 +98,17 @@ const renderForm = ({ label, icon, inline, fields }, props, onChange) => {
  * @returns {TextEditorComponent} Component.
  */
 const createComponent = (definition, { pattern }) => {
-  const { id, label, icon, trigger, inline, defaults, toBlock } = definition;
+  const { id, label, icon, trigger, inline, defaults, toBlock, fromBlock } = definition;
+
+  /**
+   * Get the field values from a Markdown match.
+   * @param {RegExpMatchArray} match Match.
+   * @returns {Record<string, string>} Field values.
+   */
+  const getProps = ({ groups = {} }) => ({
+    ...defaults,
+    ...(fromBlock ? fromBlock(groups) : groups),
+  });
 
   /**
    * Decorator node for the component.
@@ -211,7 +223,7 @@ const createComponent = (definition, { pattern }) => {
           importRegExp: pattern,
           regExp: new RegExp(`${pattern.source}$`),
           replace: (textNode, match) => {
-            textNode.replace(new ComponentNode({ ...defaults, ...match.groups }));
+            textNode.replace(new ComponentNode(getProps(match)));
           },
           export: exportNode,
         }
@@ -228,7 +240,7 @@ const createComponent = (definition, { pattern }) => {
               return null;
             }
 
-            rootNode.append(new ComponentNode({ ...defaults, ...match.groups }));
+            rootNode.append(new ComponentNode(getProps(match)));
 
             return [true, startLineIndex + match[0].split('\n').length - 1];
           },
@@ -241,21 +253,61 @@ const createComponent = (definition, { pattern }) => {
 /**
  * An image, inserted inline like the built-in image component of Sveltia CMS.
  */
-export const imageComponent = createComponent(
+export const imageComponent = {
+  ...createComponent(
+    {
+      id: 'demo-image',
+      label: 'Image',
+      icon: 'image',
+      trigger: 'button',
+      inline: true,
+      fields: [
+        { name: 'src', label: 'URL' },
+        { name: 'alt', label: 'Alt Text' },
+      ],
+      defaults: { src: '', alt: '' },
+      toBlock: ({ src, alt }) => (src ? `![${alt}](${src})` : ''),
+    },
+    { pattern: /!\[(?<alt>[^\]]*)\]\((?<src>[^)\s]+)\)/ },
+  ),
+  // `toBlock()` gives nothing without an image URL, so provide the empty markup to be filled in the
+  // plain text mode
+  createMarkdown: () => '![]()',
+};
+
+/**
+ * Escape a value for a double-quoted shortcode attribute.
+ * @param {string} value Value.
+ * @returns {string} Escaped value.
+ */
+const escapeAttr = (value) => value.replaceAll('&', '&amp;').replaceAll('"', '&quot;');
+/**
+ * Unescape a value escaped with {@link escapeAttr}.
+ * @param {string} value Escaped value.
+ * @returns {string} Value.
+ */
+const unescapeAttr = (value) => value.replaceAll('&quot;', '"').replaceAll('&amp;', '&');
+
+/**
+ * An image with a caption, as a single-line block, like a Hugo shortcode.
+ */
+export const figureComponent = createComponent(
   {
-    id: 'demo-image',
-    label: 'Image',
-    icon: 'image',
-    trigger: 'button',
-    inline: true,
+    id: 'demo-figure',
+    label: 'Image with Caption',
+    icon: 'photo',
+    trigger: 'menuitem',
+    inline: false,
     fields: [
       { name: 'src', label: 'URL' },
-      { name: 'alt', label: 'Alt Text' },
+      { name: 'caption', label: 'Caption' },
     ],
-    defaults: { src: '', alt: '' },
-    toBlock: ({ src, alt }) => (src ? `![${alt}](${src})` : ''),
+    defaults: { src: '', caption: '' },
+    toBlock: ({ src, caption }) =>
+      `{{< image src="${escapeAttr(src)}" caption="${escapeAttr(caption)}" >}}`,
+    fromBlock: ({ src, caption }) => ({ src: unescapeAttr(src), caption: unescapeAttr(caption) }),
   },
-  { pattern: /!\[(?<alt>[^\]]*)\]\((?<src>[^)\s]+)\)/ },
+  { pattern: /^\{\{< image src="(?<src>[^"]*)" caption="(?<caption>[^"]*)" >\}\}$/m },
 );
 
 /**
@@ -281,16 +333,21 @@ export const calloutComponent = createComponent(
 /**
  * A YouTube embed, as a single-line block.
  */
-export const youtubeComponent = createComponent(
-  {
-    id: 'demo-youtube',
-    label: 'YouTube',
-    icon: 'smart_display',
-    trigger: 'menuitem',
-    inline: false,
-    fields: [{ name: 'id', label: 'Video ID' }],
-    defaults: { id: '' },
-    toBlock: ({ id: videoId }) => (videoId ? `{{< youtube ${videoId} >}}` : ''),
-  },
-  { pattern: /^\{\{< youtube (?<id>[\w-]+) >\}\}$/m },
-);
+export const youtubeComponent = {
+  ...createComponent(
+    {
+      id: 'demo-youtube',
+      label: 'YouTube',
+      icon: 'smart_display',
+      trigger: 'menuitem',
+      inline: false,
+      fields: [{ name: 'id', label: 'Video ID' }],
+      defaults: { id: '' },
+      toBlock: ({ id: videoId }) => (videoId ? `{{< youtube ${videoId} >}}` : ''),
+    },
+    { pattern: /^\{\{< youtube (?<id>[\w-]+) >\}\}$/m },
+  ),
+  // `toBlock()` gives nothing without a video ID, so provide a template to be filled in the plain
+  // text mode
+  createMarkdown: () => '{{< youtube VIDEO_ID >}}',
+};

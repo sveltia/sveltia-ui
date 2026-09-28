@@ -6,7 +6,7 @@
   import { getContext } from 'svelte';
   import Button from '../../button/button.svelte';
   import Icon from '../../icon/icon.svelte';
-  import InsertComponentDialog from './insert-component-dialog.svelte';
+  import { insertComponent } from '../raw-markdown.js';
 
   /**
    * @import { TextEditorComponent, TextEditorStore } from '$lib/typedefs';
@@ -28,8 +28,6 @@
   const editorStore = getContext('editorStore');
 
   const { label, icon, createNode } = $derived(component);
-
-  let openDialog = $state(false);
 </script>
 
 <Button
@@ -39,9 +37,15 @@
   aria-label={label}
   aria-controls={editorStore.controlId}
   onclick={() => {
-    // The plain text mode needs a dialog to fill in the component’s fields
-    if (!editorStore.useRichText) {
-      openDialog = true;
+    const { textArea, useRichText } = editorStore;
+
+    // Insert the component’s Markdown in the plain text mode
+    if (!useRichText) {
+      // The button is only enabled while the `<textarea>` is there
+      /* v8 ignore else */
+      if (textArea) {
+        insertComponent(textArea, component);
+      }
 
       return;
     }
@@ -58,5 +62,3 @@
     {/if}
   {/snippet}
 </Button>
-
-<InsertComponentDialog {component} bind:open={openDialog} />
