@@ -1,4 +1,5 @@
 import {
+  CodeExtension,
   CodeHighlightNode,
   CodeNode,
   $createCodeNode as createCodeNode,
@@ -6,7 +7,7 @@ import {
   $isCodeNode as isCodeNode,
 } from '@lexical/code-core';
 import { registerDragonSupport } from '@lexical/dragon';
-import { HorizontalRuleNode } from '@lexical/extension';
+import { buildEditorFromExtensions, HorizontalRuleNode } from '@lexical/extension';
 import { createEmptyHistoryState, registerHistory } from '@lexical/history';
 import {
   $isLinkNode as isLinkNode,
@@ -41,6 +42,7 @@ import {
   COMMAND_PRIORITY_LOW,
   COMMAND_PRIORITY_NORMAL,
   createEditor,
+  defineExtension,
   DELETE_CHARACTER_COMMAND,
   $createParagraphNode as createParagraphNode,
   $createTextNode as createTextNode,
@@ -87,7 +89,7 @@ import { HR } from './transformers/hr.js';
 import { TABLE } from './transformers/table.js';
 
 /**
- * @import { CreateEditorArgs, LexicalEditor } from 'lexical';
+ * @import { LexicalEditor } from 'lexical';
  * @import { Transformer } from '@lexical/markdown';
  * @import {
  * TextEditorBlockType,
@@ -540,9 +542,14 @@ export const initEditor = ({
   isCodeEditor = false,
   defaultLanguage = 'plain',
 }) => {
-  /** @type {CreateEditorArgs} */
-  const editorConfig = {
+  const hasCodeBlock = enabledButtons.includes('code-block') || isCodeEditor;
+
+  const editorExtension = defineExtension({
+    name: '@sveltia/ui/editor',
     namespace: 'editor',
+    // `CodeNode` expects the editor to be built with `CodeExtension`, which also registers the
+    // `CodeNode` and `CodeHighlightNode` nodes
+    dependencies: hasCodeBlock ? [CodeExtension] : [],
     nodes: [
       ...components.map(({ node }) => node),
       ...new Set(
@@ -557,7 +564,15 @@ export const initEditor = ({
           [HorizontalRuleNode, TableNode, TableCellNode, TableRowNode]),
     ],
     theme: EDITOR_THEME,
-  };
+    /**
+     * Log an error like `createEditor` does by default, instead of throwing it.
+     * @param {Error} error Error.
+     */
+    onError: (error) => {
+      // eslint-disable-next-line no-console
+      console.error(error);
+    },
+  });
 
   /** @type {Transformer[]} */
   const enabledTransformers = [
@@ -573,7 +588,7 @@ export const initEditor = ({
         [HR, TABLE]),
   ];
 
-  const editor = createEditor(editorConfig);
+  const editor = buildEditorFromExtensions(editorExtension);
   /** @type {Array<() => void>} */
   const unregisters = [];
 
@@ -661,7 +676,7 @@ export const initEditor = ({
     addUnregister(registerMarkdownShortcuts(editor, enabledTransformers));
   }
 
-  if (enabledButtons.includes('code-block') || isCodeEditor) {
+  if (hasCodeBlock) {
     addUnregister(
       registerCodeHighlighting(editor, {
         ...shikiTokenizer,
@@ -876,6 +891,7 @@ export const initEditor = ({
      */
     dispose: () => {
       unregisters.forEach((unregister) => unregister());
+      editor.dispose();
     },
   };
 };

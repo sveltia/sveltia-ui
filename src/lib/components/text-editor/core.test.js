@@ -27,6 +27,7 @@ const { editorState, mockState, rootState } = vi.hoisted(() => {
   };
 
   const hoistedEditorState = {
+    dispose: () => {},
     _commands: /** @type {any[]} */ ([]),
     _rootListeners: /** @type {any[]} */ ([]),
     _updateListeners: /** @type {any[]} */ ([]),
@@ -99,6 +100,7 @@ vi.mock('@sveltia/utils/string', () => ({
 }));
 
 vi.mock('@lexical/code-core', () => ({
+  CodeExtension: { name: '@lexical/code' },
   CodeHighlightNode: class {},
   CodeNode: class {},
   $createCodeNode: vi.fn((language) => ({ type: 'code', language, selectStart: vi.fn() })),
@@ -133,6 +135,7 @@ vi.mock('@lexical/dragon', () => ({
 }));
 
 vi.mock('@lexical/extension', () => ({
+  buildEditorFromExtensions: vi.fn(() => editorState),
   HorizontalRuleNode: class {},
 }));
 
@@ -246,6 +249,7 @@ vi.mock('lexical', () => ({
   COMMAND_PRIORITY_NORMAL: 0,
   COMMAND_PRIORITY_LOW: -1,
   createEditor: vi.fn(() => editorState),
+  defineExtension: vi.fn((extension) => extension),
   DELETE_CHARACTER_COMMAND: 'deleteCharacter',
   $createTextNode: vi.fn((text) => ({ type: 'text', text })),
   $insertNodes: vi.fn(),
