@@ -2,8 +2,11 @@ import { isRTL } from '@sveltia/i18n';
 import { generateElementId } from '@sveltia/utils/element';
 import { sleep } from '@sveltia/utils/misc';
 import { on } from 'svelte/events';
+import { calculatePopupStyle, isShallowEqual, mirrorPosition } from './popup-position.js';
+
 /**
  * @import { PopupPosition } from '$lib/typedefs';
+ * @import { PopupStyle } from './popup-position.js';
  */
 
 /**
@@ -51,10 +54,7 @@ class Popup {
   }
 
   style = $state(
-    /**
-     * @type {{ inset: string | undefined, zIndex: number | undefined, minWidth: string | undefined,
-     * maxWidth: string | undefined, height: string | undefined }}
-     */
+    /** @type {PopupStyle} */
     ({
       inset: undefined,
       zIndex: undefined,
@@ -94,10 +94,16 @@ class Popup {
   #removeAnchorListeners = [];
 
   /**
+   * ID of the animation frame requested to recalculate the position after a resize.
+   * @type {number}
+   */
+  _rafId = 0;
+
+  /**
    * Initialize a new `Popup` instance. Note that the `popupElement` is optional, because the
    * element is typically mounted only while the popup is open. Use {@link attachPopupElement} to
    * provide it later.
-   * @param {HTMLButtonElement} anchorElement `<button>` element that triggers the popup.
+   * @param {HTMLElement} anchorElement Element that triggers the popup, typically a `<button>`.
    * @param {HTMLDialogElement | undefined} popupElement `<dialog>` element to be used for the
    * popup, if it’s already in the DOM tree.
    * @param {PopupPosition} position Where to show the popup content.
@@ -324,23 +330,6 @@ class Popup {
       return;
     }
 
-    const anchorRect = this.positionBaseElement.getBoundingClientRect();
-    const rootBounds = { width: window.innerWidth, height: window.innerHeight };
-
-    // Clip the anchor’s rect to the viewport, mirroring what `IntersectionObserver` used to report
-    // as `intersectionRect`
-    const intersectionRect = {
-      top: Math.max(anchorRect.top, 0),
-      left: Math.max(anchorRect.left, 0),
-      right: Math.min(anchorRect.right, rootBounds.width),
-      bottom: Math.min(anchorRect.bottom, rootBounds.height),
-      width: 0,
-      height: 0,
-    };
-
-    intersectionRect.width = Math.max(0, intersectionRect.right - intersectionRect.left);
-    intersectionRect.height = Math.max(0, intersectionRect.bottom - intersectionRect.top);
-
     // Measure the content at its natural size, with any limit previously applied here taken off
     // first. A popup that delegates its scrolling to a child — the combobox hands it to the option
     // list, so the filter stays put — reports a `scrollHeight` no larger than the `max-height` it’s
@@ -348,6 +337,7 @@ class Popup {
     // clipped values would make the cap stick: once the popup had shrunk to fit a small viewport,
     // it could never grow back when the viewport did. The properties are put back synchronously,
     // before the browser can paint, so nothing flickers.
+    const anchorRect = this.positionBaseElement.getBoundingClientRect();
     const { maxHeight: appliedMaxHeight, maxWidth: appliedMaxWidth } = content.style;
 
     content.style.maxHeight = '';
@@ -358,157 +348,16 @@ class Popup {
     content.style.maxHeight = appliedMaxHeight;
     content.style.maxWidth = appliedMaxWidth;
 
-    const topMargin = intersectionRect.top - 8;
-    const bottomMargin = rootBounds.height - intersectionRect.bottom - 8;
-    // A popup that opens beside its anchor is aligned with one of the anchor’s edges and extends
-    // across it, so its room is measured from that edge, not from the opposite one a dropdown
-    // hangs off
-    const leftMargin = intersectionRect.left - 8;
-    const rightMargin = rootBounds.width - intersectionRect.right - 8;
-    const downwardMargin = rootBounds.height - intersectionRect.top - 8;
-    const upwardMargin = intersectionRect.bottom - 8;
-    let { position } = this;
-    let height;
+    const style = calculatePopupStyle({
+      // Normalize RTL-friendly positions to LTR for LTR documents
+      position: isRTL() ? mirrorPosition(this.position) : this.position,
+      anchorRect,
+      viewport: { width: window.innerWidth, height: window.innerHeight },
+      contentWidth,
+      contentHeight,
+    });
 
-    // Normalize RTL-friendly positions to LTR for LTR documents
-    // @todo Rename `PopupPosition` enums to be direction-agnostic
-    if (isRTL()) {
-      if (position.endsWith('-left')) {
-        position = /** @type {PopupPosition} */ (position.replace('-left', '-right'));
-      } else if (position.endsWith('-right')) {
-        position = /** @type {PopupPosition} */ (position.replace('-right', '-left'));
-      }
-
-      if (position.startsWith('left-')) {
-        position = /** @type {PopupPosition} */ (position.replace('left-', 'right-'));
-      } else if (position.startsWith('right-')) {
-        position = /** @type {PopupPosition} */ (position.replace('right-', 'left-'));
-      }
-    }
-
-    // Alter the position if the space is limited
-    if (position.startsWith('bottom-')) {
-      if (contentHeight > bottomMargin) {
-        if (topMargin > bottomMargin) {
-          position = /** @type {PopupPosition} */ (position.replace('bottom-', 'top-'));
-          height = topMargin;
-        } else {
-          height = bottomMargin;
-        }
-      }
-    } else if (position.startsWith('top-')) {
-      if (contentHeight > topMargin) {
-        if (bottomMargin > topMargin) {
-          position = /** @type {PopupPosition} */ (position.replace('top-', 'bottom-'));
-          height = bottomMargin;
-        } else {
-          height = topMargin;
-        }
-      }
-    }
-
-    // Only a popup that opens beside its anchor carries a `-top`/`-bottom` suffix, and it grows
-    // away from the edge it’s aligned with: down from the anchor’s top, or up from its bottom. It
-    // gets the same treatment as the dropdown above — align with the other edge when the content
-    // doesn’t fit and that edge has more room, and cap it either way, so a long submenu scrolls
-    // instead of running past the viewport
-    if (position.endsWith('-top')) {
-      if (contentHeight > downwardMargin) {
-        if (upwardMargin > downwardMargin) {
-          position = /** @type {PopupPosition} */ (position.replace('-top', '-bottom'));
-          height = upwardMargin;
-        } else {
-          height = downwardMargin;
-        }
-      }
-    } else if (position.endsWith('-bottom')) {
-      if (contentHeight > upwardMargin) {
-        if (downwardMargin > upwardMargin) {
-          position = /** @type {PopupPosition} */ (position.replace('-bottom', '-top'));
-          height = downwardMargin;
-        } else {
-          height = upwardMargin;
-        }
-      }
-    }
-
-    // If the popup overflows the viewport, change the position
-    if (position.endsWith('-left')) {
-      if (intersectionRect.left + contentWidth > rootBounds.width - 8) {
-        position = /** @type {PopupPosition} */ (position.replace('-left', '-right'));
-      }
-    }
-
-    if (position.endsWith('-right')) {
-      if (intersectionRect.right - contentWidth < 8) {
-        position = /** @type {PopupPosition} */ (position.replace('-right', '-left'));
-      }
-    }
-
-    // The two checks above align a dropdown that opens below or above its anchor, so neither
-    // covers a popup that opens beside one — a submenu — running off the edge it opens towards.
-    // That gets the same treatment as the vertical flip above: switch to the other side, but only
-    // when it has more room, so a submenu with nowhere to go stays where the caller put it
-    if (position.startsWith('right-')) {
-      if (contentWidth > rightMargin && leftMargin > rightMargin) {
-        position = /** @type {PopupPosition} */ (position.replace('right-', 'left-'));
-      }
-    } else if (position.startsWith('left-')) {
-      if (contentWidth > leftMargin && rightMargin > leftMargin) {
-        position = /** @type {PopupPosition} */ (position.replace('left-', 'right-'));
-      }
-    }
-
-    const top = position.startsWith('bottom-')
-      ? `${Math.round(intersectionRect.bottom)}px`
-      : position.endsWith('-top')
-        ? `${Math.round(intersectionRect.top)}px`
-        : 'auto';
-
-    const right = position.startsWith('left-')
-      ? `${Math.round(rootBounds.width - intersectionRect.left)}px`
-      : position.endsWith('-right')
-        ? `${Math.round(rootBounds.width - intersectionRect.right)}px`
-        : 'auto';
-
-    const bottom = position.startsWith('top-')
-      ? `${Math.round(rootBounds.height - intersectionRect.top)}px`
-      : position.endsWith('-bottom')
-        ? `${Math.round(rootBounds.height - intersectionRect.bottom)}px`
-        : 'auto';
-
-    const left = position.startsWith('right-')
-      ? `${Math.round(intersectionRect.right)}px`
-      : position.endsWith('-left')
-        ? `${Math.round(intersectionRect.left)}px`
-        : 'auto';
-
-    const style = {
-      inset: [top, right, bottom, left].join(' '),
-      zIndex: 1000,
-      minWidth: `${Math.round(intersectionRect.width)}px`,
-      // A popup opening beside the anchor is capped by the room on that side, not by the width the
-      // anchor’s own edges leave, which is what the two dropdown cases below measure
-      maxWidth: position.startsWith('right-')
-        ? `${Math.round(rightMargin)}px`
-        : position.startsWith('left-')
-          ? `${Math.round(leftMargin)}px`
-          : position.endsWith('-left')
-            ? `${Math.round(rootBounds.width - intersectionRect.left - 8)}px`
-            : `${Math.round(intersectionRect.right - 8)}px`,
-      // `undefined` removes the `max-height` the popup is given, letting it take its natural size
-      // again. `auto` would look equivalent but isn’t a valid `max-height`, so the browser would
-      // drop it and leave whatever limit was applied last in place.
-      height: height ? `${Math.round(height)}px` : undefined,
-    };
-
-    if (
-      style.inset !== this.style.inset ||
-      style.zIndex !== this.style.zIndex ||
-      style.minWidth !== this.style.minWidth ||
-      style.maxWidth !== this.style.maxWidth ||
-      style.height !== this.style.height
-    ) {
+    if (!isShallowEqual(style, this.style)) {
       this.style = style;
     }
   }
@@ -549,8 +398,7 @@ class Popup {
 
 /**
  * Activate a new popup.
- * @param {...any} args Arguments.
+ * @param {ConstructorParameters<typeof Popup>} args Arguments passed to the `Popup` constructor.
  * @returns {Popup} New popup.
  */
-// @ts-ignore
 export const activatePopup = (...args) => new Popup(...args);

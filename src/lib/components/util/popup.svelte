@@ -73,10 +73,7 @@
    */
   let contentType = $state();
   /**
-   * @type {{ style: { inset: string | undefined, zIndex: number | undefined, minWidth: string |
-   * undefined, maxWidth: string | undefined, height: string | undefined }, open: boolean,
-   * attachPopupElement: (popupElement: HTMLDialogElement, contentElement?: HTMLElement) => void,
-   * detachPopupElement: () => void, checkPosition: () => void, destroy: () => void } | undefined}
+   * @type {ReturnType<typeof activatePopup> | undefined}
    */
   let popupInstance = $state();
   let hoveredTimeout = 0;
