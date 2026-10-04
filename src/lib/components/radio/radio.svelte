@@ -164,22 +164,10 @@
 </span>
 
 <style lang="scss">
+  @use '../../styles/mixins';
+
   .radio {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    margin: var(--sui-focus-ring-width);
-    // The wrapper forwards clicks to the 20px control, so it’s the pointer target; keep it at the
-    // 24px minimum (WCAG 2.5.8) even without a label
-    min-width: 24px;
-    min-height: 24px;
-    color: var(--sui-control-foreground-color);
-    font-family: var(--sui-control-font-family);
-    font-size: var(--sui-control-font-size);
-    line-height: var(--sui-control-line-height);
-    cursor: pointer;
-    -webkit-user-select: none;
-    user-select: none;
+    @include mixins.toggle-control-wrapper;
 
     &:hover :global {
       button {

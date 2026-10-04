@@ -6,10 +6,7 @@
   @see https://w3c.github.io/aria/#textbox
 -->
 <script>
-  import { _ } from '@sveltia/i18n';
-  import Button from '../button/button.svelte';
-  import Icon from '../icon/icon.svelte';
-  import TextInput from './text-input.svelte';
+  import MaskedInput from './masked-input.svelte';
 
   /**
    * @import { Snippet } from 'svelte';
@@ -28,129 +25,9 @@
   let {
     /* eslint-disable prefer-const */
     value = $bindable(),
-    flex = false,
-    monospace = true,
-    class: className,
-    hidden = false,
-    disabled = false,
-    readonly = false,
-    required = false,
-    invalid = false,
-    children,
-    visibilityIcon,
     ...restProps
     /* eslint-enable prefer-const */
   } = $props();
-
-  const id = $props.id();
-
-  /**
-   * Reference to the `<input>` element.
-   * @type {HTMLInputElement | undefined}
-   */
-  let inputElement = $state();
-  let passwordVisible = $state(false);
-
-  $effect(() => {
-    inputElement?.setAttribute('type', passwordVisible ? 'text' : 'password');
-  });
 </script>
 
-<div
-  role="none"
-  class="sui password-input {className}"
-  class:flex
-  class:disabled
-  class:readonly
-  {hidden}
->
-  <TextInput
-    dir="ltr"
-    bind:element={inputElement}
-    {...restProps}
-    {id}
-    bind:value
-    type="password"
-    spellcheck="false"
-    {flex}
-    {monospace}
-    {hidden}
-    {disabled}
-    {readonly}
-    {required}
-    {invalid}
-  />
-  <Button
-    iconic
-    disabled={disabled || readonly}
-    pressed={passwordVisible}
-    aria-label={_(
-      passwordVisible ? '_sui.password_input.hide_password' : '_sui.password_input.show_password',
-    )}
-    aria-controls={id}
-    onclick={() => {
-      passwordVisible = !passwordVisible;
-    }}
-  >
-    {#snippet startIcon()}
-      {#if visibilityIcon}
-        {@render visibilityIcon()}
-      {:else}
-        <Icon name={passwordVisible ? 'visibility_off' : 'visibility'} />
-      {/if}
-    {/snippet}
-  </Button>
-</div>
-
-<style lang="scss">
-  .password-input {
-    display: inline-flex;
-    align-items: center;
-    margin: var(--sui-focus-ring-width);
-    min-width: var(--sui-textbox-singleline-min-width);
-
-    &.flex:not([hidden]) {
-      display: inline-flex; // Avoid Tailwind .flex class collisions
-      width: -moz-available;
-      width: -webkit-fill-available;
-      width: stretch;
-      min-width: 0;
-    }
-
-    :global {
-      .text-input {
-        flex: auto;
-        margin: 0 !important;
-        width: 0; // = auto
-        min-width: 0 !important;
-      }
-
-      input {
-        border-start-end-radius: 0;
-        border-end-end-radius: 0;
-      }
-
-      button {
-        flex: none;
-        margin-block: 0;
-        margin-inline-start: -1px;
-        margin-inline-end: 0;
-        border-width: 1px;
-        border-color: var(--sui-textbox-border-color);
-        width: var(--sui-textbox-height);
-        aspect-ratio: 1 / 1;
-
-        &:last-child {
-          border-start-start-radius: 0;
-          border-start-end-radius: 4px;
-          border-end-end-radius: 4px;
-          border-end-start-radius: 0;
-        }
-
-        .icon {
-          font-size: var(--sui-font-size-xx-large);
-        }
-      }
-    }
-  }
-</style>
+<MaskedInput bind:value {...restProps} mask="type" />

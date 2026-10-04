@@ -1,0 +1,85 @@
+// Shared component style mixins. Components load this with `@use '../../styles/mixins';`; it emits
+// no CSS on its own.
+
+// Make a field stretch to fill its container when the `flex` prop is set. The `display` is repeated
+// to avoid Tailwind `.flex` class collisions.
+@mixin flex-stretch($display: inline-flex) {
+  &.flex:not([hidden]) {
+    display: $display; // Avoid Tailwind .flex class collisions
+    width: -moz-available;
+    width: -webkit-fill-available;
+    width: stretch;
+    min-width: 0;
+  }
+}
+
+// A `<TextInput>` embedded in a composite field, like `<SearchBar>` or `<NumberInput>`, filling the
+// space left by the other parts. To be included within a `:global` block.
+@mixin embedded-text-input {
+  .text-input {
+    flex: auto;
+    margin: 0 !important;
+    width: 0; // = auto
+    min-width: 0 !important;
+  }
+}
+
+// A square button attached to the end of a text field, sharing its border. `$size-property` is the
+// dimension tied to the field height (`width` or `height`), the other one following the aspect
+// ratio.
+@mixin attached-button($size-property) {
+  flex: none;
+  margin-inline-start: -1px;
+  border-width: 1px;
+  border-color: var(--sui-textbox-border-color);
+  #{$size-property}: var(--sui-textbox-height);
+  aspect-ratio: 1 / 1;
+
+  &:last-child {
+    border-start-start-radius: 0;
+    border-start-end-radius: 4px;
+    border-end-end-radius: 4px;
+    border-end-start-radius: 0;
+  }
+
+  .icon {
+    font-size: var(--sui-font-size-xx-large);
+  }
+}
+
+// The label wrapper of a checkbox or radio button.
+@mixin toggle-control-wrapper {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: var(--sui-focus-ring-width);
+  // The wrapper forwards clicks to the 20px control, so it’s the pointer target; keep it at the
+  // 24px minimum (WCAG 2.5.8) even without a label
+  min-width: 24px;
+  min-height: 24px;
+  color: var(--sui-control-foreground-color);
+  font-family: var(--sui-control-font-family);
+  font-size: var(--sui-control-font-size);
+  line-height: var(--sui-control-line-height);
+  cursor: pointer;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+// The `horizontal` and `vertical` orientations of a checkbox or radio group.
+@mixin toggle-group-orientation {
+  &.horizontal {
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  &.vertical {
+    gap: 4px;
+    flex-direction: column;
+
+    @media (pointer: coarse) {
+      gap: 8px;
+    }
+  }
+}

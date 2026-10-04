@@ -214,19 +214,15 @@
 </div>
 
 <style lang="scss">
+  @use '../../styles/mixins';
+
   .number-input {
     display: inline-flex;
     align-items: center;
     margin: var(--sui-focus-ring-width);
     min-width: var(--sui-textbox-singleline-min-width);
 
-    &.flex:not([hidden]) {
-      display: inline-flex; // Avoid Tailwind .flex class collisions
-      width: -moz-available;
-      width: -webkit-fill-available;
-      width: stretch;
-      min-width: 0;
-    }
+    @include mixins.flex-stretch;
 
     // Maintain the border opacity
     &:not(.disabled) :global(button[aria-disabled='true']) {
@@ -248,12 +244,7 @@
         border-end-end-radius: 0;
       }
 
-      .text-input {
-        flex: auto;
-        margin: 0 !important;
-        width: 0; // = auto
-        min-width: 0 !important;
-      }
+      @include mixins.embedded-text-input;
     }
   }
 

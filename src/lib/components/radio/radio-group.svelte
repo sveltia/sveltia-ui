@@ -74,6 +74,8 @@
 </div>
 
 <style lang="scss">
+  @use '../../styles/mixins';
+
   .radio-group {
     display: inline-flex;
 
@@ -81,20 +83,7 @@
       outline-width: 0 !important;
     }
 
-    &.horizontal {
-      gap: 8px;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-
-    &.vertical {
-      gap: 4px;
-      flex-direction: column;
-
-      @media (pointer: coarse) {
-        gap: 8px;
-      }
-    }
+    @include mixins.toggle-group-orientation;
 
     &[aria-invalid='true'] :global {
       button {

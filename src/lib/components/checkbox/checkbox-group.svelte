@@ -53,23 +53,12 @@
 </div>
 
 <style lang="scss">
+  @use '../../styles/mixins';
+
   .checkbox-group {
     display: inline-flex;
 
-    &.horizontal {
-      gap: 8px;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-
-    &.vertical {
-      gap: 4px;
-      flex-direction: column;
-
-      @media (pointer: coarse) {
-        gap: 8px;
-      }
-    }
+    @include mixins.toggle-group-orientation;
   }
 
   .inner {

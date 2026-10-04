@@ -117,6 +117,8 @@
 </div>
 
 <style lang="scss">
+  @use '../../styles/mixins';
+
   .search-bar {
     display: inline-flex;
     align-items: center;
@@ -124,13 +126,7 @@
     margin: var(--sui-focus-ring-width);
     min-width: var(--sui-textbox-singleline-min-width);
 
-    &.flex:not([hidden]) {
-      display: inline-flex; // Avoid Tailwind .flex class collisions
-      width: -moz-available;
-      width: -webkit-fill-available;
-      width: stretch;
-      min-width: 0;
-    }
+    @include mixins.flex-stretch;
 
     & > span {
       position: absolute;
@@ -165,12 +161,7 @@
         --sui-textbox-singleline-padding: 0 36px;
       }
 
-      .text-input {
-        flex: auto;
-        margin: 0 !important;
-        width: 0; // = auto
-        min-width: 0 !important;
-      }
+      @include mixins.embedded-text-input;
 
       input {
         z-index: 1;

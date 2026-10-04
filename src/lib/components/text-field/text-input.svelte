@@ -141,6 +141,8 @@
 </div>
 
 <style lang="scss">
+  @use '../../styles/mixins';
+
   .text-input {
     display: inline-flex;
     align-items: center;
@@ -148,13 +150,7 @@
     margin: var(--sui-focus-ring-width);
     min-width: var(--sui-textbox-singleline-min-width);
 
-    &.flex:not([hidden]) {
-      display: inline-flex; // Avoid Tailwind .flex class collisions
-      width: -moz-available;
-      width: -webkit-fill-available;
-      width: stretch;
-      min-width: 0;
-    }
+    @include mixins.flex-stretch;
 
     &.monospace {
       --sui-textbox-font-family: var(--sui-font-family-monospace, monospace);
@@ -213,23 +209,7 @@
 
     :global {
       & ~ button {
-        flex: none;
-        margin-inline-start: -1px;
-        border-width: 1px;
-        border-color: var(--sui-textbox-border-color);
-        height: var(--sui-textbox-height);
-        aspect-ratio: 1 / 1;
-
-        &:last-child {
-          border-start-start-radius: 0;
-          border-start-end-radius: 4px;
-          border-end-end-radius: 4px;
-          border-end-start-radius: 0;
-        }
-
-        .icon {
-          font-size: var(--sui-font-size-xx-large);
-        }
+        @include mixins.attached-button(height);
       }
     }
   }

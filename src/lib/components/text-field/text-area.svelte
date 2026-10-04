@@ -168,6 +168,8 @@
 </div>
 
 <style lang="scss">
+  @use '../../styles/mixins';
+
   .text-area {
     position: relative;
     display: inline-grid;
@@ -178,13 +180,7 @@
       display: none;
     }
 
-    &.flex:not([hidden]) {
-      display: inline-grid; // Avoid Tailwind .flex class collisions
-      width: -moz-available;
-      width: -webkit-fill-available;
-      width: stretch;
-      min-width: 0;
-    }
+    @include mixins.flex-stretch(inline-grid);
   }
 
   :is(textarea, .clone) {
