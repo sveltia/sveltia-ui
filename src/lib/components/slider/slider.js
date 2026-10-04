@@ -152,3 +152,51 @@ export const getSliderKeyTargetIndex = ({ key, rtl, currentIndex, length }) => {
 export const wouldCrossThumbs = ({ valueIndex, targetPosition, sliderPositions }) =>
   (valueIndex === 0 && sliderPositions[1] <= targetPosition) ||
   (valueIndex === 1 && sliderPositions[0] >= targetPosition);
+
+/**
+ * Get the step index a key press starts from. A value that sits between two steps, such as `55`
+ * with a step of `10`, has no index of its own, so it starts from the step below when the key
+ * increases the value and from the step above when it decreases it. That way the first press
+ * moves the thumb to the adjacent step in the direction of the key.
+ * @param {object} options Options.
+ * @param {number[]} options.valueList Values of each step, in ascending order.
+ * @param {number} options.value Current value.
+ * @param {boolean} options.decreasing Whether the key decreases the value.
+ * @returns {number} Index of the current step. It can be `-1` or `valueList.length` for a value
+ * below the minimum or above the maximum, so any move brings it back into the range.
+ */
+export const getSliderCurrentIndex = ({ valueList, value, decreasing }) => {
+  const index = valueList.indexOf(value);
+
+  if (index !== -1) {
+    return index;
+  }
+
+  if (decreasing) {
+    const upperIndex = valueList.findIndex((v) => v > value);
+
+    return upperIndex === -1 ? valueList.length : upperIndex;
+  }
+
+  return valueList.findLastIndex((v) => v < value);
+};
+
+/**
+ * Find the thumb of a multi-thumb slider closest to the given position, so a click on the track
+ * moves that one. When both thumbs sit at the same spot, the second one is picked for a position
+ * after it and the first one otherwise, so the click never has to cross the other thumb.
+ * @param {number[]} sliderPositions Current position of each thumb, in pixels.
+ * @param {number} logicalX Logical position in pixels.
+ * @returns {number} Index of the nearest thumb, `0` or `1`.
+ */
+export const getNearestThumbIndex = (sliderPositions, logicalX) => {
+  const [position0, position1] = sliderPositions;
+  const diff0 = Math.abs(position0 - logicalX);
+  const diff1 = Math.abs(position1 - logicalX);
+
+  if (diff0 === diff1) {
+    return logicalX > position1 ? 1 : 0;
+  }
+
+  return diff1 < diff0 ? 1 : 0;
+};

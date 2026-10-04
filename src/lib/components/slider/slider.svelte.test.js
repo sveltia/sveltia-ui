@@ -100,7 +100,8 @@ describe('Slider', () => {
     const slider = /** @type {HTMLElement} */ (screen.container.querySelector('[role="slider"]'));
 
     await waitForInit(screen.container);
-    onChange.mockClear();
+    // Mounting the slider isn’t a change
+    expect(onChange).not.toHaveBeenCalled();
     slider.focus();
     await userEvent.keyboard('{ArrowRight}');
     expect(props.value).toBe(3);
@@ -112,6 +113,66 @@ describe('Slider', () => {
       expect(onChange).toHaveBeenLastCalledWith({ value: 1 });
     });
     await expect.element(screen.getByRole('slider')).toHaveAttribute('aria-valuenow', '1');
+  });
+
+  it('fires the change event only when the user changes the value', async () => {
+    const onChange = vi.fn();
+    /** @type {ComponentProps<typeof Slider>} */
+    const props = $state({ value: 10, min: 0, max: 10, step: 1, onChange });
+    const screen = await renderSlider(props);
+    const slider = /** @type {HTMLElement} */ (screen.container.querySelector('[role="slider"]'));
+    const base = /** @type {HTMLElement} */ (screen.container.querySelector('.base'));
+
+    await waitForInit(screen.container);
+    // Resizing the track and updating the prop don’t fire the event either
+    base.style.width = '200px';
+    await vi.waitFor(() => {
+      expect(slider.style.insetInlineStart).toBe(`${base.clientWidth}px`);
+    });
+    props.value = 5;
+    await vi.waitFor(() => {
+      expect(slider.style.insetInlineStart).toBe(`${base.clientWidth / 2}px`);
+    });
+    expect(onChange).not.toHaveBeenCalled();
+    // Neither does a key that doesn’t move the thumb
+    props.value = 10;
+    slider.focus();
+    await userEvent.keyboard('{ArrowRight}{End}');
+    expect(onChange).not.toHaveBeenCalled();
+    await userEvent.keyboard('{ArrowLeft}');
+    expect(onChange).toHaveBeenCalledOnce();
+    expect(onChange).toHaveBeenCalledWith({ value: 9 });
+  });
+
+  it('draws a value between two steps at the nearest one, and moves it to the adjacent step', async () => {
+    /** @type {ComponentProps<typeof Slider>} */
+    const props = $state({ value: 54, min: 0, max: 100, step: 10 });
+    const screen = await renderSlider(props);
+    const slider = /** @type {HTMLElement} */ (screen.container.querySelector('[role="slider"]'));
+
+    await waitForInit(screen.container);
+
+    const barWidth = /** @type {HTMLElement} */ (screen.container.querySelector('.base'))
+      .clientWidth;
+
+    // The value is kept as is until the user moves the thumb
+    expect(slider.getAttribute('aria-valuenow')).toBe('54');
+    expect(slider.style.insetInlineStart).toBe(`${barWidth * 0.5}px`);
+    slider.focus();
+    await userEvent.keyboard('{ArrowRight}');
+    expect(props.value).toBe(60);
+    props.value = 54;
+    await userEvent.keyboard('{ArrowLeft}');
+    expect(props.value).toBe(50);
+    props.value = 56;
+    await vi.waitFor(() => {
+      expect(slider.style.insetInlineStart).toBe(`${barWidth * 0.6}px`);
+    });
+    await userEvent.keyboard('{PageDown}');
+    expect(props.value).toBe(50);
+    props.value = 56;
+    await userEvent.keyboard('{PageUp}');
+    expect(props.value).toBe(60);
   });
 
   it('jumps with Home, End and the Page keys', async () => {
@@ -410,6 +471,51 @@ describe('Slider', () => {
     await vi.waitFor(() => {
       expect(onChange).toHaveBeenLastCalledWith({ values: [3, 5] });
     });
+  });
+
+  it('moves the thumb nearest to the click on the track of a two-thumb slider', async () => {
+    const onChange = vi.fn();
+    /** @type {ComponentProps<typeof Slider>} */
+    const props = $state({ values: [2, 4], min: 0, max: 10, step: 1, onChange });
+    const screen = await renderSlider(props);
+
+    await waitForInit(screen.container);
+
+    const base = /** @type {HTMLElement} */ (screen.container.querySelector('.base'));
+    const bar = /** @type {HTMLElement} */ (base.querySelector('.base-bar'));
+    const { left, width, top, height } = base.getBoundingClientRect();
+
+    /**
+     * Click the track at the given fraction.
+     * @param {number} fraction Position along the track.
+     */
+    const clickAt = (fraction) => {
+      const x = left + width * fraction;
+      const y = top + height / 2;
+      const init = { bubbles: true, clientX: x, clientY: y, screenX: x, screenY: y, pointerId: 1 };
+
+      base.dispatchEvent(new PointerEvent('pointerdown', init));
+      bar.dispatchEvent(new PointerEvent('pointerup', init));
+    };
+
+    expect(onChange).not.toHaveBeenCalled();
+    // Past the second thumb
+    clickAt(0.9);
+    expect(props.values).toEqual([2, 9]);
+    // Before the first thumb
+    clickAt(0.1);
+    expect(props.values).toEqual([1, 9]);
+    // Between the thumbs, closer to the second one
+    clickAt(0.6);
+    expect(props.values).toEqual([1, 6]);
+    // Between the thumbs, closer to the first one
+    clickAt(0.3);
+    expect(props.values).toEqual([3, 6]);
+    // On a thumb’s current step, nothing changes
+    clickAt(0.3);
+    expect(props.values).toEqual([3, 6]);
+    expect(onChange).toHaveBeenCalledTimes(4);
+    expect(onChange).toHaveBeenLastCalledWith({ values: [3, 6] });
   });
 
   it('drags the second thumb, and stops dragging when the page is clicked', async () => {

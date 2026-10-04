@@ -12,6 +12,9 @@
   import { onMount } from 'svelte';
   import {
     findNearestStepIndex,
+    getNearestThumbIndex,
+    getSliderCurrentIndex,
+    getSliderKeyDirection,
     getSliderKeyTargetIndex,
     getSliderSteps,
     toLogicalX,
@@ -107,6 +110,29 @@
   let targetValueIndex = $state(0);
 
   /**
+   * Set the value of a thumb, and fire the `change` event if it’s actually changed. This is only
+   * called for user actions, so the event doesn’t fire when the slider is mounted or resized.
+   * @param {number} valueIndex Index in the {@link values} array, `0` for a single-thumb slider.
+   * @param {number} newValue New value.
+   */
+  const setValue = (valueIndex, newValue) => {
+    const _values = /** @type {[number, number]} */ (values);
+
+    if ((multiThumb ? _values[valueIndex] : value) === newValue) {
+      return;
+    }
+
+    if (multiThumb) {
+      _values[valueIndex] = newValue;
+      values = [..._values];
+      onChange?.({ values });
+    } else {
+      value = newValue;
+      onChange?.({ value });
+    }
+  };
+
+  /**
    * Move a thumb with mouse.
    * @param {number} physicalX Physical X position in pixels from the left edge.
    */
@@ -114,23 +140,17 @@
     const index = findNearestStepIndex(positionList, toLogicalX(physicalX, barWidth, isRTL()));
 
     if (
-      sliderPositions[targetValueIndex] === positionList[index] ||
-      (multiThumb &&
-        wouldCrossThumbs({
-          valueIndex: targetValueIndex,
-          targetPosition: positionList[index],
-          sliderPositions,
-        }))
+      multiThumb &&
+      wouldCrossThumbs({
+        valueIndex: targetValueIndex,
+        targetPosition: positionList[index],
+        sliderPositions,
+      })
     ) {
       return;
     }
 
-    if (multiThumb) {
-      /** @type {[number, number]} */ (values)[targetValueIndex] = valueList[index];
-      values = [.../** @type {[number, number]} */ (values)];
-    } else {
-      value = valueList[index];
-    }
+    setValue(targetValueIndex, valueList[index]);
   };
 
   /**
@@ -147,11 +167,16 @@
     }
 
     const _value = multiThumb ? /** @type {[number, number]} */ (values)[valueIndex] : value;
+    const rtl = isRTL();
 
     const index = getSliderKeyTargetIndex({
       key,
-      rtl: isRTL(),
-      currentIndex: valueList.indexOf(_value),
+      rtl,
+      currentIndex: getSliderCurrentIndex({
+        valueList,
+        value: _value,
+        decreasing: key === 'PageDown' || getSliderKeyDirection(key, rtl) === -1,
+      }),
       length: valueList.length,
     });
 
@@ -174,12 +199,7 @@
       return;
     }
 
-    if (multiThumb) {
-      /** @type {[number, number]} */ (values)[valueIndex] = valueList[index];
-      values = [.../** @type {[number, number]} */ (values)];
-    } else {
-      value = valueList[index];
-    }
+    setValue(valueIndex, valueList[index]);
   };
 
   /**
@@ -244,8 +264,9 @@
    * Handle the `pointerdown` event fired on the slider.
    * @param {PointerEvent} event `pointerdown` event.
    * @param {number} [valueIndex] Index in the {@link values} array to be used to get/set the value.
+   * Omitted when the track is pressed, so the thumb nearest to the pointer is used.
    */
-  const onPointerDown = (event, valueIndex = 0) => {
+  const onPointerDown = (event, valueIndex) => {
     if (disabled || readonly) {
       return;
     }
@@ -263,7 +284,11 @@
     startX = clientX - rect.left;
     startScreenX = screenX;
     targetPointerId = pointerId;
-    targetValueIndex = valueIndex;
+    targetValueIndex =
+      valueIndex ??
+      (multiThumb
+        ? getNearestThumbIndex(sliderPositions, toLogicalX(startX, barWidth, isRTL()))
+        : 0);
     slider.setPointerCapture(pointerId);
 
     document.addEventListener('pointermove', onPointerMove);
@@ -272,18 +297,24 @@
   };
 
   /**
-   * Update the thumb position and fire the `change` event when the value is changed.
+   * Get the thumb position for a value. A value that doesn’t sit on a step, such as `55` with a
+   * step of `10`, is kept as is until the user moves the thumb, but drawn at the nearest step.
+   * @param {number} _value Value.
+   * @returns {number} Position in pixels.
    */
-  const onValueChange = () => {
+  const getPosition = (_value) => positionList[findNearestStepIndex(valueList, _value)] ?? 0;
+
+  /**
+   * Update the thumb positions when the value or the track is changed.
+   */
+  const updatePositions = () => {
     if (multiThumb) {
       const [value0, value1] = /** @type {[number, number]} */ (values);
 
-      sliderPositions[0] = positionList[valueList.indexOf(value0)];
-      sliderPositions[1] = positionList[valueList.indexOf(value1)];
-      onChange?.({ values });
+      sliderPositions[0] = getPosition(value0);
+      sliderPositions[1] = getPosition(value1);
     } else {
-      sliderPositions[0] = positionList[valueList.indexOf(value)];
-      onChange?.({ value });
+      sliderPositions[0] = getPosition(value);
     }
   };
 
@@ -299,7 +330,7 @@
 
     barWidth = base.clientWidth;
     ({ valueList, positionList } = getSliderSteps({ min, max, step, barWidth }));
-    onValueChange();
+    updatePositions();
   };
 
   onMount(() => {
@@ -323,7 +354,7 @@
   $effect(() => {
     void value;
     void values;
-    onValueChange();
+    updatePositions();
   });
 </script>
 

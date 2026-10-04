@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import {
   findNearestStepIndex,
+  getNearestThumbIndex,
+  getSliderCurrentIndex,
   getSliderKeyDirection,
   getSliderKeyTargetIndex,
   getSliderSteps,
@@ -159,5 +161,39 @@ describe('wouldCrossThumbs', () => {
     expect(wouldCrossThumbs({ valueIndex: 1, targetPosition: 200, sliderPositions })).toBe(false);
     expect(wouldCrossThumbs({ valueIndex: 1, targetPosition: 100, sliderPositions })).toBe(true);
     expect(wouldCrossThumbs({ valueIndex: 1, targetPosition: 0, sliderPositions })).toBe(true);
+  });
+});
+
+describe('getSliderCurrentIndex', () => {
+  const valueList = [0, 10, 20, 30];
+
+  it('should return the index of a value on a step', () => {
+    expect(getSliderCurrentIndex({ valueList, value: 20, decreasing: false })).toBe(2);
+    expect(getSliderCurrentIndex({ valueList, value: 20, decreasing: true })).toBe(2);
+  });
+
+  it('should start from the step below or above a value between two steps', () => {
+    expect(getSliderCurrentIndex({ valueList, value: 15, decreasing: false })).toBe(1);
+    expect(getSliderCurrentIndex({ valueList, value: 15, decreasing: true })).toBe(2);
+  });
+
+  it('should start from outside the range for a value outside it', () => {
+    expect(getSliderCurrentIndex({ valueList, value: -5, decreasing: false })).toBe(-1);
+    expect(getSliderCurrentIndex({ valueList, value: 35, decreasing: true })).toBe(4);
+  });
+});
+
+describe('getNearestThumbIndex', () => {
+  it('should pick the thumb closest to the position', () => {
+    expect(getNearestThumbIndex([100, 300], 0)).toBe(0);
+    expect(getNearestThumbIndex([100, 300], 150)).toBe(0);
+    expect(getNearestThumbIndex([100, 300], 250)).toBe(1);
+    expect(getNearestThumbIndex([100, 300], 400)).toBe(1);
+  });
+
+  it('should break a tie by the side of the position', () => {
+    expect(getNearestThumbIndex([100, 300], 200)).toBe(0);
+    expect(getNearestThumbIndex([200, 200], 100)).toBe(0);
+    expect(getNearestThumbIndex([200, 200], 300)).toBe(1);
   });
 });
