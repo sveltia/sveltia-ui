@@ -16,7 +16,8 @@
    * attribute.
    * @property {boolean} [disabled] Whether to disable the widget. An alias of the `aria-disabled`
    * attribute.
-   * @property {string} [title] Text label displayed above the group items.
+   * @property {string} [label] Text label displayed above the group items.
+   * @property {string} [title] Deprecated: use `label` instead.
    */
 
   /**
@@ -27,6 +28,7 @@
     class: className,
     hidden = false,
     disabled = false,
+    label = '',
     title = '',
     children,
     ...restProps
@@ -34,6 +36,7 @@
   } = $props();
 
   const id = $props.id();
+  const groupLabel = $derived(label || title);
 </script>
 
 <div
@@ -44,11 +47,11 @@
   {hidden}
   aria-hidden={hidden}
   aria-disabled={disabled}
-  aria-labelledby={title ? `${id}-title` : undefined}
+  aria-labelledby={groupLabel ? `${id}-title` : undefined}
   aria-roledescription={_('_sui.role_descriptions.menu_item_group')}
 >
-  {#if title}
-    <div role="none" class="title" id="{id}-title">{title}</div>
+  {#if groupLabel}
+    <div role="none" class="title" id="{id}-title">{groupLabel}</div>
   {/if}
   <div role="none" class="inner" inert={disabled}>
     {@render children?.()}

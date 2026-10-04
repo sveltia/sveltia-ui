@@ -16,12 +16,18 @@ it('renders an unlabelled group by default', async () => {
   expect(group.textContent).toContain('child');
 });
 
-it('renders the title and labels the group with it', async () => {
-  const screen = await render(MenuItemGroup, { title: 'Sort by' });
+it('renders the label and labels the group with it', async () => {
+  const screen = await render(MenuItemGroup, { label: 'Sort by' });
   const group = screen.getByRole('group', { name: 'Sort by' });
   const title = /** @type {HTMLElement} */ (group.element().querySelector('.title'));
 
   expect(group.element().getAttribute('aria-labelledby')).toBe(title.id);
+});
+
+it('still accepts the deprecated title prop', async () => {
+  const screen = await render(MenuItemGroup, { title: 'Sort by' });
+
+  await expect.element(screen.getByRole('group', { name: 'Sort by' })).toBeInTheDocument();
 });
 
 it('hides and disables the group', async () => {
