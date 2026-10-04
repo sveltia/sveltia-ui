@@ -1,5 +1,5 @@
 <script>
-  import { Progressbar } from '$lib';
+  import { Progressbar } from '#lib';
   import Example from '../../_components/example.svelte';
 </script>
 

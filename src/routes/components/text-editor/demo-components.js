@@ -10,7 +10,7 @@ import { DecoratorNode } from 'lexical';
 
 /**
  * @import { LexicalEditor, LexicalNode } from 'lexical';
- * @import { TextEditorComponent } from '$lib/typedefs';
+ * @import { TextEditorComponent } from '#lib/typedefs.js';
  */
 
 /**

@@ -29,7 +29,7 @@ import { getCodeTheme } from './theme.js';
 /**
  * @import { CodeNode } from '@lexical/code-core';
  * @import { LexicalEditor, LexicalNode, NodeKey } from 'lexical';
- * @import { HighlightedToken } from '$lib/typedefs';
+ * @import { HighlightedToken } from '#lib/typedefs.js';
  */
 
 /**

@@ -10,7 +10,7 @@ import { createTestComponent, getEditorStore } from '../../../test-utils/editor.
 
 /**
  * @import { ComponentProps } from 'svelte';
- * @import { TextEditorComponent, TextEditorStore } from '$lib/typedefs';
+ * @import { TextEditorComponent, TextEditorStore } from '#lib/typedefs.js';
  */
 
 /** @type {TextEditorComponent[]} */

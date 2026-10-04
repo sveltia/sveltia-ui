@@ -1,5 +1,5 @@
 <script>
-  import { Listbox, Option, OptionGroup } from '$lib';
+  import { Listbox, Option, OptionGroup } from '#lib';
   import Example from '../../_components/example.svelte';
 </script>
 

@@ -20,7 +20,7 @@
   import Popup from '../util/popup.svelte';
 
   /**
-   * @import { ComboboxProps, OptionEntry, TextInputProps } from '$lib/typedefs';
+   * @import { ComboboxProps, OptionEntry, TextInputProps } from '#lib/typedefs.js';
    */
 
   /**

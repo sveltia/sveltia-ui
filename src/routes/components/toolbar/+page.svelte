@@ -1,6 +1,6 @@
 <script>
-  import { Toolbar } from '$lib';
-  import Button from '$lib/components/button/button.svelte';
+  import { Toolbar } from '#lib';
+  import Button from '#lib/components/button/button.svelte';
   import Example from '../../_components/example.svelte';
 </script>
 

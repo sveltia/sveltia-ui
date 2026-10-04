@@ -17,7 +17,7 @@
    * DialogProps,
    * InputEventHandlers,
    * ModalProps,
-   * } from '$lib/typedefs';
+   * } from '#lib/typedefs.js';
    */
 
   /**

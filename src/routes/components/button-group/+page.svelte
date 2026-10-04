@@ -1,7 +1,7 @@
 <script>
-  import { SelectButton, SelectButtonGroup } from '$lib';
-  import ButtonGroup from '$lib/components/button/button-group.svelte';
-  import Button from '$lib/components/button/button.svelte';
+  import { SelectButton, SelectButtonGroup } from '#lib';
+  import ButtonGroup from '#lib/components/button/button-group.svelte';
+  import Button from '#lib/components/button/button.svelte';
   import Example from '../../_components/example.svelte';
 </script>
 

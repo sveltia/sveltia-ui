@@ -6,8 +6,8 @@ import { DecoratorNode } from 'lexical';
 
 /**
  * @import { ComponentProps } from 'svelte';
- * @import { TextEditorComponent, TextEditorStore } from '$lib/typedefs';
- * @import EditorFixture from '$lib/components/text-editor/editor-fixture.test.svelte';
+ * @import { TextEditorComponent, TextEditorStore } from '#lib/typedefs.js';
+ * @import EditorFixture from '#lib/components/text-editor/editor-fixture.test.svelte';
  */
 
 /**

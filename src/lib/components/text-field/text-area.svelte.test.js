@@ -95,7 +95,7 @@ describe('TextArea', () => {
   /**
    * Tokenize the value by painting each `#` heading line, and emboldening `**` runs.
    * @param {string} value Value.
-   * @returns {import('$lib/typedefs').HighlightedToken[][]} Tokens.
+   * @returns {import('#lib/typedefs.js').HighlightedToken[][]} Tokens.
    */
   const highlight = (value) =>
     value
@@ -141,7 +141,7 @@ describe('TextArea', () => {
       autoResize: true,
       /**
        * Return tokens for another value.
-       * @returns {import('$lib/typedefs').HighlightedToken[][]} Tokens.
+       * @returns {import('#lib/typedefs.js').HighlightedToken[][]} Tokens.
        */
       highlight: () => [[{ content: 'Stale', color: 'red' }]],
     });

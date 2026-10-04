@@ -13,7 +13,7 @@
   import ModalCloseButton from './modal-close-button.svelte';
 
   /**
-   * @import { DialogProps, ModalProps } from '$lib/typedefs';
+   * @import { DialogProps, ModalProps } from '#lib/typedefs.js';
    */
 
   /**

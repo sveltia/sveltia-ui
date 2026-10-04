@@ -14,7 +14,7 @@ import { getComponentMarkdown } from './core.js';
  * TextEditorBlockType,
  * TextEditorComponent,
  * TextEditorFormatType,
- * } from '$lib/typedefs';
+ * } from '#lib/typedefs.js';
  */
 
 /**

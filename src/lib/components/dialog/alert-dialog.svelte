@@ -9,7 +9,7 @@
   import Dialog from './dialog.svelte';
 
   /**
-   * @import { DialogProps, ModalProps } from '$lib/typedefs';
+   * @import { DialogProps, ModalProps } from '#lib/typedefs.js';
    */
 
   /**

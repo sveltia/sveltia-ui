@@ -13,7 +13,7 @@
 
   /**
    * @import { Snippet } from 'svelte';
-   * @import { ButtonProps, CommonEventHandlers, PopupPosition } from '$lib/typedefs';
+   * @import { ButtonProps, CommonEventHandlers, PopupPosition } from '#lib/typedefs.js';
    */
 
   /**

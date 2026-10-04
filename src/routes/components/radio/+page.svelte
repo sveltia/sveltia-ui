@@ -1,5 +1,5 @@
 <script>
-  import { Radio, RadioGroup } from '$lib';
+  import { Radio, RadioGroup } from '#lib';
   import Example from '../../_components/example.svelte';
 
   let fruit = $state('');

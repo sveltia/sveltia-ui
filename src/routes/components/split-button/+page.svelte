@@ -1,7 +1,7 @@
 <script>
-  import { SplitButton } from '$lib';
-  import MenuItem from '$lib/components/menu/menu-item.svelte';
-  import Menu from '$lib/components/menu/menu.svelte';
+  import { SplitButton } from '#lib';
+  import MenuItem from '#lib/components/menu/menu-item.svelte';
+  import Menu from '#lib/components/menu/menu.svelte';
   import Example from '../../_components/example.svelte';
 </script>
 

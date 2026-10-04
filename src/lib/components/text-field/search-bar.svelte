@@ -14,7 +14,7 @@
 
   /**
    * @import { Snippet } from 'svelte';
-   * @import { CommonEventHandlers, InputEventHandlers, TextInputProps } from '$lib/typedefs';
+   * @import { CommonEventHandlers, InputEventHandlers, TextInputProps } from '#lib/typedefs.js';
    */
 
   /**

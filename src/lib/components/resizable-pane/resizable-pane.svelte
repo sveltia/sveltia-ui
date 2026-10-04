@@ -8,7 +8,7 @@
 
   /**
    * @import { Snippet } from 'svelte';
-   * @import { PaneGroupContext, ResizablePaneSize } from '$lib/typedefs.js';
+   * @import { PaneGroupContext, ResizablePaneSize } from '#lib/typedefs.js';
    */
 
   /**

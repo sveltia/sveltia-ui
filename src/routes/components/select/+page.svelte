@@ -1,5 +1,5 @@
 <script>
-  import { Combobox, Divider, Option, Select, SelectTags } from '$lib';
+  import { Combobox, Divider, Option, Select, SelectTags } from '#lib';
   import Example from '../../_components/example.svelte';
 
   let selectValue1 = $state();

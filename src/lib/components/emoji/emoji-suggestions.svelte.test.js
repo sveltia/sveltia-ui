@@ -4,7 +4,7 @@ import EmojiSuggestions from './emoji-suggestions.svelte';
 import { parkPointer } from '../../test-utils/pointer.js';
 
 /**
- * @import { EmojiAnchorRect, EmojiTrigger } from '$lib/typedefs';
+ * @import { EmojiAnchorRect, EmojiTrigger } from '#lib/typedefs.js';
  */
 
 /** @type {EmojiAnchorRect} */

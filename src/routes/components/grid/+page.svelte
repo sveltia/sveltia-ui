@@ -1,5 +1,5 @@
 <script>
-  import { Grid, GridBody, GridCell, GridColHeader, GridHead, GridRow, GridRowHeader } from '$lib';
+  import { Grid, GridBody, GridCell, GridColHeader, GridHead, GridRow, GridRowHeader } from '#lib';
   import Example from '../../_components/example.svelte';
 </script>
 

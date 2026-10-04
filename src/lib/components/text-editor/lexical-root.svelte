@@ -6,7 +6,7 @@
 
   /**
    * @import { Snippet } from 'svelte';
-   * @import { TextEditorStore } from '$lib/typedefs';
+   * @import { TextEditorStore } from '#lib/typedefs.js';
    */
 
   /**

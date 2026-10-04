@@ -1,13 +1,23 @@
 /// <reference types="vitest/config" />
 
 import yaml from '@rollup/plugin-yaml';
+import adapter from '@sveltejs/adapter-auto';
 import { sveltekit } from '@sveltejs/kit/vite';
 import { playwright } from '@vitest/browser-playwright';
+import { sveltePreprocess } from 'svelte-preprocess';
 import { defineConfig } from 'vite';
 
 /** @type {import('vite').UserConfig} */
 export default defineConfig({
-  plugins: [sveltekit(), yaml()],
+  plugins: [
+    sveltekit({
+      preprocess: sveltePreprocess(),
+      compilerOptions: { runes: true },
+      adapter: adapter(),
+    }),
+    yaml(),
+  ],
+
   // Resolve Svelte to its client build under Vitest so tests can mount components
   resolve: process.env.VITEST ? { conditions: ['browser'] } : {},
   test: {

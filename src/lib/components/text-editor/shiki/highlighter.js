@@ -49,7 +49,7 @@ import { CODE_THEME_LIGHT } from './theme.js';
 /**
  * @import { CodeNode as CodeNodeType } from '@lexical/code-core';
  * @import { LexicalEditor, LexicalNode, NodeKey } from 'lexical';
- * @import { CodeTokenizer, CodeTransformState } from '$lib/typedefs';
+ * @import { CodeTokenizer, CodeTransformState } from '#lib/typedefs.js';
  */
 
 /**

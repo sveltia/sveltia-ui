@@ -128,7 +128,7 @@ describe('createEditorStore', () => {
     const sel = {
       blockNodeKey: 'abc',
       blockType: /** @type {const} */ ('heading-2'),
-      inlineTypes: /** @type {import('$lib/typedefs').TextEditorInlineType[]} */ ([
+      inlineTypes: /** @type {import('#lib/typedefs.js').TextEditorInlineType[]} */ ([
         'bold',
         'italic',
       ]),

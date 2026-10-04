@@ -1,5 +1,5 @@
 <script>
-  import { ResizableHandle, ResizablePane, ResizablePaneGroup } from '$lib';
+  import { ResizableHandle, ResizablePane, ResizablePaneGroup } from '#lib';
   import Example from '../../_components/example.svelte';
 
   /** @type {string[]} */

@@ -11,7 +11,7 @@
   import EmojiSuggestions from '../emoji/emoji-suggestions.svelte';
 
   /**
-   * @import { EmojiEntry, EmojiTrigger } from '$lib/typedefs';
+   * @import { EmojiEntry, EmojiTrigger } from '#lib/typedefs.js';
    */
 
   /**

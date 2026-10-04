@@ -10,7 +10,7 @@
 
   /**
    * @import { CodeNode } from '@lexical/code-core';
-   * @import { TextEditorStore } from '$lib/typedefs';
+   * @import { TextEditorStore } from '#lib/typedefs.js';
    */
 
   /**

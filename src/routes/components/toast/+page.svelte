@@ -1,10 +1,10 @@
 <script>
-  import { Button, Toast } from '$lib';
-  import Alert from '$lib/components/alert/alert.svelte';
+  import { Button, Toast } from '#lib';
+  import Alert from '#lib/components/alert/alert.svelte';
   import Example from '../../_components/example.svelte';
 
   /**
-   * @import { ToastPosition } from '$lib/typedefs';
+   * @import { ToastPosition } from '#lib/typedefs.js';
    */
 
   let showStandardToast = $state(false);

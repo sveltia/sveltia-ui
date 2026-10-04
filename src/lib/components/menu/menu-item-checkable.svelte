@@ -10,7 +10,7 @@
   import MenuItem from './menu-item.svelte';
 
   /**
-   * @import { ButtonProps, CommonEventHandlers, MenuItemProps } from '$lib/typedefs';
+   * @import { ButtonProps, CommonEventHandlers, MenuItemProps } from '#lib/typedefs.js';
    */
 
   /**

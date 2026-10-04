@@ -1,5 +1,5 @@
 <script>
-  import { Checkbox, CheckboxGroup } from '$lib';
+  import { Checkbox, CheckboxGroup } from '#lib';
   import Example from '../../_components/example.svelte';
 
   /** @type {string[]} */

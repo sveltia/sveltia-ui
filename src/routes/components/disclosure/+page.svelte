@@ -1,5 +1,5 @@
 <script>
-  import { Disclosure } from '$lib';
+  import { Disclosure } from '#lib';
   import Example from '../../_components/example.svelte';
 </script>
 

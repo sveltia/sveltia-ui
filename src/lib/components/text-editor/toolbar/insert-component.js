@@ -2,7 +2,7 @@ import { $createParagraphNode as createParagraphNode, $insertNodes as insertNode
 import { insertComponent } from '../raw-markdown.js';
 
 /**
- * @import { TextEditorComponent, TextEditorStore } from '$lib/typedefs';
+ * @import { TextEditorComponent, TextEditorStore } from '#lib/typedefs.js';
  */
 
 /**

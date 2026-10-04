@@ -1,5 +1,5 @@
 <script>
-  import { Button, Drawer } from '$lib';
+  import { Button, Drawer } from '#lib';
   import Example from '../../_components/example.svelte';
 
   const openStandardDrawer = $state({ top: false, right: false, bottom: false, left: false });

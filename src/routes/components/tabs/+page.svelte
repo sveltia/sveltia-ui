@@ -1,5 +1,5 @@
 <script>
-  import { Tab, TabBox, TabList, TabPanel, TabPanels } from '$lib';
+  import { Tab, TabBox, TabList, TabPanel, TabPanels } from '#lib';
   import Example from '../../_components/example.svelte';
 </script>
 

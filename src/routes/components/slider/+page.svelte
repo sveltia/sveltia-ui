@@ -1,5 +1,5 @@
 <script>
-  import { Slider } from '$lib';
+  import { Slider } from '#lib';
   import Example from '../../_components/example.svelte';
 </script>
 

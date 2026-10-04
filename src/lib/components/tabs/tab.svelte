@@ -8,7 +8,7 @@
   import Button from '../button/button.svelte';
 
   /**
-   * @import { ButtonProps, CommonEventHandlers } from '$lib/typedefs';
+   * @import { ButtonProps, CommonEventHandlers } from '#lib/typedefs.js';
    */
 
   /**

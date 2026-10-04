@@ -1,5 +1,5 @@
 <script>
-  import { Spacer } from '$lib';
+  import { Spacer } from '#lib';
   import Example from '../../_components/example.svelte';
 </script>
 

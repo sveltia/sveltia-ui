@@ -16,7 +16,7 @@
   import { getSuggestionListPosition } from './position.js';
 
   /**
-   * @import { EmojiAnchorRect, EmojiEntry, EmojiTrigger } from '$lib/typedefs';
+   * @import { EmojiAnchorRect, EmojiEntry, EmojiTrigger } from '#lib/typedefs.js';
    */
 
   /**

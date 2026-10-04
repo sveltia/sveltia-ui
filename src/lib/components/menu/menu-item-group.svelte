@@ -6,7 +6,7 @@
   import { _ } from '@sveltia/i18n';
 
   /**
-   * @import { CommonEventHandlers } from '$lib/typedefs';
+   * @import { CommonEventHandlers } from '#lib/typedefs.js';
    */
 
   /**

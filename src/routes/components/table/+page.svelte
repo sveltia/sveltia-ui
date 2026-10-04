@@ -7,7 +7,7 @@
     TableHead,
     TableRow,
     TableRowHeader,
-  } from '$lib';
+  } from '#lib';
   import Example from '../../_components/example.svelte';
 </script>
 

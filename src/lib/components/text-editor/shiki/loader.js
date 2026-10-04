@@ -2,7 +2,7 @@ import { SHIKI_VERSION } from './generated.js';
 import { UI_VERSION } from './version.js';
 
 /**
- * @import { CodeHighlighterLoaders } from '$lib/typedefs';
+ * @import { CodeHighlighterLoaders } from '#lib/typedefs.js';
  */
 
 const SHIKI_CDN_BASE_URL = 'https://unpkg.com/@shikijs';

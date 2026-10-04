@@ -5,7 +5,7 @@
   import { insertEditorComponent } from './insert-component.js';
 
   /**
-   * @import { TextEditorComponent, TextEditorStore } from '$lib/typedefs';
+   * @import { TextEditorComponent, TextEditorStore } from '#lib/typedefs.js';
    */
 
   /**

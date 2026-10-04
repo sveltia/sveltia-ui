@@ -1,5 +1,5 @@
 <script>
-  import { Infobar } from '$lib';
+  import { Infobar } from '#lib';
   import Example from '../../_components/example.svelte';
 </script>
 

@@ -1,7 +1,7 @@
 <script>
   import { isLoading } from '@sveltia/i18n';
   import { resolve } from '$app/paths';
-  import { AppShell, initLocales, setCodeHighlighterLoaders } from '$lib';
+  import { AppShell, initLocales, setCodeHighlighterLoaders } from '#lib';
   import NavSection from './_components/nav-section.svelte';
 
   // The default engine loader fetches the prebuilt chunk published with this package, which doesn’t

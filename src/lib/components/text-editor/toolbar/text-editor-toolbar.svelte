@@ -19,7 +19,7 @@
   import ToolbarWrapper from './toolbar-wrapper.svelte';
 
   /**
-   * @import { TextEditorBlockType, TextEditorInlineType, TextEditorStore } from '$lib/typedefs';
+   * @import { TextEditorBlockType, TextEditorInlineType, TextEditorStore } from '#lib/typedefs.js';
    */
 
   /**

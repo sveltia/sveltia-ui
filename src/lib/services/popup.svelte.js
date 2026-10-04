@@ -5,7 +5,7 @@ import { on } from 'svelte/events';
 import { calculatePopupStyle, isShallowEqual, mirrorPosition } from './popup-position.js';
 
 /**
- * @import { PopupPosition } from '$lib/typedefs';
+ * @import { PopupPosition } from '#lib/typedefs.js';
  * @import { PopupStyle } from './popup-position.js';
  */
 

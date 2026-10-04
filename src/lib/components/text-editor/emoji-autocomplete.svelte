@@ -24,7 +24,7 @@
   import EmojiSuggestions from '../emoji/emoji-suggestions.svelte';
 
   /**
-   * @import { EmojiAnchorRect, EmojiEntry, EmojiTrigger, TextEditorStore } from '$lib/typedefs';
+   * @import { EmojiAnchorRect, EmojiEntry, EmojiTrigger, TextEditorStore } from '#lib/typedefs.js';
    */
 
   /**

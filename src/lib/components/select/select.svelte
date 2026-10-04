@@ -9,7 +9,7 @@
   import Combobox from './combobox.svelte';
 
   /**
-   * @import { ComboboxProps } from '$lib/typedefs';
+   * @import { ComboboxProps } from '#lib/typedefs.js';
    */
 
   /**

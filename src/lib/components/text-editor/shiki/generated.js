@@ -5,7 +5,7 @@
  * version bundled into `dist/shiki-engine.js`, because grammar and theme payloads are only
  * guaranteed to be compatible with the matching engine.
  */
-export const SHIKI_VERSION = "4.4.3";
+export const SHIKI_VERSION = "4.5.0";
 
 /**
  * Available syntax highlighting languages, sorted by display name.

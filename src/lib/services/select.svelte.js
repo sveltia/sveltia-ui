@@ -2,7 +2,7 @@ import { getContext, setContext } from 'svelte';
 import { castValue } from './value.js';
 
 /**
- * @import { OptionEntry, SelectedItemDetail } from '$lib/typedefs';
+ * @import { OptionEntry, SelectedItemDetail } from '#lib/typedefs.js';
  */
 
 /**

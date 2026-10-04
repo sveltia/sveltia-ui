@@ -11,7 +11,7 @@
 
   /**
    * @import { Component } from 'svelte';
-   * @import { TextEditorConfig, TextEditorStore } from '$lib/typedefs';
+   * @import { TextEditorConfig, TextEditorStore } from '#lib/typedefs.js';
    */
 
   /**

@@ -4,7 +4,7 @@
  */
 
 /**
- * @import { EmojiAnchorRect } from '$lib/typedefs';
+ * @import { EmojiAnchorRect } from '#lib/typedefs.js';
  */
 
 /**

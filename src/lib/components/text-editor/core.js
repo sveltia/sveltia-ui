@@ -100,7 +100,7 @@ import { TABLE } from './transformers/table.js';
  * TextEditorInlineType,
  * TextEditorNodeType,
  * TextEditorSelectionState,
- * } from '$lib/typedefs';
+ * } from '#lib/typedefs.js';
  */
 
 /**

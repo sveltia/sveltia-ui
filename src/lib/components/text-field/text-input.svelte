@@ -10,7 +10,7 @@
   import EmojiAutocomplete from './emoji-autocomplete.svelte';
 
   /**
-   * @import { CommonEventHandlers, InputEventHandlers, TextInputProps } from '$lib/typedefs';
+   * @import { CommonEventHandlers, InputEventHandlers, TextInputProps } from '#lib/typedefs.js';
    */
 
   /**

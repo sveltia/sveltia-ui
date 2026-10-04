@@ -183,7 +183,7 @@
 
   /**
    * @import { Snippet } from 'svelte';
-   * @import { ToastPosition } from '$lib/typedefs';
+   * @import { ToastPosition } from '#lib/typedefs.js';
    */
 
   /**

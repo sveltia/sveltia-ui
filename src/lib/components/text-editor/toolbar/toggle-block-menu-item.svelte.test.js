@@ -6,7 +6,7 @@ import { getEditorStore } from '../../../test-utils/editor.js';
 
 /**
  * @import { ComponentProps } from 'svelte';
- * @import { TextEditorBlockType, TextEditorStore } from '$lib/typedefs';
+ * @import { TextEditorBlockType, TextEditorStore } from '#lib/typedefs.js';
  */
 
 /**

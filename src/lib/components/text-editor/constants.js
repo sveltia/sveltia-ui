@@ -27,7 +27,7 @@ import { HeadingNode, QuoteNode } from '@lexical/rich-text';
  * TextEditorFormatType,
  * TextEditorInlineType,
  * TextEditorNodeType,
- * } from '$lib/typedefs';
+ * } from '#lib/typedefs.js';
  */
 
 /**

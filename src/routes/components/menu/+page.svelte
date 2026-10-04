@@ -1,5 +1,5 @@
 <script>
-  import { Divider, Menu, MenuButton, MenuItem, MenuItemCheckbox, MenuItemRadio } from '$lib';
+  import { Divider, Menu, MenuButton, MenuItem, MenuItemCheckbox, MenuItemRadio } from '#lib';
   import Example from '../../_components/example.svelte';
 </script>
 

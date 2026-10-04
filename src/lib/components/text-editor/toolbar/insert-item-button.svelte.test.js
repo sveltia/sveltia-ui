@@ -10,7 +10,7 @@ import { createTestComponent, getEditorStore } from '../../../test-utils/editor.
 
 /**
  * @import { ComponentProps } from 'svelte';
- * @import { TextEditorComponent, TextEditorStore } from '$lib/typedefs';
+ * @import { TextEditorComponent, TextEditorStore } from '#lib/typedefs.js';
  */
 
 /**
@@ -84,7 +84,7 @@ it('inserts the node into the editor when clicked', async () => {
 
 /**
  * Render the button for the given component in plain text mode.
- * @param {import('$lib/typedefs').TextEditorComponent} editorComponent Component.
+ * @param {import('#lib/typedefs.js').TextEditorComponent} editorComponent Component.
  * @returns {Promise<{ screen: any, textarea: HTMLTextAreaElement }>} Rendered fixture and the
  * `<textarea>`.
  */

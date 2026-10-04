@@ -10,7 +10,7 @@ import { getSelectedItemDetail, OptionRegistry } from './select.svelte.js';
  * @param {any} value The option’s value.
  * @param {string} label The option’s text label.
  * @param {boolean} [selected] Whether the option is selected.
- * @returns {import('$lib/typedefs').OptionEntry} A fake entry.
+ * @returns {import('#lib/typedefs.js').OptionEntry} A fake entry.
  */
 const makeEntry = (value, label, selected = false) => ({
   value,

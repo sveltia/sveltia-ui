@@ -10,7 +10,7 @@
 
   /**
    * @import { Snippet } from 'svelte';
-   * @import { ModalProps, PopupPosition } from '$lib/typedefs';
+   * @import { ModalProps, PopupPosition } from '#lib/typedefs.js';
    */
 
   /**

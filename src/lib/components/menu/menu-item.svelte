@@ -17,7 +17,7 @@
    * CommonEventHandlers,
    * MenuItemProps,
    * PopupPosition,
-   * } from '$lib/typedefs';
+   * } from '#lib/typedefs.js';
    */
 
   /**

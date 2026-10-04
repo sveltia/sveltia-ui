@@ -20,8 +20,8 @@
 
   /**
    * @import { Snippet } from 'svelte';
-   * @import { TextEditorComponent, TextEditorMode, TextEditorNodeType } from '$lib/typedefs';
-   * @import { HighlightedToken } from '$lib/typedefs';
+   * @import { TextEditorComponent, TextEditorMode, TextEditorNodeType } from '#lib/typedefs.js';
+   * @import { HighlightedToken } from '#lib/typedefs.js';
    */
 
   /**

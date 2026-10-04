@@ -117,7 +117,7 @@ describe('getEmojiInsertText', () => {
 });
 
 describe('getEmojiMatchRank', () => {
-  /** @type {import('$lib/typedefs').EmojiEntry} */
+  /** @type {import('#lib/typedefs.js').EmojiEntry} */
   const entry = { emoji: '🎉', name: 'party_popper', aliases: ['tada', 'celebration'] };
   /**
    * Get the best rank for the given query.

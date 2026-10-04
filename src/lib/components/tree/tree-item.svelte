@@ -14,7 +14,7 @@
   /**
    * @import { Snippet } from 'svelte';
    * @import { Attachment } from 'svelte/attachments';
-   * @import { CommonEventHandlers } from '$lib/typedefs';
+   * @import { CommonEventHandlers } from '#lib/typedefs.js';
    */
 
   /**

@@ -1,5 +1,5 @@
 <script>
-  import { NumberInput, PasswordInput, SearchBar, SecretInput, TextArea, TextInput } from '$lib';
+  import { NumberInput, PasswordInput, SearchBar, SecretInput, TextArea, TextInput } from '#lib';
   import Example from '../../_components/example.svelte';
 
   let value = $state('');

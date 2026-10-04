@@ -9,7 +9,7 @@
   import { editRawText, registerRawTextShortcut, toggleInlineFormat } from '../raw-markdown.js';
 
   /**
-   * @import { TextEditorFormatType, TextEditorStore } from '$lib/typedefs';
+   * @import { TextEditorFormatType, TextEditorStore } from '#lib/typedefs.js';
    */
 
   /**

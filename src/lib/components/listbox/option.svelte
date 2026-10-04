@@ -13,7 +13,7 @@
 
   /**
    * @import { Snippet } from 'svelte';
-   * @import { ButtonProps, CommonEventHandlers } from '$lib/typedefs';
+   * @import { ButtonProps, CommonEventHandlers } from '#lib/typedefs.js';
    */
 
   /**

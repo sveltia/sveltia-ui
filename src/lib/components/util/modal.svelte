@@ -25,7 +25,7 @@
   import Placeholder from './placeholder.svelte';
 
   /**
-   * @import { ModalProps } from '$lib/typedefs';
+   * @import { ModalProps } from '#lib/typedefs.js';
    */
 
   /**

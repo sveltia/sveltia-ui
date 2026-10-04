@@ -19,7 +19,7 @@
 
   /**
    * @import { Snippet } from 'svelte';
-   * @import { ModalProps } from '$lib/typedefs';
+   * @import { ModalProps } from '#lib/typedefs.js';
    * @import { SwipeState } from './drawer.js';
    */
 

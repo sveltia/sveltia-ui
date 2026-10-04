@@ -7,7 +7,7 @@
   import MenuItemCheckable from './menu-item-checkable.svelte';
 
   /**
-   * @import { ButtonProps, CommonEventHandlers, MenuItemProps } from '$lib/typedefs';
+   * @import { ButtonProps, CommonEventHandlers, MenuItemProps } from '#lib/typedefs.js';
    */
 
   /**

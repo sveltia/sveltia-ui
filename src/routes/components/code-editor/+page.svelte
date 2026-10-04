@@ -1,5 +1,5 @@
 <script>
-  import { CodeEditor } from '$lib';
+  import { CodeEditor } from '#lib';
   import Example from '../../_components/example.svelte';
 </script>
 

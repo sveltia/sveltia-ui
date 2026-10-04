@@ -1,5 +1,5 @@
 <script>
-  import { Group } from '$lib';
+  import { Group } from '#lib';
   import Example from '../../_components/example.svelte';
 </script>
 

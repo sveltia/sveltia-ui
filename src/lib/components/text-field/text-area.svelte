@@ -10,7 +10,7 @@
 
   /**
    * @import { Snippet } from 'svelte';
-   * @import { CommonEventHandlers, HighlightedToken, InputEventHandlers } from '$lib/typedefs';
+   * @import { CommonEventHandlers, HighlightedToken, InputEventHandlers } from '#lib/typedefs.js';
    */
 
   /**

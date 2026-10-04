@@ -1,5 +1,5 @@
 <script>
-  import { TextEditor } from '$lib';
+  import { TextEditor } from '#lib';
   import Example from '../../_components/example.svelte';
   import {
     calloutComponent,

@@ -4,7 +4,7 @@
  */
 
 /**
- * @import { PopupPosition } from '$lib/typedefs';
+ * @import { PopupPosition } from '#lib/typedefs.js';
  */
 
 /**

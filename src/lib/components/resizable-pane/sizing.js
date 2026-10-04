@@ -7,7 +7,7 @@
 import { getArrowKeys } from '../../services/navigation.js';
 
 /**
- * @import { ResizablePaneSize } from '$lib/typedefs';
+ * @import { ResizablePaneSize } from '#lib/typedefs.js';
  */
 
 /**

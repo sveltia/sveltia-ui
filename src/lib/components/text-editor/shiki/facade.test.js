@@ -55,7 +55,7 @@ const createFakeEngine = ({ loadedLanguages = [] } = {}) => {
 
 /**
  * Import a fresh copy of the facade, since it keeps the engine in module state.
- * @param {Partial<import('$lib/typedefs').CodeHighlighterLoaders>} [loaders] Loader overrides.
+ * @param {Partial<import('#lib/typedefs.js').CodeHighlighterLoaders>} [loaders] Loader overrides.
  * @returns {Promise<any>} Freshly imported facade module.
  */
 const importFacade = async (loaders = {}) => {

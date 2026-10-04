@@ -12,7 +12,7 @@ import { getEditorStore } from '../../../test-utils/editor.js';
 
 /**
  * @import { ComponentProps } from 'svelte';
- * @import { TextEditorComponent, TextEditorConfig, TextEditorStore } from '$lib/typedefs';
+ * @import { TextEditorComponent, TextEditorConfig, TextEditorStore } from '#lib/typedefs.js';
  */
 
 /**

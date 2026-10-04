@@ -11,7 +11,7 @@
 
   /**
    * @import { Snippet } from 'svelte';
-   * @import { PaneGroupContext } from '$lib/typedefs.js';
+   * @import { PaneGroupContext } from '#lib/typedefs.js';
    */
 
   /**

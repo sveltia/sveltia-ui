@@ -4,7 +4,7 @@ import { convertMarkdownToLexical } from './core.js';
 /**
  * @import { LexicalEditor } from 'lexical';
  * @import { Transformer } from '@lexical/markdown';
- * @import { TextEditorConfig, TextEditorSelectionState, TextEditorStore } from '$lib/typedefs';
+ * @import { TextEditorConfig, TextEditorSelectionState, TextEditorStore } from '#lib/typedefs.js';
  */
 
 /**

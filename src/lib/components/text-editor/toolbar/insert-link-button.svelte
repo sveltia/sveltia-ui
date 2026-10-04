@@ -31,7 +31,7 @@
   } from '../raw-markdown.js';
 
   /**
-   * @import { TextEditorStore } from '$lib/typedefs';
+   * @import { TextEditorStore } from '#lib/typedefs.js';
    * @import { RangeSelection } from 'lexical';
    */
 

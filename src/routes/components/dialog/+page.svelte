@@ -1,9 +1,9 @@
 <script>
-  import { Button, Dialog, Menu, MenuButton, MenuItem, Option, Select, Toast } from '$lib';
-  import Alert from '$lib/components/alert/alert.svelte';
-  import AlertDialog from '$lib/components/dialog/alert-dialog.svelte';
-  import ConfirmationDialog from '$lib/components/dialog/confirmation-dialog.svelte';
-  import PromptDialog from '$lib/components/dialog/prompt-dialog.svelte';
+  import { Button, Dialog, Menu, MenuButton, MenuItem, Option, Select, Toast } from '#lib';
+  import Alert from '#lib/components/alert/alert.svelte';
+  import AlertDialog from '#lib/components/dialog/alert-dialog.svelte';
+  import ConfirmationDialog from '#lib/components/dialog/confirmation-dialog.svelte';
+  import PromptDialog from '#lib/components/dialog/prompt-dialog.svelte';
   import Example from '../../_components/example.svelte';
 
   let openStandardDialog = $state(false);

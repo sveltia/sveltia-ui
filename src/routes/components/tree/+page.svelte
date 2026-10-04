@@ -1,5 +1,5 @@
 <script>
-  import { Icon, Tree, TreeItem } from '$lib';
+  import { Icon, Tree, TreeItem } from '#lib';
   import Example from '../../_components/example.svelte';
 
   /**

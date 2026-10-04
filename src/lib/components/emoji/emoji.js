@@ -1,7 +1,7 @@
 import { EMOJI_DATA } from './generated.js';
 
 /**
- * @import { EmojiEntry } from '$lib/typedefs';
+ * @import { EmojiEntry } from '#lib/typedefs.js';
  */
 
 /**

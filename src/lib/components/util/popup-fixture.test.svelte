@@ -7,7 +7,7 @@
   import Popup from './popup.svelte';
 
   /**
-   * @import { PopupPosition } from '$lib/typedefs';
+   * @import { PopupPosition } from '#lib/typedefs.js';
    */
 
   /**

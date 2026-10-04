@@ -1,5 +1,5 @@
 <script>
-  import { Icon } from '$lib';
+  import { Icon } from '#lib';
   import Example from '../../_components/example.svelte';
 </script>
 

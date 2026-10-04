@@ -1,5 +1,5 @@
 <script>
-  import { Switch } from '$lib';
+  import { Switch } from '#lib';
   import Example from '../../_components/example.svelte';
 </script>
 

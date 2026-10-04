@@ -19,7 +19,7 @@
   import { editRawText, setBlockType } from '../raw-markdown.js';
 
   /**
-   * @import { TextEditorBlockType, TextEditorStore } from '$lib/typedefs';
+   * @import { TextEditorBlockType, TextEditorStore } from '#lib/typedefs.js';
    * @import { HeadingTagType } from '@lexical/rich-text';
    * @import { ElementNode, LexicalCommand } from 'lexical';
    */
