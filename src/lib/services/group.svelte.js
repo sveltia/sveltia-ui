@@ -2,6 +2,7 @@ import { isRTL } from '@sveltia/i18n';
 import { generateElementId } from '@sveltia/utils/element';
 import { sleep } from '@sveltia/utils/misc';
 import { untrack } from 'svelte';
+import { scrollIntoViewIfNeeded } from './scroll.js';
 import { getSelectedItemDetail } from './select.svelte.js';
 import { normalize } from './text.js';
 import { findTypeAheadMatch, TypeAhead } from './type-ahead.js';
@@ -9,6 +10,11 @@ import { findTypeAheadMatch, TypeAhead } from './type-ahead.js';
 /**
  * @import { Attachment } from 'svelte/attachments';
  */
+
+/**
+ * CSS selector matching the members that are disabled or hidden, which are left out of navigation.
+ */
+const INACTIVE_MEMBER_SELECTOR = '[aria-disabled="true"], [aria-hidden="true"]';
 
 /**
  * Set an element’s `tabindex` attribute, leaving the DOM alone if it already holds that value.
@@ -268,6 +274,30 @@ export class Group {
   }
 
   /**
+   * Get the panel a member controls, if the group owns such panels. See {@link controlsPanel}.
+   * @param {HTMLElement} member Member element.
+   * @returns {HTMLElement | null} The member’s `aria-controls` target, or `null` if there’s none
+   * or the group doesn’t own its members’ targets.
+   */
+  #getControlTarget(member) {
+    const controlTargetId = this.controlsPanel ? member.getAttribute('aria-controls') : null;
+
+    // Looked up by ID rather than with a selector, which would throw on an ID that isn’t a valid
+    // CSS identifier, such as one starting with a digit
+    return controlTargetId ? document.getElementById(controlTargetId) : null;
+  }
+
+  /**
+   * Show or hide a panel controlled by a member, both to the user and to assistive technology.
+   * @param {HTMLElement} panel Panel element.
+   * @param {boolean} shown Whether the panel is to be shown.
+   */
+  #setPanelShown(panel, shown) {
+    panel.inert = !shown;
+    panel.setAttribute('aria-hidden', String(!shown));
+  }
+
+  /**
    * Initialize a new `Group` instance.
    * @param {HTMLElement} parent Parent element.
    * @param {object} [options] Options.
@@ -407,10 +437,7 @@ export class Group {
         element.getAttribute(this.childSelectedAttr) === 'true' ||
         (defaultSelected ? element === defaultSelected : this.selectFirst && index === 0);
 
-      const controlTargetId = this.controlsPanel ? element.getAttribute('aria-controls') : null;
-      // Looked up by ID rather than with a selector, which would throw on an ID that isn’t a valid
-      // CSS identifier, such as one starting with a digit
-      const controlTarget = controlTargetId ? document.getElementById(controlTargetId) : null;
+      const controlTarget = this.#getControlTarget(element);
 
       element.id ||= `${this.id}-item-${index + 1}`;
 
@@ -419,21 +446,12 @@ export class Group {
       }
 
       if (controlTarget) {
-        controlTarget.inert = !isSelected;
         controlTarget.setAttribute('aria-labelledby', element.id);
-        controlTarget.setAttribute('aria-hidden', String(!isSelected));
+        this.#setPanelShown(controlTarget, isSelected);
 
         if (isSelected) {
           globalThis.setTimeout(() => {
-            try {
-              controlTarget.scrollIntoView({
-                block: 'nearest',
-                inline: 'nearest',
-                behavior: 'auto',
-              });
-            } catch {
-              controlTarget.scrollIntoView(true);
-            }
+            scrollIntoViewIfNeeded(controlTarget);
           }, 300);
         }
       }
@@ -476,11 +494,7 @@ export class Group {
       focused ??
       (holders.length === 1
         ? holders[0]
-        : ((this.rovingTabStop === 'selected'
-            ? activeMembers.find(
-                (element) => element.getAttribute(this.childSelectedAttr) === 'true',
-              )
-            : undefined) ?? activeMembers[0]));
+        : ((this.rovingTabStop === 'selected' ? this.selected : undefined) ?? activeMembers[0]));
 
     allMembers.forEach((element) => {
       // Only touch the DOM when it changes; this runs on every mutation of a large widget. The
@@ -495,18 +509,17 @@ export class Group {
    * been changed from outside the group.
    */
   syncSelection() {
-    const { allMembers, activeMembers, parent } = this;
+    const { allMembers, parent } = this;
 
     if (this.controlsPanel) {
       allMembers.forEach((element) => {
-        const controlTargetId = element.getAttribute('aria-controls');
-        const controlTarget = controlTargetId ? document.getElementById(controlTargetId) : null;
+        const controlTarget = this.#getControlTarget(element);
 
         if (controlTarget) {
-          const isSelected = element.getAttribute(this.childSelectedAttr) === 'true';
-
-          controlTarget.inert = !isSelected;
-          controlTarget.setAttribute('aria-hidden', String(!isSelected));
+          this.#setPanelShown(
+            controlTarget,
+            element.getAttribute(this.childSelectedAttr) === 'true',
+          );
         }
       });
     }
@@ -514,9 +527,7 @@ export class Group {
     // The tab stop moves to the newly selected member, unless the user is in the widget, in which
     // case it stays where they are
     if (this.focusChild && !parent.contains(document.activeElement)) {
-      const selected = activeMembers.find(
-        (element) => element.getAttribute(this.childSelectedAttr) === 'true',
-      );
+      const { selected } = this;
 
       if (selected) {
         allMembers.forEach((element) => {
@@ -574,9 +585,7 @@ export class Group {
 
       this.#memberCache = {
         all,
-        active: all.filter(
-          (element) => !element.matches('[aria-disabled="true"], [aria-hidden="true"]'),
-        ),
+        active: all.filter((element) => !element.matches(INACTIVE_MEMBER_SELECTOR)),
       };
     }
 
@@ -689,7 +698,7 @@ export class Group {
     for (let i = 0; i < 20; i += 1) {
       const first = /** @type {HTMLElement | undefined} */ (
         [...(submenu?.querySelectorAll(this.selector) ?? [])].find(
-          (element) => !element.matches('[aria-disabled="true"], [aria-hidden="true"]'),
+          (element) => !element.matches(INACTIVE_MEMBER_SELECTOR),
         )
       );
 
@@ -815,8 +824,7 @@ export class Group {
       const singleSelect = selectable && targetSelectable && (isMenuItemRadio || !multiSelect);
       const isTarget = element === newTarget;
       const isSelected = element.getAttribute(this.childSelectedAttr) === 'true';
-      const controlTargetId = this.controlsPanel ? element.getAttribute('aria-controls') : null;
-      const controlTarget = controlTargetId ? document.getElementById(controlTargetId) : null;
+      const controlTarget = this.#getControlTarget(element);
 
       affected.push(element);
       targetAffected ||= isTarget;
@@ -877,8 +885,7 @@ export class Group {
       }
 
       if (controlTarget) {
-        controlTarget.inert = !isTarget;
-        controlTarget.setAttribute('aria-hidden', String(!isTarget));
+        this.#setPanelShown(controlTarget, isTarget);
 
         if (isTarget) {
           scrollTargets.push(controlTarget);
@@ -927,13 +934,7 @@ export class Group {
     this.#scrollTimer = globalThis.setTimeout(() => {
       this.#scrollTimer = undefined;
 
-      elements.forEach((element) => {
-        try {
-          element.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'auto' });
-        } catch {
-          element.scrollIntoView(true);
-        }
-      });
+      elements.forEach(scrollIntoViewIfNeeded);
     }, 300);
   }
 

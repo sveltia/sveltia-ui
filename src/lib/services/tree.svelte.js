@@ -1,6 +1,7 @@
 import { isRTL } from '@sveltia/i18n';
 import { generateElementId } from '@sveltia/utils/element';
 import { sleep } from '@sveltia/utils/misc';
+import { scrollIntoViewIfNeeded } from './scroll.js';
 import { normalize } from './text.js';
 import { getSelectedItemDetail } from './select.svelte.js';
 import { findTypeAheadMatch, TypeAhead } from './type-ahead.js';
@@ -385,11 +386,7 @@ export class Tree {
    * @param {HTMLElement} element Element to be scrolled into view.
    */
   scrollIntoView(element) {
-    try {
-      element.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'auto' });
-    } catch {
-      element.scrollIntoView(true);
-    }
+    scrollIntoViewIfNeeded(element);
   }
 
   /**
