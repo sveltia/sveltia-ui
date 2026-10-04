@@ -5,6 +5,8 @@
   @see https://w3c.github.io/aria/#gridcell
 -->
 <script>
+  import TablePart from '../table/table-part.svelte';
+
   /**
    * @import { Snippet } from 'svelte';
    */
@@ -20,19 +22,9 @@
    */
   let {
     /* eslint-disable prefer-const */
-    class: className,
-    children,
     ...restProps
     /* eslint-enable prefer-const */
   } = $props();
 </script>
 
-<div {...restProps} role="gridcell" class="sui grid-cell {className}">
-  {@render children?.()}
-</div>
-
-<style lang="scss">
-  .grid-cell {
-    display: table-cell;
-  }
-</style>
+<TablePart {...restProps} role="gridcell" kind="grid-cell" />

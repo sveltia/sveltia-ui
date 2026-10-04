@@ -6,6 +6,7 @@
 -->
 <script>
   import { _ } from '@sveltia/i18n';
+  import TablePart from './table-part.svelte';
 
   /**
    * @import { Snippet } from 'svelte';
@@ -22,24 +23,14 @@
    */
   let {
     /* eslint-disable prefer-const */
-    class: className,
-    children,
     ...restProps
     /* eslint-enable prefer-const */
   } = $props();
 </script>
 
-<div
+<TablePart
   {...restProps}
   role="rowgroup"
-  class="sui table-foot {className}"
+  kind="table-foot"
   aria-roledescription={_('_sui.role_descriptions.table_foot')}
->
-  {@render children?.()}
-</div>
-
-<style lang="scss">
-  .table-foot {
-    display: table-footer-group;
-  }
-</style>
+/>

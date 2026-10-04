@@ -126,22 +126,9 @@
 </div>
 
 <style lang="scss">
-  [role='rowgroup'] {
-    display: table-row-group;
-  }
+  @use '../../styles/mixins';
 
-  [role='row'] {
-    display: table-row;
-  }
-
-  [role='columnheader'] {
-    display: table-cell;
-    padding: 8px;
-    color: var(--sui-secondary-foreground-color);
-    background-color: var(--sui-secondary-background-color);
-    font-size: var(--sui-font-size-default);
-    text-align: start;
-
+  @include mixins.row-group {
     // The expander takes the place of the caption text, so it fills the cell and keeps its look
     &:has(> :global(.expander)) {
       padding: 0;

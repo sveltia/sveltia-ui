@@ -5,6 +5,8 @@
   @see https://w3c.github.io/aria/#columnheader
 -->
 <script>
+  import TablePart from '../table/table-part.svelte';
+
   /**
    * @import { Snippet } from 'svelte';
    */
@@ -20,19 +22,9 @@
    */
   let {
     /* eslint-disable prefer-const */
-    class: className,
-    children,
     ...restProps
     /* eslint-enable prefer-const */
   } = $props();
 </script>
 
-<div {...restProps} role="columnheader" class="sui grid-col-header {className}">
-  {@render children?.()}
-</div>
-
-<style lang="scss">
-  .grid-col-header {
-    display: table-cell;
-  }
-</style>
+<TablePart {...restProps} role="columnheader" kind="grid-col-header" />

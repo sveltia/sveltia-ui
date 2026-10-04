@@ -34,20 +34,9 @@
 </div>
 
 <style lang="scss">
+  @use '../../styles/mixins';
+
   .table {
-    display: table;
-    margin: var(--sui-focus-ring-width);
-    width: calc(100% - var(--sui-focus-ring-width) * 2);
-
-    &.data {
-      border-collapse: collapse;
-
-      :global {
-        :is(.table-col-header, .table-row-header, .table-cell) {
-          border: 1px solid var(--sui-secondary-border-color);
-          padding: 8px 8px;
-        }
-      }
-    }
+    @include mixins.table(table);
   }
 </style>

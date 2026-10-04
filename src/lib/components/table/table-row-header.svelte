@@ -5,6 +5,8 @@
   @see https://w3c.github.io/aria/#rowheader
 -->
 <script>
+  import TablePart from './table-part.svelte';
+
   /**
    * @import { Snippet } from 'svelte';
    */
@@ -20,20 +22,9 @@
    */
   let {
     /* eslint-disable prefer-const */
-    class: className,
-    children,
     ...restProps
     /* eslint-enable prefer-const */
   } = $props();
 </script>
 
-<div {...restProps} role="rowheader" class="sui table-row-header {className}">
-  {@render children?.()}
-</div>
-
-<style lang="scss">
-  .table-row-header {
-    display: table-cell;
-    height: var(--sui-secondary-row-height);
-  }
-</style>
+<TablePart {...restProps} role="rowheader" kind="table-row-header" />

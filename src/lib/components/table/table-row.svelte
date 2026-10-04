@@ -5,6 +5,8 @@
   @see https://w3c.github.io/aria/#row
 -->
 <script>
+  import TablePart from './table-part.svelte';
+
   /**
    * @import { Snippet } from 'svelte';
    */
@@ -20,20 +22,9 @@
    */
   let {
     /* eslint-disable prefer-const */
-    class: className,
-    children,
     ...restProps
     /* eslint-enable prefer-const */
   } = $props();
 </script>
 
-<div {...restProps} role="row" class="sui table-row {className}">
-  {@render children?.()}
-</div>
-
-<style lang="scss">
-  .table-row {
-    display: table-row;
-    height: var(--sui-primary-row-height);
-  }
-</style>
+<TablePart {...restProps} role="row" kind="table-row" />

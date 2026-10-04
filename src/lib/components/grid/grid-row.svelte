@@ -5,6 +5,8 @@
   @see https://w3c.github.io/aria/#row
 -->
 <script>
+  import TablePart from '../table/table-part.svelte';
+
   /**
    * @import { Snippet } from 'svelte';
    */
@@ -24,27 +26,10 @@
    */
   let {
     /* eslint-disable prefer-const */
-    class: className,
     selected = false,
-    children,
     ...restProps
     /* eslint-enable prefer-const */
   } = $props();
 </script>
 
-<div
-  {...restProps}
-  role="row"
-  class="sui grid-row {className}"
-  tabindex="0"
-  aria-selected={selected}
->
-  {@render children?.()}
-</div>
-
-<style lang="scss">
-  .grid-row {
-    display: table-row;
-    height: var(--sui-primary-row-height);
-  }
-</style>
+<TablePart {...restProps} role="row" kind="grid-row" tabindex="0" aria-selected={selected} />

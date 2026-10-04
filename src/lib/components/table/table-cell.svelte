@@ -5,6 +5,8 @@
   @see https://w3c.github.io/aria/#cell
 -->
 <script>
+  import TablePart from './table-part.svelte';
+
   /**
    * @import { Snippet } from 'svelte';
    */
@@ -20,19 +22,9 @@
    */
   let {
     /* eslint-disable prefer-const */
-    class: className,
-    children,
     ...restProps
     /* eslint-enable prefer-const */
   } = $props();
 </script>
 
-<div {...restProps} role="cell" class="sui table-cell {className}">
-  {@render children?.()}
-</div>
-
-<style lang="scss">
-  .table-cell {
-    display: table-cell;
-  }
-</style>
+<TablePart {...restProps} role="cell" kind="table-cell" />

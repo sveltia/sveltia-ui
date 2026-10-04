@@ -83,3 +83,44 @@
     }
   }
 }
+
+// The `<Table>` or `<Grid>` wrapper. `$prefix` is the class name prefix of its cells (`table` or
+// `grid`), bordered and padded when the `data` class is set.
+@mixin table($prefix) {
+  display: table;
+  margin: var(--sui-focus-ring-width);
+  width: calc(100% - var(--sui-focus-ring-width) * 2);
+
+  &.data {
+    border-collapse: collapse;
+
+    :global {
+      :is(.#{$prefix}-col-header, .#{$prefix}-row-header, .#{$prefix}-cell) {
+        border: 1px solid var(--sui-secondary-border-color);
+        padding: 8px 8px;
+      }
+    }
+  }
+}
+
+// A `<TableBody>` or `<GridBody>` row group with its optional caption row. Extra caption cell
+// styles can be passed as the content block.
+@mixin row-group {
+  [role="rowgroup"] {
+    display: table-row-group;
+  }
+
+  [role="row"] {
+    display: table-row;
+  }
+
+  [role="columnheader"] {
+    display: table-cell;
+    padding: 8px;
+    color: var(--sui-secondary-foreground-color);
+    background-color: var(--sui-secondary-background-color);
+    font-size: var(--sui-font-size-default);
+    text-align: start;
+    @content;
+  }
+}
