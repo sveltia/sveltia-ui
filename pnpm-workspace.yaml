@@ -4,6 +4,12 @@ allowBuilds:
   svelte-preprocess: true
   unrs-resolver: false
 
+auditConfig:
+  ignoreGhsas:
+    # braces, used only in Stylelint
+    # https://github.com/advisories/GHSA-vfj7-8cjw-p6xm
+    - GHSA-vfj7-8cjw-p6xm
+
 engineStrict: true
 
 minimumReleaseAge: 1440
