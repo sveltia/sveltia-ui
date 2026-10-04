@@ -243,14 +243,21 @@ const resolvePayload = async (kind, id, load) => {
 };
 
 /**
+ * Find the metadata of the given language.
+ * @param {string} language Language identifier or alias, like `ts`.
+ * @returns {(typeof LANGUAGES)[number] | undefined} Language metadata, or `undefined` when the
+ * language is unknown.
+ */
+const findLanguage = (language) =>
+  LANGUAGES.find(({ id, aliases }) => id === language || aliases?.includes(language));
+
+/**
  * Resolve a language alias to its canonical identifier.
  * @param {string} language Language identifier or alias, like `ts`.
  * @returns {string} Canonical identifier, like `typescript`. Returns the input unchanged when the
  * language is unknown.
  */
-export const normalizeCodeLanguage = (language) =>
-  LANGUAGES.find(({ id, aliases }) => id === language || aliases?.includes(language))?.id ??
-  language;
+export const normalizeCodeLanguage = (language) => findLanguage(language)?.id ?? language;
 
 /**
  * Load the grammar for the given language, then refresh the given code node.
@@ -267,7 +274,7 @@ export const loadCodeLanguage = (language, editor, codeNodeKey) => {
     return undefined;
   }
 
-  const info = LANGUAGES.find(({ id: langId, aliases }) => langId === id || aliases?.includes(id));
+  const info = findLanguage(id);
 
   if (!info) {
     return undefined;
@@ -420,6 +427,24 @@ export const getHighlightNodes = (codeNode, language) => {
 };
 
 /**
+ * Get the theme to highlight a snippet of code with, if it can be highlighted synchronously: the
+ * engine, the grammar of the given language and the theme are all loaded.
+ * @param {string} id Canonical language identifier.
+ * @param {string} [theme] Shiki theme ID. Defaults to the one matching the app’s appearance.
+ * @returns {string | undefined} Theme ID, or `undefined` when the code cannot be highlighted yet.
+ */
+const getHighlightTheme = (id, theme) => {
+  if (!highlighter || isPlainLanguage(id) || !isCodeLanguageLoaded(id)) {
+    return undefined;
+  }
+
+  // Resolved only once the cheap checks pass, so bailing out early costs nothing
+  const resolvedTheme = theme ?? getCodeTheme();
+
+  return isCodeThemeLoaded(resolvedTheme) ? resolvedTheme : undefined;
+};
+
+/**
  * Highlight a snippet of code as an HTML string.
  *
  * Unlike the editor, which builds Lexical nodes, this returns markup for rendering elsewhere, such
@@ -436,16 +461,11 @@ export const getHighlightNodes = (codeNode, language) => {
  * yet.
  */
 export const highlightCodeToHTML = (code, language, { theme } = {}) => {
+  // Unlike tokens, the HTML is highlighted with the language a `diff-*` language wraps
   const id = normalizeCodeLanguage(getDiffedLanguage(language) ?? language);
+  const resolvedTheme = getHighlightTheme(id, theme);
 
-  if (!highlighter || isPlainLanguage(id) || !isCodeLanguageLoaded(id)) {
-    return undefined;
-  }
-
-  // Resolved only once the cheap checks pass, so bailing out early costs nothing
-  const resolvedTheme = theme ?? getCodeTheme();
-
-  if (!isCodeThemeLoaded(resolvedTheme)) {
+  if (resolvedTheme === undefined) {
     return undefined;
   }
 
@@ -471,14 +491,9 @@ export const highlightCodeToHTML = (code, language, { theme } = {}) => {
  */
 export const highlightCodeToTokens = (code, language, { theme } = {}) => {
   const id = normalizeCodeLanguage(language);
+  const resolvedTheme = getHighlightTheme(id, theme);
 
-  if (!highlighter || isPlainLanguage(id) || !isCodeLanguageLoaded(id)) {
-    return undefined;
-  }
-
-  const resolvedTheme = theme ?? getCodeTheme();
-
-  if (!isCodeThemeLoaded(resolvedTheme)) {
+  if (resolvedTheme === undefined) {
     return undefined;
   }
 

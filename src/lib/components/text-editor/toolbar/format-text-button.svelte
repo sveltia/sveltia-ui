@@ -1,18 +1,12 @@
 <script>
   import { _ } from '@sveltia/i18n';
-  import { isMac, matchesShortcuts } from '@sveltia/utils/events';
   import { FORMAT_TEXT_COMMAND } from 'lexical';
   import { getContext } from 'svelte';
   import Button from '../../button/button.svelte';
   import Icon from '../../icon/icon.svelte';
   import { AVAILABLE_BUTTONS } from '../constants.js';
   import { focusEditor } from '../core.js';
-  import {
-    applyRawTextEdit,
-    getRawTextState,
-    isRawTextEditable,
-    toggleInlineFormat,
-  } from '../raw-markdown.js';
+  import { editRawText, registerRawTextShortcut, toggleInlineFormat } from '../raw-markdown.js';
 
   /**
    * @import { TextEditorFormatType, TextEditorStore } from '$lib/typedefs';
@@ -50,10 +44,7 @@
 
     if (!useRichText) {
       // The button is only enabled while the `<textarea>` is there
-      /* v8 ignore else */
-      if (textArea) {
-        applyRawTextEdit(textArea, toggleInlineFormat(getRawTextState(textArea), type));
-      }
+      editRawText(textArea, (state) => toggleInlineFormat(state, type));
 
       return;
     }
@@ -74,25 +65,10 @@
       return undefined;
     }
 
-    /**
-     * Handle the keyboard shortcut in the plain text mode.
-     * @param {KeyboardEvent} event `keydown` event.
-     */
-    const onKeyDown = (event) => {
-      if (
-        isRawTextEditable(textArea) &&
-        matchesShortcuts(event, isMac() ? `Meta+${key}` : `Ctrl+${key}`)
-      ) {
-        event.preventDefault();
-        format();
-      }
-    };
-
-    textArea.addEventListener('keydown', onKeyDown);
-
-    return () => {
-      textArea.removeEventListener('keydown', onKeyDown);
-    };
+    // Handle the keyboard shortcut in the plain text mode
+    return registerRawTextShortcut(textArea, key, () => {
+      format();
+    });
   });
 </script>
 

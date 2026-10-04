@@ -16,7 +16,7 @@
   import MenuItemCheckbox from '../../menu/menu-item-checkbox.svelte';
   import { AVAILABLE_BUTTONS } from '../constants.js';
   import { focusEditor } from '../core.js';
-  import { applyRawTextEdit, getRawTextState, setBlockType } from '../raw-markdown.js';
+  import { editRawText, setBlockType } from '../raw-markdown.js';
 
   /**
    * @import { TextEditorBlockType, TextEditorStore } from '$lib/typedefs';
@@ -46,13 +46,8 @@
    */
   const changeBlockType = async () => {
     if (!editorStore.useRichText) {
-      const { textArea } = editorStore;
-
       // The item is only clickable while the `<textarea>` is there
-      /* v8 ignore else */
-      if (textArea) {
-        applyRawTextEdit(textArea, setBlockType(getRawTextState(textArea), type));
-      }
+      editRawText(editorStore.textArea, (state) => setBlockType(state, type));
 
       return;
     }

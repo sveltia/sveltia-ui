@@ -1,12 +1,8 @@
 <script>
-  import {
-    $createParagraphNode as createParagraphNode,
-    $insertNodes as insertNodes,
-  } from 'lexical';
   import { getContext } from 'svelte';
   import Button from '../../button/button.svelte';
   import Icon from '../../icon/icon.svelte';
-  import { insertComponent } from '../raw-markdown.js';
+  import { insertEditorComponent } from './insert-component.js';
 
   /**
    * @import { TextEditorComponent, TextEditorStore } from '$lib/typedefs';
@@ -27,7 +23,7 @@
   /** @type {TextEditorStore} */
   const editorStore = getContext('editorStore');
 
-  const { label, icon, createNode } = $derived(component);
+  const { label, icon } = $derived(component);
 </script>
 
 <Button
@@ -37,23 +33,7 @@
   aria-label={label}
   aria-controls={editorStore.controlId}
   onclick={() => {
-    const { textArea, useRichText } = editorStore;
-
-    // Insert the component’s Markdown in the plain text mode
-    if (!useRichText) {
-      // The button is only enabled while the `<textarea>` is there
-      /* v8 ignore else */
-      if (textArea) {
-        insertComponent(textArea, component);
-      }
-
-      return;
-    }
-
-    editorStore.editor?.update(() => {
-      // Add an additional paragraph for easier editing
-      insertNodes([createNode(), createParagraphNode()]);
-    });
+    insertEditorComponent(editorStore, component);
   }}
 >
   {#snippet startIcon()}

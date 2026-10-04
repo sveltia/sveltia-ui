@@ -1,10 +1,12 @@
 /**
  * Markdown editing helpers for the plain text mode of the text editor, where the toolbar buttons
  * edit the Markdown source in the `<textarea>` instead of Lexical nodes. Apart from
- * {@link getRawTextState}, {@link applyRawTextEdit} and {@link insertComponent}, everything here is
- * pure: a function takes the current value and selection, and returns the edit to apply.
+ * {@link getRawTextState}, {@link applyRawTextEdit}, {@link editRawText},
+ * {@link registerRawTextShortcut} and {@link insertComponent}, everything here is pure: a function
+ * takes the current value and selection, and returns the edit to apply.
  */
 
+import { isMac, matchesShortcuts } from '@sveltia/utils/events';
 import { getComponentMarkdown } from './core.js';
 
 /**
@@ -67,6 +69,13 @@ const getLineRange = ({ value, start, end }) => {
 };
 
 /**
+ * Get the index of the line where the selection starts.
+ * @param {RawTextState} state Current state.
+ * @returns {number} Line index.
+ */
+const getStartLineIndex = ({ value, start }) => value.slice(0, start).split('\n').length - 1;
+
+/**
  * Find the fenced code block the given line is in.
  * @param {string[]} lines All the lines.
  * @param {number} lineIndex Index of the line.
@@ -104,9 +113,9 @@ const findCodeBlock = (lines, lineIndex) => {
  * @param {RawTextState} state Current state.
  * @returns {TextEditorBlockType} Block type.
  */
-export const getBlockType = ({ value, start }) => {
-  const lines = value.split('\n');
-  const lineIndex = value.slice(0, start).split('\n').length - 1;
+export const getBlockType = (state) => {
+  const lines = state.value.split('\n');
+  const lineIndex = getStartLineIndex(state);
   const line = lines[lineIndex];
 
   if (findCodeBlock(lines, lineIndex)) {
@@ -205,7 +214,7 @@ export const toggleInlineFormat = ({ value, start, end }, type) => {
 export const setBlockType = (state, type) => {
   const { value, start, end } = state;
   const lines = value.split('\n');
-  const firstIndex = value.slice(0, start).split('\n').length - 1;
+  const firstIndex = getStartLineIndex(state);
   const codeBlock = findCodeBlock(lines, firstIndex);
 
   // Leave a code block by removing its fences, then change the type of the selected lines
@@ -474,6 +483,52 @@ export const applyRawTextEdit = async (
   }
 
   textArea.setSelectionRange(selectionStart, selectionEnd);
+};
+
+/**
+ * Apply the edit made by the given function from the current state of the `<textarea>`, and focus
+ * it. Nothing happens if there’s no `<textarea>`.
+ * @param {HTMLTextAreaElement | undefined} textArea `<textarea>` element.
+ * @param {(state: RawTextState) => RawTextEdit} getEdit Function to make the edit from the current
+ * state.
+ * @returns {Promise<void>} Nothing.
+ */
+export const editRawText = async (textArea, getEdit) => {
+  if (!textArea) {
+    return;
+  }
+
+  await applyRawTextEdit(textArea, getEdit(getRawTextState(textArea)));
+};
+
+/**
+ * Handle the given keyboard shortcut, Accel+{key}, on the `<textarea>` while it’s editable. The
+ * rich text editor handles its shortcuts on its own.
+ * @param {HTMLTextAreaElement} textArea `<textarea>` element.
+ * @param {string} key Key to combine with the Accel key, like `B`.
+ * @param {() => void} handler Function to call when the shortcut is pressed.
+ * @returns {() => void} Function to stop handling the shortcut.
+ */
+export const registerRawTextShortcut = (textArea, key, handler) => {
+  /**
+   * Handle the `keydown` event.
+   * @param {KeyboardEvent} event `keydown` event.
+   */
+  const onKeyDown = (event) => {
+    if (
+      isRawTextEditable(textArea) &&
+      matchesShortcuts(event, isMac() ? `Meta+${key}` : `Ctrl+${key}`)
+    ) {
+      event.preventDefault();
+      handler();
+    }
+  };
+
+  textArea.addEventListener('keydown', onKeyDown);
+
+  return () => {
+    textArea.removeEventListener('keydown', onKeyDown);
+  };
 };
 
 /**

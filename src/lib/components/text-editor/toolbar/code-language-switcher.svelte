@@ -9,6 +9,7 @@
   import { LANGUAGES } from '../shiki/generated.js';
 
   /**
+   * @import { CodeNode } from '@lexical/code-core';
    * @import { TextEditorStore } from '$lib/typedefs';
    */
 
@@ -46,15 +47,31 @@
     )?.key ?? 'plain',
   );
 
+  /**
+   * Get the code block the switcher targets. A code editor has exactly one code block, and its
+   * `blockNodeKey` is still unset the first time the switcher is used, before the editor has ever
+   * been focused. Call this within `editor.read()` or `editor.update()`.
+   * @returns {CodeNode | null} Code node, or `null` if the selection is not in a code block.
+   */
+  const getCodeNode = () => {
+    const { blockNodeKey } = editorStore.selection;
+
+    const node = editorStore.config.isCodeEditor
+      ? getRoot().getChildren()[0]
+      : blockNodeKey
+        ? getNodeByKey(blockNodeKey)
+        : null;
+
+    return isCodeNode(node) ? node : null;
+  };
+
   $effect(() => {
     void editorStore.selection.blockNodeKey;
 
     editorStore.editor?.read(() => {
-      const node = editorStore.config.isCodeEditor
-        ? getRoot().getChildren()[0]
-        : getNodeByKey(/** @type {string} */ (editorStore.selection.blockNodeKey));
+      const node = getCodeNode();
 
-      if (isCodeNode(node)) {
+      if (node) {
         // The highlighter gives a block without a language the default one as it’s transformed,
         // so the fallbacks here are only for the unexpected
         /* v8 ignore next */
@@ -77,19 +94,10 @@
     await loadCodeHighlighter(lang);
 
     editorStore.editor.update(() => {
-      // Resolve the target the same way the effect above does. A code editor has exactly one code
-      // block, and its `blockNodeKey` is still unset the first time the switcher is used, before
-      // the editor has ever been focused.
       // https://github.com/facebook/lexical/blob/main/packages/lexical-playground/src/plugins/ToolbarPlugin/index.tsx#L713
-      const { blockNodeKey } = editorStore.selection;
+      const node = getCodeNode();
 
-      const node = editorStore.config.isCodeEditor
-        ? getRoot().getChildren()[0]
-        : blockNodeKey
-          ? getNodeByKey(blockNodeKey)
-          : null;
-
-      if (isCodeNode(node)) {
+      if (node) {
         node.setLanguage(lang);
         selectedLanguage = lang;
       }

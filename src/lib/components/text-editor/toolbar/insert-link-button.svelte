@@ -24,10 +24,10 @@
   import { AVAILABLE_BUTTONS } from '../constants.js';
   import { focusEditor, isSafeLinkURL } from '../core.js';
   import {
-    applyRawTextEdit,
+    editRawText,
     getRawTextState,
     insertLink,
-    isRawTextEditable,
+    registerRawTextShortcut,
   } from '../raw-markdown.js';
 
   /**
@@ -169,12 +169,8 @@
       /* v8 ignore else */
       if (textArea) {
         if (event.detail.returnValue !== 'cancel') {
-          applyRawTextEdit(
-            textArea,
-            insertLink(getRawTextState(textArea), {
-              url: anchorURL.trim(),
-              text: hasAnchor ? undefined : anchorText,
-            }),
+          editRawText(textArea, (state) =>
+            insertLink(state, { url: anchorURL.trim(), text: hasAnchor ? undefined : anchorText }),
           );
         } else {
           textArea.focus();
@@ -249,22 +245,10 @@
       return undefined;
     }
 
-    /**
-     * Handle the keyboard shortcut in the plain text mode.
-     * @param {KeyboardEvent} event `keydown` event.
-     */
-    const onKeyDown = (event) => {
-      if (isRawTextEditable(textArea) && matchesShortcuts(event, isMac() ? 'Meta+K' : 'Ctrl+K')) {
-        event.preventDefault();
-        onButtonClick();
-      }
-    };
-
-    textArea.addEventListener('keydown', onKeyDown);
-
-    return () => {
-      textArea.removeEventListener('keydown', onKeyDown);
-    };
+    // Handle the keyboard shortcut in the plain text mode
+    return registerRawTextShortcut(textArea, 'K', () => {
+      onButtonClick();
+    });
   });
 
   $effect(() => {

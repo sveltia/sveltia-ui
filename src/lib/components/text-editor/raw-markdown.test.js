@@ -1,11 +1,14 @@
+import { isMac } from '@sveltia/utils/events';
 import { describe, expect, it, vi } from 'vitest';
 import {
   applyRawTextEdit,
+  editRawText,
   focusTextArea,
   getBlockType,
   getRawTextState,
   insertLink,
   insertMarkdown,
+  registerRawTextShortcut,
   setBlockType,
   toggleInlineFormat,
 } from './raw-markdown.js';
@@ -263,6 +266,58 @@ describe('textarea helpers', () => {
     await applyRawTextEdit(textArea, edit);
     expect(textArea.value).toBe('');
     textArea.remove();
+  });
+
+  it('edits the `<textarea>` from its current state, if any', async () => {
+    const textArea = document.createElement('textarea');
+    const getEdit = vi.fn((current) => toggleInlineFormat(current, 'bold'));
+
+    document.body.append(textArea);
+    textArea.value = 'Hello world';
+    textArea.setSelectionRange(6, 11);
+    await editRawText(textArea, getEdit);
+    expect(getEdit).toHaveBeenCalledWith({ value: 'Hello world', start: 6, end: 11 });
+    expect(textArea.value).toBe('Hello **world**');
+
+    getEdit.mockClear();
+    await editRawText(undefined, getEdit);
+    expect(getEdit).not.toHaveBeenCalled();
+    textArea.remove();
+  });
+
+  it('handles a keyboard shortcut while the `<textarea>` is editable', () => {
+    const textArea = document.createElement('textarea');
+    const handler = vi.fn();
+    const unregister = registerRawTextShortcut(textArea, 'B', handler);
+
+    /**
+     * Press Accel+B.
+     * @returns {KeyboardEvent} Event.
+     */
+    const press = () => {
+      const event = new KeyboardEvent('keydown', {
+        key: 'b',
+        ctrlKey: !isMac(),
+        metaKey: isMac(),
+        cancelable: true,
+      });
+
+      textArea.dispatchEvent(event);
+
+      return event;
+    };
+
+    expect(press().defaultPrevented).toBe(true);
+    expect(handler).toHaveBeenCalledOnce();
+
+    textArea.readOnly = true;
+    press();
+    expect(handler).toHaveBeenCalledOnce();
+    textArea.readOnly = false;
+
+    unregister();
+    press();
+    expect(handler).toHaveBeenCalledOnce();
   });
 
   it('gives up on moving the focus to an element that cannot take it', async () => {
