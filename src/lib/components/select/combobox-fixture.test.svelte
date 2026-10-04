@@ -18,6 +18,7 @@
    * filterThreshold?: number,
    * initiallySelected?: string,
    * onChange?: (event: CustomEvent) => void,
+   * [key: string]: any,
    * }}
    */
   let {
@@ -31,6 +32,7 @@
     filterThreshold = 5,
     initiallySelected = undefined,
     onChange = undefined,
+    ...restProps
     /* eslint-enable prefer-const */
   } = $props();
 
@@ -40,6 +42,7 @@
 </script>
 
 <Component
+  {...restProps}
   bind:value
   {editable}
   {disabled}

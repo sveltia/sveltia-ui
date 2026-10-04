@@ -315,4 +315,13 @@ describe('SelectTags', () => {
       /** @type {HTMLElement} */ (screen.container.querySelector('.sui.select-tags')).hidden,
     ).toBe(true);
   });
+
+  it('keeps the select while options remain, even with values missing from the options', async () => {
+    const screen = await render(SelectTags, {
+      options,
+      values: ['unknown1', 'unknown2', 'unknown3', 'apple'],
+    });
+
+    await expect.element(screen.getByRole('combobox')).toBeVisible();
+  });
 });

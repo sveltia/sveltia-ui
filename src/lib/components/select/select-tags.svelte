@@ -67,6 +67,12 @@
    * @type {Set<any>}
    */
   const selectedValues = $derived(new Set(values));
+  /**
+   * Whether any option is left to pick. This can’t be told by comparing the number of selected
+   * values with the number of options, as the values may include entries missing from the options.
+   * @type {boolean}
+   */
+  const hasUnselectedOptions = $derived(options.some(({ value }) => !selectedValues.has(value)));
 
   /**
    * Reference to the wrapper element.
@@ -241,7 +247,7 @@
       </span>
     {/each}
   </span>
-  {#if (typeof max !== 'number' || values.length < max) && values.length < options.length}
+  {#if (typeof max !== 'number' || values.length < max) && hasUnselectedOptions}
     <Select
       {...restProps}
       bind:value={selectedValue}

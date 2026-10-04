@@ -68,3 +68,22 @@ it('hides and disables the item', async () => {
   expect(item.hidden).toBe(true);
   expect(item.disabled).toBe(true);
 });
+
+it('updates the checked state before calling the Change handler', async () => {
+  const onChange = vi.fn();
+  /** @type {ComponentProps<typeof MenuItemRadio>} */
+  const props = $state({ label: 'Ascending', checked: false, onChange });
+
+  onChange.mockImplementation(() => {
+    expect(props.checked).toBe(true);
+  });
+
+  const screen = await render(MenuItemRadio, props);
+
+  const item = /** @type {HTMLElement} */ (
+    screen.container.querySelector('[role="menuitemradio"]')
+  );
+
+  item.dispatchEvent(new CustomEvent('Change', { detail: { checked: true } }));
+  expect(onChange).toHaveReturned();
+});

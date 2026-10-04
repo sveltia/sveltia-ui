@@ -19,6 +19,13 @@ describe('getMaximumFractionDigits', () => {
     expect(getMaximumFractionDigits(0.25)).toBe(2);
     expect(getMaximumFractionDigits(2.005)).toBe(3);
   });
+
+  it('should count the fraction digits of a step in exponent notation', () => {
+    expect(getMaximumFractionDigits(1e-7)).toBe(7);
+    expect(getMaximumFractionDigits(1.5e-7)).toBe(8);
+    expect(getMaximumFractionDigits(1e21)).toBe(0);
+    expect(stepNumber('0', { step: 1e-7, direction: 1 })).toBe('0.0000001');
+  });
 });
 
 describe('parseNumber', () => {

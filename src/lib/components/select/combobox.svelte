@@ -102,15 +102,16 @@
   const registry = createOptionRegistry();
 
   /**
-   * Update the {@link label} and selected option when the {@link value} is changed.
+   * Update the {@link label} and selected option when the {@link value} is changed. A value that
+   * matches no option, including `undefined`, clears both, so the previous option doesn’t stay
+   * selected.
    */
   const _onChange = () => {
     const entry = registry.find(value);
 
-    if (entry) {
-      label = entry.label;
-      registry.selectOnly(value);
-    }
+    label = entry?.label ?? '';
+    // With no matching entry, this deselects every option
+    registry.selectOnly(value);
   };
 
   /**
@@ -124,6 +125,24 @@
 
     _onChange();
     onChange?.(new CustomEvent('Change', { detail }));
+  };
+
+  /**
+   * Update the {@link value} as the user types in the editable combobox. The text is a free-form
+   * value, so the `Change` event carries the text itself rather than an option.
+   * @param {Event} event The `input` event.
+   */
+  const onTextInput = (event) => {
+    const { target } = /** @type {Event & { target: HTMLInputElement }} */ (event);
+
+    value = target.value;
+    _onChange();
+    restProps.oninput?.(event);
+    onChange?.(
+      new CustomEvent('Change', {
+        detail: { target, type: 'string', name: undefined, label: target.value, value },
+      }),
+    );
   };
 
   /**
@@ -304,7 +323,7 @@
   only in the DOM tree while it’s expanded, and a reference to a missing element is worse than no
   reference at all. The popup service adds it on open and removes it on close.
 -->
-<div {...restProps} role="none" class="sui combobox {className}" class:editable {hidden}>
+<div role="none" class="sui combobox {className}" class:editable {hidden}>
   {#if !editable}
     <div
       bind:this={comboboxElement}
@@ -345,6 +364,7 @@
       aria-expanded={isPopupOpen}
       aria-haspopup="listbox"
       {ariaLabel}
+      oninput={onTextInput}
     />
   {/if}
   <Button

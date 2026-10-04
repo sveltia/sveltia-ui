@@ -216,4 +216,42 @@ describe('NumberInput', () => {
     expect(screen.container.querySelector('.down')).not.toBeNull();
     expect(screen.container.querySelector('.sui.icon')).toBeNull();
   });
+
+  it('calls the consumer’s keydown and input handlers', async () => {
+    const onkeydown = vi.fn();
+    const oninput = vi.fn();
+    const screen = await render(NumberInput, { value: 1, onkeydown, oninput });
+    const input = screen.getByRole('spinbutton');
+
+    await input.click();
+    await userEvent.keyboard('{ArrowUp}');
+    expect(onkeydown).toHaveBeenCalled();
+    await userEvent.keyboard('5');
+    expect(oninput).toHaveBeenCalled();
+  });
+
+  it('ignores the arrow keys while read-only', async () => {
+    /** @type {ComponentProps<typeof NumberInput>} */
+    const props = $state({ value: 1, readonly: true });
+    const screen = await render(NumberInput, props);
+
+    await screen.getByRole('spinbutton').click();
+    await userEvent.keyboard('{ArrowUp}');
+    await userEvent.keyboard('{ArrowDown}');
+    await userEvent.keyboard('{ArrowDown}');
+    expect(props.value).toBe(1);
+  });
+
+  it('omits `aria-valuenow` while the field holds no number', async () => {
+    /** @type {ComponentProps<typeof NumberInput>} */
+    const props = $state({ value: undefined });
+    const screen = await render(NumberInput, props);
+    const input = screen.getByRole('spinbutton');
+
+    await expect.element(input).not.toHaveAttribute('aria-valuenow');
+    await input.fill('abc');
+    await expect.element(input).not.toHaveAttribute('aria-valuenow');
+    await input.fill('0');
+    await expect.element(input).toHaveAttribute('aria-valuenow', '0');
+  });
 });

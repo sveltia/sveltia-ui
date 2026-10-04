@@ -9,7 +9,13 @@
  * @param {number} step Step value.
  * @returns {number} Number of fraction digits, `0` for an integer step.
  */
-export const getMaximumFractionDigits = (step) => String(step).split('.')[1]?.length || 0;
+export const getMaximumFractionDigits = (step) => {
+  // A small step like `0.0000001` is stringified in exponent notation as `1e-7`
+  const [mantissa, exponent = '0'] = String(step).toLowerCase().split('e');
+  const digits = (mantissa.split('.')[1]?.length ?? 0) - Number(exponent);
+
+  return Math.max(digits, 0);
+};
 
 /**
  * Parse the text entered in the field.

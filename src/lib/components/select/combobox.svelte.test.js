@@ -344,4 +344,61 @@ describe('Combobox', () => {
     });
     expect(combobox.getAttribute('aria-expanded')).toBe('false');
   });
+
+  it('updates the value and fires Change as the user types in the editable mode', async () => {
+    const onChange = vi.fn();
+    /** @type {ComponentProps<typeof ComboboxFixture>} */
+    const props = $state({ editable: true, value: undefined, onChange });
+    const screen = await render(ComboboxFixture, props);
+    const input = screen.getByRole('combobox', { name: 'Fruit' });
+
+    await input.fill('kiwi');
+    await vi.waitFor(() => {
+      expect(props.value).toBe('kiwi');
+    });
+    expect(onChange).toHaveBeenCalled();
+    expect(onChange.mock.lastCall?.[0].detail.value).toBe('kiwi');
+    expect(onChange.mock.lastCall?.[0].detail.target).toBe(input.element());
+  });
+
+  it('applies the rest props to the inner control only', async () => {
+    const onclick = vi.fn();
+
+    const screen = await render(ComboboxFixture, {
+      editable: false,
+      onclick,
+      'data-testid': 'fruit',
+    });
+
+    await screen.getByRole('combobox').click();
+    expect(onclick).toHaveBeenCalledOnce();
+    expect(screen.container.querySelectorAll('[data-testid="fruit"]')).toHaveLength(1);
+    expect(screen.getByRole('combobox').element().getAttribute('data-testid')).toBe('fruit');
+  });
+
+  it('clears the label and the selection when the value matches no option', async () => {
+    /** @type {ComponentProps<typeof ComboboxFixture>} */
+    const props = $state({ editable: false, value: 'cherry' });
+    const screen = await render(ComboboxFixture, props);
+    const combobox = screen.getByRole('combobox');
+
+    await vi.waitFor(() => {
+      expect(combobox.element().textContent).toContain('Cherry');
+    });
+    props.value = 'unknown';
+    await vi.waitFor(() => {
+      expect(combobox.element().textContent).not.toContain('Cherry');
+    });
+    await combobox.click();
+    await waitForOptions(3);
+    expect(getListbox()?.querySelector('[aria-selected="true"]')).toBeNull();
+    /** @type {HTMLElement} */ (document.querySelector('dialog.popup')).click();
+    await vi.waitFor(() => {
+      expect(getListbox()).toBeNull();
+    });
+    props.value = undefined;
+    await vi.waitFor(() => {
+      expect(combobox.element().textContent).toContain('Select an option…');
+    });
+  });
 });

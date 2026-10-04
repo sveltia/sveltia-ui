@@ -38,8 +38,9 @@
   {disabled}
   aria-checked={checked}
   onChange={(event) => {
-    onChange?.(event);
+    // Update the state first, so the handler sees the new value through a bound `checked`
     checked = event.detail.checked;
+    onChange?.(event);
   }}
 >
   {#snippet startIcon()}

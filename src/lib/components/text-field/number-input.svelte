@@ -55,6 +55,8 @@
     increaseIcon,
     decreaseIcon,
     onChange,
+    onkeydown,
+    oninput,
     ...restProps
     /* eslint-enable prefer-const */
   } = $props();
@@ -174,20 +176,22 @@
     {readonly}
     {required}
     {invalid}
-    aria-valuenow={Number(value || 0)}
+    aria-valuenow={Number.isFinite(value) ? value : undefined}
     aria-valuemin={min}
     aria-valuemax={max}
     inputmode={maximumFractionDigits > 0 ? 'decimal' : 'numeric'}
     onkeydown={(event) => {
       const { key, ctrlKey, metaKey, altKey, shiftKey } = event;
       const hasModifier = shiftKey || altKey || ctrlKey || metaKey;
+      // A read-only field can’t be stepped, just like the spin buttons
+      const canStep = !disabled && !readonly && !hasModifier;
 
-      if (key === 'ArrowDown' && !hasModifier) {
+      if (key === 'ArrowDown' && canStep) {
         event.preventDefault();
         decrease();
       }
 
-      if (key === 'ArrowUp' && !hasModifier) {
+      if (key === 'ArrowUp' && canStep) {
         event.preventDefault();
         increase();
       }
@@ -195,11 +199,15 @@
       if (!edited) {
         edited = true;
       }
+
+      onkeydown?.(event);
     }}
-    oninput={() => {
+    oninput={(event) => {
       if (!edited) {
         edited = true;
       }
+
+      oninput?.(event);
     }}
     {onChange}
   />

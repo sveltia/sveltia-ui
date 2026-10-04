@@ -68,3 +68,22 @@ it('hides and disables the item', async () => {
   expect(item.hidden).toBe(true);
   expect(item.disabled).toBe(true);
 });
+
+it('updates the checked state before calling the Change handler', async () => {
+  const onChange = vi.fn();
+  /** @type {ComponentProps<typeof MenuItemCheckbox>} */
+  const props = $state({ label: 'Pinned', checked: false, onChange });
+
+  onChange.mockImplementation(() => {
+    expect(props.checked).toBe(true);
+  });
+
+  const screen = await render(MenuItemCheckbox, props);
+
+  const item = /** @type {HTMLElement} */ (
+    screen.container.querySelector('[role="menuitemcheckbox"]')
+  );
+
+  item.dispatchEvent(new CustomEvent('Change', { detail: { checked: true } }));
+  expect(onChange).toHaveReturned();
+});
