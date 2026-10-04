@@ -5,6 +5,10 @@ import { text } from '../../test-utils/snippets.js';
 import TabListFixture from './tab-list-fixture.test.svelte';
 import TabList from './tab-list.svelte';
 
+/**
+ * @import { ComponentProps } from 'svelte';
+ */
+
 it('renders a labelled tab list with the state attributes', async () => {
   const screen = await render(TabList, {
     ariaLabel: 'Settings',
@@ -67,4 +71,44 @@ it('switches the tabs and panels, and moves the indicator', async () => {
       `left: ${/** @type {HTMLElement} */ (advanced.element()).offsetLeft}px`,
     );
   });
+});
+
+it('follows a tab selected from code', async () => {
+  const onChange = vi.fn();
+  /** @type {ComponentProps<typeof TabListFixture>} */
+  const props = $state({ selected: 'general', onChange });
+  const activated = whenActivated();
+  const screen = await render(TabListFixture, props);
+
+  await activated;
+
+  const general = screen.getByRole('tab', { name: 'General' });
+  const advanced = screen.getByRole('tab', { name: 'Advanced' });
+  const generalPanel = /** @type {HTMLElement} */ (document.getElementById('panel-general'));
+  const advancedPanel = /** @type {HTMLElement} */ (document.getElementById('panel-advanced'));
+  const indicator = /** @type {HTMLElement} */ (screen.container.querySelector('.indicator'));
+
+  await vi.waitFor(() => {
+    expect(indicator.getAttribute('style')).toContain(
+      `left: ${/** @type {HTMLElement} */ (general.element()).offsetLeft}px`,
+    );
+  });
+
+  props.selected = 'advanced';
+  await expect.element(advanced).toHaveAttribute('aria-selected', 'true');
+  await vi.waitFor(() => {
+    expect(advancedPanel.inert).toBe(false);
+  });
+  expect(advancedPanel.getAttribute('aria-hidden')).toBe('false');
+  expect(generalPanel.inert).toBe(true);
+  expect(generalPanel.getAttribute('aria-hidden')).toBe('true');
+  await expect.element(advanced).toHaveAttribute('tabindex', '0');
+  await expect.element(general).toHaveAttribute('tabindex', '-1');
+  await vi.waitFor(() => {
+    expect(indicator.getAttribute('style')).toContain(
+      `left: ${/** @type {HTMLElement} */ (advanced.element()).offsetLeft}px`,
+    );
+  });
+  // Nothing was chosen by the user
+  expect(onChange).not.toHaveBeenCalled();
 });

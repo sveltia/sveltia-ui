@@ -10,15 +10,16 @@
   /**
    * @type {{
    * orientation?: 'horizontal' | 'vertical',
+   * selected?: 'general' | 'advanced',
    * onChange?: (event: CustomEvent) => void,
    * }}
    */
-  const { orientation = 'horizontal', onChange = undefined } = $props();
+  const { orientation = 'horizontal', selected = 'general', onChange = undefined } = $props();
 </script>
 
 <TabList ariaLabel="Settings" name="settings" {orientation} {onChange}>
-  <Tab label="General" aria-controls="panel-general" selected={true} />
-  <Tab label="Advanced" aria-controls="panel-advanced" />
+  <Tab label="General" aria-controls="panel-general" selected={selected === 'general'} />
+  <Tab label="Advanced" aria-controls="panel-advanced" selected={selected === 'advanced'} />
 </TabList>
 <TabPanel id="panel-general">General panel</TabPanel>
 <TabPanel id="panel-advanced">Advanced panel</TabPanel>

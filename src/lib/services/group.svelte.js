@@ -189,6 +189,18 @@ const getMenuOpener = (element) => {
 };
 
 /**
+ * Check whether the given member can hold a selected state. A plain menu item is an action, not a
+ * choice, so it has no checked state, and a member marked with `data-selectable="false"`, such as
+ * the caption row of a collapsible row group in a grid, can be focused but not selected.
+ * @internal
+ * @param {HTMLElement} element Member element.
+ * @param {string | null} [role] The member’s role, if already read.
+ * @returns {boolean} Result.
+ */
+const isSelectable = (element, role = element.getAttribute('role')) =>
+  role !== 'menuitem' && element.dataset.selectable !== 'false';
+
+/**
  * Implement keyboard and mouse interactions for a grouping composite widget.
  */
 export class Group {
@@ -197,6 +209,12 @@ export class Group {
    * @type {boolean}
    */
   activated = false;
+
+  /**
+   * Observer of the members’ selected state, for the widgets whose panels or tab stop follow it.
+   * @type {MutationObserver | undefined}
+   */
+  selectionObserver = undefined;
 
   /**
    * Whether {@link destroy} has run, so a pending {@link activate} must not run.
@@ -238,6 +256,13 @@ export class Group {
    * @type {TypeAhead}
    */
   #typeAhead = new TypeAhead();
+
+  /**
+   * Whether {@link selectTarget} is clicking a radio button to have its component check it, so the
+   * click that comes back to {@link onClick} is not handled as a second selection.
+   * @type {boolean}
+   */
+  #clickingRadio = false;
 
   /**
    * Get the normalized value a member is searched by, computing it only when the underlying raw
@@ -354,6 +379,23 @@ export class Group {
       attributeFilter: ['aria-disabled', 'aria-hidden'],
     });
 
+    // A member can also be selected from code, as when a `<Tab>`’s `selected` prop changes. The
+    // group’s own writes are already in sync, so this only matters for the ones made elsewhere: the
+    // panels and the roving tab stop have to follow the new selection.
+    if (controlsPanel || (focusChild && rovingTabStop === 'selected')) {
+      this.selectionObserver = new globalThis.MutationObserver(() => {
+        if (this.activated) {
+          this.syncSelection();
+        }
+      });
+
+      this.selectionObserver.observe(parent, {
+        subtree: true,
+        attributes: true,
+        attributeFilter: [childSelectedAttr],
+      });
+    }
+
     // Listen right away: a click or a key press that comes before the activation below activates
     // the members first, rather than being lost
     parent.addEventListener('click', this._onClick);
@@ -394,7 +436,10 @@ export class Group {
       const controlTarget = controlTargetId ? document.getElementById(controlTargetId) : null;
 
       element.id ||= `${this.id}-item-${index + 1}`;
-      element.setAttribute(this.childSelectedAttr, String(isSelected));
+
+      if (isSelectable(element)) {
+        element.setAttribute(this.childSelectedAttr, String(isSelected));
+      }
 
       if (controlTarget) {
         controlTarget.inert = !isSelected;
@@ -466,6 +511,42 @@ export class Group {
       // popup looks the tab stop up by attribute.
       setTabIndex(element, element === tabStop ? 0 : -1);
     });
+  }
+
+  /**
+   * Bring the panels and the roving tab stop in line with the members’ selected state, after it has
+   * been changed from outside the group.
+   */
+  syncSelection() {
+    const { allMembers, activeMembers, parent } = this;
+
+    if (this.controlsPanel) {
+      allMembers.forEach((element) => {
+        const controlTargetId = element.getAttribute('aria-controls');
+        const controlTarget = controlTargetId ? document.getElementById(controlTargetId) : null;
+
+        if (controlTarget) {
+          const isSelected = element.getAttribute(this.childSelectedAttr) === 'true';
+
+          controlTarget.inert = !isSelected;
+          controlTarget.setAttribute('aria-hidden', String(!isSelected));
+        }
+      });
+    }
+
+    // The tab stop moves to the newly selected member, unless the user is in the widget, in which
+    // case it stays where they are
+    if (this.focusChild && !parent.contains(document.activeElement)) {
+      const selected = activeMembers.find(
+        (element) => element.getAttribute(this.childSelectedAttr) === 'true',
+      );
+
+      if (selected) {
+        allMembers.forEach((element) => {
+          setTabIndex(element, element === selected ? 0 : -1);
+        });
+      }
+    }
   }
 
   /**
@@ -706,6 +787,9 @@ export class Group {
 
     const targetRole = newTarget.getAttribute('role');
     const targetParent = newTarget.closest(this.parentGroupSelector);
+    // Moving to a member that can’t be selected, such as a plain menu item, leaves the selection
+    // as it is, rather than clearing it as moving to another member of a single-select group does
+    const targetSelectable = isSelectable(newTarget, targetRole);
     const selectByClick = event.type === 'click';
 
     const selectByKeydown =
@@ -727,6 +811,13 @@ export class Group {
      * @type {HTMLElement[]}
      */
     const scrollTargets = [];
+    /**
+     * Whether the selection changed, or an action was taken on a menu item, which is what the
+     * group’s own `Change` event reports. Moving the cursor alone, or selecting the member that is
+     * already selected, changes nothing.
+     * @type {boolean}
+     */
+    let changed = false;
 
     this.activeMembers.forEach((element) => {
       // Reading the role once and comparing it is markedly cheaper than putting every member
@@ -742,8 +833,9 @@ export class Group {
         return;
       }
 
-      const multiSelect = isMenuItemCheckbox || this.multi;
-      const singleSelect = isMenuItemRadio || !multiSelect;
+      const selectable = isSelectable(element, role);
+      const multiSelect = selectable && (isMenuItemCheckbox || this.multi);
+      const singleSelect = selectable && targetSelectable && (isMenuItemRadio || !multiSelect);
       const isTarget = element === newTarget;
       const isSelected = element.getAttribute(this.childSelectedAttr) === 'true';
       const controlTargetId = this.controlsPanel ? element.getAttribute('aria-controls') : null;
@@ -752,7 +844,15 @@ export class Group {
       affected.push(element);
       targetAffected ||= isTarget;
 
+      // A plain menu item is activated, never checked, and only by a click or Space: the arrow
+      // keys merely move to it
+      if (role === 'menuitem' && isTarget && (selectByClick || selectByKeydown)) {
+        changed = true;
+        element.dispatchEvent(new CustomEvent('Select'));
+      }
+
       if (multiSelect && isTarget && (selectByClick || selectByKeydown)) {
+        changed = true;
         element.setAttribute(this.childSelectedAttr, String(!isSelected));
         element.dispatchEvent(
           new CustomEvent('Change', { detail: { [this.childSelectedProp]: !isSelected } }),
@@ -768,14 +868,23 @@ export class Group {
         isSelected !== isTarget &&
         (isMenuItemRadio ? selectByKeydown || selectByClick : true)
       ) {
+        changed = true;
         element.setAttribute(this.childSelectedAttr, String(isTarget));
         element.dispatchEvent(
           new CustomEvent('Change', { detail: { [this.childSelectedProp]: isTarget } }),
         );
 
         if (isTarget) {
+          // Let the radio button’s component check itself and update its bound group. The click
+          // bubbles back up to the group, which must not take it as another selection.
           if (event.type === 'keydown' && role === 'radio') {
-            element.click();
+            this.#clickingRadio = true;
+
+            try {
+              element.click();
+            } finally {
+              this.#clickingRadio = false;
+            }
           }
 
           element.dispatchEvent(new CustomEvent('Select'));
@@ -823,9 +932,11 @@ export class Group {
       }
     }
 
-    this.parent.dispatchEvent(
-      new CustomEvent('Change', { detail: getSelectedItemDetail(newTarget) }),
-    );
+    if (changed) {
+      this.parent.dispatchEvent(
+        new CustomEvent('Change', { detail: getSelectedItemDetail(newTarget) }),
+      );
+    }
   }
 
   /**
@@ -861,7 +972,7 @@ export class Group {
       ? target
       : /** @type {HTMLElement | null} */ (target.closest(this.selector));
 
-    if (!newTarget || event.button !== 0 || !this.clickToSelect) {
+    if (!newTarget || event.button !== 0 || !this.clickToSelect || this.#clickingRadio) {
       return;
     }
 
@@ -1043,10 +1154,14 @@ export class Group {
 
     if (this.grid) {
       const colCount = this.columnCount;
-      const lastIndex = allMembers.length - 1;
+      // Members filtered out by a search take no cell in the layout, so they’re left out of the
+      // index the same way they’re left out of the column count. A disabled member still takes its
+      // cell, and stays in.
+      const members = allMembers.filter((member) => member.getAttribute('aria-hidden') !== 'true');
+      const lastIndex = members.length - 1;
       const _isRTL = isRTL();
 
-      index = currentTarget ? allMembers.indexOf(currentTarget) : -1;
+      index = currentTarget ? members.indexOf(currentTarget) : -1;
 
       // With nothing focused yet, the arrows start from either end, as in a list
       if (index === -1) {
@@ -1061,12 +1176,12 @@ export class Group {
       }
 
       if (key === 'ArrowUp' && index > 0) {
-        newTarget = allMembers[Math.max(index - colCount, 0)];
+        newTarget = members[Math.max(index - colCount, 0)];
       }
 
       if (key === 'ArrowDown' && index !== -1 && index < lastIndex) {
         // A partial last row still gets reached
-        newTarget = allMembers[Math.min(index + colCount, lastIndex)];
+        newTarget = members[Math.min(index + colCount, lastIndex)];
       }
 
       // In RTL, ArrowLeft moves to the next member, ArrowRight to the previous one
@@ -1074,14 +1189,14 @@ export class Group {
       const nextKey = _isRTL ? 'ArrowLeft' : 'ArrowRight';
 
       if (key === prevKey && index > 0) {
-        newTarget = allMembers[index - 1];
+        newTarget = members[index - 1];
       }
 
       if (key === nextKey && index !== -1 && index < lastIndex) {
-        newTarget = allMembers[index + 1];
+        newTarget = members[index + 1];
       }
 
-      if (newTarget?.matches('[aria-disabled="true"], [aria-hidden="true"]')) {
+      if (newTarget?.matches('[aria-disabled="true"]')) {
         newTarget = undefined;
       }
     } else {
@@ -1134,6 +1249,7 @@ export class Group {
     globalThis.clearTimeout(this.#scrollTimer);
     this.#typeAhead.reset();
     this.observer.disconnect();
+    this.selectionObserver?.disconnect();
     this.parent.removeEventListener('click', this._onClick);
     this.parent.removeEventListener('keydown', this._onKeyDown);
   }

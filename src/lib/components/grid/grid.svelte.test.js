@@ -79,6 +79,39 @@ it('allows selecting several rows when multiple', async () => {
   await expect.element(beta).toHaveAttribute('aria-selected', 'false');
 });
 
+it('toggles a collapsible row group without touching the selection', async () => {
+  const onChange = vi.fn();
+  const activated = whenActivated();
+  const screen = await render(GridFixture, { label: 'Recent', collapsible: true, onChange });
+
+  await activated;
+
+  const caption = /** @type {HTMLElement} */ (screen.container.querySelector('.row-group-caption'));
+  const expander = screen.getByRole('button', { name: 'Recent' });
+  const beta = screen.getByRole('row', { name: 'Beta' });
+
+  await beta.click();
+  await expect.element(beta).toHaveAttribute('aria-selected', 'true');
+  expect(onChange).toHaveBeenCalledOnce();
+  expect(caption.hasAttribute('aria-selected')).toBe(false);
+
+  // The expander collapses and expands the group; the user’s row stays selected
+  await expander.click();
+  await expect.element(expander).toHaveAttribute('aria-expanded', 'false');
+  expect(caption.hasAttribute('aria-selected')).toBe(false);
+  await expander.click();
+  await expect.element(expander).toHaveAttribute('aria-expanded', 'true');
+
+  // So does Enter on the caption row
+  caption.focus();
+  await userEvent.keyboard('{Enter}');
+  await expect.element(expander).toHaveAttribute('aria-expanded', 'false');
+  await userEvent.keyboard('{Enter}');
+  await expect.element(expander).toHaveAttribute('aria-expanded', 'true');
+  expect(caption.hasAttribute('aria-selected')).toBe(false);
+  expect(onChange).toHaveBeenCalledOnce();
+});
+
 it('moves through the rows with the arrow keys, Home and End', async () => {
   const activated = whenActivated();
   const screen = await render(GridFixture, { multiple: true });

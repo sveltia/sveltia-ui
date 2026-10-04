@@ -83,6 +83,33 @@ it('moves the selection with the arrow keys', async () => {
   expect(props.group).toBe('green');
 });
 
+it('fires a single Change per choice, and none for the radio already checked', async () => {
+  const onChange = vi.fn();
+  /** @type {ComponentProps<typeof RadioGroupFixture>} */
+  const props = $state({ group: 'red', onChange });
+  const activated = whenActivated();
+  const screen = await render(RadioGroupFixture, props);
+
+  await activated;
+
+  const red = screen.getByRole('radio', { name: 'Red' });
+  const green = screen.getByRole('radio', { name: 'Green' });
+
+  await red.click();
+  expect(onChange).not.toHaveBeenCalled();
+  /** @type {HTMLElement} */ (red.element()).focus();
+  await userEvent.keyboard('{ArrowRight}');
+  await expect.element(green).toHaveAttribute('aria-checked', 'true');
+  expect(onChange).toHaveBeenCalledOnce();
+  expect(onChange.mock.calls[0][0].detail.value).toBe('green');
+  expect(props.group).toBe('green');
+  // The radio unchecked by the arrow key can be checked again with a click
+  await red.click();
+  await expect.element(red).toHaveAttribute('aria-checked', 'true');
+  expect(props.group).toBe('red');
+  expect(onChange).toHaveBeenCalledTimes(2);
+});
+
 it('keeps the selection when read-only', async () => {
   const onChange = vi.fn();
   /** @type {ComponentProps<typeof RadioGroupFixture>} */

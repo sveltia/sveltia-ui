@@ -91,7 +91,11 @@
   aria-roledescription={_('_sui.role_descriptions.grid_body')}
 >
   {#if label}
-    <div role="row" class="row-group-caption" {@attach handleCaptionClick}>
+    <!--
+      The caption is a row the keyboard can land on, but not one that can be selected: clicking or
+      pressing Enter on it toggles the group instead
+    -->
+    <div role="row" class="row-group-caption" data-selectable="false" {@attach handleCaptionClick}>
       <!-- We need `colspan` here but cannot place `<th>` under `<div>`, so use a hack -->
       <svelte:element this={"th"} role="columnheader" id="{id}-label" colspan="9999">
         {#if hasExpander}

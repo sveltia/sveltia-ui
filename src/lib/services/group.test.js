@@ -809,6 +809,194 @@ describe('Group - menu with menuitemradio', () => {
   });
 });
 
+describe('Group - menu with plain menuitems', () => {
+  /** @type {HTMLElement} */
+  let menu;
+  /** @type {HTMLElement[]} */
+  let items;
+
+  beforeEach(async () => {
+    vi.useFakeTimers();
+    menu = document.createElement('div');
+    menu.setAttribute('role', 'menu');
+    items = ['Cut', 'Copy', 'Paste'].map((label) => {
+      const item = document.createElement('button');
+
+      item.setAttribute('role', 'menuitem');
+      item.textContent = label;
+      menu.appendChild(item);
+
+      return item;
+    });
+    document.body.appendChild(menu);
+    activateGroup()(menu);
+    await vi.advanceTimersByTimeAsync(150);
+  });
+
+  afterEach(() => {
+    menu.remove();
+    vi.useRealTimers();
+  });
+
+  it('should not give the items a checked state on activation', () => {
+    items.forEach((item) => {
+      expect(item.hasAttribute('aria-checked')).toBe(false);
+    });
+  });
+
+  it('should only move focus with the arrow keys, Home, End and type-ahead', () => {
+    const onMenuChange = vi.fn();
+    const onItemChange = vi.fn();
+    const onItemSelect = vi.fn();
+
+    menu.addEventListener('Change', onMenuChange);
+    items.forEach((item) => {
+      item.addEventListener('Change', onItemChange);
+      item.addEventListener('Select', onItemSelect);
+    });
+    items[0].focus();
+    items[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+    expect(document.activeElement).toBe(items[1]);
+    items[1].dispatchEvent(new KeyboardEvent('keydown', { key: 'End', bubbles: true }));
+    expect(document.activeElement).toBe(items[2]);
+    items[2].dispatchEvent(new KeyboardEvent('keydown', { key: 'c', bubbles: true }));
+    expect(document.activeElement).toBe(items[0]);
+    items.forEach((item) => {
+      expect(item.hasAttribute('aria-checked')).toBe(false);
+    });
+    expect(onMenuChange).not.toHaveBeenCalled();
+    expect(onItemChange).not.toHaveBeenCalled();
+    expect(onItemSelect).not.toHaveBeenCalled();
+  });
+
+  it('should fire Select on a click, every time, without checking the item', () => {
+    const onMenuChange = vi.fn();
+    const onItemSelect = vi.fn();
+
+    menu.addEventListener('Change', onMenuChange);
+    items[1].addEventListener('Select', onItemSelect);
+    items[1].click();
+    items[1].click();
+    expect(onItemSelect).toHaveBeenCalledTimes(2);
+    expect(onMenuChange).toHaveBeenCalledTimes(2);
+    expect(items[1].hasAttribute('aria-checked')).toBe(false);
+  });
+});
+
+describe('Group - members that cannot be selected', () => {
+  /** @type {HTMLElement} */
+  let grid;
+  /** @type {HTMLElement} */
+  let caption;
+  /** @type {HTMLElement[]} */
+  let rows;
+
+  beforeEach(async () => {
+    vi.useFakeTimers();
+    grid = document.createElement('div');
+    grid.setAttribute('role', 'grid');
+    caption = document.createElement('div');
+    caption.setAttribute('role', 'row');
+    caption.dataset.selectable = 'false';
+    grid.appendChild(caption);
+    rows = ['A', 'B'].map((label) => {
+      const row = document.createElement('div');
+
+      row.setAttribute('role', 'row');
+      row.textContent = label;
+      grid.appendChild(row);
+
+      return row;
+    });
+    document.body.appendChild(grid);
+    activateGroup()(grid);
+    await vi.advanceTimersByTimeAsync(150);
+  });
+
+  afterEach(() => {
+    grid.remove();
+    vi.useRealTimers();
+  });
+
+  it('should focus the member on a click but leave the selection alone', () => {
+    const onChange = vi.fn();
+
+    rows[0].click();
+    grid.addEventListener('Change', onChange);
+    caption.click();
+    expect(document.activeElement).toBe(caption);
+    expect(caption.hasAttribute('aria-selected')).toBe(false);
+    expect(rows[0].getAttribute('aria-selected')).toBe('true');
+    expect(onChange).not.toHaveBeenCalled();
+  });
+});
+
+describe('Group - selection changed from outside', () => {
+  /** @type {HTMLElement} */
+  let tablist;
+  /** @type {HTMLElement[]} */
+  let tabs;
+  /** @type {HTMLElement[]} */
+  let panels;
+
+  beforeEach(async () => {
+    vi.useFakeTimers();
+    panels = ['panel-x', 'panel-y'].map((id) => {
+      const panel = document.createElement('div');
+
+      panel.id = id;
+      document.body.appendChild(panel);
+
+      return panel;
+    });
+    tablist = document.createElement('div');
+    tablist.setAttribute('role', 'tablist');
+    tabs = panels.map((panel) => {
+      const tab = document.createElement('button');
+
+      tab.setAttribute('role', 'tab');
+      tab.setAttribute('aria-controls', panel.id);
+      tablist.appendChild(tab);
+
+      return tab;
+    });
+    document.body.appendChild(tablist);
+    activateGroup()(tablist);
+    await vi.advanceTimersByTimeAsync(500);
+  });
+
+  afterEach(() => {
+    tablist.remove();
+    panels.forEach((p) => p.remove());
+    vi.useRealTimers();
+  });
+
+  it('should show the panel of the newly selected tab and move the tab stop to it', async () => {
+    const onChange = vi.fn();
+
+    tablist.addEventListener('Change', onChange);
+    tabs[0].setAttribute('aria-selected', 'false');
+    tabs[1].setAttribute('aria-selected', 'true');
+    await vi.advanceTimersByTimeAsync(0);
+    expect(panels[0].inert).toBe(true);
+    expect(panels[0].getAttribute('aria-hidden')).toBe('true');
+    expect(panels[1].inert).toBe(false);
+    expect(panels[1].getAttribute('aria-hidden')).toBe('false');
+    expect(tabs[0].getAttribute('tabindex')).toBe('-1');
+    expect(tabs[1].getAttribute('tabindex')).toBe('0');
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
+  it('should leave the tab stop where the user is', async () => {
+    tabs[0].focus();
+    tabs[0].setAttribute('aria-selected', 'false');
+    tabs[1].setAttribute('aria-selected', 'true');
+    await vi.advanceTimersByTimeAsync(0);
+    expect(panels[1].inert).toBe(false);
+    expect(tabs[0].getAttribute('tabindex')).toBe('0');
+  });
+});
+
 describe('Group - menu with menuitemcheckbox', () => {
   /** @type {HTMLElement} */
   let menu;
@@ -910,6 +1098,27 @@ describe('Group - radiogroup keyboard navigation', () => {
     expect(radios[0].getAttribute('aria-checked')).toBe('true');
     expect(radios[1].getAttribute('aria-checked')).toBe('false');
   });
+
+  it('should fire a single Change per arrow key', () => {
+    const onChange = vi.fn();
+
+    radiogroup.addEventListener('Change', onChange);
+    radios[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+    expect(onChange).toHaveBeenCalledOnce();
+    expect(radios[1].getAttribute('aria-checked')).toBe('true');
+  });
+
+  it('should not fire Change when the checked radio is clicked again', () => {
+    const onChange = vi.fn();
+    const onSelect = vi.fn();
+
+    radiogroup.addEventListener('Change', onChange);
+    radios[0].addEventListener('Select', onSelect);
+    radios[0].click();
+    expect(onChange).not.toHaveBeenCalled();
+    expect(onSelect).not.toHaveBeenCalled();
+    expect(radios[0].getAttribute('aria-checked')).toBe('true');
+  });
 });
 
 describe('Group - grid listbox navigation', () => {
@@ -981,6 +1190,31 @@ describe('Group - grid listbox navigation', () => {
     // A single row: ArrowDown lands on the last member, and ArrowUp goes back to the first
     listbox.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
     expect(options[5].getAttribute('aria-selected')).toBe('true');
+    listbox.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true }));
+    expect(options[0].getAttribute('aria-selected')).toBe('true');
+  });
+
+  it('should step over an option filtered out by a search', () => {
+    // A hidden option has no box, so the next row starts one option later
+    options[1].setAttribute('aria-hidden', 'true');
+    options.forEach((opt, i) => {
+      const position = i > 1 ? i - 1 : i;
+
+      opt.getClientRects = () =>
+        /** @type {DOMRectList} */ (/** @type {unknown} */ (i === 1 ? [] : [{}]));
+      opt.getBoundingClientRect = () =>
+        /** @type {DOMRect} */ ({
+          top: Math.floor(position / 3) * 100,
+          left: (position % 3) * 100,
+        });
+    });
+    listbox.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+    expect(options[2].getAttribute('aria-selected')).toBe('true');
+    listbox.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true }));
+    expect(options[0].getAttribute('aria-selected')).toBe('true');
+    // The visible options are 0, 2, 3 on the first row and 4, 5 on the second
+    listbox.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+    expect(options[4].getAttribute('aria-selected')).toBe('true');
     listbox.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true }));
     expect(options[0].getAttribute('aria-selected')).toBe('true');
   });

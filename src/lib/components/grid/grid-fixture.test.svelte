@@ -14,6 +14,8 @@
    * clickToSelect?: boolean,
    * values?: string[],
    * withButtons?: boolean,
+   * label?: string,
+   * collapsible?: boolean,
    * onChange?: (event: CustomEvent) => void,
    * }}
    */
@@ -22,6 +24,8 @@
     clickToSelect = true,
     values = ['a', 'b', 'c'],
     withButtons = false,
+    label = '',
+    collapsible = false,
     onChange = undefined,
   } = $props();
 
@@ -30,7 +34,7 @@
 </script>
 
 <Grid ariaLabel="Files" {multiple} {clickToSelect} {onChange}>
-  <GridBody>
+  <GridBody {label} {collapsible}>
     {#each values as value (value)}
       <GridRow data-value={value}>
         <GridCell>

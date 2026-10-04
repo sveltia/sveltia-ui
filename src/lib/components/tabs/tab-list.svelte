@@ -73,10 +73,22 @@
       updateIndicator();
     });
 
+    // A tab can also be selected from code through its `selected` prop, which doesn’t go through
+    // the `Change` event below
+    const selectionObserver = new MutationObserver(() => {
+      updateIndicator();
+    });
+
     observer.observe(/** @type {HTMLElement} */ (wrapper));
+    selectionObserver.observe(/** @type {HTMLElement} */ (wrapper), {
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['aria-selected'],
+    });
 
     return () => {
       observer.disconnect();
+      selectionObserver.disconnect();
     };
   });
 </script>

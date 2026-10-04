@@ -138,7 +138,18 @@
         group = value;
       }
     }}
-    {onChange}
+    onChange={(/** @type {CustomEvent} */ event) => {
+      // The group checks and unchecks the radio buttons by itself, as the arrow keys move, so keep
+      // the state in step; otherwise a radio button unchecked that way would still think it’s
+      // checked and ignore the next click
+      checked = event.detail.checked;
+
+      if (checked && typeof group === 'string') {
+        group = value;
+      }
+
+      onChange?.(event);
+    }}
     {onSelect}
   />
   {#if children || label}
