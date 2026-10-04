@@ -82,8 +82,8 @@
     "@lexical/utils": "^0.52.0",
     "@shikijs/langs": "4.5.0",
     "@shikijs/themes": "4.5.0",
-    "@sveltia/i18n": "^1.4.0",
-    "@sveltia/utils": "^0.12.2",
+    "@sveltia/i18n": "^1.4.1",
+    "@sveltia/utils": "^0.12.3",
     "lexical": "^0.52.0"
   },
   "devDependencies": {
