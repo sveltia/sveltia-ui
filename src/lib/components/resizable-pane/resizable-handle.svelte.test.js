@@ -4,16 +4,7 @@ import { userEvent } from 'vitest/browser';
 import ResizableHandle from './resizable-handle.svelte';
 import ResizablePaneFixture from './resizable-pane-fixture.test.svelte';
 import { setRTL } from '../../test-utils/locale.js';
-
-/**
- * Get the flex basis of each pane.
- * @param {HTMLElement} container Container.
- * @returns {string[]} Flex bases.
- */
-const getSizes = (container) =>
-  /** @type {HTMLElement[]} */ ([...container.querySelectorAll('.sui.resizable-pane')]).map(
-    (pane) => pane.style.flexBasis,
-  );
+import { getSizes } from '../../test-utils/resizable.js';
 
 describe('ResizableHandle', () => {
   afterEach(() => {

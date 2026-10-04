@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-svelte';
+import { getDialog } from '../../test-utils/dialog.js';
 import { whenActivated } from '../../test-utils/group.js';
 import { html } from '../../test-utils/snippets.js';
 import Modal from './modal.svelte';
@@ -8,12 +9,6 @@ import NestedModalFixture from './nested-modal-fixture.test.svelte';
 /**
  * @import { ComponentProps } from 'svelte';
  */
-
-/**
- * Get the `<dialog>` element a modal has rendered into the document.
- * @returns {HTMLDialogElement | null} Element.
- */
-const getDialog = () => document.querySelector('dialog.sui.modal');
 
 /**
  * Wait until the given condition is met.

@@ -3,18 +3,13 @@ import { render } from 'vitest-browser-svelte';
 import { userEvent } from 'vitest/browser';
 import EditorFixture from '../editor-fixture.test.svelte';
 import InsertLinkButton from './insert-link-button.svelte';
+import { getDialog, waitForOpen } from '../../../test-utils/dialog.js';
 import { getEditorStore } from '../../../test-utils/editor.js';
 
 /**
  * @import { ComponentProps } from 'svelte';
  * @import { TextEditorStore } from '$lib/typedefs';
  */
-
-/**
- * Get the link dialog.
- * @returns {HTMLDialogElement | null} Element.
- */
-const getDialog = () => document.querySelector('dialog.sui.modal');
 
 /**
  * Render the button with the given content in the editor.
@@ -60,9 +55,7 @@ describe('InsertLinkButton', () => {
 
     root.focus();
     await screen.getByRole('button', { name: 'Link' }).click();
-    await vi.waitFor(() => {
-      expect(getDialog()?.open).toBe(true);
-    });
+    await waitForOpen();
 
     const dialog = /** @type {HTMLDialogElement} */ (getDialog());
 
@@ -137,9 +130,7 @@ describe('InsertLinkButton', () => {
     root.focus();
     document.execCommand('selectAll');
     await screen.getByRole('button', { name: 'Link' }).click();
-    await vi.waitFor(() => {
-      expect(getDialog()?.open).toBe(true);
-    });
+    await waitForOpen();
     await expect
       .element(screen.getByRole('textbox', { name: 'URL' }))
       .toHaveValue('https://example.com/');
@@ -157,9 +148,7 @@ describe('InsertLinkButton', () => {
     root.focus();
     document.execCommand('selectAll');
     await screen.getByRole('button', { name: 'Link' }).click();
-    await vi.waitFor(() => {
-      expect(getDialog()?.open).toBe(true);
-    });
+    await waitForOpen();
 
     const url = screen.getByRole('textbox', { name: 'URL' });
 
@@ -180,9 +169,7 @@ describe('InsertLinkButton', () => {
     root.focus();
     document.execCommand('selectAll');
     await screen.getByRole('button', { name: 'Link' }).click();
-    await vi.waitFor(() => {
-      expect(getDialog()?.open).toBe(true);
-    });
+    await waitForOpen();
     await expect.element(screen.getByRole('textbox', { name: 'URL' })).toHaveValue('');
   });
 
@@ -192,9 +179,7 @@ describe('InsertLinkButton', () => {
     root.focus();
     document.execCommand('selectAll');
     await screen.getByRole('button', { name: 'Link' }).click();
-    await vi.waitFor(() => {
-      expect(getDialog()?.open).toBe(true);
-    });
+    await waitForOpen();
     await screen.getByRole('textbox', { name: 'URL' }).fill('https://example.com/');
     await screen.getByRole('button', { name: 'Cancel' }).click();
     await vi.waitFor(() => {
@@ -214,9 +199,7 @@ describe('InsertLinkButton', () => {
     });
     await expect.element(button).toHaveAttribute('aria-pressed', 'true');
     await button.click();
-    await vi.waitFor(() => {
-      expect(getDialog()?.open).toBe(true);
-    });
+    await waitForOpen();
     expect(getDialog()?.querySelector('.title')?.textContent?.trim()).toBe('Update Link');
     await expect
       .element(screen.getByRole('textbox', { name: 'URL' }))
@@ -228,9 +211,7 @@ describe('InsertLinkButton', () => {
     });
 
     await button.click();
-    await vi.waitFor(() => {
-      expect(getDialog()?.open).toBe(true);
-    });
+    await waitForOpen();
     await screen.getByRole('button', { name: 'Remove' }).click();
     await vi.waitFor(() => {
       expect(store.inputValue).toBe('Example');
@@ -246,9 +227,7 @@ describe('InsertLinkButton', () => {
     await userEvent.keyboard('x');
     expect(getDialog()).toBeNull();
     await userEvent.keyboard(`{${modifier}>}k{/${modifier}}`);
-    await vi.waitFor(() => {
-      expect(getDialog()?.open).toBe(true);
-    });
+    await waitForOpen();
     expect(screen.container).toBeDefined();
   });
 

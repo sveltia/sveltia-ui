@@ -1,5 +1,6 @@
 import { expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-svelte';
+import { getDialog, waitForOpen } from '../../test-utils/dialog.js';
 import { text } from '../../test-utils/snippets.js';
 import AlertDialog from './alert-dialog.svelte';
 
@@ -13,11 +14,9 @@ it('renders an alert dialog with only the OK button', async () => {
   const props = $state({ open: true, title: 'Notice', children: text('Saved'), onOk });
 
   await render(AlertDialog, props);
-  await vi.waitFor(() => {
-    expect(document.querySelector('dialog')?.open).toBe(true);
-  });
+  await waitForOpen();
 
-  const dialog = /** @type {HTMLDialogElement} */ (document.querySelector('dialog'));
+  const dialog = /** @type {HTMLDialogElement} */ (getDialog());
 
   expect(dialog.getAttribute('role')).toBe('alertdialog');
   expect(dialog.querySelector('.title')?.textContent?.trim()).toBe('Notice');

@@ -1,27 +1,13 @@
 import { tick } from 'svelte';
 import { describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-svelte';
+import { getDialog, waitForOpen } from '../../test-utils/dialog.js';
 import { html, text } from '../../test-utils/snippets.js';
 import Drawer from './drawer.svelte';
 
 /**
  * @import { ComponentProps } from 'svelte';
  */
-
-/**
- * Get the `<dialog>` element.
- * @returns {HTMLDialogElement | null} Element.
- */
-const getDialog = () => document.querySelector('dialog.sui.modal');
-
-/**
- * Wait until the drawer is open.
- */
-const waitForOpen = async () => {
-  await vi.waitFor(() => {
-    expect(getDialog()?.open).toBe(true);
-  });
-};
 
 describe('Drawer', () => {
   it('renders a right-hand drawer with an outside close button by default', async () => {

@@ -2,16 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-svelte';
 import { userEvent } from 'vitest/browser';
 import ResizablePaneFixture from './resizable-pane-fixture.test.svelte';
-
-/**
- * Get the flex basis of each pane.
- * @param {HTMLElement} container Container.
- * @returns {string[]} Flex bases.
- */
-const getSizes = (container) =>
-  /** @type {HTMLElement[]} */ ([...container.querySelectorAll('.sui.resizable-pane')]).map(
-    (pane) => pane.style.flexBasis,
-  );
+import { getSizes } from '../../test-utils/resizable.js';
 
 describe('ResizablePaneGroup', () => {
   it('lays out the panes horizontally, sharing the space equally by default', async () => {

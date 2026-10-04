@@ -1,21 +1,13 @@
 import { expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-svelte';
 import { userEvent } from 'vitest/browser';
+import { getDialog, waitForOpen } from '../../test-utils/dialog.js';
 import { html, text } from '../../test-utils/snippets.js';
 import PromptDialog from './prompt-dialog.svelte';
 
 /**
  * @import { ComponentProps } from 'svelte';
  */
-
-/**
- * Wait until the dialog is open.
- */
-const waitForOpen = async () => {
-  await vi.waitFor(() => {
-    expect(document.querySelector('dialog')?.open).toBe(true);
-  });
-};
 
 it('renders a text input bound to the value', async () => {
   const oninput = vi.fn();
@@ -33,7 +25,7 @@ it('renders a text input bound to the value', async () => {
   await render(PromptDialog, props);
   await waitForOpen();
 
-  const dialog = /** @type {HTMLDialogElement} */ (document.querySelector('dialog'));
+  const dialog = /** @type {HTMLDialogElement} */ (getDialog());
   const input = /** @type {HTMLInputElement} */ (dialog.querySelector('.input-outer input'));
 
   expect(dialog.getAttribute('role')).toBe('alertdialog');
@@ -54,7 +46,7 @@ it('labels the built-in input by the title unless told otherwise', async () => {
   await render(PromptDialog, { open: true, title: 'Name' });
   await waitForOpen();
 
-  const dialog = /** @type {HTMLDialogElement} */ (document.querySelector('dialog'));
+  const dialog = /** @type {HTMLDialogElement} */ (getDialog());
   const input = /** @type {HTMLInputElement} */ (dialog.querySelector('.input-outer input'));
 
   expect(dialog.getAttribute('aria-labelledby')).toBe(dialog.querySelector('.title')?.id);
@@ -70,7 +62,7 @@ it('drops the title label when the input is labelled by an element', async () =>
   });
   await waitForOpen();
 
-  const dialog = /** @type {HTMLDialogElement} */ (document.querySelector('dialog'));
+  const dialog = /** @type {HTMLDialogElement} */ (getDialog());
   const input = /** @type {HTMLInputElement} */ (dialog.querySelector('.input-outer input'));
 
   expect(input.hasAttribute('aria-label')).toBe(false);
@@ -86,7 +78,7 @@ it('renders a custom input instead', async () => {
 
   await waitForOpen();
 
-  const dialog = /** @type {HTMLDialogElement} */ (document.querySelector('dialog'));
+  const dialog = /** @type {HTMLDialogElement} */ (getDialog());
 
   expect(dialog.querySelector('.input-outer .custom-input')).not.toBeNull();
   expect(dialog.querySelector('.input-outer input')).toBeNull();

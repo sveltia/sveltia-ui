@@ -1,27 +1,13 @@
 import { describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-svelte';
 import { userEvent } from 'vitest/browser';
+import { getDialog, waitForOpen } from '../../test-utils/dialog.js';
 import { html, text } from '../../test-utils/snippets.js';
 import Dialog from './dialog.svelte';
 
 /**
  * @import { ComponentProps } from 'svelte';
  */
-
-/**
- * Get the `<dialog>` element.
- * @returns {HTMLDialogElement | null} Element.
- */
-const getDialog = () => document.querySelector('dialog.sui.modal');
-
-/**
- * Wait until the dialog is open.
- */
-const waitForOpen = async () => {
-  await vi.waitFor(() => {
-    expect(getDialog()?.open).toBe(true);
-  });
-};
 
 describe('Dialog', () => {
   it('renders the title, body and default buttons', async () => {
