@@ -51,6 +51,14 @@
   } = $props();
 </script>
 
+{#snippet labelText()}
+  <span role="none" class="label" dir={labelDir}>
+    <TruncatedText {lines}>
+      {label}
+    </TruncatedText>
+  </span>
+{/snippet}
+
 <!--
   `aria-readonly` is only rendered when it applies: the attribute isn’t supported on the `button`
   role (or `option`, `tab` and `menuitem`, which also wrap this component), and Svelte would
@@ -86,11 +94,7 @@
   {@render startIcon?.()}
   {#if variant === 'link'}
     {#if label}
-      <span role="none" class="label" dir={labelDir}>
-        <TruncatedText {lines}>
-          {label}
-        </TruncatedText>
-      </span>
+      {@render labelText()}
     {:else}
       <span role="none" class="label">
         {@render children?.()}
@@ -98,11 +102,7 @@
     {/if}
   {:else}
     {#if label}
-      <span role="none" class="label" dir={labelDir}>
-        <TruncatedText {lines}>
-          {label}
-        </TruncatedText>
-      </span>
+      {@render labelText()}
     {/if}
     {@render children?.()}
   {/if}

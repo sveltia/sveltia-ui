@@ -266,54 +266,26 @@
     backdrop-filter: blur(16px);
     transition-property: opacity, transform;
 
-    &.menu {
-      border-width: var(--sui-menu-border-width, 1px);
-      border-style: var(--sui-menu-border-style, solid);
-      border-color: var(--sui-menu-border-color, var(--sui-secondary-border-color));
-      border-radius: var(--sui-menu-border-radius, 4px);
-      padding: var(--sui-menu-padding, 4px);
+    // Move the border and padding of the widget inside to the popup itself
+    @each $widget in menu, listbox, tree {
+      &.#{$widget} {
+        border-width: var(--sui-#{$widget}-border-width, 1px);
+        border-style: var(--sui-#{$widget}-border-style, solid);
+        border-color: var(--sui-#{$widget}-border-color, var(--sui-secondary-border-color));
+        border-radius: var(--sui-#{$widget}-border-radius, 4px);
+        padding: var(--sui-#{$widget}-padding, 4px);
 
-      :global {
-        .sui.menu {
-          border-width: 0;
-          border-radius: 0;
-          padding: 0;
-          background-color: transparent;
-        }
-      }
-    }
+        :global {
+          .sui.#{$widget} {
+            @if $widget == tree {
+              margin: 0;
+            }
 
-    &.listbox {
-      border-width: var(--sui-listbox-border-width, 1px);
-      border-style: var(--sui-listbox-border-style, solid);
-      border-color: var(--sui-listbox-border-color, var(--sui-secondary-border-color));
-      border-radius: var(--sui-listbox-border-radius, 4px);
-      padding: var(--sui-listbox-padding, 4px);
-
-      :global {
-        .sui.listbox {
-          border-width: 0;
-          border-radius: 0;
-          padding: 0;
-          background-color: transparent;
-        }
-      }
-    }
-
-    &.tree {
-      border-width: var(--sui-tree-border-width, 1px);
-      border-style: var(--sui-tree-border-style, solid);
-      border-color: var(--sui-tree-border-color, var(--sui-secondary-border-color));
-      border-radius: var(--sui-tree-border-radius, 4px);
-      padding: var(--sui-tree-padding, 4px);
-
-      :global {
-        .sui.tree {
-          margin: 0;
-          border-width: 0;
-          border-radius: 0;
-          padding: 0;
-          background-color: transparent;
+            border-width: 0;
+            border-radius: 0;
+            padding: 0;
+            background-color: transparent;
+          }
         }
       }
     }
