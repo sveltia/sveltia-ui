@@ -57,25 +57,15 @@
   // The value reported via aria-valuenow is the size of the pane immediately before this handle
   const currentPaneSize = $derived(sizes[handleIndex] ?? 0);
   const currentPaneConstraints = $derived(ctx.getPaneConstraints(handleIndex));
+  const nextPaneConstraints = $derived(ctx.getPaneConstraints(handleIndex + 1));
+  // The handle only moves space between the panes either side of it, so its range is bound by
+  // what those two panes can take
+  const pairSize = $derived(currentPaneSize + (sizes[handleIndex + 1] ?? 0));
   const currentPaneMin = $derived(
-    Math.max(
-      currentPaneConstraints.minSize,
-      100 -
-        ctx.paneDefs.reduce(
-          (sum, _pane, i) => sum + (i !== handleIndex ? ctx.getPaneConstraints(i).maxSize : 0),
-          0,
-        ),
-    ),
+    Math.max(currentPaneConstraints.minSize, pairSize - nextPaneConstraints.maxSize),
   );
   const currentPaneMax = $derived(
-    Math.min(
-      currentPaneConstraints.maxSize,
-      100 -
-        ctx.paneDefs.reduce(
-          (sum, _pane, i) => sum + (i !== handleIndex ? ctx.getPaneConstraints(i).minSize : 0),
-          0,
-        ),
-    ),
+    Math.min(currentPaneConstraints.maxSize, pairSize - nextPaneConstraints.minSize),
   );
 
   /**
@@ -85,6 +75,12 @@
   let element = $state();
   let dragging = $state(false);
   let startScreenPos = $state(0);
+  /**
+   * Size of the pane before the handle when the drag began. Each move sets the pane to this plus
+   * the distance from where the drag began, rather than adding the latest step to the current
+   * size, so the handle stays under the pointer after it has been held back at a limit.
+   */
+  let startPaneSize = 0;
   let targetPointerId = $state(0);
   /**
    * Whether the handle is being resized via keyboard (at least one step fired).
@@ -126,8 +122,7 @@
       percentDelta = -percentDelta;
     }
 
-    startScreenPos = screenPos;
-    ctx.resize(handleIndex, percentDelta);
+    ctx.resize(handleIndex, startPaneSize + percentDelta - (sizes[handleIndex] ?? 0));
   };
 
   /**
@@ -165,6 +160,7 @@
 
     dragging = true;
     startScreenPos = isHorizontal ? screenX : screenY;
+    startPaneSize = sizes[handleIndex] ?? 0;
     targetPointerId = pointerId;
     containerSize = ctx.measurePaneSpace();
     element?.setPointerCapture(pointerId);

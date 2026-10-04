@@ -79,6 +79,14 @@ describe('ResizablePaneGroup', () => {
     });
   });
 
+  it('keeps the default sizes within the constraints', async () => {
+    const screen = await render(ResizablePaneFixture, { firstDefaultSize: 90, firstMaxSize: 60 });
+
+    await vi.waitFor(() => {
+      expect(getSizes(screen.container)).toEqual(['60%', '40%']);
+    });
+  });
+
   it('lays out the panes vertically on demand', async () => {
     const screen = await render(ResizablePaneFixture, { direction: 'vertical' });
 

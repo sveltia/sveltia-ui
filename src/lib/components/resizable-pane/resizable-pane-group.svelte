@@ -121,7 +121,8 @@
 
   /**
    * Initialize pane sizes from `defaultSize` props. Called once all panes have registered. Panes
-   * without `defaultSize` share the remaining space equally.
+   * without `defaultSize` share the remaining space equally, and every size is kept within its
+   * pane’s `minSize` and `maxSize`.
    */
   const initSizes = () => {
     // Only called once panes have registered; see the effect below
@@ -135,7 +136,9 @@
       p.defaultSize === undefined ? NaN : resolveToPercent(p.defaultSize, NaN, env),
     );
 
-    sizes.splice(0, sizes.length, ...getInitialSizes(resolvedDefaults));
+    const constraints = _paneDefs.map((p) => resolvePaneConstraints(p, env));
+
+    sizes.splice(0, sizes.length, ...getInitialSizes(resolvedDefaults, constraints));
   };
 
   /**

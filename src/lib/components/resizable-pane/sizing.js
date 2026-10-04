@@ -92,20 +92,82 @@ export const resolvePaneConstraints = (paneDef, env) => {
 };
 
 /**
+ * Spread an amount over some of the panes, as far as their constraints allow. A positive amount
+ * grows the panes and a negative one shrinks them.
+ * @param {number[]} sizes Size of each pane, updated in place.
+ * @param {PaneConstraints[]} constraints Constraints of each pane.
+ * @param {number[]} indexes Indexes of the panes to spread the amount over.
+ * @param {number} amount Amount to spread.
+ * @returns {number} What is left of the amount once the panes are full or empty.
+ */
+const spreadSize = (sizes, constraints, indexes, amount) => {
+  let remaining = amount;
+  let adjustable = indexes;
+
+  // Each round either uses up the amount or fills at least one pane, so the loop is bounded
+  while (adjustable.length && Math.abs(remaining) > 1e-9) {
+    const share = remaining / adjustable.length;
+
+    const moved = adjustable.map((i) => {
+      const { minSize, maxSize } = constraints[i];
+      const size = Math.min(maxSize, Math.max(minSize, sizes[i] + share));
+      const diff = size - sizes[i];
+
+      sizes[i] = size;
+
+      return diff;
+    });
+
+    remaining -= moved.reduce((sum, diff) => sum + diff, 0);
+    adjustable = adjustable.filter((i) =>
+      share > 0 ? sizes[i] < constraints[i].maxSize : sizes[i] > constraints[i].minSize,
+    );
+  }
+
+  return remaining;
+};
+
+/**
  * Work out the initial size of each pane. Panes with a default size get it; the others share
- * whatever is left of the group equally.
+ * whatever is left of the group equally. When constraints are given, each size is then brought
+ * within its pane’s constraints, and whatever that frees up or takes away is made up by the other
+ * panes, those without a default size first, so the total stays the same where possible.
  * @param {number[]} resolvedDefaults Each pane’s default size as a percentage, or `NaN` for a pane
  * that has none, or whose default couldn’t be resolved.
+ * @param {PaneConstraints[]} [constraints] Constraints of each pane.
  * @returns {number[]} Size of each pane.
  */
-export const getInitialSizes = (resolvedDefaults) => {
+export const getInitialSizes = (resolvedDefaults, constraints) => {
   const specified = resolvedDefaults.filter((v) => !Number.isNaN(v));
   const totalSpecified = specified.reduce((sum, v) => sum + v, 0);
   const unspecifiedCount = resolvedDefaults.length - specified.length;
   const remaining = Math.max(0, 100 - totalSpecified);
   const defaultSize = unspecifiedCount > 0 ? remaining / unspecifiedCount : 0;
+  const sizes = resolvedDefaults.map((v) => (Number.isNaN(v) ? defaultSize : v));
 
-  return resolvedDefaults.map((v) => (Number.isNaN(v) ? defaultSize : v));
+  if (!constraints) {
+    return sizes;
+  }
+
+  const total = sizes.reduce((sum, v) => sum + v, 0);
+  const allConstraints = sizes.map((_v, i) => constraints[i] ?? { minSize: 0, maxSize: 100 });
+
+  const fitted = sizes.map((v, i) =>
+    Math.min(allConstraints[i].maxSize, Math.max(allConstraints[i].minSize, v)),
+  );
+
+  const indexes = sizes.map((_v, i) => i);
+  const unspecified = indexes.filter((i) => Number.isNaN(resolvedDefaults[i]));
+  const excess = total - fitted.reduce((sum, v) => sum + v, 0);
+
+  spreadSize(
+    fitted,
+    allConstraints,
+    indexes,
+    spreadSize(fitted, allConstraints, unspecified, excess),
+  );
+
+  return fitted;
 };
 
 /**
@@ -124,14 +186,16 @@ export const clampResizeDelta = (
   deltaPercent,
   { sizeBefore, sizeAfter, constraintsBefore, constraintsAfter },
 ) => {
-  const canGrow = Math.min(
-    constraintsBefore.maxSize - sizeBefore,
-    sizeAfter - constraintsAfter.minSize,
+  // Never below zero, so a pane that is already out of its constraints can’t make the handle move
+  // the wrong way
+  const canGrow = Math.max(
+    0,
+    Math.min(constraintsBefore.maxSize - sizeBefore, sizeAfter - constraintsAfter.minSize),
   );
 
-  const canShrink = Math.min(
-    sizeBefore - constraintsBefore.minSize,
-    constraintsAfter.maxSize - sizeAfter,
+  const canShrink = Math.max(
+    0,
+    Math.min(sizeBefore - constraintsBefore.minSize, constraintsAfter.maxSize - sizeAfter),
   );
 
   return deltaPercent > 0 ? Math.min(deltaPercent, canGrow) : -Math.min(-deltaPercent, canShrink);

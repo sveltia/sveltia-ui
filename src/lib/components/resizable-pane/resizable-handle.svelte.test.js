@@ -263,6 +263,57 @@ describe('ResizableHandle', () => {
     expect(getSizes(screen.container)).toEqual(['50%', '50%']);
   });
 
+  it('keeps the handle under the pointer after it has been held back at a limit', async () => {
+    const screen = await render(ResizablePaneFixture, { firstMaxSize: 60 });
+    const handle = /** @type {HTMLElement} */ (screen.getByRole('separator').element());
+
+    await vi.waitFor(() => {
+      expect(getSizes(screen.container)).toEqual(['50%', '50%']);
+    });
+
+    /**
+     * Make a pointer event.
+     * @param {string} type Event type.
+     * @param {number} screenX Pointer position.
+     * @returns {PointerEvent} Event.
+     */
+    const at = (type, screenX) =>
+      new PointerEvent(type, { bubbles: true, cancelable: true, screenX, pointerId: 1 });
+
+    handle.dispatchEvent(at('pointerdown', 100));
+    // 100px past the start is 20%, but the first pane stops at 60%
+    document.dispatchEvent(at('pointermove', 200));
+    await vi.waitFor(() => {
+      expect(getSizes(screen.container)).toEqual(['60%', '40%']);
+    });
+    // The pointer is still 50px (10%) past the start, which is where the limit is
+    document.dispatchEvent(at('pointermove', 150));
+    await new Promise((resolve) => {
+      setTimeout(resolve, 50);
+    });
+    expect(getSizes(screen.container)).toEqual(['60%', '40%']);
+    document.dispatchEvent(at('pointermove', 125));
+    await vi.waitFor(() => {
+      expect(getSizes(screen.container)).toEqual(['55%', '45%']);
+    });
+    document.dispatchEvent(at('pointerup', 125));
+  });
+
+  it('bounds its range by the panes either side of it', async () => {
+    const screen = await render(ResizablePaneFixture, {
+      firstDefaultSize: 20,
+      secondDefaultSize: 30,
+      third: true,
+    });
+
+    const [, second] = screen.getByRole('separator').all();
+
+    // The second handle only moves space between the second and third panes, 30% + 50%
+    await expect.element(second).toHaveAttribute('aria-valuenow', '30');
+    await expect.element(second).toHaveAttribute('aria-valuemin', '0');
+    await expect.element(second).toHaveAttribute('aria-valuemax', '80');
+  });
+
   it('resizes vertically by dragging', async () => {
     const screen = await render(ResizablePaneFixture, { direction: 'vertical' });
     const handle = /** @type {HTMLElement} */ (screen.getByRole('separator').element());

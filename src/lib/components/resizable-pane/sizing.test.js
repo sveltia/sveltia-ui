@@ -98,6 +98,25 @@ describe('getInitialSizes', () => {
   it('should handle an empty group', () => {
     expect(getInitialSizes([])).toEqual([]);
   });
+
+  it('should keep the sizes within the constraints, giving the difference to the other panes', () => {
+    const unconstrained = { minSize: 0, maxSize: 100 };
+
+    expect(getInitialSizes([90, NaN], [{ minSize: 0, maxSize: 60 }, unconstrained])).toEqual([
+      60, 40,
+    ]);
+    expect(getInitialSizes([NaN, NaN], [{ minSize: 70, maxSize: 100 }, unconstrained])).toEqual([
+      70, 30,
+    ]);
+    // The panes without a default size make up the difference first
+    expect(
+      getInitialSizes([30, NaN, NaN], [unconstrained, { minSize: 0, maxSize: 20 }, unconstrained]),
+    ).toEqual([30, 20, 50]);
+    // Then the others
+    expect(getInitialSizes([20, 80], [{ minSize: 30, maxSize: 100 }, unconstrained])).toEqual([
+      30, 70,
+    ]);
+  });
 });
 
 describe('clampResizeDelta', () => {
@@ -157,6 +176,26 @@ describe('clampResizeDelta', () => {
         constraintsAfter: { minSize: 0, maxSize: 55 },
       }),
     ).toBe(-5);
+  });
+
+  it('should never move the other way when a pane is already out of its constraints', () => {
+    const panes = {
+      sizeBefore: 90,
+      sizeAfter: 10,
+      constraintsBefore: { minSize: 0, maxSize: 60 },
+      constraintsAfter: { minSize: 20, maxSize: 100 },
+    };
+
+    expect(clampResizeDelta(10, panes)).toBe(0);
+    expect(clampResizeDelta(-10, panes)).toBe(-10);
+    expect(
+      clampResizeDelta(-10, {
+        sizeBefore: 10,
+        sizeAfter: 90,
+        constraintsBefore: { minSize: 20, maxSize: 100 },
+        constraintsAfter: { minSize: 0, maxSize: 60 },
+      }),
+    ).toBeCloseTo(0);
   });
 
   it('should return zero when nothing can move', () => {
