@@ -90,7 +90,8 @@ import { HR } from './transformers/hr.js';
 import { TABLE } from './transformers/table.js';
 
 /**
- * @import { LexicalEditor } from 'lexical';
+ * @import { LexicalEditor, LexicalNode } from 'lexical';
+ * @import { ListType } from '@lexical/list';
  * @import { Transformer } from '@lexical/markdown';
  * @import {
  * TextEditorBlockType,
@@ -206,17 +207,29 @@ const $moveCaretIntoBlock = () => {
 };
 
 /**
+ * Move the focus to the editor, and run the given function with the node of the given element
+ * within an editor update.
+ * @param {LexicalEditor} editor Editor instance.
+ * @param {Element} element Element of the node.
+ * @param {(node: ReturnType<typeof getNearestNodeFromDOMNode>) => void} callback Function to be
+ * called with the node.
+ */
+const updateNodeWithFocus = (editor, element, callback) => {
+  editor.getRootElement()?.focus({ preventScroll: true });
+
+  editor.update(() => {
+    callback(getNearestNodeFromDOMNode(element));
+  });
+};
+
+/**
  * Move the focus to the editor, and the caret to right after the given decorator node, like an
  * editor component: the start of the next block, or a new paragraph if there’s none to type in.
  * @param {LexicalEditor} editor Editor instance.
  * @param {Element} decorator Element of the decorator node.
  */
 const placeCaretAfterDecorator = (editor, decorator) => {
-  editor.getRootElement()?.focus({ preventScroll: true });
-
-  editor.update(() => {
-    const node = getNearestNodeFromDOMNode(decorator);
-
+  updateNodeWithFocus(editor, decorator, (node) => {
     // The element has been found by its `data-lexical-decorator` attribute
     /* v8 ignore next 3 */
     if (!isDecoratorNode(node)) {
@@ -234,11 +247,7 @@ const placeCaretAfterDecorator = (editor, decorator) => {
  * @param {Element} block Element of the block node.
  */
 const placeCaretAtBlockEnd = (editor, block) => {
-  editor.getRootElement()?.focus({ preventScroll: true });
-
-  editor.update(() => {
-    const node = getNearestNodeFromDOMNode(block);
-
+  updateNodeWithFocus(editor, block, (node) => {
     /* v8 ignore next 3 */
     if (!isElementNode(node)) {
       return;
@@ -356,6 +365,14 @@ export const isSafeLinkURL = (url) => {
 };
 
 /**
+ * Get the given node itself if it’s an element node, or its nearest element node ancestor.
+ * @param {LexicalNode} node Node.
+ * @returns {ElementNode | null} Element node.
+ */
+const getNearestElementNode = (node) =>
+  node instanceof ElementNode ? node : getNearestNodeOfType(node, ElementNode);
+
+/**
  * Get the current selection’s block node key as well as block and inline level types.
  * @internal
  * @returns {TextEditorSelectionState} Current selection state.
@@ -378,7 +395,7 @@ export const getSelectionTypes = () => {
   const inlineTypes = TEXT_FORMAT_BUTTON_TYPES.filter((type) => selection.hasFormat(type));
 
   if (anchor.getType() !== 'root') {
-    parent = anchor instanceof ElementNode ? anchor : getNearestNodeOfType(anchor, ElementNode);
+    parent = getNearestElementNode(anchor);
 
     if (isLinkNode(parent)) {
       inlineTypes.push('link');
@@ -532,6 +549,304 @@ export const getComponentMarkdown = ({ node, createNode, transformer, createMark
 };
 
 /**
+ * Combine the given cleanup handlers into one, which calls them in the given order. Missing
+ * handlers, like those of the features that are not enabled, are skipped.
+ * @param {...((() => void) | undefined | null)} unregisters Cleanup handlers.
+ * @returns {() => void} Combined cleanup handler.
+ */
+const mergeUnregisters = (...unregisters) => {
+  const handlers = unregisters.filter((unregister) => typeof unregister === 'function');
+
+  return () => {
+    handlers.forEach((unregister) => unregister());
+  };
+};
+
+/**
+ * Register the commands and transform specific to the code editor, which only holds a single code
+ * block.
+ * @param {LexicalEditor} editor Editor instance.
+ * @param {string} defaultLanguage Default language of the code block.
+ * @returns {() => void} Cleanup handler.
+ */
+const registerCodeEditorCommands = (editor, defaultLanguage) =>
+  mergeUnregisters(
+    // Pressing Backspace at the very beginning of a code block converts it to a paragraph by
+    // default (`CodeNode.collapseAtStart()`), which makes no sense when the editor only holds a
+    // single code block, so ignore it
+    editor.registerCommand(
+      DELETE_CHARACTER_COMMAND,
+      (isBackward) => {
+        const selection = getSelection();
+
+        if (!isBackward || !isRangeSelection(selection) || !selection.isCollapsed()) {
+          return false;
+        }
+
+        const { offset } = selection.anchor;
+        const node = selection.anchor.getNode();
+        const codeNode = isCodeNode(node) ? node : getNearestNodeOfType(node, CodeNode);
+
+        return (
+          !!codeNode &&
+          offset === 0 &&
+          (node.is(codeNode) || !!codeNode.getFirstDescendant()?.is(node))
+        );
+      },
+      COMMAND_PRIORITY_LOW,
+    ),
+    // Pressing Enter after two blank lines at the end of a code block exits it by default
+    // (`CodeExtension`), adding a paragraph after it, which would be left out of the code. Insert a
+    // new line instead, which `CodeNode.insertNewAfter()` does without exiting when the extension
+    // is in place. This has to take priority over the extension’s own handler
+    editor.registerCommand(
+      KEY_ENTER_COMMAND,
+      (event) => {
+        const selection = getSelection();
+
+        if (!isRangeSelection(selection)) {
+          return false;
+        }
+
+        event?.preventDefault();
+
+        return editor.dispatchCommand(INSERT_PARAGRAPH_COMMAND, undefined);
+      },
+      COMMAND_PRIORITY_NORMAL,
+    ),
+    // Make sure the editor always has a single code block. This runs within the same update that
+    // made the change, so the user never gets a chance to type in anything else
+    editor.registerNodeTransform(RootNode, (root) => {
+      const children = root.getChildren();
+
+      if (children.length === 1 && isCodeNode(children[0])) {
+        return;
+      }
+
+      const [firstChild] = children;
+
+      if (children.length === 1 && isElementNode(firstChild)) {
+        const node = createCodeNode(defaultLanguage);
+
+        // Keep the content and the selection
+        firstChild.replace(node, true);
+      } else if (children.length === 0) {
+        const node = createCodeNode(defaultLanguage);
+
+        root.append(node);
+        node.selectStart();
+      }
+    }),
+  );
+
+/**
+ * Register the link command, and the paste handler that turns a pasted URL into a link.
+ * @param {LexicalEditor} editor Editor instance.
+ * @returns {() => void} Cleanup handler.
+ * @see https://github.com/facebook/lexical/blob/main/packages/lexical-link/src/LexicalLinkExtension.ts
+ */
+const registerLinkCommands = (editor) =>
+  mergeUnregisters(
+    editor.registerCommand(
+      TOGGLE_LINK_COMMAND,
+      (payload) => {
+        // Ignore an unsafe URL rather than linking to it
+        if (typeof payload === 'string' && !isSafeLinkURL(payload)) {
+          return true;
+        }
+
+        toggleLink(typeof payload === 'string' ? payload : null);
+
+        return true;
+      },
+      COMMAND_PRIORITY_NORMAL,
+    ),
+    editor.registerCommand(
+      PASTE_COMMAND,
+      (event) => {
+        const selection = getSelection();
+
+        if (
+          !isRangeSelection(selection) ||
+          !objectKlassEquals(event, ClipboardEvent) ||
+          !event.clipboardData ||
+          /** @type {HTMLElement} */ (event.target).matches('input, textarea')
+        ) {
+          return false;
+        }
+
+        const clipboardText = event.clipboardData.getData('text').trim();
+
+        // Paste an unsafe URL as plain text rather than as a link
+        if (!isURL(clipboardText) || !isSafeLinkURL(clipboardText)) {
+          return false;
+        }
+
+        if (selection.isCollapsed()) {
+          insertNodes([createTextNode(clipboardText)]);
+        }
+
+        if (
+          !selection
+            .getNodes()
+            .some((node) => isElementNode(node) || (isTextNode(node) && !node.isSimpleText()))
+        ) {
+          editor.dispatchCommand(TOGGLE_LINK_COMMAND, clipboardText);
+          event.preventDefault();
+          return true;
+        }
+
+        return false;
+      },
+      COMMAND_PRIORITY_LOW,
+    ),
+  );
+
+/**
+ * List buttons, along with the command to insert the list and its type.
+ * @type {[TextEditorBlockType, typeof INSERT_UNORDERED_LIST_COMMAND, ListType][]}
+ */
+const LIST_COMMANDS = [
+  ['bulleted-list', INSERT_UNORDERED_LIST_COMMAND, 'bullet'],
+  ['numbered-list', INSERT_ORDERED_LIST_COMMAND, 'number'],
+];
+
+/**
+ * Register the commands for the enabled list buttons.
+ * @param {LexicalEditor} editor Editor instance.
+ * @param {TextEditorConfig['enabledButtons']} enabledButtons Enabled buttons.
+ * @returns {() => void} Cleanup handler.
+ */
+const registerListCommands = (editor, enabledButtons = []) => {
+  const enabledLists = LIST_COMMANDS.filter(([button]) => enabledButtons.includes(button));
+
+  return mergeUnregisters(
+    ...enabledLists.map(([, command, listType]) =>
+      editor.registerCommand(
+        command,
+        () => {
+          insertList(listType);
+
+          return true;
+        },
+        COMMAND_PRIORITY_NORMAL,
+      ),
+    ),
+    // https://github.com/facebook/lexical/blob/main/packages/lexical-react/src/shared/useList.ts
+    enabledLists.length
+      ? editor.registerCommand(
+          INSERT_PARAGRAPH_COMMAND,
+          () => handleListInsertParagraph(),
+          COMMAND_PRIORITY_NORMAL,
+        )
+      : undefined,
+  );
+};
+
+/**
+ * Register an update listener that triggers the Update event with the Markdown value, debounced so
+ * only the latest update in a burst triggers it.
+ * @param {LexicalEditor} editor Editor instance.
+ * @param {Transformer[]} enabledTransformers Enabled Markdown transformers.
+ * @returns {() => void} Cleanup handler.
+ */
+const registerUpdateEvent = (editor, enabledTransformers) => {
+  /** Incremented on every update, so only the latest one in a burst triggers the Update event. */
+  let updateCount = 0;
+  /** Whether the content has changed since the Update event was last triggered. */
+  let contentChanged = true;
+  /** @type {string | undefined} */
+  let lastValue = undefined;
+  let disposed = false;
+
+  return mergeUnregisters(
+    () => {
+      disposed = true;
+    },
+    editor.registerUpdateListener(({ dirtyElements, dirtyLeaves } = /** @type {any} */ ({})) => {
+      // An update that only moves the selection leaves no dirty nodes. Remember whether any update
+      // in the burst changed the content, so the document is only converted again when needed.
+      // This includes the updates made while composing, which are otherwise skipped.
+      contentChanged ||= !dirtyElements || dirtyElements.size > 0 || dirtyLeaves.size > 0;
+
+      if (editor?.isComposing()) {
+        return;
+      }
+
+      updateCount += 1;
+
+      const currentCount = updateCount;
+
+      (async () => {
+        await sleep(100);
+
+        // Skip if a newer update has been made in the meantime, or the editor has been disposed
+        if (currentCount !== updateCount || disposed) {
+          return;
+        }
+
+        editor.update(() => {
+          lastValue = onEditorUpdate(
+            editor,
+            enabledTransformers,
+            contentChanged ? undefined : lastValue,
+          );
+          contentChanged = false;
+        });
+      })();
+    }),
+  );
+};
+
+/**
+ * Register a handler for the Tab key that indents a list item, or unindents it with Shift.
+ * `editor.registerCommand(KEY_TAB_COMMAND, listener, priority)` doesn’t work for some reason, so
+ * listen to the `keydown` event on the root element instead.
+ * @param {LexicalEditor} editor Editor instance.
+ * @returns {() => void} Cleanup handler.
+ */
+const registerTabIndentation = (editor) =>
+  editor.registerRootListener((root) => {
+    if (!root) {
+      return undefined;
+    }
+
+    /**
+     * Handle Tab indentation shortcuts.
+     * @param {KeyboardEvent} event Keydown event.
+     */
+    const onKeydown = (event) => {
+      editor.update(() => {
+        if (event.key === 'Tab') {
+          const selection = getSelection();
+
+          if (!isRangeSelection(selection)) {
+            return;
+          }
+
+          const parent = getNearestElementNode(selection.anchor.getNode());
+
+          if (isListItemNode(parent) && parent.canIndent()) {
+            if (!event.shiftKey) {
+              event.preventDefault();
+              editor.dispatchCommand(INDENT_CONTENT_COMMAND, undefined);
+            } else if (parent.getIndent() > 0) {
+              event.preventDefault();
+              editor.dispatchCommand(OUTDENT_CONTENT_COMMAND, undefined);
+            }
+          }
+        }
+      });
+    };
+
+    root.addEventListener('keydown', onKeydown);
+
+    return () => {
+      root.removeEventListener('keydown', onKeydown);
+    };
+  });
+
+/**
  * Initialize the Lexical editor.
  * @param {TextEditorConfig} config Editor configuration.
  * @returns {InitEditorResult} Editor instance and cleanup.
@@ -594,24 +909,12 @@ export const initEditor = ({
   ];
 
   const editor = buildEditorFromExtensions(editorExtension);
-  /** @type {Array<() => void>} */
-  const unregisters = [];
 
-  /**
-   * Add a cleanup handler if it is defined.
-   * @param {(() => void) | undefined | null} unregister Cleanup handler.
-   */
-  const addUnregister = (unregister) => {
-    /* v8 ignore next */
-    if (typeof unregister === 'function') {
-      unregisters.push(unregister);
-    }
-  };
-
-  addUnregister(registerRichText(editor));
-  addUnregister(registerDragonSupport(editor));
-  // Cap the undo stack, as each entry holds a snapshot of the whole document
-  addUnregister(
+  // The order matters, as listeners with the same priority are called in the registration order
+  const unregister = mergeUnregisters(
+    registerRichText(editor),
+    registerDragonSupport(editor),
+    // Cap the undo stack, as each entry holds a snapshot of the whole document
     registerHistory(
       editor,
       createEmptyHistoryState(),
@@ -620,294 +923,20 @@ export const initEditor = ({
       undefined,
       HISTORY_MAX_DEPTH,
     ),
-  );
-
-  if (isCodeEditor) {
-    // Pressing Backspace at the very beginning of a code block converts it to a paragraph by
-    // default (`CodeNode.collapseAtStart()`), which makes no sense when the editor only holds a
-    // single code block, so ignore it
-    addUnregister(
-      editor.registerCommand(
-        DELETE_CHARACTER_COMMAND,
-        (isBackward) => {
-          const selection = getSelection();
-
-          if (!isBackward || !isRangeSelection(selection) || !selection.isCollapsed()) {
-            return false;
-          }
-
-          const { offset } = selection.anchor;
-          const node = selection.anchor.getNode();
-          const codeNode = isCodeNode(node) ? node : getNearestNodeOfType(node, CodeNode);
-
-          return (
-            !!codeNode &&
-            offset === 0 &&
-            (node.is(codeNode) || !!codeNode.getFirstDescendant()?.is(node))
-          );
-        },
-        COMMAND_PRIORITY_LOW,
-      ),
-    );
-
-    // Pressing Enter after two blank lines at the end of a code block exits it by default
-    // (`CodeExtension`), adding a paragraph after it, which would be left out of the code. Insert a
-    // new line instead, which `CodeNode.insertNewAfter()` does without exiting when the extension
-    // is in place. This has to take priority over the extension’s own handler
-    addUnregister(
-      editor.registerCommand(
-        KEY_ENTER_COMMAND,
-        (event) => {
-          const selection = getSelection();
-
-          if (!isRangeSelection(selection)) {
-            return false;
-          }
-
-          event?.preventDefault();
-
-          return editor.dispatchCommand(INSERT_PARAGRAPH_COMMAND, undefined);
-        },
-        COMMAND_PRIORITY_NORMAL,
-      ),
-    );
-
-    // Make sure the editor always has a single code block. This runs within the same update that
-    // made the change, so the user never gets a chance to type in anything else
-    addUnregister(
-      editor.registerNodeTransform(RootNode, (root) => {
-        const children = root.getChildren();
-
-        if (children.length === 1 && isCodeNode(children[0])) {
-          return;
-        }
-
-        const [firstChild] = children;
-
-        if (children.length === 1 && isElementNode(firstChild)) {
-          const node = createCodeNode(defaultLanguage);
-
-          // Keep the content and the selection
-          firstChild.replace(node, true);
-        } else if (children.length === 0) {
-          const node = createCodeNode(defaultLanguage);
-
-          root.append(node);
-          node.selectStart();
-        }
-      }),
-    );
-  }
-
-  if (useMarkdownShortcuts) {
-    addUnregister(registerMarkdownShortcuts(editor, enabledTransformers));
-  }
-
-  if (hasCodeBlock) {
-    addUnregister(
-      registerCodeHighlighting(editor, {
-        ...shikiTokenizer,
-        defaultLanguage,
-        defaultTheme: getCodeTheme(),
-      }),
-    );
-
-    addUnregister(observeCodeTheme(editor));
-  }
-
-  // https://github.com/facebook/lexical/blob/main/packages/lexical-link/src/LexicalLinkExtension.ts
-  if (enabledButtons.includes('link')) {
-    addUnregister(
-      editor.registerCommand(
-        TOGGLE_LINK_COMMAND,
-        (payload) => {
-          // Ignore an unsafe URL rather than linking to it
-          if (typeof payload === 'string' && !isSafeLinkURL(payload)) {
-            return true;
-          }
-
-          toggleLink(typeof payload === 'string' ? payload : null);
-
-          return true;
-        },
-        COMMAND_PRIORITY_NORMAL,
-      ),
-    );
-
-    addUnregister(
-      editor.registerCommand(
-        PASTE_COMMAND,
-        (event) => {
-          const selection = getSelection();
-
-          if (
-            !isRangeSelection(selection) ||
-            !objectKlassEquals(event, ClipboardEvent) ||
-            !event.clipboardData ||
-            /** @type {HTMLElement} */ (event.target).matches('input, textarea')
-          ) {
-            return false;
-          }
-
-          const clipboardText = event.clipboardData.getData('text').trim();
-
-          // Paste an unsafe URL as plain text rather than as a link
-          if (!isURL(clipboardText) || !isSafeLinkURL(clipboardText)) {
-            return false;
-          }
-
-          if (selection.isCollapsed()) {
-            insertNodes([createTextNode(clipboardText)]);
-          }
-
-          if (
-            !selection
-              .getNodes()
-              .some((node) => isElementNode(node) || (isTextNode(node) && !node.isSimpleText()))
-          ) {
-            editor.dispatchCommand(TOGGLE_LINK_COMMAND, clipboardText);
-            event.preventDefault();
-            return true;
-          }
-
-          return false;
-        },
-        COMMAND_PRIORITY_LOW,
-      ),
-    );
-  }
-
-  if (enabledButtons.includes('bulleted-list')) {
-    addUnregister(
-      editor.registerCommand(
-        INSERT_UNORDERED_LIST_COMMAND,
-        () => {
-          insertList('bullet');
-
-          return true;
-        },
-        COMMAND_PRIORITY_NORMAL,
-      ),
-    );
-  }
-
-  if (enabledButtons.includes('numbered-list')) {
-    addUnregister(
-      editor.registerCommand(
-        INSERT_ORDERED_LIST_COMMAND,
-        () => {
-          insertList('number');
-
-          return true;
-        },
-        COMMAND_PRIORITY_NORMAL,
-      ),
-    );
-  }
-
-  if (enabledButtons.includes('bulleted-list') || enabledButtons.includes('numbered-list')) {
-    // https://github.com/facebook/lexical/blob/main/packages/lexical-react/src/shared/useList.ts
-    addUnregister(
-      editor.registerCommand(
-        INSERT_PARAGRAPH_COMMAND,
-        () => handleListInsertParagraph(),
-        COMMAND_PRIORITY_NORMAL,
-      ),
-    );
-  }
-
-  /** Incremented on every update, so only the latest one in a burst triggers the Update event. */
-  let updateCount = 0;
-  /** Whether the content has changed since the Update event was last triggered. */
-  let contentChanged = true;
-  /** @type {string | undefined} */
-  let lastValue = undefined;
-  let disposed = false;
-
-  addUnregister(() => {
-    disposed = true;
-  });
-
-  addUnregister(
-    editor.registerUpdateListener(({ dirtyElements, dirtyLeaves } = /** @type {any} */ ({})) => {
-      // An update that only moves the selection leaves no dirty nodes. Remember whether any update
-      // in the burst changed the content, so the document is only converted again when needed.
-      // This includes the updates made while composing, which are otherwise skipped.
-      contentChanged ||= !dirtyElements || dirtyElements.size > 0 || dirtyLeaves.size > 0;
-
-      if (editor?.isComposing()) {
-        return;
-      }
-
-      updateCount += 1;
-
-      const currentCount = updateCount;
-
-      (async () => {
-        await sleep(100);
-
-        // Skip if a newer update has been made in the meantime, or the editor has been disposed
-        if (currentCount !== updateCount || disposed) {
-          return;
-        }
-
-        editor.update(() => {
-          lastValue = onEditorUpdate(
-            editor,
-            enabledTransformers,
-            contentChanged ? undefined : lastValue,
-          );
-          contentChanged = false;
-        });
-      })();
-    }),
-  );
-
-  // `editor.registerCommand(KEY_TAB_COMMAND, listener, priority)` doesn’t work for some reason, so
-  // use another method
-  addUnregister(
-    editor.registerRootListener((root) => {
-      if (!root) {
-        return undefined;
-      }
-
-      /**
-       * Handle Tab indentation shortcuts.
-       * @param {KeyboardEvent} event Keydown event.
-       */
-      const onKeydown = (event) => {
-        editor.update(() => {
-          if (event.key === 'Tab') {
-            const selection = getSelection();
-
-            if (!isRangeSelection(selection)) {
-              return;
-            }
-
-            const anchor = selection.anchor.getNode();
-
-            const parent =
-              anchor instanceof ElementNode ? anchor : getNearestNodeOfType(anchor, ElementNode);
-
-            if (isListItemNode(parent) && parent.canIndent()) {
-              if (!event.shiftKey) {
-                event.preventDefault();
-                editor.dispatchCommand(INDENT_CONTENT_COMMAND, undefined);
-              } else if (parent.getIndent() > 0) {
-                event.preventDefault();
-                editor.dispatchCommand(OUTDENT_CONTENT_COMMAND, undefined);
-              }
-            }
-          }
-        });
-      };
-
-      root.addEventListener('keydown', onKeydown);
-
-      return () => {
-        root.removeEventListener('keydown', onKeydown);
-      };
-    }),
+    isCodeEditor ? registerCodeEditorCommands(editor, defaultLanguage) : undefined,
+    useMarkdownShortcuts ? registerMarkdownShortcuts(editor, enabledTransformers) : undefined,
+    hasCodeBlock
+      ? registerCodeHighlighting(editor, {
+          ...shikiTokenizer,
+          defaultLanguage,
+          defaultTheme: getCodeTheme(),
+        })
+      : undefined,
+    hasCodeBlock ? observeCodeTheme(editor) : undefined,
+    enabledButtons.includes('link') ? registerLinkCommands(editor) : undefined,
+    registerListCommands(editor, enabledButtons),
+    registerUpdateEvent(editor, enabledTransformers),
+    registerTabIndentation(editor),
   );
 
   return {
@@ -917,7 +946,7 @@ export const initEditor = ({
      * Remove all registered Lexical listeners.
      */
     dispose: () => {
-      unregisters.forEach((unregister) => unregister());
+      unregister();
       editor.dispose();
     },
   };
