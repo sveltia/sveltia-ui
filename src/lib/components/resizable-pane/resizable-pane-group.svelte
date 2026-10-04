@@ -15,7 +15,7 @@
 
   /**
    * @import { Snippet } from 'svelte';
-   * @import { PaneGroupContext } from '$lib/typedefs.js';
+   * @import { PaneGroupContext, ResizablePaneSize } from '$lib/typedefs.js';
    */
 
   /**
@@ -30,9 +30,9 @@
   /**
    * @typedef {{
    * id: string,
-   * defaultSize: number | string | undefined,
-   * minSize: number | string,
-   * maxSize: number | string,
+   * defaultSize: ResizablePaneSize | undefined,
+   * minSize: ResizablePaneSize,
+   * maxSize: ResizablePaneSize,
    * }} PaneDef
    */
 

@@ -4,6 +4,12 @@
  * size here is a percentage of the pane group unless stated otherwise.
  */
 
+import { getArrowKeys } from '../../services/navigation.js';
+
+/**
+ * @import { ResizablePaneSize } from '$lib/typedefs';
+ */
+
 /**
  * @typedef {object} SizeEnvironment
  * @property {number} containerSize Size of the pane group in pixels along its direction, or `0`
@@ -20,7 +26,7 @@
 
 /**
  * Resolve a size given as a percentage number or a CSS length string to a percentage.
- * @param {number | string | undefined} value Size as a percentage number, or a CSS size string
+ * @param {ResizablePaneSize | undefined} value Size as a percentage number, or a CSS size string
  * such as `240px`, `20%` or `20dvw`.
  * @param {number} fallback Percentage to return when the value can’t be resolved.
  * @param {SizeEnvironment} env Sizes the lengths are relative to. A length other than a percentage
@@ -72,7 +78,7 @@ export const resolveToPercent = (value, fallback, env) => {
 /**
  * Resolve a pane’s size constraints to percentages, clamped to the `0`–`100` range, with the
  * maximum never below the minimum.
- * @param {{ minSize: number | string, maxSize: number | string } | undefined} paneDef Pane
+ * @param {{ minSize: ResizablePaneSize, maxSize: ResizablePaneSize } | undefined} paneDef Pane
  * definition, or `undefined` for a pane that hasn’t registered, which is unconstrained.
  * @param {SizeEnvironment} env Sizes the lengths are relative to.
  * @returns {PaneConstraints} Constraints.
@@ -229,24 +235,13 @@ export const getHandleKeyAction = ({ key, shiftKey, isHorizontal, rtl }) => {
   }
 
   const step = shiftKey ? 10 : 1;
+  const { prevKey, nextKey } = getArrowKeys(isHorizontal ? 'horizontal' : 'vertical', rtl);
 
-  if (isHorizontal) {
-    if (key === 'ArrowLeft') {
-      return { type: 'resize', delta: rtl ? step : -step };
-    }
-
-    if (key === 'ArrowRight') {
-      return { type: 'resize', delta: rtl ? -step : step };
-    }
-
-    return undefined;
-  }
-
-  if (key === 'ArrowUp') {
+  if (key === prevKey) {
     return { type: 'resize', delta: -step };
   }
 
-  if (key === 'ArrowDown') {
+  if (key === nextKey) {
     return { type: 'resize', delta: step };
   }
 

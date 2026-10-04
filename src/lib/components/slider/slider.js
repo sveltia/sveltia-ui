@@ -1,3 +1,5 @@
+import { getArrowKeys } from '../../services/navigation.js';
+
 /**
  * Geometry and keyboard logic behind `<Slider>`, kept apart from the component so the value
  * calculations can be tested without a rendered track.
@@ -89,11 +91,14 @@ export const findNearestStepIndex = (positionList, logicalX) => {
  * @returns {1 | -1 | 0} `1` to increase, `-1` to decrease, `0` if the key doesn’t move the thumb.
  */
 export const getSliderKeyDirection = (key, rtl) => {
-  if (key === 'ArrowUp' || key === (rtl ? 'ArrowLeft' : 'ArrowRight')) {
+  // Only the horizontal keys are mirrored; `ArrowUp` increases the value, unlike in a list
+  const { prevKey, nextKey } = getArrowKeys('horizontal', rtl);
+
+  if (key === 'ArrowUp' || key === nextKey) {
     return 1;
   }
 
-  if (key === 'ArrowDown' || key === (rtl ? 'ArrowRight' : 'ArrowLeft')) {
+  if (key === 'ArrowDown' || key === prevKey) {
     return -1;
   }
 

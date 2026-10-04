@@ -1,5 +1,7 @@
 import { date as formatLocaleDate } from '@sveltia/i18n';
 
+import { getArrowKeys } from '../../services/navigation.js';
+
 /**
  * Date helpers behind `<Calendar>`, kept apart from the component so the grid can be tested without
  * rendering anything.
@@ -80,13 +82,16 @@ export const addDays = (date, delta) => {
  * @param {boolean} [rtl] Whether the layout is right-to-left.
  * @returns {number | undefined} Number of days, or `undefined` if the key is not an arrow key.
  */
-export const getArrowKeyDayOffset = (key, rtl = false) =>
-  /** @type {Record<string, number>} */ ({
+export const getArrowKeyDayOffset = (key, rtl = false) => {
+  const { prevKey, nextKey } = getArrowKeys('horizontal', rtl);
+
+  return /** @type {Record<string, number>} */ ({
     ArrowUp: -7,
     ArrowDown: 7,
-    ArrowLeft: rtl ? 1 : -1,
-    ArrowRight: rtl ? -1 : 1,
+    [prevKey]: -1,
+    [nextKey]: 1,
   })[key];
+};
 
 /**
  * Get the days to be laid out in the calendar grid.
