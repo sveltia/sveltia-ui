@@ -5,7 +5,9 @@ import { untrack } from 'svelte';
 import { scrollIntoViewIfNeeded } from './scroll.js';
 import { getSelectedItemDetail } from './select.svelte.js';
 import { normalize } from './text.js';
+import { getArrowKeys, getGridTargetIndex, getLinearTargetIndex } from './navigation.js';
 import { findTypeAheadMatch, TypeAhead } from './type-ahead.js';
+import { activateBefore, activateLater } from './widget.js';
 
 /**
  * @import { Attachment } from 'svelte/attachments';
@@ -313,19 +315,10 @@ export class Group {
     this.parentGroupSelector = `[role="group"], [role="${this.role}"]`;
     this.clickToSelect = clickToSelect;
 
-    // eslint-disable-next-line jsdoc/require-description
     /** @type {(event: MouseEvent) => void} */
-    this._onClick = (event) => {
-      this.activate();
-      this.onClick(event);
-    };
-
-    // eslint-disable-next-line jsdoc/require-description
+    this._onClick = activateBefore(this, (event) => this.onClick(event));
     /** @type {(event: KeyboardEvent) => void} */
-    this._onKeyDown = (event) => {
-      this.activate();
-      this.onKeyDown(event);
-    };
+    this._onKeyDown = activateBefore(this, (event) => this.onKeyDown(event));
 
     const {
       orientation,
@@ -409,14 +402,7 @@ export class Group {
     parent.addEventListener('keydown', this._onKeyDown);
 
     // Wait a bit before the relevant components, including the `aria-controls` target are mounted
-    (async () => {
-      await sleep(100);
-
-      // The widget may have been unmounted in the meantime
-      if (!this.#destroyed) {
-        this.activate();
-      }
-    })();
+    activateLater(this, () => this.#destroyed);
   }
 
   /**
@@ -760,6 +746,141 @@ export class Group {
   }
 
   /**
+   * Set a member’s selected state and tell its component about the change.
+   * @param {HTMLElement} element Member element.
+   * @param {boolean} selected Whether the member is selected.
+   */
+  #setMemberSelected(element, selected) {
+    element.setAttribute(this.childSelectedAttr, String(selected));
+    element.dispatchEvent(
+      new CustomEvent('Change', { detail: { [this.childSelectedProp]: selected } }),
+    );
+  }
+
+  /**
+   * Click a radio button, so its component checks itself and updates its bound group. The click
+   * bubbles back up to the group, which must not take it as another selection.
+   * @param {HTMLElement} element Radio button.
+   */
+  #clickRadio(element) {
+    this.#clickingRadio = true;
+
+    try {
+      element.click();
+    } finally {
+      this.#clickingRadio = false;
+    }
+  }
+
+  /**
+   * Apply a selection made on the target to one of the members taking part in it: activate a plain
+   * menu item, toggle a member of a multi-select group, or check or uncheck a member of a
+   * single-select group.
+   * @param {MouseEvent | KeyboardEvent} event Triggered event.
+   * @param {HTMLElement} element Member element.
+   * @param {object} context Selection context.
+   * @param {string | null} context.role The member’s role.
+   * @param {boolean} context.isTarget Whether the member is the target.
+   * @param {boolean} context.targetSelectable Whether the target can hold a selected state.
+   * @param {boolean} context.selecting Whether the event is a click or Space, which selects, rather
+   * than a key that merely moves.
+   * @returns {boolean} Whether the member’s selection changed, or an action was taken on it.
+   */
+  #applySelection(event, element, { role, isTarget, targetSelectable, selecting }) {
+    const isMenuItemRadio = role === 'menuitemradio';
+    const selectable = isSelectable(element, role);
+    const multiSelect = selectable && (role === 'menuitemcheckbox' || this.multi);
+    const singleSelect = selectable && targetSelectable && (isMenuItemRadio || !multiSelect);
+    const isSelected = element.getAttribute(this.childSelectedAttr) === 'true';
+    let changed = false;
+
+    // A plain menu item is activated, never checked, and only by a click or Space: the arrow
+    // keys merely move to it
+    if (role === 'menuitem' && isTarget && selecting) {
+      changed = true;
+      element.dispatchEvent(new CustomEvent('Select'));
+    }
+
+    if (multiSelect && isTarget && selecting) {
+      changed = true;
+      this.#setMemberSelected(element, !isSelected);
+
+      if (!isSelected) {
+        element.dispatchEvent(new CustomEvent('Select'));
+      }
+    }
+
+    if (singleSelect && isSelected !== isTarget && (isMenuItemRadio ? selecting : true)) {
+      changed = true;
+      this.#setMemberSelected(element, isTarget);
+
+      if (isTarget) {
+        if (event.type === 'keydown' && role === 'radio') {
+          this.#clickRadio(element);
+        }
+
+        element.dispatchEvent(new CustomEvent('Select'));
+      }
+    }
+
+    return changed;
+  }
+
+  /**
+   * Move the cursor onto the target, or off any other member taking part in a selection: the
+   * focused state where the group itself holds focus, the panel the member controls, and the
+   * group’s active descendant.
+   * @param {HTMLElement} element Member element.
+   * @param {boolean} isTarget Whether the member is the target.
+   * @param {HTMLElement[]} scrollTargets Elements to be scrolled into view, which the target and
+   * its panel are added to.
+   */
+  #moveCursor(element, isTarget, scrollTargets) {
+    const controlTarget = this.#getControlTarget(element);
+
+    if (!this.focusChild) {
+      element.classList.toggle('focused', isTarget);
+
+      if (isTarget) {
+        element.dispatchEvent(new CustomEvent('Focus'));
+      }
+    }
+
+    if (controlTarget) {
+      this.#setPanelShown(controlTarget, isTarget);
+
+      if (isTarget) {
+        scrollTargets.push(controlTarget);
+      }
+    }
+
+    if (isTarget) {
+      this.parent.setAttribute('aria-activedescendant', element.id);
+      scrollTargets.push(element);
+    }
+  }
+
+  /**
+   * Move the roving tab stop and the focus onto the target.
+   * @param {HTMLElement[]} affected Members that took part in the selection.
+   * @param {HTMLElement} newTarget Target element.
+   * @param {boolean} targetAffected Whether the target itself took part, meaning it’s the one to
+   * receive focus.
+   */
+  #moveFocus(affected, newTarget, targetAffected) {
+    // Done right away rather than on the next frame: a key that repeats, or a second press before
+    // the frame, has to start from the member that was just reached, which it reads from the focus
+    affected.forEach((element) => {
+      setTabIndex(element, element === newTarget ? 0 : -1);
+    });
+
+    if (targetAffected) {
+      newTarget.focus();
+      newTarget.dispatchEvent(new CustomEvent('Focus'));
+    }
+  }
+
+  /**
    * Select (and move focus to) the given target.
    * @param {(MouseEvent | KeyboardEvent)} event Triggered event.
    * @param {HTMLElement} newTarget Target element.
@@ -776,10 +897,11 @@ export class Group {
     // Moving to a member that can’t be selected, such as a plain menu item, leaves the selection
     // as it is, rather than clearing it as moving to another member of a single-select group does
     const targetSelectable = isSelectable(newTarget, targetRole);
-    const selectByClick = event.type === 'click';
 
-    const selectByKeydown =
-      event.type === 'keydown' && /** @type {KeyboardEvent} */ (event).key === ' ';
+    // A click or Space selects; the arrow keys and the like merely move
+    const selecting =
+      event.type === 'click' ||
+      (event.type === 'keydown' && /** @type {KeyboardEvent} */ (event).key === ' ');
 
     /**
      * Members that took part in this selection, and whose roving `tabindex` therefore has to be
@@ -809,93 +931,24 @@ export class Group {
       // Reading the role once and comparing it is markedly cheaper than putting every member
       // through the selector engine three times over
       const role = element.getAttribute('role');
-      const isMenuItemCheckbox = role === 'menuitemcheckbox';
-      const isMenuItemRadio = role === 'menuitemradio';
 
       if (
-        (isMenuItemCheckbox || isMenuItemRadio) &&
+        (role === 'menuitemcheckbox' || role === 'menuitemradio') &&
         (role !== targetRole || element.closest(this.parentGroupSelector) !== targetParent)
       ) {
         return;
       }
 
-      const selectable = isSelectable(element, role);
-      const multiSelect = selectable && (isMenuItemCheckbox || this.multi);
-      const singleSelect = selectable && targetSelectable && (isMenuItemRadio || !multiSelect);
       const isTarget = element === newTarget;
-      const isSelected = element.getAttribute(this.childSelectedAttr) === 'true';
-      const controlTarget = this.#getControlTarget(element);
 
       affected.push(element);
       targetAffected ||= isTarget;
 
-      // A plain menu item is activated, never checked, and only by a click or Space: the arrow
-      // keys merely move to it
-      if (role === 'menuitem' && isTarget && (selectByClick || selectByKeydown)) {
+      if (this.#applySelection(event, element, { role, isTarget, targetSelectable, selecting })) {
         changed = true;
-        element.dispatchEvent(new CustomEvent('Select'));
       }
 
-      if (multiSelect && isTarget && (selectByClick || selectByKeydown)) {
-        changed = true;
-        element.setAttribute(this.childSelectedAttr, String(!isSelected));
-        element.dispatchEvent(
-          new CustomEvent('Change', { detail: { [this.childSelectedProp]: !isSelected } }),
-        );
-
-        if (!isSelected) {
-          element.dispatchEvent(new CustomEvent('Select'));
-        }
-      }
-
-      if (
-        singleSelect &&
-        isSelected !== isTarget &&
-        (isMenuItemRadio ? selectByKeydown || selectByClick : true)
-      ) {
-        changed = true;
-        element.setAttribute(this.childSelectedAttr, String(isTarget));
-        element.dispatchEvent(
-          new CustomEvent('Change', { detail: { [this.childSelectedProp]: isTarget } }),
-        );
-
-        if (isTarget) {
-          // Let the radio button’s component check itself and update its bound group. The click
-          // bubbles back up to the group, which must not take it as another selection.
-          if (event.type === 'keydown' && role === 'radio') {
-            this.#clickingRadio = true;
-
-            try {
-              element.click();
-            } finally {
-              this.#clickingRadio = false;
-            }
-          }
-
-          element.dispatchEvent(new CustomEvent('Select'));
-        }
-      }
-
-      if (!this.focusChild) {
-        element.classList.toggle('focused', isTarget);
-
-        if (isTarget) {
-          element.dispatchEvent(new CustomEvent('Focus'));
-        }
-      }
-
-      if (controlTarget) {
-        this.#setPanelShown(controlTarget, isTarget);
-
-        if (isTarget) {
-          scrollTargets.push(controlTarget);
-        }
-      }
-
-      if (isTarget) {
-        this.parent.setAttribute('aria-activedescendant', element.id);
-        scrollTargets.push(element);
-      }
+      this.#moveCursor(element, isTarget, scrollTargets);
     });
 
     if (scrollTargets.length) {
@@ -903,17 +956,7 @@ export class Group {
     }
 
     if (this.focusChild) {
-      // Done right away rather than on the next frame: a key that repeats, or a second press
-      // before the frame, has to start from the member that was just reached, which it reads
-      // from the focus
-      affected.forEach((element) => {
-        setTabIndex(element, element === newTarget ? 0 : -1);
-      });
-
-      if (targetAffected) {
-        newTarget.focus();
-        newTarget.dispatchEvent(new CustomEvent('Focus'));
-      }
+      this.#moveFocus(affected, newTarget, targetAffected);
     }
 
     if (changed) {
@@ -993,9 +1036,8 @@ export class Group {
 
     // eslint-disable-next-line prefer-destructuring
     const target = /** @type {HTMLElement} */ (event.target);
-    const { allMembers, activeMembers } = this;
+    const { activeMembers } = this;
 
-    /** @type {HTMLElement | undefined} */
     // A field the user is typing in keeps its keys: the caret moves, the text changes. Escape and
     // Tab still reach the group, so a menu holding a field can be left the usual ways.
     if (
@@ -1007,17 +1049,7 @@ export class Group {
       return;
     }
 
-    const currentTarget = (() => {
-      if (!this.focusChild) {
-        return activeMembers.find((member) => member.matches('.focused'));
-      }
-
-      // A key pressed on a control inside a member, such as a checkbox in a grid row, moves from
-      // that member
-      const member = /** @type {HTMLElement | null} */ (target.closest(this.selector));
-
-      return member && this.parent.contains(member) ? member : undefined;
-    })();
+    const currentTarget = this.#getCurrentTarget(target);
 
     if (['Enter', ' ', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(key)) {
       event.preventDefault();
@@ -1053,23 +1085,10 @@ export class Group {
       // browser, a printable key on a non-editable element starts Firefox’s find-as-you-type.
       event.preventDefault();
 
-      const labels = activeMembers.map((member) =>
-        normalize(
-          member.dataset.label ??
-            member.querySelector('.label')?.textContent ??
-            member.textContent ??
-            '',
-        ),
-      );
+      const newTarget = this.#getTypeAheadTarget(key, currentTarget);
 
-      const index = findTypeAheadMatch(
-        labels,
-        this.#typeAhead.push(key),
-        currentTarget ? activeMembers.indexOf(currentTarget) : -1,
-      );
-
-      if (index !== -1 && activeMembers[index] !== currentTarget) {
-        this.selectTarget(event, activeMembers[index]);
+      if (newTarget && newTarget !== currentTarget) {
+        this.selectTarget(event, newTarget);
       }
 
       return;
@@ -1104,11 +1123,12 @@ export class Group {
       }
     }
 
+    const rtl = isRTL();
+
     // Submenu traversal. In a vertical menu the inline arrows are free, so they step into a submenu
     // and back out again, as the Menu pattern expects. Mirrored for RTL.
     if (this.orientation === 'vertical' && isMenu) {
-      const intoSubmenuKey = isRTL() ? 'ArrowLeft' : 'ArrowRight';
-      const outOfSubmenuKey = isRTL() ? 'ArrowRight' : 'ArrowLeft';
+      const { prevKey: outOfSubmenuKey, nextKey: intoSubmenuKey } = getArrowKeys('horizontal', rtl);
 
       if (key === intoSubmenuKey && currentTarget?.getAttribute('aria-haspopup') === 'menu') {
         this.enterSubmenu(currentTarget);
@@ -1127,96 +1147,92 @@ export class Group {
       }
     }
 
-    let index;
-    let newTarget;
-
-    if (this.grid) {
-      const colCount = this.columnCount;
-      // Members filtered out by a search take no cell in the layout, so they’re left out of the
-      // index the same way they’re left out of the column count. A disabled member still takes its
-      // cell, and stays in.
-      const members = allMembers.filter((member) => member.getAttribute('aria-hidden') !== 'true');
-      const lastIndex = members.length - 1;
-      const _isRTL = isRTL();
-
-      index = currentTarget ? members.indexOf(currentTarget) : -1;
-
-      // With nothing focused yet, the arrows start from either end, as in a list
-      if (index === -1) {
-        const forward = key === 'ArrowDown' || key === (_isRTL ? 'ArrowLeft' : 'ArrowRight');
-        const backward = key === 'ArrowUp' || key === (_isRTL ? 'ArrowRight' : 'ArrowLeft');
-
-        if (forward) {
-          [newTarget] = activeMembers;
-        } else if (backward) {
-          newTarget = activeMembers[activeMembers.length - 1];
-        }
-      }
-
-      if (key === 'ArrowUp' && index > 0) {
-        newTarget = members[Math.max(index - colCount, 0)];
-      }
-
-      if (key === 'ArrowDown' && index !== -1 && index < lastIndex) {
-        // A partial last row still gets reached
-        newTarget = members[Math.min(index + colCount, lastIndex)];
-      }
-
-      // In RTL, ArrowLeft moves to the next member, ArrowRight to the previous one
-      const prevKey = _isRTL ? 'ArrowRight' : 'ArrowLeft';
-      const nextKey = _isRTL ? 'ArrowLeft' : 'ArrowRight';
-
-      if (key === prevKey && index > 0) {
-        newTarget = members[index - 1];
-      }
-
-      if (key === nextKey && index !== -1 && index < lastIndex) {
-        newTarget = members[index + 1];
-      }
-
-      if (newTarget?.matches('[aria-disabled="true"]')) {
-        newTarget = undefined;
-      }
-    } else {
-      index = currentTarget ? activeMembers.indexOf(currentTarget) : -1;
-
-      const _isRTL = isRTL();
-
-      // For horizontal orientation in RTL: ArrowLeft moves forward, ArrowRight moves backward
-      const prevKey =
-        this.orientation === 'horizontal' ? (_isRTL ? 'ArrowRight' : 'ArrowLeft') : 'ArrowUp';
-
-      const nextKey =
-        this.orientation === 'horizontal' ? (_isRTL ? 'ArrowLeft' : 'ArrowRight') : 'ArrowDown';
-
-      if (key === prevKey) {
-        if (index > 0) {
-          // Previous member
-          newTarget = activeMembers[index - 1];
-        }
-
-        if (index <= 0) {
-          // Last member (also handles the case when nothing is focused, index === -1)
-          newTarget = activeMembers[activeMembers.length - 1];
-        }
-      }
-
-      if (key === nextKey) {
-        if (index < activeMembers.length - 1) {
-          // Next member
-          newTarget = activeMembers[index + 1];
-        }
-
-        if (index === activeMembers.length - 1) {
-          // First member
-          [newTarget] = activeMembers;
-        }
-      }
-    }
+    const newTarget = this.#getArrowTarget(key, currentTarget, rtl);
 
     if (newTarget && newTarget !== currentTarget) {
       this.selectTarget(event, newTarget);
     }
+  }
+
+  /**
+   * Get the member a key press moves from: the member with the cursor where the group itself holds
+   * focus, otherwise the member the key was pressed on.
+   * @param {HTMLElement} target Element the key was pressed on.
+   * @returns {HTMLElement | undefined} Current member, if any.
+   */
+  #getCurrentTarget(target) {
+    if (!this.focusChild) {
+      return this.activeMembers.find((member) => member.matches('.focused'));
+    }
+
+    // A key pressed on a control inside a member, such as a checkbox in a grid row, moves from
+    // that member
+    const member = /** @type {HTMLElement | null} */ (target.closest(this.selector));
+
+    return member && this.parent.contains(member) ? member : undefined;
+  }
+
+  /**
+   * Get the next member whose label starts with what has been typed so far, including the given
+   * key.
+   * @param {string} key Printable key.
+   * @param {HTMLElement | undefined} currentTarget Current member, if any.
+   * @returns {HTMLElement | undefined} Matching member, if any.
+   */
+  #getTypeAheadTarget(key, currentTarget) {
+    const { activeMembers } = this;
+
+    const labels = activeMembers.map((member) =>
+      normalize(
+        member.dataset.label ??
+          member.querySelector('.label')?.textContent ??
+          member.textContent ??
+          '',
+      ),
+    );
+
+    const index = findTypeAheadMatch(
+      labels,
+      this.#typeAhead.push(key),
+      currentTarget ? activeMembers.indexOf(currentTarget) : -1,
+    );
+
+    return index === -1 ? undefined : activeMembers[index];
+  }
+
+  /**
+   * Get the member an arrow key moves to.
+   * @param {string} key Pressed key.
+   * @param {HTMLElement | undefined} currentTarget Current member, if any.
+   * @param {boolean} rtl Whether the layout runs right to left.
+   * @returns {HTMLElement | undefined} Member to move to, if any.
+   */
+  #getArrowTarget(key, currentTarget, rtl) {
+    const { allMembers, activeMembers } = this;
+
+    if (!this.grid) {
+      const index = currentTarget ? activeMembers.indexOf(currentTarget) : -1;
+      const keys = getArrowKeys(this.orientation, rtl);
+
+      return activeMembers[
+        getLinearTargetIndex({ key, index, count: activeMembers.length, ...keys })
+      ];
+    }
+
+    const { columnCount } = this;
+    // Members filtered out by a search take no cell in the layout, so they’re left out of the index
+    // the same way they’re left out of the column count. A disabled member still takes its cell,
+    // and stays in.
+    const members = allMembers.filter((member) => member.getAttribute('aria-hidden') !== 'true');
+    const index = currentTarget ? members.indexOf(currentTarget) : -1;
+    // With nothing focused yet, the arrows start from either end of the active members
+    const list = index === -1 ? activeMembers : members;
+    const keys = getArrowKeys('horizontal', rtl);
+
+    const newTarget =
+      list[getGridTargetIndex({ key, index, count: list.length, columnCount, ...keys })];
+
+    return newTarget?.matches('[aria-disabled="true"]') ? undefined : newTarget;
   }
 
   /**

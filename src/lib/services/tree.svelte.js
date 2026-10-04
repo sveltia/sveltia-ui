@@ -1,10 +1,11 @@
 import { isRTL } from '@sveltia/i18n';
 import { generateElementId } from '@sveltia/utils/element';
-import { sleep } from '@sveltia/utils/misc';
+import { getArrowKeys } from './navigation.js';
 import { scrollIntoViewIfNeeded } from './scroll.js';
 import { normalize } from './text.js';
 import { getSelectedItemDetail } from './select.svelte.js';
 import { findTypeAheadMatch, TypeAhead } from './type-ahead.js';
+import { activateBefore, activateLater } from './widget.js';
 
 /**
  * @import { Attachment } from 'svelte/attachments';
@@ -71,26 +72,12 @@ export class Tree {
      */
     this.destroyed = false;
 
-    // eslint-disable-next-line jsdoc/require-description
     /** @type {(event: MouseEvent) => void} */
-    this._onClick = (event) => {
-      this.activate();
-      this.onClick(event);
-    };
-
-    // eslint-disable-next-line jsdoc/require-description
+    this._onClick = activateBefore(this, (event) => this.onClick(event));
     /** @type {(event: KeyboardEvent) => void} */
-    this._onKeyDown = (event) => {
-      this.activate();
-      this.onKeyDown(event);
-    };
-
-    // eslint-disable-next-line jsdoc/require-description
+    this._onKeyDown = activateBefore(this, (event) => this.onKeyDown(event));
     /** @type {(event: FocusEvent) => void} */
-    this._onFocusIn = (event) => {
-      this.activate();
-      this.onFocusIn(event);
-    };
+    this._onFocusIn = activateBefore(this, (event) => this.onFocusIn(event));
 
     // The items can be added or removed at any time, e.g. when a subtree is lazily rendered
     this.observer = new globalThis.MutationObserver(() => {
@@ -106,16 +93,9 @@ export class Tree {
     parent.addEventListener('keydown', this._onKeyDown);
     parent.addEventListener('focusin', this._onFocusIn);
 
-    // Wait a bit before the child components are mounted
-    (async () => {
-      await sleep(100);
-
-      // The widget may have been unmounted in the meantime, and the observer set up by
-      // `activate()` would then never be disconnected
-      if (!this.destroyed) {
-        this.activate();
-      }
-    })();
+    // Wait a bit before the child components are mounted. If the widget is unmounted in the
+    // meantime, the observer set up by `activate()` would never be disconnected.
+    activateLater(this, () => this.destroyed);
   }
 
   /**
@@ -647,8 +627,7 @@ export class Tree {
     const currentItem = target ?? this.currentItem ?? activeItems[0];
     const index = activeItems.indexOf(currentItem);
     // In RTL, the Left and Right arrow keys are swapped
-    const forwardKey = isRTL() ? 'ArrowLeft' : 'ArrowRight';
-    const backwardKey = isRTL() ? 'ArrowRight' : 'ArrowLeft';
+    const { prevKey: backwardKey, nextKey: forwardKey } = getArrowKeys('horizontal', isRTL());
 
     if (key === 'a' && (ctrlKey || metaKey)) {
       if (multi) {
