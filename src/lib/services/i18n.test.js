@@ -35,3 +35,29 @@ describe('initLocales', () => {
     expect(init).toHaveBeenCalledWith({ fallbackLocale: 'en-GB', initialLocale: 'ja' });
   });
 });
+
+describe('strings', () => {
+  /**
+   * Get the dotted paths of all the leaf strings in a locale.
+   * @param {Record<string, any>} object Locale strings, or a nested part of them.
+   * @param {string} [prefix] Path of the given part.
+   * @returns {string[]} Key paths, sorted.
+   */
+  const getKeyPaths = (object, prefix = '') =>
+    Object.entries(object)
+      .flatMap(([key, value]) =>
+        value && typeof value === 'object'
+          ? getKeyPaths(value, `${prefix}${key}.`)
+          : [`${prefix}${key}`],
+      )
+      .sort();
+
+  const referenceKeys = getKeyPaths(strings['en-US']);
+
+  it.each(Object.keys(strings).filter((locale) => locale !== 'en-US'))(
+    'has the same keys in %s as in en-US',
+    (locale) => {
+      expect(getKeyPaths(strings[locale])).toEqual(referenceKeys);
+    },
+  );
+});
