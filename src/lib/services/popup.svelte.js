@@ -397,6 +397,15 @@ class Popup {
           height = bottomMargin;
         }
       }
+    } else if (position.startsWith('top-')) {
+      if (contentHeight > topMargin) {
+        if (bottomMargin > topMargin) {
+          position = /** @type {PopupPosition} */ (position.replace('top-', 'bottom-'));
+          height = bottomMargin;
+        } else {
+          height = topMargin;
+        }
+      }
     }
 
     // Only a popup that opens beside its anchor carries a `-top`/`-bottom` suffix, and it grows

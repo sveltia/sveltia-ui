@@ -625,6 +625,36 @@ describe('Popup - checkPosition() calculation', () => {
     expect(style.inset).not.toBeUndefined();
   });
 
+  it('should switch top-left to bottom-left when content overflows the top', () => {
+    const instance = activatePopup(anchor, popup, 'top-left');
+
+    // topMargin = 50 - 8 = 42; bottomMargin = 600 - 100 - 8 = 492. The content doesn’t fit above
+    // and there is more room below, so the popup opens downwards, capped by that room
+    Object.defineProperty(content, 'scrollHeight', { configurable: true, get: () => 300 });
+    mockRect({ top: 50, bottom: 100, left: 50, right: 300, vw: 800, vh: 600 });
+    instance.checkPosition();
+
+    const { style } = instance;
+
+    expect(style.inset).toBe('100px auto auto 50px');
+    expect(style.height).toBe('492px');
+  });
+
+  it('should cap the height of a top-right popup that has more room above than below', () => {
+    const instance = activatePopup(anchor, popup, 'top-right');
+
+    // topMargin = 400 - 8 = 392; bottomMargin = 600 - 450 - 8 = 142. The content fits neither way,
+    // so the popup stays above and scrolls
+    Object.defineProperty(content, 'scrollHeight', { configurable: true, get: () => 500 });
+    mockRect({ top: 400, bottom: 450, left: 50, right: 300, vw: 800, vh: 600 });
+    instance.checkPosition();
+
+    const { style } = instance;
+
+    expect(style.inset).toBe('auto 500px 200px auto');
+    expect(style.height).toBe('392px');
+  });
+
   it('should switch position to bottom-right when content overflows to the right', () => {
     const instance = activatePopup(anchor, popup, 'bottom-left');
 
