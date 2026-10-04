@@ -60,6 +60,35 @@ export const addMonths = (firstDay, delta) => {
 };
 
 /**
+ * Get another day, relative to the given one.
+ * @param {Date} date Any date.
+ * @param {number} delta Number of days to move by; negative to go back.
+ * @returns {Date} A new date, `delta` days away.
+ */
+export const addDays = (date, delta) => {
+  const day = new Date(date);
+
+  day.setUTCDate(day.getUTCDate() + delta);
+
+  return day;
+};
+
+/**
+ * Get how many days an arrow key moves the cursor on the day grid: a day sideways, a week up or
+ * down. The inline arrows are mirrored for RTL.
+ * @param {string} key `KeyboardEvent.key` value.
+ * @param {boolean} [rtl] Whether the layout is right-to-left.
+ * @returns {number | undefined} Number of days, or `undefined` if the key is not an arrow key.
+ */
+export const getArrowKeyDayOffset = (key, rtl = false) =>
+  /** @type {Record<string, number>} */ ({
+    ArrowUp: -7,
+    ArrowDown: 7,
+    ArrowLeft: rtl ? 1 : -1,
+    ArrowRight: rtl ? -1 : 1,
+  })[key];
+
+/**
  * Get the days to be laid out in the calendar grid.
  * @param {Date} firstDay First day of the month being displayed.
  * @returns {Date[]} {@link DAY_GRID_SIZE} consecutive days, starting from the Sunday on or before

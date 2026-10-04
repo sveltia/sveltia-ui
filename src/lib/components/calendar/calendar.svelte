@@ -11,8 +11,10 @@
   import Spacer from '../divider/spacer.svelte';
   import Icon from '../icon/icon.svelte';
   import {
+    addDays,
     addMonths,
     formatDate,
+    getArrowKeyDayOffset,
     getCalendarDays,
     getFirstDayOfMonth,
     getToday,
@@ -52,6 +54,46 @@
   const id = $props.id();
   /** @type {HTMLElement | undefined} */
   let grid = $state();
+
+  /**
+   * Move the keyboard cursor, and with it the selection, by date rather than by cell: the group
+   * service would step through the 42 cells on the grid and stop at its edges, whereas a week up
+   * from the first of the month is a day in the previous month, which may not be on the grid at
+   * all. The month displayed follows the new {@link value}.
+   * @param {KeyboardEvent} event `keydown` event.
+   */
+  const onGridKeyDown = (event) => {
+    const { key, shiftKey, altKey, ctrlKey, metaKey } = event;
+    const offset = getArrowKeyDayOffset(key, isRTL());
+
+    if (offset === undefined || shiftKey || altKey || ctrlKey || metaKey) {
+      return;
+    }
+
+    // Keep the group service, which listens on the same element, from moving the cursor as well
+    event.preventDefault();
+    event.stopImmediatePropagation();
+
+    const focused = /** @type {HTMLButtonElement | null | undefined} */ (
+      grid?.querySelector('[role="option"].focused')
+    );
+
+    // Without a cursor, start from the selected day only if it’s on the grid. After browsing to
+    // another month, it isn’t, and moving from it would bring that month back. Land on today if
+    // it’s in the month displayed, or on the first of the month otherwise.
+    const cursor =
+      focused?.value ||
+      (value && dayList.some(({ day }) => toDateString(day) === value) ? value : undefined);
+
+    if (cursor) {
+      value = toDateString(addDays(new Date(cursor), offset));
+    } else {
+      value =
+        getFirstDayOfMonth(today).getTime() === firstDay.getTime()
+          ? todayString
+          : toDateString(firstDay);
+    }
+  };
 
   // Keep the keyboard cursor on the selected day. The group service tracks the cursor with the
   // `focused` class and `aria-activedescendant`, and moves both along with the selection it makes
@@ -107,7 +149,7 @@
                   //
                 }}
               >
-                <Icon name="chevron_left" />
+                <Icon name={isRTL() ? 'chevron_right' : 'chevron_left'} />
               </Button>
               <Button
                 aria-label={_('_sui.calendar.next_decade')}
@@ -145,7 +187,7 @@
         firstDay = addMonths(firstDay, -1);
       }}
     >
-      <Icon name="chevron_left" />
+      <Icon name={isRTL() ? 'chevron_right' : 'chevron_left'} />
     </Button>
     <Button
       aria-label={_('_sui.calendar.next_month')}
@@ -157,9 +199,10 @@
     </Button>
   </div>
   <!--
-    The day grid is a listbox laid out as a grid, so the group service moves through it with all
-    four arrow keys. Each day is named by its full date: the digit alone means nothing out of
-    context. The days are UTC-based, like the `value`, so the names are formatted the same way.
+    The day grid is a listbox laid out as a grid. The arrow keys move through it by date, handled
+    above; the group service still takes care of the rest, such as Home and End. Each day is named
+    by its full date: the digit alone means nothing out of context. The days are UTC-based, like
+    the `value`, so the names are formatted the same way.
     The cells are keyed by date string rather than by `Date` object, which is recreated on every
     update: a day that stays on the grid when the month changes — the last days of the previous
     month, say — keeps its element, and with it the keyboard cursor.
@@ -169,6 +212,7 @@
     role="listbox"
     class="grid"
     aria-label={monthLabel}
+    onkeydowncapture={onGridKeyDown}
     onChange={(/** @type {CustomEvent} */ event) => {
       value = event.detail.value;
     }}

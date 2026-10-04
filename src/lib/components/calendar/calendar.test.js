@@ -1,9 +1,11 @@
 import { date as formatLocaleDate } from '@sveltia/i18n';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
+  addDays,
   addMonths,
   DAY_GRID_SIZE,
   formatDate,
+  getArrowKeyDayOffset,
   getCalendarDays,
   getFirstDayOfMonth,
   getToday,
@@ -84,6 +86,41 @@ describe('addMonths', () => {
 
     addMonths(march, 1);
     expect(march.getMonth()).toBe(2);
+  });
+});
+
+describe('addDays', () => {
+  it('should move by days across month and year boundaries', () => {
+    expect(toDateString(addDays(new Date('2024-03-01T00:00:00Z'), -7))).toBe('2024-02-23');
+    expect(toDateString(addDays(new Date('2024-03-31T00:00:00Z'), 7))).toBe('2024-04-07');
+    expect(toDateString(addDays(new Date('2024-12-31T00:00:00Z'), 1))).toBe('2025-01-01');
+  });
+
+  it('should not modify the given date', () => {
+    const day = new Date('2024-03-01T00:00:00Z');
+
+    addDays(day, 1);
+    expect(toDateString(day)).toBe('2024-03-01');
+  });
+});
+
+describe('getArrowKeyDayOffset', () => {
+  it('should move by a week vertically and by a day horizontally', () => {
+    expect(getArrowKeyDayOffset('ArrowUp')).toBe(-7);
+    expect(getArrowKeyDayOffset('ArrowDown')).toBe(7);
+    expect(getArrowKeyDayOffset('ArrowLeft')).toBe(-1);
+    expect(getArrowKeyDayOffset('ArrowRight')).toBe(1);
+  });
+
+  it('should mirror the inline arrows in RTL', () => {
+    expect(getArrowKeyDayOffset('ArrowUp', true)).toBe(-7);
+    expect(getArrowKeyDayOffset('ArrowLeft', true)).toBe(1);
+    expect(getArrowKeyDayOffset('ArrowRight', true)).toBe(-1);
+  });
+
+  it('should return `undefined` for other keys', () => {
+    expect(getArrowKeyDayOffset('Home')).toBeUndefined();
+    expect(getArrowKeyDayOffset('a')).toBeUndefined();
   });
 });
 

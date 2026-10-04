@@ -50,6 +50,7 @@ words:
   - nocheck
   - noto
   - oninputcapture
+  - onkeydowncapture
   - onpointerrawupdate
   - opsz
   - oxlint
