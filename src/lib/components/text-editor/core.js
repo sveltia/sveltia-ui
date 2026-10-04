@@ -163,7 +163,7 @@ export const isStaticDecoratorContent = (target) => {
  * block, or a new paragraph if the adjacent nodes are decorators, where nothing can be typed.
  * @returns {boolean} Whether the selection has been moved.
  */
-export const $moveCaretIntoBlock = () => {
+const $moveCaretIntoBlock = () => {
   const selection = getSelection();
 
   if (

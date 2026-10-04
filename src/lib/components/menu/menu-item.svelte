@@ -54,6 +54,8 @@
 
   let isPopupOpen = $state(false);
   let isPopupHovered = $state(false);
+  /** @type {number | undefined} */
+  let hoverTimer;
 
   /**
    * Reference to the `<button>` element.
@@ -62,15 +64,29 @@
   let buttonElement = $state();
 
   /**
-   * Reference to the `<button>` element.
+   * Reference to the `<dialog>` element the menu is in, if any.
    * @type {HTMLDialogElement | undefined}
    */
   let dialogElement = $state();
 
   const hasItems = $derived(role === 'menuitem' && !!items);
 
+  /**
+   * Open or close the submenu after a short delay, cancelling any pending change, so that quickly
+   * moving the pointer in and out doesn’t leave a stale timer to act on the state later.
+   * @param {() => void} callback Function to run after the delay.
+   */
+  const scheduleHoverChange = (callback) => {
+    window.clearTimeout(hoverTimer);
+    hoverTimer = window.setTimeout(callback, 200);
+  };
+
   onMount(() => {
     dialogElement = buttonElement?.closest('dialog') ?? undefined;
+
+    return () => {
+      window.clearTimeout(hoverTimer);
+    };
   });
 </script>
 
@@ -85,20 +101,20 @@
     aria-expanded={hasItems ? isPopupOpen : undefined}
     onmouseenter={(event) => {
       if (hasItems) {
-        window.setTimeout(() => {
+        scheduleHoverChange(() => {
           isPopupOpen = true;
-        }, 200);
+        });
       }
 
       onmouseenter?.(event);
     }}
     onmouseleave={(event) => {
       if (hasItems) {
-        window.setTimeout(() => {
+        scheduleHoverChange(() => {
           if (!isPopupHovered) {
             isPopupOpen = false;
           }
-        }, 200);
+        });
       }
 
       onmouseleave?.(event);

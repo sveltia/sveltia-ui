@@ -50,7 +50,7 @@
   } = $props();
 
   /**
-   * The ID of the drawer.
+   * The ID of the dialog.
    * @type {string}
    */
   const id = $props.id();

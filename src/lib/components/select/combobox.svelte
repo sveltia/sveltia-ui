@@ -527,13 +527,6 @@
         opacity: 0.5;
       }
 
-      & > .icon {
-        position: absolute;
-        inset-block-start: 8px;
-        inset-inline-start: 8px;
-        z-index: 1;
-      }
-
       & > button {
         position: absolute;
         inset-block-start: 0;
@@ -558,24 +551,6 @@
         padding-block: 0;
         padding-inline: 8px 32px;
         width: 0; // = auto
-      }
-
-      & + [role='listbox'] {
-        position: fixed;
-        z-index: 100;
-        border-radius: var(--sui-control-medium-border-radius);
-        box-shadow: 0 8px 16px var(--sui-popup-shadow-color);
-        overflow: auto;
-        background-color: var(--sui-secondary-background-color);
-        -webkit-backdrop-filter: blur(32px);
-        backdrop-filter: blur(32px);
-        /* Add .1s delay before the position can be determined */
-        transition: opacity 100ms 100ms;
-
-        &:not(.open) {
-          opacity: 0;
-          pointer-events: none;
-        }
       }
     }
   }

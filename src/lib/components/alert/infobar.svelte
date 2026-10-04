@@ -9,7 +9,7 @@
 
   /**
    * @typedef {object} Props
-   * @property {boolean} [show] Whether to show the toast.
+   * @property {boolean} [show] Whether to show the infobar.
    * @property {boolean} [dismissible] Whether to show the close button.
    * @property {'error' | 'warning' | 'info' | 'success'} [status] Information status. Errors and
    * warnings are `role="alert"` and interrupt; information and success are `role="status"` and

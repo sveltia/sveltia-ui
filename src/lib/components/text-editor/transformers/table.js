@@ -44,11 +44,10 @@ export const getTableColumnsSize = (table) => {
 
 /**
  * Creates a table cell with the given text content.
- * @internal
  * @param {string} textContent
  * @returns {TableCellNode}
  */
-export const createTableCell = (textContent) => {
+const createTableCell = (textContent) => {
   textContent = textContent.replace(/\\n/g, '\n');
 
   const cell = createTableCellNode(TableCellHeaderStates.NO_STATUS);

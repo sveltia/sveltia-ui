@@ -15,7 +15,7 @@
   /**
    * @typedef {object} Props
    * @property {HTMLElement} [popupPositionBaseElement] The base element of {@link popupPosition}.
-   * If omitted, this will be {@link buttonComponent}.
+   * If omitted, this will be the button itself.
    */
 
   /**

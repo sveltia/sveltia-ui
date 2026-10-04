@@ -9,8 +9,6 @@
    * @typedef {object} Props
    * @property {boolean} [disabled] Whether to disable the widget. An alias of the `aria-disabled`
    * attribute.
-   * @property {boolean} [readonly] Whether to make the widget read-only. An alias of the
-   * `aria-readonly` attribute.
    * @property {Snippet} [children] Primary slot content.
    */
 
@@ -19,8 +17,6 @@
    */
   let {
     /* eslint-disable prefer-const */
-    code = $bindable(''),
-    lang = $bindable('plain'),
     disabled = false,
     children,
     ...restProps
@@ -57,11 +53,6 @@
         height: auto;
         min-height: 40px;
         background-color: var(--sui-tertiary-background-color);
-
-        @media (width < 768px) {
-          flex-wrap: wrap;
-          height: auto;
-        }
       }
 
       .sui.menu-button {

@@ -260,9 +260,8 @@ class Popup {
   }
 
   /**
-   * Detach the `<dialog>` element, typically because it’s being unmounted. The `aria-controls`
-   * attribute on the anchor is left to the {@link open} setter, which removes it once the closing
-   * animation is complete.
+   * Detach the `<dialog>` element, typically because it’s being unmounted. The anchor’s
+   * `aria-controls` attribute is removed as well, since the content is leaving the DOM tree.
    */
   detachPopupElement() {
     this.#removeEventListeners?.();

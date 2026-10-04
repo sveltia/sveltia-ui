@@ -38,7 +38,7 @@ import { getComponentMarkdown } from './core.js';
  * Markdown markers for the inline formats.
  * @type {Record<TextEditorFormatType, string>}
  */
-export const INLINE_MARKERS = {
+const INLINE_MARKERS = {
   bold: '**',
   italic: '_',
   strikethrough: '~~',

@@ -44,14 +44,13 @@ import {
   loadCodeTheme,
   loadEngine,
 } from './facade.js';
+import { CODE_THEME_LIGHT } from './theme.js';
 
 /**
  * @import { CodeNode as CodeNodeType } from '@lexical/code-core';
  * @import { LexicalEditor, LexicalNode, NodeKey } from 'lexical';
  * @import { CodeTokenizer, CodeTransformState } from '$lib/typedefs';
  */
-
-const DEFAULT_CODE_THEME = 'github-light';
 
 /**
  * Default tokenizer backed by Shiki.
@@ -62,7 +61,7 @@ const DEFAULT_CODE_THEME = 'github-light';
  */
 export const shikiTokenizer = {
   defaultLanguage: DEFAULT_CODE_LANGUAGE,
-  defaultTheme: DEFAULT_CODE_THEME,
+  defaultTheme: CODE_THEME_LIGHT,
   /**
    * Convert a code node’s content into Lexical nodes.
    * @param {CodeNodeType} codeNode Code node to tokenize.

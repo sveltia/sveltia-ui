@@ -71,6 +71,30 @@ it('marks an item with a submenu, and shows a chevron', async () => {
   );
 });
 
+it('cancels a pending submenu open when the pointer leaves quickly', async () => {
+  const screen = await render(MenuItem, {
+    label: 'Share',
+    items: html('<div role="menuitem">Sub</div>'),
+  });
+
+  const item = screen.getByRole('menuitem', { name: /Share/ });
+
+  vi.useFakeTimers();
+
+  try {
+    item.element().dispatchEvent(new MouseEvent('mouseenter'));
+    vi.advanceTimersByTime(100);
+    item.element().dispatchEvent(new MouseEvent('mouseleave'));
+    // The open timer would have fired here, had the leave not replaced it
+    vi.advanceTimersByTime(150);
+    await expect.element(item).toHaveAttribute('aria-expanded', 'false');
+    vi.advanceTimersByTime(100);
+    await expect.element(item).toHaveAttribute('aria-expanded', 'false');
+  } finally {
+    vi.useRealTimers();
+  }
+});
+
 it('mirrors the chevron in a right-to-left locale', async () => {
   setRTL(true);
 
