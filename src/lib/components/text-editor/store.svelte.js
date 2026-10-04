@@ -86,7 +86,10 @@ export const createEditorStore = () => {
         enabledTransformers,
       );
 
-      lastImport = { source: originalValue, exported };
+      // Skip an import superseded by a newer one, which sets its own value
+      if (exported !== undefined) {
+        lastImport = { source: originalValue, exported };
+      }
     } catch (ex) {
       // Go through the setter, so the editor actually falls back to the plain text mode
       setConverterError(true);

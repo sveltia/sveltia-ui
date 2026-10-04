@@ -52,6 +52,7 @@ import {
   $getSelection as getSelection,
   INDENT_CONTENT_COMMAND,
   INSERT_PARAGRAPH_COMMAND,
+  KEY_ENTER_COMMAND,
   $insertNodes as insertNodes,
   $isDecoratorNode as isDecoratorNode,
   $isElementNode as isElementNode,
@@ -550,6 +551,10 @@ export const initEditor = ({
     // `CodeNode` expects the editor to be built with `CodeExtension`, which also registers the
     // `CodeNode` and `CodeHighlightNode` nodes
     dependencies: hasCodeBlock ? [CodeExtension] : [],
+    // Start with an empty editor state like `createEditor` does, instead of a blank paragraph. The
+    // Markdown import then becomes the first state in the history, so undoing right after the
+    // editor loads doesn’t revert it to the blank paragraph and clear the value
+    $initialEditorState: null,
     nodes: [
       ...components.map(({ node }) => node),
       ...new Set(
@@ -642,6 +647,28 @@ export const initEditor = ({
           );
         },
         COMMAND_PRIORITY_LOW,
+      ),
+    );
+
+    // Pressing Enter after two blank lines at the end of a code block exits it by default
+    // (`CodeExtension`), adding a paragraph after it, which would be left out of the code. Insert a
+    // new line instead, which `CodeNode.insertNewAfter()` does without exiting when the extension
+    // is in place. This has to take priority over the extension’s own handler
+    addUnregister(
+      editor.registerCommand(
+        KEY_ENTER_COMMAND,
+        (event) => {
+          const selection = getSelection();
+
+          if (!isRangeSelection(selection)) {
+            return false;
+          }
+
+          event?.preventDefault();
+
+          return editor.dispatchCommand(INSERT_PARAGRAPH_COMMAND, undefined);
+        },
+        COMMAND_PRIORITY_NORMAL,
       ),
     );
 
@@ -915,22 +942,53 @@ export const loadCodeHighlighter = async (lang) => {
 };
 
 /**
+ * Number of the latest Markdown import started for each editor.
+ * @type {WeakMap<LexicalEditor, number>}
+ */
+const latestImports = new WeakMap();
+
+/**
  * Convert Markdown to Lexical nodes.
  * @param {LexicalEditor} editor Editor instance.
  * @param {string} value Current Markdown value.
  * @param {Transformer[]} enabledTransformers List of enabled Markdown transformers.
- * @returns {Promise<string>} The value as the editor exports it once imported, which can differ in
- * style from the given value, e.g. `_text_` for `*text*`.
+ * @returns {Promise<string | undefined>} The value as the editor exports it once imported, which
+ * can differ in style from the given value, e.g. `_text_` for `*text*`. `undefined` if another
+ * import has been started for the same editor in the meantime, in which case this value is skipped.
  * @throws {Error} Failed to convert the value to Lexical nodes.
  */
 export const convertMarkdownToLexical = async (editor, value, enabledTransformers) => {
-  // Preload the highlighter for every language used in the document, so code blocks are highlighted
-  // as soon as they appear rather than a moment later
-  await Promise.all(
-    [...value.matchAll(/^```(?<lang>.+?)\n/gm)].map(async ({ groups: { lang = 'plain' } = {} }) =>
-      loadCodeHighlighter(lang),
-    ),
-  );
+  const importId = (latestImports.get(editor) ?? 0) + 1;
+
+  latestImports.set(editor, importId);
+
+  /**
+   * Check if a newer import has been started while waiting for the highlighter. Imports can finish
+   * out of order, as only those with code blocks have to wait, and an older value must not
+   * overwrite a newer one.
+   * @returns {boolean} Result.
+   */
+  const isSuperseded = () => latestImports.get(editor) !== importId;
+
+  try {
+    // Preload the highlighter for every language used in the document, so code blocks are
+    // highlighted as soon as they appear rather than a moment later
+    await Promise.all(
+      [...value.matchAll(/^```(?<lang>.+?)\n/gm)].map(async ({ groups: { lang = 'plain' } = {} }) =>
+        loadCodeHighlighter(lang),
+      ),
+    );
+  } catch (ex) {
+    if (isSuperseded()) {
+      return undefined;
+    }
+
+    throw ex;
+  }
+
+  if (isSuperseded()) {
+    return undefined;
+  }
 
   // Split multiline formatting into separate lines to prevent Markdown parsing issues
   value = splitMultilineFormatting(value);

@@ -260,6 +260,7 @@ vi.mock('lexical', () => ({
   $getSelection: vi.fn(() => selectionState.value),
   INDENT_CONTENT_COMMAND: 'indent',
   INSERT_PARAGRAPH_COMMAND: 'insertParagraph',
+  KEY_ENTER_COMMAND: 'keyEnter',
   $isRangeSelection: vi.fn((selection) => selection?.type === 'range'),
   OUTDENT_CONTENT_COMMAND: 'outdent',
   PASTE_COMMAND: 'paste',
@@ -429,7 +430,7 @@ describe('text editor core', () => {
     });
 
     expect(editor).toBe(editorState);
-    expect(editorState._commands).toHaveLength(6);
+    expect(editorState._commands).toHaveLength(7);
     expect(editorState._transforms).toHaveLength(1);
     expect(editorState._updateListeners).toHaveLength(1);
     expect(editorState._rootListeners).toHaveLength(1);
@@ -445,6 +446,74 @@ describe('text editor core', () => {
     cleanup();
     dispose();
     expect(root.removeEventListener).toHaveBeenCalledWith('keydown', expect.any(Function));
+  });
+
+  it('builds the editor without an initial blank paragraph', async () => {
+    const { buildEditorFromExtensions } = await import('@lexical/extension');
+
+    vi.mocked(buildEditorFromExtensions).mockClear();
+
+    const { dispose } = initEditor({
+      components: [],
+      useMarkdownShortcuts: false,
+      isCodeEditor: false,
+      modes: [],
+      enabledButtons: [],
+    });
+
+    // Otherwise the blank paragraph lands on the undo stack, and undoing right after the editor
+    // loads clears the imported content
+    expect(vi.mocked(buildEditorFromExtensions).mock.calls[0][0]).toMatchObject({
+      $initialEditorState: null,
+    });
+    dispose();
+  });
+
+  it('skips an import superseded by a newer one while loading the highlighter', async () => {
+    const engine = Promise.withResolvers();
+
+    vi.mocked(loadEngine).mockImplementationOnce(() => engine.promise);
+
+    /** @type {string[]} */
+    const imported = [];
+    const { $convertFromMarkdownString } = await import('@lexical/markdown');
+
+    vi.mocked($convertFromMarkdownString).mockImplementation((value) => {
+      imported.push(/** @type {string} */ (value));
+    });
+
+    const editor = /** @type {any} */ ({
+      update: vi.fn((callback) => callback()),
+      read: vi.fn((callback) => callback()),
+    });
+
+    const first = convertMarkdownToLexical(editor, '```js\nconst a = 1;\n```', []);
+    const second = convertMarkdownToLexical(editor, 'Newer', []);
+
+    await expect(second).resolves.toBe('converted');
+    engine.resolve(undefined);
+    // The older value, which finishes last, must not overwrite the newer one
+    await expect(first).resolves.toBeUndefined();
+    expect(imported).toEqual(['Newer']);
+    vi.mocked($convertFromMarkdownString).mockReset();
+  });
+
+  it('ignores a highlighter error in a superseded import', async () => {
+    const engine = Promise.withResolvers();
+
+    vi.mocked(loadEngine).mockImplementationOnce(() => engine.promise);
+
+    const editor = /** @type {any} */ ({
+      update: vi.fn((callback) => callback()),
+      read: vi.fn((callback) => callback()),
+    });
+
+    const first = convertMarkdownToLexical(editor, '```js\nconst a = 1;\n```', []);
+
+    await convertMarkdownToLexical(editor, 'Newer', []);
+    engine.reject(new Error('offline'));
+    await expect(first).resolves.toBeUndefined();
+    expect(editor.update).toHaveBeenCalledTimes(1);
   });
 
   it('skips loading the highlighter entirely for a plain language', async () => {
@@ -2190,6 +2259,47 @@ describe('isSafeLinkURL', () => {
         anchor: { offset: 0, getNode: () => textNode },
       };
       expect(listener(true)).toBe(false);
+    });
+
+    it('inserts a new line on Enter instead of exiting the code block', () => {
+      const event = new KeyboardEvent('keydown', { key: 'Enter', cancelable: true });
+
+      const dispatchCommand = vi
+        .spyOn(editorState, 'dispatchCommand')
+        .mockReturnValue(/** @type {any} */ (true));
+
+      editorState._commands = [];
+      initCodeEditor();
+
+      const { listener } = editorState._commands.find(({ command }) => command === 'keyEnter');
+
+      selectionState.value = { type: 'range' };
+      expect(listener(event)).toBe(true);
+      expect(event.defaultPrevented).toBe(true);
+      expect(dispatchCommand).toHaveBeenCalledExactlyOnceWith('insertParagraph', undefined);
+
+      // A null event, e.g. from `beforeinput`
+      expect(listener(null)).toBe(true);
+      expect(dispatchCommand).toHaveBeenCalledTimes(2);
+
+      // Not a range selection
+      selectionState.value = null;
+      expect(listener(event)).toBe(false);
+      expect(dispatchCommand).toHaveBeenCalledTimes(2);
+      dispatchCommand.mockRestore();
+    });
+
+    it('does not handle Enter in the rich text editor', () => {
+      editorState._commands = [];
+      initEditor({
+        components: [],
+        useMarkdownShortcuts: false,
+        isCodeEditor: false,
+        modes: [],
+        enabledButtons: ['code-block'],
+      });
+
+      expect(editorState._commands.some(({ command }) => command === 'keyEnter')).toBe(false);
     });
   });
 });

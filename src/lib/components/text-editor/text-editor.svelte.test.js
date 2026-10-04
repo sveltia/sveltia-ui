@@ -1,4 +1,5 @@
 import { sleep } from '@sveltia/utils/misc';
+import { UNDO_COMMAND } from 'lexical';
 import { beforeAll, describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-svelte';
 import { userEvent } from 'vitest/browser';
@@ -6,6 +7,7 @@ import { setCodeHighlighterLoaders } from './shiki/loader.js';
 import TextEditor from './text-editor.svelte';
 
 /**
+ * @import { LexicalEditor } from 'lexical';
  * @import { ComponentProps } from 'svelte';
  */
 
@@ -223,6 +225,20 @@ describe('TextEditor', () => {
     await vi.waitFor(() => {
       expect(props.value).toBe('__Bye__');
     });
+  });
+
+  it('keeps the content when undoing right after the editor loads', async () => {
+    /** @type {ComponentProps<typeof TextEditor>} */
+    const props = $state({ value: 'Hello' });
+    const screen = await render(TextEditor, props);
+    const root = await waitForContent(screen.container, 'Hello');
+    const editor = /** @type {LexicalEditor} */ (/** @type {any} */ (root).__lexicalEditor);
+
+    // Nothing to undo, as the loaded content is the initial state rather than a change
+    editor.dispatchCommand(UNDO_COMMAND, undefined);
+    await sleep(300);
+    expect(root.textContent).toBe('Hello');
+    expect(props.value).toBe('Hello');
   });
 
   it('clears the pending state when the editor is removed before converting a change', async () => {

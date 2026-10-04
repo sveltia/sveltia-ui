@@ -110,6 +110,21 @@ describe('CodeEditor', () => {
     });
   });
 
+  it('keeps new lines in the code block after blank lines', async () => {
+    /** @type {ComponentProps<typeof CodeEditor>} */
+    const props = $state({ code: 'one', lang: 'plain' });
+    const screen = await render(CodeEditor, props);
+    const root = await waitForContent(screen.container, 'one');
+
+    // The third Enter would exit the code block by default, leaving `two` out of the code
+    focusEnd(root);
+    await userEvent.keyboard('{Enter}{Enter}{Enter}two');
+    await vi.waitFor(() => {
+      expect(props.code).toBe('one\n\n\ntwo');
+    });
+    expect(root.querySelectorAll(':scope > *')).toHaveLength(1);
+  });
+
   it('switches the language of the code block', async () => {
     /** @type {ComponentProps<typeof CodeEditor>} */
     const props = $state({ code: 'a', lang: 'plain', showLanguageSwitcher: true });
