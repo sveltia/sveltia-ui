@@ -8,7 +8,7 @@
 <script>
   import { _ } from '@sveltia/i18n';
   import { onMount } from 'svelte';
-  import { normalize } from '../../services/group.svelte.js';
+  import { normalize } from '../../services/text.js';
   import { createOptionRegistry, getSelectedItemDetail } from '../../services/select.svelte.js';
   import { findTypeAheadMatch, TypeAhead } from '../../services/type-ahead.js';
   import Button from '../button/button.svelte';

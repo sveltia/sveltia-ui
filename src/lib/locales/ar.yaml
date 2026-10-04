@@ -104,7 +104,7 @@ text_editor:
   show_text_style_options: إظهار خيارات نمط النص
   # Block style menu items
   paragraph: فقرة
-  heading_ 1: عنوان 1
+  heading_1: عنوان 1
   heading_2: عنوان 2
   heading_3: عنوان 3
   heading_4: عنوان 4

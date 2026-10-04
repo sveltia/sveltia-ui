@@ -54,7 +54,7 @@
    */
   const toggle = () => {
     expanded = !expanded;
-    onChange?.(new CustomEvent('change', { detail: { expanded } }));
+    onChange?.(new CustomEvent('Change', { detail: { expanded } }));
   };
 
   /**

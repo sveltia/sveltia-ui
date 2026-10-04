@@ -3,6 +3,8 @@
  * listbox and menu groups.
  */
 
+import { fold } from './text.js';
+
 /**
  * How long, in milliseconds, successive keystrokes keep adding up to one type-ahead prefix.
  */
@@ -26,7 +28,7 @@ export class TypeAhead {
    */
   push(key) {
     globalThis.clearTimeout(this.#timer);
-    this.#prefix += key.toLocaleLowerCase();
+    this.#prefix += fold(key);
     this.#timer = /** @type {number} */ (
       /** @type {unknown} */ (
         globalThis.setTimeout(() => {

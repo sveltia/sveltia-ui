@@ -63,6 +63,13 @@
    */
   let buttonElement = $state();
 
+  /**
+   * Accessible name given as a prop or as a plain `aria-label` attribute. It takes the place of the
+   * visible label, which the button otherwise points at — but only when there is one to point at.
+   * @type {string | undefined}
+   */
+  const accessibleLabel = $derived(ariaLabel ?? restProps['aria-label']);
+  const hasVisibleLabel = $derived(!!(children || label));
   const indeterminate = $derived(checked === 'mixed');
 
   // Sync `checked` with `group` and `value`
@@ -112,8 +119,8 @@
       aria-required={required}
       aria-invalid={invalid}
       aria-checked={checked}
-      aria-label={ariaLabel || undefined}
-      aria-labelledby={ariaLabel ? undefined : `${id}-label`}
+      aria-label={accessibleLabel || undefined}
+      aria-labelledby={!accessibleLabel && hasVisibleLabel ? `${id}-label` : undefined}
       onclick={(event) => {
         event.preventDefault();
         event.stopPropagation();
@@ -150,7 +157,7 @@
         {/if}
       {/snippet}
     </Button>
-    {#if children || label}
+    {#if hasVisibleLabel}
       <label id="{id}-label">
         {#if children}
           {@render children()}

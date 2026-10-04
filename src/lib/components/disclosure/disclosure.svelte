@@ -68,7 +68,7 @@
       aria-expanded={expanded}
       onclick={() => {
         expanded = !expanded;
-        onChange?.(new CustomEvent('change', { detail: { expanded } }));
+        onChange?.(new CustomEvent('Change', { detail: { expanded } }));
       }}
     >
       {#snippet startIcon()}

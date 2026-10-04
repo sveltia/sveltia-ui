@@ -18,6 +18,13 @@ describe('TypeAhead', () => {
     expect(typeAhead.push('a')).toBe('ba');
   });
 
+  it('strips diacritics so the prefix matches normalized labels', () => {
+    const typeAhead = new TypeAhead();
+
+    expect(typeAhead.push('É')).toBe('e');
+    expect(typeAhead.push('t')).toBe('et');
+  });
+
   it('drops the prefix after a pause, or on reset', () => {
     const typeAhead = new TypeAhead();
 

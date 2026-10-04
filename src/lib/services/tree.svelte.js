@@ -1,7 +1,7 @@
 import { isRTL } from '@sveltia/i18n';
 import { generateElementId } from '@sveltia/utils/element';
 import { sleep } from '@sveltia/utils/misc';
-import { normalize } from './group.svelte.js';
+import { normalize } from './text.js';
 import { getSelectedItemDetail } from './select.svelte.js';
 import { findTypeAheadMatch, TypeAhead } from './type-ahead.js';
 
@@ -564,7 +564,7 @@ export class Tree {
 
     const index = findTypeAheadMatch(
       items.map((item) => normalize(this.getLabel(item))),
-      normalize(this.#typeAhead.push(char)),
+      this.#typeAhead.push(char),
       items.indexOf(currentItem),
     );
 

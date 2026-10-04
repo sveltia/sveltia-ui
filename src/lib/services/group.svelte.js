@@ -3,35 +3,12 @@ import { generateElementId } from '@sveltia/utils/element';
 import { sleep } from '@sveltia/utils/misc';
 import { untrack } from 'svelte';
 import { getSelectedItemDetail } from './select.svelte.js';
+import { normalize } from './text.js';
 import { findTypeAheadMatch, TypeAhead } from './type-ahead.js';
 
 /**
  * @import { Attachment } from 'svelte/attachments';
  */
-
-/**
- * Diacritic characters regex for normalization. We use a regex instead of `Intl` APIs for better
- * performance, since `transliterate` is slow and we only need basic normalization.
- */
-const DIACRITIC_RE = /\p{Diacritic}/gu;
-
-/**
- * Normalize the given string for search value comparison. Since `transliterate` is slow, we only
- * apply basic normalization.
- * @internal
- * @param {string} value Original value.
- * @returns {string} Normalized value.
- * @todo Move this to `@sveltia/utils`.
- */
-export const normalize = (value) => {
-  value = value.trim();
-
-  if (!value) {
-    return '';
-  }
-
-  return value.normalize('NFD').replace(DIACRITIC_RE, '').toLocaleLowerCase();
-};
 
 /**
  * Set an element’s `tabindex` attribute, leaving the DOM alone if it already holds that value.

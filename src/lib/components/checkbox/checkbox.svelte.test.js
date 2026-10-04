@@ -32,6 +32,21 @@ describe('Checkbox', () => {
 
     expect(checkbox.element().hasAttribute('aria-labelledby')).toBe(false);
     expect(screen.container.querySelector('label')).toBeNull();
+
+    const attr = await render(Checkbox, { 'aria-label': 'Select all', label: 'Ignored' });
+    const checkbox2 = attr.getByRole('checkbox', { name: 'Select all' });
+
+    await expect.element(checkbox2).toHaveAttribute('aria-label', 'Select all');
+    expect(checkbox2.element().hasAttribute('aria-labelledby')).toBe(false);
+  });
+
+  it('leaves no dangling label reference without a visible label', async () => {
+    const screen = await render(Checkbox, {});
+
+    expect(screen.container.querySelector('label')).toBeNull();
+    expect(
+      screen.container.querySelector('[role="checkbox"]')?.hasAttribute('aria-labelledby'),
+    ).toBe(false);
   });
 
   it('renders children as the label', async () => {
