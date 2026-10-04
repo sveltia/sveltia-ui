@@ -117,6 +117,10 @@ describe('getInitialSizes', () => {
       30, 70,
     ]);
   });
+
+  it('should leave a pane without constraints unconstrained', () => {
+    expect(getInitialSizes([90, NaN], [{ minSize: 0, maxSize: 60 }])).toEqual([60, 40]);
+  });
 });
 
 describe('clampResizeDelta', () => {

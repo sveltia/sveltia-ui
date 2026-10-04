@@ -148,3 +148,23 @@ it('prefers the component’s own Markdown in plain text mode', async () => {
     expect(textarea.value).toBe('Before\n\n![]()\n\nAfter');
   });
 });
+
+it('inserts nothing in plain text mode if the component cannot be created', async () => {
+  const { screen, textarea } = await renderPlainText({
+    ...createTestComponent({ id: 'broken', label: 'Broken', markdown: '' }),
+    node: /** @type {any} */ (undefined),
+    /**
+     * Fail to create the node, like a component that depends on the rich text editor.
+     * @throws {Error} Always.
+     */
+    createNode: () => {
+      throw new Error('Not available');
+    },
+  });
+
+  await screen.getByRole('button', { name: 'Broken' }).click();
+  await vi.waitFor(() => {
+    expect(document.activeElement).toBe(textarea);
+  });
+  expect(textarea.value).toBe('Before After');
+});

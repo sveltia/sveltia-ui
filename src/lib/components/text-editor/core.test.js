@@ -219,6 +219,7 @@ vi.mock('@lexical/utils', () => ({
 }));
 
 const selectionState = vi.hoisted(() => /** @type {{ value: any }} */ ({ value: null }));
+const nearestNodeState = vi.hoisted(() => /** @type {{ value: any }} */ ({ value: null }));
 
 const ElementNodeClass = vi.hoisted(
   () =>
@@ -251,8 +252,11 @@ vi.mock('lexical', () => ({
   createEditor: vi.fn(() => editorState),
   defineExtension: vi.fn((extension) => extension),
   DELETE_CHARACTER_COMMAND: 'deleteCharacter',
+  $createParagraphNode: vi.fn(() => ({ type: 'element', select: vi.fn() })),
   $createTextNode: vi.fn((text) => ({ type: 'text', text })),
+  $getNearestNodeFromDOMNode: vi.fn(() => nearestNodeState.value),
   $insertNodes: vi.fn(),
+  $isDecoratorNode: vi.fn((node) => node?.type === 'decorator'),
   $isElementNode: vi.fn((node) => node?.type === 'element' || node instanceof ElementNodeClass),
   $isTextNode: vi.fn((node) => node?.type === 'text'),
   ElementNode: ElementNodeClass,
@@ -268,13 +272,18 @@ vi.mock('lexical', () => ({
 }));
 
 import { $getNearestNodeOfType as getNearestNodeOfType } from '@lexical/utils';
-import { ElementNode } from 'lexical';
+import {
+  $createParagraphNode as createParagraphNode,
+  $getRoot as getRoot,
+  ElementNode,
+} from 'lexical';
 import { loadCodeLanguage, loadCodeTheme, loadEngine } from './shiki/facade.js';
 import { registerCodeHighlighting } from './shiki/highlighter.js';
 import {
   convertMarkdownToLexical,
   focusEditor,
   getSelectionTypes,
+  handleEditorMouseDown,
   initEditor,
   isSafeLinkURL,
   loadCodeHighlighter,
@@ -514,6 +523,20 @@ describe('text editor core', () => {
     engine.reject(new Error('offline'));
     await expect(first).resolves.toBeUndefined();
     expect(editor.update).toHaveBeenCalledTimes(1);
+  });
+
+  it('throws a highlighter error in the latest import', async () => {
+    vi.mocked(loadEngine).mockRejectedValueOnce(new Error('offline'));
+
+    const editor = /** @type {any} */ ({
+      update: vi.fn((callback) => callback()),
+      read: vi.fn((callback) => callback()),
+    });
+
+    await expect(convertMarkdownToLexical(editor, '```js\nconst a = 1;\n```', [])).rejects.toThrow(
+      'offline',
+    );
+    expect(editor.update).not.toHaveBeenCalled();
   });
 
   it('skips loading the highlighter entirely for a plain language', async () => {
@@ -2359,5 +2382,150 @@ describe('isStaticDecoratorContent', () => {
     expect(isStaticDecoratorContent(root)).toBe(false);
     expect(isStaticDecoratorContent(null)).toBe(false);
     expect(isStaticDecoratorContent(document)).toBe(false);
+  });
+});
+
+describe('handleEditorMouseDown', () => {
+  beforeEach(() => {
+    selectionState.value = null;
+    nearestNodeState.value = null;
+    vi.mocked(createParagraphNode).mockClear();
+  });
+
+  /**
+   * Click the static content of a decorator, whose `selectNext()` sets the given selection.
+   * @param {object} args Arguments.
+   * @param {any} args.selection Selection set after the decorator.
+   * @param {any} [args.rootNode] Root node to be returned by `$getRoot()`.
+   * @returns {{ handled: boolean, preventDefault: any }} Result.
+   */
+  const clickDecorator = ({ selection, rootNode }) => {
+    const root = document.createElement('div');
+
+    root.setAttribute('data-lexical-editor', 'true');
+    root.innerHTML = '<div data-lexical-decorator="true"><span class="label">Label</span></div>';
+
+    nearestNodeState.value = {
+      type: 'decorator',
+      selectNext: vi.fn(() => {
+        selectionState.value = selection;
+      }),
+    };
+
+    if (rootNode) {
+      vi.mocked(getRoot).mockReturnValueOnce(rootNode);
+    }
+
+    const editor = /** @type {any} */ ({
+      getRootElement: () => root,
+      isEditable: () => true,
+      update: (/** @type {() => void} */ callback) => callback(),
+    });
+
+    const preventDefault = vi.fn();
+
+    const handled = handleEditorMouseDown(
+      editor,
+      /** @type {any} */ ({
+        target: root.querySelector('.label'),
+        button: 0,
+        shiftKey: false,
+        clientY: 0,
+        defaultPrevented: false,
+        preventDefault,
+      }),
+    );
+
+    return { handled, preventDefault };
+  };
+
+  /**
+   * Create a root node with the given children.
+   * @param {any[]} children Children.
+   * @returns {any} Root node.
+   */
+  const createRootNode = (children) => {
+    const rootNode = {
+      is: (/** @type {any} */ node) => node === rootNode,
+      getChildAtIndex: (/** @type {number} */ index) => children[index] ?? null,
+      append: vi.fn(),
+    };
+
+    return rootNode;
+  };
+
+  /**
+   * Create a collapsed range selection on the given element node.
+   * @param {any} node Anchor node.
+   * @param {number} offset Anchor offset.
+   * @returns {any} Selection.
+   */
+  const createSelection = (node, offset) => ({
+    type: 'range',
+    isCollapsed: () => true,
+    anchor: { type: 'element', offset, getNode: () => node },
+  });
+
+  it('leaves a selection that is not a caret on the root alone', () => {
+    const { handled, preventDefault } = clickDecorator({ selection: null });
+
+    expect(handled).toBe(true);
+    expect(preventDefault).toHaveBeenCalled();
+    expect(createParagraphNode).not.toHaveBeenCalled();
+  });
+
+  it('leaves a caret within a block alone', () => {
+    const rootNode = createRootNode([]);
+
+    clickDecorator({
+      selection: createSelection({ type: 'element', is: () => false }, 0),
+      rootNode,
+    });
+
+    expect(createParagraphNode).not.toHaveBeenCalled();
+    expect(rootNode.append).not.toHaveBeenCalled();
+  });
+
+  it('moves a caret on the root to the start of the next block', () => {
+    const after = { type: 'element', selectStart: vi.fn() };
+    const rootNode = createRootNode([{ type: 'decorator' }, after]);
+
+    clickDecorator({ selection: createSelection(rootNode, 1), rootNode });
+
+    expect(after.selectStart).toHaveBeenCalled();
+    expect(createParagraphNode).not.toHaveBeenCalled();
+  });
+
+  it('moves a caret on the root to the end of the previous block', () => {
+    const before = { type: 'element', selectEnd: vi.fn() };
+    const rootNode = createRootNode([before]);
+
+    clickDecorator({ selection: createSelection(rootNode, 1), rootNode });
+
+    expect(before.selectEnd).toHaveBeenCalled();
+    expect(createParagraphNode).not.toHaveBeenCalled();
+  });
+
+  it('adds a paragraph before a decorator at the start of the root', () => {
+    const after = { type: 'decorator', insertBefore: vi.fn() };
+    const rootNode = createRootNode([after]);
+
+    clickDecorator({ selection: createSelection(rootNode, 0), rootNode });
+
+    const paragraph = vi.mocked(createParagraphNode).mock.results[0].value;
+
+    expect(after.insertBefore).toHaveBeenCalledWith(paragraph);
+    expect(paragraph.select).toHaveBeenCalled();
+  });
+
+  it('adds a paragraph to an empty root', () => {
+    const rootNode = createRootNode([]);
+
+    clickDecorator({ selection: createSelection(rootNode, 0), rootNode });
+
+    const paragraph = vi.mocked(createParagraphNode).mock.results[0].value;
+
+    expect(rootNode.append).toHaveBeenCalledWith(paragraph);
+    expect(paragraph.select).toHaveBeenCalled();
   });
 });

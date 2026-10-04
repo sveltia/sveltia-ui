@@ -255,6 +255,13 @@ describe('Popup', () => {
       expect(instance.open).toBe(false);
     });
 
+    it('should not open a popup of an unknown type with the arrow keys', () => {
+      const instance = activatePopup(anchor, popup, 'bottom-left');
+
+      expect(press('ArrowDown').defaultPrevented).toBe(false);
+      expect(instance.open).toBe(false);
+    });
+
     it('should leave the arrow keys to the parent menu on a menu item opening a submenu', () => {
       anchor.setAttribute('role', 'menuitem');
       anchor.setAttribute('aria-haspopup', 'menu');

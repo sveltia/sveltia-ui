@@ -36,3 +36,13 @@ it('keeps the bar within the range', async () => {
 
   expect(fill.style.width).toBe('100%');
 });
+
+it('leaves the bar empty when the range is empty', async () => {
+  const screen = await render(Progressbar, { now: 5, min: 10, max: 10 });
+
+  const fill = /** @type {HTMLElement} */ (
+    screen.getByRole('progressbar').element().firstElementChild
+  );
+
+  expect(fill.style.width).toBe('0%');
+});

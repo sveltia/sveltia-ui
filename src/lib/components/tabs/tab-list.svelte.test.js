@@ -112,3 +112,19 @@ it('follows a tab selected from code', async () => {
   // Nothing was chosen by the user
   expect(onChange).not.toHaveBeenCalled();
 });
+
+it('leaves the indicator unstyled without a selected tab', async () => {
+  const requestAnimationFrame = vi.spyOn(globalThis, 'requestAnimationFrame');
+  const screen = await render(TabList, { ariaLabel: 'Settings', children: text('child') });
+  const indicator = /** @type {HTMLElement} */ (screen.container.querySelector('.indicator'));
+
+  // Wait for the initial resize observation, and then the indicator update it schedules
+  await vi.waitFor(() => {
+    expect(requestAnimationFrame).toHaveBeenCalled();
+  });
+  await new Promise((resolve) => {
+    globalThis.requestAnimationFrame(resolve);
+  });
+  expect(indicator.hasAttribute('style')).toBe(false);
+  requestAnimationFrame.mockRestore();
+});

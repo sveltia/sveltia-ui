@@ -128,6 +128,8 @@ describe('setBlockType', () => {
     expect(change('|One\nTwo\n\nThree|', 'bulleted-list')).toBe('- |One\n- Two\n\n- Three|');
     expect(change('|One\nTwo|', 'numbered-list')).toBe('1. |One\n2. Two|');
     expect(change('|One\n\nTwo|', 'blockquote')).toBe('> |One\n>\n> Two|');
+    expect(change('|One\n\nTwo|', 'numbered-list')).toBe('1. |One\n\n2. Two|');
+    expect(change('|One\n\nTwo|', 'heading-2')).toBe('## |One\n\n## Two|');
   });
 
   it('ignores a line only selected at its very start', () => {
@@ -251,6 +253,40 @@ describe('textarea helpers', () => {
     expect(textArea.selectionStart).toBe(0);
 
     textArea.remove();
+  });
+
+  it('deletes text with the native command to keep it in the undo history', async () => {
+    const textArea = document.createElement('textarea');
+    const original = document.execCommand;
+
+    const execCommand = vi.fn((/** @type {string} */ command) => {
+      if (command === 'delete') {
+        textArea.setRangeText('', textArea.selectionStart, textArea.selectionEnd);
+      }
+
+      return true;
+    });
+
+    document.body.append(textArea);
+    textArea.value = 'Hello world';
+    document.execCommand = execCommand;
+
+    try {
+      await applyRawTextEdit(textArea, {
+        start: 5,
+        end: 11,
+        text: '',
+        selectionStart: 5,
+        selectionEnd: 5,
+      });
+    } finally {
+      document.execCommand = original;
+      textArea.remove();
+    }
+
+    expect(execCommand).toHaveBeenCalledWith('delete', false);
+    expect(textArea.value).toBe('Hello');
+    expect(textArea.selectionStart).toBe(5);
   });
 
   it('leaves a read-only or disabled `<textarea>` alone', async () => {
