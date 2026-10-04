@@ -160,6 +160,37 @@ describe('Modal', () => {
     expect(props.open).toBe(true);
   });
 
+  it('shows the dialog again when the browser closes it despite escape dismiss being disabled', async () => {
+    const onClose = vi.fn();
+    /** @type {ComponentProps<typeof Modal>} */
+    const props = $state({ open: true, escapeDismiss: false, onClose });
+
+    await render(Modal, props);
+    await waitFor(() => !!getDialog()?.open);
+    // Chrome closes the dialog regardless when Escape is pressed again without user activation,
+    // as the `cancel` event can’t be prevented then
+    getDialog()?.close();
+    await new Promise((resolve) => {
+      setTimeout(resolve, 50);
+    });
+    expect(getDialog()?.open).toBe(true);
+    expect(props.open).toBe(true);
+    expect(onClose).not.toHaveBeenCalled();
+  });
+
+  it('keeps the state in sync when the browser closes the dialog on its own', async () => {
+    const onClose = vi.fn();
+    /** @type {ComponentProps<typeof Modal>} */
+    const props = $state({ open: true, onClose });
+
+    await render(Modal, props);
+    await waitFor(() => !!getDialog()?.open);
+    getDialog()?.close();
+    await waitFor(() => props.open === false);
+    await waitFor(() => onClose.mock.calls.length === 1);
+    expect(getDialog()).toBeNull();
+  });
+
   it('dismisses when the backdrop is clicked only with light dismiss enabled', async () => {
     const onCancel = vi.fn();
     /** @type {ComponentProps<typeof Modal>} */
@@ -178,6 +209,27 @@ describe('Modal', () => {
     dialog.click();
     expect(props.open).toBe(false);
     await waitFor(() => onCancel.mock.calls.length === 1);
+  });
+
+  it('does not dismiss when a drag from the content ends on the backdrop', async () => {
+    /** @type {ComponentProps<typeof Modal>} */
+    const props = $state({ open: true, lightDismiss: true, children: html('<p>Inside</p>') });
+
+    await render(Modal, props);
+    await waitFor(() => !!getDialog()?.open);
+
+    const dialog = /** @type {HTMLDialogElement} */ (getDialog());
+    const content = /** @type {HTMLElement} */ (dialog.querySelector('p'));
+
+    // The click that follows such a drag is fired on the common ancestor, the `<dialog>` element
+    content.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+    dialog.click();
+    expect(props.open).toBe(true);
+
+    // A press and release both on the backdrop still dismisses it
+    dialog.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+    dialog.click();
+    expect(props.open).toBe(false);
   });
 
   it('does not dismiss when the content is clicked', async () => {

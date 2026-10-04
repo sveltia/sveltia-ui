@@ -155,6 +155,14 @@
   let lastActiveElement;
 
   /**
+   * The element the last `pointerdown` event in the modal was fired on. A click that lands on the
+   * backdrop only dismisses the modal if the pointer was also pressed there, so selecting text in
+   * the content by dragging and releasing the pointer over the backdrop doesn’t close it.
+   * @type {EventTarget | null | undefined}
+   */
+  let pointerDownTarget;
+
+  /**
    * Timer used to defer the focus restoration in {@link moveFocusBack}.
    * @type {number | undefined}
    */
@@ -404,7 +412,19 @@
       class:backdrop={showBackdrop}
       class:open={setOpenClass}
       class:active={setActiveClass}
+      onpointerdown={({ target }) => {
+        pointerDownTarget = target;
+      }}
       onclick={({ target }) => {
+        const downTarget = pointerDownTarget;
+
+        pointerDownTarget = undefined;
+
+        // A click with no `pointerdown` before it, like one dispatched by a script, is taken as is
+        if (downTarget && downTarget !== dialog) {
+          return;
+        }
+
         if (
           dialog &&
           lightDismiss &&
@@ -420,6 +440,22 @@
         // Escape key is pressed
         if (dialog && escapeDismiss) {
           dialog.returnValue = 'cancel';
+          open = false;
+        }
+      }}
+      onclose={() => {
+        // Closed by `closeDialog()` or on unmount, or already shown again by `openDialog()`
+        if (!requestedOpen || !dialog?.isConnected || dialog.open) {
+          return;
+        }
+
+        // The browser has closed the dialog on its own. The `cancel` event can’t always be
+        // prevented: Chrome makes it non-cancelable when Escape is pressed again without any user
+        // activation in between. Show the dialog again if it shouldn’t be dismissed with Escape,
+        // otherwise bring the state in line, so the usual closing steps run.
+        if (!escapeDismiss) {
+          dialog.showModal();
+        } else {
           open = false;
         }
       }}
