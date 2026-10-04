@@ -243,6 +243,32 @@ const resolvePayload = async (kind, id, load) => {
 };
 
 /**
+ * Load a grammar or theme into the highlighter once, then refresh the given code node. The
+ * configured loader and the highlighter share the method name for each kind.
+ * @param {'lang' | 'theme'} kind Payload kind.
+ * @param {string} id Language or theme ID.
+ * @param {LexicalEditor} [editor] Editor instance to refresh once the payload is loaded.
+ * @param {NodeKey} [codeNodeKey] Key of the code node to refresh.
+ * @returns {Promise<void>} Promise resolving when the payload is loaded.
+ */
+const loadAsset = (kind, id, editor, codeNodeKey) => {
+  const method = kind === 'lang' ? 'loadLanguage' : 'loadTheme';
+
+  return loadOnce(
+    `${kind}/${id}`,
+    async () => {
+      const payload = await resolvePayload(kind, id, () => getCodeHighlighterLoaders()[method](id));
+
+      if (payload) {
+        await highlighter[method](payload);
+      }
+    },
+    editor,
+    codeNodeKey,
+  );
+};
+
+/**
  * Find the metadata of the given language.
  * @param {string} language Language identifier or alias, like `ts`.
  * @returns {(typeof LANGUAGES)[number] | undefined} Language metadata, or `undefined` when the
@@ -280,20 +306,7 @@ export const loadCodeLanguage = (language, editor, codeNodeKey) => {
     return undefined;
   }
 
-  return loadOnce(
-    `lang/${info.id}`,
-    async () => {
-      const payload = await resolvePayload('lang', info.id, () =>
-        getCodeHighlighterLoaders().loadLanguage(info.id),
-      );
-
-      if (payload) {
-        await highlighter.loadLanguage(payload);
-      }
-    },
-    editor,
-    codeNodeKey,
-  );
+  return loadAsset('lang', info.id, editor, codeNodeKey);
 };
 
 /**
@@ -326,20 +339,7 @@ export const loadCodeTheme = (theme, editor, codeNodeKey) => {
     return undefined;
   }
 
-  return loadOnce(
-    `theme/${theme}`,
-    async () => {
-      const payload = await resolvePayload('theme', theme, () =>
-        getCodeHighlighterLoaders().loadTheme(theme),
-      );
-
-      if (payload) {
-        await highlighter.loadTheme(payload);
-      }
-    },
-    editor,
-    codeNodeKey,
-  );
+  return loadAsset('theme', theme, editor, codeNodeKey);
 };
 
 /**

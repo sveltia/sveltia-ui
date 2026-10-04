@@ -19,29 +19,9 @@
     /* eslint-disable prefer-const */
     value = $bindable(),
     class: className,
-    hidden = false,
-    disabled = false,
-    readonly = false,
-    required = false,
-    invalid = false,
-    children,
-    onChange,
     ...restProps
     /* eslint-enable prefer-const */
   } = $props();
 </script>
 
-<Combobox
-  {...restProps}
-  bind:value
-  class="sui select {className}"
-  {hidden}
-  {disabled}
-  {readonly}
-  {required}
-  {invalid}
-  {onChange}
-  editable={false}
->
-  {@render children?.()}
-</Combobox>
+<Combobox {...restProps} bind:value class="sui select {className}" editable={false} />

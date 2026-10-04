@@ -179,7 +179,7 @@
 </script>
 
 <script>
-  import { onMount, untrack } from 'svelte';
+  import { onMount } from 'svelte';
 
   /**
    * @import { Snippet } from 'svelte';
@@ -220,10 +220,6 @@
    * @type {HTMLElement | undefined}
    */
   let toast = $state();
-  /**
-   * @type {number}
-   */
-  let timerId = $state(0);
   /**
    * Whether the pointer is over the toast or the focus is inside it. The auto-hide countdown is
    * held while it is, so a toast with a control in it can’t vanish from under the user (WCAG
@@ -323,23 +319,18 @@
     void duration;
     void held;
 
-    untrack(() => {
-      globalThis.clearTimeout(timerId);
-    });
-
-    if (show && duration && !held) {
-      timerId = /** @type {number} */ (
-        /** @type {unknown} */ (
-          globalThis.setTimeout(() => {
-            show = false;
-          }, duration)
-        )
-      );
+    if (!show || !duration || held) {
+      return undefined;
     }
 
-    // Stop the countdown when the toast is destroyed, or it would still hide the toast later
+    const timer = globalThis.setTimeout(() => {
+      show = false;
+    }, duration);
+
+    // Stop the countdown when any of the above changes, so the previous timer can’t fire, or when
+    // the toast is destroyed, or it would still hide the toast later
     return () => {
-      globalThis.clearTimeout(timerId);
+      globalThis.clearTimeout(timer);
     };
   });
 </script>

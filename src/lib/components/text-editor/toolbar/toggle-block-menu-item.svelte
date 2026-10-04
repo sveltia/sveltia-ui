@@ -21,7 +21,28 @@
   /**
    * @import { TextEditorBlockType, TextEditorStore } from '$lib/typedefs';
    * @import { HeadingTagType } from '@lexical/rich-text';
+   * @import { ElementNode, LexicalCommand } from 'lexical';
    */
+
+  /**
+   * Node factories for the block types applied with `$setBlocksType()`, except headings, whose
+   * level is parsed from the type.
+   * @type {Record<string, () => ElementNode>}
+   */
+  const NODE_FACTORIES = {
+    paragraph: createParagraphNode,
+    blockquote: createQuoteNode,
+    'code-block': createCodeNode,
+  };
+
+  /**
+   * Commands for the list block types, which are toggled by the list plugin instead.
+   * @type {Record<string, LexicalCommand<void>>}
+   */
+  const LIST_COMMANDS = {
+    'bulleted-list': INSERT_UNORDERED_LIST_COMMAND,
+    'numbered-list': INSERT_ORDERED_LIST_COMMAND,
+  };
 
   /**
    * @typedef {object} Props
@@ -62,38 +83,18 @@
 
     const [, headingLevel] = type.match(/^heading-(\d)$/) ?? [];
 
-    if (headingLevel) {
+    const createNode = headingLevel
+      ? () => createHeadingNode(/** @type {HeadingTagType} */ (`h${headingLevel}`))
+      : NODE_FACTORIES[type];
+
+    if (createNode) {
       editorStore.editor.update(() => {
-        setBlocksType(getSelection(), () =>
-          createHeadingNode(/** @type {HeadingTagType} */ (`h${headingLevel}`)),
-        );
+        setBlocksType(getSelection(), createNode);
       });
     }
 
-    if (type === 'paragraph') {
-      editorStore.editor.update(() => {
-        setBlocksType(getSelection(), () => createParagraphNode());
-      });
-    }
-
-    if (type === 'bulleted-list') {
-      editorStore.editor.dispatchCommand(INSERT_UNORDERED_LIST_COMMAND, undefined);
-    }
-
-    if (type === 'numbered-list') {
-      editorStore.editor.dispatchCommand(INSERT_ORDERED_LIST_COMMAND, undefined);
-    }
-
-    if (type === 'blockquote') {
-      editorStore.editor.update(() => {
-        setBlocksType(getSelection(), () => createQuoteNode());
-      });
-    }
-
-    if (type === 'code-block') {
-      editorStore.editor.update(() => {
-        setBlocksType(getSelection(), () => createCodeNode());
-      });
+    if (type in LIST_COMMANDS) {
+      editorStore.editor.dispatchCommand(LIST_COMMANDS[type], undefined);
     }
   };
 </script>
