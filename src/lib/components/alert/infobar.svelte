@@ -2,6 +2,8 @@
   import { _ } from '@sveltia/i18n';
   import Button from '../button/button.svelte';
   import Icon from '../icon/icon.svelte';
+  import AlertContent from './alert-content.svelte';
+  import { getAlertAriaLive, getAlertRole } from './alert.js';
 
   /**
    * @import { Snippet } from 'svelte';
@@ -34,20 +36,13 @@
     /* eslint-enable prefer-const */
   } = $props();
 
-  const role = $derived(status === 'error' || status === 'warning' ? 'alert' : 'status');
+  const role = $derived(getAlertRole(status));
 </script>
 
 {#if show}
   <div role="none" class={['infobar', status]}>
-    <!-- The status is spelled out off screen for screen readers; see `<Alert>` -->
-    <div {role} class="message" aria-live={ariaLive ?? (role === 'alert' ? 'assertive' : 'polite')}>
-      {#if icon}
-        {@render icon()}
-      {:else}
-        <Icon name={status === 'success' ? 'check_circle' : status} />
-      {/if}
-      <span class="status-label">{_(`_sui.alert.${status}`)}</span>
-      {@render children?.()}
+    <div {role} class="message" aria-live={getAlertAriaLive(role, ariaLive)}>
+      <AlertContent {status} {children} {icon} />
     </div>
     {#if dismissible}
       <div role="none">
@@ -69,15 +64,6 @@
 {/if}
 
 <style lang="scss">
-  .status-label {
-    position: absolute;
-    overflow: hidden;
-    clip-path: inset(50%);
-    width: 1px;
-    height: 1px;
-    white-space: nowrap;
-  }
-
   .infobar {
     flex: none;
     display: flex;

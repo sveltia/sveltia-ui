@@ -20,7 +20,7 @@
   import Popup from '../util/popup.svelte';
 
   /**
-   * @import { ComboboxProps, TextInputProps } from '$lib/typedefs';
+   * @import { ComboboxProps, OptionEntry, TextInputProps } from '$lib/typedefs';
    */
 
   /**
@@ -115,6 +115,19 @@
   };
 
   /**
+   * Raise a `Change` event for an option known only through its registry entry. There is no option
+   * element to report while the dropdown is collapsed.
+   * @param {OptionEntry} entry Selected option’s entry.
+   */
+  const dispatchEntryChange = ({ type, name, label: entryLabel, value: entryValue }) => {
+    onChange?.(
+      new CustomEvent('Change', {
+        detail: { target: undefined, type, name, label: entryLabel, value: entryValue },
+      }),
+    );
+  };
+
+  /**
    * Update the {@link value} whenever an option is selected.
    * @param {HTMLButtonElement} target Selected option.
    */
@@ -197,17 +210,7 @@
 
     value = entry.value;
     _onChange();
-    onChange?.(
-      new CustomEvent('Change', {
-        detail: {
-          target: undefined,
-          type: entry.type,
-          name: entry.name,
-          label: entry.label,
-          value: entry.value,
-        },
-      }),
-    );
+    dispatchEntryChange(entry);
   };
 
   /**
@@ -299,17 +302,7 @@
     label = entry.label;
 
     // There is no element to report while the dropdown has never been expanded
-    onChange?.(
-      new CustomEvent('Change', {
-        detail: {
-          target: undefined,
-          type: entry.type,
-          name: entry.name,
-          label: entry.label,
-          value: entry.value,
-        },
-      }),
-    );
+    dispatchEntryChange(entry);
   });
 
   $effect(() => {

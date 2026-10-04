@@ -9,8 +9,8 @@
   import { sleep } from '@sveltia/utils/misc';
   import Button from '../button/button.svelte';
   import Spacer from '../divider/spacer.svelte';
-  import Icon from '../icon/icon.svelte';
   import Modal from '../util/modal.svelte';
+  import ModalCloseButton from './modal-close-button.svelte';
 
   /**
    * @import { DialogProps, ModalProps } from '$lib/typedefs';
@@ -139,23 +139,13 @@
           <Spacer flex={true} />
           {@render headerExtra?.()}
           {#if showClose}
-            <Button
-              variant="ghost"
-              iconic
-              aria-label={_('_sui.close')}
-              aria-controls={id}
-              onclick={() => {
+            <ModalCloseButton
+              controls={id}
+              {closeIcon}
+              onClose={() => {
                 modal?.close('close');
               }}
-            >
-              {#snippet startIcon()}
-                {#if closeIcon}
-                  {@render closeIcon()}
-                {:else}
-                  <Icon name="close" />
-                {/if}
-              {/snippet}
-            </Button>
+            />
           {/if}
         {/if}
       </div>

@@ -4,8 +4,7 @@
   @see https://w3c.github.io/aria/#menuitemcheckbox
 -->
 <script>
-  import Icon from '../icon/icon.svelte';
-  import MenuItem from './menu-item.svelte';
+  import MenuItemCheckable from './menu-item-checkable.svelte';
 
   /**
    * @import { ButtonProps, CommonEventHandlers, MenuItemProps } from '$lib/typedefs';
@@ -17,42 +16,9 @@
   let {
     /* eslint-disable prefer-const */
     checked = $bindable(),
-    class: className,
-    hidden = false,
-    disabled = false,
-    label = '',
-    children: _children,
-    startIcon: _startIcon,
-    onChange,
     ...restProps
     /* eslint-enable prefer-const */
   } = $props();
 </script>
 
-<MenuItem
-  {...restProps}
-  role="menuitemcheckbox"
-  class="sui menu-item-checkbox {className}"
-  {label}
-  {hidden}
-  {disabled}
-  aria-checked={checked}
-  onChange={(event) => {
-    // Update the state first, so the handler sees the new value through a bound `checked`
-    checked = event.detail.checked;
-    onChange?.(event);
-  }}
->
-  {#snippet startIcon()}
-    {@render _startIcon?.()}
-  {/snippet}
-  <!-- eslint-disable-next-line svelte/no-useless-children-snippet -->
-  {#snippet children()}
-    {@render _children?.()}
-  {/snippet}
-  {#snippet endIcon()}
-    {#if checked}
-      <Icon name="check" />
-    {/if}
-  {/snippet}
-</MenuItem>
+<MenuItemCheckable {...restProps} bind:checked role="menuitemcheckbox" />

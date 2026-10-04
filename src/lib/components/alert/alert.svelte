@@ -5,8 +5,8 @@
   @see https://www.w3.org/WAI/ARIA/apg/patterns/alert/
 -->
 <script>
-  import { _ } from '@sveltia/i18n';
-  import Icon from '../icon/icon.svelte';
+  import AlertContent from './alert-content.svelte';
+  import { getAlertAriaLive, getAlertRole } from './alert.js';
 
   /**
    * @import { Snippet } from 'svelte';
@@ -35,38 +35,14 @@
     /* eslint-enable prefer-const */
   } = $props();
 
-  const role = $derived(status === 'error' || status === 'warning' ? 'alert' : 'status');
+  const role = $derived(getAlertRole(status));
 </script>
 
-<!--
-  The colour and icon tell sighted users how serious the message is; the icon is hidden from
-  assistive technology, so the status is also spelled out for screen readers, off screen.
--->
-<div
-  {...restProps}
-  {role}
-  class="sui alert {status}"
-  aria-live={ariaLive ?? (role === 'alert' ? 'assertive' : 'polite')}
->
-  {#if icon}
-    {@render icon()}
-  {:else}
-    <Icon name={status === 'success' ? 'check_circle' : status} />
-  {/if}
-  <span class="status-label">{_(`_sui.alert.${status}`)}</span>
-  {@render children?.()}
+<div {...restProps} {role} class="sui alert {status}" aria-live={getAlertAriaLive(role, ariaLive)}>
+  <AlertContent {status} {children} {icon} />
 </div>
 
 <style lang="scss">
-  .status-label {
-    position: absolute;
-    overflow: hidden;
-    clip-path: inset(50%);
-    width: 1px;
-    height: 1px;
-    white-space: nowrap;
-  }
-
   .alert {
     display: flex;
     align-items: center;

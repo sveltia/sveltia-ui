@@ -5,11 +5,9 @@
   @see https://www.w3.org/WAI/ARIA/apg/patterns/dialog-modal/
 -->
 <script>
-  import { _ } from '@sveltia/i18n';
   import { untrack } from 'svelte';
-  import Button from '../button/button.svelte';
   import Spacer from '../divider/spacer.svelte';
-  import Icon from '../icon/icon.svelte';
+  import ModalCloseButton from '../dialog/modal-close-button.svelte';
   import Modal from '../util/modal.svelte';
   import {
     addSwipeSample,
@@ -251,24 +249,14 @@
     {/if}
     <div role="none" class="extra-control">
       {#if showClose === 'outside'}
-        <Button
-          variant="ghost"
-          iconic
+        <ModalCloseButton
           class="close"
-          aria-label={_('_sui.close')}
-          aria-controls={id}
-          onclick={() => {
+          controls={id}
+          {closeIcon}
+          onClose={() => {
             modal?.close('close');
           }}
-        >
-          {#snippet startIcon()}
-            {#if closeIcon}
-              {@render closeIcon()}
-            {:else}
-              <Icon name="close" />
-            {/if}
-          {/snippet}
-        </Button>
+        />
       {/if}
     </div>
     {#if title || showClose === 'inside' || header || headerExtra}
@@ -282,24 +270,14 @@
           <Spacer flex={true} />
           {@render headerExtra?.()}
           {#if showClose === 'inside'}
-            <Button
-              variant="ghost"
-              iconic
+            <ModalCloseButton
               class="close"
-              aria-label={_('_sui.close')}
-              aria-controls={id}
-              onclick={() => {
+              controls={id}
+              {closeIcon}
+              onClose={() => {
                 modal?.close('close');
               }}
-            >
-              {#snippet startIcon()}
-                {#if closeIcon}
-                  {@render closeIcon()}
-                {:else}
-                  <Icon name="close" />
-                {/if}
-              {/snippet}
-            </Button>
+            />
           {/if}
         </div>
       {/if}
