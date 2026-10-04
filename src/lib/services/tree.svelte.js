@@ -3,15 +3,12 @@ import { generateElementId } from '@sveltia/utils/element';
 import { sleep } from '@sveltia/utils/misc';
 import { normalize } from './group.svelte.js';
 import { getSelectedItemDetail } from './select.svelte.js';
+import { findTypeAheadMatch, TypeAhead } from './type-ahead.js';
 
 /**
  * @import { Attachment } from 'svelte/attachments';
  */
 
-/**
- * How long to wait, in milliseconds, before the type-ahead search terms are reset.
- */
-const TYPE_AHEAD_TIMEOUT = 500;
 /**
  * CSS selector to retrieve the tree items.
  */
@@ -25,6 +22,12 @@ const ITEM_SELECTOR = '[role="treeitem"]';
  * @see https://www.w3.org/WAI/ARIA/apg/patterns/treeview/
  */
 export class Tree {
+  /**
+   * Keystroke buffer for type-ahead.
+   * @type {TypeAhead}
+   */
+  #typeAhead = new TypeAhead();
+
   /**
    * Initialize a new `Tree` instance.
    * @param {HTMLElement} parent Parent element.
@@ -54,18 +57,6 @@ export class Tree {
      * @type {HTMLElement | undefined}
      */
     this.anchor = undefined;
-
-    /**
-     * Currently accumulated type-ahead search terms.
-     * @type {string}
-     */
-    this.typeAheadTerms = '';
-
-    /**
-     * Timer used to reset the type-ahead search terms.
-     * @type {ReturnType<typeof globalThis.setTimeout> | undefined}
-     */
-    this.typeAheadTimer = undefined;
 
     /**
      * Whether {@link activate} has run.
@@ -473,10 +464,13 @@ export class Tree {
     }
 
     const { multi, anchor } = this;
+    const items = multi && range && anchor && anchor !== item ? this.visibleItems : [];
+    const anchorIndex = items.indexOf(/** @type {HTMLElement} */ (anchor));
 
-    if (multi && range && anchor && anchor !== item) {
-      const items = this.visibleItems;
-      const indexes = [items.indexOf(anchor), items.indexOf(item)].sort((a, b) => a - b);
+    // An anchor that has been hidden in a collapsed parent, or removed, can’t start a range, so
+    // the item is selected on its own instead, becoming the new anchor
+    if (anchorIndex !== -1) {
+      const indexes = [anchorIndex, items.indexOf(item)].sort((a, b) => a - b);
 
       items.forEach((element, index) => {
         this.setSelected(
@@ -560,34 +554,22 @@ export class Tree {
   }
 
   /**
-   * Move focus to the next item that matches the accumulated type-ahead search terms.
+   * Move focus to the next item that matches the accumulated type-ahead search terms. Typing the
+   * same character repeatedly cycles through the items starting with it.
    * @param {string} char Typed character.
    * @param {HTMLElement} currentItem Currently focused item.
    */
   typeAhead(char, currentItem) {
-    globalThis.clearTimeout(this.typeAheadTimer);
-
-    this.typeAheadTerms += char;
-    this.typeAheadTimer = globalThis.setTimeout(() => {
-      this.typeAheadTerms = '';
-    }, TYPE_AHEAD_TIMEOUT);
-
-    const terms = normalize(this.typeAheadTerms);
     const items = this.activeItems;
-    const index = items.indexOf(currentItem);
 
-    // Start the search right after the current item, so repeatedly typing the same character
-    // cycles through the matches. Keep the current item first while the terms are being extended.
-    const orderedItems = [
-      ...(terms.length > 1 ? [currentItem] : []),
-      ...items.slice(index + 1),
-      ...items.slice(0, index + 1),
-    ];
+    const index = findTypeAheadMatch(
+      items.map((item) => normalize(this.getLabel(item))),
+      normalize(this.#typeAhead.push(char)),
+      items.indexOf(currentItem),
+    );
 
-    const match = orderedItems.find((item) => normalize(this.getLabel(item)).startsWith(terms));
-
-    if (match && match !== currentItem) {
-      this.focusItem(match);
+    if (index !== -1 && items[index] !== currentItem) {
+      this.focusItem(items[index]);
     }
   }
 
@@ -787,7 +769,7 @@ export class Tree {
    */
   destroy() {
     this.destroyed = true;
-    globalThis.clearTimeout(this.typeAheadTimer);
+    this.#typeAhead.reset();
     this.observer.disconnect();
     this.parent.removeEventListener('click', this._onClick);
     this.parent.removeEventListener('keydown', this._onKeyDown);

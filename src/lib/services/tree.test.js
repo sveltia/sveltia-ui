@@ -341,6 +341,15 @@ describe('Tree', () => {
       keyDown(items.documents, 'q');
       expect(document.activeElement).not.toBe(items.q1);
     });
+
+    it('should cycle through the matching items when the same character is typed repeatedly', () => {
+      keyDown(items.documents, 'r');
+      expect(document.activeElement).toBe(items.reports);
+      keyDown(items.reports, 'r');
+      expect(document.activeElement).toBe(items.readme);
+      keyDown(items.readme, 'r');
+      expect(document.activeElement).toBe(items.reports);
+    });
   });
 
   describe('single selection', () => {
@@ -445,6 +454,27 @@ describe('Tree', () => {
       // Items outside the range are deselected, and disabled items are skipped
       expect(items.documents.getAttribute('aria-selected')).toBe('false');
       expect(items.archive.getAttribute('aria-selected')).toBe('false');
+    });
+
+    it('should select the item alone with Shift+click when the anchor has been collapsed away', () => {
+      const chevron = /** @type {HTMLElement} */ (items.pictures.querySelector('.chevron'));
+
+      click(chevron);
+      click(items.beach, { ctrlKey: true });
+      click(chevron);
+      // The anchor, `Beach`, is now hidden
+      click(items.readme, { shiftKey: true });
+      expect(items.readme.getAttribute('aria-selected')).toBe('true');
+      // Nothing from the top of the tree is selected
+      expect(items.documents.getAttribute('aria-selected')).toBe('false');
+      expect(items.reports.getAttribute('aria-selected')).toBe('false');
+      expect(items.pictures.getAttribute('aria-selected')).toBe('false');
+      // `Readme` is the new anchor
+      click(items.notes, { shiftKey: true });
+      expect(items.notes.getAttribute('aria-selected')).toBe('true');
+      expect(items.pictures.getAttribute('aria-selected')).toBe('true');
+      expect(items.readme.getAttribute('aria-selected')).toBe('true');
+      expect(items.documents.getAttribute('aria-selected')).toBe('false');
     });
 
     it('should toggle a single item with Ctrl+click', () => {
