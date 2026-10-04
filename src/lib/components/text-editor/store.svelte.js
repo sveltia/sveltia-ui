@@ -50,6 +50,16 @@ export const createEditorStore = () => {
    * @type {{ source: string, exported: string } | undefined}
    */
   let lastImport = undefined;
+  /**
+   * Number of imports started, to tell the latest one.
+   * @type {number}
+   */
+  let importCount = 0;
+  /**
+   * Whether the latest import is still in progress.
+   * @type {boolean}
+   */
+  let importing = false;
 
   /**
    * Flag a conversion error, which takes the editor out of the rich text mode, and shows the error
@@ -76,6 +86,12 @@ export const createEditorStore = () => {
 
     const originalValue = inputValue;
 
+    importCount += 1;
+
+    const importId = importCount;
+
+    importing = true;
+
     try {
       // We should avoid an empty editor; there should be at least one `<p>`, so give it an empty
       // string if the `value` is `undefined`
@@ -96,6 +112,11 @@ export const createEditorStore = () => {
       inputValue = originalValue;
       // eslint-disable-next-line no-console
       console.error(ex);
+    } finally {
+      // An earlier import finishing last doesn’t end the latest one
+      if (importId === importCount) {
+        importing = false;
+      }
     }
   };
 
@@ -178,6 +199,9 @@ export const createEditorStore = () => {
     },
     set pending(newValue) {
       pending = newValue;
+    },
+    get importing() {
+      return importing;
     },
     editorId,
     convertMarkdown,

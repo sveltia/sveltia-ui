@@ -88,7 +88,9 @@
     // The content has been converted, if it has changed at all
     editorStore.pending = false;
 
-    if (hasConverterError || !useRichText) {
+    // Ignore the content while a value is being imported, like the empty code block the editor
+    // starts with: it would overwrite the value, which then replaces the content once imported
+    if (hasConverterError || !useRichText || editorStore.importing) {
       return;
     }
 

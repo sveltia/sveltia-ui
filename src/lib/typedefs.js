@@ -448,6 +448,8 @@
  * @property {boolean} showConverterError Whether to show a converter error in the UI.
  * @property {boolean} pending Whether the user has changed the rich text content, and the editor
  * has yet to convert it to Markdown and update {@link TextEditorStore.inputValue}.
+ * @property {boolean} importing Whether the latest {@link TextEditorStore.inputValue} is still
+ * being imported to the Lexical editor.
  * @property {() => Promise<void>} convertMarkdown Function to trigger the Lexical converter.
  * @property {(value: string) => string | undefined} getImportedValue Function to get the
  * {@link TextEditorStore.inputValue} last imported if the given value, exported by the editor, is
