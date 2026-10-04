@@ -35,35 +35,29 @@
 
   const loading = $derived(items.length > loadedItemSize);
 
-  const observer = new IntersectionObserver(([{ isIntersecting }]) => {
-    if (isIntersecting) {
-      // The spinner is unmounted as soon as everything is loaded, so it can’t intersect afterwards
-      /* v8 ignore else */
-      if (loading) {
-        loadedItemSize += itemChunkSize;
-      } else {
-        observer.disconnect();
-      }
-    }
-  });
-
   // Observe the spinner anew once each chunk is rendered: the observer only reports changes, so a
   // spinner that stays in view because the chunk didn’t fill the viewport would stall the loading.
-  // Observing an element always reports its current state first. Stop observing on unmount too.
+  // Observing an element always reports its current state first. The observer is created here
+  // rather than when the component is set up, since `IntersectionObserver` doesn’t exist during
+  // server-side rendering, and it’s disconnected before the next chunk and on unmount.
   $effect(() => {
     void loadedItemSize;
 
-    if (spinner) {
-      const target = spinner;
-
-      observer.observe(target);
-
-      return () => {
-        observer.unobserve(target);
-      };
+    if (!spinner) {
+      return undefined;
     }
 
-    return undefined;
+    const observer = new IntersectionObserver(([{ isIntersecting }]) => {
+      if (isIntersecting && loading) {
+        loadedItemSize += itemChunkSize;
+      }
+    });
+
+    observer.observe(spinner);
+
+    return () => {
+      observer.disconnect();
+    };
   });
 </script>
 

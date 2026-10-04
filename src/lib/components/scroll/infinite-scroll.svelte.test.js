@@ -50,3 +50,45 @@ it('keeps loading while the spinner stays in view after a chunk is rendered', as
     expect(screen.container.querySelectorAll('.item').length).toBeGreaterThanOrEqual(6);
   });
 });
+
+it('only creates an observer while the spinner is mounted, and disconnects it on unmount', async () => {
+  const NativeObserver = IntersectionObserver;
+  const created = vi.fn();
+  const disconnect = vi.spyOn(NativeObserver.prototype, 'disconnect');
+
+  // Creating the observer while the component is set up would break server-side rendering, where
+  // `IntersectionObserver` doesn’t exist
+  vi.stubGlobal(
+    'IntersectionObserver',
+    /**
+     * `IntersectionObserver` that records its creation.
+     */
+    class extends NativeObserver {
+      /**
+       * Record the creation.
+       * @param {IntersectionObserverCallback} callback Callback.
+       */
+      constructor(callback) {
+        super(callback);
+        created();
+      }
+    },
+  );
+
+  try {
+    const fitting = await render(InfiniteScrollFixture, { items: items.slice(0, 3) });
+
+    expect(created).not.toHaveBeenCalled();
+    await fitting.unmount();
+
+    const screen = await render(InfiniteScrollFixture, { items, itemChunkSize: 5 });
+
+    expect(created).toHaveBeenCalled();
+    disconnect.mockClear();
+    await screen.unmount();
+    expect(disconnect).toHaveBeenCalled();
+  } finally {
+    vi.unstubAllGlobals();
+    disconnect.mockRestore();
+  }
+});
