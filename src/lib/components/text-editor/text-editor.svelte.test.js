@@ -242,6 +242,36 @@ describe('TextEditor', () => {
     expect(props.value).toBe('Hello');
   });
 
+  it('does not try to restore the empty initial state when undoing', async () => {
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    try {
+      /** @type {ComponentProps<typeof TextEditor>} */
+      const props = $state({ value: '' });
+      const screen = await render(TextEditor, props);
+      const root = await waitForContent(screen.container, '<p');
+
+      focusEnd(root);
+      await userEvent.keyboard('{ControlOrMeta>}z{/ControlOrMeta}');
+      await sleep(300);
+
+      // Undo past the first change made by the user
+      await userEvent.keyboard('a');
+      await vi.waitFor(() => {
+        expect(props.value).toBe('a');
+      });
+      await userEvent.keyboard('{ControlOrMeta>}z{/ControlOrMeta}');
+      await userEvent.keyboard('{ControlOrMeta>}z{/ControlOrMeta}');
+      await vi.waitFor(() => {
+        expect(props.value).toBe('');
+      });
+      expect(root.innerHTML).toContain('<p');
+      expect(consoleError).not.toHaveBeenCalled();
+    } finally {
+      consoleError.mockRestore();
+    }
+  });
+
   it('clears the pending state when the editor is removed before converting a change', async () => {
     /** @type {ComponentProps<typeof TextEditor>} */
     const props = $state({ value: 'Hello', pending: false });

@@ -50,6 +50,7 @@ import {
   $getNearestNodeFromDOMNode as getNearestNodeFromDOMNode,
   $getRoot as getRoot,
   $getSelection as getSelection,
+  HISTORY_MERGE_TAG,
   INDENT_CONTENT_COMMAND,
   INSERT_PARAGRAPH_COMMAND,
   KEY_ENTER_COMMAND,
@@ -1033,6 +1034,10 @@ export const convertMarkdownToLexical = async (editor, value, enabledTransformer
   // Pad blank blockquote lines so they are not imported as literal `>` text
   value = padBlankBlockquoteLines(value);
 
+  // Lexical commits an empty state when the root element is attached, and the history keeps it as
+  // the current entry. An empty state can’t be restored, so undoing to it throws an error. Merge
+  // the first import into that entry instead of pushing it onto the undo stack
+  const isEmpty = editor.getEditorState().isEmpty();
   /** @type {unknown} */
   let error;
 
@@ -1047,7 +1052,7 @@ export const convertMarkdownToLexical = async (editor, value, enabledTransformer
     // Tell the import from a change made by the user, and commit it right away, so the node
     // transforms, e.g. the one giving a code block its default language, have run by the time the
     // content is exported below
-    { tag: IMPORT_UPDATE_TAG, discrete: true },
+    { tag: isEmpty ? [IMPORT_UPDATE_TAG, HISTORY_MERGE_TAG] : IMPORT_UPDATE_TAG, discrete: true },
   );
 
   if (error) {

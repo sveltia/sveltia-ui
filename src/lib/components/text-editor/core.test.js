@@ -262,6 +262,7 @@ vi.mock('lexical', () => ({
   ElementNode: ElementNodeClass,
   $getRoot: vi.fn(() => rootState),
   $getSelection: vi.fn(() => selectionState.value),
+  HISTORY_MERGE_TAG: 'history-merge',
   INDENT_CONTENT_COMMAND: 'indent',
   INSERT_PARAGRAPH_COMMAND: 'insertParagraph',
   KEY_ENTER_COMMAND: 'keyEnter',
@@ -495,6 +496,7 @@ describe('text editor core', () => {
     const editor = /** @type {any} */ ({
       update: vi.fn((callback) => callback()),
       read: vi.fn((callback) => callback()),
+      getEditorState: () => ({ isEmpty: () => false }),
     });
 
     const first = convertMarkdownToLexical(editor, '```js\nconst a = 1;\n```', []);
@@ -516,6 +518,7 @@ describe('text editor core', () => {
     const editor = /** @type {any} */ ({
       update: vi.fn((callback) => callback()),
       read: vi.fn((callback) => callback()),
+      getEditorState: () => ({ isEmpty: () => false }),
     });
 
     const first = convertMarkdownToLexical(editor, '```js\nconst a = 1;\n```', []);
@@ -532,6 +535,7 @@ describe('text editor core', () => {
     const editor = /** @type {any} */ ({
       update: vi.fn((callback) => callback()),
       read: vi.fn((callback) => callback()),
+      getEditorState: () => ({ isEmpty: () => false }),
     });
 
     await expect(convertMarkdownToLexical(editor, '```js\nconst a = 1;\n```', [])).rejects.toThrow(
@@ -562,6 +566,7 @@ describe('text editor core', () => {
     const editor = /** @type {any} */ ({
       update: vi.fn((callback) => callback()),
       read: vi.fn((callback) => callback()),
+      getEditorState: () => ({ isEmpty: () => false }),
       focus: vi.fn(),
       isComposing: () => false,
     });
@@ -574,12 +579,30 @@ describe('text editor core', () => {
     });
   });
 
+  it('merges the first import into the empty initial state in the history', async () => {
+    const editor = /** @type {any} */ ({
+      update: vi.fn((callback) => callback()),
+      read: vi.fn((callback) => callback()),
+      getEditorState: () => ({ isEmpty: () => true }),
+      focus: vi.fn(),
+      isComposing: () => false,
+    });
+
+    // The empty state can’t be restored, so it must not be pushed onto the undo stack
+    await expect(convertMarkdownToLexical(editor, '# Heading', [])).resolves.toBe('converted');
+    expect(editor.update).toHaveBeenCalledWith(expect.any(Function), {
+      tag: ['sui-import', 'history-merge'],
+      discrete: true,
+    });
+  });
+
   it('pads blank blockquote lines before converting markdown', async () => {
     const { $convertFromMarkdownString } = await import('@lexical/markdown');
 
     const editor = /** @type {any} */ ({
       update: vi.fn((callback) => callback()),
       read: vi.fn((callback) => callback()),
+      getEditorState: () => ({ isEmpty: () => false }),
       focus: vi.fn(),
       isComposing: () => false,
     });
@@ -678,6 +701,7 @@ describe('text editor core', () => {
     const editor = /** @type {any} */ ({
       update: vi.fn((callback) => callback()),
       read: vi.fn((callback) => callback()),
+      getEditorState: () => ({ isEmpty: () => false }),
       focus: vi.fn(),
       isComposing: () => false,
     });
@@ -1111,6 +1135,7 @@ describe('text editor core', () => {
     const editor = /** @type {any} */ ({
       update: vi.fn((callback) => callback()),
       read: vi.fn((callback) => callback()),
+      getEditorState: () => ({ isEmpty: () => false }),
       focus: vi.fn(),
       isComposing: () => false,
     });
@@ -1123,6 +1148,7 @@ describe('text editor core', () => {
     const editor = /** @type {any} */ ({
       update: vi.fn((callback) => callback()),
       read: vi.fn((callback) => callback()),
+      getEditorState: () => ({ isEmpty: () => false }),
       focus: vi.fn(),
       isComposing: () => false,
     });
@@ -1221,6 +1247,7 @@ describe('text editor core', () => {
     const editor = /** @type {any} */ ({
       update: vi.fn((callback) => callback()),
       read: vi.fn((callback) => callback()),
+      getEditorState: () => ({ isEmpty: () => false }),
       focus: vi.fn(),
       isComposing: () => false,
     });
@@ -1283,6 +1310,7 @@ describe('text editor core', () => {
     const editor = /** @type {any} */ ({
       update: vi.fn((callback) => callback()),
       read: vi.fn((callback) => callback()),
+      getEditorState: () => ({ isEmpty: () => false }),
       focus: vi.fn(),
       isComposing: () => false,
     });
@@ -1309,6 +1337,7 @@ describe('text editor core', () => {
       update: vi.fn((callback) => {
         callback();
       }),
+      getEditorState: () => ({ isEmpty: () => false }),
       focus: vi.fn(),
       isComposing: () => false,
     });
