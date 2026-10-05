@@ -20,6 +20,9 @@
    * @typedef {object} Props
    * @property {string} [code] Input value.
    * @property {string} [lang] Selected language.
+   * @property {boolean} [pending] Whether the user has changed the code, and the editor has yet to
+   * update {@link code}, which it does a moment later. Bind it to wait for the change before
+   * reading the code, for example to save it. Read-only.
    * @property {boolean} [showLanguageSwitcher] Whether to show the language selector.
    * @property {boolean} [flex] Make the text input container flexible.
    * @property {string} [class] The `class` attribute on the wrapper element.
@@ -47,6 +50,7 @@
     /* eslint-disable prefer-const */
     code = $bindable(''),
     lang = $bindable('plain'),
+    pending = $bindable(false),
     showLanguageSwitcher = false,
     flex = false,
     hidden = false,
@@ -85,6 +89,16 @@
   };
 
   setContext('editorStore', editorStore);
+
+  $effect(() => {
+    pending = editorStore.pending;
+  });
+
+  // An editor removed right after a change never converts it, so don’t leave a bound `pending` set
+  // for good, which would hold up anything waiting for the change
+  $effect(() => () => {
+    pending = false;
+  });
 
   $effect(() => {
     // The root initializes the editor before these effects first run, and stays initialized
