@@ -1,5 +1,6 @@
 import { sleep } from '@sveltia/utils/misc';
-import { UNDO_COMMAND } from 'lexical';
+import { $getRoot as getRoot, UNDO_COMMAND } from 'lexical';
+import { flushSync } from 'svelte';
 import { beforeAll, describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-svelte';
 import { userEvent } from 'vitest/browser';
@@ -246,12 +247,18 @@ describe('TextEditor', () => {
     const props = $state({ value: 'Hello', pending: false });
     const screen = await render(TextEditor, props);
     const root = await waitForContent(screen.container, 'Hello');
+    const editor = /** @type {LexicalEditor} */ (/** @type {any} */ (root).__lexicalEditor);
 
-    focusEnd(root);
-    await userEvent.keyboard('!');
-    await vi.waitFor(() => {
-      expect(props.pending).toBe(true);
-    });
+    // Make the change and check it in one go, as it’s converted, and no longer pending, only 100ms
+    // later, which a slow keystroke can miss
+    editor.update(
+      () => {
+        getRoot().selectEnd().insertText('!');
+      },
+      { discrete: true },
+    );
+    flushSync();
+    expect(props.pending).toBe(true);
     screen.unmount();
     expect(props.pending).toBe(false);
   });

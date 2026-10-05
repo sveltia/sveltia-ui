@@ -168,6 +168,19 @@ describe('Listbox', () => {
         setTimeout(resolve, 600);
       });
 
+    /**
+     * Dispatch a `keydown` event on the listbox.
+     * @param {string} key Key.
+     * @returns {KeyboardEvent} Dispatched event.
+     */
+    const type = (key) => {
+      const event = new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true });
+
+      listbox.element().dispatchEvent(event);
+
+      return event;
+    };
+
     /** @type {HTMLElement} */ (listbox.element()).focus();
     await userEvent.keyboard('l');
     await expect.element(lemon).toHaveAttribute('aria-selected', 'true');
@@ -175,14 +188,16 @@ describe('Listbox', () => {
     await userEvent.keyboard('a');
     await expect.element(apple).toHaveAttribute('aria-selected', 'true');
     await pause();
-    await userEvent.keyboard('ba');
+    // Dispatch both keys at once, as keystrokes sent one by one can arrive further apart than the
+    // prefix lasts on a slow machine
+    type('b');
+    type('a');
     await expect.element(banana).toHaveAttribute('aria-selected', 'true');
 
     // Nothing starts with this, so nothing moves — but the key is still swallowed, so the browser
     // doesn’t start searching the page (Firefox find-as-you-type)
-    const miss = new KeyboardEvent('keydown', { key: 'z', bubbles: true, cancelable: true });
+    const miss = type('z');
 
-    listbox.element().dispatchEvent(miss);
     expect(miss.defaultPrevented).toBe(true);
     await expect.element(banana).toHaveAttribute('aria-selected', 'true');
   });
