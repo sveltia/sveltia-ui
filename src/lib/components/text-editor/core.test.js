@@ -290,6 +290,7 @@ import {
   onEditorUpdate,
   isStaticDecoratorContent,
 } from './core.js';
+import { BLOCK_SYNTAX_ESCAPE } from './transformers/block-escape.js';
 
 // eslint-disable-next-line no-script-url -- Testing that it’s rejected
 const SCRIPT_URL = 'javascript:alert(1)';
@@ -1095,8 +1096,14 @@ describe('text editor core', () => {
       expect(calledWithTransformers).not.toContainEqual({ tag: '***' });
       expect(calledWithTransformers).not.toContainEqual({ tag: '___' });
 
-      // Verify the filtered list has 3 transformers instead of 7
-      expect(calledWithTransformers.length).toBe(3);
+      // Verify the filtered list has 3 transformers instead of 7, followed by the escape of block
+      // syntax at the start of a line
+      expect(calledWithTransformers).toEqual([
+        { tag: '**' },
+        { tag: '_' },
+        { tag: '~~' },
+        BLOCK_SYNTAX_ESCAPE,
+      ]);
     }
   });
 

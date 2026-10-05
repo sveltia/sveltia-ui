@@ -86,6 +86,7 @@ import {
 } from './shiki/facade.js';
 import { registerCodeHighlighting, shikiTokenizer } from './shiki/highlighter.js';
 import { getCodeTheme, observeCodeTheme } from './shiki/theme.js';
+import { BLOCK_SYNTAX_ESCAPE } from './transformers/block-escape.js';
 import { HR } from './transformers/hr.js';
 import { TABLE } from './transformers/table.js';
 
@@ -455,9 +456,13 @@ export const getSelectionTypes = () => {
  * @returns {string} Markdown value.
  */
 export const exportMarkdown = (enabledTransformers) => {
-  const transformers = enabledTransformers.filter(
-    (/** @type {any} */ { tag }) => !DISABLED_MARKDOWN_TAGS.includes(tag),
-  );
+  const transformers = [
+    ...enabledTransformers.filter(
+      (/** @type {any} */ { tag }) => !DISABLED_MARKDOWN_TAGS.includes(tag),
+    ),
+    // Last, so a transformer of the editor’s own, such as a link, comes first
+    BLOCK_SYNTAX_ESCAPE,
+  ];
 
   return trimBlankBlockquoteLines(
     convertToMarkdownString(transformers)
