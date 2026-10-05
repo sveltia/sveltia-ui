@@ -18,6 +18,11 @@ vi.mock('lexical', () => ({
   HISTORY_MERGE_TAG: 'history-merge',
 }));
 
+// The editor stubs have no root element to check the focus against
+vi.mock('../background-update.js', () => ({
+  getBackgroundUpdateTags: vi.fn((_editor, tags = []) => tags),
+}));
+
 // eslint-disable-next-line import/first
 import { THEME_LOADERS } from '../../../self-hosted/generated.js';
 // eslint-disable-next-line import/first

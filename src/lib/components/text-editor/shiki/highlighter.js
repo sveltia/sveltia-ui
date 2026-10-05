@@ -33,6 +33,7 @@ import {
   HISTORY_MERGE_TAG,
   TextNode,
 } from 'lexical';
+import { getBackgroundUpdateTags } from '../background-update.js';
 import {
   getHighlightNodes,
   isCodeLanguageLoaded,
@@ -368,7 +369,7 @@ const codeNodeTransform = (editor, tokenizer, transformState, node) => {
               staleNode.markDirty();
             }
           },
-          { tag: HISTORY_MERGE_TAG },
+          { tag: getBackgroundUpdateTags(editor, [HISTORY_MERGE_TAG]) },
         );
       });
     }

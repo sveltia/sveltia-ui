@@ -22,6 +22,11 @@ vi.mock('lexical', () => ({
   tokenizeRawText: vi.fn(),
 }));
 
+// The editor stubs have no root element to check the focus against
+vi.mock('../background-update.js', () => ({
+  getBackgroundUpdateTags: vi.fn((_editor, tags = []) => tags),
+}));
+
 /**
  * Build a fake Shiki engine module.
  * @param {object} [options] Options.

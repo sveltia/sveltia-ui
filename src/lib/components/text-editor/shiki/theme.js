@@ -1,5 +1,6 @@
 import { $isCodeNode as isCodeNode } from '@lexical/code-core';
 import { $getRoot as getRoot, HISTORY_MERGE_TAG } from 'lexical';
+import { getBackgroundUpdateTags } from '../background-update.js';
 
 /**
  * @import { LexicalEditor } from 'lexical';
@@ -85,6 +86,6 @@ export const observeCodeTheme = (editor) =>
             }
           });
       },
-      { tag: HISTORY_MERGE_TAG },
+      { tag: getBackgroundUpdateTags(editor, [HISTORY_MERGE_TAG]) },
     );
   });

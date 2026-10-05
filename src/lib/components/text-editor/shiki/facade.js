@@ -21,6 +21,7 @@ import {
   HISTORY_MERGE_TAG,
   tokenizeRawText,
 } from 'lexical';
+import { getBackgroundUpdateTags } from '../background-update.js';
 import { cachePayload, getCachedPayload } from './cache.js';
 import { LANGUAGES, THEMES } from './generated.js';
 import { getCodeHighlighterLoaders } from './loader.js';
@@ -123,7 +124,7 @@ const refreshCodeNode = (editor, codeNodeKey) => {
 
       codeNode.markDirty();
     },
-    { tag: HISTORY_MERGE_TAG },
+    { tag: getBackgroundUpdateTags(editor, [HISTORY_MERGE_TAG]) },
   );
 };
 

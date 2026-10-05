@@ -5,6 +5,7 @@
   import { getContext } from 'svelte';
   import Option from '../../listbox/option.svelte';
   import Select from '../../select/select.svelte';
+  import { getBackgroundUpdateTags } from '../background-update.js';
   import { focusEditor, loadCodeHighlighter } from '../core.js';
   import { LANGUAGES } from '../shiki/generated.js';
 
@@ -90,18 +91,24 @@
       return;
     }
 
-    await focusEditor(editorStore.editor);
+    const { editor } = editorStore;
+
+    await focusEditor(editor);
     await loadCodeHighlighter(lang);
 
-    editorStore.editor.update(() => {
-      // https://github.com/facebook/lexical/blob/main/packages/lexical-playground/src/plugins/ToolbarPlugin/index.tsx#L713
-      const node = getCodeNode();
+    // The user may have moved on to another field while the highlighter was loading
+    editor.update(
+      () => {
+        // https://github.com/facebook/lexical/blob/main/packages/lexical-playground/src/plugins/ToolbarPlugin/index.tsx#L713
+        const node = getCodeNode();
 
-      if (node) {
-        node.setLanguage(lang);
-        selectedLanguage = lang;
-      }
-    });
+        if (node) {
+          node.setLanguage(lang);
+          selectedLanguage = lang;
+        }
+      },
+      { tag: getBackgroundUpdateTags(editor) },
+    );
   }}
 >
   <Option label={_('_sui.text_editor.plain_text')} value="plain" dir="ltr" />
