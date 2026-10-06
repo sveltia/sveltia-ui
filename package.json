@@ -1,6 +1,6 @@
 {
   "name": "@sveltia/ui",
-  "version": "0.79.3",
+  "version": "0.79.4",
   "description": "A collection of Svelte components and utilities for building user interfaces.",
   "repository": {
     "type": "git",
