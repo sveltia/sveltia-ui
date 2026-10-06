@@ -246,6 +246,38 @@ describe('createEditorStore', () => {
     consoleSpy.mockRestore();
   });
 
+  it('should count the content as pending while an operation is running', () => {
+    const store = createEditorStore();
+
+    expect(store.pending).toBe(false);
+
+    const end = store.startOperation();
+    const endOther = store.startOperation();
+
+    expect(store.pending).toBe(true);
+    end();
+    // The other operation is still running
+    expect(store.pending).toBe(true);
+    // Ending an operation that is already done changes nothing
+    end();
+    expect(store.pending).toBe(true);
+    endOther();
+    expect(store.pending).toBe(false);
+  });
+
+  it('should keep the content pending while an operation is running even if the flag is cleared', () => {
+    const store = createEditorStore();
+    const end = store.startOperation();
+
+    // This is what an editor update made by the operation itself does
+    store.pending = false;
+    expect(store.pending).toBe(true);
+    end();
+    expect(store.pending).toBe(false);
+    store.pending = true;
+    expect(store.pending).toBe(true);
+  });
+
   it('should trigger convertMarkdown when isEmpty() is true even though value is unchanged (branch 6)', async () => {
     const store = createEditorStore();
     const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});

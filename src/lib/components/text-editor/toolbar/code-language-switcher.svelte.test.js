@@ -146,6 +146,10 @@ it('changes the language of the code block', async () => {
   await vi.waitFor(() => {
     expect(store.inputValue).toBe('```html\nx\n```');
   });
+  // The content is no longer pending once the change has reached the editor
+  await vi.waitFor(() => {
+    expect(store.pending).toBe(false);
+  });
 });
 
 it.each([
@@ -207,6 +211,8 @@ it('leaves the code block alone when the same language is picked', async () => {
     setTimeout(resolve, 100);
   });
   expect(store.inputValue).toBe('```plain\nx\n```');
+  // Nothing was started, so nothing is pending
+  expect(store.pending).toBe(false);
 });
 
 it('does nothing in the rich text editor while the selection is not in a code block', async () => {
@@ -229,6 +235,9 @@ it('does nothing in the rich text editor while the selection is not in a code bl
     setTimeout(resolve, 100);
   });
   expect(store.inputValue).toBe('Just text');
+  // The editor was left clean, so it never flags an export of its own: the switcher has to release
+  // the content itself, or a consumer waiting for it before saving would wait forever
+  expect(store.pending).toBe(false);
 });
 
 it('can be disabled', async () => {

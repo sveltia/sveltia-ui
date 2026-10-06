@@ -66,6 +66,46 @@
     return isCodeNode(node) ? node : null;
   };
 
+  /**
+   * Give the code block the given language, once the highlighter for it has loaded.
+   * @param {string} lang Language ID.
+   */
+  const changeLanguage = async (lang) => {
+    const { editor } = editorStore;
+
+    if (!editor || selectedKey === lang) {
+      return;
+    }
+
+    // The change only reaches the editor, and anything bound to it, once the highlighter has
+    // loaded, so report the content as pending until then: the flag the editor sets for itself is
+    // cleared by the update the focus move below fires
+    const endOperation = editorStore.startOperation();
+
+    try {
+      await focusEditor(editor);
+      await loadCodeHighlighter(lang);
+
+      // The user may have moved on to another field while the highlighter was loading
+      editor.update(
+        () => {
+          // https://github.com/facebook/lexical/blob/main/packages/lexical-playground/src/plugins/ToolbarPlugin/index.tsx#L713
+          const node = getCodeNode();
+
+          if (node) {
+            node.setLanguage(lang);
+            selectedLanguage = lang;
+          }
+        },
+        { tag: getBackgroundUpdateTags(editor) },
+      );
+    } finally {
+      // The editor has flagged the export that follows as pending by now, so the hand-off leaves
+      // no gap
+      endOperation();
+    }
+  };
+
   $effect(() => {
     void editorStore.selection.blockNodeKey;
 
@@ -86,29 +126,8 @@
   {disabled}
   ariaLabel={_('_sui.text_editor.language')}
   value={selectedKey}
-  onChange={async ({ detail: { value: lang } }) => {
-    if (!editorStore.editor || selectedKey === lang) {
-      return;
-    }
-
-    const { editor } = editorStore;
-
-    await focusEditor(editor);
-    await loadCodeHighlighter(lang);
-
-    // The user may have moved on to another field while the highlighter was loading
-    editor.update(
-      () => {
-        // https://github.com/facebook/lexical/blob/main/packages/lexical-playground/src/plugins/ToolbarPlugin/index.tsx#L713
-        const node = getCodeNode();
-
-        if (node) {
-          node.setLanguage(lang);
-          selectedLanguage = lang;
-        }
-      },
-      { tag: getBackgroundUpdateTags(editor) },
-    );
+  onChange={({ detail: { value: lang } }) => {
+    changeLanguage(lang);
   }}
 >
   <Option label={_('_sui.text_editor.plain_text')} value="plain" dir="ltr" />

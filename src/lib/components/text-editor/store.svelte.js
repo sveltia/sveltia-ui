@@ -46,6 +46,11 @@ export const createEditorStore = () => {
   /** @type {boolean} */
   let pending = $state(false);
   /**
+   * Number of editor operations started by the user that have yet to update the editor.
+   * @type {number}
+   */
+  let runningOperations = $state(0);
+  /**
    * Value last imported to the Lexical editor, and the Markdown the editor exports for it.
    * @type {{ source: string, exported: string } | undefined}
    */
@@ -195,7 +200,7 @@ export const createEditorStore = () => {
       showConverterError = newValue;
     },
     get pending() {
-      return pending;
+      return pending || runningOperations > 0;
     },
     set pending(newValue) {
       pending = newValue;
@@ -205,6 +210,27 @@ export const createEditorStore = () => {
     },
     editorId,
     convertMarkdown,
+    /**
+     * Mark an operation the user started as running, which makes the content count as
+     * {@link TextEditorStore.pending} until it’s done. Use it for an operation that only reaches
+     * the editor after an `await`, such as a language change waiting for the highlighter to load:
+     * the flag the editor sets for itself is cleared by every update it makes in the meantime,
+     * including the one the focus move fires, so it can’t cover the wait.
+     * @returns {() => void} Function to call once the operation has updated the editor. Calling it
+     * more than once has no further effect.
+     */
+    startOperation: () => {
+      runningOperations += 1;
+
+      let done = false;
+
+      return () => {
+        if (!done) {
+          done = true;
+          runningOperations -= 1;
+        }
+      };
+    },
     /**
      * Get the value last imported if the given value, exported by the editor, is only that value
      * written in the editor’s own Markdown style.
