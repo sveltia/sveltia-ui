@@ -188,7 +188,7 @@ describe('InsertLinkButton', () => {
     expect(store.inputValue).toBe('Hello');
   });
 
-  it('updates or removes an existing link', async () => {
+  it('shows the link as pressed while the selection is on one', async () => {
     const { screen, store, root } = await renderButton('[Example](https://example.com/)');
     const button = screen.getByRole('button', { name: 'Link' });
 
@@ -198,24 +198,6 @@ describe('InsertLinkButton', () => {
       expect(store.selection.inlineTypes).toContain('link');
     });
     await expect.element(button).toHaveAttribute('aria-pressed', 'true');
-    await button.click();
-    await waitForOpen();
-    expect(getDialog()?.querySelector('.title')?.textContent?.trim()).toBe('Update Link');
-    await expect
-      .element(screen.getByRole('textbox', { name: 'URL' }))
-      .toHaveValue('https://example.com/');
-    await screen.getByRole('textbox', { name: 'URL' }).fill('https://example.org/');
-    await screen.getByRole('button', { name: 'Update' }).click();
-    await vi.waitFor(() => {
-      expect(store.inputValue).toBe('[Example](https://example.org/)');
-    });
-
-    await button.click();
-    await waitForOpen();
-    await screen.getByRole('button', { name: 'Remove' }).click();
-    await vi.waitFor(() => {
-      expect(store.inputValue).toBe('Example');
-    });
   });
 
   it('opens the dialog with the keyboard shortcut', async () => {

@@ -122,7 +122,9 @@ text_editor:
   link: 링크
   # Link dialog title
   insert_link: 링크 삽입
-  update_link: 링크 업데이트
+  # Floating link editor button aria-labels
+  edit_link: 링크 편집
+  remove_link: 링크 제거
   # Link dialog input field labels
   text: 텍스트
   url: URL

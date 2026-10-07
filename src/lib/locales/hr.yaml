@@ -122,7 +122,9 @@ text_editor:
   link: Poveznica
   # Link dialog title
   insert_link: Umetni poveznicu
-  update_link: Ažuriraj poveznicu
+  # Floating link editor button aria-labels
+  edit_link: Uredi poveznicu
+  remove_link: Ukloni poveznicu
   # Link dialog input field labels
   text: Tekst
   url: URL

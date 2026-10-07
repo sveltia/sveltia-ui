@@ -261,6 +261,7 @@ const ElementNodeClass = vi.hoisted(
 vi.mock('lexical', () => ({
   COMMAND_PRIORITY_NORMAL: 0,
   COMMAND_PRIORITY_LOW: -1,
+  createCommand: vi.fn((type) => ({ type })),
   createEditor: vi.fn(() => editorState),
   defineExtension: vi.fn((extension) => extension),
   DELETE_CHARACTER_COMMAND: 'deleteCharacter',

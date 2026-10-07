@@ -122,7 +122,9 @@ text_editor:
   link: 链接
   # Link dialog title
   insert_link: 插入链接
-  update_link: 更新链接
+  # Floating link editor button aria-labels
+  edit_link: 编辑链接
+  remove_link: 移除链接
   # Link dialog input field labels
   text: 文字
   url: URL

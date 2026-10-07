@@ -122,7 +122,9 @@ text_editor:
   link: Σύνδεσμος
   # Link dialog title
   insert_link: Εισαγωγή συνδέσμου
-  update_link: Ενημέρωση συνδέσμου
+  # Floating link editor button aria-labels
+  edit_link: Επεξεργασία συνδέσμου
+  remove_link: Αφαίρεση συνδέσμου
   # Link dialog input field labels
   text: Κείμενο
   url: URL

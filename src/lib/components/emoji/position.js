@@ -38,20 +38,28 @@ export const VIEWPORT_MARGIN = 8;
  * @param {number} options.listMaxHeight The height the list would like to have, in pixels.
  * @param {{ width: number, height: number }} options.viewport Size of the viewport in pixels.
  * @param {boolean} options.rtl Whether the layout is right-to-left.
+ * @param {number} [options.listWidth] Width of the dropdown in pixels, for another popup placed
+ * the same way.
  * @returns {SuggestionListPosition} Position.
  */
-export const getSuggestionListPosition = ({ anchorRect, listMaxHeight, viewport, rtl }) => {
+export const getSuggestionListPosition = ({
+  anchorRect,
+  listMaxHeight,
+  viewport,
+  rtl,
+  listWidth = LIST_WIDTH,
+}) => {
   const { width: innerWidth, height: innerHeight } = viewport;
   const spaceBelow = innerHeight - anchorRect.bottom;
   const spaceAbove = anchorRect.top;
   const flipped = spaceBelow < listMaxHeight + VIEWPORT_MARGIN && spaceAbove > spaceBelow;
-  const anchorLeft = rtl ? anchorRect.right - LIST_WIDTH : anchorRect.left;
+  const anchorLeft = rtl ? anchorRect.right - listWidth : anchorRect.left;
 
   return {
     top: flipped ? undefined : `${Math.round(anchorRect.bottom + LIST_OFFSET)}px`,
     bottom: flipped ? `${Math.round(innerHeight - anchorRect.top + LIST_OFFSET)}px` : undefined,
     left: `${Math.round(
-      Math.max(VIEWPORT_MARGIN, Math.min(anchorLeft, innerWidth - LIST_WIDTH - VIEWPORT_MARGIN)),
+      Math.max(VIEWPORT_MARGIN, Math.min(anchorLeft, innerWidth - listWidth - VIEWPORT_MARGIN)),
     )}px`,
     maxHeight: `${Math.round(
       Math.min(listMaxHeight, (flipped ? spaceAbove : spaceBelow) - LIST_OFFSET - VIEWPORT_MARGIN),

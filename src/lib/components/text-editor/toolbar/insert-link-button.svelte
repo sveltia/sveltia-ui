@@ -1,6 +1,5 @@
 <script>
-  import { LinkNode, TOGGLE_LINK_COMMAND } from '@lexical/link';
-  import { $getNearestNodeOfType as getNearestNodeOfType } from '@lexical/utils';
+  import { TOGGLE_LINK_COMMAND } from '@lexical/link';
   import { _ } from '@sveltia/i18n';
   import { isMac, matchesShortcuts } from '@sveltia/utils/events';
   import { isURL } from '@sveltia/utils/string';
@@ -21,7 +20,7 @@
   import Dialog from '../../dialog/dialog.svelte';
   import Icon from '../../icon/icon.svelte';
   import TextInput from '../../text-field/text-input.svelte';
-  import { AVAILABLE_BUTTONS } from '../constants.js';
+  import { AVAILABLE_BUTTONS, OPEN_LINK_EDITOR_COMMAND } from '../constants.js';
   import { focusEditor, isSafeLinkURL } from '../core.js';
   import {
     editRawText,
@@ -32,7 +31,6 @@
 
   /**
    * @import { TextEditorStore } from '#lib/typedefs.js';
-   * @import { RangeSelection } from 'lexical';
    */
 
   const id = $props.id();
@@ -47,8 +45,6 @@
   const selectionTypeMatches = $derived(editorStore.selection.inlineTypes.includes(type));
 
   let openDialog = $state(false);
-  /** @type {'create' | 'update' | 'remove'} */
-  let dialogMode = $state('create');
   let hasAnchor = $state(false);
   let anchorURL = $state('');
   let anchorText = $state('');
@@ -66,7 +62,6 @@
     // Otherwise, it’s just the link text, like a word or phrase.
     anchorURL = isURL(textContent) && isSafeLinkURL(textContent) ? textContent : '';
     hasAnchor = !!textContent;
-    dialogMode = 'create';
     openDialog = true;
   };
 
@@ -94,56 +89,19 @@
   };
 
   /**
-   * Remove an existing link.
-   */
-  const removeLink = () => {
-    editorStore.editor?.dispatchCommand(TOGGLE_LINK_COMMAND, null);
-  };
-
-  /**
-   * Update an existing link.
-   */
-  const updateLink = () => {
-    editorStore.editor?.getEditorState().read(() => {
-      const _selection = getSelection();
-
-      // This is only called while the selection is reported to be within a link, so the fallbacks
-      // below are for the unexpected
-      /* v8 ignore else */
-      if (isRangeSelection(_selection)) {
-        const anchor = _selection.anchor.getNode();
-        /* v8 ignore next */
-        const parent = anchor instanceof LinkNode ? anchor : getNearestNodeOfType(anchor, LinkNode);
-        const url = parent?.getURL();
-
-        /* v8 ignore else */
-        if (url) {
-          hasAnchor = true;
-          anchorURL = url;
-          dialogMode = 'update';
-          openDialog = true;
-
-          return;
-        }
-      }
-
-      // Can’t update for some reason; remove it
-      /* v8 ignore next */
-      removeLink();
-    });
-  };
-
-  /**
-   * Handle `click` event fired on the Link button. If a link is selected, update it. Otherwise,
-   * create a new link.
+   * Handle `click` event fired on the Link button. In the rich text mode, the floating link editor
+   * takes care of a selected link or text. Otherwise, create a new link with the dialog.
    */
   const onButtonClick = () => {
     // Links are not detected in the plain text mode, so a new one is always created there
-    if (selectionTypeMatches && editorStore.useRichText) {
-      updateLink();
-    } else {
-      createLink();
+    if (
+      editorStore.useRichText &&
+      editorStore.editor?.dispatchCommand(OPEN_LINK_EDITOR_COMMAND, undefined)
+    ) {
+      return;
     }
+
+    createLink();
   };
 
   /**
@@ -183,7 +141,7 @@
       return;
     }
 
-    if (event.detail.returnValue !== 'cancel' && dialogMode !== 'remove') {
+    if (event.detail.returnValue !== 'cancel') {
       // The dialog can only be opened from the button, which needs the editor
       /* v8 ignore next */
       if (!editorStore.editor) {
@@ -277,12 +235,10 @@
 </Button>
 
 <Dialog
-  title={dialogMode === 'create'
-    ? _('_sui.text_editor.insert_link')
-    : _('_sui.text_editor.update_link')}
+  title={_('_sui.text_editor.insert_link')}
   bind:open={openDialog}
   okDisabled={!isValidURL}
-  okLabel={dialogMode === 'create' ? _('_sui.insert') : _('_sui.update')}
+  okLabel={_('_sui.insert')}
   restoreFocus={false}
   onClose={(event) => {
     onDialogClose(event);
@@ -317,17 +273,4 @@
       />
     </div>
   {/if}
-  {#snippet footerExtra()}
-    {#if dialogMode !== 'create'}
-      <Button
-        variant="secondary"
-        label={_('_sui.remove')}
-        onclick={() => {
-          removeLink();
-          dialogMode = 'remove';
-          openDialog = false;
-        }}
-      />
-    {/if}
-  {/snippet}
 </Dialog>

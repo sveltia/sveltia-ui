@@ -11,6 +11,7 @@
   import { BLOCK_BUTTON_TYPES, INLINE_BUTTON_TYPES } from './constants.js';
   import { loadCodeHighlighter } from './core.js';
   import EmojiAutocomplete from './emoji-autocomplete.svelte';
+  import FloatingLinkEditor from './floating-link-editor.svelte';
   import LexicalRoot from './lexical-root.svelte';
   import { getBlockType, getRawTextState } from './raw-markdown.js';
   import { highlightCodeToTokens } from './shiki/facade.js';
@@ -324,6 +325,9 @@
   />
   {#if editorStore.config.useEmojiAutocomplete && !disabled && !readonly}
     <EmojiAutocomplete />
+  {/if}
+  {#if editorStore.config.enabledButtons.includes('link') && !disabled && !readonly}
+    <FloatingLinkEditor />
   {/if}
 </div>
 

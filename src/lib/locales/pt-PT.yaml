@@ -122,7 +122,9 @@ text_editor:
   link: Ligação
   # Link dialog title
   insert_link: Inserir ligação
-  update_link: Atualizar ligação
+  # Floating link editor button aria-labels
+  edit_link: Editar ligação
+  remove_link: Remover ligação
   # Link dialog input field labels
   text: Texto
   url: URL

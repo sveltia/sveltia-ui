@@ -18,9 +18,10 @@ import {
   UNORDERED_LIST,
 } from '@lexical/markdown';
 import { HeadingNode, QuoteNode } from '@lexical/rich-text';
+import { createCommand } from 'lexical';
 
 /**
- * @import { EditorThemeClasses } from 'lexical';
+ * @import { EditorThemeClasses, LexicalCommand } from 'lexical';
  * @import { Transformer } from '@lexical/markdown';
  * @import {
  * TextEditorBlockType,
@@ -237,3 +238,11 @@ export const DISABLED_MARKDOWN_TAGS = ['*', '__', '***', '___'];
  * change made by the user.
  */
 export const IMPORT_UPDATE_TAG = 'sui-import';
+
+/**
+ * Command to show the floating link editor for the link at the selection, or for the selected text
+ * to be linked. A listener returns `false` when there is no link or text to edit, in which case the
+ * Link button falls back to the dialog.
+ * @type {LexicalCommand<void>}
+ */
+export const OPEN_LINK_EDITOR_COMMAND = createCommand('OPEN_LINK_EDITOR_COMMAND');

@@ -122,7 +122,9 @@ text_editor:
   link: リンク
   # Link dialog title
   insert_link: リンクを挿入
-  update_link: リンクを更新
+  # Floating link editor button aria-labels
+  edit_link: リンクを編集
+  remove_link: リンクを削除
   # Link dialog input field labels
   text: テキスト
   url: URL

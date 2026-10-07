@@ -122,7 +122,9 @@ text_editor:
   link: Liên kết
   # Link dialog title
   insert_link: Chèn liên kết
-  update_link: Cập nhật liên kết
+  # Floating link editor button aria-labels
+  edit_link: Chỉnh sửa liên kết
+  remove_link: Xóa liên kết
   # Link dialog input field labels
   text: Văn bản
   url: URL

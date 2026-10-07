@@ -122,7 +122,9 @@ text_editor:
   link: Посилання
   # Link dialog title
   insert_link: Вставити посилання
-  update_link: Оновити посилання
+  # Floating link editor button aria-labels
+  edit_link: Редагувати посилання
+  remove_link: Видалити посилання
   # Link dialog input field labels
   text: Текст
   url: URL
