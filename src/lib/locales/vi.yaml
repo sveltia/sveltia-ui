@@ -128,6 +128,8 @@ text_editor:
   url: URL
   # Markdown mode toggle button aria-label
   edit_in_markdown: Chỉnh sửa bằng Markdown
+  # HTML mode toggle button aria-label
+  edit_in_html: Chỉnh sửa bằng HTML
   # Error message when rich text conversion fails
   converter_error: Không thể bật chế độ văn bản đa định dạng. Vui lòng sử dụng trình soạn thảo văn bản thuần.
   # Language selector aria-label

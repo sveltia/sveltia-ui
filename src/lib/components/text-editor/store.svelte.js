@@ -1,5 +1,5 @@
 import { generateElementId } from '@sveltia/utils/element';
-import { convertMarkdownToLexical } from './core.js';
+import { convertHtmlToLexical, convertMarkdownToLexical } from './core.js';
 
 /**
  * @import { LexicalEditor } from 'lexical';
@@ -51,7 +51,7 @@ export const createEditorStore = () => {
    */
   let runningOperations = $state(0);
   /**
-   * Value last imported to the Lexical editor, and the Markdown the editor exports for it.
+   * Value last imported to the Lexical editor, and the Markdown or HTML the editor exports for it.
    * @type {{ source: string, exported: string } | undefined}
    */
   let lastImport = undefined;
@@ -81,10 +81,10 @@ export const createEditorStore = () => {
   };
 
   /**
-   * Convert the Markdown {@link inputValue} to Lexical nodes. Disable the rich text mode and
-   * restore the original value when there is an error while conversion.
+   * Convert the Markdown or HTML {@link inputValue} to Lexical nodes. Disable the rich text mode
+   * and restore the original value when there is an error while conversion.
    */
-  const convertMarkdown = async () => {
+  const convertToLexical = async () => {
     if (!editor || !initialized) {
       return;
     }
@@ -101,11 +101,10 @@ export const createEditorStore = () => {
       // We should avoid an empty editor; there should be at least one `<p>`, so give it an empty
       // string if the `value` is `undefined`
       // @see https://github.com/facebook/lexical/issues/2308
-      const exported = await convertMarkdownToLexical(
-        editor,
-        inputValue || '',
-        enabledTransformers,
-      );
+      const exported =
+        config.format === 'html'
+          ? await convertHtmlToLexical(editor, inputValue || '')
+          : await convertMarkdownToLexical(editor, inputValue || '', enabledTransformers);
 
       // Skip an import superseded by a newer one, which sets its own value
       if (exported !== undefined) {
@@ -163,7 +162,7 @@ export const createEditorStore = () => {
       }
 
       if (useRichText && (hasChange || editor?.getEditorState().isEmpty())) {
-        convertMarkdown();
+        convertToLexical();
       }
     },
     get selection() {
@@ -209,7 +208,7 @@ export const createEditorStore = () => {
       return importing;
     },
     editorId,
-    convertMarkdown,
+    convertToLexical,
     /**
      * Mark an operation the user started as running, which makes the content count as
      * {@link TextEditorStore.pending} until it’s done. Use it for an operation that only reaches
@@ -233,7 +232,7 @@ export const createEditorStore = () => {
     },
     /**
      * Get the value last imported if the given value, exported by the editor, is only that value
-     * written in the editor’s own Markdown style.
+     * written in the editor’s own Markdown or HTML style.
      * @param {string} value Exported value.
      * @returns {string | undefined} Imported value, or `undefined` if the content has changed.
      */

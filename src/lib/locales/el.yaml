@@ -128,6 +128,8 @@ text_editor:
   url: URL
   # Markdown mode toggle button aria-label
   edit_in_markdown: Επεξεργασία σε Markdown
+  # HTML mode toggle button aria-label
+  edit_in_html: Επεξεργασία σε HTML
   # Error message when rich text conversion fails
   converter_error: Δεν ήταν δυνατή η ενεργοποίηση της λειτουργίας εμπλουτισμένου κειμένου. Παρακαλούμε χρησιμοποιήστε τον επεξεργαστή απλού κειμένου.
   # Language selector aria-label

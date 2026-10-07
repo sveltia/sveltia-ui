@@ -128,6 +128,8 @@ text_editor:
   url: آدرس (URL)
   # Markdown mode toggle button aria-label
   edit_in_markdown: ویرایش در حالت مارک‌داون
+  # HTML mode toggle button aria-label
+  edit_in_html: ویرایش در حالت HTML
   # Error message when rich text conversion fails
   converter_error: امکان فعال‌سازی حالت متن غنی وجود ندارد. لطفاً در عوض از ویرایشگر متن ساده استفاده کنید.
   # Language selector aria-label

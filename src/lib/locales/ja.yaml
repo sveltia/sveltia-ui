@@ -128,6 +128,8 @@ text_editor:
   url: URL
   # Markdown mode toggle button aria-label
   edit_in_markdown: マークダウンで編集
+  # HTML mode toggle button aria-label
+  edit_in_html: HTML で編集
   # Error message when rich text conversion fails
   converter_error: リッチテキストモードを有効にできませんでした。プレーンテキストエディターを使用してください。
   # Language selector aria-label

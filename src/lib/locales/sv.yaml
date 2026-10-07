@@ -128,6 +128,8 @@ text_editor:
   url: URL
   # Markdown mode toggle button aria-label
   edit_in_markdown: Redigera som Markdown
+  # HTML mode toggle button aria-label
+  edit_in_html: Redigera som HTML
   # Error message when rich text conversion fails
   converter_error: Det gick inte att aktivera läget för formaterad text. Använd istället redigeraren för vanlig text.
   # Language selector aria-label

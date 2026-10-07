@@ -64,6 +64,13 @@
     ]),
   );
 
+  const isHtml = $derived(editorStore.config.format === 'html');
+  /**
+   * Whether the formatting buttons are available. They insert Markdown syntax in the plain text
+   * mode, so they’re hidden while the HTML source is edited.
+   */
+  const canFormat = $derived(editorStore.useRichText || !isHtml);
+
   /**
    * Enabled inline level buttons.
    * @type {TextEditorInlineType[]}
@@ -78,7 +85,7 @@
 </script>
 
 <ToolbarWrapper disabled={disabled || readonly} ariaLabel={_('_sui.text_editor.text_editor')}>
-  {#if blockLevelButtons.length > 1}
+  {#if canFormat && blockLevelButtons.length > 1}
     <MenuButton
       aria-label={_('_sui.text_editor.show_text_style_options')}
       aria-controls={editorStore.controlId}
@@ -101,7 +108,7 @@
   {#if editorStore.useRichText && editorStore.selection.blockType === 'code-block'}
     <Divider orientation="vertical" />
     <CodeLanguageSwitcher />
-  {:else}
+  {:else if canFormat}
     {#if inlineLevelButtons.length}
       <Divider orientation="vertical" />
       <ButtonGroup>
@@ -130,17 +137,17 @@
       iconic
       disabled={editorStore.hasConverterError}
       pressed={!editorStore.useRichText}
-      aria-label={_('_sui.text_editor.edit_in_markdown')}
+      aria-label={_(`_sui.text_editor.${isHtml ? 'edit_in_html' : 'edit_in_markdown'}`)}
       onclick={() => {
         editorStore.useRichText = !editorStore.useRichText;
 
         if (editorStore.useRichText) {
-          editorStore.convertMarkdown();
+          editorStore.convertToLexical();
         }
       }}
     >
       {#snippet startIcon()}
-        <Icon name="markdown" />
+        <Icon name={isHtml ? 'html' : 'markdown'} />
       {/snippet}
     </Button>
   {/if}

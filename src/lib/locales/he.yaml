@@ -133,6 +133,8 @@ text_editor:
   url: כתובת קישור
   # Markdown mode toggle button aria-label
   edit_in_markdown: עריכה ב-Markdown
+  # HTML mode toggle button aria-label
+  edit_in_html: עריכה ב-HTML
   # Error message when rich text conversion fails
   converter_error: לא ניתן להפעיל מצב טקסט עשיר. יש להשתמש בעורך טקסט פשוט במקום.
   # Language selector aria-label

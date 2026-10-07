@@ -128,6 +128,8 @@ text_editor:
   url: الرابط
   # Markdown mode toggle button aria-label
   edit_in_markdown: التحرير بلغة Markdown
+  # HTML mode toggle button aria-label
+  edit_in_html: التحرير بلغة HTML
   # Error message when rich text conversion fails
   converter_error: تعذر تمكين وضع النص الغني. يرجى استخدام محرر النصوص البسيط بدلاً من ذلك.
   # Language selector aria-label

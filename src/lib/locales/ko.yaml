@@ -128,6 +128,8 @@ text_editor:
   url: URL
   # Markdown mode toggle button aria-label
   edit_in_markdown: 마크다운으로 편집
+  # HTML mode toggle button aria-label
+  edit_in_html: HTML로 편집
   # Error message when rich text conversion fails
   converter_error: 리치 텍스트 모드를 사용할 수 없습니다. 일반 텍스트 에디터를 사용하십시오.
   # Language selector aria-label

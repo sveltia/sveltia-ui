@@ -34,6 +34,17 @@
     'const answer = 42;',
     '```',
   ].join('\n');
+
+  const html = [
+    '<h1>Heading</h1>',
+    '<p>Some <strong>bold</strong>, <em>italic</em> and <code>code</code> text with a',
+    '<a href="https://example.com">link</a>.</p>',
+    '<ul><li>List item</li><li>Another item</li></ul>',
+    '<blockquote>Quote</blockquote>',
+    '<pre><code class="language-js">const answer = 42;</code></pre>',
+  ].join('\n');
+
+  let htmlValue = $state(html);
 </script>
 
 <svelte:head>
@@ -47,6 +58,16 @@
   <Example>
     <div role="none">
       <TextEditor />
+    </div>
+  </Example>
+</section>
+
+<section>
+  <h3>HTML Output</h3>
+  <Example>
+    <div role="none">
+      <TextEditor format="html" bind:value={htmlValue} />
+      <pre class="output">{htmlValue}</pre>
     </div>
   </Example>
 </section>
@@ -115,6 +136,13 @@
 </section>
 
 <style lang="scss">
+  .output {
+    margin: 16px 0 0;
+    font-size: var(--sui-font-size-small);
+    white-space: pre-wrap;
+    word-break: break-all;
+  }
+
   :global(.demo-component) {
     display: inline-flex;
     flex-wrap: wrap;

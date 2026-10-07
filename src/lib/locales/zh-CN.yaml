@@ -128,6 +128,8 @@ text_editor:
   url: URL
   # Markdown mode toggle button aria-label
   edit_in_markdown: 以 Markdown 编辑
+  # HTML mode toggle button aria-label
+  edit_in_html: 以 HTML 编辑
   # Error message when rich text conversion fails
   converter_error: 无法启用富文本模式。请改用纯文本编辑器。
   # Language selector aria-label

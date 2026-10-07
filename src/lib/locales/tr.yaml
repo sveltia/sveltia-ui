@@ -128,6 +128,8 @@ text_editor:
   url: URL
   # Markdown mode toggle button aria-label
   edit_in_markdown: Markdown ile Düzenle
+  # HTML mode toggle button aria-label
+  edit_in_html: HTML ile Düzenle
   # Error message when rich text conversion fails
   converter_error: Zengin metin modu etkinleştirilemedi. Lütfen düz metin düzenleyicisini kullanın.
   # Language selector aria-label

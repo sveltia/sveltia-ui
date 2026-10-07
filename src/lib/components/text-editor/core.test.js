@@ -139,6 +139,18 @@ vi.mock('@lexical/extension', () => ({
   HorizontalRuleNode: class {},
 }));
 
+vi.mock('@lexical/html', () => ({
+  $generateNodesFromDOM: vi.fn(() => []),
+}));
+
+vi.mock('./html.js', () => ({
+  exportHtml: vi.fn(() => '<p>converted</p>'),
+  findUnsupportedNode: vi.fn(() => undefined),
+  getCodeLanguage: vi.fn(() => undefined),
+  HTML_EXPORT_MAP: new Map(),
+  HTML_IMPORT_MAP: {},
+}));
+
 vi.mock('@lexical/history', () => ({
   createEmptyHistoryState: vi.fn(() => ({})),
   registerHistory: vi.fn(() => vi.fn()),

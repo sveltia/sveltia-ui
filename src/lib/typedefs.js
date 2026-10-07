@@ -308,6 +308,10 @@
  */
 
 /**
+ * @typedef {'markdown' | 'html'} TextEditorValueFormat
+ */
+
+/**
  * @typedef {object} TextEditorComponent
  * @property {string} id Component ID.
  * @property {string} label Component label.
@@ -336,6 +340,7 @@
  * @property {boolean} [useEmojiAutocomplete] Whether to autocomplete emojis when the user types a
  * shortcode, like `:smi`. Default: `false`.
  * @property {string} [defaultLanguage] Default language for the code editor.
+ * @property {TextEditorValueFormat} [format] Format of the value. Default: `markdown`.
  */
 
 /**
@@ -443,21 +448,22 @@
  * mode.
  * @property {string} controlId ID of the editable element currently shown: the Lexical root in the
  * rich text mode, or the `<textarea>` in the plain text mode.
- * @property {boolean} hasConverterError Whether there was an error while converting Markdown to
- * Lexical nodes.
+ * @property {boolean} hasConverterError Whether there was an error while converting Markdown or
+ * HTML to Lexical nodes.
  * @property {boolean} showConverterError Whether to show a converter error in the UI.
  * @property {boolean} pending Whether the user has changed the rich text content, and the editor
- * has yet to convert it to Markdown and update {@link TextEditorStore.inputValue}. It’s also set
- * while an operation started with {@link TextEditorStore.startOperation} is running.
+ * has yet to convert it to Markdown or HTML and update {@link TextEditorStore.inputValue}. It’s
+ * also set while an operation started with {@link TextEditorStore.startOperation} is running.
  * @property {boolean} importing Whether the latest {@link TextEditorStore.inputValue} is still
  * being imported to the Lexical editor.
- * @property {() => Promise<void>} convertMarkdown Function to trigger the Lexical converter.
+ * @property {() => Promise<void>} convertToLexical Function to trigger the Lexical converter, which
+ * imports the Markdown or HTML {@link TextEditorStore.inputValue} to the editor.
  * @property {() => () => void} startOperation Function marking an operation the user started, which
  * only updates the editor after an `await`, as running. It returns a function to call once the
  * operation is done. The content counts as {@link TextEditorStore.pending} meanwhile.
  * @property {(value: string) => string | undefined} getImportedValue Function to get the
  * {@link TextEditorStore.inputValue} last imported if the given value, exported by the editor, is
- * only that value written in the editor’s own Markdown style, e.g. `_text_` for `*text*`.
+ * only that value written in the editor’s own Markdown or HTML style, e.g. `_text_` for `*text*`.
  */
 
 /**

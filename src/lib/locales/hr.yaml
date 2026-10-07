@@ -128,6 +128,8 @@ text_editor:
   url: URL
   # Markdown mode toggle button aria-label
   edit_in_markdown: Uredi u Markdownu
+  # HTML mode toggle button aria-label
+  edit_in_html: Uredi u HTML-u
   # Error message when rich text conversion fails
   converter_error: Nije moguće omogućiti način obogaćenog teksta. Umjesto toga upotrijebite uređivač običnog teksta.
   # Language selector aria-label

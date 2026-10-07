@@ -128,6 +128,8 @@ text_editor:
   url: URL
   # Markdown mode toggle button aria-label
   edit_in_markdown: Modifica in Markdown
+  # HTML mode toggle button aria-label
+  edit_in_html: Modifica in HTML
   # Error message when rich text conversion fails
   converter_error: Impossibile abilitare la modalità rich text. Usa l’editor di testo semplice.
   # Language selector aria-label

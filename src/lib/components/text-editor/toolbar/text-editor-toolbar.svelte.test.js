@@ -158,6 +158,28 @@ describe('TextEditorToolbar', () => {
     });
   });
 
+  it('toggles the HTML source, hiding the buttons that would insert Markdown', async () => {
+    const { screen, store } = await renderToolbar({ format: 'html' });
+    const toggle = screen.getByRole('button', { name: 'Edit in HTML' });
+    const root = /** @type {HTMLElement} */ (screen.container.querySelector('.lexical-root'));
+
+    await vi.waitFor(() => {
+      expect(store.initialized).toBe(true);
+    });
+    await expect.element(screen.getByRole('button', { name: 'Bold' })).toBeVisible();
+    await toggle.click();
+    expect(store.useRichText).toBe(false);
+    expect(document.querySelector('[aria-label="Bold"]')).toBeNull();
+    expect(document.querySelector('[aria-label="Show Text Style Options"]')).toBeNull();
+    store.inputValue = '<h1>Typed in HTML</h1>';
+    await toggle.click();
+    expect(store.useRichText).toBe(true);
+    await expect.element(screen.getByRole('button', { name: 'Bold' })).toBeVisible();
+    await vi.waitFor(() => {
+      expect(root.querySelector('h1')?.textContent).toBe('Typed in HTML');
+    });
+  });
+
   it('omits the mode toggle with a single mode, and disables it on a converter error', async () => {
     const single = await renderToolbar({ modes: ['rich-text'] });
 

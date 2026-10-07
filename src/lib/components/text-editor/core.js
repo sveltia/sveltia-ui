@@ -9,6 +9,7 @@ import {
 import { registerDragonSupport } from '@lexical/dragon';
 import { buildEditorFromExtensions, HorizontalRuleNode } from '@lexical/extension';
 import { createEmptyHistoryState, registerHistory } from '@lexical/history';
+import { $generateNodesFromDOM as generateNodesFromDOM } from '@lexical/html';
 import {
   $isLinkNode as isLinkNode,
   TOGGLE_LINK_COMMAND,
@@ -73,6 +74,13 @@ import {
   TRANSFORMER_MAP,
 } from './constants.js';
 import {
+  exportHtml,
+  findUnsupportedNode,
+  getCodeLanguage,
+  HTML_EXPORT_MAP,
+  HTML_IMPORT_MAP,
+} from './html.js';
+import {
   increaseListIndentation,
   padBlankBlockquoteLines,
   splitMultilineFormatting,
@@ -101,6 +109,7 @@ import { TABLE } from './transformers/table.js';
  * TextEditorConfig,
  * TextEditorInlineType,
  * TextEditorNodeType,
+ * TextEditorValueFormat,
  * TextEditorSelectionState,
  * } from '#lib/typedefs.js';
  */
@@ -487,12 +496,14 @@ export const exportMarkdown = (enabledTransformers) => {
  * @internal
  * @param {LexicalEditor} editor Editor instance.
  * @param {Transformer[]} enabledTransformers Enabled Markdown transformers.
- * @param {string} [cachedValue] Markdown value from a previous call, to be reused instead of
- * converting the whole document again when only the selection has changed.
- * @returns {string} Markdown value.
+ * @param {string} [cachedValue] Value from a previous call, to be reused instead of converting the
+ * whole document again when only the selection has changed.
+ * @param {TextEditorValueFormat} [format] Value format.
+ * @returns {string} Markdown or HTML value.
  */
-export const onEditorUpdate = (editor, enabledTransformers, cachedValue) => {
-  const value = cachedValue ?? exportMarkdown(enabledTransformers);
+export const onEditorUpdate = (editor, enabledTransformers, cachedValue, format = 'markdown') => {
+  const value =
+    cachedValue ?? (format === 'html' ? exportHtml(editor) : exportMarkdown(enabledTransformers));
 
   editor.getRootElement()?.dispatchEvent(
     new CustomEvent('Update', {
@@ -750,13 +761,14 @@ const registerListCommands = (editor, enabledButtons = []) => {
 };
 
 /**
- * Register an update listener that triggers the Update event with the Markdown value, debounced so
- * only the latest update in a burst triggers it.
+ * Register an update listener that triggers the Update event with the Markdown or HTML value,
+ * debounced so only the latest update in a burst triggers it.
  * @param {LexicalEditor} editor Editor instance.
  * @param {Transformer[]} enabledTransformers Enabled Markdown transformers.
+ * @param {TextEditorValueFormat} format Value format.
  * @returns {() => void} Cleanup handler.
  */
-const registerUpdateEvent = (editor, enabledTransformers) => {
+const registerUpdateEvent = (editor, enabledTransformers, format) => {
   /** Incremented on every update, so only the latest one in a burst triggers the Update event. */
   let updateCount = 0;
   /** Whether the content has changed since the Update event was last triggered. */
@@ -796,6 +808,7 @@ const registerUpdateEvent = (editor, enabledTransformers) => {
             editor,
             enabledTransformers,
             contentChanged ? undefined : lastValue,
+            format,
           );
           contentChanged = false;
         });
@@ -863,6 +876,7 @@ export const initEditor = ({
   useMarkdownShortcuts,
   isCodeEditor = false,
   defaultLanguage = 'plain',
+  format = 'markdown',
 }) => {
   const hasCodeBlock = enabledButtons.includes('code-block') || isCodeEditor;
 
@@ -890,6 +904,12 @@ export const initEditor = ({
           [HorizontalRuleNode, TableNode, TableCellNode, TableRowNode]),
     ],
     theme: EDITOR_THEME,
+    // Export clean HTML without the attributes and elements only meant for the editor, and import
+    // code blocks with their language. The export map also applies to copying
+    html:
+      format === 'html'
+        ? { export: HTML_EXPORT_MAP, import: hasCodeBlock ? HTML_IMPORT_MAP : {} }
+        : undefined,
     /**
      * Log an error like `createEditor` does by default, instead of throwing it.
      * @param {Error} error Error.
@@ -941,7 +961,7 @@ export const initEditor = ({
     hasCodeBlock ? observeCodeTheme(editor) : undefined,
     enabledButtons.includes('link') ? registerLinkCommands(editor) : undefined,
     registerListCommands(editor, enabledButtons),
-    registerUpdateEvent(editor, enabledTransformers),
+    registerUpdateEvent(editor, enabledTransformers, format),
     registerTabIndentation(editor),
   );
 
@@ -977,22 +997,26 @@ export const loadCodeHighlighter = async (lang) => {
 };
 
 /**
- * Number of the latest Markdown import started for each editor.
+ * Number of the latest import started for each editor.
  * @type {WeakMap<LexicalEditor, number>}
  */
 const latestImports = new WeakMap();
 
 /**
- * Convert Markdown to Lexical nodes.
+ * Import a value to the editor, replacing the current content.
  * @param {LexicalEditor} editor Editor instance.
- * @param {string} value Current Markdown value.
- * @param {Transformer[]} enabledTransformers List of enabled Markdown transformers.
+ * @param {object} args Arguments.
+ * @param {string[]} args.languages Programming languages used in the code blocks.
+ * @param {() => void} args.$import Function to convert the value to Lexical nodes, called within an
+ * editor update.
+ * @param {() => string} args.$export Function to convert the editor content back to the value.
+ * @param {string} args.formatName Name of the value format, used in the error message.
  * @returns {Promise<string | undefined>} The value as the editor exports it once imported, which
- * can differ in style from the given value, e.g. `_text_` for `*text*`. `undefined` if another
- * import has been started for the same editor in the meantime, in which case this value is skipped.
+ * can differ in style from the given value. `undefined` if another import has been started for the
+ * same editor in the meantime, in which case this value is skipped.
  * @throws {Error} Failed to convert the value to Lexical nodes.
  */
-export const convertMarkdownToLexical = async (editor, value, enabledTransformers) => {
+const importValue = async (editor, { languages, $import, $export, formatName }) => {
   const importId = (latestImports.get(editor) ?? 0) + 1;
 
   latestImports.set(editor, importId);
@@ -1008,11 +1032,7 @@ export const convertMarkdownToLexical = async (editor, value, enabledTransformer
   try {
     // Preload the highlighter for every language used in the document, so code blocks are
     // highlighted as soon as they appear rather than a moment later
-    await Promise.all(
-      [...value.matchAll(/^```(?<lang>.+?)\n/gm)].map(async ({ groups: { lang = 'plain' } = {} }) =>
-        loadCodeHighlighter(lang),
-      ),
-    );
+    await Promise.all(languages.map(async (lang) => loadCodeHighlighter(lang)));
   } catch (ex) {
     if (isSuperseded()) {
       return undefined;
@@ -1025,15 +1045,6 @@ export const convertMarkdownToLexical = async (editor, value, enabledTransformer
     return undefined;
   }
 
-  // Split multiline formatting into separate lines to prevent Markdown parsing issues
-  value = splitMultilineFormatting(value);
-
-  // Increase list indentation levels to prevent Markdown parsing issues
-  value = increaseListIndentation(value);
-
-  // Pad blank blockquote lines so they are not imported as literal `>` text
-  value = padBlankBlockquoteLines(value);
-
   // Lexical commits an empty state when the root element is attached, and the history keeps it as
   // the current entry. An empty state can’t be restored, so undoing to it throws an error. Merge
   // the first import into that entry instead of pushing it onto the undo stack
@@ -1044,7 +1055,7 @@ export const convertMarkdownToLexical = async (editor, value, enabledTransformer
   editor.update(
     () => {
       try {
-        convertFromMarkdownString(value, enabledTransformers);
+        $import();
       } catch (ex) {
         error = ex;
       }
@@ -1056,10 +1067,118 @@ export const convertMarkdownToLexical = async (editor, value, enabledTransformer
   );
 
   if (error) {
-    throw new Error('Failed to convert Markdown', { cause: error });
+    throw new Error(`Failed to convert ${formatName}`, { cause: error });
   }
 
-  return editor.read(() => exportMarkdown(enabledTransformers));
+  return editor.read($export);
+};
+
+/**
+ * Convert Markdown to Lexical nodes.
+ * @param {LexicalEditor} editor Editor instance.
+ * @param {string} value Current Markdown value.
+ * @param {Transformer[]} enabledTransformers List of enabled Markdown transformers.
+ * @returns {Promise<string | undefined>} The value as the editor exports it once imported, which
+ * can differ in style from the given value, e.g. `_text_` for `*text*`. `undefined` if another
+ * import has been started for the same editor in the meantime, in which case this value is skipped.
+ * @throws {Error} Failed to convert the value to Lexical nodes.
+ */
+export const convertMarkdownToLexical = async (editor, value, enabledTransformers) =>
+  importValue(editor, {
+    languages: [...value.matchAll(/^```(?<lang>.+?)\n/gm)].map(
+      ({ groups: { lang = 'plain' } = {} }) => lang,
+    ),
+    /**
+     * Import the Markdown.
+     */
+    $import: () => {
+      convertFromMarkdownString(
+        // Split multiline formatting into separate lines to prevent Markdown parsing issues, then
+        // increase list indentation levels to prevent Markdown parsing issues, and pad blank
+        // blockquote lines so they are not imported as literal `>` text
+        padBlankBlockquoteLines(increaseListIndentation(splitMultilineFormatting(value))),
+        enabledTransformers,
+      );
+    },
+    /**
+     * Export the content as Markdown.
+     * @returns {string} Markdown.
+     */
+    $export: () => exportMarkdown(enabledTransformers),
+    formatName: 'Markdown',
+  });
+
+/**
+ * Convert HTML to Lexical nodes. Inline content outside any block, like bare text, is wrapped with
+ * a paragraph. An element that none of the registered nodes can import, like `<img>` or a heading
+ * with the heading buttons disabled, as well as a comment, causes an error instead of being
+ * silently dropped.
+ * @param {LexicalEditor} editor Editor instance.
+ * @param {string} value Current HTML value.
+ * @returns {Promise<string | undefined>} The value as the editor exports it once imported, which
+ * can differ in style from the given value, e.g. `<strong>` for `<b>`. `undefined` if another
+ * import has been started for the same editor in the meantime, in which case this value is skipped.
+ * @throws {Error} Failed to convert the value to Lexical nodes.
+ */
+export const convertHtmlToLexical = async (editor, value) => {
+  const dom = new DOMParser().parseFromString(value, 'text/html');
+
+  return importValue(editor, {
+    languages: [...dom.querySelectorAll('pre > code')]
+      .map(getCodeLanguage)
+      .filter((lang) => lang !== undefined),
+    /**
+     * Import the HTML.
+     * @throws {Error} The HTML has an element the editor cannot handle.
+     */
+    $import: () => {
+      const unsupportedNode = findUnsupportedNode(editor, dom);
+
+      if (unsupportedNode) {
+        throw new Error(
+          unsupportedNode.nodeType === Node.COMMENT_NODE
+            ? 'Unsupported comment'
+            : `Unsupported element: <${/** @type {Element} */ (unsupportedNode).localName}>`,
+        );
+      }
+
+      const root = getRoot();
+      /** @type {ElementNode | null} */
+      let paragraph = null;
+
+      root.clear();
+
+      generateNodesFromDOM(editor, dom).forEach((node) => {
+        if (isElementNode(node) ? !node.isInline() : isDecoratorNode(node) && !node.isInline()) {
+          paragraph = null;
+          root.append(node);
+        } else {
+          if (!paragraph) {
+            paragraph = createParagraphNode();
+            root.append(paragraph);
+          }
+
+          paragraph.append(node);
+        }
+      });
+
+      // Like the Markdown import, there should be at least one paragraph
+      // @see https://github.com/facebook/lexical/issues/2308
+      if (root.isEmpty()) {
+        root.append(createParagraphNode());
+      }
+
+      if (getSelection() !== null) {
+        root.selectStart();
+      }
+    },
+    /**
+     * Export the content as HTML.
+     * @returns {string} HTML.
+     */
+    $export: () => exportHtml(editor),
+    formatName: 'HTML',
+  });
 };
 
 /**

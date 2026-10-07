@@ -20,15 +20,25 @@
 
   /**
    * @import { Snippet } from 'svelte';
-   * @import { TextEditorComponent, TextEditorMode, TextEditorNodeType } from '#lib/typedefs.js';
+   * @import {
+   * TextEditorComponent,
+   * TextEditorMode,
+   * TextEditorNodeType,
+   * TextEditorValueFormat,
+   * } from '#lib/typedefs.js';
    * @import { HighlightedToken } from '#lib/typedefs.js';
    */
 
   /**
    * @typedef {object} Props
-   * @property {string} [value] Input value. A value set from outside is kept as is until the user
-   * changes the content, although the rich text editor writes Markdown in its own style, such as
-   * `_text_` for `*text*`.
+   * @property {string} [value] Input value in the {@link format}. A value set from outside
+   * is kept as is until the user changes the content, although the rich text editor writes Markdown
+   * or HTML in its own style, such as `_text_` for `*text*` or `<strong>` for `<b>`.
+   * @property {TextEditorValueFormat} [format] Format of the {@link value}: `markdown` or `html`.
+   * With `html`, the plain text mode shows the HTML source, and editor components have to
+   * implement `importDOM` and `exportDOM` for their nodes. HTML with an element the editor cannot
+   * handle, like `<img>`, can only be edited in the plain text mode. Attributes not used by the
+   * editor, like `class`, are dropped once the content is changed in the rich text mode.
    * @property {boolean} [pending] Whether the user has changed the rich text content, and the
    * editor has yet to update {@link value}, which it does a moment later. Bind it to wait for the
    * change before reading the value, for example to save it. Read-only.
@@ -67,6 +77,7 @@
     /* eslint-disable prefer-const */
     value = $bindable(''),
     pending = $bindable(false),
+    format = 'markdown',
     flex = false,
     dir = undefined,
     modes = ['rich-text', 'plain-text'],
@@ -110,13 +121,19 @@
     components,
     useMarkdownShortcuts,
     useEmojiAutocomplete,
+    format,
   };
 
   setContext('editorStore', editorStore);
 
+  /** Language of the source shown in the plain text mode. */
+  // svelte-ignore state_referenced_locally
+  const sourceLanguage = format === 'html' ? 'html' : 'markdown';
+
   /**
-   * Maximum length of the Markdown source to highlight in the plain text mode. The whole source is
-   * tokenized on every keystroke, so highlighting a longer one would make typing sluggish.
+   * Maximum length of the Markdown or HTML source to highlight in the plain text mode. The whole
+   * source is tokenized on every keystroke, so highlighting a longer one would make typing
+   * sluggish.
    */
   const MAX_HIGHLIGHT_LENGTH = 20_000;
 
@@ -127,11 +144,16 @@
 
   const usePlainText = $derived(!editorStore.useRichText && !hidden);
   /**
-   * Comma-separated languages used in the fenced code blocks, which are highlighted as well. It’s a
-   * string rather than an array, so the highlighter isn’t reloaded on every keystroke.
+   * Comma-separated languages used in the fenced code blocks of the Markdown source, which are
+   * highlighted as well. It’s a string rather than an array, so the highlighter isn’t reloaded on
+   * every keystroke.
    */
   const codeLanguages = $derived.by(() => {
-    if (!usePlainText || editorStore.inputValue.length > MAX_HIGHLIGHT_LENGTH) {
+    if (
+      !usePlainText ||
+      sourceLanguage !== 'markdown' ||
+      editorStore.inputValue.length > MAX_HIGHLIGHT_LENGTH
+    ) {
       return '';
     }
 
@@ -145,12 +167,12 @@
   });
 
   /**
-   * Highlight the Markdown source in the plain text mode.
-   * @param {string} source Markdown source.
+   * Highlight the Markdown or HTML source in the plain text mode.
+   * @param {string} source Markdown or HTML source.
    * @returns {HighlightedToken[][] | undefined} Tokens, or `undefined` while the highlighter is
    * still loading.
    */
-  const highlightMarkdown = (source) => {
+  const highlightSource = (source) => {
     void highlighterLoadCount;
 
     // Don’t waste time on tokenizing the source while the rich text mode is shown
@@ -158,7 +180,7 @@
       return undefined;
     }
 
-    return highlightCodeToTokens(source, 'markdown', { theme: codeTheme });
+    return highlightCodeToTokens(source, sourceLanguage, { theme: codeTheme });
   };
 
   $effect(() =>
@@ -167,7 +189,7 @@
 
       // Keep the current highlighting until the new theme is ready, so the text doesn’t flash
       if (usePlainText) {
-        await loadCodeHighlighter('markdown');
+        await loadCodeHighlighter(sourceLanguage);
       }
 
       // Ignore an outdated change, in case the appearance has changed again while loading
@@ -188,9 +210,9 @@
     void codeTheme;
 
     untrack(() => {
-      // The Markdown grammar is loaded first, because the engine has to be in place before
+      // The Markdown or HTML grammar is loaded first, because the engine has to be in place before
       // anything else can be loaded
-      loadCodeHighlighter('markdown').then(async () => {
+      loadCodeHighlighter(sourceLanguage).then(async () => {
         highlighterLoadCount += 1;
         await Promise.all(languages.map((lang) => loadCodeHighlighter(lang)));
         highlighterLoadCount += 1;
@@ -291,7 +313,7 @@
     autoResize={true}
     bind:value={editorStore.inputValue}
     {useEmojiAutocomplete}
-    highlight={highlightMarkdown}
+    highlight={highlightSource}
     {flex}
     {dir}
     hidden={editorStore.useRichText || hidden}

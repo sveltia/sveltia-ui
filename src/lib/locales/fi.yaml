@@ -128,6 +128,8 @@ text_editor:
   url: URL-osoite
   # Markdown mode toggle button aria-label
   edit_in_markdown: Muokkaa Markdown-muodossa
+  # HTML mode toggle button aria-label
+  edit_in_html: Muokkaa HTML-muodossa
   # Error message when rich text conversion fails
   converter_error: Rikastettua tekstimuotoa ei voi ottaa käyttöön. Käytä sen sijaan muotoilemattoman tekstin editoria.
   # Language selector aria-label

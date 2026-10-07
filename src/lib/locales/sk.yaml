@@ -128,6 +128,8 @@ text_editor:
   url: URL
   # Markdown mode toggle button aria-label
   edit_in_markdown: Upraviť v Markdowne
+  # HTML mode toggle button aria-label
+  edit_in_html: Upraviť v HTML
   # Error message when rich text conversion fails
   converter_error: Režim formátovaného textu nie je možné zapnúť. Použite namiesto neho editor obyčajného textu.
   # Language selector aria-label

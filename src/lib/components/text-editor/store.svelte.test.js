@@ -1,6 +1,7 @@
 /* eslint-disable jsdoc/require-jsdoc */
 
 import { describe, expect, it, vi } from 'vitest';
+import { initEditor } from './core.js';
 import { createEditorStore } from './store.svelte.js';
 
 describe('createEditorStore', () => {
@@ -155,10 +156,10 @@ describe('createEditorStore', () => {
     expect(store.inputValue).toBe('same');
   });
 
-  it('should expose convertMarkdown as a function', () => {
+  it('should expose convertToLexical as a function', () => {
     const store = createEditorStore();
 
-    expect(typeof store.convertMarkdown).toBe('function');
+    expect(typeof store.convertToLexical).toBe('function');
   });
 
   it('should allow getting and setting the editor (covers line 63)', () => {
@@ -198,11 +199,11 @@ describe('createEditorStore', () => {
     expect(store.enabledTransformers).toHaveLength(2);
   });
 
-  it('should call convertMarkdown (returns early) when inputValue changes with useRichText=true', async () => {
+  it('should call convertToLexical (returns early) when inputValue changes with useRichText=true', async () => {
     const store = createEditorStore();
 
-    // useRichText is true by default; no editor set → convertMarkdown returns early (line 40)
-    store.inputValue = 'hello'; // triggers line 89: convertMarkdown()
+    // useRichText is true by default; no editor set → convertToLexical returns early (line 40)
+    store.inputValue = 'hello'; // triggers line 89: convertToLexical()
     await new Promise((r) => {
       setTimeout(r, 0);
     });
@@ -219,7 +220,7 @@ describe('createEditorStore', () => {
 
     store.editor = mockEditor;
     store.initialized = true;
-    store.inputValue = 'some text'; // triggers convertMarkdown (line 89), which awaits the rejection
+    store.inputValue = 'some text'; // triggers convertToLexical (line 89), which awaits the rejection
     await new Promise((r) => {
       setTimeout(r, 0);
     });
@@ -228,6 +229,75 @@ describe('createEditorStore', () => {
     expect(store.useRichText).toBe(false);
     expect(store.showConverterError).toBe(true);
     consoleSpy.mockRestore();
+  });
+
+  it('should import HTML with the HTML format, keeping the value as given', async () => {
+    const store = createEditorStore();
+
+    store.config = {
+      ...store.config,
+      modes: ['rich-text'],
+      enabledButtons: ['bold'],
+      format: 'html',
+    };
+
+    const { editor, dispose } = initEditor(store.config);
+
+    editor.setRootElement(document.createElement('div'));
+    store.editor = editor;
+    store.initialized = true;
+    store.inputValue = '<p><b>bold</b></p>';
+    await vi.waitFor(() => expect(store.importing).toBe(false));
+    expect(store.hasConverterError).toBe(false);
+    expect(store.getImportedValue('<p><strong>bold</strong></p>')).toBe('<p><b>bold</b></p>');
+    dispose();
+  });
+
+  it('should set hasConverterError when the HTML has an element the editor cannot handle', async () => {
+    const store = createEditorStore();
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    store.config = {
+      ...store.config,
+      modes: ['rich-text'],
+      enabledButtons: ['bold'],
+      format: 'html',
+    };
+
+    const { editor, dispose } = initEditor(store.config);
+
+    editor.setRootElement(document.createElement('div'));
+    store.editor = editor;
+    store.initialized = true;
+    store.inputValue = '<p><img src="a.png"></p>';
+    await vi.waitFor(() => expect(store.hasConverterError).toBe(true));
+    // The original value is kept for the plain text mode
+    expect(store.inputValue).toBe('<p><img src="a.png"></p>');
+    expect(store.useRichText).toBe(false);
+    consoleSpy.mockRestore();
+    dispose();
+  });
+
+  it('should set hasConverterError when the HTML starts with an element moved to <head>', async () => {
+    const store = createEditorStore();
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    store.config = {
+      ...store.config,
+      modes: ['rich-text'],
+      enabledButtons: ['bold'],
+      format: 'html',
+    };
+
+    const { editor, dispose } = initEditor(store.config);
+
+    editor.setRootElement(document.createElement('div'));
+    store.editor = editor;
+    store.initialized = true;
+    store.inputValue = '<script src="embed.js"></script><p>Text</p>';
+    await vi.waitFor(() => expect(store.hasConverterError).toBe(true));
+    consoleSpy.mockRestore();
+    dispose();
   });
 
   it('should pass empty string fallback to convertMarkdownToLexical when inputValue is empty (branch 2)', async () => {
@@ -278,10 +348,10 @@ describe('createEditorStore', () => {
     expect(store.pending).toBe(true);
   });
 
-  it('should trigger convertMarkdown when isEmpty() is true even though value is unchanged (branch 6)', async () => {
+  it('should trigger convertToLexical when isEmpty() is true even though value is unchanged (branch 6)', async () => {
     const store = createEditorStore();
     const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-    // isEmpty() returns true → triggers convertMarkdown even when hasChange = false
+    // isEmpty() returns true → triggers convertToLexical even when hasChange = false
     const mockEditor = /** @type {any} */ ({ getEditorState: () => ({ isEmpty: () => true }) });
 
     store.editor = mockEditor;

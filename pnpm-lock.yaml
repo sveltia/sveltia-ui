@@ -24,6 +24,9 @@ importers:
       '@lexical/history':
         specifier: ^0.52.0
         version: 0.52.0(typescript@6.0.3)
+      '@lexical/html':
+        specifier: ^0.52.0
+        version: 0.52.0(typescript@6.0.3)
       '@lexical/link':
         specifier: ^0.52.0
         version: 0.52.0(typescript@6.0.3)
