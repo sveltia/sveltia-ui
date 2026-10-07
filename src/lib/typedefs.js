@@ -318,7 +318,11 @@
  * @property {string} [icon] Material Symbols icon name.
  * @property {'menuitem' | 'button'} [trigger] Trigger UI of the component. Default: `menuitem`. A
  * menu item is placed under the Insert menu, while a button is placed directly on the toolbar.
- * @property {LexicalNode} node Lexical node class implementation.
+ * @property {LexicalNode} node Lexical node class implementation. To support the HTML format, the
+ * class implements `importDOM` and `exportDOM`. An element the class imports is taken as a whole,
+ * and the editor doesn’t check its children for elements it cannot import. So the conversion should
+ * drop the children with `after: () => []`, and take priority over the editor’s own conversions
+ * for the same element type, like a link, with a `priority` of 4 or higher.
  * @property {(props?: Record<string, any>) => LexicalNode} createNode Function to create a new node
  * instance.
  * @property {Transformer} transformer Node transformer.

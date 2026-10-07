@@ -7,8 +7,11 @@ import { HeadingNode, QuoteNode } from '@lexical/rich-text';
 import { TableCellNode, TableNode } from '@lexical/table';
 import {
   $createTextNode as createTextNode,
+  $getEditor as getEditor,
   $isParagraphNode as isParagraphNode,
+  isDOMTextNode,
   isHTMLElement,
+  isInlineDomNode,
   ParagraphNode,
   TabNode,
   TextNode,
@@ -26,6 +29,7 @@ import { isPlainLanguage } from './shiki/facade.js';
  * LexicalEditor,
  * LexicalNode,
  * } from 'lexical';
+ * @import { TextEditorComponent } from '../../typedefs.js';
  */
 
 /**
@@ -346,10 +350,244 @@ const convertPreElement = (pre) => {
 };
 
 /**
+ * Editor components of each editor, used to tell the elements they import, which come with their
+ * content, when HTML is imported.
+ * @type {WeakMap<LexicalEditor, TextEditorComponent[]>}
+ */
+export const editorComponents = new WeakMap();
+
+/**
+ * Conversion maps of the editor component nodes, cached as each `importDOM()` call can create a new
+ * map.
+ * @type {WeakMap<any, DOMConversionMap>}
+ */
+const componentConversionMaps = new WeakMap();
+
+/**
+ * Get the conversion map of the given editor component node.
+ * @param {any} node Lexical node class.
+ * @returns {DOMConversionMap} Conversion map.
+ */
+const getComponentConversionMap = (node) => {
+  let map = componentConversionMaps.get(node);
+
+  if (!map) {
+    map = node.importDOM?.() ?? {};
+    componentConversionMaps.set(node, /** @type {DOMConversionMap} */ (map));
+  }
+
+  return /** @type {DOMConversionMap} */ (map);
+};
+
+/**
+ * Editor component that imports each element, or `null` if none does, cached as the same element is
+ * checked many times during an import, and a conversion can run developer code. An element is only
+ * imported to one editor, as each import parses the HTML anew.
+ * @type {WeakMap<Element, TextEditorComponent | null>}
+ */
+const elementComponents = new WeakMap();
+
+/**
+ * Get the editor component that imports the given element, if any. The element’s content is then
+ * part of the component.
+ * @param {LexicalEditor} editor Editor instance.
+ * @param {Element} element Element.
+ * @returns {TextEditorComponent | undefined} Component.
+ */
+const getElementComponent = (editor, element) => {
+  let component = elementComponents.get(element);
+
+  if (component === undefined) {
+    component =
+      editorComponents
+        .get(editor)
+        ?.find(
+          ({ node }) =>
+            !!getComponentConversionMap(node)[element.localName]?.(
+              /** @type {HTMLElement} */ (element),
+            ),
+        ) ?? null;
+    elementComponents.set(element, component);
+  }
+
+  return component ?? undefined;
+};
+
+/**
+ * Check if the given element is imported by an inline editor component, like an image, which is
+ * content in the line just like text.
+ * @param {Element} element Element.
+ * @returns {boolean} Result.
+ */
+const isInlineComponentElement = (element) => {
+  const component = getElementComponent(getEditor(), element);
+
+  // The `node` is actually a node class
+  return !!component && !!(/** @type {any} */ (component.node).prototype.isInline?.());
+};
+
+/**
+ * Find the text or the inline editor component element next to the given text in the same line,
+ * like Lexical’s own `findTextInLine()` does for text only. Without the component, Lexical takes an
+ * element like an image for the end of the line, or skips it, and drops the space between it and
+ * the text, e.g. `a <img> b` becomes `a<img>b`.
+ * @param {Node} text Text node.
+ * @param {boolean} forward Whether to search forward.
+ * @returns {Text | Element | null} Text or element, or `null` if the line ends.
+ */
+const findContentInLine = (text, forward) => {
+  let node = text;
+
+  for (;;) {
+    let sibling = forward ? node.nextSibling : node.previousSibling;
+
+    while (!sibling) {
+      const { parentElement } = node;
+
+      if (!parentElement) {
+        return null;
+      }
+
+      node = parentElement;
+      sibling = forward ? node.nextSibling : node.previousSibling;
+    }
+
+    node = sibling;
+
+    if (isHTMLElement(node)) {
+      if (isInlineComponentElement(node)) {
+        return node;
+      }
+
+      const { display } = node.style;
+
+      if (display ? !display.startsWith('inline') : !isInlineDomNode(node)) {
+        return null;
+      }
+    }
+
+    let descendant = forward ? node.firstChild : node.lastChild;
+
+    while (descendant) {
+      node = descendant;
+
+      if (isHTMLElement(node) && isInlineComponentElement(node)) {
+        return node;
+      }
+
+      descendant = forward ? node.firstChild : node.lastChild;
+    }
+
+    if (isDOMTextNode(node)) {
+      return node;
+    }
+
+    if (node.nodeName === 'BR') {
+      return null;
+    }
+  }
+};
+
+/**
+ * Check if the given node is within a `<pre>` element or an element with preformatted whitespace,
+ * whose text is imported by Lexical’s own conversion as is.
+ * @param {Node} node Node.
+ * @returns {boolean} Result.
+ */
+const isPreformatted = (node) => {
+  for (let element = node.parentElement; element; element = element.parentElement) {
+    if (element.localName === 'pre' || element.style.whiteSpace.startsWith('pre')) {
+      return true;
+    }
+  }
+
+  return false;
+};
+
+/**
+ * Convert a text node, collapsing whitespace like Lexical’s own conversion does, except that an
+ * inline editor component element counts as content. See {@link findContentInLine}.
+ * @param {Text} domNode Text node.
+ * @returns {DOMConversionOutput} Conversion output.
+ */
+const convertTextNode = (domNode) => {
+  let textContent = domNode.data.replace(/\r/g, '').replace(/[ \t\n]+/g, ' ');
+
+  if (textContent.startsWith(' ')) {
+    let previous = findContentInLine(domNode, false);
+    // Drop the space at the start of a line, or after another space
+    let drop = true;
+
+    for (; previous; previous = findContentInLine(previous, false)) {
+      if (!isDOMTextNode(previous)) {
+        drop = false;
+        break;
+      }
+
+      const previousText = previous.data;
+
+      // Skip empty text
+      if (previousText) {
+        drop = /[ \t\n]$/.test(previousText);
+        break;
+      }
+    }
+
+    if (drop) {
+      textContent = textContent.slice(1);
+    }
+  }
+
+  if (textContent.endsWith(' ')) {
+    let next = findContentInLine(domNode, true);
+    let isEndOfLine = true;
+
+    // Skip any text that only has whitespace, which is dropped as well
+    for (; next; next = findContentInLine(next, true)) {
+      if (!isDOMTextNode(next) || next.data.replace(/^[ \t\n]+/, '')) {
+        isEndOfLine = false;
+        break;
+      }
+    }
+
+    if (isEndOfLine) {
+      textContent = textContent.slice(0, -1);
+    }
+  }
+
+  return { node: textContent ? createTextNode(textContent) : null };
+};
+
+/**
  * Additional DOM conversions to import HTML. They take priority over Lexical’s own conversions.
  * @type {DOMConversionMap}
  */
 export const HTML_IMPORT_MAP = {
+  /**
+   * Get the conversion for a text node, unless it’s preformatted, which Lexical’s own conversion
+   * handles.
+   * @param {Node} node Text node.
+   * @returns {DOMConversion | null} Conversion.
+   */
+  '#text': (node) =>
+    isPreformatted(node)
+      ? null
+      : {
+          /**
+           * Convert the text node.
+           * @param {Node} domNode Text node.
+           * @returns {DOMConversionOutput} Conversion output.
+           */
+          conversion: (domNode) => convertTextNode(/** @type {Text} */ (domNode)),
+          priority: 1,
+        },
+};
+
+/**
+ * Additional DOM conversions to import HTML with code blocks.
+ * @type {DOMConversionMap}
+ */
+export const HTML_CODE_IMPORT_MAP = {
   /**
    * Get the conversion for a `<pre>` element.
    * @returns {DOMConversion} Conversion.
@@ -358,29 +596,74 @@ export const HTML_IMPORT_MAP = {
 };
 
 /**
+ * Get the names of the elements only editor components import, which no other node handles.
+ * @param {LexicalEditor} editor Editor instance.
+ * @returns {Set<string>} Tag names.
+ */
+const getComponentOnlyTagNames = (editor) => {
+  const components = editorComponents.get(editor) ?? [];
+  // The `node` is actually a node class
+  const componentNodes = new Set(components.map(({ node }) => /** @type {any} */ (node)));
+
+  const otherTagNames = new Set(
+    [...editor._nodes.values()]
+      .filter(({ klass }) => !componentNodes.has(klass))
+      .flatMap(({ klass }) => Object.keys(klass.importDOM?.() ?? {})),
+  );
+
+  return new Set(
+    components
+      .flatMap(({ node }) => Object.keys(getComponentConversionMap(node)))
+      .filter((tagName) => !otherTagNames.has(tagName)),
+  );
+};
+
+/**
  * Get the first node in the given document that the editor cannot import, which would be silently
  * dropped, possibly along with its content:
  *
  * - An element none of the registered nodes, including the ones of editor components, handle. This
- * includes an element the parser moves to `<head>`, like a `<script>` at the beginning.
+ * includes an element the parser moves to `<head>`, like a `<script>` at the beginning, and an
+ * element only editor components handle, but none of them imports, like a `<figure>` that isn’t an
+ * instance of a component for `<figure class="photo">`, which would be unwrapped.
  * - A comment, like `<!-- more -->`.
  *
- * The elements within a `<pre>` element are ignored, as its content is imported as plain text.
+ * The content of an element an editor component imports is part of the component, which is
+ * expected to drop the children, and the elements within a `<pre>` element are imported as plain
+ * text, so they’re ignored.
  * @param {LexicalEditor} editor Editor instance.
  * @param {Document} dom Parsed document.
  * @returns {Element | Comment | undefined} Unsupported node.
  */
 export const findUnsupportedNode = (editor, dom) => {
-  const walker = dom.createTreeWalker(dom, NodeFilter.SHOW_ALL);
+  const componentOnlyTagNames = getComponentOnlyTagNames(editor);
 
-  for (let node = walker.nextNode(); node; node = walker.nextNode()) {
-    if (node.nodeType === Node.COMMENT_NODE) {
-      return /** @type {Comment} */ (node);
-    }
+  /**
+   * Find an unsupported node among the descendants of the given node.
+   * @param {Node} parent Parent node.
+   * @returns {Element | Comment | undefined} Unsupported node.
+   */
+  const findWithin = (parent) => {
+    /** @type {Element | Comment | undefined} */
+    let found;
 
-    if (node.nodeType === Node.ELEMENT_NODE) {
+    [...parent.childNodes].some((node) => {
+      if (node.nodeType === Node.COMMENT_NODE) {
+        found = /** @type {Comment} */ (node);
+
+        return true;
+      }
+
+      if (node.nodeType !== Node.ELEMENT_NODE) {
+        return false;
+      }
+
       const element = /** @type {Element} */ (node);
       const tagName = element.localName;
+
+      if (getElementComponent(editor, element)) {
+        return false;
+      }
 
       // `_htmlConversions` holds the conversions of all the registered nodes, along with the ones
       // in the `html.import` editor config. A conversion may still skip an element on purpose,
@@ -388,15 +671,27 @@ export const findUnsupportedNode = (editor, dom) => {
       if (
         !DOCUMENT_TAGS.includes(tagName) &&
         !PASSTHROUGH_TAGS.includes(tagName) &&
-        !element.parentElement?.closest('pre') &&
-        !editor._htmlConversions.has(tagName)
+        (!editor._htmlConversions.has(tagName) || componentOnlyTagNames.has(tagName))
       ) {
-        return element;
-      }
-    }
-  }
+        found = element;
 
-  return undefined;
+        return true;
+      }
+
+      found =
+        tagName === 'pre'
+          ? /** @type {Comment | undefined} */ (
+              dom.createTreeWalker(element, NodeFilter.SHOW_COMMENT).nextNode() ?? undefined
+            )
+          : findWithin(element);
+
+      return !!found;
+    });
+
+    return found;
+  };
+
+  return findWithin(dom);
 };
 
 /**

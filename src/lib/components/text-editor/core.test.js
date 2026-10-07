@@ -144,9 +144,11 @@ vi.mock('@lexical/html', () => ({
 }));
 
 vi.mock('./html.js', () => ({
+  editorComponents: new WeakMap(),
   exportHtml: vi.fn(() => '<p>converted</p>'),
   findUnsupportedNode: vi.fn(() => undefined),
   getCodeLanguage: vi.fn(() => undefined),
+  HTML_CODE_IMPORT_MAP: {},
   HTML_EXPORT_MAP: new Map(),
   HTML_IMPORT_MAP: {},
 }));

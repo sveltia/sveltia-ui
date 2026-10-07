@@ -1,4 +1,5 @@
 /* eslint-disable jsdoc/require-jsdoc */
+/* eslint-disable max-classes-per-file */
 
 import { $generateHtmlFromNodes as generateHtmlFromNodes } from '@lexical/html';
 import { $createLinkNode as createLinkNode, $isLinkNode as isLinkNode } from '@lexical/link';
@@ -78,6 +79,130 @@ const markdownToHtml = async (markdown) => {
  * @returns {Promise<string | undefined>} HTML.
  */
 const roundTrip = async (html, config) => convertHtmlToLexical(createEditor(config).editor, html);
+
+/**
+ * Create the Lexical node class of an editor component that imports the elements of the given type
+ * the given function accepts, and exports its element as is.
+ * @param {object} args Arguments.
+ * @param {string} args.type Node type.
+ * @param {string} args.tagName Name of the elements the component imports.
+ * @param {(element: HTMLElement) => boolean} args.accepts Whether the component imports an element.
+ * @param {boolean} args.inline Whether the component is inline.
+ * @returns {any} Node class.
+ */
+const createComponentNode = ({ type, tagName, accepts, inline }) => {
+  /**
+   * Node standing in for an editor component.
+   * @augments {DecoratorNode<null>}
+   */
+  class ComponentNode extends DecoratorNode {
+    /** @type {string} */
+    __html = '';
+
+    static getType() {
+      return type;
+    }
+
+    /**
+     * Clone the node.
+     * @param {ComponentNode} node Node.
+     * @returns {ComponentNode} Clone.
+     */
+    static clone(node) {
+      const clone = new ComponentNode(node.__key);
+
+      clone.__html = node.__html;
+
+      return clone;
+    }
+
+    static importJSON() {
+      return new ComponentNode();
+    }
+
+    static importDOM() {
+      return {
+        /**
+         * Get the conversion for an element.
+         * @param {HTMLElement} element Element.
+         * @returns {any} Conversion.
+         */
+        [tagName]: (element) =>
+          accepts(element)
+            ? {
+                conversion: () => {
+                  const node = new ComponentNode();
+
+                  node.__html = element.outerHTML;
+
+                  return { node, after: () => [] };
+                },
+                priority: 4,
+              }
+            : null,
+      };
+    }
+
+    createDOM() {
+      return document.createElement('span');
+    }
+
+    updateDOM() {
+      return false;
+    }
+
+    isInline() {
+      return inline;
+    }
+
+    decorate() {
+      return null;
+    }
+
+    exportDOM() {
+      const template = document.createElement('template');
+
+      template.innerHTML = this.__html;
+
+      return { element: template.content };
+    }
+  }
+
+  return ComponentNode;
+};
+
+/**
+ * Create an editor with a block figure component for `<figure class="photo">` and an inline image
+ * component for `<img>`.
+ * @returns {LexicalEditor} Editor.
+ */
+const createEditorWithComponents = () =>
+  createEditor({
+    components: /** @type {any[]} */ ([
+      {
+        id: 'figure',
+        label: 'Figure',
+        node: createComponentNode({
+          type: 'test-figure',
+          tagName: 'figure',
+          accepts: (element) => element.classList.contains('photo'),
+          inline: false,
+        }),
+        transformer: {},
+      },
+      {
+        id: 'image',
+        label: 'Image',
+        node: createComponentNode({
+          type: 'test-image',
+          tagName: 'img',
+          accepts: () => true,
+          inline: true,
+        }),
+        transformer: {},
+      },
+    ]),
+  }).editor;
 
 describe('exportHtml', () => {
   it('should export text formats with semantic elements only', async () => {
@@ -383,6 +508,62 @@ describe('convertHtmlToLexical', () => {
   });
 });
 
+describe('editor components in HTML', () => {
+  it('should import a component element along with its content', async () => {
+    const editor = createEditorWithComponents();
+    const html = '<figure class="photo"><img src="a.png"><figcaption>A</figcaption></figure>';
+
+    expect(await convertHtmlToLexical(editor, html)).toBe(html);
+  });
+
+  it.each([
+    '<p>a <img src="a.png"> b</p>',
+    '<p>a <a href="/x"><img src="a.png"></a> b</p>',
+    '<p>See <a href="/x">link <img src="a.png"></a></p>',
+    '<p><img src="a.png"> <img src="b.png"></p>',
+  ])('should keep the spaces around an inline component element in %s', async (html) => {
+    const editor = createEditorWithComponents();
+
+    expect(await convertHtmlToLexical(editor, html)).toBe(html);
+  });
+
+  it('should still collapse whitespace like Lexical', async () => {
+    const editor = createEditorWithComponents();
+
+    expect(
+      await convertHtmlToLexical(
+        editor,
+        '<p>\n  a  <b>b</b>\n c <img src="a.png">\n</p>\n<p> d </p>',
+      ),
+    ).toBe('<p>a <strong>b</strong> c <img src="a.png"></p><p>d</p>');
+  });
+
+  it('should collapse whitespace around inline and block styled elements and line breaks', async () => {
+    const editor = createEditorWithComponents();
+
+    expect(
+      await convertHtmlToLexical(
+        editor,
+        '<p>a <span style="display: inline-block">b</span> c <br> d <img src="a.png"></p>',
+      ),
+    ).toBe('<p>a b c<br>d <img src="a.png"></p>');
+    expect(
+      await convertHtmlToLexical(editor, '<p>a <span style="display: block">b</span> c</p>'),
+    ).toBe('<p>abc</p>');
+  });
+
+  it('should drop the spaces around a block component element', async () => {
+    const editor = createEditorWithComponents();
+
+    expect(
+      await convertHtmlToLexical(
+        editor,
+        '<p>a </p> <figure class="photo"><img src="a.png"></figure> <p> b</p>',
+      ),
+    ).toBe('<p>a</p><figure class="photo"><img src="a.png"></figure><p>b</p>');
+  });
+});
+
 describe('unsafe link URLs', () => {
   // eslint-disable-next-line no-script-url -- Testing that it’s rejected
   const SCRIPT_URL = 'javascript:alert(1)';
@@ -488,6 +669,45 @@ describe('findUnsupportedNode', () => {
         parse('<p>a<br><b>b</b></p><table><thead><tr><th>h</th></tr></thead></table>'),
       ),
     ).toBeUndefined();
+  });
+
+  it('should ignore the content of an element an editor component imports', () => {
+    const editor = createEditorWithComponents();
+
+    expect(
+      findUnsupportedNode(
+        editor,
+        parse('<figure class="photo"><img src="a.png"><figcaption>A</figcaption></figure>'),
+      ),
+    ).toBeUndefined();
+  });
+
+  it('should return an element only editor components handle, which none of them imports', () => {
+    const editor = createEditorWithComponents();
+
+    expect(findUnsupportedNode(editor, parse('<figure><img src="a.png"></figure>'))?.nodeName).toBe(
+      'FIGURE',
+    );
+  });
+
+  it('should not return an element another node handles, which no editor component imports', () => {
+    const { editor } = createEditor({
+      components: /** @type {any[]} */ ([
+        {
+          id: 'linked-image',
+          label: 'Linked Image',
+          node: createComponentNode({
+            type: 'test-linked-image',
+            tagName: 'a',
+            accepts: (element) => !!element.querySelector('img'),
+            inline: true,
+          }),
+          transformer: {},
+        },
+      ]),
+    });
+
+    expect(findUnsupportedNode(editor, parse('<p><a href="/x">link</a></p>'))).toBeUndefined();
   });
 
   it('should ignore the content of a `<pre>` element', () => {

@@ -79,9 +79,11 @@ import {
   TRANSFORMER_MAP,
 } from './constants.js';
 import {
+  editorComponents,
   exportHtml,
   findUnsupportedNode,
   getCodeLanguage,
+  HTML_CODE_IMPORT_MAP,
   HTML_EXPORT_MAP,
   HTML_IMPORT_MAP,
 } from './html.js';
@@ -922,7 +924,10 @@ export const initEditor = ({
     // code blocks with their language. The export map also applies to copying
     html:
       format === 'html'
-        ? { export: HTML_EXPORT_MAP, import: hasCodeBlock ? HTML_IMPORT_MAP : {} }
+        ? {
+            export: HTML_EXPORT_MAP,
+            import: { ...HTML_IMPORT_MAP, ...(hasCodeBlock ? HTML_CODE_IMPORT_MAP : {}) },
+          }
         : undefined,
     /**
      * Log an error like `createEditor` does by default, instead of throwing it.
@@ -949,6 +954,9 @@ export const initEditor = ({
   ];
 
   const editor = buildEditorFromExtensions(editorExtension);
+
+  // Let the HTML import tell the elements the components import
+  editorComponents.set(editor, components);
 
   // The order matters, as listeners with the same priority are called in the registration order
   const unregister = mergeUnregisters(
