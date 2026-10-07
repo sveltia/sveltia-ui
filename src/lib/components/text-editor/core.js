@@ -12,6 +12,7 @@ import { createEmptyHistoryState, registerHistory } from '@lexical/history';
 import { $generateNodesFromDOM as generateNodesFromDOM } from '@lexical/html';
 import {
   $isLinkNode as isLinkNode,
+  LinkNode,
   TOGGLE_LINK_COMMAND,
   $toggleLink as toggleLink,
 } from '@lexical/link';
@@ -36,7 +37,11 @@ import {
   registerRichText,
 } from '@lexical/rich-text';
 import { TableCellNode, TableNode, TableRowNode } from '@lexical/table';
-import { $getNearestNodeOfType as getNearestNodeOfType, objectKlassEquals } from '@lexical/utils';
+import {
+  $getNearestNodeOfType as getNearestNodeOfType,
+  objectKlassEquals,
+  $unwrapNode as unwrapNode,
+} from '@lexical/utils';
 import { sleep } from '@sveltia/utils/misc';
 import { isURL } from '@sveltia/utils/string';
 import {
@@ -657,13 +662,22 @@ const registerCodeEditorCommands = (editor, defaultLanguage) =>
   );
 
 /**
- * Register the link command, and the paste handler that turns a pasted URL into a link.
+ * Register the link command, the paste handler that turns a pasted URL into a link, and the
+ * transform that removes a link with an unsafe URL.
  * @param {LexicalEditor} editor Editor instance.
  * @returns {() => void} Cleanup handler.
  * @see https://github.com/facebook/lexical/blob/main/packages/lexical-link/src/LexicalLinkExtension.ts
  */
 const registerLinkCommands = (editor) =>
   mergeUnregisters(
+    // A link can also be created by importing the value or pasting rich text, which bypass the
+    // command below. Unwrap a link with an unsafe URL, keeping its text, so the URL never reaches
+    // the Markdown or HTML value
+    editor.registerNodeTransform(LinkNode, (node) => {
+      if (!isSafeLinkURL(node.getURL())) {
+        unwrapNode(node);
+      }
+    }),
     editor.registerCommand(
       TOGGLE_LINK_COMMAND,
       (payload) => {

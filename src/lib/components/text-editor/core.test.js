@@ -228,6 +228,7 @@ vi.mock('@lexical/utils', () => ({
     return node;
   }),
   objectKlassEquals: vi.fn((obj, klass) => obj instanceof klass),
+  $unwrapNode: vi.fn(),
 }));
 
 const selectionState = vi.hoisted(() => /** @type {{ value: any }} */ ({ value: null }));
@@ -455,7 +456,8 @@ describe('text editor core', () => {
 
     expect(editor).toBe(editorState);
     expect(editorState._commands).toHaveLength(7);
-    expect(editorState._transforms).toHaveLength(1);
+    // The root transform for the code editor, and the link transform
+    expect(editorState._transforms).toHaveLength(2);
     expect(editorState._updateListeners).toHaveLength(1);
     expect(editorState._rootListeners).toHaveLength(1);
 

@@ -1,6 +1,7 @@
 /* eslint-disable jsdoc/require-jsdoc */
 
 import { $generateHtmlFromNodes as generateHtmlFromNodes } from '@lexical/html';
+import { $createLinkNode as createLinkNode, $isLinkNode as isLinkNode } from '@lexical/link';
 import {
   $createTableCellNode as createTableCellNode,
   $createTableNode as createTableNode,
@@ -22,7 +23,8 @@ import { convertHtmlToLexical, convertMarkdownToLexical, initEditor } from './co
 import { exportHtml, findUnsupportedNode } from './html.js';
 
 /**
- * @import { LexicalEditor, TextNode } from 'lexical';
+ * @import { ElementNode, LexicalEditor, TextNode } from 'lexical';
+ * @import { LinkNode } from '@lexical/link';
  * @import { Transformer } from '@lexical/markdown';
  * @import { TextEditorConfig } from '#lib/typedefs.js';
  */
@@ -378,6 +380,62 @@ describe('convertHtmlToLexical', () => {
     await expect(roundTrip('<h2>Heading</h2>', { enabledButtons: ['bold'] })).rejects.toThrow(
       'Failed to convert HTML',
     );
+  });
+});
+
+describe('unsafe link URLs', () => {
+  // eslint-disable-next-line no-script-url -- Testing that it’s rejected
+  const SCRIPT_URL = 'javascript:alert(1)';
+
+  it('should remove a link with an unsafe URL from imported Markdown, keeping the text', async () => {
+    const { editor, enabledTransformers } = createEditor({ format: 'markdown' });
+
+    expect(
+      await convertMarkdownToLexical(
+        editor,
+        '[safe](https://example.com) [unsafe](javascript:alert(1))',
+        enabledTransformers,
+      ),
+    ).toBe('[safe](https://example.com) unsafe');
+  });
+
+  it('should remove a link with an unsafe URL from imported HTML, keeping the text', async () => {
+    expect(
+      await roundTrip(
+        '<p><a href="/page">safe</a> <a href="javascript:alert(1)">unsafe</a> ' +
+          '<a href="data:text/html,x"><strong>data</strong></a></p>',
+      ),
+    ).toBe('<p><a href="/page">safe</a> unsafe <strong>data</strong></p>');
+  });
+
+  it('should remove a link whose URL is changed to an unsafe one', () => {
+    const { editor } = createEditor({ format: 'markdown' });
+
+    editor.update(
+      () => {
+        getRoot().append(
+          createParagraphNode().append(
+            createLinkNode('https://example.com').append(createTextNode('a')),
+          ),
+        );
+      },
+      { discrete: true },
+    );
+    editor.update(
+      () => {
+        /** @type {LinkNode} */ (
+          /** @type {ElementNode} */ (getRoot().getFirstChildOrThrow()).getFirstChild()
+        ).setURL(SCRIPT_URL);
+      },
+      { discrete: true },
+    );
+
+    expect(editor.read(() => getRoot().getTextContent())).toBe('a');
+    expect(
+      editor.read(() =>
+        isLinkNode(/** @type {ElementNode} */ (getRoot().getFirstChildOrThrow()).getFirstChild()),
+      ),
+    ).toBe(false);
   });
 });
 
