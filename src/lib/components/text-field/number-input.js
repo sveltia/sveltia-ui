@@ -18,6 +18,62 @@ export const getMaximumFractionDigits = (step) => {
 };
 
 /**
+ * Decimal separators of the locales looked up, keyed by locale. The separator is read on every
+ * keystroke, while creating an `Intl.NumberFormat` is comparatively expensive.
+ * @type {Map<string, string>}
+ */
+const decimalSeparatorCache = new Map();
+
+/**
+ * Get the decimal separator of the given locale, like `,` in German.
+ * @param {string | undefined} locale Locale, like `de`. If omitted, the browser’s default locale is
+ * used.
+ * @returns {string} Decimal separator. `.` if the locale is invalid.
+ */
+export const getDecimalSeparator = (locale) => {
+  const key = locale || '';
+  let separator = decimalSeparatorCache.get(key);
+
+  if (separator === undefined) {
+    try {
+      separator = /** @type {Intl.NumberFormatPart} */ (
+        new Intl.NumberFormat(locale || undefined)
+          .formatToParts(1.5)
+          .find(({ type }) => type === 'decimal')
+      ).value;
+    } catch {
+      separator = '.';
+    }
+
+    decimalSeparatorCache.set(key, separator);
+  }
+
+  return separator;
+};
+
+/**
+ * Normalize the text entered in the field, so a number typed with the locale’s decimal separator,
+ * like `1,5` in German, can be parsed as `1.5`. A period is always accepted as the decimal
+ * separator, as a value set from outside is shown with one, so the text is left as is if it has
+ * one, or more than one decimal separator of the locale. Thousands separators are not supported:
+ * `1,500` in English, whose decimal separator is a period, remains no number.
+ * @param {string} inputValue Text in the field.
+ * @param {string | undefined} locale Locale of the field.
+ * @returns {string} Normalized text.
+ */
+export const normalizeNumber = (inputValue, locale) => {
+  const separator = getDecimalSeparator(locale);
+
+  if (!inputValue || separator === '.' || inputValue.includes('.')) {
+    return inputValue;
+  }
+
+  const parts = inputValue.split(separator);
+
+  return parts.length === 2 ? parts.join('.') : inputValue;
+};
+
+/**
  * Parse the text entered in the field.
  * @param {string} inputValue Text in the field.
  * @returns {number | undefined} Number, or `undefined` if the field is empty or holds no number.

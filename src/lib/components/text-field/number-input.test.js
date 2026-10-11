@@ -1,9 +1,11 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import {
+  getDecimalSeparator,
   getMaximumFractionDigits,
   isAtMax,
   isAtMin,
   isInvalidNumber,
+  normalizeNumber,
   parseNumber,
   stepNumber,
 } from './number-input.js';
@@ -25,6 +27,52 @@ describe('getMaximumFractionDigits', () => {
     expect(getMaximumFractionDigits(1.5e-7)).toBe(8);
     expect(getMaximumFractionDigits(1e21)).toBe(0);
     expect(stepNumber('0', { step: 1e-7, direction: 1 })).toBe('0.0000001');
+  });
+});
+
+describe('getDecimalSeparator', () => {
+  it('should return the decimal separator of the locale', () => {
+    expect(getDecimalSeparator('en')).toBe('.');
+    expect(getDecimalSeparator('de')).toBe(',');
+    expect(getDecimalSeparator('fr-CA')).toBe(',');
+  });
+
+  it('should fall back to the default locale', () => {
+    expect(getDecimalSeparator(undefined)).toBe(getDecimalSeparator(navigator.language));
+    expect(getDecimalSeparator('')).toBe(getDecimalSeparator(navigator.language));
+  });
+
+  it('should look up the separator of a locale only once', () => {
+    const spy = vi.spyOn(Intl, 'NumberFormat');
+
+    getDecimalSeparator('pt-BR');
+    getDecimalSeparator('pt-BR');
+    expect(spy).toHaveBeenCalledOnce();
+    spy.mockRestore();
+  });
+
+  it('should return a period for an invalid locale', () => {
+    expect(getDecimalSeparator('not a locale')).toBe('.');
+  });
+});
+
+describe('normalizeNumber', () => {
+  it('should accept the decimal separator of the locale', () => {
+    expect(normalizeNumber('1,5', 'de')).toBe('1.5');
+    expect(normalizeNumber('-0,25', 'fr')).toBe('-0.25');
+    expect(parseNumber(normalizeNumber('1,5', 'de'))).toBe(1.5);
+  });
+
+  it('should not read a comma as a decimal separator where it’s not one', () => {
+    expect(normalizeNumber('1,5', 'en')).toBe('1,5');
+    expect(parseNumber(normalizeNumber('1,500', 'en'))).toBeUndefined();
+  });
+
+  it('should leave text with a period or several decimal separators as is', () => {
+    expect(normalizeNumber('1.5', 'de')).toBe('1.5');
+    expect(normalizeNumber('1.500,5', 'de')).toBe('1.500,5');
+    expect(normalizeNumber('1,2,3', 'de')).toBe('1,2,3');
+    expect(normalizeNumber('', 'de')).toBe('');
   });
 });
 

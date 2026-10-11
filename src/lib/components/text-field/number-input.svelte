@@ -5,7 +5,7 @@
   @see https://w3c.github.io/aria/#textbox
 -->
 <script>
-  import { _ } from '@sveltia/i18n';
+  import { _, locale } from '@sveltia/i18n';
   import { untrack } from 'svelte';
   import Button from '../button/button.svelte';
   import Icon from '../icon/icon.svelte';
@@ -14,6 +14,7 @@
     isAtMax,
     isAtMin,
     isInvalidNumber,
+    normalizeNumber,
     parseNumber,
     stepNumber,
   } from './number-input.js';
@@ -67,8 +68,10 @@
   let inputValue = $state('');
 
   const maximumFractionDigits = $derived(getMaximumFractionDigits(step));
-  const isMin = $derived(isAtMin(inputValue, min));
-  const isMax = $derived(isAtMax(inputValue, max));
+  // Accept the decimal separator of the field’s language, or that of the UI, like `,` in German
+  const numberValue = $derived(normalizeNumber(inputValue, restProps.lang ?? locale.current));
+  const isMin = $derived(isAtMin(numberValue, min));
+  const isMax = $derived(isAtMax(numberValue, max));
 
   $effect(() => {
     const newValue = value;
@@ -76,19 +79,19 @@
     // Only overwrite the field when it doesn’t already hold the value, so text that is still being
     // typed, like `1.` or `-`, isn’t wiped out when it parses to the same number or no number
     untrack(() => {
-      if (parseNumber(inputValue) !== newValue) {
+      if (parseNumber(numberValue) !== newValue) {
         inputValue = String(newValue ?? '');
       }
     });
   });
 
   $effect(() => {
-    value = parseNumber(inputValue);
+    value = parseNumber(numberValue);
   });
 
   $effect(() => {
     if (edited) {
-      invalid = isInvalidNumber(inputValue, { required, min, max });
+      invalid = isInvalidNumber(numberValue, { required, min, max });
     }
   });
 
@@ -97,7 +100,7 @@
    * @param {1 | -1} direction `1` to increase, `-1` to decrease.
    */
   const stepValue = (direction) => {
-    const newInputValue = stepNumber(inputValue, { step, direction, min, max });
+    const newInputValue = stepNumber(numberValue, { step, direction, min, max });
 
     if (newInputValue !== undefined) {
       inputValue = newInputValue;
@@ -130,7 +133,7 @@
   <div role="none" class="buttons">
     <Button
       iconic
-      disabled={disabled || readonly || Number.isNaN(Number(inputValue)) || isMax}
+      disabled={disabled || readonly || Number.isNaN(Number(numberValue)) || isMax}
       aria-label={_('_sui.number_input.increase')}
       aria-controls={id}
       onclick={() => {
@@ -147,7 +150,7 @@
     </Button>
     <Button
       iconic
-      disabled={disabled || readonly || Number.isNaN(Number(inputValue)) || isMin}
+      disabled={disabled || readonly || Number.isNaN(Number(numberValue)) || isMin}
       aria-label={_('_sui.number_input.decrease')}
       aria-controls={id}
       onclick={() => {

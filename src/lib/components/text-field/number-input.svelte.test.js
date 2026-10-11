@@ -95,6 +95,25 @@ describe('NumberInput', () => {
     await expect.element(input).toHaveValue('abc');
   });
 
+  it('accepts the decimal separator of the field’s language', async () => {
+    /** @type {ComponentProps<typeof NumberInput>} */
+    const props = $state({ value: undefined, lang: 'de', step: 0.5 });
+    const screen = await render(NumberInput, props);
+    const input = screen.getByRole('spinbutton');
+
+    await input.fill('1,5');
+    expect(props.value).toBe(1.5);
+    await expect.element(input).not.toHaveAttribute('aria-invalid', 'true');
+    // The field can be stepped from there
+    await screen.getByRole('button', { name: 'Increase' }).click();
+    await expect.element(input).toHaveValue('2.0');
+    expect(props.value).toBe(2);
+    // A comma is not a decimal separator in English
+    props.lang = 'en';
+    await input.fill('1,5');
+    expect(props.value).toBeUndefined();
+  });
+
   it('keeps text that is still being typed', async () => {
     /** @type {ComponentProps<typeof NumberInput>} */
     const props = $state({ value: 1.5 });
