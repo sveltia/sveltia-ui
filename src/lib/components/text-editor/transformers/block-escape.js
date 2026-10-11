@@ -21,16 +21,103 @@ export const escapeBlockSyntax = (text) =>
     .replace(/^( {0,3}\d{1,9})([.)])(?=[ \t]|$)/, '$1\\$2');
 
 /**
- * Export-only transformer that escapes the Markdown block syntax at the start of a block or of a
- * line after a line break. Without it, a paragraph typed as `## Hours` with the Markdown shortcuts
- * turned off, pasted as text, or imported from the escaped `\## Hours` would be exported as is and
- * become a heading the next time the Markdown is read.
+ * Check if the given character is a word character, which is neither whitespace nor punctuation
+ * (or a symbol). An underscore next to one on both sides can’t open or close emphasis.
+ * @param {string | undefined} char Character.
+ * @returns {boolean} Result.
+ * @see https://spec.commonmark.org/0.31.2/#left-flanking-delimiter-run
+ */
+const isWordChar = (char) => !!char && /[^\s\p{P}\p{S}]/u.test(char);
+
+/**
+ * Remove the backslashes Lexical adds before underscores and backslashes in text, where they’re not
+ * needed, so `snake_case` and `C:\Users` aren’t exported as `snake\_case` and `C:\\Users`. Unlike
+ * a global replacement, the escapes that are needed are kept: an underscore that could open or
+ * close emphasis, like that in `\_not italic\_`, and a backslash that would otherwise escape the
+ * next character or make a hard line break. Also replace the encoded spaces Lexical outputs around
+ * formatted text, which can appear with a combination of bold and italic text.
+ * @param {string} markdown Markdown exported from a text node with its format, in which every
+ * backslash starts an escape.
+ * @returns {string} Tidied Markdown.
+ * @see https://github.com/sveltia/sveltia-cms/issues/430
+ * @see https://github.com/sveltia/sveltia-cms/issues/512
+ * @see https://github.com/sveltia/sveltia-cms/issues/511
+ * @see https://github.com/sveltia/sveltia-cms/issues/534
+ */
+export const unescapeText = (markdown) =>
+  markdown
+    .replace(/((?:\\_)+)|\\(.)/gs, (match, underscores, char, offset, string) => {
+      if (underscores) {
+        return isWordChar(string[offset - 1]) && isWordChar(string[offset + match.length])
+          ? underscores.replaceAll('\\', '')
+          : match;
+      }
+
+      if (char === '\\') {
+        const next = string[offset + 2];
+
+        // The backslash is literal unless it’s followed by ASCII punctuation, which it would
+        // escape, or a line break, which it would turn into a hard line break. The end of the node
+        // is kept escaped, as the next node may start with either
+        return next && !/[\n\r!-/:-@[-`{-~]/.test(next) ? char : match;
+      }
+
+      return match;
+    })
+    .replace(/&#32;/g, ' ');
+
+/**
+ * Check if the given text node is italic and the italic text it’s part of is next to a word
+ * character, like `b` in `a*b*c`. The italic text then needs the `*` delimiter instead of `_`,
+ * which can’t be used within a word.
+ * @param {TextNode} node Text node.
+ * @returns {boolean} Result.
+ */
+const isItalicWithinWord = (node) => {
+  if (!node.hasFormat('italic')) {
+    return false;
+  }
+
+  /**
+   * Check if the given node is italic text.
+   * @param {LexicalNode | null} sibling Node.
+   * @returns {sibling is TextNode} Result.
+   */
+  const isItalicText = (sibling) => isTextNode(sibling) && sibling.hasFormat('italic');
+  let first = node;
+  let last = node;
+
+  while (isItalicText(first.getPreviousSibling())) {
+    first = /** @type {TextNode} */ (first.getPreviousSibling());
+  }
+
+  while (isItalicText(last.getNextSibling())) {
+    last = /** @type {TextNode} */ (last.getNextSibling());
+  }
+
+  // Lexical puts the delimiters inside the leading and trailing whitespace, if any
+  const firstText = first.getTextContent();
+  const lastText = last.getTextContent();
+  const before = /^\s/.test(firstText) ? ' ' : first.getPreviousSibling()?.getTextContent().at(-1);
+  const after = /\s$/.test(lastText) ? ' ' : last.getNextSibling()?.getTextContent()[0];
+
+  return isWordChar(before) || isWordChar(after);
+};
+
+/**
+ * Export-only transformer that tidies up the Markdown of a text node that isn’t inline code, which
+ * Lexical exports verbatim. It removes the unnecessary escapes Lexical adds; see `unescapeText()`.
+ * It uses `*` instead of `_` for italic text within a word, like `a*b*c`, which would otherwise be
+ * exported as `a_b_c`, plain text. Last, it escapes the Markdown block syntax at the start of a
+ * block or of a line after a line break. Without it, a paragraph typed as `## Hours` with the
+ * Markdown shortcuts turned off, pasted as text, or imported from the escaped `\## Hours` would be
+ * exported as is and become a heading the next time the Markdown is read.
  * @type {TextMatchTransformer}
  */
 export const BLOCK_SYNTAX_ESCAPE = {
   dependencies: [],
   /**
-   * Export a text node at the start of a line, escaping the block syntax it starts with.
+   * Export a text node.
    * @param {LexicalNode} node Node.
    * @param {(node: ElementNode) => string} _exportChildren Function to export the children of an
    * element, unused.
@@ -39,25 +126,35 @@ export const BLOCK_SYNTAX_ESCAPE = {
    * @returns {string | null} Markdown, or `null` to leave the node to the other transformers.
    */
   export: (node, _exportChildren, exportFormat) => {
-    if (!isTextNode(node)) {
+    if (!isTextNode(node) || node.hasFormat('code')) {
       return null;
     }
+
+    let markdown = exportFormat(node, node.getTextContent());
+
+    if (isItalicWithinWord(node)) {
+      // Every underscore in the text is escaped, so an unescaped one is an italic delimiter
+      markdown = markdown.replace(/\\.|_/gs, (match) => (match === '_' ? '*' : match));
+    }
+
+    markdown = unescapeText(markdown);
 
     const parent = node.getParent();
     const previous = node.getPreviousSibling();
 
     // Text in a link or other inline element, in a code block, which is exported verbatim, or in a
-    // heading, whose content is only parsed for inline syntax
-    if (!parent || parent.isInline() || ['code', 'heading'].includes(parent.getType())) {
-      return null;
-    }
-
-    if (previous && !isLineBreakNode(previous)) {
-      return null;
+    // heading, whose content is only parsed for inline syntax, or text after the start of a line
+    if (
+      !parent ||
+      parent.isInline() ||
+      ['code', 'heading'].includes(parent.getType()) ||
+      (previous && !isLineBreakNode(previous))
+    ) {
+      return markdown;
     }
 
     // A formatted node starts with its own syntax, such as `**`, which is left as is
-    return escapeBlockSyntax(exportFormat(node, node.getTextContent()));
+    return escapeBlockSyntax(markdown);
   },
   // Never used to import Markdown or as a shortcut
   regExp: /(?!)/,

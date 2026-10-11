@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
+  convertSetextHeadings,
+  convertTildeFences,
   increaseListIndentation,
   padBlankBlockquoteLines,
   splitMultilineFormatting,
@@ -41,6 +43,21 @@ describe('splitMultilineFormatting', () => {
 
   it('should handle formatting at different indentation levels', () => {
     expect(splitMultilineFormatting('    _foo\nbar_    ')).toBe('    _foo_\n_bar_    ');
+  });
+
+  it('should leave formatting in fenced code blocks alone', () => {
+    const code = '```md\nSome _italic\ntext_ here\n```\n~~~py\nx = 2 **a\nb** 3\n~~~';
+
+    expect(splitMultilineFormatting(code)).toBe(code);
+    expect(splitMultilineFormatting(`a _b\nc_ d\n${code}\ne _f\ng_ h`)).toBe(
+      `a _b_\n_c_ d\n${code}\ne _f_\n_g_ h`,
+    );
+  });
+
+  it('should leave formatting in an unclosed fenced code block alone', () => {
+    expect(splitMultilineFormatting('a _b\nc_ d\n```\nx _y\nz_ w')).toBe(
+      'a _b_\n_c_ d\n```\nx _y\nz_ w',
+    );
   });
 
   it('should process a long run of whitespace in linear time', () => {
@@ -197,5 +214,90 @@ describe('trimBlankBlockquoteLines', () => {
 
   it('should not modify lines inside a fenced code block', () => {
     expect(trimBlankBlockquoteLines('> \n```\n> \n```\n> ')).toBe('>\n```\n> \n```\n>');
+  });
+});
+
+describe('convertTildeFences', () => {
+  it('should leave a value without tilde fences as is', () => {
+    expect(convertTildeFences('```js\ncode\n```\n\n~~strike~~')).toBe(
+      '```js\ncode\n```\n\n~~strike~~',
+    );
+  });
+
+  it('should convert tilde fences to backtick fences', () => {
+    expect(convertTildeFences('a\n\n~~~py\nprint(1)\n~~~\n\nb\n\n  ~~~~\n  x\n  ~~~~~')).toBe(
+      'a\n\n```py\nprint(1)\n```\n\nb\n\n  ```\n  x\n  ```',
+    );
+  });
+
+  it('should make the fence longer than the backtick fences in the code', () => {
+    expect(convertTildeFences('~~~md\n```js\ncode\n```\n  ````\n~~~')).toBe(
+      '`````md\n```js\ncode\n```\n  ````\n`````',
+    );
+  });
+
+  it('should convert the opening fence of an unclosed code block', () => {
+    expect(convertTildeFences('~~~\ncode\n~~')).toBe('```\ncode\n~~');
+  });
+
+  it('should leave a tilde fence within a backtick code block alone', () => {
+    expect(convertTildeFences('```\n~~~\ncode\n~~~\n```')).toBe('```\n~~~\ncode\n~~~\n```');
+  });
+
+  it('should not close a code block with a shorter or a different fence', () => {
+    expect(convertTildeFences('~~~~\n~~~\n```\n~~~~')).toBe('````\n~~~\n```\n````');
+  });
+});
+
+describe('convertSetextHeadings', () => {
+  it('should leave a value without underlines as is', () => {
+    expect(convertSetextHeadings('# Title\n\nText')).toBe('# Title\n\nText');
+  });
+
+  it('should convert a setext heading starting with inline HTML, but not after an HTML block', () => {
+    expect(convertSetextHeadings('<span>Title</span>\n=====')).toBe('# <span>Title</span>');
+    expect(convertSetextHeadings('Intro\n\n<div>\nx\n</div>\n---')).toBe(
+      'Intro\n\n<div>\nx\n</div>\n---',
+    );
+  });
+
+  it('should convert setext headings to ATX headings', () => {
+    expect(convertSetextHeadings('Title\n=====\n\nSub  \n---\n\nText')).toBe(
+      '# Title\n\n## Sub\n\nText',
+    );
+  });
+
+  it('should join the lines of a multiline heading', () => {
+    expect(convertSetextHeadings('Long\n title\n===')).toBe('# Long title');
+  });
+
+  it('should convert a heading after an ATX heading or a code block', () => {
+    expect(convertSetextHeadings('# A\nB\n---\n```\ncode\n```\nC\n===')).toBe(
+      '# A\n## B\n```\ncode\n```\n# C',
+    );
+  });
+
+  it('should leave a horizontal rule after a blank line or another block as is', () => {
+    expect(convertSetextHeadings('Text\n\n---\n\n- item\n---\n\n> quote\n---\n\n===')).toBe(
+      'Text\n\n---\n\n- item\n---\n\n> quote\n---\n\n===',
+    );
+  });
+
+  it('should leave a paragraph after a block other than a heading as is', () => {
+    expect(convertSetextHeadings('- item\nlazy\n---\n\n| a |\nb\n===')).toBe(
+      '- item\nlazy\n---\n\n| a |\nb\n===',
+    );
+  });
+
+  it('should leave a block like front matter as is', () => {
+    expect(convertSetextHeadings('Text\n\n---\ntitle: x\n---\n\nMore')).toBe(
+      'Text\n\n---\ntitle: x\n---\n\nMore',
+    );
+  });
+
+  it('should leave the lines in a code block alone', () => {
+    expect(convertSetextHeadings('```\nTitle\n===\n```\n~~~\nSub\n---\n~~~')).toBe(
+      '```\nTitle\n===\n```\n~~~\nSub\n---\n~~~',
+    );
   });
 });

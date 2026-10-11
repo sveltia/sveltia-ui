@@ -16,7 +16,7 @@ import {
 } from 'lexical';
 import { describe, expect, it } from 'vitest';
 
-import { BLOCK_SYNTAX_ESCAPE, escapeBlockSyntax } from './block-escape.js';
+import { BLOCK_SYNTAX_ESCAPE, escapeBlockSyntax, unescapeText } from './block-escape.js';
 
 const transformers = [...TRANSFORMERS, BLOCK_SYNTAX_ESCAPE];
 
@@ -62,6 +62,43 @@ const exportParagraphs = (paragraphs) => {
   );
 
   return editor.read(() => convertToMarkdownString(transformers));
+};
+
+/**
+ * Fill an editor with a paragraph of text nodes and export it to Markdown.
+ * @param {[text: string, ...formats: import('lexical').TextFormatType[]][]} nodes Text and formats
+ * of each node.
+ * @returns {string} Markdown.
+ */
+const exportTextNodes = (nodes) => {
+  const editor = createTestEditor();
+
+  editor.update(
+    () => {
+      getRoot().append(
+        createParagraphNode().append(
+          ...nodes.map(([text, ...formats]) => {
+            const node = createTextNode(text);
+
+            formats.forEach((format) => node.toggleFormat(format));
+
+            return node;
+          }),
+        ),
+      );
+    },
+    { discrete: true },
+  );
+
+  // Like the editor, use `_` for italic text and `**` for bold text
+  return editor.read(() =>
+    convertToMarkdownString(
+      transformers.filter(
+        (transformer) =>
+          !('tag' in transformer) || !['*', '__', '***', '___'].includes(transformer.tag),
+      ),
+    ),
+  );
 };
 
 /**
@@ -130,6 +167,40 @@ describe('escapeBlockSyntax()', () => {
   it('leaves plain text', () => {
     expect(escapeBlockSyntax('The dome opens.')).toBe('The dome opens.');
     expect(escapeBlockSyntax('')).toBe('');
+  });
+});
+
+describe('unescapeText()', () => {
+  it('removes the escapes before underscores within a word', () => {
+    expect(unescapeText('snake\\_case\\_name and a\\_\\_b and ü\\_1')).toBe(
+      'snake_case_name and a__b and ü_1',
+    );
+  });
+
+  it('keeps the escapes before underscores that could start or end emphasis', () => {
+    expect(unescapeText('\\_not em\\_ and a\\_ and \\_b and .\\_a')).toBe(
+      '\\_not em\\_ and a\\_ and \\_b and .\\_a',
+    );
+  });
+
+  it('removes the escapes before literal backslashes', () => {
+    expect(unescapeText('C:\\\\Users\\\\me and \\\\alpha and a \\\\ b')).toBe(
+      'C:\\Users\\me and \\alpha and a \\ b',
+    );
+  });
+
+  it('keeps the escapes before backslashes that would escape a character or break a line', () => {
+    expect(unescapeText('\\\\\\* and \\\\\\_ and \\\\# and \\\\\n and end\\\\')).toBe(
+      '\\\\\\* and \\\\\\_ and \\\\# and \\\\\n and end\\\\',
+    );
+  });
+
+  it('keeps the other escapes', () => {
+    expect(unescapeText('\\* \\` \\~ \\[')).toBe('\\* \\` \\~ \\[');
+  });
+
+  it('replaces encoded spaces', () => {
+    expect(unescapeText('**&#32;bold&#32;**')).toBe('** bold **');
   });
 });
 
@@ -211,5 +282,38 @@ describe('BLOCK_SYNTAX_ESCAPE', () => {
     expect(roundTrip('## Hours\n\n- Item\n\n1. Item\n\n> Quote')).toBe(
       '## Hours\n\n- Item\n\n1. Item\n\n> Quote',
     );
+  });
+  it('leaves inline code, which Lexical exports verbatim', () => {
+    expect(roundTrip('Match `\\\\` and `\\_` in text')).toBe('Match `\\\\` and `\\_` in text');
+  });
+
+  it('removes the escapes that are not needed in text, including in a heading and a link', () => {
+    expect(roundTrip('a\\_b \\_c\\_ C:\\\\d\n\n## e\\_f\n\n[g\\_h](https://example.com)')).toBe(
+      'a_b \\_c\\_ C:\\d\n\n## e_f\n\n[g_h](https://example.com)',
+    );
+  });
+
+  it('uses asterisks for italic text within a word', () => {
+    expect(
+      exportTextNodes([
+        ['a'],
+        ['b', 'italic'],
+        ['c_d', 'italic', 'bold'],
+        ['e'],
+        [' '],
+        ['f', 'italic'],
+        [' g'],
+      ]),
+    ).toBe('a*b**c_d***e _f_ g');
+  });
+
+  it('uses asterisks for italic text at the start or the end of a word', () => {
+    expect(exportTextNodes([['a', 'italic'], ['b'], [' '], ['c'], ['d', 'italic']])).toBe(
+      '*a*b c*d*',
+    );
+  });
+
+  it('uses underscores for italic text with whitespace inside its delimiters', () => {
+    expect(exportTextNodes([['a'], [' b ', 'italic'], ['c']])).toBe('a _b_ c');
   });
 });

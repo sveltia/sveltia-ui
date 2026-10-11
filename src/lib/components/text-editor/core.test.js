@@ -189,8 +189,8 @@ vi.mock('@lexical/markdown', () => ({
   BOLD_ITALIC_UNDERSCORE: { tag: '___' },
   BOLD_STAR: { tag: '**' },
   BOLD_UNDERSCORE: { tag: '__' },
-  CODE: { tag: 'code' },
-  HEADING: { tag: '#' },
+  CODE: { tag: 'code', regExpStart: /^```/ },
+  HEADING: { tag: '#', regExp: /^#/ },
   INLINE_CODE: { tag: '`' },
   ITALIC_STAR: { tag: '*' },
   ITALIC_UNDERSCORE: { tag: '_' },
@@ -627,6 +627,44 @@ describe('text editor core', () => {
     await convertMarkdownToLexical(editor, '> a\n>\n> b', []);
 
     expect($convertFromMarkdownString).toHaveBeenCalledWith('> a\n> \n> b', []);
+  });
+
+  it('converts tilde fences and setext headings only if code blocks and headings are enabled', async () => {
+    const { $convertFromMarkdownString, CODE, HEADING } = await import('@lexical/markdown');
+
+    const editor = /** @type {any} */ ({
+      update: vi.fn((callback) => callback()),
+      read: vi.fn((callback) => callback()),
+      getEditorState: () => ({ isEmpty: () => false }),
+      focus: vi.fn(),
+      isComposing: () => false,
+    });
+
+    const value = 'Title\n===\n\n~~~\ncode\n~~~';
+    // Copies of the transformers, like the `$state` proxy the editor gets, are found by their
+    // regular expressions
+    const code = /** @type {any} */ ({ ...CODE });
+    const heading = /** @type {any} */ ({ ...HEADING });
+
+    // Neither enabled: the syntax is kept as text, as written
+    await convertMarkdownToLexical(editor, value, []);
+    expect($convertFromMarkdownString).toHaveBeenLastCalledWith(value, []);
+
+    await convertMarkdownToLexical(editor, value, [code]);
+    expect($convertFromMarkdownString).toHaveBeenLastCalledWith('Title\n===\n\n```\ncode\n```', [
+      code,
+    ]);
+
+    await convertMarkdownToLexical(editor, value, [heading]);
+    expect($convertFromMarkdownString).toHaveBeenLastCalledWith('# Title\n\n~~~\ncode\n~~~', [
+      heading,
+    ]);
+
+    await convertMarkdownToLexical(editor, value, [code, heading]);
+    expect($convertFromMarkdownString).toHaveBeenLastCalledWith('# Title\n\n```\ncode\n```', [
+      code,
+      heading,
+    ]);
   });
 
   it('focuses the editor by invoking its focus callback', async () => {

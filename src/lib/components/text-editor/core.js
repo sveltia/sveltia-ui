@@ -27,6 +27,7 @@ import {
 } from '@lexical/list';
 import {
   CODE,
+  HEADING,
   $convertFromMarkdownString as convertFromMarkdownString,
   $convertToMarkdownString as convertToMarkdownString,
   registerMarkdownShortcuts,
@@ -88,6 +89,8 @@ import {
   HTML_IMPORT_MAP,
 } from './html.js';
 import {
+  convertSetextHeadings,
+  convertTildeFences,
   increaseListIndentation,
   padBlankBlockquoteLines,
   splitMultilineFormatting,
@@ -477,21 +480,13 @@ export const exportMarkdown = (enabledTransformers) => {
     ...enabledTransformers.filter(
       (/** @type {any} */ { tag }) => !DISABLED_MARKDOWN_TAGS.includes(tag),
     ),
-    // Last, so a transformer of the editor’s own, such as a link, comes first
+    // Tidy up the escapes in text and escape the block syntax at the start of a line. Last, so a
+    // transformer of the editor’s own, such as a link, comes first
     BLOCK_SYNTAX_ESCAPE,
   ];
 
   return trimBlankBlockquoteLines(
     convertToMarkdownString(transformers)
-      // Remove unnecessary backslash for underscore and backslash characters
-      // @see https://github.com/sveltia/sveltia-cms/issues/430
-      // @see https://github.com/sveltia/sveltia-cms/issues/512
-      .replace(/\\([_\\])/g, '$1')
-      // Replace encoded spaces with regular spaces. The HTML entity can appear with a
-      // combination of bold and italic text
-      // @see https://github.com/sveltia/sveltia-cms/issues/511
-      // @see https://github.com/sveltia/sveltia-cms/issues/534
-      .replace(/&#32;/g, ' ')
       // Remove the line breaks left by empty paragraphs at the end, which have no content. One
       // may be added just by clicking below a block decorator; see `$moveCaretIntoBlock()`
       .replace(/\n+$/, ''),
@@ -1105,9 +1100,25 @@ const importValue = async (editor, { languages, $import, $export, formatName }) 
  * import has been started for the same editor in the meantime, in which case this value is skipped.
  * @throws {Error} Failed to convert the value to Lexical nodes.
  */
-export const convertMarkdownToLexical = async (editor, value, enabledTransformers) =>
-  importValue(editor, {
-    languages: [...value.matchAll(/^```(?<lang>.+?)\n/gm)].map(
+export const convertMarkdownToLexical = async (editor, value, enabledTransformers) => {
+  // Convert the syntax Lexical doesn’t support to the one it does, if the element is enabled: tilde
+  // code fences to backtick ones, and setext headings to ATX ones. Otherwise the syntax is kept as
+  // text, as written. A transformer is found by its regular expression, because the transformers
+  // can come wrapped in a `$state` proxy, which leaves a regular expression as is but not the
+  // transformer object itself
+  const hasCodeBlocks = enabledTransformers.some(
+    (transformer) => 'regExpStart' in transformer && transformer.regExpStart === CODE.regExpStart,
+  );
+
+  const hasHeadings = enabledTransformers.some(
+    (transformer) => 'regExp' in transformer && transformer.regExp === HEADING.regExp,
+  );
+
+  const fencedValue = hasCodeBlocks ? convertTildeFences(value) : value;
+  const normalizedValue = hasHeadings ? convertSetextHeadings(fencedValue) : fencedValue;
+
+  return importValue(editor, {
+    languages: [...normalizedValue.matchAll(/^`{3,}(?<lang>[^`\n]+)\n/gm)].map(
       ({ groups: { lang = 'plain' } = {} }) => lang,
     ),
     /**
@@ -1118,7 +1129,7 @@ export const convertMarkdownToLexical = async (editor, value, enabledTransformer
         // Split multiline formatting into separate lines to prevent Markdown parsing issues, then
         // increase list indentation levels to prevent Markdown parsing issues, and pad blank
         // blockquote lines so they are not imported as literal `>` text
-        padBlankBlockquoteLines(increaseListIndentation(splitMultilineFormatting(value))),
+        padBlankBlockquoteLines(increaseListIndentation(splitMultilineFormatting(normalizedValue))),
         enabledTransformers,
       );
     },
@@ -1129,6 +1140,7 @@ export const convertMarkdownToLexical = async (editor, value, enabledTransformer
     $export: () => exportMarkdown(enabledTransformers),
     formatName: 'Markdown',
   });
+};
 
 /**
  * Convert HTML to Lexical nodes. Inline content outside any block, like bare text, is wrapped with

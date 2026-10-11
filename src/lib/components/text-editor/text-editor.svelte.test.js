@@ -1,5 +1,10 @@
 import { sleep } from '@sveltia/utils/misc';
-import { $getRoot as getRoot, UNDO_COMMAND } from 'lexical';
+import {
+  $createParagraphNode as createParagraphNode,
+  $createTextNode as createTextNode,
+  $getRoot as getRoot,
+  UNDO_COMMAND,
+} from 'lexical';
 import { flushSync } from 'svelte';
 import { beforeAll, describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-svelte';
@@ -566,5 +571,88 @@ describe('TextEditor', () => {
       setTimeout(resolve, 100);
     });
     expect(document.querySelector('.emoji-suggestions')).toBeNull();
+  });
+});
+
+describe('TextEditor Markdown round trip', () => {
+  beforeAll(() => {
+    // Keep the syntax highlighter off the network: without an engine, code stays plain text
+    setCodeHighlighterLoaders({
+      /**
+       * Fail to load the engine.
+       * @throws {Error} Always.
+       */
+      loadEngine: async () => {
+        throw new Error('Not available in tests');
+      },
+    });
+  });
+
+  /**
+   * Load the given Markdown, add a paragraph at the end, as the user would, so the editor exports
+   * its content, and get the exported Markdown without the new paragraph.
+   * @param {string} markdown Markdown.
+   * @returns {Promise<string>} Exported Markdown.
+   */
+  const roundTrip = async (markdown) => {
+    /** @type {ComponentProps<typeof TextEditor>} */
+    const props = $state({ value: markdown });
+    const screen = await render(TextEditor, props);
+    const root = await waitForContent(screen.container, '<');
+    const editor = /** @type {LexicalEditor} */ (/** @type {any} */ (root).__lexicalEditor);
+
+    // Give the editor time to load the content
+    await sleep(300);
+    editor.update(() => {
+      getRoot().append(createParagraphNode().append(createTextNode('Added')));
+    });
+    await vi.waitFor(() => {
+      expect(props.value).toMatch(/\n\nAdded$/);
+    });
+
+    return /** @type {string} */ (props.value).replace(/\n\nAdded$/, '');
+  };
+
+  it('keeps the backslashes in code and the needed escapes in text', async () => {
+    const markdown = [
+      '```js\nconst re = /\\\\d+/;\n```',
+      'Match `\\\\` and `\\_` in text',
+      '\\_not italic\\_ and \\\\\\* and a line break\\\\',
+      'Next',
+    ].join('\n\n');
+
+    expect(await roundTrip(markdown)).toBe(markdown);
+  });
+
+  it('still removes the escapes that are not needed', async () => {
+    expect(await roundTrip('snake\\_case and C:\\\\Users')).toBe('snake_case and C:\\Users');
+  });
+
+  it('leaves the formatting syntax in a code block alone', async () => {
+    const markdown = '```md\nSome _italic\ntext_ here\n```\n\n```py\nx = 2 **a\nb** 3\n```';
+
+    expect(await roundTrip(markdown)).toBe(markdown);
+  });
+
+  it('imports a code block fenced with tildes', async () => {
+    expect(await roundTrip('~~~py\n# Comment\nx = **1**\n```\n~~~')).toBe(
+      '````py\n# Comment\nx = **1**\n```\n````',
+    );
+  });
+
+  it('imports setext headings', async () => {
+    expect(await roundTrip('Title\n=====\n\nSub\n---\n\nText\n\n---\n\nMore')).toBe(
+      '# Title\n\n## Sub\n\nText\n\n***\n\nMore',
+    );
+  });
+
+  it('keeps an escaped pipe in a table cell', async () => {
+    const markdown = '| a | b |\n| --- | --- |\n| x \\| y | `c \\| d` |';
+
+    expect(await roundTrip(markdown)).toBe(markdown);
+  });
+
+  it('uses asterisks for italic text within a word', async () => {
+    expect(await roundTrip('a*b*c and *d*')).toBe('a*b*c and _d_');
   });
 });

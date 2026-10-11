@@ -23,6 +23,8 @@ import {
 } from '@lexical/table';
 import { $isParagraphNode as isParagraphNode, $isTextNode as isTextNode } from 'lexical';
 
+import { BLOCK_SYNTAX_ESCAPE } from './block-escape.js';
+
 /**
  * @import { ElementTransformer } from '@lexical/markdown';
  */
@@ -48,7 +50,8 @@ export const getTableColumnsSize = (table) => {
  * @returns {TableCellNode}
  */
 const createTableCell = (textContent) => {
-  textContent = textContent.replace(/\\n/g, '\n');
+  // An escaped pipe is part of the cell, even within inline code, like GitHub Flavored Markdown
+  textContent = textContent.replace(/\\n/g, '\n').replace(/\\\|/g, '|');
 
   const cell = createTableCellNode(TableCellHeaderStates.NO_STATUS);
 
@@ -70,7 +73,9 @@ export const mapToTableCells = (textContent) => {
     return null;
   }
 
-  return match.split('|').map((text) => createTableCell(text));
+  // Split the row at the pipes that are not escaped, which are preceded by an even number of
+  // backslashes
+  return match.split(/(?<=(?<!\\)(?:\\\\)*)\|/).map((text) => createTableCell(text));
 };
 
 /**
@@ -99,7 +104,13 @@ export const TABLE = {
       row.getChildren().forEach((cell) => {
         // It’s TableCellNode so it’s just to make flow happy
         if (isTableCellNode(cell)) {
-          rowOutput.push(convertToMarkdownString(TRANSFORMERS, cell).replace(/\n/g, '\\n').trim());
+          rowOutput.push(
+            convertToMarkdownString([...TRANSFORMERS, BLOCK_SYNTAX_ESCAPE], cell)
+              // Escape a pipe, which would otherwise end the cell, even within inline code
+              .replace(/\|/g, '\\|')
+              .replace(/\n/g, '\\n')
+              .trim(),
+          );
 
           if (cell.__headerState === TableCellHeaderStates.ROW) {
             isHeaderRow = true;

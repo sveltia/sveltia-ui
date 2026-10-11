@@ -527,6 +527,21 @@ describe('TABLE transformer', () => {
     expect(parentNode.replace).toHaveBeenCalled();
   });
 
+  it('should keep an escaped pipe in a cell, even within inline code', () => {
+    const cells = /** @type {any[]} */ (mapToTableCells('| x \\| y | `c \\| d` | e \\\\| f |'));
+
+    expect(cells.map(({ text }) => text)).toEqual(['x | y', '`c | d`', 'e \\\\', 'f']);
+  });
+
+  it('export should escape a pipe in a cell, even within inline code', () => {
+    const cellA = { __kind: 'table-cell', __headerState: 0, text: 'x | y' };
+    const cellB = { __kind: 'table-cell', __headerState: 0, text: '`c | d`' };
+    const row = { __kind: 'table-row', getChildren: () => [cellA, cellB] };
+    const fakeNode = { __kind: 'table', getChildren: () => [row] };
+
+    expect(TABLE.export(/** @type {any} */ (fakeNode), () => '')).toBe('| x \\| y | `c \\| d` |');
+  });
+
   it('should handle mapToTableCells with non-matching text', () => {
     const result = mapToTableCells('no pipes here');
 
