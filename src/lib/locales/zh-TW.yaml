@@ -74,6 +74,12 @@ number_input:
   # Spin button aria-labels for incrementing/decrementing the number value
   increase: 增加
   decrease: 減少
+  # Description of the allowed range when the number can’t be stepped, e.g. “From 1 to 10”
+  range: '{$min} 至 {$max}'
+  # Description of the minimum value when the number can’t be stepped
+  min: 最小值 {$min}
+  # Description of the maximum value when the number can’t be stepped
+  max: 最大值 {$max}
 
 # Password input component
 password_input:

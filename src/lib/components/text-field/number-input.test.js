@@ -1,14 +1,44 @@
 import { describe, expect, it, vi } from 'vitest';
 import {
   getDecimalSeparator,
+  getInputMode,
   getMaximumFractionDigits,
   isAtMax,
   isAtMin,
   isInvalidNumber,
   normalizeNumber,
+  normalizeStep,
   parseNumber,
   stepNumber,
 } from './number-input.js';
+
+describe('normalizeStep', () => {
+  it('should keep a positive step', () => {
+    expect(normalizeStep(1)).toBe(1);
+    expect(normalizeStep(0.5)).toBe(0.5);
+  });
+
+  it('should fall back to 1 for a step that isn’t a positive number', () => {
+    expect(normalizeStep(0)).toBe(1);
+    expect(normalizeStep(-2)).toBe(1);
+    expect(normalizeStep(null)).toBe(1);
+    expect(normalizeStep(undefined)).toBe(1);
+    expect(normalizeStep(Number.NaN)).toBe(1);
+    expect(normalizeStep(Infinity)).toBe(1);
+  });
+});
+
+describe('getInputMode', () => {
+  it('should use the text keyboard when a negative number is allowed', () => {
+    expect(getInputMode({ fractional: false })).toBe('text');
+    expect(getInputMode({ fractional: true, min: -1 })).toBe('text');
+  });
+
+  it('should use the numeric or decimal keypad for a non-negative number', () => {
+    expect(getInputMode({ fractional: false, min: 0 })).toBe('numeric');
+    expect(getInputMode({ fractional: true, min: 1 })).toBe('decimal');
+  });
+});
 
 describe('getMaximumFractionDigits', () => {
   it('should return 0 for an integer step', () => {

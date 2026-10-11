@@ -4,6 +4,20 @@
  */
 
 /**
+ * Step value that turns stepping off: the spin buttons are hidden and the arrow keys are ignored.
+ */
+export const STEP_DISABLED = -1;
+
+/**
+ * Get the step to use, falling back to `1` for a value that isn’t a positive number, like `0`,
+ * `null` or `NaN`, which would leave the spin buttons and the arrow keys with nowhere to go.
+ * @param {number | null | undefined} step Step value.
+ * @returns {number} Positive step.
+ */
+export const normalizeStep = (step) =>
+  typeof step === 'number' && Number.isFinite(step) && step > 0 ? step : 1;
+
+/**
  * Get the number of fraction digits a value should be formatted with, so stepping by `0.1` yields
  * `0.3` rather than `0.30000000000000004`.
  * @param {number} step Step value.
@@ -15,6 +29,22 @@ export const getMaximumFractionDigits = (step) => {
   const digits = (mantissa.split('.')[1]?.length ?? 0) - Number(exponent);
 
   return Math.max(digits, 0);
+};
+
+/**
+ * Get the `inputmode` attribute for the field. The numeric and decimal keypads on iOS have no minus
+ * key, so a field that accepts a negative number gets the full keyboard instead.
+ * @param {object} options Options.
+ * @param {boolean} options.fractional Whether the number can have a fraction.
+ * @param {number} [options.min] Minimum allowed value.
+ * @returns {'text' | 'decimal' | 'numeric'} Input mode.
+ */
+export const getInputMode = ({ fractional, min }) => {
+  if (!(typeof min === 'number' && min >= 0)) {
+    return 'text';
+  }
+
+  return fractional ? 'decimal' : 'numeric';
 };
 
 /**

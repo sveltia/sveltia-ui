@@ -37,9 +37,108 @@ describe('NumberInput', () => {
   });
 
   it('uses the decimal input mode for a fractional step', async () => {
-    const screen = await render(NumberInput, { step: 0.5 });
+    const screen = await render(NumberInput, { step: 0.5, min: 0 });
 
     await expect.element(screen.getByRole('spinbutton')).toHaveAttribute('inputmode', 'decimal');
+  });
+
+  it('uses the text input mode when a negative number is allowed', async () => {
+    /** @type {ComponentProps<typeof NumberInput>} */
+    const props = $state({ min: undefined });
+    const screen = await render(NumberInput, props);
+    const input = screen.getByRole('spinbutton');
+
+    // The numeric keypad on iOS has no minus key
+    await expect.element(input).toHaveAttribute('inputmode', 'text');
+    props.min = -10;
+    await expect.element(input).toHaveAttribute('inputmode', 'text');
+    props.min = 0;
+    await expect.element(input).toHaveAttribute('inputmode', 'numeric');
+  });
+
+  it('turns stepping off with a step of -1', async () => {
+    /** @type {ComponentProps<typeof NumberInput>} */
+    const props = $state({ value: 5, min: 0, max: 10, step: -1, ariaLabel: 'ID' });
+    const screen = await render(NumberInput, props);
+    const input = screen.getByRole('textbox', { name: 'ID' });
+
+    await expect.element(input).toHaveValue('5');
+    await expect.element(input).toHaveAttribute('inputmode', 'decimal');
+    await expect.element(input).not.toHaveAttribute('aria-valuenow');
+    await expect.element(input).not.toHaveAttribute('aria-valuemin');
+    await expect.element(input).not.toHaveAttribute('aria-valuemax');
+    // The range is described instead
+    await expect.element(input).toHaveAccessibleDescription('From 0 to 10');
+    expect(screen.container.querySelector('.buttons')).toBeNull();
+    expect(screen.container.querySelectorAll('button')).toHaveLength(0);
+    // The arrow keys are left alone
+    await input.click();
+    await userEvent.keyboard('{ArrowUp}{ArrowUp}{ArrowDown}');
+    expect(props.value).toBe(5);
+    // The value can still be typed
+    await input.fill('123456');
+    expect(props.value).toBe(123456);
+    // Only the minimum or the maximum, or neither
+    props.max = undefined;
+    await expect.element(input).toHaveAccessibleDescription('Minimum 0');
+    props.min = undefined;
+    props.max = 10;
+    await expect.element(input).toHaveAccessibleDescription('Maximum 10');
+    props.max = undefined;
+    await expect.element(input).not.toHaveAttribute('aria-describedby');
+  });
+
+  it('keeps an outside description along with the range', async () => {
+    /** @type {ComponentProps<typeof NumberInput>} */
+    const props = $state({ step: -1, min: 1, 'aria-describedby': 'hint' });
+    const screen = await render(NumberInput, props);
+    const input = screen.getByRole('textbox');
+    const { id } = input.element();
+
+    await expect.element(input).toHaveAttribute('aria-describedby', `hint ${id}-range`);
+    props.min = undefined;
+    await expect.element(input).toHaveAttribute('aria-describedby', 'hint');
+  });
+
+  it('uses the decimal or numeric keypad as told by the fractional prop', async () => {
+    /** @type {ComponentProps<typeof NumberInput>} */
+    const props = $state({ min: 0, fractional: true });
+    const screen = await render(NumberInput, props);
+    const input = screen.getByRole('spinbutton');
+
+    // The integer step would bring up the numeric keypad otherwise
+    await expect.element(input).toHaveAttribute('inputmode', 'decimal');
+    props.step = -1;
+    props.fractional = false;
+    await expect.element(screen.getByRole('textbox')).toHaveAttribute('inputmode', 'numeric');
+  });
+
+  it('steps by 1 with a step that isn’t a positive number', async () => {
+    /** @type {ComponentProps<typeof NumberInput>} */
+    const props = $state({ value: 5, step: 0, min: 0 });
+    const screen = await render(NumberInput, props);
+    const input = screen.getByRole('spinbutton');
+
+    await expect.element(input).toHaveAttribute('inputmode', 'numeric');
+    await screen.getByRole('button', { name: 'Increase' }).click();
+    expect(props.value).toBe(6);
+    // `null` from a config file, for example, as well as a negative step other than `-1`
+    props.step = /** @type {any} */ (null);
+    await screen.getByRole('button', { name: 'Increase' }).click();
+    expect(props.value).toBe(7);
+    props.step = -2;
+    await screen.getByRole('button', { name: 'Decrease' }).click();
+    expect(props.value).toBe(6);
+  });
+
+  it('accepts an input mode from outside', async () => {
+    /** @type {ComponentProps<typeof NumberInput>} */
+    const props = $state({ step: -1, inputmode: 'numeric' });
+    const screen = await render(NumberInput, props);
+
+    await expect.element(screen.getByRole('textbox')).toHaveAttribute('inputmode', 'numeric');
+    props.inputmode = undefined;
+    await expect.element(screen.getByRole('textbox')).toHaveAttribute('inputmode', 'text');
   });
 
   it('steps the value with the buttons, within the range', async () => {

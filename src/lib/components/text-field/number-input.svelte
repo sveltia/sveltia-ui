@@ -10,11 +10,14 @@
   import Button from '../button/button.svelte';
   import Icon from '../icon/icon.svelte';
   import {
+    STEP_DISABLED,
+    getInputMode,
     getMaximumFractionDigits,
     isAtMax,
     isAtMin,
     isInvalidNumber,
     normalizeNumber,
+    normalizeStep,
     parseNumber,
     stepNumber,
   } from './number-input.js';
@@ -31,7 +34,15 @@
    * @property {number} [min] Minimum allowed value.
    * @property {number} [max] Maximum allowed value.
    * @property {number} [step] Value to be added or removed when using the up/down arrow key or
-   * button.
+   * button. Set to `-1` to hide the buttons and disable stepping with the arrow keys, for a number
+   * that isn’t meant to be stepped, like an ID. Any other value that isn’t a positive number falls
+   * back to `1`.
+   * @property {boolean} [fractional] Whether the number can have a fraction, which brings up the
+   * decimal keypad rather than the numeric one on mobile. If omitted, it’s inferred from `step`:
+   * `true` for a fractional step or with stepping turned off, `false` for an integer step.
+   * @property {'text' | 'decimal' | 'numeric'} [inputmode] The `inputmode` attribute on the
+   * `<input>`. If omitted, it’s `text` if a negative number is allowed, as the numeric and decimal
+   * keypads on iOS have no minus key, otherwise `decimal` or `numeric` depending on `fractional`.
    * @property {Snippet} [increaseIcon] Increase icon slot content.
    * @property {Snippet} [decreaseIcon] Decrease icon slot content.
    */
@@ -47,6 +58,8 @@
     min = undefined,
     max = undefined,
     step = 1,
+    fractional = undefined,
+    inputmode = undefined,
     class: className,
     hidden = false,
     disabled = false,
@@ -67,7 +80,36 @@
   let edited = $state(false);
   let inputValue = $state('');
 
-  const maximumFractionDigits = $derived(getMaximumFractionDigits(step));
+  // `-1` turns stepping off altogether, leaving a plain text box: a spin button promises the arrow
+  // keys step the value
+  const stepEnabled = $derived(step !== STEP_DISABLED);
+  const stepSize = $derived(normalizeStep(step));
+  const isFractional = $derived(
+    fractional ?? (!stepEnabled || getMaximumFractionDigits(stepSize) > 0),
+  );
+  // A plain text box can’t expose the range with `aria-valuemin` and `aria-valuemax`, so it’s
+  // described instead, by a hidden element: `aria-description` isn’t supported everywhere
+  const rangeDescription = $derived.by(() => {
+    const hasMin = typeof min === 'number';
+    const hasMax = typeof max === 'number';
+
+    if (stepEnabled || (!hasMin && !hasMax)) {
+      return undefined;
+    }
+
+    if (hasMin && hasMax) {
+      return _('_sui.number_input.range', { values: { min, max } });
+    }
+
+    return hasMin
+      ? _('_sui.number_input.min', { values: { min } })
+      : _('_sui.number_input.max', { values: { max } });
+  });
+  const describedBy = $derived(
+    [restProps['aria-describedby'], rangeDescription ? `${id}-range` : undefined]
+      .filter(Boolean)
+      .join(' ') || undefined,
+  );
   // Accept the decimal separator of the field’s language, or that of the UI, like `,` in German
   const numberValue = $derived(normalizeNumber(inputValue, restProps.lang ?? locale.current));
   const isMin = $derived(isAtMin(numberValue, min));
@@ -100,7 +142,7 @@
    * @param {1 | -1} direction `1` to increase, `-1` to decrease.
    */
   const stepValue = (direction) => {
-    const newInputValue = stepNumber(numberValue, { step, direction, min, max });
+    const newInputValue = stepNumber(numberValue, { step: stepSize, direction, min, max });
 
     if (newInputValue !== undefined) {
       inputValue = newInputValue;
@@ -130,46 +172,50 @@
   class:readonly
   {hidden}
 >
-  <div role="none" class="buttons">
-    <Button
-      iconic
-      disabled={disabled || readonly || Number.isNaN(Number(numberValue)) || isMax}
-      aria-label={_('_sui.number_input.increase')}
-      aria-controls={id}
-      onclick={() => {
-        increase();
-      }}
-    >
-      {#snippet startIcon()}
-        {#if increaseIcon}
-          {@render increaseIcon()}
-        {:else}
-          <Icon name="expand_less" />
-        {/if}
-      {/snippet}
-    </Button>
-    <Button
-      iconic
-      disabled={disabled || readonly || Number.isNaN(Number(numberValue)) || isMin}
-      aria-label={_('_sui.number_input.decrease')}
-      aria-controls={id}
-      onclick={() => {
-        decrease();
-      }}
-    >
-      {#snippet startIcon()}
-        {#if decreaseIcon}
-          {@render decreaseIcon()}
-        {:else}
-          <Icon name="expand_more" />
-        {/if}
-      {/snippet}
-    </Button>
-  </div>
+  {#if stepEnabled}
+    <div role="none" class="buttons">
+      <Button
+        iconic
+        disabled={disabled || readonly || Number.isNaN(Number(numberValue)) || isMax}
+        aria-label={_('_sui.number_input.increase')}
+        aria-controls={id}
+        onclick={() => {
+          increase();
+        }}
+      >
+        {#snippet startIcon()}
+          {#if increaseIcon}
+            {@render increaseIcon()}
+          {:else}
+            <Icon name="expand_less" />
+          {/if}
+        {/snippet}
+      </Button>
+      <Button
+        iconic
+        disabled={disabled || readonly || Number.isNaN(Number(numberValue)) || isMin}
+        aria-label={_('_sui.number_input.decrease')}
+        aria-controls={id}
+        onclick={() => {
+          decrease();
+        }}
+      >
+        {#snippet startIcon()}
+          {#if decreaseIcon}
+            {@render decreaseIcon()}
+          {:else}
+            <Icon name="expand_more" />
+          {/if}
+        {/snippet}
+      </Button>
+    </div>
+  {:else if rangeDescription}
+    <span id="{id}-range" hidden>{rangeDescription}</span>
+  {/if}
   <TextInput
     dir="ltr"
     {...restProps}
-    role="spinbutton"
+    role={stepEnabled ? 'spinbutton' : 'textbox'}
     {id}
     bind:value={inputValue}
     spellcheck="false"
@@ -179,15 +225,16 @@
     {readonly}
     {required}
     {invalid}
-    aria-valuenow={Number.isFinite(value) ? value : undefined}
-    aria-valuemin={min}
-    aria-valuemax={max}
-    inputmode={maximumFractionDigits > 0 ? 'decimal' : 'numeric'}
+    aria-valuenow={stepEnabled && Number.isFinite(value) ? value : undefined}
+    aria-valuemin={stepEnabled ? min : undefined}
+    aria-valuemax={stepEnabled ? max : undefined}
+    inputmode={inputmode ?? getInputMode({ fractional: isFractional, min })}
+    aria-describedby={describedBy}
     onkeydown={(event) => {
       const { key, ctrlKey, metaKey, altKey, shiftKey } = event;
       const hasModifier = shiftKey || altKey || ctrlKey || metaKey;
       // A read-only field can’t be stepped, just like the spin buttons
-      const canStep = !disabled && !readonly && !hasModifier;
+      const canStep = stepEnabled && !disabled && !readonly && !hasModifier;
 
       if (key === 'ArrowDown' && canStep) {
         event.preventDefault();
@@ -237,7 +284,9 @@
     }
 
     :global {
-      :not(:first-child) input {
+      // Square off the start corners next to the spin buttons, but not next to the hidden range
+      // description, which is there with stepping turned off
+      .buttons + * input {
         border-start-start-radius: 0;
         border-end-start-radius: 0;
       }
