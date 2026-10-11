@@ -545,6 +545,11 @@
 </script>
 
 {#if open && position}
+  <!--
+    The `mousedown` listener isn’t an interaction with the group: it only keeps the focus where it
+    is when the popup’s background is pressed, as the controls in it take the interactions.
+  -->
+  <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
   <div
     bind:this={popupElement}
     role="group"
@@ -605,7 +610,7 @@
         class="url"
         href={isSafeLinkURL(currentLink.url) ? currentLink.url : undefined}
         target="_blank"
-        rel="noopener noreferrer"
+        rel="external noopener noreferrer"
         dir="ltr"
       >
         {currentLink.url}
