@@ -148,6 +148,28 @@ describe('TextEditor', () => {
     expect(root.querySelector('p')?.getAttribute('dir')).toBe('auto');
   });
 
+  it('only sets the automatic direction on the text area once the plain text mode is shown', async () => {
+    const screen = await render(TextEditor, {
+      value: MIXED_TEXT,
+      dir: 'auto',
+      modes: ['rich-text', 'plain-text'],
+    });
+
+    const wrapper = /** @type {HTMLElement} */ (screen.container.querySelector('.sui.text-editor'));
+    const textarea = /** @type {HTMLTextAreaElement} */ (wrapper.querySelector('textarea'));
+
+    await waitForContent(screen.container, 'Hello');
+    // The hidden text area gets the value on every change, which `auto` would make slow
+    expect(textarea.dir).toBe('');
+
+    await screen.getByRole('button', { name: 'Edit in Markdown' }).click();
+    await vi.waitFor(() => {
+      expect(textarea.checkVisibility()).toBe(true);
+    });
+    expect(textarea.getAttribute('dir')).toBe('auto');
+    expect(getComputedStyle(textarea).direction).toBe('rtl');
+  });
+
   it('names both text boxes, not the wrapper', async () => {
     const screen = await render(TextEditor, {
       value: 'Hi',

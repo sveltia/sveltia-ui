@@ -145,6 +145,13 @@
 
   const usePlainText = $derived(!editorStore.useRichText && !hidden);
   /**
+   * The `dir` attribute on the `<textarea>` of the plain text mode. The rich text mode keeps the
+   * hidden `<textarea>` in sync with the editor, setting its value on every change, and the browser
+   * resolves `dir="auto"` over the whole value each time it’s set, which makes typing in a long
+   * document slow. As nobody sees the `<textarea>` meanwhile, it only gets `auto` once it’s shown.
+   */
+  const textAreaDir = $derived(dir === 'auto' && editorStore.useRichText ? undefined : dir);
+  /**
    * Comma-separated languages used in the fenced code blocks of the Markdown source, which are
    * highlighted as well. It’s a string rather than an array, so the highlighter isn’t reloaded on
    * every keystroke.
@@ -316,7 +323,7 @@
     {useEmojiAutocomplete}
     highlight={highlightSource}
     {flex}
-    {dir}
+    dir={textAreaDir}
     hidden={editorStore.useRichText || hidden}
     {disabled}
     {readonly}
