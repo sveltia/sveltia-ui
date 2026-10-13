@@ -35,11 +35,36 @@
 
   const loading = $derived(items.length > loadedItemSize);
 
+  /**
+   * Get the nearest ancestor of the given element that scrolls vertically. An ancestor that can
+   * scroll but whose content fits, like one growing with the list or a horizontal scroller, doesn’t
+   * clip the element, and as the observer’s root it would let every chunk load at once. The heights
+   * are rounded separately, so a 1px difference doesn’t count as scrolling.
+   * @param {HTMLElement} element Element.
+   * @returns {HTMLElement | null} Scroll container, or `null` if the document itself scrolls.
+   */
+  const getScrollContainer = (element) => {
+    for (let parent = element.parentElement; parent; parent = parent.parentElement) {
+      if (
+        parent.scrollHeight - parent.clientHeight > 1 &&
+        /^(auto|scroll)$/.test(getComputedStyle(parent).overflowY)
+      ) {
+        return parent;
+      }
+    }
+
+    return null;
+  };
+
   // Observe the spinner anew once each chunk is rendered: the observer only reports changes, so a
   // spinner that stays in view because the chunk didn’t fill the viewport would stall the loading.
   // Observing an element always reports its current state first. The observer is created here
   // rather than when the component is set up, since `IntersectionObserver` doesn’t exist during
   // server-side rendering, and it’s disconnected before the next chunk and on unmount.
+  // The next chunk starts loading while the spinner is still a little below the visible area, so
+  // the scrolling doesn’t stop at the end of each chunk. The margin only applies to the observer’s
+  // root, which has to be the scroll container: the viewport margin wouldn’t reveal a spinner
+  // clipped by a scrolling ancestor.
   $effect(() => {
     void loadedItemSize;
 
@@ -47,11 +72,14 @@
       return undefined;
     }
 
-    const observer = new IntersectionObserver(([{ isIntersecting }]) => {
-      if (isIntersecting && loading) {
-        loadedItemSize += itemChunkSize;
-      }
-    });
+    const observer = new IntersectionObserver(
+      ([{ isIntersecting }]) => {
+        if (isIntersecting && loading) {
+          loadedItemSize += itemChunkSize;
+        }
+      },
+      { root: getScrollContainer(spinner), rootMargin: '0px 0px 500px 0px' },
+    );
 
     observer.observe(spinner);
 

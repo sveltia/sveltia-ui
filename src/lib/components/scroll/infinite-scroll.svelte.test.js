@@ -2,22 +2,84 @@ import { expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-svelte';
 import InfiniteScrollFixture from './infinite-scroll-fixture.test.svelte';
 
-const items = Array.from({ length: 12 }, (_, i) => ({ id: `i${i}`, label: `Item ${i}` }));
+/**
+ * Create a list of items.
+ * @param {number} length Number of items.
+ * @returns {{ id: string, label: string }[]} Items.
+ */
+const createItems = (length) =>
+  Array.from({ length }, (_, i) => ({ id: `i${i}`, label: `Item ${i}` }));
 
-it('renders the first chunk with a spinner, then more as the spinner comes into view', async () => {
-  const screen = await render(InfiniteScrollFixture, { items, itemChunkSize: 5 });
+const items = createItems(12);
+const longItems = createItems(80);
+
+/**
+ * Wait for a few frames, so an observer that would load another chunk has had the chance to.
+ */
+const settle = async () => {
+  for (let i = 0; i < 5; i += 1) {
+    // eslint-disable-next-line no-await-in-loop
+    await new Promise((resolve) => {
+      requestAnimationFrame(resolve);
+    });
+  }
+};
+
+it('renders the first chunk with a spinner, then more as the spinner nears the view', async () => {
+  // Each 20-item chunk is 400px tall, four times the height of the 100px scroller
+  const screen = await render(InfiniteScrollFixture, { items: longItems, itemChunkSize: 20 });
   const scroller = /** @type {HTMLElement} */ (screen.container.querySelector('.scroller'));
 
-  expect(screen.container.querySelectorAll('.item')).toHaveLength(5);
+  expect(screen.container.querySelectorAll('.item')).toHaveLength(20);
   expect(screen.container.querySelector('.item')?.textContent).toBe('0: Item 0');
   expect(screen.container.querySelector('.spinner')).not.toBeNull();
 
-  scroller.scrollTop = scroller.scrollHeight;
+  // The spinner is 300px below the view, within the 500px margin, so the next chunk loads without
+  // scrolling; then it’s 700px below and the loading stops
   await vi.waitFor(() => {
-    expect(screen.container.querySelectorAll('.item')).toHaveLength(10);
+    expect(screen.container.querySelectorAll('.item')).toHaveLength(40);
   });
+  await settle();
+  expect(screen.container.querySelectorAll('.item')).toHaveLength(40);
+
+  // Scrolling by 250px brings the spinner within the margin before it comes into view
+  scroller.scrollTop = 250;
+  await vi.waitFor(() => {
+    expect(screen.container.querySelectorAll('.item')).toHaveLength(60);
+  });
+  await settle();
+  expect(screen.container.querySelectorAll('.item')).toHaveLength(60);
 
   scroller.scrollTop = scroller.scrollHeight;
+  await vi.waitFor(() => {
+    expect(screen.container.querySelectorAll('.item')).toHaveLength(80);
+  });
+  expect(screen.container.querySelector('.spinner')).toBeNull();
+});
+
+it('ignores an ancestor that can scroll but doesn’t clip the list', async () => {
+  // The horizontal scroller’s `overflow-y` computes to `auto`, but it grows with the list: as the
+  // observer’s root, it would let every chunk load at once
+  const screen = await render(InfiniteScrollFixture, {
+    items: longItems,
+    itemChunkSize: 20,
+    wrapped: true,
+  });
+
+  await vi.waitFor(() => {
+    expect(screen.container.querySelectorAll('.item')).toHaveLength(40);
+  });
+  await settle();
+  expect(screen.container.querySelectorAll('.item')).toHaveLength(40);
+});
+
+it('loads more within the page when there’s no scroll container', async () => {
+  const screen = await render(InfiniteScrollFixture, {
+    items,
+    itemChunkSize: 5,
+    scrollable: false,
+  });
+
   await vi.waitFor(() => {
     expect(screen.container.querySelectorAll('.item')).toHaveLength(12);
   });
@@ -67,9 +129,10 @@ it('only creates an observer while the spinner is mounted, and disconnects it on
       /**
        * Record the creation.
        * @param {IntersectionObserverCallback} callback Callback.
+       * @param {IntersectionObserverInit} [options] Options.
        */
-      constructor(callback) {
-        super(callback);
+      constructor(callback, options) {
+        super(callback, options);
         created();
       }
     },
@@ -81,7 +144,7 @@ it('only creates an observer while the spinner is mounted, and disconnects it on
     expect(created).not.toHaveBeenCalled();
     await fitting.unmount();
 
-    const screen = await render(InfiniteScrollFixture, { items, itemChunkSize: 5 });
+    const screen = await render(InfiniteScrollFixture, { items: longItems, itemChunkSize: 10 });
 
     expect(created).toHaveBeenCalled();
     disconnect.mockClear();
