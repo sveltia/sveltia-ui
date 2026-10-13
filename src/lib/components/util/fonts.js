@@ -47,7 +47,7 @@ export const FONTS = [
   {
     family: 'Source Sans 3',
     packageName: '@fontsource-variable/source-sans-3',
-    version: '5.3.0',
+    version: '5.3.1',
     cdnId: 'source-sans-3:vf',
     subset: 'latin-wght-normal',
     format: 'woff2-variations',
@@ -69,7 +69,7 @@ export const FONTS = [
   {
     family: 'Material Symbols Outlined',
     packageName: '@fontsource-variable/material-symbols-outlined',
-    version: '5.3.8',
+    version: '5.3.9',
     cdnId: 'material-symbols-outlined:vf',
     subset: 'latin-wght-normal',
     format: 'woff2-variations',
