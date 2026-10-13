@@ -235,7 +235,8 @@ export const DISABLED_MARKDOWN_TAGS = ['*', '__', '***', '___'];
 
 /**
  * Tag of the Lexical update that imports a value set from outside, so the editor can tell it from a
- * change made by the user.
+ * change made by the user. A custom node can check it with `$hasUpdateTag()` in its `createDOM()`
+ * method to tell whether it’s being rendered for an imported value.
  */
 export const IMPORT_UPDATE_TAG = 'sui-import';
 
