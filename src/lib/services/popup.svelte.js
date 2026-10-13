@@ -170,8 +170,10 @@ class Popup {
       removeTransitionStartListener,
     ];
 
-    this.intersectionObserver = new IntersectionObserver(([entry]) => {
-      if (!entry.isIntersecting && this.open) {
+    // A busy browser can report several changes at once, oldest first, so only the last entry tells
+    // whether the anchor is visible now
+    this.intersectionObserver = new IntersectionObserver((entries) => {
+      if (!entries.at(-1)?.isIntersecting && this.open) {
         this.hideImmediately();
       }
     });

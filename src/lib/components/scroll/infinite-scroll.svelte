@@ -73,8 +73,10 @@
     }
 
     const observer = new IntersectionObserver(
-      ([{ isIntersecting }]) => {
-        if (isIntersecting && loading) {
+      (entries) => {
+        // A busy browser can report several changes at once, oldest first, so only the last entry
+        // tells whether the spinner is near the view now
+        if (entries.at(-1)?.isIntersecting && loading) {
           loadedItemSize += itemChunkSize;
         }
       },

@@ -113,6 +113,48 @@ it('keeps loading while the spinner stays in view after a chunk is rendered', as
   });
 });
 
+it('goes by the latest change when several are reported at once', async () => {
+  /** @type {IntersectionObserverCallback[]} */
+  const callbacks = [];
+
+  /**
+   * Stand-in for `IntersectionObserver` that only records the callback, so the test can report
+   * several changes in one call, oldest first, as a busy browser does.
+   * @param {IntersectionObserverCallback} callback Callback.
+   * @returns {Pick<IntersectionObserver, 'observe' | 'disconnect'>} Observer.
+   */
+  function RecordingObserver(callback) {
+    callbacks.push(callback);
+
+    return { observe: vi.fn(), disconnect: vi.fn() };
+  }
+
+  vi.stubGlobal('IntersectionObserver', RecordingObserver);
+
+  try {
+    const screen = await render(InfiniteScrollFixture, { items: longItems, itemChunkSize: 20 });
+
+    // The spinner was out of reach when it was first observed, then scrolled near the view
+    callbacks.at(-1)?.(
+      /** @type {any} */ ([{ isIntersecting: false }, { isIntersecting: true }]),
+      /** @type {any} */ ({}),
+    );
+    await vi.waitFor(() => {
+      expect(screen.container.querySelectorAll('.item')).toHaveLength(40);
+    });
+
+    // And the other way around: it was scrolled away again, so nothing more is loaded
+    callbacks.at(-1)?.(
+      /** @type {any} */ ([{ isIntersecting: true }, { isIntersecting: false }]),
+      /** @type {any} */ ({}),
+    );
+    await settle();
+    expect(screen.container.querySelectorAll('.item')).toHaveLength(40);
+  } finally {
+    vi.unstubAllGlobals();
+  }
+});
+
 it('only creates an observer while the spinner is mounted, and disconnects it on unmount', async () => {
   const NativeObserver = IntersectionObserver;
   const created = vi.fn();

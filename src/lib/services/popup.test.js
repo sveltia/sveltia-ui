@@ -523,6 +523,23 @@ describe('Popup - IntersectionObserver on anchor (lines 179-180)', () => {
     await vi.advanceTimersByTimeAsync(100);
   });
 
+  it('should go by the latest of several changes reported at once', async () => {
+    const instance = activatePopup(anchor, popup, 'bottom-left');
+
+    anchor.click();
+    expect(instance.open).toBe(true);
+
+    const anchorVisibilityCallback = ioCallbacks[0];
+
+    // The anchor was hidden for a moment but is visible again, so the popup stays open
+    anchorVisibilityCallback([{ isIntersecting: false }, { isIntersecting: true }]);
+    expect(instance.open).toBe(true);
+
+    anchorVisibilityCallback([{ isIntersecting: true }, { isIntersecting: false }]);
+    expect(instance.open).toBe(false);
+    await vi.advanceTimersByTimeAsync(100);
+  });
+
   it('should not hide when anchor leaves viewport but popup is already closed', () => {
     const instance = activatePopup(anchor, popup, 'bottom-left');
     // popup is not opened
