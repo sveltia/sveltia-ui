@@ -134,6 +134,34 @@ text_editor:
   # Link dialog input field labels
   text: Metin
   url: URL
+  # Link dialog checkbox label and floating link editor button aria-label
+  open_in_new_tab: Yeni Sekmede Aç
+  # Table dialog title
+  insert_table: Tablo Ekle
+  # Table dialog input field labels
+  rows: Satırlar
+  columns: Sütunlar
+  # Table menu button and menu aria-labels
+  table_options: Tablo Seçenekleri
+  show_table_options: Tablo Seçeneklerini Göster
+  # Table menu items
+  insert_row_above: Üste Satır Ekle
+  insert_row_below: Alta Satır Ekle
+  insert_column_left: Sola Sütun Ekle
+  insert_column_right: Sağa Sütun Ekle
+  delete_row: Satırı Sil
+  delete_column: Sütunu Sil
+  delete_table: Tabloyu Sil
+  # Horizontal rule button aria-label
+  insert_horizontal_rule: Yatay Çizgi Ekle
+  # Alignment menu button and menu aria-labels
+  alignment_options: Hizalama Seçenekleri
+  show_alignment_options: Hizalama Seçeneklerini Göster
+  # Alignment menu items
+  align_left: Sola Hizala
+  align_center: Ortala
+  align_right: Sağa Hizala
+  align_justify: İki Yana Yasla
   # Markdown mode toggle button aria-label
   edit_in_markdown: Markdown ile Düzenle
   # HTML mode toggle button aria-label

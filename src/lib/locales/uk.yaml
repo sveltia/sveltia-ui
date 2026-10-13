@@ -134,6 +134,34 @@ text_editor:
   # Link dialog input field labels
   text: Текст
   url: URL
+  # Link dialog checkbox label and floating link editor button aria-label
+  open_in_new_tab: Відкрити в новій вкладці
+  # Table dialog title
+  insert_table: Вставити таблицю
+  # Table dialog input field labels
+  rows: Рядки
+  columns: Стовпці
+  # Table menu button and menu aria-labels
+  table_options: Параметри таблиці
+  show_table_options: Показати параметри таблиці
+  # Table menu items
+  insert_row_above: Вставити рядок вище
+  insert_row_below: Вставити рядок нижче
+  insert_column_left: Вставити стовпець ліворуч
+  insert_column_right: Вставити стовпець праворуч
+  delete_row: Видалити рядок
+  delete_column: Видалити стовпець
+  delete_table: Видалити таблицю
+  # Horizontal rule button aria-label
+  insert_horizontal_rule: Вставити горизонтальну лінію
+  # Alignment menu button and menu aria-labels
+  alignment_options: Параметри вирівнювання
+  show_alignment_options: Показати параметри вирівнювання
+  # Alignment menu items
+  align_left: За лівим краєм
+  align_center: По центру
+  align_right: За правим краєм
+  align_justify: За шириною
   # Markdown mode toggle button aria-label
   edit_in_markdown: Редагувати в Markdown
   # HTML mode toggle button aria-label

@@ -656,3 +656,139 @@ describe('TextEditor Markdown round trip', () => {
     expect(await roundTrip('a*b*c and *d*')).toBe('a*b*c and _d_');
   });
 });
+
+describe('TextEditor with tables', () => {
+  const TABLE = ['| Name | Role |', '| --- | --- |', '| Alice | Editor |'].join('\n');
+
+  /**
+   * Place the caret in the table cell with the given text.
+   * @param {HTMLElement} root Editor root.
+   * @param {string} text Text of the cell.
+   */
+  const placeCaretInCell = (root, text) => {
+    const cell = /** @type {HTMLElement} */ (
+      [...root.querySelectorAll('th, td')].find((element) => element.textContent === text)
+    );
+
+    const range = document.createRange();
+    const selection = /** @type {Selection} */ (window.getSelection());
+
+    root.focus();
+    range.selectNodeContents(cell);
+    range.collapse(false);
+    selection.removeAllRanges();
+    selection.addRange(range);
+  };
+
+  it('shows the menu button on the table cell with the caret', async () => {
+    const screen = await render(TextEditor, { buttons: ['bold', 'table'], value: TABLE });
+    const root = await waitForContent(screen.container, '<table>');
+
+    placeCaretInCell(root, 'Alice');
+    await expect
+      .element(screen.getByRole('button', { name: 'Show Table Options' }).first())
+      .toBeVisible();
+    // The toolbar has one as well, once the selection has been reported
+    await vi.waitFor(() => {
+      expect(screen.container.querySelectorAll('[aria-label="Show Table Options"]')).toHaveLength(
+        2,
+      );
+    });
+  });
+
+  it.each([['disabled'], ['readonly']])('has no menu button on the cell while %s', async (prop) => {
+    const screen = await render(TextEditor, {
+      buttons: ['bold', 'table'],
+      value: TABLE,
+      [prop]: true,
+    });
+
+    await waitForContent(screen.container, '<table>');
+    expect(screen.container.querySelector('.table-cell-menu-button')).toBeNull();
+  });
+
+  it('has no menu button on the cell without the table button', async () => {
+    const screen = await render(TextEditor, { buttons: ['bold'], value: TABLE });
+
+    await waitForContent(screen.container, '<table');
+    expect(screen.container.querySelector('.table-cell-menu-button')).toBeNull();
+  });
+
+  it('adds a paragraph after a table at the end, without changing the value', async () => {
+    /** @type {ComponentProps<typeof TextEditor>} */
+    const props = $state({ buttons: ['bold', 'table'], value: TABLE });
+    const screen = await render(TextEditor, props);
+    const root = await waitForContent(screen.container, '<table>');
+
+    await vi.waitFor(() => {
+      expect(root.lastElementChild?.localName).toBe('p');
+    });
+    await sleep(200);
+    expect(props.value).toBe(TABLE);
+  });
+
+  it('keeps the header row on top of a Markdown table after inserting a row above it', async () => {
+    /** @type {ComponentProps<typeof TextEditor>} */
+    const props = $state({ buttons: ['bold', 'table'], value: TABLE });
+    const screen = await render(TextEditor, props);
+    const root = await waitForContent(screen.container, '<table>');
+
+    placeCaretInCell(root, 'Name');
+    await screen.getByRole('button', { name: 'Show Table Options' }).first().click();
+    await screen.getByRole('menuitem', { name: 'Insert Row Above' }).click();
+
+    await vi.waitFor(() => {
+      expect(props.value).toBe(
+        ['|  |  |', '| --- | --- |', '| Name | Role |', '| Alice | Editor |'].join('\n'),
+      );
+    });
+    expect(root.querySelectorAll('tr:first-child > th')).toHaveLength(2);
+    expect(root.querySelectorAll('th')).toHaveLength(2);
+  });
+
+  it('exports an HTML table without the scrolling wrapper', async () => {
+    /** @type {ComponentProps<typeof TextEditor>} */
+    const props = $state({
+      buttons: ['bold', 'table'],
+      format: 'html',
+      value: '<table><tr><th>Name</th></tr><tr><td>Alice</td></tr></table>',
+    });
+
+    const screen = await render(TextEditor, props);
+    const root = await waitForContent(screen.container, '<table');
+
+    expect(root.querySelector('.table-wrapper')).not.toBeNull();
+    placeCaretInCell(root, 'Alice');
+    await userEvent.keyboard('!');
+    await vi.waitFor(() => {
+      // The HTML parser adds the `<tbody>` element
+      expect(props.value).toBe(
+        '<table><tbody><tr><th>Name</th></tr><tr><td>Alice!</td></tr></tbody></table>',
+      );
+    });
+  });
+});
+
+describe('TextEditor with horizontal rules', () => {
+  it('selects a rule with a click, which can then be deleted', async () => {
+    /** @type {ComponentProps<typeof TextEditor>} */
+    const props = $state({
+      buttons: ['bold', 'horizontal-rule'],
+      value: 'Before\n\n***\n\nAfter',
+    });
+
+    const screen = await render(TextEditor, props);
+    const root = await waitForContent(screen.container, '<hr');
+    const rule = /** @type {HTMLElement} */ (root.querySelector('hr'));
+
+    await userEvent.click(rule);
+    await vi.waitFor(() => {
+      expect(rule.classList.contains('selected')).toBe(true);
+    });
+
+    await userEvent.keyboard('{Backspace}');
+    await vi.waitFor(() => {
+      expect(props.value).toBe('Before\n\nAfter');
+    });
+  });
+});

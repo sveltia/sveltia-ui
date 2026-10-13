@@ -139,6 +139,34 @@ text_editor:
   # Link dialog input field labels
   text: טקסט
   url: כתובת קישור
+  # Link dialog checkbox label and floating link editor button aria-label
+  open_in_new_tab: פתיחה בכרטיסייה חדשה
+  # Table dialog title
+  insert_table: הוספת טבלה
+  # Table dialog input field labels
+  rows: שורות
+  columns: עמודות
+  # Table menu button and menu aria-labels
+  table_options: אפשרויות טבלה
+  show_table_options: הצגת אפשרויות טבלה
+  # Table menu items
+  insert_row_above: הוספת שורה מעל
+  insert_row_below: הוספת שורה מתחת
+  insert_column_left: הוספת עמודה משמאל
+  insert_column_right: הוספת עמודה מימין
+  delete_row: מחיקת שורה
+  delete_column: מחיקת עמודה
+  delete_table: מחיקת טבלה
+  # Horizontal rule button aria-label
+  insert_horizontal_rule: הוספת קו אופקי
+  # Alignment menu button and menu aria-labels
+  alignment_options: אפשרויות יישור
+  show_alignment_options: הצגת אפשרויות יישור
+  # Alignment menu items
+  align_left: יישור לשמאל
+  align_center: מרכוז
+  align_right: יישור לימין
+  align_justify: יישור לשני הצדדים
   # Markdown mode toggle button aria-label
   edit_in_markdown: עריכה ב-Markdown
   # HTML mode toggle button aria-label

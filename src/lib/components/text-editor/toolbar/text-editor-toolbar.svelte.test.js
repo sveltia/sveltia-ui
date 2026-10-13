@@ -210,3 +210,224 @@ describe('TextEditorToolbar', () => {
       .toHaveAttribute('aria-disabled', 'true');
   });
 });
+
+describe('TextEditorToolbar with tables', () => {
+  const enabledButtons = /** @type {TextEditorConfig['enabledButtons']} */ ([
+    'heading-1',
+    'bold',
+    'table',
+  ]);
+
+  /**
+   * Load a table, and place the caret in one of its cells.
+   * @param {Awaited<ReturnType<typeof renderToolbar>>} rendered Rendered fixture and the store.
+   */
+  const selectTableCell = async ({ screen, store }) => {
+    const root = /** @type {HTMLElement} */ (screen.container.querySelector('.lexical-root'));
+
+    await vi.waitFor(() => {
+      expect(store.initialized).toBe(true);
+    });
+    store.inputValue =
+      store.config.format === 'html'
+        ? '<table><tr><th>Name</th></tr><tr><td>Alice</td></tr></table>'
+        : ['| Name |', '| --- |', '| Alice |'].join('\n');
+    await vi.waitFor(() => {
+      expect(root.querySelector('td')).not.toBeNull();
+    });
+
+    const range = document.createRange();
+    const selection = /** @type {Selection} */ (window.getSelection());
+
+    root.focus();
+    range.selectNodeContents(/** @type {HTMLElement} */ (root.querySelector('td')));
+    range.collapse(false);
+    selection.removeAllRanges();
+    selection.addRange(range);
+
+    await vi.waitFor(() => {
+      expect(store.selection.tableCellKey).toBeTruthy();
+    });
+  };
+
+  it('shows the Insert Table button only when tables are enabled', async () => {
+    const { screen } = await renderToolbar({ enabledButtons });
+
+    await expect.element(screen.getByRole('button', { name: 'Insert Table' })).toBeVisible();
+    expect(document.querySelector('[aria-label="Show Table Options"]')).toBeNull();
+
+    screen.unmount();
+
+    const { screen: screen2 } = await renderToolbar({ enabledButtons: ['bold'] });
+
+    await expect.element(screen2.getByRole('button', { name: 'Bold' })).toBeVisible();
+    expect(document.querySelector('[aria-label="Insert Table"]')).toBeNull();
+  });
+
+  it('shows the table menu instead of the text styles while the caret is in a table', async () => {
+    const rendered = await renderToolbar({ enabledButtons });
+    const { screen } = rendered;
+
+    await selectTableCell(rendered);
+
+    const menuButton = screen.getByRole('button', { name: 'Show Table Options' });
+
+    await expect.element(menuButton).toBeVisible();
+    await expect
+      .element(screen.getByRole('button', { name: 'Insert Table' }))
+      .toHaveAttribute('aria-disabled', 'true');
+    // A Markdown table cell can only have inline content
+    expect(document.querySelector('[aria-label="Show Text Style Options"]')).toBeNull();
+    await expect.element(screen.getByRole('button', { name: 'Bold' })).toBeVisible();
+
+    await menuButton.click();
+
+    const menu = screen.getByRole('menu', { name: 'Table Options' });
+
+    await expect.element(menu).toBeVisible();
+    expect(
+      menu
+        .getByRole('menuitem')
+        .all()
+        .map((item) => item.element().textContent?.trim()),
+    ).toEqual([
+      'Insert Row Above',
+      'Insert Row Below',
+      'Insert Column Left',
+      'Insert Column Right',
+      'Delete Row',
+      'Delete Column',
+      'Delete Table',
+    ]);
+  });
+
+  it('hides the editor components in a Markdown table cell, which would lose them', async () => {
+    const rendered = await renderToolbar({ enabledButtons, components: [component] });
+    const { screen } = rendered;
+
+    await expect.element(screen.getByRole('button', { name: 'Insert' })).toBeVisible();
+    await selectTableCell(rendered);
+    await expect.element(screen.getByRole('button', { name: 'Show Table Options' })).toBeVisible();
+    expect(document.querySelector('[aria-label="Insert"]')).toBeNull();
+  });
+
+  it('shows the Insert Horizontal Rule button only when enabled, and not in a Markdown table', async () => {
+    const rendered = await renderToolbar({
+      enabledButtons: [...enabledButtons, 'horizontal-rule'],
+    });
+
+    const { screen } = rendered;
+
+    await expect
+      .element(screen.getByRole('button', { name: 'Insert Horizontal Rule' }))
+      .toBeVisible();
+    await selectTableCell(rendered);
+    await expect.element(screen.getByRole('button', { name: 'Show Table Options' })).toBeVisible();
+    expect(document.querySelector('[aria-label="Insert Horizontal Rule"]')).toBeNull();
+
+    screen.unmount();
+
+    const { screen: screen2 } = await renderToolbar({ enabledButtons });
+
+    await expect.element(screen2.getByRole('button', { name: 'Insert Table' })).toBeVisible();
+    expect(document.querySelector('[aria-label="Insert Horizontal Rule"]')).toBeNull();
+  });
+
+  it('leaves no divider at the end when nothing can be inserted in a Markdown table', async () => {
+    const rendered = await renderToolbar({
+      // The component uses the heading transformer
+      enabledButtons: ['heading-1', 'bold', 'horizontal-rule'],
+      components: [component],
+    });
+
+    const { screen } = rendered;
+
+    await selectTableCell(rendered);
+    await vi.waitFor(() => {
+      expect(document.querySelector('[aria-label="Insert Horizontal Rule"]')).toBeNull();
+    });
+
+    const toolbar = screen.getByRole('toolbar', { name: 'Text Editor' }).element();
+
+    // Only the one before the inline style buttons remains
+    expect(toolbar.querySelectorAll('[role="separator"]')).toHaveLength(1);
+  });
+
+  it('shows the Insert Horizontal Rule button without any editor component', async () => {
+    const { screen } = await renderToolbar({ enabledButtons: ['bold', 'horizontal-rule'] });
+
+    await expect
+      .element(screen.getByRole('button', { name: 'Insert Horizontal Rule' }))
+      .toBeVisible();
+  });
+
+  it('keeps the text styles and editor components in an HTML table cell', async () => {
+    const rendered = await renderToolbar({
+      enabledButtons,
+      format: 'html',
+      components: [component],
+    });
+
+    const { screen } = rendered;
+
+    await selectTableCell(rendered);
+    await expect.element(screen.getByRole('button', { name: 'Insert' })).toBeVisible();
+
+    await expect.element(screen.getByRole('button', { name: 'Show Table Options' })).toBeVisible();
+    await expect
+      .element(screen.getByRole('button', { name: 'Show Text Style Options' }))
+      .toBeVisible();
+  });
+
+  it('hides the table menu in the plain text mode', async () => {
+    const rendered = await renderToolbar({ enabledButtons });
+    const { screen, store } = rendered;
+
+    await selectTableCell(rendered);
+    await expect.element(screen.getByRole('button', { name: 'Show Table Options' })).toBeVisible();
+
+    store.useRichText = false;
+
+    await expect
+      .element(screen.getByRole('button', { name: 'Insert Table' }))
+      .not.toHaveAttribute('aria-disabled', 'true');
+    expect(document.querySelector('[aria-label="Show Table Options"]')).toBeNull();
+  });
+});
+
+describe('TextEditorToolbar with the alignment menu', () => {
+  it.each([
+    ['in HTML', 'html', true],
+    ['not in Markdown', 'markdown', false],
+  ])('shows the alignment menu %s', async (_name, format, expected) => {
+    const { screen } = await renderToolbar({
+      enabledButtons: ['bold', 'align'],
+      format: /** @type {'html' | 'markdown'} */ (format),
+    });
+
+    await expect.element(screen.getByRole('button', { name: 'Bold' })).toBeVisible();
+    expect(!!document.querySelector('[aria-label="Show Alignment Options"]')).toBe(expected);
+  });
+
+  it('hides the alignment menu without the button or in the plain text mode', async () => {
+    const { screen } = await renderToolbar({ enabledButtons: ['bold'], format: 'html' });
+
+    await expect.element(screen.getByRole('button', { name: 'Bold' })).toBeVisible();
+    expect(document.querySelector('[aria-label="Show Alignment Options"]')).toBeNull();
+
+    screen.unmount();
+
+    const { screen: screen2, store } = await renderToolbar({
+      enabledButtons: ['bold', 'align'],
+      format: 'html',
+    });
+
+    await expect
+      .element(screen2.getByRole('button', { name: 'Show Alignment Options' }))
+      .toBeVisible();
+    store.useRichText = false;
+    await vi.waitFor(() => {
+      expect(document.querySelector('[aria-label="Show Alignment Options"]')).toBeNull();
+    });
+  });
+});

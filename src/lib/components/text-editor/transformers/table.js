@@ -50,8 +50,9 @@ export const getTableColumnsSize = (table) => {
  * @returns {TableCellNode}
  */
 const createTableCell = (textContent) => {
-  // An escaped pipe is part of the cell, even within inline code, like GitHub Flavored Markdown
-  textContent = textContent.replace(/\\n/g, '\n').replace(/\\\|/g, '|');
+  // An escaped pipe is part of the cell, even within inline code, like GitHub Flavored Markdown.
+  // The spaces around the content only separate it from the pipes
+  textContent = textContent.trim().replace(/\\n/g, '\n').replace(/\\\|/g, '|');
 
   const cell = createTableCellNode(TableCellHeaderStates.NO_STATUS);
 

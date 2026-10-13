@@ -13,11 +13,17 @@ import {
  */
 
 /**
+ * Markdown of a horizontal rule. Unlike `---`, it can’t be taken for the underline of a setext
+ * heading or the delimiter of front matter.
+ */
+export const HORIZONTAL_RULE_MARKDOWN = '***';
+
+/**
  * @type {ElementTransformer}
  */
 export const HR = {
   dependencies: [HorizontalRuleNode],
-  export: (node) => (isHorizontalRuleNode(node) ? '***' : null),
+  export: (node) => (isHorizontalRuleNode(node) ? HORIZONTAL_RULE_MARKDOWN : null),
   regExp: /^(---|\*\*\*|___)\s?$/,
   replace: (parentNode, _1, _2, isImport) => {
     const line = createHorizontalRuleNode();

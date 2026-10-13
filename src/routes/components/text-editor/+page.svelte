@@ -45,6 +45,35 @@
   ].join('\n');
 
   let htmlValue = $state(html);
+
+  const htmlButtons = /** @type {const} */ ([
+    'bold',
+    'italic',
+    'strikethrough',
+    'code',
+    'link',
+    'heading-1',
+    'heading-2',
+    'bulleted-list',
+    'numbered-list',
+    'blockquote',
+    'code-block',
+    'align',
+  ]);
+
+  const tableButtons = /** @type {const} */ ([
+    'bold',
+    'italic',
+    'link',
+    'heading-2',
+    'bulleted-list',
+    'table',
+    'horizontal-rule',
+  ]);
+
+  let tableMarkdown = $state(
+    ['| Name | Role |', '| --- | --- |', '| Alice | Editor |', '| Bob | Author |'].join('\n'),
+  );
 </script>
 
 <svelte:head>
@@ -63,10 +92,20 @@
 </section>
 
 <section>
+  <h3>Tables and Horizontal Rules</h3>
+  <Example>
+    <div role="none">
+      <TextEditor buttons={[...tableButtons]} bind:value={tableMarkdown} />
+      <pre class="output">{tableMarkdown}</pre>
+    </div>
+  </Example>
+</section>
+
+<section>
   <h3>HTML Output</h3>
   <Example>
     <div role="none">
-      <TextEditor format="html" bind:value={htmlValue} />
+      <TextEditor format="html" buttons={[...htmlButtons]} bind:value={htmlValue} />
       <pre class="output">{htmlValue}</pre>
     </div>
   </Example>

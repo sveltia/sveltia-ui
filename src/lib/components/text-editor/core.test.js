@@ -136,11 +136,22 @@ vi.mock('@lexical/dragon', () => ({
 
 vi.mock('@lexical/extension', () => ({
   buildEditorFromExtensions: vi.fn(() => editorState),
+  HorizontalRuleExtension: { name: '@lexical/extension/HorizontalRule' },
   HorizontalRuleNode: class {},
 }));
 
 vi.mock('@lexical/html', () => ({
   $generateNodesFromDOM: vi.fn(() => []),
+}));
+
+vi.mock('./alignment.js', () => ({
+  $getSelectedAlignment: vi.fn(() => ''),
+}));
+
+vi.mock('./table.js', () => ({
+  $ensureParagraphAfterTable: vi.fn(),
+  $getSelectedTableCellKey: vi.fn(() => null),
+  $normalizeTableHeaders: vi.fn(),
 }));
 
 vi.mock('./html.js', () => ({
@@ -211,6 +222,7 @@ vi.mock('@lexical/rich-text', () => ({
 
 vi.mock('@lexical/table', () => ({
   TableCellNode: class {},
+  TableExtension: { name: '@lexical/table/Table' },
   TableNode: class {},
   TableRowNode: class {},
 }));
@@ -266,6 +278,7 @@ vi.mock('lexical', () => ({
   COMMAND_PRIORITY_LOW: -1,
   createCommand: vi.fn((type) => ({ type })),
   createEditor: vi.fn(() => editorState),
+  configExtension: vi.fn((extension, config) => [extension, config]),
   defineExtension: vi.fn((extension) => extension),
   DELETE_CHARACTER_COMMAND: 'deleteCharacter',
   $createParagraphNode: vi.fn(() => ({ type: 'element', select: vi.fn() })),
@@ -307,6 +320,12 @@ import {
   onEditorUpdate,
   isStaticDecoratorContent,
 } from './core.js';
+import { $getSelectedAlignment } from './alignment.js';
+import {
+  $ensureParagraphAfterTable,
+  $getSelectedTableCellKey,
+  $normalizeTableHeaders,
+} from './table.js';
 import { BLOCK_SYNTAX_ESCAPE } from './transformers/block-escape.js';
 
 // eslint-disable-next-line no-script-url -- Testing that it’s rejected
@@ -338,6 +357,8 @@ describe('text editor core', () => {
       blockNodeKey: null,
       blockType: 'paragraph',
       inlineTypes: [],
+      tableCellKey: null,
+      alignment: '',
     });
   });
 
@@ -358,6 +379,8 @@ describe('text editor core', () => {
       blockNodeKey: 'node-key',
       blockType: 'heading-2',
       inlineTypes: ['bold'],
+      tableCellKey: null,
+      alignment: '',
     });
   });
 
@@ -380,6 +403,8 @@ describe('text editor core', () => {
       blockNodeKey: 'block-key',
       blockType: 'paragraph',
       inlineTypes: ['link'],
+      tableCellKey: null,
+      alignment: '',
     });
   });
 
@@ -404,6 +429,8 @@ describe('text editor core', () => {
       blockNodeKey: 'block-key',
       blockType: 'heading-3',
       inlineTypes: ['link'],
+      tableCellKey: null,
+      alignment: '',
     });
   });
 
@@ -424,6 +451,8 @@ describe('text editor core', () => {
       blockNodeKey: 'node-key',
       blockType: 'bulleted-list',
       inlineTypes: [],
+      tableCellKey: null,
+      alignment: '',
     });
   });
 
@@ -443,6 +472,8 @@ describe('text editor core', () => {
       blockNodeKey: 'node-key',
       blockType: 'code-block',
       inlineTypes: [],
+      tableCellKey: null,
+      alignment: '',
     });
   });
 
@@ -495,6 +526,115 @@ describe('text editor core', () => {
       $initialEditorState: null,
     });
     dispose();
+  });
+
+  describe('tables', () => {
+    /**
+     * Initialize the editor with the given options, and get the extension dependencies passed to
+     * `buildEditorFromExtensions()` along with the table transforms registered.
+     * @param {Partial<import('#lib/typedefs.js').TextEditorConfig>} config Editor config.
+     * @returns {Promise<{ dependencies: any[], transforms: any[], dispose: () => void }>} Result.
+     */
+    const initWithTable = async (config) => {
+      const { buildEditorFromExtensions } = await import('@lexical/extension');
+      const { TableNode } = await import('@lexical/table');
+
+      vi.mocked(buildEditorFromExtensions).mockClear();
+
+      const { dispose } = initEditor({
+        components: [],
+        useMarkdownShortcuts: false,
+        isCodeEditor: false,
+        modes: [],
+        enabledButtons: ['table'],
+        ...config,
+      });
+
+      return {
+        dependencies: /** @type {any} */ (vi.mocked(buildEditorFromExtensions).mock.calls[0][0])
+          .dependencies,
+        transforms: editorState._transforms.filter(({ klass }) => klass === TableNode),
+        dispose,
+      };
+    };
+
+    it('registers the table extension and transform with the table button', async () => {
+      const { TableExtension } = await import('@lexical/table');
+      const { dependencies, transforms, dispose } = await initWithTable({});
+
+      expect(dependencies).toContainEqual([
+        TableExtension,
+        {
+          hasCellMerge: false,
+          hasCellBackgroundColor: false,
+          hasHorizontalScroll: true,
+          hasTabHandler: true,
+        },
+      ]);
+      expect(transforms).toHaveLength(1);
+
+      const table = {};
+
+      transforms[0].listener(table);
+      expect($ensureParagraphAfterTable).toHaveBeenCalledWith(table);
+      expect($normalizeTableHeaders).toHaveBeenCalledWith(table);
+      dispose();
+    });
+
+    it('leaves the header rows of an HTML table alone', async () => {
+      const { transforms, dispose } = await initWithTable({ format: 'html' });
+      const table = {};
+
+      transforms[0].listener(table);
+      expect($ensureParagraphAfterTable).toHaveBeenCalledWith(table);
+      expect($normalizeTableHeaders).not.toHaveBeenCalled();
+      dispose();
+    });
+
+    it.each([
+      ['without the table button', { enabledButtons: [] }],
+      ['in the code editor', { isCodeEditor: true }],
+    ])('doesn’t register table editing %s', async (_name, config) => {
+      const { dependencies, transforms, dispose } = await initWithTable(config);
+
+      expect(dependencies.some((dep) => Array.isArray(dep))).toBe(false);
+      expect(transforms).toHaveLength(0);
+      dispose();
+    });
+
+    it.each(
+      /** @type {[string, Partial<import('#lib/typedefs.js').TextEditorConfig>, boolean][]} */ ([
+        ['with the horizontal rule button', { enabledButtons: ['horizontal-rule'] }, true],
+        ['without the button', { enabledButtons: [] }, false],
+        ['in the code editor', { enabledButtons: ['horizontal-rule'], isCodeEditor: true }, false],
+      ]),
+    )('registers the horizontal rule extension %s: %s', async (_name, config, expected) => {
+      const { HorizontalRuleExtension } = await import('@lexical/extension');
+      const { dependencies, dispose } = await initWithTable(config);
+
+      expect(dependencies.includes(HorizontalRuleExtension)).toBe(expected);
+      dispose();
+    });
+
+    it('includes the alignment of the selected block in the selection state', () => {
+      const anchor = new ElementNode();
+
+      anchor.getType = () => 'text';
+      selectionState.value = {
+        type: 'range',
+        anchor: { getNode: () => anchor },
+        hasFormat: () => false,
+      };
+      vi.mocked($getSelectedAlignment).mockReturnValueOnce('center');
+
+      expect(getSelectionTypes()).toMatchObject({ alignment: 'center' });
+    });
+
+    it('includes the selected table cell in the selection state', () => {
+      vi.mocked($getSelectedTableCellKey).mockReturnValueOnce('cell-key');
+
+      expect(getSelectionTypes()).toMatchObject({ tableCellKey: 'cell-key' });
+    });
   });
 
   it('skips an import superseded by a newer one while loading the highlighter', async () => {
@@ -690,6 +830,8 @@ describe('text editor core', () => {
       blockNodeKey: 'node-key',
       blockType: 'blockquote',
       inlineTypes: [],
+      tableCellKey: null,
+      alignment: '',
     });
   });
 
@@ -709,6 +851,8 @@ describe('text editor core', () => {
       blockNodeKey: 'node-key',
       blockType: 'code-block',
       inlineTypes: [],
+      tableCellKey: null,
+      alignment: '',
     });
   });
 
@@ -1032,6 +1176,8 @@ describe('text editor core', () => {
       blockNodeKey: null,
       blockType: 'paragraph',
       inlineTypes: [],
+      tableCellKey: null,
+      alignment: '',
     });
   });
 
@@ -1436,6 +1582,37 @@ describe('text editor core', () => {
     vi.mocked($toggleLink).mockClear();
 
     expect(linkCommand?.listener(SCRIPT_URL)).toBe(true);
+    expect($toggleLink).not.toHaveBeenCalled();
+    dispose();
+  });
+
+  it('handles TOGGLE_LINK_COMMAND with the URL and attributes', async () => {
+    const { $toggleLink } = await import('@lexical/link');
+
+    const { dispose } = initEditor({
+      components: [],
+      useMarkdownShortcuts: false,
+      isCodeEditor: false,
+      modes: [],
+      enabledButtons: ['link'],
+    });
+
+    const linkCommand = editorState._commands.find((cmd) => cmd.command === 'toggleLink');
+    const payload = { url: 'https://example.com', target: '_blank' };
+
+    vi.mocked($toggleLink).mockClear();
+
+    expect(linkCommand?.listener(payload)).toBe(true);
+    expect($toggleLink).toHaveBeenCalledWith(payload);
+
+    // An object without the URL removes the link, like `null`
+    vi.mocked($toggleLink).mockClear();
+    linkCommand?.listener({ target: '_blank' });
+    expect($toggleLink).toHaveBeenCalledWith(null);
+
+    // An unsafe URL is ignored, even with attributes
+    vi.mocked($toggleLink).mockClear();
+    expect(linkCommand?.listener({ url: SCRIPT_URL, target: '_blank' })).toBe(true);
     expect($toggleLink).not.toHaveBeenCalled();
     dispose();
   });

@@ -13,6 +13,7 @@
   import EmojiAutocomplete from './emoji-autocomplete.svelte';
   import FloatingLinkEditor from './floating-link-editor.svelte';
   import LexicalRoot from './lexical-root.svelte';
+  import TableCellMenuButton from './table-cell-menu-button.svelte';
   import { getBlockType, getRawTextState } from './raw-markdown.js';
   import { highlightCodeToTokens } from './shiki/facade.js';
   import { getCodeTheme, onCodeThemeChange } from './shiki/theme.js';
@@ -336,6 +337,9 @@
   {#if editorStore.config.enabledButtons.includes('link') && !disabled && !readonly}
     <FloatingLinkEditor />
   {/if}
+  {#if editorStore.config.enabledButtons.includes('table') && !disabled && !readonly}
+    <TableCellMenuButton />
+  {/if}
 </div>
 
 {#if editorStore.showConverterError}
@@ -346,6 +350,8 @@
 
 <style lang="scss">
   .text-editor {
+    // The button on the selected table cell is positioned against this
+    position: relative;
     margin: var(--sui-focus-ring-width);
     border-radius: var(--sui-textbox-border-radius);
     width: calc(100% - var(--sui-focus-ring-width) * 2);

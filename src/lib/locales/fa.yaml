@@ -134,6 +134,34 @@ text_editor:
   # Link dialog input field labels
   text: متن
   url: آدرس (URL)
+  # Link dialog checkbox label and floating link editor button aria-label
+  open_in_new_tab: باز کردن در زبانه جدید
+  # Table dialog title
+  insert_table: درج جدول
+  # Table dialog input field labels
+  rows: ردیف‌ها
+  columns: ستون‌ها
+  # Table menu button and menu aria-labels
+  table_options: گزینه‌های جدول
+  show_table_options: نمایش گزینه‌های جدول
+  # Table menu items
+  insert_row_above: درج ردیف در بالا
+  insert_row_below: درج ردیف در پایین
+  insert_column_left: درج ستون در چپ
+  insert_column_right: درج ستون در راست
+  delete_row: حذف ردیف
+  delete_column: حذف ستون
+  delete_table: حذف جدول
+  # Horizontal rule button aria-label
+  insert_horizontal_rule: درج خط افقی
+  # Alignment menu button and menu aria-labels
+  alignment_options: گزینه‌های تراز
+  show_alignment_options: نمایش گزینه‌های تراز
+  # Alignment menu items
+  align_left: تراز چپ
+  align_center: تراز وسط
+  align_right: تراز راست
+  align_justify: تراز دوطرفه
   # Markdown mode toggle button aria-label
   edit_in_markdown: ویرایش در حالت مارک‌داون
   # HTML mode toggle button aria-label

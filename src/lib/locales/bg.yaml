@@ -134,6 +134,34 @@ text_editor:
   # Link dialog input field labels
   text: Текст
   url: URL адрес
+  # Link dialog checkbox label and floating link editor button aria-label
+  open_in_new_tab: Отваряне в нов раздел
+  # Table dialog title
+  insert_table: Вмъкване на таблица
+  # Table dialog input field labels
+  rows: Редове
+  columns: Колони
+  # Table menu button and menu aria-labels
+  table_options: Опции за таблицата
+  show_table_options: Показване на опциите за таблицата
+  # Table menu items
+  insert_row_above: Вмъкване на ред отгоре
+  insert_row_below: Вмъкване на ред отдолу
+  insert_column_left: Вмъкване на колона отляво
+  insert_column_right: Вмъкване на колона отдясно
+  delete_row: Изтриване на реда
+  delete_column: Изтриване на колоната
+  delete_table: Изтриване на таблицата
+  # Horizontal rule button aria-label
+  insert_horizontal_rule: Вмъкване на хоризонтална линия
+  # Alignment menu button and menu aria-labels
+  alignment_options: Опции за подравняване
+  show_alignment_options: Показване на опциите за подравняване
+  # Alignment menu items
+  align_left: Подравняване вляво
+  align_center: Центриране
+  align_right: Подравняване вдясно
+  align_justify: Двустранно подравняване
   # Markdown mode toggle button aria-label
   edit_in_markdown: Редактиране в Markdown
   # HTML mode toggle button aria-label

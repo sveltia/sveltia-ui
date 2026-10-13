@@ -34,7 +34,8 @@ import { isPlainLanguage } from './shiki/facade.js';
 
 /**
  * Attributes to be kept on the exported elements, by tag name. Anything else Lexical adds, like
- * `class`, `dir`, `style`, `value` or `spellcheck`, is only meant for the editor itself.
+ * `class`, `dir`, `style`, `value` or `spellcheck`, is only meant for the editor itself, except for
+ * the text alignment of a block; see {@link ALIGNABLE_TAGS}.
  * @type {Record<string, string[]>}
  */
 const ALLOWED_ATTRIBUTES = {
@@ -79,17 +80,32 @@ export const getCodeLanguage = (code) =>
   code.className.match(/(?:^|\s)(?:lang|language)-(\S+)/)?.[1];
 
 /**
- * Remove the attributes not listed in {@link ALLOWED_ATTRIBUTES} from the given element.
+ * Elements that keep their text alignment, which is the only style kept in the exported HTML.
+ * Lexical writes it as `style="text-align: …"` for the blocks it can be set on.
+ */
+const ALIGNABLE_TAGS = ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'blockquote', 'li'];
+
+/**
+ * Remove the attributes not listed in {@link ALLOWED_ATTRIBUTES} from the given element, as well as
+ * any style but the text alignment of a block listed in {@link ALIGNABLE_TAGS}.
  * @param {Element} element Element.
  */
 const removeExtraAttributes = (element) => {
   const allowedAttributes = ALLOWED_ATTRIBUTES[element.localName] ?? [];
+
+  const textAlign = ALIGNABLE_TAGS.includes(element.localName)
+    ? /** @type {HTMLElement} */ (element).style.textAlign
+    : '';
 
   [...element.attributes].forEach(({ name }) => {
     if (!allowedAttributes.includes(name)) {
       element.removeAttribute(name);
     }
   });
+
+  if (textAlign) {
+    /** @type {HTMLElement} */ (element).style.textAlign = textAlign;
+  }
 };
 
 /**
@@ -134,7 +150,7 @@ const exportElementNode = (editor, node) => {
 /**
  * Export a paragraph node. Empty paragraphs at the end are left out, as they have no content; one
  * may be added just by clicking below a block decorator. A paragraph that is the only child of a
- * table cell is exported without the `<p>` element.
+ * table cell is exported without the `<p>` element, unless it’s aligned.
  * @param {LexicalEditor} editor Editor instance.
  * @param {ParagraphNode} node Paragraph node.
  * @returns {DOMExportOutput} Export output.
@@ -142,7 +158,8 @@ const exportElementNode = (editor, node) => {
 const exportParagraphNode = (editor, node) => {
   const parent = node.getParent();
 
-  if (parent instanceof TableCellNode && parent.getChildrenSize() === 1) {
+  // Keep the `<p>` of an aligned paragraph, which holds the alignment
+  if (parent instanceof TableCellNode && parent.getChildrenSize() === 1 && !node.getFormatType()) {
     return { element: document.createDocumentFragment() };
   }
 

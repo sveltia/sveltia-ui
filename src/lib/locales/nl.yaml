@@ -134,6 +134,34 @@ text_editor:
   # Link dialog input field labels
   text: Tekst
   url: URL
+  # Link dialog checkbox label and floating link editor button aria-label
+  open_in_new_tab: Openen in nieuw tabblad
+  # Table dialog title
+  insert_table: Tabel invoegen
+  # Table dialog input field labels
+  rows: Rijen
+  columns: Kolommen
+  # Table menu button and menu aria-labels
+  table_options: Tabelopties
+  show_table_options: Tabelopties tonen
+  # Table menu items
+  insert_row_above: Rij erboven invoegen
+  insert_row_below: Rij eronder invoegen
+  insert_column_left: Kolom links invoegen
+  insert_column_right: Kolom rechts invoegen
+  delete_row: Rij verwijderen
+  delete_column: Kolom verwijderen
+  delete_table: Tabel verwijderen
+  # Horizontal rule button aria-label
+  insert_horizontal_rule: Horizontale lijn invoegen
+  # Alignment menu button and menu aria-labels
+  alignment_options: Uitlijningsopties
+  show_alignment_options: Uitlijningsopties tonen
+  # Alignment menu items
+  align_left: Links uitlijnen
+  align_center: Centreren
+  align_right: Rechts uitlijnen
+  align_justify: Uitvullen
   # Markdown mode toggle button aria-label
   edit_in_markdown: Bewerken in Markdown
   # HTML mode toggle button aria-label

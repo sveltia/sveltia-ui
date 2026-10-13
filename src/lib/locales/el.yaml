@@ -134,6 +134,34 @@ text_editor:
   # Link dialog input field labels
   text: Κείμενο
   url: URL
+  # Link dialog checkbox label and floating link editor button aria-label
+  open_in_new_tab: Άνοιγμα σε νέα καρτέλα
+  # Table dialog title
+  insert_table: Εισαγωγή πίνακα
+  # Table dialog input field labels
+  rows: Γραμμές
+  columns: Στήλες
+  # Table menu button and menu aria-labels
+  table_options: Επιλογές πίνακα
+  show_table_options: Εμφάνιση επιλογών πίνακα
+  # Table menu items
+  insert_row_above: Εισαγωγή γραμμής από πάνω
+  insert_row_below: Εισαγωγή γραμμής από κάτω
+  insert_column_left: Εισαγωγή στήλης αριστερά
+  insert_column_right: Εισαγωγή στήλης δεξιά
+  delete_row: Διαγραφή γραμμής
+  delete_column: Διαγραφή στήλης
+  delete_table: Διαγραφή πίνακα
+  # Horizontal rule button aria-label
+  insert_horizontal_rule: Εισαγωγή οριζόντιας γραμμής
+  # Alignment menu button and menu aria-labels
+  alignment_options: Επιλογές στοίχισης
+  show_alignment_options: Εμφάνιση επιλογών στοίχισης
+  # Alignment menu items
+  align_left: Στοίχιση αριστερά
+  align_center: Στοίχιση στο κέντρο
+  align_right: Στοίχιση δεξιά
+  align_justify: Πλήρης στοίχιση
   # Markdown mode toggle button aria-label
   edit_in_markdown: Επεξεργασία σε Markdown
   # HTML mode toggle button aria-label

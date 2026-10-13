@@ -134,6 +134,34 @@ text_editor:
   # Link dialog input field labels
   text: Tekst
   url: URL
+  # Link dialog checkbox label and floating link editor button aria-label
+  open_in_new_tab: Otvori u novoj kartici
+  # Table dialog title
+  insert_table: Umetni tablicu
+  # Table dialog input field labels
+  rows: Retci
+  columns: Stupci
+  # Table menu button and menu aria-labels
+  table_options: Opcije tablice
+  show_table_options: Prikaži opcije tablice
+  # Table menu items
+  insert_row_above: Umetni redak iznad
+  insert_row_below: Umetni redak ispod
+  insert_column_left: Umetni stupac lijevo
+  insert_column_right: Umetni stupac desno
+  delete_row: Izbriši redak
+  delete_column: Izbriši stupac
+  delete_table: Izbriši tablicu
+  # Horizontal rule button aria-label
+  insert_horizontal_rule: Umetni vodoravnu crtu
+  # Alignment menu button and menu aria-labels
+  alignment_options: Opcije poravnanja
+  show_alignment_options: Prikaži opcije poravnanja
+  # Alignment menu items
+  align_left: Poravnaj lijevo
+  align_center: Centriraj
+  align_right: Poravnaj desno
+  align_justify: Obostrano poravnaj
   # Markdown mode toggle button aria-label
   edit_in_markdown: Uredi u Markdownu
   # HTML mode toggle button aria-label

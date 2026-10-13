@@ -134,6 +134,34 @@ text_editor:
   # Link dialog input field labels
   text: Teksti
   url: URL-osoite
+  # Link dialog checkbox label and floating link editor button aria-label
+  open_in_new_tab: Avaa uudessa välilehdessä
+  # Table dialog title
+  insert_table: Lisää taulukko
+  # Table dialog input field labels
+  rows: Rivit
+  columns: Sarakkeet
+  # Table menu button and menu aria-labels
+  table_options: Taulukon valinnat
+  show_table_options: Näytä taulukon valinnat
+  # Table menu items
+  insert_row_above: Lisää rivi yläpuolelle
+  insert_row_below: Lisää rivi alapuolelle
+  insert_column_left: Lisää sarake vasemmalle
+  insert_column_right: Lisää sarake oikealle
+  delete_row: Poista rivi
+  delete_column: Poista sarake
+  delete_table: Poista taulukko
+  # Horizontal rule button aria-label
+  insert_horizontal_rule: Lisää vaakaviiva
+  # Alignment menu button and menu aria-labels
+  alignment_options: Tasauksen valinnat
+  show_alignment_options: Näytä tasauksen valinnat
+  # Alignment menu items
+  align_left: Tasaa vasemmalle
+  align_center: Keskitä
+  align_right: Tasaa oikealle
+  align_justify: Tasaa molemmat reunat
   # Markdown mode toggle button aria-label
   edit_in_markdown: Muokkaa Markdown-muodossa
   # HTML mode toggle button aria-label

@@ -134,6 +134,34 @@ text_editor:
   # Link dialog input field labels
   text: Text
   url: URL
+  # Link dialog checkbox label and floating link editor button aria-label
+  open_in_new_tab: Otevřít na nové kartě
+  # Table dialog title
+  insert_table: Vložit tabulku
+  # Table dialog input field labels
+  rows: Řádky
+  columns: Sloupce
+  # Table menu button and menu aria-labels
+  table_options: Možnosti tabulky
+  show_table_options: Zobrazit možnosti tabulky
+  # Table menu items
+  insert_row_above: Vložit řádek nad
+  insert_row_below: Vložit řádek pod
+  insert_column_left: Vložit sloupec vlevo
+  insert_column_right: Vložit sloupec vpravo
+  delete_row: Odstranit řádek
+  delete_column: Odstranit sloupec
+  delete_table: Odstranit tabulku
+  # Horizontal rule button aria-label
+  insert_horizontal_rule: Vložit vodorovnou čáru
+  # Alignment menu button and menu aria-labels
+  alignment_options: Možnosti zarovnání
+  show_alignment_options: Zobrazit možnosti zarovnání
+  # Alignment menu items
+  align_left: Zarovnat vlevo
+  align_center: Zarovnat na střed
+  align_right: Zarovnat vpravo
+  align_justify: Zarovnat do bloku
   # Markdown mode toggle button aria-label
   edit_in_markdown: Upravit v Markdownu
   # HTML mode toggle button aria-label

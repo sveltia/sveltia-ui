@@ -49,6 +49,11 @@ export const EDITOR_THEME = {
     },
   },
   code: 'code-block',
+  // Lexical wraps a table with an element to scroll it horizontally when the table button is
+  // enabled; see `initEditor()`
+  tableScrollableWrapper: 'table-wrapper',
+  tableCellSelected: 'selected',
+  tableSelection: 'table-selection',
 };
 
 /**
@@ -136,6 +141,16 @@ export const AVAILABLE_BUTTONS = {
     icon: 'code_blocks',
     inline: false,
   },
+  table: {
+    labelKey: 'insert_table',
+    icon: 'table',
+    inline: false,
+  },
+  'horizontal-rule': {
+    labelKey: 'insert_horizontal_rule',
+    icon: 'horizontal_rule',
+    inline: false,
+  },
 };
 
 /**
@@ -187,7 +202,8 @@ export const NODE_MAP = {
 /**
  * Map of Lexical transformers for each block type. The `paragraph` block type is excluded because
  * it is the default block type.
- * @type {Record<Exclude<TextEditorNodeType, 'paragraph'>, Transformer[]>}
+ * @type {Record<Exclude<TextEditorNodeType, 'paragraph' | 'table' | 'horizontal-rule' | 'align'>,
+ * Transformer[]>}
  */
 export const TRANSFORMER_MAP = {
   // ELEMENT_TRANSFORMERS
@@ -247,3 +263,26 @@ export const IMPORT_UPDATE_TAG = 'sui-import';
  * @type {LexicalCommand<void>}
  */
 export const OPEN_LINK_EDITOR_COMMAND = createCommand('OPEN_LINK_EDITOR_COMMAND');
+
+/**
+ * Text alignments offered by the alignment menu, which is only available for HTML, as Markdown
+ * has no syntax for alignment. Like most editors, it offers the physical sides rather than the
+ * logical `start` and `end`, which are still kept as is when the HTML has them.
+ * @type {{ type: 'left' | 'center' | 'right' | 'justify', labelKey: string, icon: string }[]}
+ */
+export const ALIGNMENT_OPTIONS = [
+  { type: 'left', labelKey: 'align_left', icon: 'format_align_left' },
+  { type: 'center', labelKey: 'align_center', icon: 'format_align_center' },
+  { type: 'right', labelKey: 'align_right', icon: 'format_align_right' },
+  { type: 'justify', labelKey: 'align_justify', icon: 'format_align_justify' },
+];
+
+/**
+ * Default number of rows, including the header row, and columns of a new table.
+ */
+export const DEFAULT_TABLE_SIZE = 3;
+
+/**
+ * Maximum number of rows and columns of a new table.
+ */
+export const MAX_TABLE_SIZE = 50;

@@ -17,6 +17,7 @@
   } from 'lexical';
   import { getContext } from 'svelte';
   import Button from '../../button/button.svelte';
+  import Checkbox from '../../checkbox/checkbox.svelte';
   import Dialog from '../../dialog/dialog.svelte';
   import Icon from '../../icon/icon.svelte';
   import TextInput from '../../text-field/text-input.svelte';
@@ -48,6 +49,12 @@
   let hasAnchor = $state(false);
   let anchorURL = $state('');
   let anchorText = $state('');
+  let openInNewTab = $state(false);
+  /**
+   * Whether the link can be set to open in a new tab. Markdown has no syntax for the link target,
+   * so it’s only available for HTML, whose source isn’t edited with the toolbar.
+   */
+  const canSetTarget = $derived(editorStore.config.format === 'html' && editorStore.useRichText);
   /**
    * Whether the URL can be inserted: not empty, and safe to link to.
    */
@@ -168,7 +175,10 @@
       });
 
       await focusEditor(editorStore.editor);
-      editorStore.editor.dispatchCommand(TOGGLE_LINK_COMMAND, anchorURL);
+      editorStore.editor.dispatchCommand(
+        TOGGLE_LINK_COMMAND,
+        canSetTarget && openInNewTab ? { url: anchorURL, target: '_blank' } : anchorURL,
+      );
     } else /* v8 ignore else */ if (editorStore.editor) {
       // The dialog leaves the focus alone (see `restoreFocus` below), so bring it back here
       await focusEditor(editorStore.editor);
@@ -176,6 +186,7 @@
 
     anchorURL = '';
     anchorText = '';
+    openInNewTab = false;
   };
 
   /**
@@ -271,6 +282,11 @@
           onInputKeyDown(event);
         }}
       />
+    </div>
+  {/if}
+  {#if canSetTarget}
+    <div role="none">
+      <Checkbox bind:checked={openInNewTab} label={_('_sui.text_editor.open_in_new_tab')} />
     </div>
   {/if}
 </Dialog>

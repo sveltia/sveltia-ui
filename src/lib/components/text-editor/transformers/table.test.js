@@ -533,6 +533,15 @@ describe('TABLE transformer', () => {
     expect(cells.map(({ text }) => text)).toEqual(['x | y', '`c | d`', 'e \\\\', 'f']);
   });
 
+  it('should drop the spaces around the cell content', () => {
+    mapToTableCells('|  Alice | **Editor**  |');
+
+    expect(tableMockState.convertFromMarkdownString.mock.calls.map(([text]) => text)).toEqual([
+      'Alice',
+      '**Editor**',
+    ]);
+  });
+
   it('export should escape a pipe in a cell, even within inline code', () => {
     const cellA = { __kind: 'table-cell', __headerState: 0, text: 'x | y' };
     const cellB = { __kind: 'table-cell', __headerState: 0, text: '`c | d`' };

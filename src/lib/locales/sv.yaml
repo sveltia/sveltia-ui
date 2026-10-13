@@ -134,6 +134,34 @@ text_editor:
   # Link dialog input field labels
   text: Text
   url: URL
+  # Link dialog checkbox label and floating link editor button aria-label
+  open_in_new_tab: Öppna i ny flik
+  # Table dialog title
+  insert_table: Infoga tabell
+  # Table dialog input field labels
+  rows: Rader
+  columns: Kolumner
+  # Table menu button and menu aria-labels
+  table_options: Tabellinställningar
+  show_table_options: Visa tabellinställningar
+  # Table menu items
+  insert_row_above: Infoga rad ovanför
+  insert_row_below: Infoga rad nedanför
+  insert_column_left: Infoga kolumn till vänster
+  insert_column_right: Infoga kolumn till höger
+  delete_row: Ta bort rad
+  delete_column: Ta bort kolumn
+  delete_table: Ta bort tabell
+  # Horizontal rule button aria-label
+  insert_horizontal_rule: Infoga horisontell linje
+  # Alignment menu button and menu aria-labels
+  alignment_options: Justeringsinställningar
+  show_alignment_options: Visa justeringsinställningar
+  # Alignment menu items
+  align_left: Vänsterjustera
+  align_center: Centrera
+  align_right: Högerjustera
+  align_justify: Marginaljustera
   # Markdown mode toggle button aria-label
   edit_in_markdown: Redigera som Markdown
   # HTML mode toggle button aria-label

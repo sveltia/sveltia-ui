@@ -13,13 +13,15 @@ import { getEditorStore } from '../../../test-utils/editor.js';
 
 /**
  * Render the button with the given content in the editor.
- * @param {string} [value] Markdown.
+ * @param {string} [value] Markdown or HTML.
+ * @param {object} [options] Options.
+ * @param {'markdown' | 'html'} [options.format] Value format.
  * @returns {Promise<{ screen: Awaited<ReturnType<typeof render<typeof EditorFixture>>>,
  * store: TextEditorStore, root: HTMLElement }>} Rendered fixture, the store and the editor root.
  */
-const renderButton = async (value = '') => {
+const renderButton = async (value = '', { format = 'markdown' } = {}) => {
   /** @type {ComponentProps<typeof EditorFixture>} */
-  const props = $state({ store: undefined, component: InsertLinkButton });
+  const props = $state({ store: undefined, config: { format }, component: InsertLinkButton });
   const screen = await render(EditorFixture, props);
   const store = getEditorStore(props);
   const root = /** @type {HTMLElement} */ (screen.container.querySelector('.lexical-root'));
@@ -269,5 +271,47 @@ describe('InsertLinkButton', () => {
     expect(textarea.value).toBe(
       'See the [docs](https://example.com)[Sveltia](https://sveltia.dev)',
     );
+  });
+
+  it('inserts a link opening in a new tab in HTML', async () => {
+    const { screen, store, root } = await renderButton('', { format: 'html' });
+
+    root.focus();
+    await screen.getByRole('button', { name: 'Link' }).click();
+    await waitForOpen();
+
+    const url = screen.getByRole('textbox', { name: 'URL' });
+    const checkbox = screen.getByRole('checkbox', { name: 'Open in New Tab' });
+
+    await vi.waitFor(() => {
+      expect(document.activeElement).toBe(url.element());
+    });
+    await url.fill('https://example.com/');
+    await expect.element(checkbox).not.toBeChecked();
+    await checkbox.click();
+    await expect.element(checkbox).toBeChecked();
+    await screen.getByRole('button', { name: 'Insert' }).click();
+
+    await vi.waitFor(() => {
+      expect(store.inputValue).toContain('target="_blank"');
+    });
+    expect(store.inputValue).toContain('href="https://example.com/"');
+
+    // The checkbox starts unchecked next time
+    await screen.getByRole('button', { name: 'Link' }).click();
+    await waitForOpen();
+    await expect
+      .element(screen.getByRole('checkbox', { name: 'Open in New Tab' }))
+      .not.toBeChecked();
+  });
+
+  it('offers no new tab option in Markdown, which can’t hold the target', async () => {
+    const { screen, root } = await renderButton();
+
+    root.focus();
+    await screen.getByRole('button', { name: 'Link' }).click();
+    await waitForOpen();
+    await expect.element(screen.getByRole('textbox', { name: 'URL' })).toBeVisible();
+    expect(document.querySelector('[role="checkbox"]')).toBeNull();
   });
 });

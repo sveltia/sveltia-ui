@@ -134,6 +134,34 @@ text_editor:
   # Link dialog input field labels
   text: Tekst
   url: URL
+  # Link dialog checkbox label and floating link editor button aria-label
+  open_in_new_tab: Åbn i ny fane
+  # Table dialog title
+  insert_table: Indsæt tabel
+  # Table dialog input field labels
+  rows: Rækker
+  columns: Kolonner
+  # Table menu button and menu aria-labels
+  table_options: Muligheder for tabel
+  show_table_options: Vis muligheder for tabel
+  # Table menu items
+  insert_row_above: Indsæt række over
+  insert_row_below: Indsæt række under
+  insert_column_left: Indsæt kolonne til venstre
+  insert_column_right: Indsæt kolonne til højre
+  delete_row: Slet række
+  delete_column: Slet kolonne
+  delete_table: Slet tabel
+  # Horizontal rule button aria-label
+  insert_horizontal_rule: Indsæt vandret linje
+  # Alignment menu button and menu aria-labels
+  alignment_options: Muligheder for justering
+  show_alignment_options: Vis muligheder for justering
+  # Alignment menu items
+  align_left: Venstrejuster
+  align_center: Centrer
+  align_right: Højrejuster
+  align_justify: Lige margener
   # Markdown mode toggle button aria-label
   edit_in_markdown: Rediger i Markdown
   # HTML mode toggle button aria-label

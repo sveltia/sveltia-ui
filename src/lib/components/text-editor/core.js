@@ -7,7 +7,11 @@ import {
   $isCodeNode as isCodeNode,
 } from '@lexical/code-core';
 import { registerDragonSupport } from '@lexical/dragon';
-import { buildEditorFromExtensions, HorizontalRuleNode } from '@lexical/extension';
+import {
+  buildEditorFromExtensions,
+  HorizontalRuleExtension,
+  HorizontalRuleNode,
+} from '@lexical/extension';
 import { createEmptyHistoryState, registerHistory } from '@lexical/history';
 import { $generateNodesFromDOM as generateNodesFromDOM } from '@lexical/html';
 import {
@@ -37,7 +41,7 @@ import {
   $isQuoteNode as isQuoteNode,
   registerRichText,
 } from '@lexical/rich-text';
-import { TableCellNode, TableNode, TableRowNode } from '@lexical/table';
+import { TableCellNode, TableExtension, TableNode, TableRowNode } from '@lexical/table';
 import {
   $getNearestNodeOfType as getNearestNodeOfType,
   objectKlassEquals,
@@ -48,6 +52,7 @@ import { isURL } from '@sveltia/utils/string';
 import {
   COMMAND_PRIORITY_LOW,
   COMMAND_PRIORITY_NORMAL,
+  configExtension,
   createEditor,
   defineExtension,
   DELETE_CHARACTER_COMMAND,
@@ -107,10 +112,17 @@ import { registerCodeHighlighting, shikiTokenizer } from './shiki/highlighter.js
 import { getCodeTheme, observeCodeTheme } from './shiki/theme.js';
 import { BLOCK_SYNTAX_ESCAPE } from './transformers/block-escape.js';
 import { HR } from './transformers/hr.js';
+import { $getSelectedAlignment } from './alignment.js';
+import {
+  $ensureParagraphAfterTable,
+  $getSelectedTableCellKey,
+  $normalizeTableHeaders,
+} from './table.js';
 import { TABLE } from './transformers/table.js';
 
 /**
  * @import { LexicalEditor, LexicalNode } from 'lexical';
+ * @import { LinkAttributes } from '@lexical/link';
  * @import { ListType } from '@lexical/list';
  * @import { Transformer } from '@lexical/markdown';
  * @import {
@@ -129,6 +141,11 @@ import { TABLE } from './transformers/table.js';
  * @property {LexicalEditor} editor Editor instance.
  * @property {Transformer[]} enabledTransformers List of enabled Markdown transformers.
  * @property {() => void} dispose Remove all registered Lexical listeners.
+ */
+
+/**
+ * Payload of `TOGGLE_LINK_COMMAND` with the URL and the link attributes, like `target`.
+ * @typedef {LinkAttributes & { url: string }} LinkAttributesWithURL
  */
 
 /**
@@ -406,6 +423,9 @@ export const getSelectionTypes = () => {
       blockNodeKey: null,
       blockType: 'paragraph',
       inlineTypes: [],
+      // Several cells can be selected at once
+      tableCellKey: $getSelectedTableCellKey(),
+      alignment: '',
     };
   }
 
@@ -466,6 +486,8 @@ export const getSelectionTypes = () => {
     blockNodeKey: parent?.getKey() ?? null,
     blockType,
     inlineTypes,
+    tableCellKey: $getSelectedTableCellKey(),
+    alignment: $getSelectedAlignment(),
   };
 };
 
@@ -678,12 +700,15 @@ const registerLinkCommands = (editor) =>
     editor.registerCommand(
       TOGGLE_LINK_COMMAND,
       (payload) => {
+        // The payload is the URL, or an object with the URL and attributes like `target`
+        const url = typeof payload === 'string' ? payload : (payload?.url ?? null);
+
         // Ignore an unsafe URL rather than linking to it
-        if (typeof payload === 'string' && !isSafeLinkURL(payload)) {
+        if (url !== null && !isSafeLinkURL(url)) {
           return true;
         }
 
-        toggleLink(typeof payload === 'string' ? payload : null);
+        toggleLink(url === null ? null : /** @type {string | LinkAttributesWithURL} */ (payload));
 
         return true;
       },
@@ -890,13 +915,31 @@ export const initEditor = ({
   format = 'markdown',
 }) => {
   const hasCodeBlock = enabledButtons.includes('code-block') || isCodeEditor;
+  const hasTable = enabledButtons.includes('table') && !isCodeEditor;
+  const hasHorizontalRule = enabledButtons.includes('horizontal-rule') && !isCodeEditor;
 
   const editorExtension = defineExtension({
     name: '@sveltia/ui/editor',
     namespace: 'editor',
-    // `CodeNode` expects the editor to be built with `CodeExtension`, which also registers the
-    // `CodeNode` and `CodeHighlightNode` nodes
-    dependencies: hasCodeBlock ? [CodeExtension] : [],
+    dependencies: [
+      // `CodeNode` expects the editor to be built with `CodeExtension`, which also registers the
+      // `CodeNode` and `CodeHighlightNode` nodes
+      ...(hasCodeBlock ? [CodeExtension] : []),
+      // Table editing: selecting cells, moving between them with the Tab key, and scrolling a wide
+      // table. Markdown and the HTML export support neither merged cells nor cell colors
+      ...(hasTable
+        ? [
+            configExtension(TableExtension, {
+              hasCellMerge: false,
+              hasCellBackgroundColor: false,
+              hasHorizontalScroll: true,
+              hasTabHandler: true,
+            }),
+          ]
+        : []),
+      // Selecting a horizontal rule with a click, so it can be deleted
+      ...(hasHorizontalRule ? [HorizontalRuleExtension] : []),
+    ],
     // Start with an empty editor state like `createEditor` does, instead of a blank paragraph. The
     // Markdown import then becomes the first state in the history, so undoing right after the
     // editor loads doesn’t revert it to the blank paragraph and clear the value
@@ -977,6 +1020,17 @@ export const initEditor = ({
       : undefined,
     hasCodeBlock ? observeCodeTheme(editor) : undefined,
     enabledButtons.includes('link') ? registerLinkCommands(editor) : undefined,
+    hasTable
+      ? editor.registerNodeTransform(TableNode, (table) => {
+          $ensureParagraphAfterTable(table);
+
+          // A Markdown table always has a single header row on top, while an HTML table can have
+          // any number of them, as well as a header column
+          if (format === 'markdown') {
+            $normalizeTableHeaders(table);
+          }
+        })
+      : undefined,
     registerListCommands(editor, enabledButtons),
     registerUpdateEvent(editor, enabledTransformers, format),
     registerTabIndentation(editor),

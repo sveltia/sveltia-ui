@@ -508,6 +508,39 @@ describe('convertHtmlToLexical', () => {
   });
 });
 
+describe('text alignment in HTML', () => {
+  it('should keep the alignment of paragraphs, headings, quotes and list items', async () => {
+    const html =
+      '<p style="text-align: center;">Center</p>' +
+      '<h2 style="text-align: right;">Right</h2>' +
+      '<blockquote style="text-align: justify;">Justify</blockquote>' +
+      '<ul><li style="text-align: center;">Item</li></ul>';
+
+    expect(await roundTrip(html, { enabledButtons: [...BLOCK_BUTTON_TYPES, 'align'] })).toBe(html);
+  });
+
+  it('should keep a logical alignment the menu doesn’t offer', async () => {
+    const html = '<p style="text-align: start;">Start</p><p style="text-align: end;">End</p>';
+
+    expect(await roundTrip(html)).toBe(html);
+  });
+
+  it('should drop any other style', async () => {
+    expect(await roundTrip('<p style="color: red; text-align: center;">Text</p>')).toBe(
+      '<p style="text-align: center;">Text</p>',
+    );
+    expect(await roundTrip('<p style="color: red;">Text</p>')).toBe('<p>Text</p>');
+  });
+
+  it('should keep the paragraph of an aligned table cell', async () => {
+    const html =
+      '<table><tbody><tr><td><p style="text-align: right;">Aligned</p></td><td>Plain</td></tr>' +
+      '</tbody></table>';
+
+    expect(await roundTrip(html)).toBe(html);
+  });
+});
+
 describe('editor components in HTML', () => {
   it('should import a component element along with its content', async () => {
     const editor = createEditorWithComponents();

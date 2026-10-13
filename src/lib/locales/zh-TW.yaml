@@ -134,6 +134,34 @@ text_editor:
   # Link dialog input field labels
   text: 文字
   url: URL
+  # Link dialog checkbox label and floating link editor button aria-label
+  open_in_new_tab: 在新分頁中開啟
+  # Table dialog title
+  insert_table: 插入表格
+  # Table dialog input field labels
+  rows: 列數
+  columns: 欄數
+  # Table menu button and menu aria-labels
+  table_options: 表格選項
+  show_table_options: 顯示表格選項
+  # Table menu items
+  insert_row_above: 在上方插入列
+  insert_row_below: 在下方插入列
+  insert_column_left: 在左側插入欄
+  insert_column_right: 在右側插入欄
+  delete_row: 刪除列
+  delete_column: 刪除欄
+  delete_table: 刪除表格
+  # Horizontal rule button aria-label
+  insert_horizontal_rule: 插入水平線
+  # Alignment menu button and menu aria-labels
+  alignment_options: 對齊選項
+  show_alignment_options: 顯示對齊選項
+  # Alignment menu items
+  align_left: 靠左對齊
+  align_center: 置中對齊
+  align_right: 靠右對齊
+  align_justify: 左右對齊
   # Markdown mode toggle button aria-label
   edit_in_markdown: 以 Markdown 編輯
   # HTML mode toggle button aria-label

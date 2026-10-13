@@ -134,6 +134,34 @@ text_editor:
   # Link dialog input field labels
   text: テキスト
   url: URL
+  # Link dialog checkbox label and floating link editor button aria-label
+  open_in_new_tab: 新しいタブで開く
+  # Table dialog title
+  insert_table: 表を挿入
+  # Table dialog input field labels
+  rows: 行数
+  columns: 列数
+  # Table menu button and menu aria-labels
+  table_options: 表のオプション
+  show_table_options: 表のオプションを表示
+  # Table menu items
+  insert_row_above: 上に行を挿入
+  insert_row_below: 下に行を挿入
+  insert_column_left: 左に列を挿入
+  insert_column_right: 右に列を挿入
+  delete_row: 行を削除
+  delete_column: 列を削除
+  delete_table: 表を削除
+  # Horizontal rule button aria-label
+  insert_horizontal_rule: 水平線を挿入
+  # Alignment menu button and menu aria-labels
+  alignment_options: 配置のオプション
+  show_alignment_options: 配置のオプションを表示
+  # Alignment menu items
+  align_left: 左揃え
+  align_center: 中央揃え
+  align_right: 右揃え
+  align_justify: 両端揃え
   # Markdown mode toggle button aria-label
   edit_in_markdown: マークダウンで編集
   # HTML mode toggle button aria-label

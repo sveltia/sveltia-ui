@@ -134,6 +134,34 @@ text_editor:
   # Link dialog input field labels
   text: نص
   url: الرابط
+  # Link dialog checkbox label and floating link editor button aria-label
+  open_in_new_tab: فتح في علامة تبويب جديدة
+  # Table dialog title
+  insert_table: إدراج جدول
+  # Table dialog input field labels
+  rows: الصفوف
+  columns: الأعمدة
+  # Table menu button and menu aria-labels
+  table_options: خيارات الجدول
+  show_table_options: إظهار خيارات الجدول
+  # Table menu items
+  insert_row_above: إدراج صف أعلاه
+  insert_row_below: إدراج صف أسفله
+  insert_column_left: إدراج عمود إلى اليسار
+  insert_column_right: إدراج عمود إلى اليمين
+  delete_row: حذف الصف
+  delete_column: حذف العمود
+  delete_table: حذف الجدول
+  # Horizontal rule button aria-label
+  insert_horizontal_rule: إدراج خط أفقي
+  # Alignment menu button and menu aria-labels
+  alignment_options: خيارات المحاذاة
+  show_alignment_options: إظهار خيارات المحاذاة
+  # Alignment menu items
+  align_left: محاذاة لليسار
+  align_center: توسيط
+  align_right: محاذاة لليمين
+  align_justify: ضبط
   # Markdown mode toggle button aria-label
   edit_in_markdown: التحرير بلغة Markdown
   # HTML mode toggle button aria-label

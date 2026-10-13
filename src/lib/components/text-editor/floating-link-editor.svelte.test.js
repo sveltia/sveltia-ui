@@ -74,13 +74,15 @@ const waitForSelectedText = async (store, text) => {
 };
 
 /**
- * Render the floating link editor with a live editor holding the given Markdown.
- * @param {string} value Markdown.
+ * Render the floating link editor with a live editor holding the given Markdown or HTML.
+ * @param {string} value Markdown or HTML.
+ * @param {object} [options] Options.
+ * @param {'markdown' | 'html'} [options.format] Value format.
  * @returns {Promise<{ store: TextEditorStore, root: HTMLElement }>} The store and the editor root.
  */
-const renderEditor = async (value) => {
+const renderEditor = async (value, { format = 'markdown' } = {}) => {
   /** @type {ComponentProps<typeof EditorFixture>} */
-  const props = $state({ store: undefined, component: FloatingLinkEditor });
+  const props = $state({ store: undefined, config: { format }, component: FloatingLinkEditor });
   const screen = await render(EditorFixture, props);
   const store = getEditorStore(props);
   const root = /** @type {HTMLElement} */ (screen.container.querySelector('.lexical-root'));
@@ -515,5 +517,110 @@ describe('FloatingLinkEditor (in TextEditor)', () => {
       setTimeout(resolve, 100);
     });
     expect(getPopup()).toBeNull();
+  });
+
+  describe('opening in a new tab', () => {
+    it('toggles the target of the link being edited in HTML', async () => {
+      const { store, root } = await renderEditor(
+        '<p>See <a href="https://example.com/">Example</a> here</p>',
+        { format: 'html' },
+      );
+
+      placeCaret(root, /** @type {HTMLElement} */ (root.querySelector('a')));
+      await vi.waitFor(() => {
+        expect(getPopup()).not.toBeNull();
+      });
+      // The view mode has no toggle
+      expect(getPopupButton('Open in New Tab')).toBeNull();
+
+      getPopupButton('Edit Link').click();
+      await vi.waitFor(() => {
+        expect(document.activeElement).toBe(getPopupInput());
+      });
+      expect(getPopupButton('Open in New Tab').getAttribute('aria-pressed')).toBe('false');
+      getPopupButton('Open in New Tab').click();
+      await vi.waitFor(() => {
+        expect(getPopupButton('Open in New Tab').getAttribute('aria-pressed')).toBe('true');
+      });
+      // Still in the edit mode
+      expect(getPopupInput()).not.toBeNull();
+      getPopupButton('Update').click();
+      await vi.waitFor(() => {
+        expect(store.inputValue).toBe(
+          '<p>See <a href="https://example.com/" target="_blank">Example</a> here</p>',
+        );
+      });
+
+      // The toggle starts from the link’s target, and turning it off removes the target
+      await vi.waitFor(() => {
+        expect(getPopupButton('Edit Link')).not.toBeNull();
+      });
+      getPopupButton('Edit Link').click();
+      await vi.waitFor(() => {
+        expect(getPopupButton('Open in New Tab').getAttribute('aria-pressed')).toBe('true');
+      });
+      getPopupButton('Open in New Tab').click();
+      getPopupButton('Update').click();
+      await vi.waitFor(() => {
+        expect(store.inputValue).toBe('<p>See <a href="https://example.com/">Example</a> here</p>');
+      });
+    });
+
+    it('keeps another target unless the toggle is changed', async () => {
+      const { store, root } = await renderEditor(
+        '<p>See <a href="https://example.com/" target="_top">Example</a> here</p>',
+        { format: 'html' },
+      );
+
+      placeCaret(root, /** @type {HTMLElement} */ (root.querySelector('a')));
+      await vi.waitFor(() => {
+        expect(getPopup()).not.toBeNull();
+      });
+      getPopupButton('Edit Link').click();
+      await vi.waitFor(() => {
+        expect(document.activeElement).toBe(getPopupInput());
+      });
+      expect(getPopupButton('Open in New Tab').getAttribute('aria-pressed')).toBe('false');
+      await userEvent.fill(getPopupInput(), 'https://example.org/');
+      getPopupButton('Update').click();
+      await vi.waitFor(() => {
+        expect(store.inputValue).toBe(
+          '<p>See <a href="https://example.org/" target="_top">Example</a> here</p>',
+        );
+      });
+    });
+
+    it('links the selected text to open in a new tab in HTML', async () => {
+      const { store, root } = await renderEditor('<p>See the docs</p>', { format: 'html' });
+
+      placeCaret(root, /** @type {HTMLElement} */ (root.querySelector('p')), { selectAll: true });
+      await waitForSelectedText(store, 'See the docs');
+      store.editor?.dispatchCommand(OPEN_LINK_EDITOR_COMMAND, undefined);
+      await vi.waitFor(() => {
+        expect(document.activeElement).toBe(getPopupInput());
+      });
+
+      await userEvent.fill(getPopupInput(), 'https://example.com/');
+      getPopupButton('Open in New Tab').click();
+      getPopupButton('Insert').click();
+      await vi.waitFor(() => {
+        expect(store.inputValue).toContain('target="_blank"');
+      });
+      expect(store.inputValue).toContain('href="https://example.com/"');
+    });
+
+    it('offers no toggle in Markdown, which can’t hold the target', async () => {
+      const { root } = await renderEditor('See [Example](https://example.com/) here');
+
+      placeCaret(root, /** @type {HTMLElement} */ (root.querySelector('a')));
+      await vi.waitFor(() => {
+        expect(getPopup()).not.toBeNull();
+      });
+      getPopupButton('Edit Link').click();
+      await vi.waitFor(() => {
+        expect(document.activeElement).toBe(getPopupInput());
+      });
+      expect(getPopupButton('Open in New Tab')).toBeNull();
+    });
   });
 });

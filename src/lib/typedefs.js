@@ -300,7 +300,8 @@
  */
 
 /**
- * @typedef {TextEditorBlockType | TextEditorInlineType} TextEditorNodeType
+ * @typedef {TextEditorBlockType | TextEditorInlineType | 'table' | 'horizontal-rule' | 'align'}
+ * TextEditorNodeType
  */
 
 /**
@@ -435,6 +436,9 @@
  * @property {?string} blockNodeKey Block level node key.
  * @property {TextEditorBlockType} blockType Block level type of the current selection.
  * @property {TextEditorInlineType[]} inlineTypes Inline level types of the current selection.
+ * @property {?string} [tableCellKey] Key of the table cell the selection is in, if any.
+ * @property {import('lexical').ElementFormatType} [alignment] Text alignment of the block the
+ * selection is in. An empty string means the default alignment.
  */
 
 /**

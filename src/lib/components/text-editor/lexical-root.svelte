@@ -302,10 +302,49 @@
         word-break: normal;
       }
 
+      // Scroll a wide table horizontally; see `EDITOR_THEME`
+      .table-wrapper {
+        overflow-x: auto;
+
+        &:not(:first-child) {
+          margin-top: 1em;
+        }
+
+        &:not(:last-child) {
+          margin-bottom: 1em;
+        }
+      }
+
+      :is(th, td) {
+        // Leave room for the menu button on the selected cell
+        min-width: 80px;
+        vertical-align: top;
+        text-align: start;
+      }
+
+      th {
+        background-color: var(--sui-secondary-background-color);
+      }
+
+      // Several cells selected at once are highlighted instead of the text
+      :is(th, td).selected {
+        background-color: var(--sui-selected-background-color);
+      }
+
+      .table-selection ::selection {
+        background-color: transparent;
+      }
+
       hr {
         margin: var(--sui-paragraph-margin) 0;
         border: none;
         padding: 0;
+
+        // Selected with a click, to be deleted; see `HorizontalRuleExtension`
+        &.selected {
+          outline: 2px solid var(--sui-primary-accent-color);
+          outline-offset: 4px;
+        }
 
         &::after {
           display: block;

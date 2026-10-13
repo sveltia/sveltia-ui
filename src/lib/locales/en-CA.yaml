@@ -134,6 +134,34 @@ text_editor:
   # Link dialog input field labels
   text: Text
   url: URL
+  # Link dialog checkbox label and floating link editor button aria-label
+  open_in_new_tab: Open in New Tab
+  # Table dialog title
+  insert_table: Insert Table
+  # Table dialog input field labels
+  rows: Rows
+  columns: Columns
+  # Table menu button and menu aria-labels
+  table_options: Table Options
+  show_table_options: Show Table Options
+  # Table menu items
+  insert_row_above: Insert Row Above
+  insert_row_below: Insert Row Below
+  insert_column_left: Insert Column Left
+  insert_column_right: Insert Column Right
+  delete_row: Delete Row
+  delete_column: Delete Column
+  delete_table: Delete Table
+  # Horizontal rule button aria-label
+  insert_horizontal_rule: Insert Horizontal Rule
+  # Alignment menu button and menu aria-labels
+  alignment_options: Alignment Options
+  show_alignment_options: Show Alignment Options
+  # Alignment menu items
+  align_left: Left Align
+  align_center: Centre Align
+  align_right: Right Align
+  align_justify: Justify Align
   # Markdown mode toggle button aria-label
   edit_in_markdown: Edit in Markdown
   # HTML mode toggle button aria-label

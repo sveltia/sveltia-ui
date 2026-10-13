@@ -134,6 +134,34 @@ text_editor:
   # Link dialog input field labels
   text: 텍스트
   url: URL
+  # Link dialog checkbox label and floating link editor button aria-label
+  open_in_new_tab: 새 탭에서 열기
+  # Table dialog title
+  insert_table: 표 삽입
+  # Table dialog input field labels
+  rows: 행
+  columns: 열
+  # Table menu button and menu aria-labels
+  table_options: 표 옵션
+  show_table_options: 표 옵션 표시
+  # Table menu items
+  insert_row_above: 위에 행 삽입
+  insert_row_below: 아래에 행 삽입
+  insert_column_left: 왼쪽에 열 삽입
+  insert_column_right: 오른쪽에 열 삽입
+  delete_row: 행 삭제
+  delete_column: 열 삭제
+  delete_table: 표 삭제
+  # Horizontal rule button aria-label
+  insert_horizontal_rule: 가로줄 삽입
+  # Alignment menu button and menu aria-labels
+  alignment_options: 정렬 옵션
+  show_alignment_options: 정렬 옵션 표시
+  # Alignment menu items
+  align_left: 왼쪽 정렬
+  align_center: 가운데 정렬
+  align_right: 오른쪽 정렬
+  align_justify: 양쪽 정렬
   # Markdown mode toggle button aria-label
   edit_in_markdown: 마크다운으로 편집
   # HTML mode toggle button aria-label

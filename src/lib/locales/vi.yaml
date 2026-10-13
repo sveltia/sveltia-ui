@@ -134,6 +134,34 @@ text_editor:
   # Link dialog input field labels
   text: Văn bản
   url: URL
+  # Link dialog checkbox label and floating link editor button aria-label
+  open_in_new_tab: Mở trong thẻ mới
+  # Table dialog title
+  insert_table: Chèn bảng
+  # Table dialog input field labels
+  rows: Số hàng
+  columns: Số cột
+  # Table menu button and menu aria-labels
+  table_options: Tùy chọn bảng
+  show_table_options: Hiện tùy chọn bảng
+  # Table menu items
+  insert_row_above: Chèn hàng phía trên
+  insert_row_below: Chèn hàng phía dưới
+  insert_column_left: Chèn cột bên trái
+  insert_column_right: Chèn cột bên phải
+  delete_row: Xóa hàng
+  delete_column: Xóa cột
+  delete_table: Xóa bảng
+  # Horizontal rule button aria-label
+  insert_horizontal_rule: Chèn đường kẻ ngang
+  # Alignment menu button and menu aria-labels
+  alignment_options: Tùy chọn căn lề
+  show_alignment_options: Hiện tùy chọn căn lề
+  # Alignment menu items
+  align_left: Căn trái
+  align_center: Căn giữa
+  align_right: Căn phải
+  align_justify: Căn đều
   # Markdown mode toggle button aria-label
   edit_in_markdown: Chỉnh sửa bằng Markdown
   # HTML mode toggle button aria-label

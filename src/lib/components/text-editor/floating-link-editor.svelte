@@ -65,7 +65,7 @@
 
   /**
    * The link at the selection, if any.
-   * @type {{ key: string, url: string } | undefined}
+   * @type {{ key: string, url: string, target: string | null } | undefined}
    */
   let currentLink = $state();
   /**
@@ -86,6 +86,15 @@
   let editTarget = $state.raw();
   /** URL entered in the edit mode. */
   let url = $state('');
+  /** Whether the link opens in a new tab, chosen in the edit mode. */
+  let openInNewTab = $state(false);
+  /** Whether the link opened in a new tab when the edit mode started. */
+  let initialOpenInNewTab = false;
+  /**
+   * Whether the link can be set to open in a new tab. Markdown has no syntax for the link target,
+   * so it’s only available for HTML.
+   */
+  const canSetTarget = $derived(editorStore.config.format === 'html');
   /**
    * Viewport-relative bounds of the link, or the selected text, the popup is anchored to.
    * @type {EmojiAnchorRect | undefined}
@@ -208,10 +217,13 @@
    * Switch the popup to the edit mode, and move the focus to the URL field.
    * @param {LinkEditTarget} target What to edit.
    * @param {string} initialURL URL to fill the field with.
+   * @param {boolean} [newTab] Whether the link opens in a new tab.
    */
-  const startEditing = async (target, initialURL) => {
+  const startEditing = async (target, initialURL, newTab = false) => {
     editTarget = target;
     url = initialURL;
+    openInNewTab = newTab;
+    initialOpenInNewTab = newTab;
     dismissedLinkKey = undefined;
     await tick();
     reposition();
@@ -226,6 +238,7 @@
   const stopEditing = () => {
     editTarget = undefined;
     url = '';
+    openInNewTab = false;
   };
 
   /**
@@ -249,6 +262,7 @@
     /** @type {LinkEditTarget | undefined} */
     let target;
     let initialURL = '';
+    let newTab = false;
 
     editorStore.editor?.getEditorState().read(() => {
       const link = findLink();
@@ -256,6 +270,7 @@
       if (link) {
         target = { linkKey: link.getKey() };
         initialURL = link.getURL();
+        newTab = link.getTarget() === '_blank';
 
         return;
       }
@@ -279,7 +294,7 @@
       return false;
     }
 
-    startEditing(target, initialURL);
+    startEditing(target, initialURL, newTab);
 
     return true;
   };
@@ -292,6 +307,15 @@
     const { editor } = editorStore;
     const target = editTarget;
     const newURL = url.trim();
+
+    // Only set the target when the toggle has been changed, so another target, like `_top`, is
+    // kept. The toggle isn’t available for Markdown, which can’t hold the target
+    const newTarget =
+      canSetTarget && openInNewTab !== initialOpenInNewTab
+        ? openInNewTab
+          ? '_blank'
+          : null
+        : undefined;
 
     // The Apply button is disabled and the Enter key is ignored otherwise
     /* v8 ignore next */
@@ -309,13 +333,20 @@
         /* v8 ignore else */
         if (isLinkNode(node)) {
           node.setURL(newURL);
+
+          if (newTarget !== undefined) {
+            node.setTarget(newTarget);
+          }
         }
       });
     } else {
       editor.update(() => {
         setSelection(target.selection.clone());
       });
-      editor.dispatchCommand(TOGGLE_LINK_COMMAND, newURL);
+      editor.dispatchCommand(
+        TOGGLE_LINK_COMMAND,
+        newTarget ? { url: newURL, target: newTarget } : newURL,
+      );
     }
 
     await refocusEditor();
@@ -417,7 +448,9 @@
       editorState.read(() => {
         const link = findLink();
 
-        currentLink = link ? { key: link.getKey(), url: link.getURL() } : undefined;
+        currentLink = link
+          ? { key: link.getKey(), url: link.getURL(), target: link.getTarget() }
+          : undefined;
 
         // What is being edited may be gone, e.g. when the value is replaced from outside, in which
         // case there is nothing to apply the URL to anymore
@@ -580,6 +613,21 @@
           onInputKeyDown(event);
         }}
       />
+      {#if canSetTarget}
+        <Button
+          iconic
+          variant="ghost"
+          pressed={openInNewTab}
+          aria-label={_('_sui.text_editor.open_in_new_tab')}
+          onclick={() => {
+            openInNewTab = !openInNewTab;
+          }}
+        >
+          {#snippet startIcon()}
+            <Icon name="open_in_new" />
+          {/snippet}
+        </Button>
+      {/if}
       <Button
         iconic
         variant="ghost"
@@ -623,7 +671,11 @@
           // The link is still at the selection, since the focus is within the popup
           /* v8 ignore else */
           if (currentLink) {
-            startEditing({ linkKey: currentLink.key }, currentLink.url);
+            startEditing(
+              { linkKey: currentLink.key },
+              currentLink.url,
+              currentLink.target === '_blank',
+            );
           }
         }}
       >

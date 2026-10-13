@@ -11,10 +11,14 @@
   import Menu from '../../menu/menu.svelte';
   import { AVAILABLE_BUTTONS, BLOCK_BUTTON_TYPES, INLINE_BUTTON_TYPES } from '../constants.js';
   import CodeLanguageSwitcher from './code-language-switcher.svelte';
+  import AlignMenuButton from './align-menu-button.svelte';
   import FormatTextButton from './format-text-button.svelte';
+  import InsertHorizontalRuleButton from './insert-horizontal-rule-button.svelte';
   import InsertItemButton from './insert-item-button.svelte';
   import InsertLinkButton from './insert-link-button.svelte';
   import InsertMenuButton from './insert-menu-button.svelte';
+  import InsertTableButton from './insert-table-button.svelte';
+  import TableActionMenu from './table-action-menu.svelte';
   import ToggleBlockMenuItem from './toggle-block-menu-item.svelte';
   import ToolbarWrapper from './toolbar-wrapper.svelte';
 
@@ -71,6 +75,41 @@
    */
   const canFormat = $derived(editorStore.useRichText || !isHtml);
 
+  const hasTable = $derived(editorStore.config.enabledButtons.includes('table'));
+  /**
+   * Whether the alignment menu is available. Markdown has no syntax for alignment, so it’s only
+   * available for HTML, and only in the rich text mode, as the plain text mode shows the source.
+   */
+  const canAlign = $derived(
+    isHtml && editorStore.useRichText && editorStore.config.enabledButtons.includes('align'),
+  );
+  const hasHorizontalRule = $derived(editorStore.config.enabledButtons.includes('horizontal-rule'));
+  /**
+   * Key of the table cell the caret is in, if any. The table menu only works with the rich text
+   * editor.
+   */
+  const tableCellKey = $derived(
+    editorStore.useRichText ? (editorStore.selection.tableCellKey ?? null) : null,
+  );
+  /**
+   * Whether the caret is in a Markdown table cell, which can only have inline content, so neither
+   * a horizontal rule nor an editor component can be inserted. A cell is also exported with the
+   * standard Markdown syntax only, so an editor component would be lost.
+   */
+  const inMarkdownTable = $derived(!!tableCellKey && !isHtml);
+  /**
+   * Whether any of the buttons to insert a table, a horizontal rule or an editor component is
+   * shown.
+   */
+  const hasInsertButtons = $derived(
+    hasTable ||
+      (!inMarkdownTable && (hasHorizontalRule || editorStore.config.components.length > 0)),
+  );
+  /**
+   * Whether the block level styles are available.
+   */
+  const canChangeBlock = $derived(canFormat && !inMarkdownTable);
+
   /**
    * Enabled inline level buttons.
    * @type {TextEditorInlineType[]}
@@ -85,7 +124,7 @@
 </script>
 
 <ToolbarWrapper disabled={disabled || readonly} ariaLabel={_('_sui.text_editor.text_editor')}>
-  {#if canFormat && blockLevelButtons.length > 1}
+  {#if canChangeBlock && blockLevelButtons.length > 1}
     <MenuButton
       aria-label={_('_sui.text_editor.show_text_style_options')}
       aria-controls={editorStore.controlId}
@@ -109,6 +148,22 @@
     <Divider orientation="vertical" />
     <CodeLanguageSwitcher />
   {:else if canFormat}
+    {#if hasTable && tableCellKey}
+      {#if canChangeBlock && blockLevelButtons.length > 1}
+        <Divider orientation="vertical" />
+      {/if}
+      <MenuButton
+        aria-label={_('_sui.text_editor.show_table_options')}
+        aria-controls={editorStore.controlId}
+      >
+        {#snippet startIcon()}
+          <Icon name="table_edit" />
+        {/snippet}
+        {#snippet popup()}
+          <TableActionMenu cellKey={tableCellKey} />
+        {/snippet}
+      </MenuButton>
+    {/if}
     {#if inlineLevelButtons.length}
       <Divider orientation="vertical" />
       <ButtonGroup>
@@ -121,13 +176,26 @@
         {/each}
       </ButtonGroup>
     {/if}
-    {#if editorStore.config.components.length}
+    {#if canAlign}
       <Divider orientation="vertical" />
-      {#each buttons as button (button.id)}
-        <InsertItemButton component={button} />
-      {/each}
-      {#if menuitems.length}
-        <InsertMenuButton components={menuitems} />
+      <AlignMenuButton />
+    {/if}
+    {#if hasInsertButtons}
+      <Divider orientation="vertical" />
+      {#if hasTable}
+        <!-- Tables can’t be nested -->
+        <InsertTableButton disabled={!!tableCellKey} />
+      {/if}
+      {#if !inMarkdownTable}
+        {#if hasHorizontalRule}
+          <InsertHorizontalRuleButton />
+        {/if}
+        {#each buttons as button (button.id)}
+          <InsertItemButton component={button} />
+        {/each}
+        {#if menuitems.length}
+          <InsertMenuButton components={menuitems} />
+        {/if}
       {/if}
     {/if}
   {/if}

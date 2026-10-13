@@ -134,6 +134,34 @@ text_editor:
   # Link dialog input field labels
   text: Text
   url: URL
+  # Link dialog checkbox label and floating link editor button aria-label
+  open_in_new_tab: Obre en una pestanya nova
+  # Table dialog title
+  insert_table: Insereix una taula
+  # Table dialog input field labels
+  rows: Files
+  columns: Columnes
+  # Table menu button and menu aria-labels
+  table_options: Opcions de la taula
+  show_table_options: Mostra les opcions de la taula
+  # Table menu items
+  insert_row_above: Insereix una fila a sobre
+  insert_row_below: Insereix una fila a sota
+  insert_column_left: Insereix una columna a l’esquerra
+  insert_column_right: Insereix una columna a la dreta
+  delete_row: Elimina la fila
+  delete_column: Elimina la columna
+  delete_table: Elimina la taula
+  # Horizontal rule button aria-label
+  insert_horizontal_rule: Insereix una línia horitzontal
+  # Alignment menu button and menu aria-labels
+  alignment_options: Opcions d’alineació
+  show_alignment_options: Mostra les opcions d’alineació
+  # Alignment menu items
+  align_left: Alinea a l’esquerra
+  align_center: Centra
+  align_right: Alinea a la dreta
+  align_justify: Justifica
   # Markdown mode toggle button aria-label
   edit_in_markdown: Edita en Markdown
   # HTML mode toggle button aria-label
