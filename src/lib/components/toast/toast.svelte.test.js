@@ -13,6 +13,17 @@ import Toast from './toast.svelte';
  */
 const getBase = () => document.querySelector('.sui.toast-base.enabled');
 
+/**
+ * Wait for the CSS transitions of the toasts to finish, such as a toast opening or collapsing.
+ */
+const finishTransitions = async () => {
+  await Promise.all(
+    [...document.querySelectorAll('.sui.toast')]
+      .flatMap((toast) => toast.getAnimations())
+      .map((animation) => animation.finished),
+  );
+};
+
 describe('Toast', () => {
   beforeEach(() => {
     vi.useFakeTimers();
@@ -40,6 +51,123 @@ describe('Toast', () => {
     await render(Toast, { show: true, children: text('Two') });
     expect(document.querySelectorAll('.sui.toast-base')).toHaveLength(1);
     expect(getBase()?.querySelectorAll('.sui.toast')).toHaveLength(2);
+  });
+
+  it('stacks the toasts at the same position instead of overlapping them', async () => {
+    await render(Toast, { show: true, position: 'bottom-right', children: text('One') });
+    await render(Toast, { show: true, position: 'bottom-right', children: text('Two') });
+    await render(Toast, { show: true, position: 'top-left', children: text('Three') });
+
+    const base = /** @type {HTMLElement} */ (getBase());
+    const lanes = [...base.querySelectorAll(':scope > .toast-lane')];
+    const [one, two] = [...base.querySelectorAll('.toast-lane.bottom-right > .sui.toast')];
+
+    expect(lanes.map((lane) => lane.className)).toEqual([
+      'toast-lane bottom-right',
+      'toast-lane top-left',
+    ]);
+    expect(one.textContent).toContain('One');
+    expect(two.textContent).toContain('Two');
+    // The later toast is below the earlier one, with the gap in between, once they’ve opened
+    await finishTransitions();
+    expect(two.getBoundingClientRect().top - one.getBoundingClientRect().bottom).toBe(8);
+    expect(base.querySelector('.toast-lane.top-left')?.textContent).toContain('Three');
+  });
+
+  it('puts the newest toast next to the edge of the screen', async () => {
+    await render(Toast, { show: true, position: 'top-left', children: text('One') });
+    await render(Toast, { show: true, position: 'top-left', children: text('Two') });
+    await render(Toast, { show: true, position: 'bottom-left', children: text('Three') });
+    await render(Toast, { show: true, position: 'bottom-left', children: text('Four') });
+
+    /**
+     * Get the text of the toasts in a lane, from top to bottom.
+     * @param {string} position Lane position.
+     * @returns {string[]} Text.
+     */
+    const getTexts = (position) =>
+      [...document.querySelectorAll(`.toast-lane.${position} > .sui.toast`)].map(
+        (toast) => toast.textContent?.trim() ?? '',
+      );
+
+    expect(getTexts('top-left')).toEqual(['Two', 'One']);
+    expect(getTexts('bottom-left')).toEqual(['Three', 'Four']);
+  });
+
+  it('keeps one lane per position, whatever the value', async () => {
+    /** @type {ComponentProps<typeof Toast>} */
+    const props = $state({
+      show: true,
+      duration: 0,
+      // Not a valid class name, so it can’t be looked up with a selector
+      position: /** @type {any} */ ('far away'),
+      children: text('Saved'),
+    });
+
+    await render(Toast, props);
+    props.show = false;
+    await vi.advanceTimersByTimeAsync(250);
+    props.show = true;
+    await vi.waitFor(() => {
+      expect(getBase()?.querySelector('.sui.toast')?.getAttribute('aria-hidden')).toBe('false');
+    });
+    expect(getBase()?.children).toHaveLength(1);
+  });
+
+  it('clips its content, with the shadow of an alert drawn outside', async () => {
+    await render(Toast, { show: true, children: html('<div class="alert">Saved</div>') });
+
+    const style = getComputedStyle(
+      /** @type {HTMLElement} */ (getBase()?.querySelector('.sui.toast')),
+    );
+
+    expect(style.overflow).toBe('clip');
+    expect(style.filter).toMatch(/^drop-shadow\(/);
+  });
+
+  it('collapses a toast that goes, so the next one slides into its place', async () => {
+    await render(Toast, { show: true, position: 'top-left', children: text('One') });
+
+    /** @type {ComponentProps<typeof Toast>} */
+    const props = $state({ show: true, duration: 0, position: 'top-left', children: text('Two') });
+
+    await render(Toast, props);
+    await finishTransitions();
+
+    // The newer toast is at the top, next to the edge
+    const [two, one] = /** @type {HTMLElement[]} */ ([
+      ...document.querySelectorAll('.toast-lane.top-left > .sui.toast'),
+    ]);
+
+    const { top } = two.getBoundingClientRect();
+
+    expect(two.textContent).toContain('Two');
+    expect(one.getBoundingClientRect().top).toBeGreaterThan(top);
+    props.show = false;
+    await vi.waitFor(() => {
+      expect(two.getAttribute('aria-hidden')).toBe('true');
+    });
+    await finishTransitions();
+    // The fading toast takes no room, along with its margins, before it’s removed
+    expect(two.isConnected).toBe(true);
+    expect(two.getBoundingClientRect().height).toBe(0);
+    expect(one.getBoundingClientRect().top).toBe(top);
+  });
+
+  it('moves the toast to the lane of its new position', async () => {
+    /** @type {ComponentProps<typeof Toast>} */
+    const props = $state({ show: true, position: 'top-left', children: text('Saved') });
+
+    await render(Toast, props);
+
+    const base = /** @type {HTMLElement} */ (getBase());
+    const toast = /** @type {HTMLElement} */ (base.querySelector('.sui.toast'));
+
+    expect(toast.parentElement?.classList.contains('top-left')).toBe(true);
+    props.position = 'bottom-center';
+    await vi.waitFor(() => {
+      expect(toast.parentElement?.classList.contains('bottom-center')).toBe(true);
+    });
   });
 
   it('renders the base within the app shell when there is one', async () => {
@@ -198,7 +326,7 @@ describe('Toast', () => {
     });
     // Still there while fading
     expect(toast.textContent).toContain('Saved');
-    expect(toast.parentElement).toBe(base);
+    expect(toast.parentElement?.parentElement).toBe(base);
     await vi.advanceTimersByTimeAsync(250);
     await vi.waitFor(() => {
       expect(toast.isConnected).toBe(false);

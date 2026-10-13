@@ -75,6 +75,30 @@
   };
 
   /**
+   * Get the lane in the toast base for the toasts at the given position, creating it if needed.
+   * The toasts at the same position are stacked in their lane rather than laid on top of each
+   * other.
+   * @param {HTMLElement} base Toast base.
+   * @param {string} position Toast position, e.g. `bottom-right`.
+   * @returns {HTMLElement} Lane.
+   */
+  const getLane = (base, position) => {
+    let lane = /** @type {HTMLElement[]} */ ([...base.children]).find(
+      (child) => child.dataset.position === position,
+    );
+
+    if (!lane) {
+      lane = document.createElement('div');
+      lane.setAttribute('role', 'none');
+      lane.className = `toast-lane ${position}`;
+      lane.dataset.position = position;
+      base.appendChild(lane);
+    }
+
+    return lane;
+  };
+
+  /**
    * Toast base shared by all the toasts. It’s created by the first toast mounted and removed with
    * the last one unmounted, rather than rendered by a component, so it doesn’t go away with the
    * toast that happened to create it.
@@ -292,7 +316,16 @@
 
     // Make sure the base is in the topmost modal dialog, in case a dialog event has been missed
     moveBase(popover);
-    popover.appendChild(toast);
+
+    // The newest toast goes next to the edge of the screen: last at the bottom, first at the top
+    const lane = getLane(popover, position);
+
+    if (position.startsWith('top-')) {
+      lane.prepend(toast);
+    } else {
+      lane.append(toast);
+    }
+
     raiseBase(popover);
   });
 
@@ -364,11 +397,6 @@
     position: fixed;
     inset: 16px;
     z-index: 99999;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-    align-items: flex-end;
-    gap: 8px;
     overflow: visible; // For shadow to be visible outside the container
     margin: 0;
     border: 0;
@@ -391,10 +419,56 @@
     }
   }
 
+  // A lane per position, where the toasts are stacked; see `getLane()` above. The space between the
+  // toasts is their margins rather than a gap, so a toast that comes or goes brings or takes its
+  // share of it along with its height; the lane’s negative margin offsets the outer ones
+  :global {
+    .sui.toast-base > .toast-lane {
+      position: absolute;
+      display: flex;
+      flex-direction: column;
+      margin-block: -4px;
+      max-width: 100%;
+
+      &.top-left,
+      &.top-center,
+      &.top-right {
+        inset-block-start: 0;
+      }
+
+      &.bottom-left,
+      &.bottom-center,
+      &.bottom-right {
+        inset-block-end: 0;
+      }
+
+      &.top-left,
+      &.bottom-left {
+        inset-inline-start: 0;
+        align-items: flex-start;
+      }
+
+      &.top-center,
+      &.bottom-center {
+        inset-inline: 0;
+        align-items: center;
+      }
+
+      &.top-right,
+      &.bottom-right {
+        inset-inline-end: 0;
+        align-items: flex-end;
+      }
+    }
+  }
+
   .toast {
-    position: absolute;
+    margin-block: 4px;
     width: max-content;
     max-width: 80dvw;
+    height: auto;
+    // Keep the content in the box while it opens or collapses; see below
+    overflow: clip;
     opacity: 1;
     transition-duration: 250ms;
     will-change: opacity;
@@ -413,68 +487,27 @@
       pointer-events: none;
     }
 
-    &.top-left {
-      inset-block-start: 0;
-      inset-block-end: auto;
-      inset-inline-start: 0;
-      inset-inline-end: auto;
-    }
+    // Open and collapse the toast along with the fade, so the other toasts in the lane slide rather
+    // than jump. That takes transitioning the height to and from `auto`; a browser that can’t keeps
+    // the full height while the toast fades out, rather than letting it fade over its neighbor
+    @supports (interpolate-size: allow-keywords) {
+      interpolate-size: allow-keywords;
 
-    &.top-center {
-      inset-block-start: 0;
-      inset-block-end: auto;
-      inset-inline-start: 50%;
-      inset-inline-end: auto;
-
-      &:dir(ltr) {
-        transform: translateX(-50%);
+      @starting-style {
+        margin-block: 0;
+        height: 0;
       }
 
-      &:dir(rtl) {
-        transform: translateX(50%);
+      &[aria-hidden='true'] {
+        margin-block: 0;
+        height: 0;
       }
     }
 
-    &.top-right {
-      inset-block-start: 0;
-      inset-block-end: auto;
-      inset-inline-start: auto;
-      inset-inline-end: 0;
-    }
-
-    &.bottom-left {
-      inset-block-start: auto;
-      inset-block-end: 0;
-      inset-inline-start: 0;
-      inset-inline-end: auto;
-    }
-
-    &.bottom-center {
-      inset-block-start: auto;
-      inset-block-end: 0;
-      inset-inline-start: 50%;
-      inset-inline-end: auto;
-
-      &:dir(ltr) {
-        transform: translateX(-50%);
-      }
-
-      &:dir(rtl) {
-        transform: translateX(50%);
-      }
-    }
-
-    &.bottom-right {
-      inset-block-start: auto;
-      inset-block-end: 0;
-      inset-inline-start: auto;
-      inset-inline-end: 0;
-    }
-
-    :global {
-      .alert {
-        box-shadow: 0 8px 16px var(--sui-popup-shadow-color);
-      }
+    // The shadow is drawn by the toast rather than the alert in it, as the toast clips its content.
+    // `drop-shadow()` takes half the blur of `box-shadow` for the same shadow
+    &:has(:global(.alert)) {
+      filter: drop-shadow(0 8px 8px var(--sui-popup-shadow-color));
     }
   }
 </style>
