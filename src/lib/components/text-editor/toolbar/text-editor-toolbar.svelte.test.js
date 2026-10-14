@@ -8,7 +8,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-svelte';
 import EditorFixture from '../editor-fixture.test.svelte';
 import TextEditorToolbar from './text-editor-toolbar.svelte';
-import { getEditorStore } from '../../../test-utils/editor.js';
+import { createTestComponent, getEditorStore } from '../../../test-utils/editor.js';
 
 /**
  * @import { ComponentProps } from 'svelte';
@@ -301,7 +301,7 @@ describe('TextEditorToolbar with tables', () => {
     ]);
   });
 
-  it('hides the editor components in a Markdown table cell, which would lose them', async () => {
+  it('hides the block editor components in a Markdown table cell', async () => {
     const rendered = await renderToolbar({ enabledButtons, components: [component] });
     const { screen } = rendered;
 
@@ -309,6 +309,31 @@ describe('TextEditorToolbar with tables', () => {
     await selectTableCell(rendered);
     await expect.element(screen.getByRole('button', { name: 'Show Table Options' })).toBeVisible();
     expect(document.querySelector('[aria-label="Insert"]')).toBeNull();
+  });
+
+  it('keeps the inline editor components in a Markdown table cell', async () => {
+    const rendered = await renderToolbar({
+      enabledButtons,
+      components: [
+        component,
+        { ...component, id: 'block-button', label: 'Block Button', trigger: 'button' },
+        createTestComponent({ id: 'badge', label: 'Badge', markdown: '[badge]', inline: true }),
+        {
+          ...createTestComponent({ id: 'icon', label: 'Icon', markdown: '[icon]', inline: true }),
+          trigger: 'button',
+        },
+      ],
+    });
+
+    const { screen } = rendered;
+
+    await selectTableCell(rendered);
+    await expect.element(screen.getByRole('button', { name: 'Show Table Options' })).toBeVisible();
+    await expect.element(screen.getByRole('button', { name: 'Icon' })).toBeVisible();
+    expect(document.querySelector('[aria-label="Block Button"]')).toBeNull();
+    await screen.getByRole('button', { name: 'Insert', exact: true }).click();
+    await expect.element(screen.getByRole('menuitem', { name: 'Badge' })).toBeVisible();
+    expect(screen.getByRole('menuitem').all()).toHaveLength(1);
   });
 
   it('shows the Insert Horizontal Rule button only when enabled, and not in a Markdown table', async () => {

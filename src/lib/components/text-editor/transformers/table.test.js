@@ -3,11 +3,14 @@
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { getTableColumnsSize, mapToTableCells, TABLE } from './table.js';
+import { BLOCK_SYNTAX_ESCAPE } from './block-escape.js';
+import { createTableTransformer, getTableColumnsSize, mapToTableCells } from './table.js';
 
 const tableMockState = vi.hoisted(() => ({
   convertFromMarkdownString: vi.fn(),
   convertToMarkdownString: vi.fn(),
+  /** Stand-in for the standard Markdown transformers. */
+  standardTransformer: { type: 'standard' },
   /** @type {any[]} */
   createdTables: [],
 }));
@@ -15,7 +18,7 @@ const tableMockState = vi.hoisted(() => ({
 vi.mock('@lexical/markdown', () => ({
   $convertFromMarkdownString: tableMockState.convertFromMarkdownString,
   $convertToMarkdownString: tableMockState.convertToMarkdownString,
-  TRANSFORMERS: [],
+  TRANSFORMERS: [tableMockState.standardTransformer],
 }));
 
 vi.mock('@lexical/table', () => {
@@ -111,6 +114,8 @@ vi.mock('lexical', () => ({
   $isParagraphNode: vi.fn((node) => node?.__kind === 'paragraph'),
   $isTextNode: vi.fn((node) => node?.__kind === 'text'),
 }));
+
+const TABLE = createTableTransformer();
 
 describe('TABLE transformer', () => {
   beforeEach(() => {
@@ -528,13 +533,13 @@ describe('TABLE transformer', () => {
   });
 
   it('should keep an escaped pipe in a cell, even within inline code', () => {
-    const cells = /** @type {any[]} */ (mapToTableCells('| x \\| y | `c \\| d` | e \\\\| f |'));
+    const cells = /** @type {any[]} */ (mapToTableCells('| x \\| y | `c \\| d` | e \\\\| f |', []));
 
     expect(cells.map(({ text }) => text)).toEqual(['x | y', '`c | d`', 'e \\\\', 'f']);
   });
 
   it('should drop the spaces around the cell content', () => {
-    mapToTableCells('|  Alice | **Editor**  |');
+    mapToTableCells('|  Alice | **Editor**  |', []);
 
     expect(tableMockState.convertFromMarkdownString.mock.calls.map(([text]) => text)).toEqual([
       'Alice',
@@ -551,8 +556,32 @@ describe('TABLE transformer', () => {
     expect(TABLE.export(/** @type {any} */ (fakeNode), () => '')).toBe('| x \\| y | `c \\| d` |');
   });
 
+  it('converts the cells with the given transformers first', () => {
+    const component = /** @type {any} */ ({ type: 'text-match' });
+    const transformer = createTableTransformer([component]);
+    const cell = { __kind: 'table-cell', __headerState: 0, text: 'Alice' };
+    const row = { __kind: 'table-row', getChildren: () => [cell] };
+    const fakeNode = { __kind: 'table', getChildren: () => [row] };
+
+    tableMockState.convertToMarkdownString.mockImplementation((_, { text }) => text);
+    transformer.export(/** @type {any} */ (fakeNode), () => '');
+    expect(tableMockState.convertToMarkdownString).toHaveBeenCalledWith(
+      [component, tableMockState.standardTransformer, BLOCK_SYNTAX_ESCAPE],
+      cell,
+    );
+
+    const parentNode = { getPreviousSibling: () => null, replace: vi.fn() };
+
+    transformer.replace(/** @type {any} */ (parentNode), [], ['| Bob |'], true);
+    expect(tableMockState.convertFromMarkdownString).toHaveBeenCalledWith(
+      'Bob',
+      [component, tableMockState.standardTransformer],
+      expect.anything(),
+    );
+  });
+
   it('should handle mapToTableCells with non-matching text', () => {
-    const result = mapToTableCells('no pipes here');
+    const result = mapToTableCells('no pipes here', []);
 
     expect(result).toBeNull();
   });

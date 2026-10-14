@@ -26,9 +26,11 @@ export const getEditorStore = ({ store }) => /** @type {TextEditorStore} */ (sto
  * @param {string | (() => string)} args.markdown Markdown the node is exported as, or a function
  * returning it.
  * @param {boolean} [args.inline] Whether the component is inline, matched by a single-line pattern.
+ * @param {RegExp} [args.pattern] Pattern an inline component is imported from. By default, the
+ * component is never imported.
  * @returns {TextEditorComponent} Component.
  */
-export const createTestComponent = ({ id, label, markdown, inline = false }) => {
+export const createTestComponent = ({ id, label, markdown, inline = false, pattern = /(?!)/ }) => {
   /**
    * Decorator node rendering the component label.
    * @augments {DecoratorNode<null>}
@@ -112,7 +114,20 @@ export const createTestComponent = ({ id, label, markdown, inline = false }) => 
     createNode: () => new TestNode(),
     transformer: /** @type {any} */ (
       inline
-        ? { type: 'text-match', dependencies: [TestNode], regExp: /^$/, export: exportNode }
+        ? {
+            type: 'text-match',
+            dependencies: [TestNode],
+            importRegExp: pattern,
+            regExp: pattern,
+            /**
+             * Replace the matched text with a new node.
+             * @param {import('lexical').TextNode} textNode Text node.
+             */
+            replace: (textNode) => {
+              textNode.replace(new TestNode());
+            },
+            export: exportNode,
+          }
         : {
             type: 'multiline-element',
             dependencies: [TestNode],

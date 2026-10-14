@@ -11,6 +11,7 @@ import { render } from 'vitest-browser-svelte';
 import { userEvent } from 'vitest/browser';
 import { setCodeHighlighterLoaders } from './shiki/loader.js';
 import TextEditor from './text-editor.svelte';
+import { createTestComponent } from '../../test-utils/editor.js';
 
 /**
  * @import { LexicalEditor } from 'lexical';
@@ -744,6 +745,68 @@ describe('TextEditor with tables', () => {
     });
     expect(root.querySelectorAll('tr:first-child > th')).toHaveLength(2);
     expect(root.querySelectorAll('th')).toHaveLength(2);
+  });
+
+  describe('with editor components', () => {
+    const badge = createTestComponent({
+      id: 'badge',
+      label: 'Badge',
+      markdown: '[badge]',
+      inline: true,
+      pattern: /\[badge\]/,
+    });
+
+    const figure = createTestComponent({ id: 'figure', label: 'Figure', markdown: '<figure>' });
+
+    it('imports and exports an inline component in a Markdown table cell', async () => {
+      const value = ['| Name | Role |', '| --- | --- |', '| Alice [badge] | Editor |'].join('\n');
+      /** @type {ComponentProps<typeof TextEditor>} */
+      const props = $state({ buttons: ['bold', 'table'], components: [badge], value });
+      const screen = await render(TextEditor, props);
+      const root = await waitForContent(screen.container, '<table>');
+
+      await vi.waitFor(() => {
+        expect(root.querySelector('td [data-lexical-decorator]')?.textContent).toBe('Badge');
+      });
+      await sleep(200);
+      expect(props.value).toBe(value);
+    });
+
+    it('inserts only an inline component into a Markdown table cell', async () => {
+      /** @type {ComponentProps<typeof TextEditor>} */
+      const props = $state({
+        buttons: ['bold', 'table'],
+        components: [badge, figure],
+        value: TABLE,
+      });
+
+      const screen = await render(TextEditor, props);
+      const root = await waitForContent(screen.container, '<table>');
+
+      placeCaretInCell(root, 'Alice');
+      await vi.waitFor(() => {
+        expect(screen.container.querySelectorAll('[aria-label="Show Table Options"]')).toHaveLength(
+          2,
+        );
+      });
+      await screen.getByRole('button', { name: 'Insert', exact: true }).click();
+      await expect.element(screen.getByRole('menuitem', { name: 'Badge' })).toBeVisible();
+      // The block component is left out
+      expect(
+        screen
+          .getByRole('menuitem')
+          .all()
+          .map((item) => item.element().textContent?.trim()),
+      ).toEqual(['Badge']);
+      await screen.getByRole('menuitem', { name: 'Badge' }).click();
+      // The node is inserted within the cell, without a paragraph after it
+      await vi.waitFor(() => {
+        expect(props.value).toBe(
+          ['| Name | Role |', '| --- | --- |', '| Alice[badge] | Editor |'].join('\n'),
+        );
+      });
+      expect(root.querySelectorAll('td p')).toHaveLength(2);
+    });
   });
 
   it('exports an HTML table without the scrolling wrapper', async () => {

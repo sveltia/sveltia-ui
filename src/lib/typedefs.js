@@ -326,7 +326,8 @@
  * for the same element type, like a link, with a `priority` of 4 or higher.
  * @property {(props?: Record<string, any>) => LexicalNode} createNode Function to create a new node
  * instance.
- * @property {Transformer} transformer Node transformer.
+ * @property {Transformer} transformer Node transformer. A component with a text match transformer
+ * is inline, so it can also be inserted into, and read from, a Markdown table cell.
  * @property {() => string} [createMarkdown] Function to create the Markdown inserted when the
  * component is chosen in the plain text mode. By default, a new node created with `createNode` is
  * exported with `transformer`, which may result in an empty string, for example if the output

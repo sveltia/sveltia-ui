@@ -118,13 +118,13 @@ import {
   $getSelectedTableCellKey,
   $normalizeTableHeaders,
 } from './table.js';
-import { TABLE } from './transformers/table.js';
+import { createTableTransformer } from './transformers/table.js';
 
 /**
  * @import { LexicalEditor, LexicalNode } from 'lexical';
  * @import { LinkAttributes } from '@lexical/link';
  * @import { ListType } from '@lexical/list';
- * @import { Transformer } from '@lexical/markdown';
+ * @import { TextMatchTransformer, Transformer } from '@lexical/markdown';
  * @import {
  * TextEditorBlockType,
  * TextEditorComponent,
@@ -977,9 +977,11 @@ export const initEditor = ({
     },
   });
 
+  const componentTransformers = components.map(({ transformer }) => transformer);
+
   /** @type {Transformer[]} */
   const enabledTransformers = [
-    ...components.map(({ transformer }) => transformer),
+    ...componentTransformers,
     ...new Set(
       Object.entries(TRANSFORMER_MAP)
         .filter(([button]) => enabledButtons.includes(/** @type {TextEditorNodeType} */ (button)))
@@ -988,7 +990,16 @@ export const initEditor = ({
     ...(isCodeEditor
       ? [CODE]
       : // See the comment above for why we always include horizontal rules and tables
-        [HR, TABLE]),
+        [
+          HR,
+          // A table cell can only have inline content, so only the components with a text match
+          // transformer can be used there
+          createTableTransformer(
+            /** @type {TextMatchTransformer[]} */ (
+              componentTransformers.filter(({ type }) => type === 'text-match')
+            ),
+          ),
+        ]),
   ];
 
   const editor = buildEditorFromExtensions(editorExtension);

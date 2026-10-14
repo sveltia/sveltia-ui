@@ -17,6 +17,7 @@
   import InsertItemButton from './insert-item-button.svelte';
   import InsertLinkButton from './insert-link-button.svelte';
   import InsertMenuButton from './insert-menu-button.svelte';
+  import { isInlineComponent } from './insert-component.js';
   import InsertTableButton from './insert-table-button.svelte';
   import TableActionMenu from './table-action-menu.svelte';
   import ToggleBlockMenuItem from './toggle-block-menu-item.svelte';
@@ -47,13 +48,6 @@
 
   /** @type {TextEditorStore} */
   const editorStore = getContext('editorStore');
-
-  const buttons = $derived(
-    editorStore.config.components.filter(({ trigger = 'menuitem' }) => trigger === 'button'),
-  );
-  const menuitems = $derived(
-    editorStore.config.components.filter(({ trigger = 'menuitem' }) => trigger === 'menuitem'),
-  );
 
   /**
    * Enabled block level buttons.
@@ -93,17 +87,28 @@
   );
   /**
    * Whether the caret is in a Markdown table cell, which can only have inline content, so neither
-   * a horizontal rule nor an editor component can be inserted. A cell is also exported with the
-   * standard Markdown syntax only, so an editor component would be lost.
+   * a horizontal rule nor a block editor component can be inserted.
    */
   const inMarkdownTable = $derived(!!tableCellKey && !isHtml);
+  /**
+   * Editor components that can be inserted at the caret: only the inline ones in a Markdown table
+   * cell.
+   */
+  const components = $derived(
+    inMarkdownTable
+      ? editorStore.config.components.filter(isInlineComponent)
+      : editorStore.config.components,
+  );
+  const buttons = $derived(components.filter(({ trigger = 'menuitem' }) => trigger === 'button'));
+  const menuitems = $derived(
+    components.filter(({ trigger = 'menuitem' }) => trigger === 'menuitem'),
+  );
   /**
    * Whether any of the buttons to insert a table, a horizontal rule or an editor component is
    * shown.
    */
   const hasInsertButtons = $derived(
-    hasTable ||
-      (!inMarkdownTable && (hasHorizontalRule || editorStore.config.components.length > 0)),
+    hasTable || (!inMarkdownTable && hasHorizontalRule) || components.length > 0,
   );
   /**
    * Whether the block level styles are available.
@@ -186,16 +191,14 @@
         <!-- Tables can’t be nested -->
         <InsertTableButton disabled={!!tableCellKey} />
       {/if}
-      {#if !inMarkdownTable}
-        {#if hasHorizontalRule}
-          <InsertHorizontalRuleButton />
-        {/if}
-        {#each buttons as button (button.id)}
-          <InsertItemButton component={button} />
-        {/each}
-        {#if menuitems.length}
-          <InsertMenuButton components={menuitems} />
-        {/if}
+      {#if hasHorizontalRule && !inMarkdownTable}
+        <InsertHorizontalRuleButton />
+      {/if}
+      {#each buttons as button (button.id)}
+        <InsertItemButton component={button} />
+      {/each}
+      {#if menuitems.length}
+        <InsertMenuButton components={menuitems} />
       {/if}
     {/if}
   {/if}
