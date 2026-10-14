@@ -5,6 +5,7 @@
   @see https://w3c.github.io/aria/#grid
 -->
 <script>
+  import { setContext } from 'svelte';
   import { activateGroup } from '../../services/group.svelte.js';
 
   /**
@@ -38,6 +39,10 @@
     ...restProps
     /* eslint-enable prefer-const */
   } = $props();
+
+  // A grid nested in a header or footer cell of another grid has data rows of its own, so the
+  // outer grid’s `<GridHead>` or `<GridFoot>` doesn’t make them unselectable
+  setContext('sui:grid-unselectable-rows', false);
 </script>
 
 <div

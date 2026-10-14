@@ -480,7 +480,12 @@ export class Group {
       focused ??
       (holders.length === 1
         ? holders[0]
-        : ((this.rovingTabStop === 'selected' ? this.selected : undefined) ?? activeMembers[0]));
+        : ((this.rovingTabStop === 'selected' ? this.selected : undefined) ??
+          // The first member not marked as unselectable, so a grid’s header row or a row group
+          // caption isn’t where the user lands when they tab into it. A plain menu item can’t be
+          // selected either, but it’s still where a menu starts
+          activeMembers.find((element) => element.dataset.selectable !== 'false') ??
+          activeMembers[0]));
 
     allMembers.forEach((element) => {
       // Only touch the DOM when it changes; this runs on every mutation of a large widget. The

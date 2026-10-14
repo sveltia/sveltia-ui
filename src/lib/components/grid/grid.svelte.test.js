@@ -4,6 +4,7 @@ import { userEvent } from 'vitest/browser';
 import { whenActivated } from '../../test-utils/group.js';
 import { text } from '../../test-utils/snippets.js';
 import GridFixture from './grid-fixture.test.svelte';
+import NestedGridFixture from './nested-grid-fixture.test.svelte';
 import Grid from './grid.svelte';
 
 /**
@@ -223,4 +224,177 @@ it('moves from the row a control belongs to when the arrows are pressed on it', 
   await vi.waitFor(() => {
     expect(document.activeElement).toBe(beta.element());
   });
+});
+
+it('keeps the header row out of the selection', async () => {
+  const onChange = vi.fn();
+  const activated = whenActivated();
+  const screen = await render(GridFixture, { multiple: true, withHead: true, onChange });
+
+  await activated;
+
+  const [header, alpha, beta, gamma] = screen.getByRole('row').all();
+
+  await expect.element(header).toHaveAttribute('data-selectable', 'false');
+  await expect.element(header).not.toHaveAttribute('aria-selected');
+  await expect.element(alpha).toHaveAttribute('aria-selected', 'false');
+
+  // A click focuses the header row, but doesn’t select it
+  await header.click();
+  await expect.element(header).not.toHaveAttribute('aria-selected');
+  expect(document.activeElement).toBe(header.element());
+
+  // Nor does Space, while the arrow keys still move from it to the data rows
+  await userEvent.keyboard(' ');
+  await expect.element(header).not.toHaveAttribute('aria-selected');
+  expect(onChange).not.toHaveBeenCalled();
+  await userEvent.keyboard('{ArrowDown}');
+  await vi.waitFor(() => {
+    expect(document.activeElement).toBe(alpha.element());
+  });
+  await userEvent.keyboard(' ');
+  await expect.element(alpha).toHaveAttribute('aria-selected', 'true');
+
+  // Select-all and range selection aren’t handled by the grid, and don’t reach the header row
+  await userEvent.keyboard('{Shift>}{ArrowUp}{/Shift}');
+  await userEvent.keyboard('{Control>}a{/Control}');
+  await expect.element(header).not.toHaveAttribute('aria-selected');
+  await beta.click();
+  await gamma.click();
+  await expect.element(header).not.toHaveAttribute('aria-selected');
+  expect(screen.container.querySelectorAll('[aria-selected="true"]')).toHaveLength(3);
+});
+
+it('sorts from a header without selecting or focusing the header row', async () => {
+  const onChange = vi.fn();
+  const onSort = vi.fn();
+  const activated = whenActivated();
+
+  const screen = await render(GridFixture, {
+    multiple: true,
+    withHead: true,
+    sortOrder: 'ascending',
+    onSort,
+    onChange,
+  });
+
+  await activated;
+
+  const [header] = screen.getByRole('row').all();
+  const button = screen.getByRole('button', { name: 'Name' });
+
+  await expect.element(button).not.toHaveAttribute('tabindex');
+  await button.click();
+  expect(onSort).toHaveBeenCalledOnce();
+  expect(onSort.mock.calls[0][0].detail).toEqual({ sortOrder: 'descending' });
+  expect(document.activeElement).toBe(button.element());
+
+  await userEvent.keyboard('{Enter}');
+  expect(onSort).toHaveBeenCalledTimes(2);
+  await userEvent.keyboard(' ');
+  expect(onSort).toHaveBeenCalledTimes(3);
+  expect(document.activeElement).toBe(button.element());
+  await expect.element(header).not.toHaveAttribute('aria-selected');
+  expect(onChange).not.toHaveBeenCalled();
+});
+
+it('puts the tab stop on the first data row rather than the header row', async () => {
+  const activated = whenActivated();
+  const screen = await render(GridFixture, { multiple: true, withHead: true });
+
+  await activated;
+
+  const [header, alpha] = screen.getByRole('row').all();
+
+  await expect.element(alpha).toHaveAttribute('tabindex', '0');
+  await expect.element(header).toHaveAttribute('tabindex', '-1');
+});
+
+it('moves the focus from the header row to its sort button on Enter', async () => {
+  const onSort = vi.fn();
+  const activated = whenActivated();
+
+  const screen = await render(GridFixture, {
+    withHead: true,
+    sortOrder: 'none',
+    onSort,
+  });
+
+  await activated;
+
+  const [header, alpha] = screen.getByRole('row').all();
+  const button = screen.getByRole('button', { name: 'Name' });
+
+  /** @type {HTMLElement} */ (alpha.element()).focus();
+  await userEvent.keyboard('{ArrowUp}');
+  await vi.waitFor(() => {
+    expect(document.activeElement).toBe(header.element());
+  });
+  await userEvent.keyboard('{Enter}');
+  expect(document.activeElement).toBe(button.element());
+  expect(onSort).not.toHaveBeenCalled();
+
+  // Enter on the button itself then sorts the column
+  await userEvent.keyboard('{Enter}');
+  expect(onSort).toHaveBeenCalledOnce();
+});
+
+it('leaves the focus on a header row without a sort button on Enter', async () => {
+  const activated = whenActivated();
+  const screen = await render(GridFixture, { withHead: true });
+
+  await activated;
+
+  const [header] = screen.getByRole('row').all();
+
+  /** @type {HTMLElement} */ (header.element()).focus();
+  await userEvent.keyboard('{Enter}');
+  expect(document.activeElement).toBe(header.element());
+});
+
+it('keeps the footer row out of the selection', async () => {
+  const onChange = vi.fn();
+  const activated = whenActivated();
+  const screen = await render(GridFixture, { multiple: true, withFoot: true, onChange });
+
+  await activated;
+
+  const footer = /** @type {import('vitest/browser').Locator} */ (
+    screen.getByRole('row').all().at(-1)
+  );
+
+  await expect.element(footer).toHaveAttribute('data-selectable', 'false');
+  await expect.element(footer).not.toHaveAttribute('aria-selected');
+  await footer.click();
+  await expect.element(footer).not.toHaveAttribute('aria-selected');
+  expect(onChange).not.toHaveBeenCalled();
+});
+
+it('drops an `aria-selected` attribute passed to a header row', async () => {
+  const activated = whenActivated();
+
+  const screen = await render(GridFixture, {
+    withHead: true,
+    headerRowProps: { 'aria-selected': 'false', 'data-x': '1' },
+  });
+
+  await activated;
+
+  const [header] = screen.getByRole('row').all();
+
+  await expect.element(header).not.toHaveAttribute('aria-selected');
+  await expect.element(header).toHaveAttribute('data-x', '1');
+  await expect.element(header).toHaveAttribute('data-selectable', 'false');
+});
+
+it('keeps the rows of a grid nested in a footer selectable', async () => {
+  const activated = whenActivated();
+  const screen = await render(NestedGridFixture);
+
+  await activated;
+
+  const innerRow = screen.getByRole('row', { name: 'Inner' });
+
+  await expect.element(innerRow).toHaveAttribute('aria-selected', 'false');
+  await expect.element(innerRow).not.toHaveAttribute('data-selectable');
 });

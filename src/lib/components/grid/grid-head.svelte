@@ -6,6 +6,7 @@
 -->
 <script>
   import { _ } from '@sveltia/i18n';
+  import { setContext } from 'svelte';
   import TablePart from '../table/table-part.svelte';
 
   /**
@@ -26,6 +27,9 @@
     ...restProps
     /* eslint-enable prefer-const */
   } = $props();
+
+  // Tell the `<GridRow>`s inside that they are header rows, which can be focused but not selected
+  setContext('sui:grid-unselectable-rows', true);
 </script>
 
 <TablePart

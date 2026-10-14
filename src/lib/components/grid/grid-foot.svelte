@@ -6,6 +6,7 @@
 -->
 <script>
   import { _ } from '@sveltia/i18n';
+  import { setContext } from 'svelte';
   import TablePart from '../table/table-part.svelte';
 
   /**
@@ -26,6 +27,10 @@
     ...restProps
     /* eslint-enable prefer-const */
   } = $props();
+
+  // Tell the `<GridRow>`s inside that they are footer rows, such as a totals row, which can be
+  // focused but not selected, like header rows
+  setContext('sui:grid-unselectable-rows', true);
 </script>
 
 <TablePart
