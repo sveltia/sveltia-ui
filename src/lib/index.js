@@ -64,6 +64,8 @@ export { default as TabPanels } from './components/tabs/tab-panels.svelte';
 export { default as Tab } from './components/tabs/tab.svelte';
 export { default as CodeEditor } from './components/text-editor/code-editor.svelte';
 export { default as TextEditor } from './components/text-editor/text-editor.svelte';
+export { default as ColorInput } from './components/text-field/color-input.svelte';
+export { default as DateTimeInput } from './components/text-field/date-time-input.svelte';
 export { default as NumberInput } from './components/text-field/number-input.svelte';
 export { default as PasswordInput } from './components/text-field/password-input.svelte';
 export { default as SearchBar } from './components/text-field/search-bar.svelte';

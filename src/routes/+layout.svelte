@@ -98,7 +98,7 @@
             pages={[
               { key: 'checkbox', label: 'Checkbox' },
               { key: 'code-editor', label: 'Code Editor' },
-              { key: 'color', label: 'Colour Picker', disabled: true },
+              { key: 'color', label: 'Colour Picker' },
               { key: 'date-time', label: 'Date/Time' },
               { key: 'emoji', label: 'Emoji Picker', disabled: true },
               { key: 'file', label: 'File Picker', disabled: true },
