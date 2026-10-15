@@ -128,7 +128,11 @@
   );
 </script>
 
-<ToolbarWrapper disabled={disabled || readonly} ariaLabel={_('_sui.text_editor.text_editor')}>
+<!-- Disabled while an editor component has focus, as the buttons only apply to this editor -->
+<ToolbarWrapper
+  disabled={disabled || readonly || editorStore.componentHasFocus}
+  ariaLabel={_('_sui.text_editor.text_editor')}
+>
   {#if canChangeBlock && blockLevelButtons.length > 1}
     <MenuButton
       aria-label={_('_sui.text_editor.show_text_style_options')}

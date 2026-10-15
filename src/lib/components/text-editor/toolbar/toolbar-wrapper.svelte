@@ -77,6 +77,12 @@
         height: auto;
         min-height: 40px;
         background-color: var(--sui-tertiary-background-color);
+
+        // Keep the background opaque, so the content scrolled under the sticky toolbar doesn’t show
+        // through; the buttons are still dimmed with their `inert` container
+        &[aria-disabled='true'] {
+          filter: none;
+        }
       }
 
       .sui.menu-button {

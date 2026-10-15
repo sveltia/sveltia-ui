@@ -1,6 +1,6 @@
 <script>
   import { $getRoot as getRoot, HISTORY_MERGE_TAG } from 'lexical';
-  import { getContext, onMount } from 'svelte';
+  import { getContext, onMount, untrack } from 'svelte';
   import { IMPORT_UPDATE_TAG } from './constants.js';
   import { handleEditorMouseDown, initEditor } from './core.js';
 
@@ -133,6 +133,58 @@
     }
   };
 
+  // The state is updated within `untrack()` or a microtask below, because the browser fires these
+  // events synchronously while it removes a focused element from the DOM, e.g. a nested editor in a
+  // component being removed, in the middle of Svelte rendering, where a plain assignment would be
+  // reported as an unsafe mutation. See also `<FloatingLinkEditor>`.
+
+  /**
+   * Check if the given element is a dialog other than the one the editor is in, if any, like a menu
+   * opened from the toolbar of a nested editor, which is rendered outside the editor.
+   * @param {Element | null} dialog Dialog element.
+   * @returns {boolean} Result.
+   */
+  const isOtherDialog = (dialog) => !!dialog && !dialog.contains(lexicalRoot ?? null);
+
+  /**
+   * Track the focus, to tell whether it’s in an editor component, like a nested editor or a field
+   * of the component, rather than on the editor itself. The focus moving to another dialog doesn’t
+   * change anything.
+   * @param {FocusEvent} event `focusin` event.
+   */
+  const onFocusIn = ({ target }) => {
+    const node = /** @type {Node} */ (target);
+
+    if (lexicalRoot?.contains(node)) {
+      untrack(() => {
+        editorStore.componentHasFocus = node !== lexicalRoot;
+      });
+    } else if (!(node instanceof Element && isOtherDialog(node.closest('dialog')))) {
+      untrack(() => {
+        editorStore.componentHasFocus = false;
+      });
+    }
+  };
+
+  /**
+   * Track the focus leaving a removed element, which doesn’t fire `focusin`. The event also comes
+   * without a related target when a dialog opens, which only moves the focus into itself a moment
+   * later, so the state is kept while another modal dialog is open.
+   * @param {FocusEvent} event `focusout` event.
+   */
+  const onFocusOut = ({ relatedTarget }) => {
+    if (!relatedTarget) {
+      queueMicrotask(() => {
+        if (
+          document.activeElement === document.body &&
+          ![...document.querySelectorAll(':modal')].some(isOtherDialog)
+        ) {
+          editorStore.componentHasFocus = false;
+        }
+      });
+    }
+  };
+
   onMount(() => {
     const { editor, enabledTransformers, dispose } = initEditor(editorStore.config);
 
@@ -142,6 +194,8 @@
     lexicalRoot?.addEventListener('Update', onUpdate);
     lexicalRoot?.addEventListener('click', onClick);
     lexicalRoot?.addEventListener('mousedown', onMouseDown);
+    document.addEventListener('focusin', onFocusIn);
+    document.addEventListener('focusout', onFocusOut);
 
     // A change made by the user is converted to Markdown a moment later, so report it as pending
     // until then. An import, or an update that only changes how the content looks, e.g. the code
@@ -163,6 +217,8 @@
       lexicalRoot?.removeEventListener('Update', onUpdate);
       lexicalRoot?.removeEventListener('click', onClick);
       lexicalRoot?.removeEventListener('mousedown', onMouseDown);
+      document.removeEventListener('focusin', onFocusIn);
+      document.removeEventListener('focusout', onFocusOut);
       dispose();
       editor.setRootElement(null);
       editorStore.initialized = false;

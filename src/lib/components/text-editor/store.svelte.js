@@ -42,6 +42,8 @@ export const createEditorStore = () => {
   /** @type {number} */
   let toolbarHeight = $state(0);
   /** @type {boolean} */
+  let componentHasFocus = $state(false);
+  /** @type {boolean} */
   let hasConverterError = $state(false);
   /** @type {boolean} */
   let showConverterError = $state(false);
@@ -187,6 +189,12 @@ export const createEditorStore = () => {
     },
     set toolbarHeight(newValue) {
       toolbarHeight = newValue;
+    },
+    get componentHasFocus() {
+      return componentHasFocus;
+    },
+    set componentHasFocus(newValue) {
+      componentHasFocus = newValue;
     },
     get useRichText() {
       return useRichText;

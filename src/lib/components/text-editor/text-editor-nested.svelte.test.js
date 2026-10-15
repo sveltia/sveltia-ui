@@ -1,8 +1,14 @@
+import { sleep } from '@sveltia/utils/misc';
 import { mount, unmount } from 'svelte';
 import { afterEach, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-svelte';
+import { userEvent } from 'vitest/browser';
 import TextEditor from './text-editor.svelte';
 import { createTestComponent } from '../../test-utils/editor.js';
+
+/**
+ * @import { ComponentProps } from 'svelte';
+ */
 
 /**
  * Editors mounted in the nested component, unmounted after each test.
@@ -30,10 +36,31 @@ const nested = createTestComponent({
         target: element,
         props: {
           value: Array.from({ length: 40 }, (_, index) => `Inner ${index + 1}`).join('\n\n'),
-          buttons: ['bold'],
+          buttons: ['bold', 'heading-1'],
         },
       }),
     );
+  },
+});
+
+/**
+ * Inline component with a text field, like an editor component with a String field.
+ */
+const field = createTestComponent({
+  id: 'field',
+  label: 'Field',
+  markdown: '[field]',
+  inline: true,
+  pattern: /\[field\]/,
+  /**
+   * Render a text field in the node.
+   * @param {HTMLElement} element Element created for the node.
+   */
+  onCreateDOM: (element) => {
+    const input = document.createElement('input');
+
+    input.setAttribute('aria-label', 'Field Input');
+    element.append(input);
   },
 });
 
@@ -101,4 +128,101 @@ it('stacks the sticky toolbar of a nested editor below the outer one', async () 
       innerEditor.getBoundingClientRect().bottom,
     );
   });
+});
+
+it('disables the outer toolbar while an editor component has focus', async () => {
+  const screen = await render(TextEditor, {
+    value: 'Outer\n\n[nested]\n\n[field]',
+    buttons: ['bold'],
+    components: [nested, field],
+  });
+
+  const [outerToolbar, innerToolbar] = screen.getByRole('toolbar', { name: 'Text Editor' }).all();
+  const outerTextbox = screen.getByRole('textbox').first();
+
+  await expect.element(screen.getByText('Inner 1', { exact: true })).toBeInTheDocument();
+  await expect.element(outerToolbar).toHaveAttribute('aria-disabled', 'false');
+
+  // In a nested editor, only its own toolbar applies
+  await userEvent.click(screen.getByText('Inner 1', { exact: true }));
+  await expect.element(outerToolbar).toHaveAttribute('aria-disabled', 'true');
+  await expect.element(innerToolbar).toHaveAttribute('aria-disabled', 'false');
+  // The sticky toolbar keeps its background opaque, with only the buttons dimmed
+  expect(getComputedStyle(outerToolbar.element()).filter).toBe('none');
+  expect(
+    getComputedStyle(/** @type {Element} */ (outerToolbar.element().firstElementChild)).filter,
+  ).not.toBe('none');
+
+  // Including a menu opened from the nested editor’s toolbar
+  await userEvent.click(innerToolbar.getByRole('button', { name: 'Show Text Style Options' }));
+  await expect.element(screen.getByRole('menuitemcheckbox', { name: 'Heading 1' })).toBeVisible();
+  await expect.element(outerToolbar).toHaveAttribute('aria-disabled', 'true');
+  await userEvent.keyboard('{Escape}');
+
+  // In another field of a component
+  await userEvent.click(screen.getByRole('textbox', { name: 'Field Input' }));
+  await expect.element(outerToolbar).toHaveAttribute('aria-disabled', 'true');
+
+  // Back in the outer editor itself
+  await userEvent.click(outerTextbox.getByText('Outer', { exact: true }));
+  await expect.element(outerToolbar).toHaveAttribute('aria-disabled', 'false');
+
+  // Out of the editor from a component
+  await userEvent.click(screen.getByRole('textbox', { name: 'Field Input' }));
+  await expect.element(outerToolbar).toHaveAttribute('aria-disabled', 'true');
+  /** @type {HTMLElement} */ (document.activeElement).blur();
+  await expect.element(outerToolbar).toHaveAttribute('aria-disabled', 'false');
+});
+
+it('enables the toolbar once the focus leaves the editor in a modal dialog', async () => {
+  const screen = await render(TextEditor, {
+    value: 'Outer\n\n[field]',
+    buttons: ['bold'],
+    components: [field],
+  });
+
+  const dialog = document.createElement('dialog');
+  const otherInput = document.createElement('input');
+  const outerToolbar = screen.getByRole('toolbar', { name: 'Text Editor' });
+  const fieldInput = screen.getByRole('textbox', { name: 'Field Input' });
+
+  otherInput.setAttribute('aria-label', 'Other Input');
+  document.body.append(dialog);
+  dialog.append(screen.container, otherInput);
+  dialog.showModal();
+
+  try {
+    // Another field of the dialog the editor is in
+    await userEvent.click(fieldInput);
+    await expect.element(outerToolbar).toHaveAttribute('aria-disabled', 'true');
+    await userEvent.click(screen.getByRole('textbox', { name: 'Other Input' }));
+    await expect.element(outerToolbar).toHaveAttribute('aria-disabled', 'false');
+
+    // A component field losing focus, e.g. as the component is removed
+    await userEvent.click(fieldInput);
+    await expect.element(outerToolbar).toHaveAttribute('aria-disabled', 'true');
+    fieldInput.element().remove();
+    await expect.element(outerToolbar).toHaveAttribute('aria-disabled', 'false');
+  } finally {
+    dialog.close();
+    dialog.remove();
+  }
+});
+
+it('applies a keyboard shortcut in a nested editor only to that editor', async () => {
+  const value = 'Outer\n\n[nested]';
+  /** @type {ComponentProps<typeof TextEditor>} */
+  const props = $state({ value, buttons: ['bold'], components: [nested] });
+  const screen = await render(TextEditor, props);
+  const innerLine = screen.getByText('Inner 1', { exact: true });
+
+  await expect.element(innerLine).toBeInTheDocument();
+  await userEvent.tripleClick(innerLine);
+  await userEvent.keyboard('{ControlOrMeta>}b{/ControlOrMeta}');
+
+  await vi.waitFor(() => {
+    expect(innerLine.element().closest('strong')).not.toBeNull();
+  });
+  await sleep(200);
+  expect(props.value).toBe(value);
 });

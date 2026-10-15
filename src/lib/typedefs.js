@@ -457,6 +457,9 @@
  * mode.
  * @property {number} toolbarHeight Height of the sticky toolbar in pixels, which the toolbars of
  * nested editors are placed below. `0` while the toolbar isn’t rendered.
+ * @property {boolean} componentHasFocus Whether the focus is in an editor component within the
+ * content, like a nested editor or a field of the component, rather than on the editor itself. The
+ * toolbar is disabled meanwhile, as it would only apply to the editor itself.
  * @property {string} controlId ID of the editable element currently shown: the Lexical root in the
  * rich text mode, or the `<textarea>` in the plain text mode.
  * @property {boolean} hasConverterError Whether there was an error while converting Markdown or
