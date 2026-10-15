@@ -32,3 +32,20 @@ it('keeps a placeholder while it is out of view', async () => {
   expect(screen.container.querySelector('.placeholder')).not.toBeNull();
   expect(screen.container.textContent).not.toContain('Loaded');
 });
+
+it('renders the children right away if eager, even out of view', async () => {
+  const wrapper = document.createElement('div');
+
+  wrapper.style.cssText = 'height: 50px; overflow: hidden;';
+  wrapper.innerHTML = '<div style="height: 5000px"></div>';
+  document.body.appendChild(wrapper);
+
+  const screen = await render(
+    VisibilityObserver,
+    { eager: true, children: text('Loaded') },
+    { baseElement: wrapper },
+  );
+
+  expect(screen.container.querySelector('.placeholder')).toBeNull();
+  expect(screen.container.textContent).toContain('Loaded');
+});
