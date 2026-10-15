@@ -28,9 +28,18 @@ export const getEditorStore = ({ store }) => /** @type {TextEditorStore} */ (sto
  * @param {boolean} [args.inline] Whether the component is inline, matched by a single-line pattern.
  * @param {RegExp} [args.pattern] Pattern an inline component is imported from. By default, the
  * component is never imported.
+ * @param {(element: HTMLElement) => void} [args.onCreateDOM] Function called with the element
+ * created for the node, like rendering a nested editor in it.
  * @returns {TextEditorComponent} Component.
  */
-export const createTestComponent = ({ id, label, markdown, inline = false, pattern = /(?!)/ }) => {
+export const createTestComponent = ({
+  id,
+  label,
+  markdown,
+  inline = false,
+  pattern = /(?!)/,
+  onCreateDOM = undefined,
+}) => {
   /**
    * Decorator node rendering the component label.
    * @augments {DecoratorNode<null>}
@@ -69,6 +78,7 @@ export const createTestComponent = ({ id, label, markdown, inline = false, patte
       const element = document.createElement(inline ? 'span' : 'div');
 
       element.textContent = label;
+      onCreateDOM?.(element);
 
       return element;
     }

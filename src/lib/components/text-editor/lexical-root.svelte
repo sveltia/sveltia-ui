@@ -199,7 +199,9 @@
 
 <style lang="scss">
   .lexical-root {
-    overflow: hidden;
+    // Not `hidden`, which makes this a scroll container, and the sticky toolbar of a nested editor
+    // would then stick to this instead of the scrolling pane
+    overflow: clip;
     border: 1px solid var(--sui-textbox-border-color);
     border-radius: var(--sui-textbox-border-radius) !important;
     padding: var(--sui-textbox-multiline-padding);

@@ -14,6 +14,7 @@ describe('createEditorStore', () => {
     expect(store.useRichText).toBe(true);
     expect(store.hasConverterError).toBe(false);
     expect(store.showConverterError).toBe(false);
+    expect(store.toolbarHeight).toBe(0);
     expect(store.selection).toEqual({
       blockNodeKey: null,
       blockType: 'paragraph',

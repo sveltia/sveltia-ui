@@ -138,7 +138,14 @@
   });
 </script>
 
-<div {...restProps} role="none" class="sui code-editor" class:flex {hidden}>
+<div
+  {...restProps}
+  role="none"
+  class="sui code-editor"
+  class:flex
+  {hidden}
+  style:--sui-text-editor-toolbar-height="{editorStore.toolbarHeight}px"
+>
   {#if showLanguageSwitcher}
     <CodeEditorToolbar {disabled} {readonly} />
   {/if}
@@ -152,6 +159,8 @@
 {/if}
 
 <style lang="scss">
+  @use '../../styles/mixins';
+
   .code-editor {
     margin: var(--sui-focus-ring-width);
     border-radius: var(--sui-textbox-border-radius);
@@ -165,5 +174,7 @@
     &.flex:not([hidden]) {
       display: block; // Avoid Tailwind .flex class collisions
     }
+
+    @include mixins.nestable-editor;
   }
 </style>

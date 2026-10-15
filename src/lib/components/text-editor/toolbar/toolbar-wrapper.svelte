@@ -1,8 +1,10 @@
 <script>
+  import { getContext } from 'svelte';
   import Toolbar from '../../toolbar/toolbar.svelte';
 
   /**
    * @import { Snippet } from 'svelte';
+   * @import { TextEditorStore } from '#lib/typedefs.js';
    */
 
   /**
@@ -22,10 +24,32 @@
     ...restProps
     /* eslint-enable prefer-const */
   } = $props();
+
+  /** @type {TextEditorStore} */
+  const editorStore = getContext('editorStore');
+
+  /**
+   * Keep the toolbar height in the store, so the sticky toolbars of nested editors can be placed
+   * below this one.
+   * @param {HTMLElement} toolbar Toolbar element.
+   * @returns {() => void} Cleanup function.
+   */
+  const observeHeight = (toolbar) => {
+    const observer = new ResizeObserver(([entry]) => {
+      editorStore.toolbarHeight = entry.borderBoxSize[0].blockSize;
+    });
+
+    observer.observe(toolbar);
+
+    return () => {
+      observer.disconnect();
+      editorStore.toolbarHeight = 0;
+    };
+  };
 </script>
 
 <div role="none" class="wrapper">
-  <Toolbar {...restProps} {disabled}>
+  <Toolbar {...restProps} {disabled} {@attach observeHeight}>
     {@render children?.()}
   </Toolbar>
 </div>
@@ -37,8 +61,8 @@
     :global {
       [role='toolbar'] {
         position: sticky;
-        top: 0;
-        z-index: 100;
+        top: var(--sui-text-editor-toolbar-top, 0px);
+        z-index: var(--sui-text-editor-toolbar-z-index, 100);
         display: flex;
         flex-wrap: wrap;
         gap: 4px;

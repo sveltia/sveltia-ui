@@ -304,7 +304,14 @@
   });
 </script>
 
-<div {...restProps} role="none" class="sui text-editor" class:flex {hidden}>
+<div
+  {...restProps}
+  role="none"
+  class="sui text-editor"
+  class:flex
+  {hidden}
+  style:--sui-text-editor-toolbar-height="{editorStore.toolbarHeight}px"
+>
   <TextEditorToolbar {disabled} {readonly} />
   <LexicalRoot
     {...labelAttrs}
@@ -349,6 +356,8 @@
 {/if}
 
 <style lang="scss">
+  @use '../../styles/mixins';
+
   .text-editor {
     // The button on the selected table cell is positioned against this
     position: relative;
@@ -379,5 +388,7 @@
         }
       }
     }
+
+    @include mixins.nestable-editor;
   }
 </style>

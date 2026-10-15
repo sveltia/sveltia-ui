@@ -124,3 +124,22 @@
     @content;
   }
 }
+
+// The root of a text or code editor, whose sticky toolbar stays below the toolbars of the outer
+// editors when nested, e.g. in an editor component. The root sets the toolbar height inline, which
+// is added to the offset for the inner editors, while their z-index goes down so the outer
+// toolbars stay on top of an inner toolbar being scrolled away.
+@mixin nestable-editor {
+  // Wrapped in `&` to keep the declarations before any nested rules of the including block
+  & {
+    --sui-text-editor-toolbar-top: var(--sui-text-editor-inner-toolbar-top, 0px);
+    --sui-text-editor-toolbar-z-index: var(--sui-text-editor-inner-toolbar-z-index, 100);
+  }
+
+  & > :global(*) {
+    --sui-text-editor-inner-toolbar-top: calc(
+      var(--sui-text-editor-toolbar-top) + var(--sui-text-editor-toolbar-height)
+    );
+    --sui-text-editor-inner-toolbar-z-index: calc(var(--sui-text-editor-toolbar-z-index) - 1);
+  }
+}

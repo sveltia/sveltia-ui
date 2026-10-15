@@ -455,6 +455,8 @@
  * plain text editor.
  * @property {HTMLTextAreaElement | undefined} textArea The `<textarea>` element of the plain text
  * mode.
+ * @property {number} toolbarHeight Height of the sticky toolbar in pixels, which the toolbars of
+ * nested editors are placed below. `0` while the toolbar isn’t rendered.
  * @property {string} controlId ID of the editable element currently shown: the Lexical root in the
  * rich text mode, or the `<textarea>` in the plain text mode.
  * @property {boolean} hasConverterError Whether there was an error while converting Markdown or

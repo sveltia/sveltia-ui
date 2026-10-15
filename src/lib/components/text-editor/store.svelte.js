@@ -39,6 +39,8 @@ export const createEditorStore = () => {
   let useRichText = $state(true);
   /** @type {HTMLTextAreaElement | undefined} */
   let textArea = $state();
+  /** @type {number} */
+  let toolbarHeight = $state(0);
   /** @type {boolean} */
   let hasConverterError = $state(false);
   /** @type {boolean} */
@@ -179,6 +181,12 @@ export const createEditorStore = () => {
     },
     set textArea(newValue) {
       textArea = newValue;
+    },
+    get toolbarHeight() {
+      return toolbarHeight;
+    },
+    set toolbarHeight(newValue) {
+      toolbarHeight = newValue;
     },
     get useRichText() {
       return useRichText;
