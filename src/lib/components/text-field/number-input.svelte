@@ -329,7 +329,10 @@
     }
   }
 
+  // The input has its own direction, so align the text to the right edge in an RTL context
   .number-input:dir(rtl) {
+    --sui-textbox-text-align: right;
+
     .buttons {
       right: auto;
       left: 2px;

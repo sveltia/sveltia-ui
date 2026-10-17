@@ -165,4 +165,10 @@
       }
     }
   }
+
+  // The input has its own direction, so align the text to the right edge in an RTL context
+  .password-input:dir(rtl),
+  .secret-input:dir(rtl) {
+    --sui-textbox-text-align: right;
+  }
 </style>
