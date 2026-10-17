@@ -170,6 +170,7 @@
   class:flex
   class:disabled
   class:readonly
+  class:stepper={stepEnabled}
   {hidden}
 >
   {#if stepEnabled}
@@ -269,8 +270,13 @@
   .number-input {
     display: inline-flex;
     align-items: center;
+    position: relative;
     margin: var(--sui-focus-ring-width);
     min-width: var(--sui-textbox-singleline-min-width);
+
+    &.stepper {
+      --sui-number-input-end-padding: 24px;
+    }
 
     @include mixins.flex-stretch;
 
@@ -284,53 +290,54 @@
     }
 
     :global {
-      // Square off the start corners next to the spin buttons, but not next to the hidden range
-      // description, which is there with stepping turned off
-      .buttons + * input {
-        border-start-start-radius: 0;
-        border-end-start-radius: 0;
-      }
-
-      :not(:last-child) input {
-        border-start-end-radius: 0;
-        border-end-end-radius: 0;
+      // Leave room for the spin buttons overlaid on the end of the field. The input itself is always
+      // LTR, so the physical sides are used
+      input {
+        padding-right: var(--sui-number-input-end-padding, 8px);
       }
 
       @include mixins.embedded-text-input;
     }
   }
 
-  // The spin buttons sit side by side, each the full height of the field: stacked in a 32px field
-  // they’d be 16px tall, well under the 24px pointer target minimum (WCAG 2.5.8)
+  // The spin buttons are stacked inside the end of the field, like those of the native number input.
+  // The input is always LTR, so the physical sides are used and flipped in RTL.
   .buttons {
     display: flex;
-    flex-direction: row;
-    width: 48px;
-    height: var(--sui-textbox-height);
+    flex-direction: column;
+    position: absolute;
+    inset-block: 2px;
+    right: 2px;
+    z-index: 1;
+    width: 18px;
 
     :global {
       button {
         flex: none;
         margin: 0 !important;
-        border-width: 1px;
-        border-color: var(--sui-textbox-border-color);
-        width: 50%;
-        height: 100%;
-        border-inline-end-width: 0;
-
-        &:first-of-type {
-          border-start-end-radius: 0;
-          border-end-end-radius: 0;
-        }
-
-        &:last-of-type {
-          border-radius: 0;
-        }
+        border-width: 0;
+        border-radius: 3px;
+        padding: 0;
+        width: 100%;
+        height: 50%;
+        min-height: 0;
 
         .icon {
-          font-size: 20px;
+          font-size: 16px;
         }
       }
+    }
+  }
+
+  .number-input:dir(rtl) {
+    .buttons {
+      right: auto;
+      left: 2px;
+    }
+
+    :global(input) {
+      padding-right: 8px;
+      padding-left: var(--sui-number-input-end-padding, 8px);
     }
   }
 </style>
