@@ -290,8 +290,8 @@
     }
 
     :global {
-      // Leave room for the spin buttons overlaid on the end of the field. The input itself is always
-      // LTR, so the physical sides are used
+      // Leave room for the spin buttons overlaid on the end of the field. The input itself is
+      // always LTR, so the physical sides are used
       input {
         padding-right: var(--sui-number-input-end-padding, 8px);
       }
@@ -300,15 +300,16 @@
     }
   }
 
-  // The spin buttons are stacked inside the end of the field, like those of the native number input.
-  // The input is always LTR, so the physical sides are used and flipped in RTL.
+  // The spin buttons are stacked inside the end of the field, like those of the native number
+  // input. The input is always LTR, so the physical sides are used and flipped in RTL.
   .buttons {
     display: flex;
     flex-direction: column;
     position: absolute;
     inset-block: 2px;
     right: 2px;
-    z-index: 1;
+    // Stay above the focused input, which has a z-index of up to 2
+    z-index: 3;
     width: 18px;
 
     :global {
