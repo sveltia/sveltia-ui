@@ -219,6 +219,21 @@
       transform: scale(90%);
     }
 
+    &.x-small {
+      width: var(--sui-dialog-x-small-content-width, var(--sui-dialog-content-width, 300px));
+      max-height: var(
+        --sui-dialog-x-small-content-max-height,
+        var(--sui-dialog-content-max-height, 300px)
+      );
+
+      // The default minimum width of a textbox would overflow a dialog this narrow
+      --sui-textbox-singleline-min-width: 0;
+
+      @media (max-height: 300px) {
+        max-height: calc(100dvh - 32px);
+      }
+    }
+
     &.small {
       width: var(--sui-dialog-small-content-width, var(--sui-dialog-content-width, 400px));
       max-height: var(

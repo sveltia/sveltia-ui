@@ -10,6 +10,7 @@
   let openAlertDialog = $state(false);
   let openConfirmationDialog = $state(false);
   let openPromptDialog = $state(false);
+  let openXSmallDialog = $state(false);
   let openSmallDialog = $state(false);
   let openMediumDialog = $state(false);
   let openLargeDialog = $state(false);
@@ -90,6 +91,16 @@
 <section>
   <h3>Size</h3>
   <Example>
+    <div role="none">
+      <Button
+        variant="secondary"
+        label="Show X-Small Dialog"
+        onclick={() => {
+          openXSmallDialog = true;
+        }}
+      />
+      <Dialog bind:open={openXSmallDialog} title="Greeting" size="x-small">Hello World!</Dialog>
+    </div>
     <div role="none">
       <Button
         variant="secondary"

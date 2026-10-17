@@ -63,6 +63,13 @@ describe('Dialog', () => {
     expect(dialog.querySelector('.header button')?.getAttribute('aria-label')).toBe('Close');
   });
 
+  it('applies the x-small size class', async () => {
+    await render(Dialog, { open: true, title: 'T', size: 'x-small' });
+    await waitForOpen();
+
+    expect(getDialog()?.querySelector('.content')?.classList.contains('x-small')).toBe(true);
+  });
+
   it('closes with the OK button', async () => {
     const onOk = vi.fn();
     const onClose = vi.fn();

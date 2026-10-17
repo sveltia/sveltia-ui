@@ -164,6 +164,7 @@
 </Button>
 
 <Dialog
+  size="x-small"
   title={_('_sui.text_editor.insert_table')}
   bind:open={openDialog}
   okDisabled={!isValid}

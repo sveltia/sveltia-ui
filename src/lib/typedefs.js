@@ -82,7 +82,7 @@
  * @property {string} [ariaLabelledby] ID of the element that labels the dialog, typically a heading
  * inside a custom `header` snippet. Takes precedence over `title` for the accessible name.
  * @property {'dialog' | 'alertdialog'} [role] The `role` attribute on the `<dialog>` element.
- * @property {'small' | 'medium' | 'large' | 'x-large'} [size] Width of the dialog.
+ * @property {'x-small' | 'small' | 'medium' | 'large' | 'x-large'} [size] Width of the dialog.
  * @property {string} [class] The `class` attribute on the `<dialog>` element.
  * @property {boolean} [open] Whether to open the dialog.
  * @property {boolean} [showClose] Whether to show the Close button on the header.
