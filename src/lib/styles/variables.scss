@@ -281,6 +281,8 @@
     --sui-heading-font-weight: var(--sui-font-weight-bold);
     --sui-heading-line-height: var(--sui-line-height-default);
     --sui-paragraph-margin: 1.75em;
+    // Menu
+    --sui-menuitem-font-size: 14px;
     // Controls
     --sui-control-small-border-width: 1px;
     --sui-control-small-border-radius: calc(var(--sui-control-small-height) / 8);
@@ -369,6 +371,7 @@
 
     // Make controls larger on touch devices, e.g. mobile & tablet
     @media (pointer: coarse) {
+      --sui-menuitem-height: 40px;
       --sui-control-small-height: 32px;
       --sui-control-medium-height: 40px;
       --sui-control-large-height: 48px;

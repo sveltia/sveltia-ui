@@ -66,10 +66,6 @@
     border-radius: var(--sui-menu-border-radius, 4px);
     padding: var(--sui-menu-padding, 4px);
 
-    @media (pointer: coarse) {
-      gap: 8px 0;
-    }
-
     :global {
       [role='separator'] {
         margin: var(--sui-menu-divider-margin, 4px);
