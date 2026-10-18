@@ -189,6 +189,7 @@
     role="none"
     class="content {className} {contentType}"
     class:touch
+    class:nested={!!parentDialogElement}
     style:inset={popupInstance?.style.inset}
     style:z-index={popupInstance?.style.zIndex}
     style:min-width={popupInstance?.style.minWidth}
@@ -336,6 +337,17 @@
       transition-duration: 300ms;
       opacity: 0;
       transform: translateY(-8px);
+    }
+
+    // A submenu opens beside its parent item, so move it up (or down, when it’s aligned with the
+    // item’s bottom instead) by its own border and padding to line up its first (or last) item with
+    // the parent item, and leave out the small drop that a dropdown makes as it opens
+    &.nested.menu {
+      margin-block: calc(-1 * (var(--sui-menu-border-width, 1px) + var(--sui-menu-padding, 4px)));
+
+      :global(dialog.open) & {
+        transform: none;
+      }
     }
   }
 </style>

@@ -118,9 +118,13 @@ class Popup {
 
     this.anchorElement.setAttribute('aria-expanded', 'false');
 
-    const removeClickListener = on(anchorElement, 'click', () => {
+    const removeClickListener = on(anchorElement, 'click', (event) => {
       if (!this.isDisabled && !this.isReadOnly) {
-        this.open = !this.open;
+        // A menu item’s submenu may already have been opened by hovering, which also happens right
+        // before a tap on a touch screen, so a pointer click only opens it rather than toggling it
+        // closed. A scripted click, which has no `detail`, still toggles it: that’s how the
+        // keyboard navigation closes a submenu.
+        this.open = event.detail && anchorElement.matches('[role="menuitem"]') ? true : !this.open;
       }
     });
 

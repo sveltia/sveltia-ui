@@ -123,7 +123,11 @@
       if (hasItems) {
         event.preventDefault();
         event.stopPropagation();
-        isPopupOpen = !isPopupOpen;
+        window.clearTimeout(hoverTimer);
+        // A pointer click opens rather than toggles, as the hover may have opened the submenu
+        // already; on a touch screen, the emulated `mouseenter` comes right before the `click`. A
+        // scripted click still toggles it, which is how the keyboard navigation closes it.
+        isPopupOpen = event.detail ? true : !isPopupOpen;
       }
 
       onclick?.(event);
