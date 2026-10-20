@@ -4,6 +4,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { BLOCK_SYNTAX_ESCAPE } from './block-escape.js';
+import { LEADING_INLINE_CODE } from './inline-code.js';
 import { createTableTransformer, getTableColumnsSize, mapToTableCells } from './table.js';
 
 const tableMockState = vi.hoisted(() => ({
@@ -566,7 +567,7 @@ describe('TABLE transformer', () => {
     tableMockState.convertToMarkdownString.mockImplementation((_, { text }) => text);
     transformer.export(/** @type {any} */ (fakeNode), () => '');
     expect(tableMockState.convertToMarkdownString).toHaveBeenCalledWith(
-      [component, tableMockState.standardTransformer, BLOCK_SYNTAX_ESCAPE],
+      [component, tableMockState.standardTransformer, LEADING_INLINE_CODE, BLOCK_SYNTAX_ESCAPE],
       cell,
     );
 
@@ -575,7 +576,7 @@ describe('TABLE transformer', () => {
     transformer.replace(/** @type {any} */ (parentNode), [], ['| Bob |'], true);
     expect(tableMockState.convertFromMarkdownString).toHaveBeenCalledWith(
       'Bob',
-      [component, tableMockState.standardTransformer],
+      [component, tableMockState.standardTransformer, LEADING_INLINE_CODE],
       expect.anything(),
     );
   });

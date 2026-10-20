@@ -24,6 +24,7 @@ import {
 import { $isParagraphNode as isParagraphNode, $isTextNode as isTextNode } from 'lexical';
 
 import { BLOCK_SYNTAX_ESCAPE } from './block-escape.js';
+import { LEADING_INLINE_CODE } from './inline-code.js';
 
 /**
  * @import { ElementTransformer, TextMatchTransformer, Transformer } from '@lexical/markdown';
@@ -90,7 +91,7 @@ export const mapToTableCells = (textContent, transformers) => {
  */
 export const createTableTransformer = (cellTransformers = []) => {
   /** @type {Transformer[]} */
-  const transformers = [...cellTransformers, ...TRANSFORMERS];
+  const transformers = [...cellTransformers, ...TRANSFORMERS, LEADING_INLINE_CODE];
   /** @type {Transformer[]} */
   const exportTransformers = [...transformers, BLOCK_SYNTAX_ESCAPE];
 

@@ -20,6 +20,8 @@ import {
 import { HeadingNode, QuoteNode } from '@lexical/rich-text';
 import { createCommand } from 'lexical';
 
+import { LEADING_INLINE_CODE } from './transformers/inline-code.js';
+
 /**
  * @import { EditorThemeClasses, LexicalCommand } from 'lexical';
  * @import { Transformer } from '@lexical/markdown';
@@ -219,7 +221,8 @@ export const TRANSFORMER_MAP = {
   // MULTILINE_ELEMENT_TRANSFORMERS
   'code-block': [CODE],
   // TEXT_FORMAT_TRANSFORMERS
-  code: [INLINE_CODE],
+  // The second one keeps the backslashes in inline code at the start of a node
+  code: [INLINE_CODE, LEADING_INLINE_CODE],
   bold: [
     BOLD_STAR,
     // Disabled for Markdown output in `DISABLED_MARKDOWN_TAGS` below

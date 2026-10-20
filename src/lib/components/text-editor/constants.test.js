@@ -17,6 +17,7 @@ import {
   TEXT_FORMAT_BUTTON_TYPES,
   TRANSFORMER_MAP,
 } from './constants.js';
+import { LEADING_INLINE_CODE } from './transformers/inline-code.js';
 
 describe('AVAILABLE_BUTTONS', () => {
   it('should contain all expected button keys', () => {
@@ -125,7 +126,7 @@ describe('TRANSFORMER_MAP', () => {
   });
 
   it('should include code transformer', () => {
-    expect(TRANSFORMER_MAP.code).toEqual([INLINE_CODE]);
+    expect(TRANSFORMER_MAP.code).toEqual([INLINE_CODE, LEADING_INLINE_CODE]);
   });
 
   it('should have entries for all text format button types', () => {

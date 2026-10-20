@@ -653,6 +653,30 @@ describe('TextEditor Markdown round trip', () => {
     expect(await roundTrip(markdown)).toBe(markdown);
   });
 
+  it('keeps the backslashes in inline code in a table cell', async () => {
+    const markdown = [
+      '| Artifact | Location |',
+      '| --- | --- |',
+      '| MFT | `C:\\$MFT` |',
+      '| Hive | `C:\\Users\\<name>\\Profile.DAT` |',
+      '| Prefetch | `C:\\Windows\\Prefetch` |',
+    ].join('\n');
+
+    expect(await roundTrip(markdown)).toBe(markdown);
+  });
+
+  it('keeps the backslashes in inline code at the start of a paragraph', async () => {
+    const markdown = [
+      '`C:\\$MFT`',
+      '**`a\\<b`**',
+      '`` a\\` ``',
+      '`C:\\$MFT` and `\\<`',
+      'Text and `C:\\$MFT`',
+    ].join('\n\n');
+
+    expect(await roundTrip(markdown)).toBe(markdown);
+  });
+
   it('uses asterisks for italic text within a word', async () => {
     expect(await roundTrip('a*b*c and *d*')).toBe('a*b*c and _d_');
   });
