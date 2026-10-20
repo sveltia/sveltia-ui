@@ -677,6 +677,37 @@ describe('TextEditor Markdown round trip', () => {
     expect(await roundTrip(markdown)).toBe(markdown);
   });
 
+  it('removes the indentation of a top-level list instead of making it a code block', async () => {
+    const markdown = [
+      'Asterisk bullets:',
+      '  * one\n  * two',
+      'Dash bullets:',
+      '   - three\n   - four',
+      'Numbered list:',
+      ' 1. five\n 2. six',
+    ].join('\n\n');
+
+    expect(await roundTrip(markdown)).toBe(
+      [
+        'Asterisk bullets:',
+        '* one\n* two',
+        'Dash bullets:',
+        '- three\n- four',
+        'Numbered list:',
+        '1. five\n2. six',
+      ].join('\n\n'),
+    );
+  });
+
+  it('nests a list item indented to the content of the item above it', async () => {
+    expect(await roundTrip('- a\n  - b\n    - c\n- d')).toBe('- a\n    - b\n        - c\n- d');
+    expect(await roundTrip('  - a\n    - b')).toBe('- a\n    - b');
+    expect(await roundTrip('1. a\n   - b\n2. c')).toBe('1. a\n    - b\n2. c');
+    expect(await roundTrip('- foo\n\n  - bar\n\n  - baz\n    - boo')).toBe(
+      '- foo\n    - bar\n    - baz\n        - boo',
+    );
+  });
+
   it('uses asterisks for italic text within a word', async () => {
     expect(await roundTrip('a*b*c and *d*')).toBe('a*b*c and _d_');
   });

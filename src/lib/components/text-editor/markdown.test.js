@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vitest';
 import {
   convertSetextHeadings,
   convertTildeFences,
-  increaseListIndentation,
   padBlankBlockquoteLines,
   splitMultilineFormatting,
   trimBlankBlockquoteLines,
@@ -70,92 +69,6 @@ describe('splitMultilineFormatting', () => {
   });
 });
 
-describe('increaseListIndentation', () => {
-  it('should double indentation for bullet lists', () => {
-    expect(increaseListIndentation('  - item')).toBe('    - item');
-  });
-
-  it('should double indentation for numbered lists', () => {
-    expect(increaseListIndentation('  1. item')).toBe('    1. item');
-  });
-
-  it('should handle different list markers', () => {
-    expect(increaseListIndentation('  - a\n  + b\n  * c')).toBe('    - a\n    + b\n    * c');
-  });
-
-  it('should double different indentation levels', () => {
-    expect(increaseListIndentation('  - level 1\n    - level 2')).toBe(
-      '    - level 1\n        - level 2',
-    );
-  });
-
-  it('should not affect non-list content', () => {
-    expect(increaseListIndentation('regular text')).toBe('regular text');
-  });
-
-  it('should not affect lists without preceding spaces', () => {
-    expect(increaseListIndentation('- item')).toBe('- item');
-  });
-
-  it('should handle mixed content', () => {
-    expect(increaseListIndentation('paragraph\n  - item\nmore text')).toBe(
-      'paragraph\n    - item\nmore text',
-    );
-  });
-
-  it('should handle lists with various indentation levels', () => {
-    expect(increaseListIndentation('  - a\n      - b\n          - c')).toBe(
-      '    - a\n            - b\n                    - c',
-    );
-  });
-
-  it('should return unchanged string if no matching lists', () => {
-    expect(increaseListIndentation('paragraph with - no list')).toBe('paragraph with - no list');
-  });
-
-  it('should not modify list items inside a backtick fenced code block', () => {
-    const input = '  - before\n```\n  - inside code\n    - nested\n```\n  - after';
-    const expected = '    - before\n```\n  - inside code\n    - nested\n```\n    - after';
-
-    expect(increaseListIndentation(input)).toBe(expected);
-  });
-
-  it('should not modify list items inside a tilde fenced code block', () => {
-    const input = '  - before\n~~~\n  - inside code\n~~~\n  - after';
-    const expected = '    - before\n~~~\n  - inside code\n~~~\n    - after';
-
-    expect(increaseListIndentation(input)).toBe(expected);
-  });
-
-  it('should handle multiple fenced code blocks', () => {
-    const input = '  - a\n```\n  - x\n```\n  - b\n```\n  - y\n```\n  - c';
-    const expected = '    - a\n```\n  - x\n```\n    - b\n```\n  - y\n```\n    - c';
-
-    expect(increaseListIndentation(input)).toBe(expected);
-  });
-
-  it('should not end a code block at a shorter or different fence within it', () => {
-    const input = '````\n```\n  - inside code\n~~~\n  - inside code\n````\n  - after';
-    const expected = '````\n```\n  - inside code\n~~~\n  - inside code\n````\n    - after';
-
-    expect(increaseListIndentation(input)).toBe(expected);
-  });
-
-  it('should not end a code block at a fence followed by an info string', () => {
-    const input = '```\n```js\n  - inside code\n```\n  - after';
-    const expected = '```\n```js\n  - inside code\n```\n    - after';
-
-    expect(increaseListIndentation(input)).toBe(expected);
-  });
-
-  it('should not modify list items inside an indented fenced code block', () => {
-    const input = '  - before\n  ```\n  - inside code\n  ```\n  - after';
-    const expected = '    - before\n  ```\n  - inside code\n  ```\n    - after';
-
-    expect(increaseListIndentation(input)).toBe(expected);
-  });
-});
-
 describe('padBlankBlockquoteLines', () => {
   it('should add a trailing space to a blank blockquote line', () => {
     expect(padBlankBlockquoteLines('> "A quotation."\n>\n> **Attribution**, Title')).toBe(
@@ -188,6 +101,26 @@ describe('padBlankBlockquoteLines', () => {
 
   it('should not modify lines inside an indented fenced code block', () => {
     expect(padBlankBlockquoteLines('>\n  ```\n>\n  ```\n>')).toBe('> \n  ```\n>\n  ```\n> ');
+  });
+
+  it('should not modify lines inside a tilde fenced code block', () => {
+    expect(padBlankBlockquoteLines('>\n~~~\n>\n~~~\n>')).toBe('> \n~~~\n>\n~~~\n> ');
+  });
+
+  it('should handle multiple fenced code blocks', () => {
+    expect(padBlankBlockquoteLines('>\n```\n>\n```\n>\n```\n>\n```\n>')).toBe(
+      '> \n```\n>\n```\n> \n```\n>\n```\n> ',
+    );
+  });
+
+  it('should not end a code block at a shorter or different fence within it', () => {
+    expect(padBlankBlockquoteLines('````\n```\n>\n~~~\n>\n````\n>')).toBe(
+      '````\n```\n>\n~~~\n>\n````\n> ',
+    );
+  });
+
+  it('should not end a code block at a fence followed by an info string', () => {
+    expect(padBlankBlockquoteLines('```\n```js\n>\n```\n>')).toBe('```\n```js\n>\n```\n> ');
   });
 });
 

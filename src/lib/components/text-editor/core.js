@@ -96,7 +96,6 @@ import {
 import {
   convertSetextHeadings,
   convertTildeFences,
-  increaseListIndentation,
   padBlankBlockquoteLines,
   splitMultilineFormatting,
   trimBlankBlockquoteLines,
@@ -1191,10 +1190,9 @@ export const convertMarkdownToLexical = async (editor, value, enabledTransformer
      */
     $import: () => {
       convertFromMarkdownString(
-        // Split multiline formatting into separate lines to prevent Markdown parsing issues, then
-        // increase list indentation levels to prevent Markdown parsing issues, and pad blank
-        // blockquote lines so they are not imported as literal `>` text
-        padBlankBlockquoteLines(increaseListIndentation(splitMultilineFormatting(normalizedValue))),
+        // Split multiline formatting into separate lines to prevent Markdown parsing issues, and
+        // pad blank blockquote lines so they are not imported as literal `>` text
+        padBlankBlockquoteLines(splitMultilineFormatting(normalizedValue)),
         enabledTransformers,
       );
     },

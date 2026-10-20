@@ -328,24 +328,6 @@ export const convertSetextHeadings = (value) => {
 };
 
 /**
- * Increase list indentation levels to prevent Markdown parsing issues.
- * Slate uses 2 spaces per indentation level, whereas Lexical uses 4 spaces.
- * This function doubles the indentation to match Lexical's expectations.
- * @param {string} value Markdown string to process.
- * @returns {string} Processed Markdown string.
- * @see https://github.com/sveltia/sveltia-cms/issues/549
- */
-export const increaseListIndentation = (value) => {
-  if (!value.match(/^\s{2}(?:-|\+|\*|\d+\.)\s/m)) {
-    return value;
-  }
-
-  return mapLinesOutsideCodeBlocks(value, (line) =>
-    line.replace(/^(\s+)(-|\+|\*|\d+\.)/, (_match, p1, p2) => `${' '.repeat(p1.length * 2)}${p2}`),
-  );
-};
-
-/**
  * Add a trailing space to a blank blockquote line (`>`) so Lexical treats it as a blank line within
  * the blockquote. Without the space, the line does not match Lexical's `/^>\s/` quote pattern and
  * is imported as literal `>` text, which is then exported as `> >`, an empty nested blockquote.
