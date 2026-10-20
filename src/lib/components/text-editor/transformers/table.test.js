@@ -5,6 +5,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { BLOCK_SYNTAX_ESCAPE } from './block-escape.js';
 import { LEADING_INLINE_CODE } from './inline-code.js';
+import { RAW_SYNTAX } from './raw-syntax.js';
 import { createTableTransformer, getTableColumnsSize, mapToTableCells } from './table.js';
 
 const tableMockState = vi.hoisted(() => ({
@@ -19,6 +20,7 @@ const tableMockState = vi.hoisted(() => ({
 vi.mock('@lexical/markdown', () => ({
   $convertFromMarkdownString: tableMockState.convertFromMarkdownString,
   $convertToMarkdownString: tableMockState.convertToMarkdownString,
+  LINK: {},
   TRANSFORMERS: [tableMockState.standardTransformer],
 }));
 
@@ -112,6 +114,10 @@ vi.mock('@lexical/table', () => {
 });
 
 vi.mock('lexical', () => ({
+  $createTextNode: vi.fn(),
+  $getState: vi.fn(() => ''),
+  $setState: vi.fn(),
+  createState: vi.fn(() => ({})),
   $isParagraphNode: vi.fn((node) => node?.__kind === 'paragraph'),
   $isTextNode: vi.fn((node) => node?.__kind === 'text'),
 }));
@@ -567,7 +573,13 @@ describe('TABLE transformer', () => {
     tableMockState.convertToMarkdownString.mockImplementation((_, { text }) => text);
     transformer.export(/** @type {any} */ (fakeNode), () => '');
     expect(tableMockState.convertToMarkdownString).toHaveBeenCalledWith(
-      [component, tableMockState.standardTransformer, LEADING_INLINE_CODE, BLOCK_SYNTAX_ESCAPE],
+      [
+        component,
+        tableMockState.standardTransformer,
+        LEADING_INLINE_CODE,
+        RAW_SYNTAX,
+        BLOCK_SYNTAX_ESCAPE,
+      ],
       cell,
     );
 
@@ -576,7 +588,7 @@ describe('TABLE transformer', () => {
     transformer.replace(/** @type {any} */ (parentNode), [], ['| Bob |'], true);
     expect(tableMockState.convertFromMarkdownString).toHaveBeenCalledWith(
       'Bob',
-      [component, tableMockState.standardTransformer, LEADING_INLINE_CODE],
+      [component, tableMockState.standardTransformer, LEADING_INLINE_CODE, RAW_SYNTAX],
       expect.anything(),
     );
   });

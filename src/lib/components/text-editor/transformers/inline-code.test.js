@@ -7,7 +7,13 @@ import {
   TRANSFORMERS,
 } from '@lexical/markdown';
 import { HeadingNode, QuoteNode } from '@lexical/rich-text';
-import { $getRoot as getRoot, $isTextNode as isTextNode, createEditor } from 'lexical';
+import {
+  $createParagraphNode as createParagraphNode,
+  $createTextNode as createTextNode,
+  $getRoot as getRoot,
+  $isTextNode as isTextNode,
+  createEditor,
+} from 'lexical';
 import { describe, expect, it } from 'vitest';
 
 import { LEADING_INLINE_CODE } from './inline-code.js';
@@ -56,8 +62,43 @@ const roundTrip = (markdown) => {
   return { markdown: output, texts };
 };
 
+/**
+ * Export paragraphs, each with a text node, which can be code. Lexical can’t import code with a
+ * tab, as it turns it into a tab node.
+ * @param {...(string | { code: string, bold?: boolean })} paragraphs Text of each paragraph, or the
+ * code and whether it’s bold. An empty string is an empty paragraph.
+ * @returns {string} Exported Markdown.
+ */
+const exportParagraphs = (...paragraphs) => {
+  const transformers = [...TRANSFORMERS, LEADING_INLINE_CODE];
+  const editor = createEditor({ nodes: [CodeNode, LinkNode] });
+  let output = '';
+
+  editor.update(
+    () => {
+      paragraphs.forEach((paragraph) => {
+        const element = createParagraphNode();
+
+        if (typeof paragraph !== 'string') {
+          const code = createTextNode(paragraph.code).toggleFormat('code');
+
+          element.append(paragraph.bold ? code.toggleFormat('bold') : code);
+        } else if (paragraph) {
+          element.append(createTextNode(paragraph));
+        }
+
+        getRoot().append(element);
+      });
+      output = convertToMarkdownString(transformers);
+    },
+    { discrete: true },
+  );
+
+  return output;
+};
+
 describe('LEADING_INLINE_CODE', () => {
-  it('is never used to export Markdown or as a shortcut', () => {
+  it('is never used to export other nodes or as a shortcut', () => {
     expect(
       LEADING_INLINE_CODE.export?.(
         /** @type {any} */ ({}),
@@ -66,6 +107,51 @@ describe('LEADING_INLINE_CODE', () => {
       ),
     ).toBeNull();
     expect(LEADING_INLINE_CODE.regExp.test('`a`')).toBe(false);
+  });
+
+  it('exports a code span made only of spaces without padding', () => {
+    expect(roundTrip('` `').markdown).toBe('` `');
+    expect(roundTrip('a `  ` b').markdown).toBe('a `  ` b');
+    expect(roundTrip('`   `').markdown).toBe('`   `');
+  });
+
+  it('exports a code span that starts and ends with a tab without padding', () => {
+    expect(exportParagraphs({ code: '\t' })).toBe('`\t`');
+    expect(exportParagraphs({ code: '\t ' })).toBe('`\t `');
+    expect(exportParagraphs({ code: ' \ta\t' })).toBe('` \ta\t`');
+    expect(exportParagraphs({ code: '\t', bold: true })).toBe('**`\t`**');
+    // CommonMark would strip one space from both ends
+    expect(exportParagraphs({ code: ' \t ' })).toBe('`  \t  `');
+  });
+
+  it('exports a paragraph with only a code span made of whitespace as a paragraph', () => {
+    expect(exportParagraphs('a', { code: '\t' }, 'b')).toBe('a\n\n`\t`\n\nb');
+    expect(exportParagraphs('a', { code: ' ', bold: true }, { code: '  ' }, 'b')).toBe(
+      'a\n\n**` `**\n\n`  `\n\nb',
+    );
+    expect(exportParagraphs('a', '', { code: '\t' }, '', 'b')).toBe(
+      exportParagraphs('a', '', 'x', '', 'b').replace('x', '`\t`'),
+    );
+    // Not taken as empty
+    expect(exportParagraphs('a', { code: '    ' }, 'b')).toBe('a\n\n`    `\n\nb');
+  });
+
+  it('exports the formats around a code span made only of spaces', () => {
+    expect(roundTrip('**` `** *` `* ~~`  `~~').markdown).toBe('**` `** *` `* ~~`  `~~');
+
+    // Like those around other code spans
+    ['~~**`x`**`a`~~', '~~`a`**`x`**~~'].forEach((markdown) => {
+      expect(roundTrip(markdown.replace('x', ' ')).markdown).toBe(
+        roundTrip(markdown).markdown.replace('x', ' '),
+      );
+    });
+  });
+
+  it('keeps exporting the other code spans with Lexical’s padding', () => {
+    expect(roundTrip('` a `').markdown).toBe('`a`');
+    expect(roundTrip('`  a  `').markdown).toBe('`  a  `');
+    expect(roundTrip('` a` and `a `').markdown).toBe('` a` and `a `');
+    expect(roundTrip('`` ` ``').markdown).toBe('`` ` ``');
   });
 
   it('matches the code span at the start of the text', () => {

@@ -1,5 +1,8 @@
 import { $isLineBreakNode as isLineBreakNode, $isTextNode as isTextNode } from 'lexical';
 
+import { getFormatExportNode } from './inline-code.js';
+import { getRawSyntax } from './raw-syntax.js';
+
 /**
  * @import { TextMatchTransformer } from '@lexical/markdown';
  * @import { ElementNode, LexicalNode, TextNode } from 'lexical';
@@ -105,13 +108,20 @@ const isItalicWithinWord = (node) => {
 };
 
 /**
+ * Placeholder for the text of a raw syntax node, which Lexical doesn’t escape.
+ */
+const RAW_TEXT = '\uE000';
+
+/**
  * Export-only transformer that tidies up the Markdown of a text node that isn’t inline code, which
  * Lexical exports verbatim. It removes the unnecessary escapes Lexical adds; see `unescapeText()`.
  * It uses `*` instead of `_` for italic text within a word, like `a*b*c`, which would otherwise be
  * exported as `a_b_c`, plain text. Last, it escapes the Markdown block syntax at the start of a
  * block or of a line after a line break. Without it, a paragraph typed as `## Hours` with the
  * Markdown shortcuts turned off, pasted as text, or imported from the escaped `\## Hours` would be
- * exported as is and become a heading the next time the Markdown is read.
+ * exported as is and become a heading the next time the Markdown is read. The text imported from
+ * the syntax the editor doesn’t support, like a list in a blockquote, is exported as is instead;
+ * see `RAW_SYNTAX`.
  * @type {TextMatchTransformer}
  */
 export const BLOCK_SYNTAX_ESCAPE = {
@@ -130,11 +140,30 @@ export const BLOCK_SYNTAX_ESCAPE = {
       return null;
     }
 
-    let markdown = exportFormat(node, node.getTextContent());
+    const text = node.getTextContent();
+
+    // Lexical exports formatted whitespace, like the bold space in `**_a_ [b](u)**`, as is, but it
+    // drops the closing syntax due after it, before a link for example, leaving `**_a_ **[b](u)**`.
+    // Export a placeholder instead to get the closing syntax, which goes before the whitespace
+    if (node.getFormat() && /^\s+$/.test(text)) {
+      return `${exportFormat(getFormatExportNode(node), RAW_TEXT).replace(RAW_TEXT, '')}${text}`;
+    }
+
+    const rawSyntax = getRawSyntax(node);
+
+    // Raw syntax is exported as is, but with the syntax of its format, if any
+    let markdown = exportFormat(
+      getFormatExportNode(node),
+      rawSyntax === undefined ? text : RAW_TEXT,
+    );
 
     if (isItalicWithinWord(node)) {
       // Every underscore in the text is escaped, so an unescaped one is an italic delimiter
       markdown = markdown.replace(/\\.|_/gs, (match) => (match === '_' ? '*' : match));
+    }
+
+    if (rawSyntax !== undefined) {
+      return markdown.replace(RAW_TEXT, () => rawSyntax);
     }
 
     markdown = unescapeText(markdown);

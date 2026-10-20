@@ -6,12 +6,10 @@ import {
   BOLD_ITALIC_UNDERSCORE,
   BOLD_STAR,
   BOLD_UNDERSCORE,
-  CODE,
   HEADING,
   INLINE_CODE,
   ITALIC_STAR,
   ITALIC_UNDERSCORE,
-  LINK,
   ORDERED_LIST,
   QUOTE,
   STRIKETHROUGH,
@@ -20,7 +18,9 @@ import {
 import { HeadingNode, QuoteNode } from '@lexical/rich-text';
 import { createCommand } from 'lexical';
 
+import { CODE } from './transformers/code.js';
 import { LEADING_INLINE_CODE } from './transformers/inline-code.js';
+import { LINK } from './transformers/link.js';
 
 /**
  * @import { EditorThemeClasses, LexicalCommand } from 'lexical';
@@ -239,6 +239,7 @@ export const TRANSFORMER_MAP = {
   ],
   strikethrough: [STRIKETHROUGH],
   // TEXT_MATCH_TRANSFORMERS
+  // Unlike Lexical’s, it keeps the formats of the whole link text outside the link
   link: [LINK],
 };
 

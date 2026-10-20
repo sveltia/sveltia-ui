@@ -1,11 +1,15 @@
 import { describe, expect, it } from 'vitest';
 import {
+  addImportPlaceholders,
   convertSetextHeadings,
   convertTildeFences,
   padBlankBlockquoteLines,
+  removeImportPlaceholders,
   splitMultilineFormatting,
   trimBlankBlockquoteLines,
 } from './markdown.js';
+import { INFO_BACKTICK } from './transformers/code.js';
+import { expectLinearTime } from '../../test-utils/complexity.js';
 
 describe('splitMultilineFormatting', () => {
   it('should split italic formatting across lines', () => {
@@ -36,8 +40,57 @@ describe('splitMultilineFormatting', () => {
     );
   });
 
-  it('should only split when surrounded by whitespace', () => {
-    expect(splitMultilineFormatting('_foo\nbar_')).toBe('_foo\nbar_');
+  it('should split formatting at the start or the end of the value or next to punctuation', () => {
+    expect(splitMultilineFormatting('_foo\nbar_')).toBe('_foo_\n_bar_');
+    expect(splitMultilineFormatting('**foo\nbar**')).toBe('**foo**\n**bar**');
+    expect(splitMultilineFormatting('a **foo\nbar**')).toBe('a **foo**\n**bar**');
+    expect(splitMultilineFormatting('**foo\nbar** a')).toBe('**foo**\n**bar** a');
+    expect(splitMultilineFormatting('(~~foo\nbar~~).')).toBe('(~~foo~~\n~~bar~~).');
+    expect(splitMultilineFormatting('**foo\nbar**\n\nbaz')).toBe('**foo**\n**bar**\n\nbaz');
+  });
+
+  it('should not split underscores within a word, escaped markers or other markers', () => {
+    expect(splitMultilineFormatting('snake_case\nfoo_bar')).toBe('snake_case\nfoo_bar');
+    expect(splitMultilineFormatting('__foo\nbar__baz')).toBe('__foo\nbar__baz');
+    expect(splitMultilineFormatting('baz__foo\nbar__')).toBe('baz__foo\nbar__');
+    expect(splitMultilineFormatting('\\_foo\nbar\\_')).toBe('\\_foo\nbar\\_');
+    expect(splitMultilineFormatting('\\*\\*foo\nbar\\*\\*')).toBe('\\*\\*foo\nbar\\*\\*');
+    expect(splitMultilineFormatting('**foo\nbar__')).toBe('**foo\nbar__');
+  });
+
+  it('should split asterisks within a word unless the text has punctuation there', () => {
+    expect(splitMultilineFormatting('**foo\nbar**baz')).toBe('**foo**\n**bar**baz');
+    expect(splitMultilineFormatting('baz**foo\nbar**')).toBe('baz**foo**\n**bar**');
+    expect(splitMultilineFormatting('2*3\n4*5')).toBe('2*3*\n*4*5');
+    expect(splitMultilineFormatting('**foo\nbar.**baz')).toBe('**foo\nbar.**baz');
+    expect(splitMultilineFormatting('baz**.foo\nbar**')).toBe('baz**.foo\nbar**');
+  });
+
+  it('should split double underscores and bold italic formatting', () => {
+    expect(splitMultilineFormatting('__foo\nbar__')).toBe('__foo__\n__bar__');
+    expect(splitMultilineFormatting('***foo\nbar***')).toBe('***foo***\n***bar***');
+    expect(splitMultilineFormatting('___foo\nbar___')).toBe('___foo___\n___bar___');
+    expect(splitMultilineFormatting('*foo\nbar*')).toBe('*foo*\n*bar*');
+  });
+
+  it('should split nested formatting from the inside', () => {
+    expect(splitMultilineFormatting('**_foo\nbar_**')).toBe('**_foo_**\n**_bar_**');
+    expect(splitMultilineFormatting('_**foo\nbar**_')).toBe('_**foo**_\n_**bar**_');
+    expect(splitMultilineFormatting('~~**foo\nbar**~~')).toBe('~~**foo**~~\n~~**bar**~~');
+    expect(splitMultilineFormatting('**_foo\nbar**')).toBe('**_foo**\n**bar**');
+  });
+
+  it('should read the backslash escapes in the text', () => {
+    expect(splitMultilineFormatting('_foo\\_bar\nbaz_')).toBe('_foo\\_bar_\n_baz_');
+    expect(splitMultilineFormatting('_foo\\\\\nbar_')).toBe('_foo\\\\_\n_bar_');
+    expect(splitMultilineFormatting('_foo\\\\\\\nbar_')).toBe('_foo\\\\_\\\n_bar_');
+    expect(splitMultilineFormatting('_foo\\\nbar_')).toBe('_foo_\\\n_bar_');
+  });
+
+  it('should keep the whitespace and hard line breaks outside the markers', () => {
+    expect(splitMultilineFormatting('a _foo  \nbar_ b')).toBe('a _foo_  \n_bar_ b');
+    expect(splitMultilineFormatting('**foo\\\n  bar**')).toBe('**foo**\\\n  **bar**');
+    expect(splitMultilineFormatting('a _ foo\nbar_ b')).toBe('a _ foo\nbar_ b');
   });
 
   it('should handle formatting at different indentation levels', () => {
@@ -59,6 +112,69 @@ describe('splitMultilineFormatting', () => {
     );
   });
 
+  it('should process formatting after a line with a backtick after three backticks', () => {
+    // Inline code, not a code block, like ```` ``` ```` in ```` ```` ``` ```` ````
+    expect(splitMultilineFormatting('```a``` _b\nc_ d')).toBe('```a``` _b_\n_c_ d');
+  });
+
+  it('should split formatting across two or more line breaks', () => {
+    expect(splitMultilineFormatting('**a\nb\nc**')).toBe('**a**\n**b**\n**c**');
+    expect(splitMultilineFormatting('x _a\nb\nc_ y')).toBe('x _a_\n_b_\n_c_ y');
+    expect(splitMultilineFormatting('~~a\nb\nc\nd~~')).toBe('~~a~~\n~~b~~\n~~c~~\n~~d~~');
+    expect(splitMultilineFormatting('__a\nb\nc__ ***d\ne\nf***')).toBe(
+      '__a__\n__b__\n__c__ ***d***\n***e***\n***f***',
+    );
+    expect(splitMultilineFormatting('_a  \n  b\\\\\n c\\\nd_')).toBe(
+      '_a_  \n  _b\\\\_\n _c_\\\n_d_',
+    );
+  });
+
+  it('should split nested formatting across two or more line breaks from the inside', () => {
+    expect(splitMultilineFormatting('**_a\nb\nc_**')).toBe('**_a_**\n**_b_**\n**_c_**');
+    expect(splitMultilineFormatting('**_a\nb_\nc**')).toBe('**_a_**\n**_b_**\n**c**');
+    expect(splitMultilineFormatting('~~a\n**b\nc**\nd~~')).toBe(
+      '~~a~~\n~~**b**~~\n~~**c**~~\n~~d~~',
+    );
+  });
+
+  it('should not split formatting across a line that starts a block', () => {
+    expect(splitMultilineFormatting('**a\n# b\nc**')).toBe('**a\n# b\nc**');
+    expect(splitMultilineFormatting('_a\n- b_')).toBe('_a\n- b_');
+    expect(splitMultilineFormatting('**a\n    b**')).toBe('**a**\n    **b**');
+  });
+
+  it('should split formatting across many lines in linear time', () => {
+    expectLinearTime(
+      (size) => `**${'a\n'.repeat(size)}b**`,
+      (value) => splitMultilineFormatting(value),
+      2000,
+    );
+    expectLinearTime(
+      (size) => `**_a\n${'b\n'.repeat(size)}c_\nd**`,
+      (value) => splitMultilineFormatting(value),
+      2000,
+    );
+  });
+
+  it('should process many markers and lines in linear time', () => {
+    // Unclosed formatting
+    expectLinearTime(
+      (size) => '**a\n'.repeat(size),
+      (value) => splitMultilineFormatting(value),
+      2000,
+    );
+    expectLinearTime(
+      (size) => `_a\n${'b \n'.repeat(size)}`,
+      (value) => splitMultilineFormatting(value),
+      2000,
+    );
+    expectLinearTime(
+      (size) => `**a${' '.repeat(size)}b\nc**`,
+      (value) => splitMultilineFormatting(value),
+      4000,
+    );
+  });
+
   it('should process a long run of whitespace in linear time', () => {
     const value = `${' \n'.repeat(100_000)}x`;
     const start = performance.now();
@@ -66,6 +182,92 @@ describe('splitMultilineFormatting', () => {
     expect(splitMultilineFormatting(value)).toBe(value);
     // The previous regexes took several seconds on this input
     expect(performance.now() - start).toBeLessThan(500);
+  });
+});
+
+describe('addImportPlaceholders', () => {
+  /**
+   * Add the placeholders, and show them as `<E>` for an escaped backslash, `<P>` for a period,
+   * `<T>` for a tab and `<S>` for a space.
+   * @param {string} value Markdown.
+   * @returns {string} Result.
+   */
+  const mark = (value) =>
+    addImportPlaceholders(value)
+      .replaceAll('\uE002', '<E>')
+      .replaceAll(/\.\uE003|\uE003\./g, '<P>')
+      .replaceAll('\uE005', '<T>')
+      .replaceAll('\uE006', '<S>');
+
+  it('should mark an escaped backslash at the end of a line', () => {
+    expect(mark('a\\\\\nb')).toBe('a\\\\<E>\nb');
+    expect(mark('a\\\\\\\nb')).toBe('a\\\\<E>\\\nb');
+    expect(mark('_a\\\\_\n**b\\\\**')).toBe('_a\\\\<E>_\n**b\\\\<E>**');
+  });
+
+  it('should mark a backslash before the closing backticks of a code span', () => {
+    expect(mark('`a\\`\n``b\\``_')).toBe('`a\\<E>`\n``b\\<E>``_');
+    expect(mark('`a` b\\`\n\\`c\\`')).toBe('`a` b\\`\n\\`c\\`');
+  });
+
+  it('should mark a formatting marker before a backslash', () => {
+    expect(mark('_a_\\\n__b__\\\\')).toBe('_a_<P>\\\n__b__<P>\\\\<E>');
+    expect(mark('_a\\\\_\\')).toBe('_a\\\\<E>_<P>\\');
+    expect(mark('x _a_\\y **b.**\\* ~~c.~~\\z')).toBe('x _a_<P>\\y **b.**<P>\\* ~~c.~~<P>\\z');
+    expect(mark('a_\\_b')).toBe('a_<P>\\_b');
+  });
+
+  it('should mark a formatting marker after an escaped backslash', () => {
+    expect(mark('a \\\\_b_ \\\\\\\\**c**')).toBe('a \\\\<P>_b_ \\\\\\\\<P>**c**');
+  });
+
+  it('should not mark an escaped formatting marker', () => {
+    expect(mark('\\_a\\_\\b \\\\\\_c')).toBe('\\_a\\_\\b \\\\\\_c');
+  });
+
+  it('should mark the tabs in a code span', () => {
+    expect(mark('`\t` a\tb ``c\td`` \\`e\tf ` \t `')).toBe('`<T>` a\tb ``c<T>d`` \\`e\tf ` <T> `');
+  });
+
+  it('should mark the spaces in a code span made only of spaces', () => {
+    expect(mark('` ` a `` `  ` `` `   ` ` b `')).toBe('`<S>` a `` `  ` `` `<S><S><S>` ` b `');
+  });
+
+  it('should leave other lines alone', () => {
+    const value = 'a\\\nb\\ c\n\\_a\\\n```\na\\\\\n_b_\\\n`\t`\n```';
+
+    expect(mark(value)).toBe(value);
+  });
+
+  it('should mark a line with many backticks in linear time', () => {
+    expectLinearTime(
+      (size) => `${'`a'.repeat(size)}\\\\`,
+      (value) => addImportPlaceholders(value),
+      2000,
+    );
+  });
+
+  it('should mark a line with many backslashes and markers in linear time', () => {
+    expectLinearTime(
+      (size) => `${'\\\\'.repeat(size)}_${'\\'.repeat(size)}`,
+      (value) => addImportPlaceholders(value),
+      2000,
+    );
+    expectLinearTime(
+      (size) => '_\\'.repeat(size),
+      (value) => addImportPlaceholders(value),
+      2000,
+    );
+  });
+});
+
+describe('removeImportPlaceholders', () => {
+  it('should remove the placeholders', () => {
+    expect(removeImportPlaceholders(addImportPlaceholders('_a\\\\_\\'))).toBe('_a\\\\_\\');
+    expect(removeImportPlaceholders(addImportPlaceholders('`\t` ` ` _a_\\b'))).toBe(
+      '`\t` ` ` _a_\\b',
+    );
+    expect(removeImportPlaceholders('a b.')).toBe('a b.');
   });
 });
 
@@ -171,6 +373,16 @@ describe('convertTildeFences', () => {
 
   it('should convert the opening fence of an unclosed code block', () => {
     expect(convertTildeFences('~~~\ncode\n~~')).toBe('```\ncode\n~~');
+  });
+
+  it('should replace backticks after the language in the info string with a placeholder', () => {
+    expect(convertTildeFences('~~~js `a`\ncode\n~~~')).toBe(
+      `\`\`\`js ${INFO_BACKTICK}a${INFO_BACKTICK}\ncode\n\`\`\``,
+    );
+  });
+
+  it('should remove backticks from an info string without a language', () => {
+    expect(convertTildeFences('~~~`js`\ncode\n~~~')).toBe('```js\ncode\n```');
   });
 
   it('should leave a tilde fence within a backtick code block alone', () => {

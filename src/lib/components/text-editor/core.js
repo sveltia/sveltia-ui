@@ -30,7 +30,6 @@ import {
   ListNode,
 } from '@lexical/list';
 import {
-  CODE,
   HEADING,
   $convertFromMarkdownString as convertFromMarkdownString,
   $convertToMarkdownString as convertToMarkdownString,
@@ -94,9 +93,11 @@ import {
   HTML_IMPORT_MAP,
 } from './html.js';
 import {
+  addImportPlaceholders,
   convertSetextHeadings,
   convertTildeFences,
   padBlankBlockquoteLines,
+  removeImportPlaceholders,
   splitMultilineFormatting,
   trimBlankBlockquoteLines,
 } from './markdown.js';
@@ -110,7 +111,10 @@ import {
 import { registerCodeHighlighting, shikiTokenizer } from './shiki/highlighter.js';
 import { getCodeTheme, observeCodeTheme } from './shiki/theme.js';
 import { BLOCK_SYNTAX_ESCAPE } from './transformers/block-escape.js';
+import { CODE } from './transformers/code.js';
+import { addCodeSpanSplit } from './transformers/formatted-code.js';
 import { HR } from './transformers/hr.js';
+import { RAW_SYNTAX } from './transformers/raw-syntax.js';
 import { $getSelectedAlignment } from './alignment.js';
 import {
   $ensureParagraphAfterTable,
@@ -998,6 +1002,8 @@ export const initEditor = ({
               componentTransformers.filter(({ type }) => type === 'text-match')
             ),
           ),
+          // Last, so the syntax of the editor’s own comes first
+          RAW_SYNTAX,
         ]),
   ];
 
@@ -1155,6 +1161,37 @@ const importValue = async (editor, { languages, $import, $export, formatName }) 
 };
 
 /**
+ * Remove the placeholders added by `addImportPlaceholders()` from the imported nodes: the text, the
+ * Markdown of raw syntax, and the URL and title of a link.
+ */
+const removePlaceholders = () => {
+  getRoot()
+    .getAllTextNodes()
+    .forEach((node) => {
+      const text = node.getTextContent();
+      const newText = removeImportPlaceholders(text);
+      const link = node.getParent();
+
+      if (newText !== text) {
+        node.setTextContent(newText);
+      }
+
+      if (isLinkNode(link)) {
+        const url = link.getURL();
+        const title = link.getTitle();
+
+        if (removeImportPlaceholders(url) !== url) {
+          link.setURL(removeImportPlaceholders(url));
+        }
+
+        if (title && removeImportPlaceholders(title) !== title) {
+          link.setTitle(removeImportPlaceholders(title));
+        }
+      }
+    });
+};
+
+/**
  * Convert Markdown to Lexical nodes.
  * @param {LexicalEditor} editor Editor instance.
  * @param {string} value Current Markdown value.
@@ -1182,19 +1219,30 @@ export const convertMarkdownToLexical = async (editor, value, enabledTransformer
   const normalizedValue = hasHeadings ? convertSetextHeadings(fencedValue) : fencedValue;
 
   return importValue(editor, {
-    languages: [...normalizedValue.matchAll(/^`{3,}(?<lang>[^`\n]+)\n/gm)].map(
+    // The language is the leading word of the info string, like `js` in ```` ``` js title=x ````;
+    // see `CODE`
+    languages: [...normalizedValue.matchAll(/^`{3,}[ \t]*(?<lang>[\w-]+)/gm)].map(
       ({ groups: { lang = 'plain' } = {} }) => lang,
     ),
     /**
      * Import the Markdown.
      */
     $import: () => {
+      // Split multiline formatting into separate lines to prevent Markdown parsing issues
+      const splitValue = splitMultilineFormatting(normalizedValue);
+      // Add placeholders so Lexical reads the backslashes and the tabs in code spans right
+      const markedValue = addImportPlaceholders(splitValue);
+
       convertFromMarkdownString(
-        // Split multiline formatting into separate lines to prevent Markdown parsing issues, and
-        // pad blank blockquote lines so they are not imported as literal `>` text
-        padBlankBlockquoteLines(splitMultilineFormatting(normalizedValue)),
-        enabledTransformers,
+        // Pad blank blockquote lines so they are not imported as literal `>` text
+        padBlankBlockquoteLines(markedValue),
+        // Keep the formatting around a code span after other formatting
+        addCodeSpanSplit(enabledTransformers),
       );
+
+      if (markedValue !== splitValue) {
+        removePlaceholders();
+      }
     },
     /**
      * Export the content as Markdown.

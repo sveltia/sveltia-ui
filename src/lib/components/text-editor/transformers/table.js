@@ -7,6 +7,7 @@
 import {
   $convertFromMarkdownString as convertFromMarkdownString,
   $convertToMarkdownString as convertToMarkdownString,
+  LINK as LEXICAL_LINK,
   TRANSFORMERS,
 } from '@lexical/markdown';
 import {
@@ -25,6 +26,8 @@ import { $isParagraphNode as isParagraphNode, $isTextNode as isTextNode } from '
 
 import { BLOCK_SYNTAX_ESCAPE } from './block-escape.js';
 import { LEADING_INLINE_CODE } from './inline-code.js';
+import { LINK } from './link.js';
+import { RAW_SYNTAX } from './raw-syntax.js';
 
 /**
  * @import { ElementTransformer, TextMatchTransformer, Transformer } from '@lexical/markdown';
@@ -91,7 +94,13 @@ export const mapToTableCells = (textContent, transformers) => {
  */
 export const createTableTransformer = (cellTransformers = []) => {
   /** @type {Transformer[]} */
-  const transformers = [...cellTransformers, ...TRANSFORMERS, LEADING_INLINE_CODE];
+  const transformers = [
+    ...cellTransformers,
+    ...TRANSFORMERS.map((transformer) => (transformer === LEXICAL_LINK ? LINK : transformer)),
+    LEADING_INLINE_CODE,
+    RAW_SYNTAX,
+  ];
+
   /** @type {Transformer[]} */
   const exportTransformers = [...transformers, BLOCK_SYNTAX_ESCAPE];
 

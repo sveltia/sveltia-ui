@@ -641,6 +641,73 @@ describe('TextEditor Markdown round trip', () => {
     );
   });
 
+  it('keeps the info string of a code block', async () => {
+    expect(await roundTrip('~~~js `x`\ncode\n~~~\n\n``` js title=x\ncode\n```')).toBe(
+      '~~~js `x`\ncode\n~~~\n\n```js title=x\ncode\n```',
+    );
+    expect(await roundTrip('```js title=x\ncode')).toBe('```js title=x\ncode\n```');
+  });
+
+  it('keeps formatting across a line break at the start and the end of the value', async () => {
+    expect(await roundTrip('**a\nb** c\n\nd _e\nf_')).toBe('**a**\n**b** c\n\nd _e_\n_f_');
+  });
+
+  it('keeps a code span made only of spaces and the formats around a link', async () => {
+    expect(await roundTrip('` ` and `  `\n\n**_a_ [b](u)**')).toBe(
+      '` ` and `  `\n\n**_a_** **[b](u)**',
+    );
+  });
+
+  it('keeps the formats around inline code made only of spaces', async () => {
+    expect(await roundTrip('**` `** _` `_ ~~` `~~\n\n**` `a** **a` `** **[` `](u)**')).toBe(
+      '**` `** _` `_ ~~` `~~\n\n**` `a** **a` `** **[` `](u)**',
+    );
+  });
+
+  it('keeps italic text before a backslash hard line break', async () => {
+    expect(await roundTrip('_a_\\\nb __c__\\\nd\n\n*e*\\\nf\n\n_g\\\nh_')).toBe(
+      '_a_\\\nb **c**\\\nd\n\n_e_\\\nf\n\n_g_\\\n_h_',
+    );
+  });
+
+  it('keeps an escaped backslash at the end of a line', async () => {
+    expect(await roundTrip('a\\\\\nb\n\n_c\\\\\nd_\n\n`e\\`\nf\n\ng\\\\\\\nh')).toBe(
+      'a\\\\\nb\n\n_c\\\\_\n_d_\n\n`e\\`\nf\n\ng\\\\\\\nh',
+    );
+  });
+
+  it('keeps double underscores, bold italic and bold within a word across a line break', async () => {
+    expect(await roundTrip('__a\nb__ ***c\nd*** **e\nf**g __h\ni__j')).toBe(
+      '**a**\n**b** **_c_**\n**_d_** **e**\n**f**g \\_\\_h\ni__j',
+    );
+  });
+
+  it('keeps the tabs in a code span and a paragraph of whitespace code', async () => {
+    const markdown = '`\t` a `\ta` `a\tb\t` **`\t`**\n\n`\t`\n\n` `\n\n**`  `**\n\nb\tc';
+
+    expect(await roundTrip(markdown)).toBe(markdown);
+  });
+
+  it('keeps the formatting around a code span after other formatting or a link', async () => {
+    const markdown = '**a** **`b`** [**c**](u)**`d`** _e_ _`f`_ ~~g~~ ~~`h`~~ `i` **j** **`k`**';
+
+    expect(await roundTrip(markdown)).toBe(markdown);
+    // Lexical puts the formats of a link with code next to it in the link text
+    expect(await roundTrip('**[a](u)`b`**')).toBe('[**a**](u)**`b`**');
+  });
+
+  it('reads a formatting marker next to a backslash as CommonMark does', async () => {
+    expect(await roundTrip('_a_\\x __b__\\y ~~c.~~\\z d \\\\_e_ f_\\_g [h](/i_\\j "k_\\l")')).toBe(
+      '_a_\\x **b**\\y ~~c.~~\\z d \\\\_e_ f__g [h](/i_\\\\j "k_\\\\l")',
+    );
+  });
+
+  it('keeps formatting across two or more line breaks', async () => {
+    expect(await roundTrip('**a\nb\nc** _d\ne\\\nf_ ~~g\nh\ni~~')).toBe(
+      '**a**\n**b**\n**c** _d_\n_e_\\\n_f_ ~~g~~\n~~h~~\n~~i~~',
+    );
+  });
+
   it('imports setext headings', async () => {
     expect(await roundTrip('Title\n=====\n\nSub\n---\n\nText\n\n---\n\nMore')).toBe(
       '# Title\n\n## Sub\n\nText\n\n***\n\nMore',

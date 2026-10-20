@@ -274,6 +274,9 @@ const ElementNodeClass = vi.hoisted(
 );
 
 vi.mock('lexical', () => ({
+  $getState: vi.fn(() => ''),
+  $setState: vi.fn(),
+  createState: vi.fn(() => ({})),
   COMMAND_PRIORITY_NORMAL: 0,
   COMMAND_PRIORITY_LOW: -1,
   createCommand: vi.fn((type) => ({ type })),
@@ -770,7 +773,8 @@ describe('text editor core', () => {
   });
 
   it('converts tilde fences and setext headings only if code blocks and headings are enabled', async () => {
-    const { $convertFromMarkdownString, CODE, HEADING } = await import('@lexical/markdown');
+    const { $convertFromMarkdownString, HEADING } = await import('@lexical/markdown');
+    const { CODE } = await import('./transformers/code.js');
 
     const editor = /** @type {any} */ ({
       update: vi.fn((callback) => callback()),

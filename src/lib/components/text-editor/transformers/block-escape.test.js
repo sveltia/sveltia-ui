@@ -4,6 +4,7 @@ import { ListItemNode, ListNode } from '@lexical/list';
 import {
   $convertFromMarkdownString as convertFromMarkdownString,
   $convertToMarkdownString as convertToMarkdownString,
+  LINK as LEXICAL_LINK,
   TRANSFORMERS,
 } from '@lexical/markdown';
 import { HeadingNode, QuoteNode } from '@lexical/rich-text';
@@ -17,8 +18,16 @@ import {
 import { describe, expect, it } from 'vitest';
 
 import { BLOCK_SYNTAX_ESCAPE, escapeBlockSyntax, unescapeText } from './block-escape.js';
+import { LINK } from './link.js';
+import { RAW_SYNTAX } from './raw-syntax.js';
 
-const transformers = [...TRANSFORMERS, BLOCK_SYNTAX_ESCAPE];
+// Like the editor, use the link transformer that keeps the formats of the whole link text outside
+// the link, and mark the syntax the editor doesn’t support
+const transformers = [
+  ...TRANSFORMERS.map((transformer) => (transformer === LEXICAL_LINK ? LINK : transformer)),
+  RAW_SYNTAX,
+  BLOCK_SYNTAX_ESCAPE,
+];
 
 /**
  * Create a headless editor with the nodes the Markdown transformers need.
@@ -65,6 +74,14 @@ const exportParagraphs = (paragraphs) => {
 };
 
 /**
+ * Transformers to export Markdown with. Like the editor, use `_` for italic text and `**` for bold
+ * text.
+ */
+const exportTransformers = transformers.filter(
+  (transformer) => !('tag' in transformer) || !['*', '__', '***', '___'].includes(transformer.tag),
+);
+
+/**
  * Fill an editor with a paragraph of text nodes and export it to Markdown.
  * @param {[text: string, ...formats: import('lexical').TextFormatType[]][]} nodes Text and formats
  * of each node.
@@ -90,28 +107,23 @@ const exportTextNodes = (nodes) => {
     { discrete: true },
   );
 
-  // Like the editor, use `_` for italic text and `**` for bold text
-  return editor.read(() =>
-    convertToMarkdownString(
-      transformers.filter(
-        (transformer) =>
-          !('tag' in transformer) || !['*', '__', '***', '___'].includes(transformer.tag),
-      ),
-    ),
-  );
+  return editor.read(() => convertToMarkdownString(exportTransformers));
 };
 
 /**
  * Import Markdown into an editor and export it again.
  * @param {string} markdown Markdown.
+ * @param {object} [options] Options.
+ * @param {boolean} [options.asEditor] Whether to export the formats like the editor; see
+ * `exportTransformers`.
  * @returns {string} Exported Markdown.
  */
-const roundTrip = (markdown) => {
+const roundTrip = (markdown, { asEditor = false } = {}) => {
   const editor = createTestEditor();
 
   editor.update(() => convertFromMarkdownString(markdown, transformers), { discrete: true });
 
-  return editor.read(() => convertToMarkdownString(transformers));
+  return editor.read(() => convertToMarkdownString(asEditor ? exportTransformers : transformers));
 };
 
 describe('escapeBlockSyntax()', () => {
@@ -315,5 +327,35 @@ describe('BLOCK_SYNTAX_ESCAPE', () => {
 
   it('uses underscores for italic text with whitespace inside its delimiters', () => {
     expect(exportTextNodes([['a'], [' b ', 'italic'], ['c']])).toBe('a _b_ c');
+  });
+
+  it('leaves the block syntax that can’t be nested in a blockquote or a list item', () => {
+    const markdown =
+      '> - a\n> - b\n\n> ```\n> code\n> ```\n\n> # Heading\n\n> > Quote\n\n> 1. a\n\n> * a\n\n' +
+      '> ---\n\n> * * *\n\n- a\n  > Quote';
+
+    expect(roundTrip(markdown)).toBe(markdown);
+  });
+
+  it('leaves an ordered list item with a parenthesis, which Lexical doesn’t support', () => {
+    expect(roundTrip('1) a\n2) b')).toBe('1) a\n2) b');
+  });
+
+  it('closes the formats of formatted whitespace before the whitespace', () => {
+    expect(exportTextNodes([['a', 'bold', 'italic'], [' ', 'bold'], ['b']])).toBe('**_a_** b');
+    expect(
+      exportTextNodes([
+        ['a', 'bold'],
+        ['  ', 'bold', 'italic'],
+      ]),
+    ).toBe('**a**  ');
+  });
+
+  it('keeps the formats around whitespace before a link across an import and an export', () => {
+    expect(roundTrip('**_a_ [b](u)**', { asEditor: true })).toBe('**_a_** **[b](u)**');
+    expect(roundTrip('**a _b_ [c](u)**', { asEditor: true })).toBe('**a _b_** **[c](u)**');
+    expect(roundTrip('**`a` [b](u)**', { asEditor: true })).toBe('**`a`** **[b](u)**');
+    expect(roundTrip('_~~a~~ [b](u)_', { asEditor: true })).toBe('_~~a~~_ _[b](u)_');
+    expect(roundTrip('**_a_ [b](u)** c', { asEditor: true })).toBe('**_a_** **[b](u)** c');
   });
 });
