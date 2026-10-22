@@ -37,37 +37,32 @@ const isWordChar = (char) => !!char && /[^\s\p{P}\p{S}]/u.test(char);
  * needed, so `snake_case` and `C:\Users` aren’t exported as `snake\_case` and `C:\\Users`. Unlike
  * a global replacement, the escapes that are needed are kept: an underscore that could open or
  * close emphasis, like that in `\_not italic\_`, and a backslash that would otherwise escape the
- * next character or make a hard line break. Also replace the encoded spaces Lexical outputs around
- * formatted text, which can appear with a combination of bold and italic text.
+ * next character or make a hard line break.
  * @param {string} markdown Markdown exported from a text node with its format, in which every
  * backslash starts an escape.
  * @returns {string} Tidied Markdown.
  * @see https://github.com/sveltia/sveltia-cms/issues/430
  * @see https://github.com/sveltia/sveltia-cms/issues/512
- * @see https://github.com/sveltia/sveltia-cms/issues/511
- * @see https://github.com/sveltia/sveltia-cms/issues/534
  */
 export const unescapeText = (markdown) =>
-  markdown
-    .replace(/((?:\\_)+)|\\(.)/gs, (match, underscores, char, offset, string) => {
-      if (underscores) {
-        return isWordChar(string[offset - 1]) && isWordChar(string[offset + match.length])
-          ? underscores.replaceAll('\\', '')
-          : match;
-      }
+  markdown.replace(/((?:\\_)+)|\\(.)/gs, (match, underscores, char, offset, string) => {
+    if (underscores) {
+      return isWordChar(string[offset - 1]) && isWordChar(string[offset + match.length])
+        ? underscores.replaceAll('\\', '')
+        : match;
+    }
 
-      if (char === '\\') {
-        const next = string[offset + 2];
+    if (char === '\\') {
+      const next = string[offset + 2];
 
-        // The backslash is literal unless it’s followed by ASCII punctuation, which it would
-        // escape, or a line break, which it would turn into a hard line break. The end of the node
-        // is kept escaped, as the next node may start with either
-        return next && !/[\n\r!-/:-@[-`{-~]/.test(next) ? char : match;
-      }
+      // The backslash is literal unless it’s followed by ASCII punctuation, which it would
+      // escape, or a line break, which it would turn into a hard line break. The end of the node
+      // is kept escaped, as the next node may start with either
+      return next && !/[\n\r!-/:-@[-`{-~]/.test(next) ? char : match;
+    }
 
-      return match;
-    })
-    .replace(/&#32;/g, ' ');
+    return match;
+  });
 
 /**
  * Check if the given text node is italic and the italic text it’s part of is next to a word

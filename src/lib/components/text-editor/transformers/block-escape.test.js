@@ -210,10 +210,6 @@ describe('unescapeText()', () => {
   it('keeps the other escapes', () => {
     expect(unescapeText('\\* \\` \\~ \\[')).toBe('\\* \\` \\~ \\[');
   });
-
-  it('replaces encoded spaces', () => {
-    expect(unescapeText('**&#32;bold&#32;**')).toBe('** bold **');
-  });
 });
 
 describe('BLOCK_SYNTAX_ESCAPE', () => {

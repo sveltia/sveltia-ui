@@ -590,12 +590,12 @@ describe('TextEditor Markdown round trip', () => {
   });
 
   /**
-   * Load the given Markdown, add a paragraph at the end, as the user would, so the editor exports
-   * its content, and get the exported Markdown without the new paragraph.
+   * Render the editor with the given Markdown and wait for it to load the content.
    * @param {string} markdown Markdown.
-   * @returns {Promise<string>} Exported Markdown.
+   * @returns {Promise<{ props: ComponentProps<typeof TextEditor>, editor: LexicalEditor }>} Bound
+   * props and the Lexical editor.
    */
-  const roundTrip = async (markdown) => {
+  const loadEditor = async (markdown) => {
     /** @type {ComponentProps<typeof TextEditor>} */
     const props = $state({ value: markdown });
     const screen = await render(TextEditor, props);
@@ -604,6 +604,19 @@ describe('TextEditor Markdown round trip', () => {
 
     // Give the editor time to load the content
     await sleep(300);
+
+    return { props, editor };
+  };
+
+  /**
+   * Load the given Markdown, add a paragraph at the end, as the user would, so the editor exports
+   * its content, and get the exported Markdown without the new paragraph.
+   * @param {string} markdown Markdown.
+   * @returns {Promise<string>} Exported Markdown.
+   */
+  const roundTrip = async (markdown) => {
+    const { props, editor } = await loadEditor(markdown);
+
     editor.update(() => {
       getRoot().append(createParagraphNode().append(createTextNode('Added')));
     });
@@ -777,6 +790,29 @@ describe('TextEditor Markdown round trip', () => {
 
   it('uses asterisks for italic text within a word', async () => {
     expect(await roundTrip('a*b*c and *d*')).toBe('a*b*c and _d_');
+  });
+
+  it('keeps the spaces around formatted text outside its delimiters', async () => {
+    const { props, editor } = await loadEditor('Text');
+
+    // Lexical used to encode the spaces as `&#32;` within the delimiters
+    editor.update(() => {
+      getRoot()
+        .clear()
+        .append(
+          createParagraphNode().append(
+            createTextNode('The main hall of '),
+            createTextNode('City Hall ').toggleFormat('bold'),
+            createTextNode('Utrecht, '),
+            createTextNode('a ').toggleFormat('italic'),
+            createTextNode('b ').toggleFormat('italic').toggleFormat('bold'),
+            createTextNode('c').toggleFormat('italic'),
+          ),
+        );
+    });
+    await vi.waitFor(() => {
+      expect(props.value).toBe('The main hall of **City Hall** Utrecht, _a **b** c_');
+    });
   });
 
   it('keeps raw HTML as is', async () => {
