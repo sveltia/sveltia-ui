@@ -34,6 +34,18 @@ describe('splitMultilineFormatting', () => {
     ).toBe('  _italic_\n_text_   **bold**\n**text**  ~~strike~~\n~~through~~  ');
   });
 
+  it('should leave a match from the end of a line to the start of the next one alone', () => {
+    // These used to never finish, as each split added markers that matched again
+    [
+      '**_(a)_**\n**_(b)_**',
+      '**_[a](https://example.com/1)_**\n**_[b](https://example.com/2)_**',
+    ].forEach((value) => {
+      expect(splitMultilineFormatting(value)).toBe(value);
+    });
+
+    expect(splitMultilineFormatting('**_foo\nbar_**')).toBe('**_foo_**\n**_bar_**');
+  });
+
   it('should not affect properly formatted single-line text', () => {
     expect(splitMultilineFormatting('_italic_ **bold** ~~strike~~ `code`')).toBe(
       '_italic_ **bold** ~~strike~~ `code`',
@@ -197,7 +209,8 @@ describe('addImportPlaceholders', () => {
       .replaceAll('\uE002', '<E>')
       .replaceAll(/\.\uE003|\uE003\./g, '<P>')
       .replaceAll('\uE005', '<T>')
-      .replaceAll('\uE006', '<S>');
+      .replaceAll('\uE006', '<S>')
+      .replaceAll('\uE007', '<H>');
 
   it('should mark an escaped backslash at the end of a line', () => {
     expect(mark('a\\\\\nb')).toBe('a\\\\<E>\nb');
@@ -221,6 +234,13 @@ describe('addImportPlaceholders', () => {
     expect(mark('a \\\\_b_ \\\\\\\\**c**')).toBe('a \\\\<P>_b_ \\\\\\\\<P>**c**');
   });
 
+  it('should mark a formatting marker next to Unicode punctuation or a symbol', () => {
+    expect(mark('See –**[a](u)** “_b_” ~~c~~— d*…')).toBe(
+      'See –<P>**[a](u)** “<P>_b_<P>” ~~c~~<P>— d*<P>…',
+    );
+    expect(mark('é**a** – b – “c” **(d)**')).toBe('é**a** – b – “c” **(d)**');
+  });
+
   it('should not mark an escaped formatting marker', () => {
     expect(mark('\\_a\\_\\b \\\\\\_c')).toBe('\\_a\\_\\b \\\\\\_c');
   });
@@ -235,6 +255,45 @@ describe('addImportPlaceholders', () => {
 
   it('should leave other lines alone', () => {
     const value = 'a\\\nb\\ c\n\\_a\\\n```\na\\\\\n_b_\\\n`\t`\n```';
+
+    expect(mark(value)).toBe(value);
+  });
+
+  it('should mark the lines of an HTML block and the tabs in it', () => {
+    expect(mark('<div>\n\t*a*\n</div>\n\n*b*')).toBe('<H><div>\n<H><T>*a*\n<H></div>\n\n*b*');
+    expect(mark('Text\n<DIV class="x">\nmore')).toBe('Text\n<H><DIV class="x">\n<H>more');
+  });
+
+  it('should end an HTML block of a raw text element, a comment and the like at its end', () => {
+    [
+      ['<script>', '</script>'],
+      ['<!-- a', 'b -->'],
+      ['<?php', '?>'],
+      ['<!DOCTYPE', 'html>'],
+      ['<![CDATA[', ']]>'],
+    ].forEach(([start, end]) => {
+      expect(mark(`${start}\n\n*a*\n${end}\n*b*`)).toBe(`<H>${start}\n<H>\n<H>*a*\n<H>${end}\n*b*`);
+    });
+
+    expect(mark('<!-- *a* -->\n*b*')).toBe('<H><!-- *a* -->\n*b*');
+  });
+
+  it('should mark a line with only a tag unless it’s in a paragraph', () => {
+    expect(mark('<span title="_a">\n*b*\n\nText\n<span>')).toBe(
+      '<H><span title="_a">\n<H>*b*\n\nText\n<span>',
+    );
+    expect(mark('<pre class="x">\n*a*\n</pre>')).toBe('<H><pre class="x">\n<H>*a*\n<H></pre>');
+    expect(mark('<span> a')).toBe('<span> a');
+  });
+
+  it('should mark the tabs in inline HTML', () => {
+    expect(mark('a <img\tsrc="x"\talt="y\tz"> b\tc `<i\tx>`')).toBe(
+      'a <img<T>src="x"<T>alt="y<T>z"> b\tc `<i<T>x>`',
+    );
+  });
+
+  it('should leave HTML in a code block alone', () => {
+    const value = '```\n<div>\n\t*a*\n</div>\n```';
 
     expect(mark(value)).toBe(value);
   });
@@ -268,6 +327,9 @@ describe('removeImportPlaceholders', () => {
       '`\t` ` ` _a_\\b',
     );
     expect(removeImportPlaceholders('a b.')).toBe('a b.');
+    expect(removeImportPlaceholders(addImportPlaceholders('<div>\n\ta\n</div>'))).toBe(
+      '<div>\n\ta\n</div>',
+    );
   });
 });
 

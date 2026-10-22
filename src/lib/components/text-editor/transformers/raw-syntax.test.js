@@ -6,7 +6,13 @@ import {
 } from 'lexical';
 import { describe, expect, it } from 'vitest';
 
-import { getRawSyntax, RAW_SYNTAX } from './raw-syntax.js';
+import {
+  getImportedRawSyntax,
+  getRawSyntax,
+  INLINE_HTML_REGEX,
+  RAW_HTML,
+  RAW_SYNTAX,
+} from './raw-syntax.js';
 
 /**
  * Get the text matched as raw syntax in the given text.
@@ -46,6 +52,93 @@ describe('RAW_SYNTAX', () => {
     expect(match('-5 degrees')).toBeUndefined();
     expect(match('#hashtag')).toBeUndefined();
     expect(match('*italic*')).toBeUndefined();
+  });
+});
+
+describe('RAW_HTML', () => {
+  /**
+   * Get the text matched as raw HTML in the given text.
+   * @param {string} text Text.
+   * @returns {string | undefined} Matched text.
+   */
+  const matchHtml = (text) => text.match(/** @type {RegExp} */ (RAW_HTML.importRegExp))?.[0];
+
+  it('is an import-only text match transformer', () => {
+    expect(RAW_HTML.type).toBe('text-match');
+    expect(RAW_HTML.regExp.test('<b>')).toBe(false);
+    expect(
+      RAW_HTML.export?.(
+        /** @type {any} */ ({}),
+        () => '',
+        () => '',
+      ),
+    ).toBeNull();
+  });
+
+  it('matches a line of an HTML block', () => {
+    expect(matchHtml('\uE007*a* <b>')).toBe('*a* <b>');
+    expect(matchHtml('*a* \uE007<b>')).toBe('<b>');
+  });
+
+  it('matches inline HTML', () => {
+    expect(matchHtml('a <img src="/_a.png" alt=\'b\' data-x=y_z hidden /> c')).toBe(
+      '<img src="/_a.png" alt=\'b\' data-x=y_z hidden />',
+    );
+    expect(matchHtml('a </span > b')).toBe('</span >');
+    expect(matchHtml('a <i\uE005title="x"> b')).toBe('<i\uE005title="x">');
+    expect(matchHtml('<!-- a_b --> <!--> <!--->')).toBe('<!-- a_b -->');
+    expect(matchHtml('<!--> a')).toBe('<!-->');
+    expect(matchHtml('<?php echo 1; ?>')).toBe('<?php echo 1; ?>');
+    expect(matchHtml('<!DOCTYPE html>')).toBe('<!DOCTYPE html>');
+    expect(matchHtml('<![CDATA[ a_b ]]>')).toBe('<![CDATA[ a_b ]]>');
+  });
+
+  it('doesn’t match text that only looks like HTML', () => {
+    expect(matchHtml('a < b > c')).toBeUndefined();
+    expect(matchHtml('<https://example.com>')).toBeUndefined();
+    expect(matchHtml('<a title="x>')).toBeUndefined();
+    expect(INLINE_HTML_REGEX.test('<1a>')).toBe(false);
+  });
+
+  it('marks the node as raw syntax, which isn’t merged into the text before it', () => {
+    const editor = createEditor({
+      /**
+       * Fail the test on an editor error.
+       * @param {Error} error Error.
+       * @throws {Error} The same error.
+       */
+      onError: (error) => {
+        throw error;
+      },
+    });
+
+    editor.update(
+      () => {
+        const plain = createTextNode('a ');
+        const raw = createTextNode('<b title="\\_">');
+
+        RAW_HTML.replace?.(raw, /** @type {any} */ ([]));
+        raw.setTextContent('<b title="_">');
+        getRoot().append(createParagraphNode().append(plain, raw));
+
+        expect(getImportedRawSyntax(raw)).toBe('<b title="\\_">');
+        expect(getImportedRawSyntax(plain)).toBeUndefined();
+        expect(getRawSyntax(raw)).toBe('<b title="_">');
+      },
+      { discrete: true },
+    );
+
+    // Lexical normalizes the text nodes when the update is committed
+    editor.read(() => {
+      expect(
+        getRoot()
+          .getAllTextNodes()
+          .map((node) => [node.getTextContent(), getRawSyntax(node)]),
+      ).toEqual([
+        ['a ', undefined],
+        ['<b title="_">', '<b title="_">'],
+      ]);
+    });
   });
 });
 

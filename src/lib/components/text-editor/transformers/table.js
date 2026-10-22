@@ -27,14 +27,19 @@ import { $isParagraphNode as isParagraphNode, $isTextNode as isTextNode } from '
 import { BLOCK_SYNTAX_ESCAPE } from './block-escape.js';
 import { LEADING_INLINE_CODE } from './inline-code.js';
 import { LINK } from './link.js';
-import { RAW_SYNTAX } from './raw-syntax.js';
+import { RAW_HTML, RAW_SYNTAX } from './raw-syntax.js';
 
 /**
  * @import { ElementTransformer, TextMatchTransformer, Transformer } from '@lexical/markdown';
  */
 
 const TABLE_ROW_REG_EXP = /^(?:\|)(.+)(?:\|)\s?$/;
-const TABLE_ROW_DIVIDER_REG_EXP = /^(\| ?:?-*:? ?)+\|\s?$/;
+/**
+ * Regular expression to match a delimiter row, like `| --- | :-: |`. Each cell needs a hyphen, so a
+ * row of empty cells, like `|  |  |`, is an empty header row, not a delimiter row.
+ * @see https://github.github.com/gfm/#delimiter-row
+ */
+const TABLE_ROW_DIVIDER_REG_EXP = /^(?:\|[ \t]*:?-+:?[ \t]*)+\|\s?$/;
 
 /**
  * Returns the number of columns in the table.
@@ -98,6 +103,7 @@ export const createTableTransformer = (cellTransformers = []) => {
     ...cellTransformers,
     ...TRANSFORMERS.map((transformer) => (transformer === LEXICAL_LINK ? LINK : transformer)),
     LEADING_INLINE_CODE,
+    RAW_HTML,
     RAW_SYNTAX,
   ];
 

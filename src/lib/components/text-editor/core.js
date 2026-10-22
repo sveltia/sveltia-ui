@@ -114,7 +114,13 @@ import { BLOCK_SYNTAX_ESCAPE } from './transformers/block-escape.js';
 import { CODE } from './transformers/code.js';
 import { addCodeSpanSplit } from './transformers/formatted-code.js';
 import { HR } from './transformers/hr.js';
-import { RAW_SYNTAX } from './transformers/raw-syntax.js';
+import {
+  getImportedRawSyntax,
+  HTML_BLOCK_PLACEHOLDER,
+  INLINE_HTML_REGEX,
+  RAW_HTML,
+  RAW_SYNTAX,
+} from './transformers/raw-syntax.js';
 import { $getSelectedAlignment } from './alignment.js';
 import {
   $ensureParagraphAfterTable,
@@ -905,6 +911,160 @@ const registerTabIndentation = (editor) =>
   });
 
 /**
+ * Remove the placeholders added by `addImportPlaceholders()` from a regular expression match.
+ * @param {RegExpMatchArray} match Match.
+ * @returns {RegExpMatchArray} Match without the placeholders, with the same index and input.
+ */
+const cleanMatch = (match) => {
+  /**
+   * Remove the placeholders from a captured string, if any.
+   * @param {string | undefined} value Captured string.
+   * @returns {string | undefined} Cleaned string.
+   */
+  const clean = (value) => (value === undefined ? value : removeImportPlaceholders(value));
+
+  return /** @type {RegExpMatchArray} */ (
+    Object.assign(match.map(clean), {
+      index: match.index,
+      input: match.input,
+      groups: match.groups
+        ? Object.fromEntries(
+            Object.entries(match.groups).map(([key, value]) => [key, clean(value)]),
+          )
+        : undefined,
+    })
+  );
+};
+
+/**
+ * Make a regular expression match the text after the placeholder at the start of a line of an HTML
+ * block, if any, so the pattern of an editor component, like `^<aside>`, still matches the line.
+ * @param {RegExp} regExp Regular expression without the `g` flag.
+ * @param {boolean} isLineStart Whether Lexical takes the match as the start of the line and removes
+ * it by its length, like that of an element transformer, in which case the match includes the
+ * placeholder. Otherwise its index is moved past the placeholder.
+ * @returns {RegExp} Regular expression.
+ */
+const skipHtmlBlockPlaceholder = (regExp, isLineStart) =>
+  // Lexical matches the text with `String.prototype.match()`, which calls this method
+  Object.assign(new RegExp(regExp), {
+    /**
+     * Match the text after the placeholder at its start, if any.
+     * @param {string} text Text.
+     * @returns {RegExpMatchArray | null} Match.
+     */
+    [Symbol.match]: (text) => {
+      const offset = text.startsWith(HTML_BLOCK_PLACEHOLDER) ? 1 : 0;
+      const match = text.slice(offset).match(regExp);
+
+      if (!match || !offset) {
+        return match;
+      }
+
+      match.input = text;
+
+      if (isLineStart && match.index === 0) {
+        match[0] = `${HTML_BLOCK_PLACEHOLDER}${match[0]}`;
+      } else {
+        // The pattern has no `g` flag, so the match has an index
+        /** @type {number} */ (match.index) += offset;
+      }
+
+      return match;
+    },
+  });
+
+/**
+ * Remove the placeholders added by `addImportPlaceholders()` from an argument of a transformer’s
+ * `replace()`: a regular expression match, or the lines of a multiline element.
+ * @param {any} arg Argument.
+ * @returns {any} Argument without the placeholders.
+ */
+const cleanReplaceArg = (arg) => {
+  if (!Array.isArray(arg)) {
+    return arg;
+  }
+
+  if ('index' in arg) {
+    return cleanMatch(/** @type {RegExpMatchArray} */ (arg));
+  }
+
+  return arg.every((item) => typeof item === 'string')
+    ? arg.map((line) => removeImportPlaceholders(line))
+    : arg;
+};
+
+/**
+ * Make an editor component’s transformer import the Markdown without the placeholders added by
+ * `addImportPlaceholders()`, which `removePlaceholders()` can’t remove from the properties of the
+ * component node it creates, like the alt text of an image. The line of an HTML block starts with
+ * a placeholder, so the patterns of a component, like `^<aside>`, are matched after it.
+ * @param {Transformer} transformer Transformer.
+ * @returns {Transformer} Transformer.
+ */
+export const removePlaceholdersFromMatch = (transformer) => {
+  /** @type {any} */
+  const {
+    type,
+    handleImportAfterStartMatch,
+    importRegExp,
+    regExp,
+    regExpStart,
+    regExpEnd,
+    replace,
+  } = transformer;
+
+  /** @type {Record<string, any>} */
+  const overrides = {};
+
+  if (handleImportAfterStartMatch) {
+    /**
+     * Import the lines without the placeholders.
+     * @param {{ lines: string[] }} args Arguments.
+     * @returns {any} Result.
+     */
+    overrides.handleImportAfterStartMatch = (args) =>
+      handleImportAfterStartMatch({
+        ...args,
+        lines: args.lines.map((line) => removeImportPlaceholders(line)),
+      });
+  }
+
+  if (importRegExp) {
+    overrides.importRegExp = skipHtmlBlockPlaceholder(importRegExp, false);
+  }
+
+  // The regular expression of an element is matched against the start of a line on import
+  if (type === 'element' && regExp) {
+    overrides.regExp = skipHtmlBlockPlaceholder(regExp, true);
+  }
+
+  if (regExpStart) {
+    overrides.regExpStart = skipHtmlBlockPlaceholder(regExpStart, true);
+  }
+
+  if (regExpEnd instanceof RegExp) {
+    overrides.regExpEnd = skipHtmlBlockPlaceholder(regExpEnd, true);
+  } else if (regExpEnd?.regExp) {
+    overrides.regExpEnd = {
+      ...regExpEnd,
+      regExp: skipHtmlBlockPlaceholder(regExpEnd.regExp, true),
+    };
+  }
+
+  if (replace) {
+    /**
+     * Import the match and the lines without the placeholders.
+     * @param {...any} args Arguments.
+     * @returns {any} Result.
+     */
+    overrides.replace = (...args) => replace(...args.map(cleanReplaceArg));
+  }
+
+  return /** @type {Transformer} */ ({ ...transformer, ...overrides });
+};
+
+/**
  * Initialize the Lexical editor.
  * @param {TextEditorConfig} config Editor configuration.
  * @returns {InitEditorResult} Editor instance and cleanup.
@@ -980,11 +1140,16 @@ export const initEditor = ({
     },
   });
 
-  const componentTransformers = components.map(({ transformer }) => transformer);
+  const componentTransformers = components.map(({ transformer }) =>
+    removePlaceholdersFromMatch(transformer),
+  );
 
   /** @type {Transformer[]} */
   const enabledTransformers = [
     ...componentTransformers,
+    // Raw HTML comes before the editor’s own syntax, so a line of an HTML block that starts like a
+    // link, for example, is still raw HTML. Only an editor component takes precedence
+    ...(isCodeEditor ? [] : [RAW_HTML]),
     ...new Set(
       Object.entries(TRANSFORMER_MAP)
         .filter(([button]) => enabledButtons.includes(/** @type {TextEditorNodeType} */ (button)))
@@ -1162,14 +1327,16 @@ const importValue = async (editor, { languages, $import, $export, formatName }) 
 
 /**
  * Remove the placeholders added by `addImportPlaceholders()` from the imported nodes: the text, the
- * Markdown of raw syntax, and the URL and title of a link.
+ * Markdown of raw syntax, and the URL and title of a link. The text of raw syntax is restored from
+ * the Markdown it was imported from, as Lexical has removed its escapes, which are not escapes in
+ * raw HTML; see `RAW_HTML`.
  */
 const removePlaceholders = () => {
   getRoot()
     .getAllTextNodes()
     .forEach((node) => {
       const text = node.getTextContent();
-      const newText = removeImportPlaceholders(text);
+      const newText = removeImportPlaceholders(getImportedRawSyntax(node) ?? text);
       const link = node.getParent();
 
       if (newText !== text) {
@@ -1230,7 +1397,8 @@ export const convertMarkdownToLexical = async (editor, value, enabledTransformer
     $import: () => {
       // Split multiline formatting into separate lines to prevent Markdown parsing issues
       const splitValue = splitMultilineFormatting(normalizedValue);
-      // Add placeholders so Lexical reads the backslashes and the tabs in code spans right
+      // Add placeholders so Lexical reads the backslashes, the tabs in code spans and raw HTML
+      // right
       const markedValue = addImportPlaceholders(splitValue);
 
       convertFromMarkdownString(
@@ -1240,7 +1408,8 @@ export const convertMarkdownToLexical = async (editor, value, enabledTransformer
         addCodeSpanSplit(enabledTransformers),
       );
 
-      if (markedValue !== splitValue) {
+      // The text of raw HTML is restored as well. The lines of an HTML block have a placeholder
+      if (markedValue !== splitValue || INLINE_HTML_REGEX.test(markedValue)) {
         removePlaceholders();
       }
     },

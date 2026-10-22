@@ -1,4 +1,9 @@
 import { INFO_BACKTICK } from './transformers/code.js';
+import {
+  HTML_BLOCK_PLACEHOLDER,
+  HTML_TAG_SOURCE,
+  INLINE_HTML_REGEX,
+} from './transformers/raw-syntax.js';
 
 /**
  * @typedef {object} CodeBlock
@@ -187,14 +192,52 @@ const HTML_BLOCK_TAG_NAMES = [
 ];
 
 /**
- * Regular expression to match the start of an HTML block that can interrupt a paragraph: a raw
- * text element, a comment, a processing instruction, a declaration, a CDATA section or a block
- * element.
+ * Start and end conditions of the HTML blocks that can interrupt a paragraph: a raw text element, a
+ * comment, a processing instruction, a declaration, a CDATA section or a block element. The start
+ * is what follows the `<` at the start of the line. The end of the block is the line that matches
+ * the end condition, or the line before a blank line if there’s none.
+ * @type {[string, RegExp | null][]}
  * @see https://spec.commonmark.org/0.31.2/#html-blocks
  */
+const HTML_BLOCK_CONDITION_SOURCES = [
+  ['(?:script|pre|style|textarea)(?:[ \\t>]|$)', /<\/(?:pre|script|style|textarea)>/i],
+  ['!--', /-->/],
+  ['\\?', /\?>/],
+  ['![A-Za-z]', />/],
+  ['!\\[CDATA\\[', /\]\]>/],
+  [`/?(?:${HTML_BLOCK_TAG_NAMES.join('|')})(?:[ \\t>]|/>|$)`, null],
+];
+
+/**
+ * Regular expression to match the start of an HTML block that can interrupt a paragraph; see
+ * {@link HTML_BLOCK_CONDITION_SOURCES}.
+ */
 const HTML_BLOCK_START_REGEX = new RegExp(
-  `<(?:(?:script|pre|style|textarea)(?:[ \\t>]|$)|!--|\\?|![A-Za-z]|!\\[CDATA\\[|` +
-    `/?(?:${HTML_BLOCK_TAG_NAMES.join('|')})(?:[ \\t>]|/>|$))`,
+  `<(?:${HTML_BLOCK_CONDITION_SOURCES.map(([start]) => start).join('|')})`,
+  'i',
+);
+
+/**
+ * Start and end conditions of the HTML blocks that can interrupt a paragraph, with the start as a
+ * regular expression to match a line; see {@link HTML_BLOCK_CONDITION_SOURCES}.
+ * @type {[RegExp, RegExp | null][]}
+ */
+const HTML_BLOCK_CONDITIONS = HTML_BLOCK_CONDITION_SOURCES.map(([start, end]) => [
+  new RegExp(`^ {0,3}<(?:${start})`, 'i'),
+  end,
+]);
+
+/**
+ * Global version of `INLINE_HTML_REGEX`.
+ */
+const GLOBAL_INLINE_HTML_REGEX = new RegExp(INLINE_HTML_REGEX, 'g');
+
+/**
+ * Regular expression to match a line that starts an HTML block that can’t interrupt a paragraph.
+ * @see https://spec.commonmark.org/0.31.2/#html-blocks
+ */
+const STANDALONE_HTML_TAG_REGEX = new RegExp(
+  `^ {0,3}(?!</?(?:pre|script|style|textarea)\\b)(?:${HTML_TAG_SOURCE})[ \\t]*$`,
   'i',
 );
 
@@ -360,7 +403,11 @@ export const splitMultilineFormatting = (value) =>
 
             const lines = splitFormattedLines(text);
 
+            // A line with only markers, like `**` in `_**\n**_` of `**_(a)_**\n**_(b)_**`, means
+            // the match runs from the closing marker of one line to the opening marker of the next,
+            // which isn’t formatting. Splitting it would add markers that match again, without end
             if (
+              lines.some(({ text: lineText }) => /^[*_~]+$/.test(lineText)) ||
               lines
                 .slice(1)
                 .some(({ indent, text: lineText }) =>
@@ -537,6 +584,35 @@ const markMarkersNextToBackslashes = (line) =>
     : line;
 
 /**
+ * Regular expression to match the place between a formatting marker and a punctuation character or
+ * a symbol other than ASCII, like an en dash or a curly quote.
+ */
+const MARKER_UNICODE_PUNCTUATION_REGEX =
+  /(?<=[*_~])(?=(?![\0-\x7F])[\p{P}\p{S}])|(?<=(?![\0-\x7F])[\p{P}\p{S}])(?=[*_~])/gu;
+
+/**
+ * Put a period, which Lexical takes as punctuation, between a formatting marker and a punctuation
+ * character or a symbol other than ASCII. Unlike CommonMark, Lexical only takes ASCII characters as
+ * punctuation, so it reads the marker as being next to a letter: it doesn’t read `**[a](u)**` in
+ * `–**[a](u)**` or `“**[a](u)**”` as bold, as the marker can’t open or close the formatting there.
+ * The period gives the marker the same neighbor as in CommonMark. A placeholder on the other side
+ * lets it be removed.
+ * @param {string} line Line.
+ * @returns {string} Processed line.
+ * @see https://spec.commonmark.org/0.31.2/#unicode-punctuation-character
+ * @see https://github.com/sveltia/sveltia-cms/issues/1107
+ */
+const markMarkersNextToUnicodePunctuation = (line) =>
+  /[^\0-\x7F]/.test(line)
+    ? line.replace(MARKER_UNICODE_PUNCTUATION_REGEX, (_match, index) =>
+        // The period goes next to the marker
+        '*_~'.includes(line[index - 1])
+          ? `.${PUNCTUATION_PLACEHOLDER}`
+          : `${PUNCTUATION_PLACEHOLDER}.`,
+      )
+    : line;
+
+/**
  * Replace the tabs in the code spans of a line, and the spaces in a code span made only of spaces,
  * with placeholders. Lexical turns a tab into a tab node, which has no format, so a tab in a code
  * span would leave the code span, and a code span with only tabs would be exported as text. Also,
@@ -570,16 +646,80 @@ const markCodeSpanWhitespace = (line) => {
 };
 
 /**
+ * Mark the lines of the HTML blocks in a part of a Markdown string with a placeholder at the start,
+ * so they’re imported as raw HTML, without the Markdown syntax being read; see `RAW_HTML`. Their
+ * tabs, and those in the inline HTML of the other lines, are replaced with a placeholder, as
+ * Lexical would otherwise split the raw HTML into separate nodes around a tab node.
+ * @param {string} part Part of a Markdown string outside fenced code blocks.
+ * @returns {string} Processed part.
+ * @see https://spec.commonmark.org/0.31.2/#html-blocks
+ * @see https://github.com/sveltia/sveltia-cms/issues/1106
+ */
+const markHtml = (part) => {
+  /**
+   * End condition of the current HTML block: a regular expression, `null` for a blank line, or
+   * `undefined` if the line is not in an HTML block.
+   * @type {RegExp | null | undefined}
+   */
+  let end;
+  let isInParagraph = false;
+
+  return part
+    .split('\n')
+    .map((line) => {
+      const isBlankLine = !line.trim();
+
+      if (end === null && isBlankLine) {
+        end = undefined;
+      }
+
+      if (end === undefined) {
+        const condition = HTML_BLOCK_CONDITIONS.find(([start]) => start.test(line));
+
+        if (condition) {
+          [, end] = condition;
+        } else if (!isInParagraph && STANDALONE_HTML_TAG_REGEX.test(line)) {
+          end = null;
+        } else {
+          isInParagraph = !isBlankLine;
+
+          return line.includes('\t')
+            ? line.replace(GLOBAL_INLINE_HTML_REGEX, (tag) =>
+                tag.replaceAll('\t', CODE_TAB_PLACEHOLDER),
+              )
+            : line;
+        }
+      }
+
+      if (end?.test(line)) {
+        end = undefined;
+      }
+
+      isInParagraph = false;
+
+      return `${HTML_BLOCK_PLACEHOLDER}${line.replaceAll('\t', CODE_TAB_PLACEHOLDER)}`;
+    })
+    .join('\n');
+};
+
+/**
  * Add placeholders to a Markdown string, so Lexical reads it as CommonMark does; see
- * `markLineEndBackslashes()`, `markMarkersNextToBackslashes()` and `markCodeSpanWhitespace()`.
+ * `markLineEndBackslashes()`, `markMarkersNextToBackslashes()`,
+ * `markMarkersNextToUnicodePunctuation()` and `markCodeSpanWhitespace()`.
  * Lines in fenced code blocks are left untouched. The placeholders are removed from the imported
  * text with `removeImportPlaceholders()`.
  * @param {string} value Markdown string to process.
  * @returns {string} Processed Markdown string.
  */
 export const addImportPlaceholders = (value) =>
-  mapLinesOutsideCodeBlocks(value, (line) =>
-    markCodeSpanWhitespace(markMarkersNextToBackslashes(markLineEndBackslashes(line))),
+  mapLinesOutsideCodeBlocks(
+    value.includes('<') ? mapOutsideCodeBlocks(value, markHtml) : value,
+    (line) =>
+      markCodeSpanWhitespace(
+        markMarkersNextToUnicodePunctuation(
+          markMarkersNextToBackslashes(markLineEndBackslashes(line)),
+        ),
+      ),
   );
 
 /**
@@ -591,6 +731,7 @@ export const removeImportPlaceholders = (text) =>
   text
     .replace(new RegExp(`\\.${PUNCTUATION_PLACEHOLDER}|${PUNCTUATION_PLACEHOLDER}\\.`, 'g'), '')
     .replaceAll(ESCAPED_BACKSLASH_PLACEHOLDER, '')
+    .replaceAll(HTML_BLOCK_PLACEHOLDER, '')
     .replaceAll(CODE_TAB_PLACEHOLDER, '\t')
     .replaceAll(CODE_SPACE_PLACEHOLDER, ' ');
 

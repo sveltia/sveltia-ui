@@ -778,6 +778,40 @@ describe('TextEditor Markdown round trip', () => {
   it('uses asterisks for italic text within a word', async () => {
     expect(await roundTrip('a*b*c and *d*')).toBe('a*b*c and _d_');
   });
+
+  it('keeps raw HTML as is', async () => {
+    const markdown = [
+      '<iframe src="https://example.com/embed/_abc123" title="Video"></iframe>',
+      'An image: <img src="/_images/my_image.png" alt="x" />',
+      '<table><tbody><tr><td>Total*</td><td>~10 g</td></tr></tbody></table>',
+      '<div>Total* ~10 g</div>',
+      '<div>\n\t<p>*not* \\_italic_</p>\n- not a list\n</div>',
+      '<span title="a\\*b">x</span> and _y_ <b>**z**</b> `<i>_</i>` <i>a_b\\*</i>',
+      '<script>\nconst a = b_c * d;\n\nconst e = `**`;\n</script>\nAfter _script_',
+      '<!-- a_b *c* -->',
+      'Text\n<div>a_b *c*</div>',
+      '<div>\n[a](u) x_*y\n</div>',
+      '| <i title="/_x*">a</i> | c |\n| --- | --- |\n| d | e |',
+    ].join('\n\n');
+
+    expect(await roundTrip(markdown)).toBe(markdown);
+  });
+
+  it('reads emphasis after Unicode punctuation', async () => {
+    const markdown = [
+      'See –**[here](https://example.com)** now.',
+      'See –**_[here](https://example.com)_** now.',
+      'See “**[here](https://example.com)**” now.',
+    ].join('\n\n');
+
+    expect(await roundTrip(markdown)).toBe(markdown);
+  });
+
+  it('keeps a table with an empty header row', async () => {
+    const markdown = 'Text\n\n|  |  |\n| --- | --- |\n| a | b |\n| c | d |\n\nEnd';
+
+    expect(await roundTrip(markdown)).toBe(markdown);
+  });
 });
 
 describe('TextEditor with tables', () => {

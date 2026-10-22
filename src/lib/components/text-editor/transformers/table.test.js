@@ -5,7 +5,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { BLOCK_SYNTAX_ESCAPE } from './block-escape.js';
 import { LEADING_INLINE_CODE } from './inline-code.js';
-import { RAW_SYNTAX } from './raw-syntax.js';
+import { RAW_HTML, RAW_SYNTAX } from './raw-syntax.js';
 import { createTableTransformer, getTableColumnsSize, mapToTableCells } from './table.js';
 
 const tableMockState = vi.hoisted(() => ({
@@ -204,6 +204,18 @@ describe('TABLE transformer', () => {
     expect(parentNode.remove).toHaveBeenCalled();
     expect(firstCell.setHeaderStyles).toHaveBeenCalledWith(1, 1);
     expect(secondCell.setHeaderStyles).toHaveBeenCalledWith(1, 1);
+  });
+
+  it('should take a row of empty cells as a header row, not a divider row', () => {
+    const parentNode = {
+      getPreviousSibling: () => null,
+      replace: vi.fn(),
+    };
+
+    TABLE.replace(/** @type {any} */ (parentNode), [], ['|  |  |'], true);
+
+    expect(parentNode.replace).toHaveBeenCalled();
+    expect(tableMockState.createdTables[0].children[0].children).toHaveLength(2);
   });
 
   it('should skip non-row entries and non-cell entries while exporting', () => {
@@ -577,6 +589,7 @@ describe('TABLE transformer', () => {
         component,
         tableMockState.standardTransformer,
         LEADING_INLINE_CODE,
+        RAW_HTML,
         RAW_SYNTAX,
         BLOCK_SYNTAX_ESCAPE,
       ],
@@ -588,7 +601,7 @@ describe('TABLE transformer', () => {
     transformer.replace(/** @type {any} */ (parentNode), [], ['| Bob |'], true);
     expect(tableMockState.convertFromMarkdownString).toHaveBeenCalledWith(
       'Bob',
-      [component, tableMockState.standardTransformer, LEADING_INLINE_CODE, RAW_SYNTAX],
+      [component, tableMockState.standardTransformer, LEADING_INLINE_CODE, RAW_HTML, RAW_SYNTAX],
       expect.anything(),
     );
   });

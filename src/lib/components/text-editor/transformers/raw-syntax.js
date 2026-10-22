@@ -6,6 +6,49 @@ import { $getState as getState, $setState as setState, createState } from 'lexic
  */
 
 /**
+ * Placeholder put at the start of a line of an HTML block; see `addImportPlaceholders()`.
+ */
+export const HTML_BLOCK_PLACEHOLDER = '\uE007';
+
+/**
+ * Whitespace within an HTML tag, including the placeholder of a tab; see `addImportPlaceholders()`.
+ */
+const TAG_SPACE = '[ \\t\\uE005]';
+
+/**
+ * Regular expression source to match an HTML open tag or closing tag.
+ * @see https://spec.commonmark.org/0.31.2/#raw-html
+ */
+export const HTML_TAG_SOURCE =
+  `<[A-Za-z][A-Za-z0-9-]*(?:${TAG_SPACE}+[A-Za-z_:][\\w.:-]*` +
+  `(?:${TAG_SPACE}*=${TAG_SPACE}*(?:[^\\s"'=<>\`\\uE005]+|'[^'\\n]*'|"[^"\\n]*"))?)*` +
+  `${TAG_SPACE}*/?>|</[A-Za-z][A-Za-z0-9-]*${TAG_SPACE}*>`;
+
+/**
+ * Regular expression to match inline raw HTML on a line: an open tag, a closing tag, a comment, a
+ * processing instruction, a declaration or a CDATA section, which isn’t escaped.
+ * @see https://spec.commonmark.org/0.31.2/#raw-html
+ */
+export const INLINE_HTML_REGEX = new RegExp(
+  [
+    // Not escaped. The lookahead comes first, so the lookbehind is only tried before a `<`
+    String.raw`(?=<)(?<!(?:^|[^\\])(?:\\\\)*\\)(?:`,
+    [
+      HTML_TAG_SOURCE,
+      // Comment
+      String.raw`<!-->|<!--->|<!--.*?-->`,
+      // Processing instruction
+      String.raw`<\?.*?\?>`,
+      // Declaration
+      String.raw`<![A-Za-z][^>]*>`,
+      // CDATA section
+      String.raw`<!\[CDATA\[.*?\]\]>`,
+    ].join('|'),
+    ')',
+  ].join(''),
+);
+
+/**
  * Block syntax at the start of a line, after up to 3 spaces.
  */
 const BLOCK_SYNTAX = [
@@ -42,6 +85,13 @@ const rawSyntaxState = createState('suiRawSyntax', {
 });
 
 /**
+ * Get the Markdown a text node was imported from, if it’s raw syntax.
+ * @param {TextNode} node Text node.
+ * @returns {string | undefined} Markdown, or `undefined` if the node is not raw syntax.
+ */
+export const getImportedRawSyntax = (node) => getState(node, rawSyntaxState) || undefined;
+
+/**
  * Get the Markdown of a text node imported from raw syntax.
  * @param {TextNode} node Text node.
  * @returns {string | undefined} The Markdown the node was imported from, or its current text if it
@@ -54,7 +104,7 @@ export const getRawSyntax = (node) => {
     return undefined;
   }
 
-  // The block syntax has no escapes, so the text is the Markdown, even if it has been edited since
+  // Raw syntax has no escapes, so the text is the Markdown, even if it has been edited since
   return node.getTextContent();
 };
 
@@ -84,5 +134,39 @@ export const RAW_SYNTAX = {
   replace: (node) => {
     setState(node, rawSyntaxState, node.getTextContent());
   },
+  type: 'text-match',
+};
+
+/**
+ * Regular expression to match raw HTML: a line of an HTML block after the placeholder that marks
+ * it, or inline HTML, like a tag. The placeholder is left out of the match, so an editor component
+ * that matches the line after it, which comes first, still takes precedence; see
+ * `removePlaceholdersFromMatch()` in `core.js`.
+ */
+const RAW_HTML_REGEX = new RegExp(`(?<=^${HTML_BLOCK_PLACEHOLDER}).+|${INLINE_HTML_REGEX.source}`);
+
+/**
+ * Import-only transformer that marks raw HTML, so it’s exported as is. Neither the Markdown syntax
+ * nor the escapes are read in raw HTML, so an escape added to it on export, like `\_` in an
+ * attribute value or `\*` in the text of an HTML block, would show up as a backslash. Lexical
+ * removes the escapes from the text it has imported, so the text is restored with
+ * `getImportedRawSyntax()` once the import is done.
+ * @type {TextMatchTransformer}
+ * @see https://spec.commonmark.org/0.31.2/#raw-html
+ * @see https://spec.commonmark.org/0.31.2/#html-blocks
+ * @see https://github.com/sveltia/sveltia-cms/issues/1105
+ * @see https://github.com/sveltia/sveltia-cms/issues/1106
+ */
+export const RAW_HTML = {
+  dependencies: [],
+  /**
+   * Leave the export to `BLOCK_SYNTAX_ESCAPE`.
+   * @returns {null} Nothing.
+   */
+  export: () => null,
+  importRegExp: RAW_HTML_REGEX,
+  // Never used as a shortcut
+  regExp: /(?!)/,
+  replace: RAW_SYNTAX.replace,
   type: 'text-match',
 };
