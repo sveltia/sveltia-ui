@@ -49,6 +49,7 @@ import {
 import { sleep } from '@sveltia/utils/misc';
 import { isURL } from '@sveltia/utils/string';
 import {
+  COMMAND_PRIORITY_HIGH,
   COMMAND_PRIORITY_LOW,
   COMMAND_PRIORITY_NORMAL,
   configExtension,
@@ -63,11 +64,14 @@ import {
   $getSelection as getSelection,
   HISTORY_MERGE_TAG,
   INDENT_CONTENT_COMMAND,
+  INSERT_LINE_BREAK_COMMAND,
   INSERT_PARAGRAPH_COMMAND,
   KEY_ENTER_COMMAND,
+  LineBreakNode,
   $insertNodes as insertNodes,
   $isDecoratorNode as isDecoratorNode,
   $isElementNode as isElementNode,
+  $isParagraphNode as isParagraphNode,
   $isRangeSelection as isRangeSelection,
   $isTextNode as isTextNode,
   OUTDENT_CONTENT_COMMAND,
@@ -79,6 +83,7 @@ import {
   DISABLED_MARKDOWN_TAGS,
   EDITOR_THEME,
   IMPORT_UPDATE_TAG,
+  INLINE_BUTTON_TYPES,
   NODE_MAP,
   TEXT_FORMAT_BUTTON_TYPES,
   TRANSFORMER_MAP,
@@ -690,6 +695,157 @@ const registerCodeEditorCommands = (editor, defaultLanguage) =>
   );
 
 /**
+ * Check if the given editor component is inline, which means its Markdown is matched within a line
+ * of text by a text match transformer. Only an inline component can be inserted into a Markdown
+ * table cell or a single-line editor.
+ * @param {TextEditorComponent} component Editor component.
+ * @returns {boolean} Result.
+ */
+export const isInlineComponent = ({ transformer }) => transformer.type === 'text-match';
+
+/**
+ * Limit the given editor configuration to what a single-line editor can hold, if it’s one: only
+ * the inline buttons and components, and no plain text mode for HTML, whose source can’t be kept to
+ * a single paragraph by keeping it on a single line. Any other configuration is returned as is.
+ * @param {TextEditorConfig} config Editor configuration.
+ * @returns {TextEditorConfig} Limited configuration.
+ */
+export const limitToSingleLine = (config) => {
+  if (config.multiline !== false || config.isCodeEditor) {
+    return config;
+  }
+
+  return {
+    ...config,
+    modes: config.format === 'html' ? ['rich-text'] : config.modes,
+    enabledButtons: (config.enabledButtons ?? []).filter((button) =>
+      /** @type {TextEditorNodeType[]} */ (INLINE_BUTTON_TYPES).includes(button),
+    ),
+    components: (config.components ?? []).filter(isInlineComponent),
+  };
+};
+
+/**
+ * Get the inline content of the given top-level node, looking into any block within it.
+ * @param {LexicalNode} node Node.
+ * @returns {LexicalNode[]} Inline nodes, or an empty array for a block that has no inline content,
+ * like a horizontal rule.
+ */
+const getInlineContent = (node) => {
+  if (isElementNode(node) && !node.isInline()) {
+    return node.getChildren().flatMap(getInlineContent);
+  }
+
+  return node.isInline() ? [node] : [];
+};
+
+/**
+ * Join the top-level nodes of the given root into a single paragraph, with a space between the
+ * content of each, for a single-line editor.
+ * @param {RootNode} root Root node.
+ */
+export const $joinIntoSingleParagraph = (root) => {
+  const children = root.getChildren();
+  const [firstChild] = children;
+
+  if (!firstChild || (children.length === 1 && isParagraphNode(firstChild))) {
+    return;
+  }
+
+  const paragraph = isParagraphNode(firstChild) ? firstChild : createParagraphNode();
+
+  if (paragraph !== firstChild) {
+    firstChild.insertBefore(paragraph);
+  }
+
+  // Keep track of the last character rather than reading the growing text of the paragraph again
+  // for each block, which would take quadratic time on a long pasted document
+  let lastChar = paragraph.getTextContent().at(-1) ?? '';
+
+  children
+    .filter((child) => child !== paragraph)
+    .forEach((child) => {
+      const content = getInlineContent(child);
+      const text = content.map((node) => node.getTextContent()).join('');
+
+      // Add a space between the content of each block, unless there’s one already
+      if (content.length && paragraph.getChildrenSize() && !/\s/.test(lastChar + text.charAt(0))) {
+        paragraph.append(createTextNode(' '));
+      }
+
+      paragraph.append(...content);
+      lastChar = text.at(-1) ?? lastChar;
+      // Lexical moves the selection out of a removed node on its own
+      child.remove();
+    });
+};
+
+/**
+ * Replace the given line break with a space for a single-line editor, with the formats the text on
+ * both sides shares, so a line break within bold text doesn’t split it. With a space on either side
+ * already, or nothing at all, the line break is just removed.
+ * @param {LineBreakNode} node Line break.
+ */
+export const $replaceLineBreak = (node) => {
+  const previous = node.getPreviousSibling();
+  const next = node.getNextSibling();
+
+  // A line break at either end of the paragraph separates nothing, so it leaves no space
+  if (
+    !previous ||
+    !next ||
+    /\s$/.test(previous.getTextContent()) ||
+    /^\s/.test(next.getTextContent())
+  ) {
+    node.remove();
+
+    return;
+  }
+
+  const space = createTextNode(' ');
+
+  if (isTextNode(previous) && isTextNode(next)) {
+    // Keep the formats both sides share, e.g. italic between italic and bold italic text
+    TEXT_FORMAT_BUTTON_TYPES.forEach((format) => {
+      if (previous.hasFormat(format) && next.hasFormat(format)) {
+        space.toggleFormat(format);
+      }
+    });
+
+    if (previous.getStyle() === next.getStyle()) {
+      space.setStyle(previous.getStyle());
+    }
+  }
+
+  node.replace(space);
+};
+
+/**
+ * Register the commands and transforms that keep a single-line editor on one line. Neither a new
+ * paragraph nor a line break can be inserted, and any content that brings them in anyway, like
+ * pasted text or an imported value, is joined into a single paragraph with spaces.
+ * @param {LexicalEditor} editor Editor instance.
+ * @returns {() => void} Cleanup handler.
+ */
+const registerSingleLine = (editor) =>
+  mergeUnregisters(
+    // The emoji autocomplete, which selects an emoji with the Enter key, takes priority
+    editor.registerCommand(
+      KEY_ENTER_COMMAND,
+      (event) => {
+        event?.preventDefault();
+
+        return true;
+      },
+      COMMAND_PRIORITY_HIGH,
+    ),
+    editor.registerCommand(INSERT_PARAGRAPH_COMMAND, () => true, COMMAND_PRIORITY_HIGH),
+    editor.registerCommand(INSERT_LINE_BREAK_COMMAND, () => true, COMMAND_PRIORITY_HIGH),
+    editor.registerNodeTransform(LineBreakNode, $replaceLineBreak),
+    editor.registerNodeTransform(RootNode, $joinIntoSingleParagraph),
+  );
+
+/**
  * Register the link command, the paste handler that turns a pasted URL into a link, and the
  * transform that removes a link with an unsafe URL.
  * @param {LexicalEditor} editor Editor instance.
@@ -1069,17 +1225,22 @@ export const removePlaceholdersFromMatch = (transformer) => {
  * @param {TextEditorConfig} config Editor configuration.
  * @returns {InitEditorResult} Editor instance and cleanup.
  */
-export const initEditor = ({
-  enabledButtons = [],
-  components = [],
-  useMarkdownShortcuts,
-  isCodeEditor = false,
-  defaultLanguage = 'plain',
-  format = 'markdown',
-}) => {
+export const initEditor = (config) => {
+  const {
+    enabledButtons = [],
+    components = [],
+    useMarkdownShortcuts,
+    isCodeEditor = false,
+    defaultLanguage = 'plain',
+    format = 'markdown',
+    multiline = true,
+  } = limitToSingleLine(config);
+
   const hasCodeBlock = enabledButtons.includes('code-block') || isCodeEditor;
   const hasTable = enabledButtons.includes('table') && !isCodeEditor;
   const hasHorizontalRule = enabledButtons.includes('horizontal-rule') && !isCodeEditor;
+  /** Whether to support horizontal rules and tables in Markdown, even without their buttons. */
+  const hasBlockSyntax = !isCodeEditor && multiline;
 
   const editorExtension = defineExtension({
     name: '@sveltia/ui/editor',
@@ -1114,11 +1275,11 @@ export const initEditor = ({
           .filter(([button]) => enabledButtons.includes(/** @type {TextEditorNodeType} */ (button)))
           .flatMap(([, nodes]) => nodes),
       ),
-      ...(isCodeEditor
-        ? [CodeNode, CodeHighlightNode]
-        : // We haven’t implemented buttons for horizontal rules and tables yet, but we still want
-          // to support them in Markdown, so always include them in the node list
-          [HorizontalRuleNode, TableNode, TableCellNode, TableRowNode]),
+      ...(isCodeEditor ? [CodeNode, CodeHighlightNode] : []),
+      // We haven’t implemented buttons for horizontal rules and tables yet, but we still want to
+      // support them in Markdown, so always include them in the node list, unless the editor is
+      // limited to a single line
+      ...(hasBlockSyntax ? [HorizontalRuleNode, TableNode, TableCellNode, TableRowNode] : []),
     ],
     theme: EDITOR_THEME,
     // Export clean HTML without the attributes and elements only meant for the editor, and import
@@ -1155,10 +1316,10 @@ export const initEditor = ({
         .filter(([button]) => enabledButtons.includes(/** @type {TextEditorNodeType} */ (button)))
         .flatMap(([, transformers]) => transformers),
     ),
-    ...(isCodeEditor
-      ? [CODE]
-      : // See the comment above for why we always include horizontal rules and tables
-        [
+    ...(isCodeEditor ? [CODE] : []),
+    // See the comment above for why we always include horizontal rules and tables
+    ...(hasBlockSyntax
+      ? [
           HR,
           // A table cell can only have inline content, so only the components with a text match
           // transformer can be used there
@@ -1167,9 +1328,10 @@ export const initEditor = ({
               componentTransformers.filter(({ type }) => type === 'text-match')
             ),
           ),
-          // Last, so the syntax of the editor’s own comes first
-          RAW_SYNTAX,
-        ]),
+        ]
+      : []),
+    // Last, so the syntax of the editor’s own comes first
+    ...(isCodeEditor ? [] : [RAW_SYNTAX]),
   ];
 
   const editor = buildEditorFromExtensions(editorExtension);
@@ -1191,6 +1353,7 @@ export const initEditor = ({
       HISTORY_MAX_DEPTH,
     ),
     isCodeEditor ? registerCodeEditorCommands(editor, defaultLanguage) : undefined,
+    multiline || isCodeEditor ? undefined : registerSingleLine(editor),
     useMarkdownShortcuts ? registerMarkdownShortcuts(editor, enabledTransformers) : undefined,
     hasCodeBlock
       ? registerCodeHighlighting(editor, {

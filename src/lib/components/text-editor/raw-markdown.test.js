@@ -8,7 +8,9 @@ import {
   getRawTextState,
   insertLink,
   insertMarkdown,
+  joinLines,
   registerRawTextShortcut,
+  registerRawTextSingleLine,
   setBlockType,
   toggleInlineFormat,
 } from './raw-markdown.js';
@@ -365,5 +367,123 @@ describe('textarea helpers', () => {
     await vi.advanceTimersByTimeAsync(1100);
     await expect(promise).resolves.toBe(false);
     vi.useRealTimers();
+  });
+});
+
+describe('joinLines', () => {
+  it('joins the lines with spaces, keeping the caret where it was in the text', () => {
+    expect(joinLines({ value: 'One\n\nTwo  \r\n\tThree', caret: 5 })).toEqual({
+      value: 'One Two Three',
+      caret: 4,
+    });
+    expect(joinLines({ value: 'One\nTwo', caret: 2 })).toEqual({ value: 'One Two', caret: 2 });
+    expect(joinLines({ value: 'One', caret: 3 })).toEqual({ value: 'One', caret: 3 });
+  });
+});
+
+describe('registerRawTextSingleLine', () => {
+  it('keeps the `<textarea>` on a single line', () => {
+    const textArea = document.createElement('textarea');
+    const onInput = vi.fn(() => textArea.value);
+
+    document.body.append(textArea);
+    textArea.addEventListener('input', onInput);
+
+    const unregister = registerRawTextSingleLine(textArea);
+
+    /**
+     * Fire a `beforeinput` event of the given type.
+     * @param {string} inputType Input type.
+     * @returns {InputEvent} Event.
+     */
+    const beforeInput = (inputType) => {
+      const event = new InputEvent('beforeinput', { inputType, cancelable: true });
+
+      textArea.dispatchEvent(event);
+
+      return event;
+    };
+
+    expect(beforeInput('insertLineBreak').defaultPrevented).toBe(true);
+    expect(beforeInput('insertParagraph').defaultPrevented).toBe(true);
+    expect(beforeInput('insertText').defaultPrevented).toBe(false);
+
+    // The lines are joined before any other `input` listener reads the value
+    textArea.value = 'One\nTwo';
+    textArea.setSelectionRange(5, 5);
+    textArea.dispatchEvent(new InputEvent('input'));
+    expect(onInput).toHaveLastReturnedWith('One Two');
+    expect(textArea.selectionStart).toBe(5);
+
+    textArea.value = 'One';
+    textArea.dispatchEvent(new InputEvent('input'));
+    expect(onInput).toHaveLastReturnedWith('One');
+
+    unregister();
+    expect(beforeInput('insertLineBreak').defaultPrevented).toBe(false);
+    textArea.value = 'One\nTwo';
+    textArea.dispatchEvent(new InputEvent('input'));
+    expect(onInput).toHaveLastReturnedWith('One\nTwo');
+    textArea.remove();
+  });
+
+  it('inserts pasted text with its lines joined, keeping the undo history', () => {
+    const textArea = document.createElement('textarea');
+    const original = document.execCommand;
+    const execCommand = vi.fn(() => true);
+
+    document.execCommand = execCommand;
+
+    const unregister = registerRawTextSingleLine(textArea);
+
+    /**
+     * Fire a `beforeinput` event.
+     * @param {InputEventInit} init Event properties.
+     * @returns {InputEvent} Event.
+     */
+    const beforeInput = ({ dataTransfer, ...init }) => {
+      const event = new InputEvent('beforeinput', { cancelable: true, ...init });
+
+      // Happy DOM ignores the `dataTransfer` option
+      Object.defineProperty(event, 'dataTransfer', { value: dataTransfer ?? null });
+      textArea.dispatchEvent(event);
+
+      return event;
+    };
+
+    try {
+      expect(
+        beforeInput({ inputType: 'insertFromPaste', data: 'One\n\nTwo' }).defaultPrevented,
+      ).toBe(true);
+      expect(execCommand).toHaveBeenLastCalledWith('insertText', false, 'One Two');
+
+      const dataTransfer = new DataTransfer();
+
+      dataTransfer.setData('text/plain', 'Three\nFour');
+      expect(
+        beforeInput({ inputType: 'insertReplacementText', dataTransfer }).defaultPrevented,
+      ).toBe(true);
+      expect(execCommand).toHaveBeenLastCalledWith('insertText', false, 'Three Four');
+
+      // A single line, or a drop, is left to the browser, and the `input` listener
+      expect(beforeInput({ inputType: 'insertFromPaste', data: 'Five' }).defaultPrevented).toBe(
+        false,
+      );
+      expect(
+        beforeInput({ inputType: 'insertFromDrop', data: 'Six\nSeven' }).defaultPrevented,
+      ).toBe(false);
+      expect(beforeInput({ inputType: 'insertFromPaste' }).defaultPrevented).toBe(false);
+
+      // Without `execCommand()`, the `input` listener joins the lines
+      // @ts-ignore
+      document.execCommand = undefined;
+      expect(
+        beforeInput({ inputType: 'insertFromPaste', data: 'Six\nSeven' }).defaultPrevented,
+      ).toBe(false);
+      expect(execCommand).toHaveBeenCalledTimes(2);
+    } finally {
+      document.execCommand = original;
+      unregister();
+    }
   });
 });

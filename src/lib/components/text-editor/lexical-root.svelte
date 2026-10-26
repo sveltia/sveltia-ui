@@ -240,7 +240,7 @@
   bind:this={lexicalRoot}
   {...restProps}
   role="textbox"
-  aria-multiline="true"
+  aria-multiline={editorStore.config.multiline !== false}
   aria-hidden={hidden}
   aria-disabled={disabled}
   aria-readonly={readonly}

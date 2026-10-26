@@ -553,3 +553,88 @@ export const insertComponent = async (textArea, component) => {
 
   await applyRawTextEdit(textArea, insertMarkdown(getRawTextState(textArea), markdown, { block }));
 };
+
+/**
+ * Line breaks, along with the spaces and tabs around them, to replace with a single space.
+ */
+const LINE_BREAK_REGEX = /[ \t]*(?:\r?\n[ \t]*)+/g;
+
+/**
+ * Join the lines of the given value with spaces, for a single-line editor, keeping the caret where
+ * it was in the text.
+ * @param {object} state Value and caret position.
+ * @param {string} state.value Value.
+ * @param {number} state.caret Caret position.
+ * @returns {{ value: string, caret: number }} Joined value and the new caret position.
+ */
+export const joinLines = ({ value, caret }) => {
+  const before = value.slice(0, caret).replace(LINE_BREAK_REGEX, ' ');
+
+  return {
+    value: before + value.slice(caret).replace(LINE_BREAK_REGEX, ' '),
+    caret: before.length,
+  };
+};
+
+/**
+ * Keep the `<textarea>` on a single line: the Enter key doesn’t insert a line break, and the lines
+ * of pasted or dropped text are joined with spaces before the value is read.
+ * @param {HTMLTextAreaElement} textArea `<textarea>` element.
+ * @returns {() => void} Function to stop handling the events.
+ */
+export const registerRawTextSingleLine = (textArea) => {
+  /**
+   * Handle the `beforeinput` event. The emoji autocomplete, which selects an emoji with the Enter
+   * key, cancels the `keydown` event first, so there’s no `beforeinput` event then. Pasted text is
+   * inserted with its lines joined instead, which keeps the edit in the native undo history.
+   * @param {InputEvent} event `beforeinput` event.
+   */
+  const onBeforeInput = (event) => {
+    const { inputType } = event;
+
+    if (inputType === 'insertLineBreak' || inputType === 'insertParagraph') {
+      event.preventDefault();
+
+      return;
+    }
+
+    const text = event.data || event.dataTransfer?.getData('text/plain') || '';
+
+    if (
+      (inputType === 'insertFromPaste' || inputType === 'insertReplacementText') &&
+      text.includes('\n') &&
+      // `execCommand()` is deprecated, but it’s still the only way to keep the edit in the native
+      // undo history. If it’s unavailable, the `input` listener below joins the lines instead
+      typeof document.execCommand === 'function'
+    ) {
+      event.preventDefault();
+      document.execCommand('insertText', false, text.replace(LINE_BREAK_REGEX, ' '));
+    }
+  };
+
+  /**
+   * Handle the `input` event, in the capture phase, so the value is joined before the bound value
+   * is updated. It catches the line breaks the `beforeinput` listener can’t, like those of dropped
+   * text, but the edit then leaves the native undo history.
+   */
+  const onInput = () => {
+    const { value, selectionStart } = textArea;
+
+    if (!value.includes('\n')) {
+      return;
+    }
+
+    const joined = joinLines({ value, caret: selectionStart });
+
+    textArea.value = joined.value;
+    textArea.setSelectionRange(joined.caret, joined.caret);
+  };
+
+  textArea.addEventListener('beforeinput', onBeforeInput);
+  textArea.addEventListener('input', onInput, { capture: true });
+
+  return () => {
+    textArea.removeEventListener('beforeinput', onBeforeInput);
+    textArea.removeEventListener('input', onInput, { capture: true });
+  };
+};

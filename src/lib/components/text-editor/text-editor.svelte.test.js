@@ -8,7 +8,7 @@ import {
 import { flushSync } from 'svelte';
 import { beforeAll, describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-svelte';
-import { userEvent } from 'vitest/browser';
+import { page, userEvent } from 'vitest/browser';
 import { setCodeHighlighterLoaders } from './shiki/loader.js';
 import TextEditor from './text-editor.svelte';
 import { createTestComponent } from '../../test-utils/editor.js';
@@ -1045,5 +1045,160 @@ describe('TextEditor with horizontal rules', () => {
     await vi.waitFor(() => {
       expect(props.value).toBe('Before\n\nAfter');
     });
+  });
+});
+
+describe('TextEditor single line', () => {
+  const badge = createTestComponent({
+    id: 'badge',
+    label: 'Badge',
+    markdown: '[badge]',
+    inline: true,
+    pattern: /\[badge\]/,
+  });
+
+  const figure = createTestComponent({ id: 'figure', label: 'Figure', markdown: '<figure>' });
+
+  it('only offers inline buttons and components', async () => {
+    const screen = await render(TextEditor, {
+      multiline: false,
+      components: [badge, figure],
+      ariaLabel: 'Title',
+    });
+
+    const root = await waitForContent(screen.container, '<p');
+
+    expect(root.getAttribute('aria-multiline')).toBe('false');
+    await expect.element(screen.getByRole('button', { name: 'Bold' })).toBeVisible();
+    await expect.element(screen.getByRole('button', { name: 'Link' })).toBeVisible();
+    expect(document.querySelector('[aria-label="Show Text Style Options"]')).toBeNull();
+    expect(document.querySelector('[aria-label="Bulleted List"]')).toBeNull();
+
+    await screen.getByRole('button', { name: 'Insert' }).click();
+    await expect.element(screen.getByRole('menuitem', { name: 'Badge' })).toBeVisible();
+    expect(document.querySelector('[role="menuitem"][aria-label="Figure"]')).toBeNull();
+  });
+
+  it('keeps the content on a single line as the user types and pastes', async () => {
+    /** @type {ComponentProps<typeof TextEditor>} */
+    const props = $state({ value: 'One', multiline: false });
+    const screen = await render(TextEditor, props);
+    const root = await waitForContent(screen.container, 'One');
+
+    focusEnd(root);
+    await userEvent.keyboard('{Enter}{Shift>}{Enter}{/Shift} two');
+    await vi.waitFor(() => {
+      expect(props.value).toBe('One two');
+    });
+
+    const clipboardData = new DataTransfer();
+
+    clipboardData.setData('text/plain', ' three\n\nfour\nfive');
+    root.dispatchEvent(new ClipboardEvent('paste', { clipboardData, bubbles: true }));
+    await vi.waitFor(() => {
+      expect(props.value).toBe('One two three four five');
+    });
+
+    // The first pasted paragraph goes right after the caret, like pasted text
+    await userEvent.keyboard(' ');
+
+    const htmlData = new DataTransfer();
+
+    htmlData.setData('text/html', '<p>six</p><h2>seven</h2><ul><li>eight</li></ul>');
+    root.dispatchEvent(new ClipboardEvent('paste', { clipboardData: htmlData, bubbles: true }));
+    await vi.waitFor(() => {
+      expect(props.value).toBe('One two three four five six seven eight');
+    });
+    expect(root.querySelectorAll('p')).toHaveLength(1);
+  });
+
+  it('keeps a value with several paragraphs until the user changes the content', async () => {
+    /** @type {ComponentProps<typeof TextEditor>} */
+    const props = $state({ value: 'One\n\nTwo', multiline: false });
+    const screen = await render(TextEditor, props);
+    const root = await waitForContent(screen.container, 'One Two');
+
+    await sleep(300);
+    expect(props.value).toBe('One\n\nTwo');
+
+    focusEnd(root);
+    await userEvent.keyboard('!');
+    await vi.waitFor(() => {
+      expect(props.value).toBe('One Two!');
+    });
+  });
+
+  it('keeps the Markdown source on a single line', async () => {
+    /** @type {ComponentProps<typeof TextEditor>} */
+    const props = $state({ value: 'One', multiline: false, modes: ['plain-text', 'rich-text'] });
+    const screen = await render(TextEditor, props);
+
+    const textarea = /** @type {HTMLTextAreaElement} */ (
+      screen.container.querySelector('textarea')
+    );
+
+    await vi.waitFor(() => {
+      expect(textarea.checkVisibility()).toBe(true);
+    });
+
+    expect(textarea.getAttribute('aria-multiline')).toBe('false');
+    textarea.focus();
+    textarea.setSelectionRange(3, 3);
+    await userEvent.keyboard('{Enter}{Shift>}{Enter}{/Shift} two');
+    await vi.waitFor(() => {
+      expect(props.value).toBe('One two');
+    });
+
+    // Pasted text goes through the same `input` event
+    document.execCommand('insertText', false, ' three\n\nfour');
+    await vi.waitFor(() => {
+      expect(props.value).toBe('One two three four');
+    });
+    expect(textarea.selectionStart).toBe('One two three four'.length);
+  });
+
+  it('keeps a paste into the Markdown source in the undo history', async () => {
+    /** @type {ComponentProps<typeof TextEditor>} */
+    const props = $state({ value: 'One', multiline: false, modes: ['plain-text', 'rich-text'] });
+    const screen = await render(TextEditor, props);
+
+    const textarea = /** @type {HTMLTextAreaElement} */ (
+      screen.container.querySelector('textarea')
+    );
+
+    const source = document.createElement('textarea');
+
+    document.body.append(source);
+    source.value = ' two\n\nthree';
+    source.select();
+    await userEvent.copy();
+    source.remove();
+
+    textarea.focus();
+    textarea.setSelectionRange(3, 3);
+    await userEvent.paste();
+    await vi.waitFor(() => {
+      expect(props.value).toBe('One two three');
+    });
+
+    await userEvent.keyboard('{ControlOrMeta>}z{/ControlOrMeta}');
+    await vi.waitFor(() => {
+      expect(props.value).toBe('One');
+    });
+  });
+
+  it('has no plain text mode for HTML', async () => {
+    const screen = await render(TextEditor, {
+      multiline: false,
+      format: 'html',
+      value: '<p>One</p>',
+    });
+
+    await waitForContent(screen.container, 'One');
+    expect(document.querySelector('[aria-label="Edit in HTML"]')).toBeNull();
+
+    // A multiline editor has one
+    await render(TextEditor, { format: 'html', value: '<p>Two</p>' });
+    await expect.element(page.getByRole('button', { name: 'Edit in HTML' })).toBeVisible();
   });
 });

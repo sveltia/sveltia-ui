@@ -71,6 +71,8 @@
     'horizontal-rule',
   ]);
 
+  let singleLineMarkdown = $state('A **bold** title with a [link](https://example.com)');
+
   let tableMarkdown = $state(
     ['| Name | Role |', '| --- | --- |', '| Alice | Editor |', '| Bob | Author |'].join('\n'),
   );
@@ -116,6 +118,16 @@
   <Example>
     <div role="none">
       <TextEditor buttons={['bold', 'italic', 'strikethrough', 'code']} />
+    </div>
+  </Example>
+</section>
+
+<section>
+  <h3>Single Line</h3>
+  <Example>
+    <div role="none">
+      <TextEditor multiline={false} {components} bind:value={singleLineMarkdown} />
+      <pre class="output">{singleLineMarkdown}</pre>
     </div>
   </Example>
 </section>

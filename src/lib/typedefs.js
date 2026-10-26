@@ -347,6 +347,8 @@
  * shortcode, like `:smi`. Default: `false`.
  * @property {string} [defaultLanguage] Default language for the code editor.
  * @property {TextEditorValueFormat} [format] Format of the value. Default: `markdown`.
+ * @property {boolean} [multiline] Whether the content can span multiple paragraphs and lines. With
+ * `false`, it’s kept in a single paragraph without line breaks. Default: `true`.
  */
 
 /**

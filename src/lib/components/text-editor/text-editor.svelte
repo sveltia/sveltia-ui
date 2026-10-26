@@ -14,7 +14,7 @@
   import FloatingLinkEditor from './floating-link-editor.svelte';
   import LexicalRoot from './lexical-root.svelte';
   import TableCellMenuButton from './table-cell-menu-button.svelte';
-  import { getBlockType, getRawTextState } from './raw-markdown.js';
+  import { getBlockType, getRawTextState, registerRawTextSingleLine } from './raw-markdown.js';
   import { highlightCodeToTokens } from './shiki/facade.js';
   import { getCodeTheme, onCodeThemeChange } from './shiki/theme.js';
   import { createEditorStore } from './store.svelte.js';
@@ -50,6 +50,11 @@
    * @property {TextEditorMode[]} [modes] Enabled modes.
    * @property {TextEditorNodeType[]} [buttons] Enabled buttons.
    * @property {TextEditorComponent[]} [components] Editor components.
+   * @property {boolean} [multiline] Whether the content can span multiple paragraphs and lines.
+   * With `false`, the content is kept in a single paragraph: the Enter key does nothing, and the
+   * paragraphs and lines of pasted or imported content are joined with spaces. Only the inline
+   * buttons and the editor components with a text match transformer are enabled then, horizontal
+   * rules and tables in Markdown are kept as text, and the HTML format has no plain text mode.
    * @property {boolean} [useMarkdownShortcuts] Whether to enable Markdown keyboard shortcuts in the
    * rich text editor.
    * @property {boolean} [useEmojiAutocomplete] Whether to autocomplete emojis when the user
@@ -85,6 +90,7 @@
     modes = ['rich-text', 'plain-text'],
     buttons = [...INLINE_BUTTON_TYPES, ...BLOCK_BUTTON_TYPES],
     components = [],
+    multiline = true,
     useMarkdownShortcuts = true,
     useEmojiAutocomplete = true,
     hidden = false,
@@ -121,6 +127,7 @@
     modes,
     enabledButtons: buttons,
     components,
+    multiline,
     useMarkdownShortcuts,
     useEmojiAutocomplete,
     format,
@@ -264,6 +271,16 @@
   });
 
   $effect(() => {
+    const { textArea } = editorStore;
+
+    if (!textArea || multiline) {
+      return undefined;
+    }
+
+    return registerRawTextSingleLine(textArea);
+  });
+
+  $effect(() => {
     pending = editorStore.pending;
   });
 
@@ -309,6 +326,7 @@
   role="none"
   class="sui text-editor"
   class:flex
+  class:single-line={!multiline}
   {hidden}
   style:--sui-text-editor-toolbar-height="{editorStore.toolbarHeight}px"
 >
@@ -327,6 +345,8 @@
     bind:element={editorStore.textArea}
     id="{editorStore.editorId}-plain-text"
     autoResize={true}
+    rows={multiline ? undefined : 1}
+    aria-multiline={multiline ? undefined : false}
     bind:value={editorStore.inputValue}
     {useEmojiAutocomplete}
     highlight={highlightSource}
@@ -372,6 +392,11 @@
 
     &.flex:not([hidden]) {
       display: block; // Avoid Tailwind .flex class collisions
+    }
+
+    // Fit a single line of text, rather than the room a multiline editor starts with
+    &.single-line :global(:is(.lexical-root, textarea, .text-area .clone)) {
+      min-height: 0;
     }
 
     :global {

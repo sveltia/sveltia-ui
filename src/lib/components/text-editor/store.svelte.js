@@ -1,5 +1,5 @@
 import { generateElementId } from '@sveltia/utils/element';
-import { convertHtmlToLexical, convertMarkdownToLexical } from './core.js';
+import { convertHtmlToLexical, convertMarkdownToLexical, limitToSingleLine } from './core.js';
 
 /**
  * @import { LexicalEditor } from 'lexical';
@@ -152,8 +152,8 @@ export const createEditorStore = () => {
       return config;
     },
     set config(newValue) {
-      config = newValue;
-      useRichText = newValue.modes[0] === 'rich-text' || newValue.isCodeEditor;
+      config = limitToSingleLine(newValue);
+      useRichText = config.modes[0] === 'rich-text' || config.isCodeEditor;
     },
     get inputValue() {
       return inputValue;

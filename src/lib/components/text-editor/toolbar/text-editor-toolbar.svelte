@@ -10,6 +10,7 @@
   import MenuButton from '../../menu/menu-button.svelte';
   import Menu from '../../menu/menu.svelte';
   import { AVAILABLE_BUTTONS, BLOCK_BUTTON_TYPES, INLINE_BUTTON_TYPES } from '../constants.js';
+  import { isInlineComponent } from '../core.js';
   import CodeLanguageSwitcher from './code-language-switcher.svelte';
   import AlignMenuButton from './align-menu-button.svelte';
   import FormatTextButton from './format-text-button.svelte';
@@ -17,7 +18,6 @@
   import InsertItemButton from './insert-item-button.svelte';
   import InsertLinkButton from './insert-link-button.svelte';
   import InsertMenuButton from './insert-menu-button.svelte';
-  import { isInlineComponent } from './insert-component.js';
   import InsertTableButton from './insert-table-button.svelte';
   import TableActionMenu from './table-action-menu.svelte';
   import ToggleBlockMenuItem from './toggle-block-menu-item.svelte';
