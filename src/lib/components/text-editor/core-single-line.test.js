@@ -285,7 +285,8 @@ describe('$joinIntoSingleParagraph spacing', () => {
           $joinIntoSingleParagraph(root);
         });
       },
-      500,
+      // Large enough for the time a quadratic join takes to stand out from building the nodes
+      1000,
     );
   });
 
