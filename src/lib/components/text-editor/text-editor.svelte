@@ -387,13 +387,7 @@
     // The button on the selected table cell is positioned against this
     position: relative;
     margin: var(--sui-focus-ring-width);
-    border-radius: var(--sui-textbox-border-radius);
     width: calc(100% - var(--sui-focus-ring-width) * 2);
-    transition: all 200ms;
-
-    &:focus-within {
-      outline: var(--sui-focus-ring-width) solid var(--sui-focus-ring-color);
-    }
 
     &.flex:not([hidden]) {
       display: block; // Avoid Tailwind .flex class collisions
@@ -452,6 +446,10 @@
           border-start-end-radius: 0 !important;
           border-end-start-radius: var(--sui-textbox-border-radius) !important;
           border-end-end-radius: var(--sui-textbox-border-radius) !important;
+          // Draw the focus ring inside the box, like the rich text editor does, as the toolbar
+          // right above would cover its top edge otherwise. It’s set while not focused too, so
+          // the ring doesn’t slide into place as the `<textarea>` transitions all its properties
+          outline-offset: calc(var(--sui-focus-ring-width) * -1);
         }
       }
     }

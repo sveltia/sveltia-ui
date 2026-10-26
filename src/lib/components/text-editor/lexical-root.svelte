@@ -267,6 +267,13 @@
     font-family: var(--sui-textbox-font-family);
     font-size: var(--sui-textbox-font-size);
     line-height: var(--sui-textbox-multiline-line-height);
+    // Fade the focus ring in and out like the other text fields, including the `<textarea>` of the
+    // plain text mode. Only the colours, so a change of the size isn’t animated
+    transition-duration: 200ms;
+    transition-property: outline-color, border-color, color, background-color;
+    // Draw the focus ring inside the box, as the editor’s sticky toolbar right above would cover
+    // its top edge otherwise
+    outline-offset: calc(var(--sui-focus-ring-width) * -1);
 
     &:not(:first-child) {
       border-start-start-radius: 0 !important;
@@ -284,8 +291,12 @@
       }
     }
 
-    &:focus-visible {
-      outline: 0;
+    &:focus {
+      color: var(--sui-textbox-foreground-color-focus, var(--sui-textbox-foreground-color));
+      background-color: var(
+        --sui-textbox-background-color-focus,
+        var(--sui-textbox-background-color)
+      );
     }
 
     &[aria-invalid='true'] {

@@ -1287,3 +1287,78 @@ describe('TextEditor minimal', () => {
     expect(root.getBoundingClientRect().height).toBeGreaterThan(240);
   });
 });
+
+describe('TextEditor focus ring', () => {
+  /**
+   * Check whether the given element shows a focus ring.
+   * @param {Element} element Element.
+   * @returns {boolean} Result.
+   */
+  const hasRing = (element) => getComputedStyle(element).outlineColor !== 'rgba(0, 0, 0, 0)';
+
+  /**
+   * Check whether the focus ring of the given element is drawn inside its box.
+   * @param {Element} element Element.
+   * @returns {boolean} Result.
+   */
+  const isInsetRing = (element) => {
+    const { outlineOffset, outlineWidth } = getComputedStyle(element);
+
+    return parseFloat(outlineOffset) === -parseFloat(outlineWidth);
+  };
+
+  it('rings the text box, not the whole editor with its toolbar, in both modes', async () => {
+    const screen = await render(TextEditor, { value: 'One', ariaLabel: 'Body' });
+    const root = await waitForContent(screen.container, 'One');
+    const wrapper = /** @type {HTMLElement} */ (screen.container.querySelector('.sui.text-editor'));
+
+    await userEvent.click(root);
+    await vi.waitFor(() => {
+      expect(hasRing(root)).toBe(true);
+    });
+    expect(hasRing(wrapper)).toBe(false);
+    // Inside the box, so the toolbar right above doesn’t cover its top edge
+    expect(isInsetRing(root)).toBe(true);
+
+    await screen.getByRole('button', { name: 'Edit in Markdown' }).click();
+
+    const textarea = /** @type {HTMLTextAreaElement} */ (wrapper.querySelector('textarea'));
+
+    await vi.waitFor(() => {
+      expect(textarea.checkVisibility()).toBe(true);
+    });
+    await userEvent.click(textarea);
+    await vi.waitFor(() => {
+      expect(hasRing(textarea)).toBe(true);
+    });
+    // Only one ring, not another one around the editor
+    expect(hasRing(wrapper)).toBe(false);
+    expect(isInsetRing(textarea)).toBe(true);
+  });
+
+  it('fades the ring in both modes alike', async () => {
+    const screen = await render(TextEditor, { value: 'One', ariaLabel: 'Body' });
+    const root = await waitForContent(screen.container, 'One');
+
+    const textarea = /** @type {HTMLTextAreaElement} */ (
+      screen.container.querySelector('textarea')
+    );
+
+    /**
+     * Get the duration of the transition of the focus ring.
+     * @param {Element} element Element.
+     * @returns {string} Duration, like `0.2s`.
+     */
+    const getRingDuration = (element) => {
+      const { transitionProperty, transitionDuration } = getComputedStyle(element);
+      const properties = transitionProperty.split(', ');
+      const durations = transitionDuration.split(', ');
+      const index = properties.findIndex((property) => ['all', 'outline-color'].includes(property));
+
+      return durations[index % durations.length];
+    };
+
+    expect(getRingDuration(textarea)).toBe('0.2s');
+    expect(getRingDuration(root)).toBe('0.2s');
+  });
+});
