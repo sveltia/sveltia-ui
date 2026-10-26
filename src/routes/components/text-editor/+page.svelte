@@ -133,6 +133,15 @@
 </section>
 
 <section>
+  <h3>Minimal</h3>
+  <Example>
+    <div role="none">
+      <TextEditor minimal value={markdown} />
+    </div>
+  </Example>
+</section>
+
+<section>
   <h3>Without Emoji Autocomplete</h3>
   <Example>
     <div role="none">

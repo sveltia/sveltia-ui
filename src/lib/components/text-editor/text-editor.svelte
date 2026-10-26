@@ -55,6 +55,9 @@
    * paragraphs and lines of pasted or imported content are joined with spaces. Only the inline
    * buttons and the editor components with a text match transformer are enabled then, horizontal
    * rules and tables in Markdown are kept as text, and the HTML format has no plain text mode.
+   * @property {boolean} [minimal] Whether to make the editor compact: it starts with the height of
+   * a single line, like a single-line editor, and stops growing at 240 pixels, scrolling the
+   * content beyond that.
    * @property {boolean} [useMarkdownShortcuts] Whether to enable Markdown keyboard shortcuts in the
    * rich text editor.
    * @property {boolean} [useEmojiAutocomplete] Whether to autocomplete emojis when the user
@@ -91,6 +94,7 @@
     buttons = [...INLINE_BUTTON_TYPES, ...BLOCK_BUTTON_TYPES],
     components = [],
     multiline = true,
+    minimal = false,
     useMarkdownShortcuts = true,
     useEmojiAutocomplete = true,
     hidden = false,
@@ -327,6 +331,7 @@
   class="sui text-editor"
   class:flex
   class:single-line={!multiline}
+  class:minimal
   {hidden}
   style:--sui-text-editor-toolbar-height="{editorStore.toolbarHeight}px"
 >
@@ -394,9 +399,46 @@
       display: block; // Avoid Tailwind .flex class collisions
     }
 
+    // The rules below only apply to the editor’s own boxes, not to those of the editors and fields
+    // nested in its editor components, hence the child combinators
+
     // Fit a single line of text, rather than the room a multiline editor starts with
-    &.single-line :global(:is(.lexical-root, textarea, .text-area .clone)) {
-      min-height: 0;
+    &:is(.single-line, .minimal) {
+      :global {
+        > .lexical-root,
+        > .text-area > :is(textarea, .clone) {
+          min-height: 0;
+        }
+      }
+    }
+
+    &.minimal {
+      :global {
+        // Stop growing at a certain height, and scroll the content beyond it. The highlighted
+        // clone of the plain text mode is capped too, so it doesn’t make the box taller, and
+        // scrolls along
+        > .lexical-root,
+        > .text-area > :is(textarea, .clone) {
+          max-height: 240px;
+        }
+
+        > .lexical-root,
+        > .text-area > textarea {
+          overflow: auto;
+        }
+
+        // The editor is the scroll container of nested editors now, so their sticky toolbars stick
+        // to its top rather than below this editor’s toolbar
+        > .lexical-root {
+          --sui-text-editor-inner-toolbar-top: 0px;
+        }
+
+        // Reserve the room for the scrollbar the `<textarea>` gets once it’s capped, so the
+        // highlighted clone wraps the lines at the same place
+        > .text-area > :is(textarea, .clone) {
+          scrollbar-gutter: stable;
+        }
+      }
     }
 
     :global {

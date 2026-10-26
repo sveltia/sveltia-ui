@@ -94,9 +94,9 @@
   let cloneElement = $state();
 
   $effect(() => {
-    // Keep the highlighted text scrolled along with the `<textarea>`. It never scrolls when it’s
-    // auto-resized
-    if (!element || !cloneElement || autoResize) {
+    // Keep the highlighted text scrolled along with the `<textarea>`, which can also scroll when
+    // it’s auto-resized, if its height is capped with `max-height`
+    if (!element || !cloneElement) {
       return undefined;
     }
 
@@ -240,13 +240,13 @@
   .clone {
     overflow: hidden;
     visibility: hidden;
+    // Follow the `<textarea>` immediately, even if smooth scrolling is enabled
+    scroll-behavior: auto;
 
     &:not(.auto-resize) {
       position: absolute;
       inset: 0;
       min-height: 0;
-      // Follow the `<textarea>` immediately, even if smooth scrolling is enabled
-      scroll-behavior: auto;
     }
   }
 

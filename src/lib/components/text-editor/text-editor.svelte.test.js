@@ -1202,3 +1202,88 @@ describe('TextEditor single line', () => {
     await expect.element(page.getByRole('button', { name: 'Edit in HTML' })).toBeVisible();
   });
 });
+
+describe('TextEditor minimal', () => {
+  const LONG_VALUE = Array.from({ length: 30 }, (_, index) => `Paragraph ${index + 1}.`).join(
+    '\n\n',
+  );
+
+  it('starts with the height of a single line', async () => {
+    const screen = await render(TextEditor, { minimal: true, value: 'One' });
+    const root = await waitForContent(screen.container, 'One');
+    const style = getComputedStyle(root);
+
+    expect(screen.container.querySelector('.sui.text-editor')?.classList.contains('minimal')).toBe(
+      true,
+    );
+    expect(root.getBoundingClientRect().height).toBeCloseTo(
+      parseFloat(style.lineHeight) +
+        parseFloat(style.paddingTop) +
+        parseFloat(style.paddingBottom) +
+        parseFloat(style.borderTopWidth) +
+        parseFloat(style.borderBottomWidth),
+      0,
+    );
+  });
+
+  it('limits the height, scrolling the content', async () => {
+    const screen = await render(TextEditor, { minimal: true, value: LONG_VALUE });
+    const root = await waitForContent(screen.container, 'Paragraph 30.');
+
+    expect(root.getBoundingClientRect().height).toBeLessThanOrEqual(240);
+    expect(root.scrollHeight).toBeGreaterThan(root.clientHeight);
+  });
+
+  it('limits the height of the plain text mode too', async () => {
+    const screen = await render(TextEditor, {
+      minimal: true,
+      value: LONG_VALUE,
+      modes: ['plain-text', 'rich-text'],
+    });
+
+    const textarea = /** @type {HTMLTextAreaElement} */ (
+      screen.container.querySelector('textarea')
+    );
+
+    await vi.waitFor(() => {
+      expect(textarea.checkVisibility()).toBe(true);
+    });
+    expect(textarea.getBoundingClientRect().height).toBeLessThanOrEqual(240);
+    expect(
+      /** @type {HTMLElement} */ (
+        screen.container.querySelector('.text-area')
+      ).getBoundingClientRect().height,
+    ).toBeLessThanOrEqual(240);
+    expect(textarea.scrollHeight).toBeGreaterThan(textarea.clientHeight);
+  });
+
+  it('leaves the boxes of a nested editor alone', async () => {
+    const screen = await render(TextEditor, { minimal: true, value: 'One' });
+    const root = await waitForContent(screen.container, 'One');
+    const editor = /** @type {HTMLElement} */ (screen.container.querySelector('.sui.text-editor'));
+    // Stand in for an editor nested in an editor component, with the same classes
+    const holder = document.createElement('div');
+
+    holder.innerHTML =
+      '<div class="lexical-root"></div><div class="sui text-area"><textarea></textarea></div>';
+    editor.append(holder);
+
+    expect(getComputedStyle(root).maxHeight).toBe('240px');
+    expect(getComputedStyle(root).getPropertyValue('--sui-text-editor-inner-toolbar-top')).toBe(
+      '0px',
+    );
+
+    holder.querySelectorAll('.lexical-root, textarea').forEach((element) => {
+      expect(getComputedStyle(element).maxHeight).toBe('none');
+    });
+
+    holder.remove();
+  });
+
+  it('grows with its content by default', async () => {
+    const screen = await render(TextEditor, { value: LONG_VALUE });
+    const root = await waitForContent(screen.container, 'Paragraph 30.');
+
+    expect(root.getBoundingClientRect().height).toBeGreaterThan(240);
+  });
+});

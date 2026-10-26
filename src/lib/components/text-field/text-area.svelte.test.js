@@ -177,6 +177,29 @@ describe('TextArea', () => {
     });
   });
 
+  it('scrolls the highlighted text along with an auto-resized text area with a capped height', async () => {
+    const value = Array.from({ length: 50 }, (_, index) => `# Line ${index}`).join('\n');
+    const screen = await render(TextArea, { value, highlight, autoResize: true });
+    const wrapper = /** @type {HTMLElement} */ (screen.container.querySelector('.sui.text-area'));
+    const textarea = /** @type {HTMLTextAreaElement} */ (wrapper.querySelector('textarea'));
+
+    // The plain clone is replaced with the highlighted one
+    await vi.waitFor(() => {
+      expect(wrapper.querySelector('.clone span')).not.toBeNull();
+    });
+
+    const clone = /** @type {HTMLElement} */ (wrapper.querySelector('.clone'));
+
+    // Cap both, like a compact text editor does, and scroll instantly
+    Object.assign(textarea.style, { maxHeight: '100px', overflow: 'auto', scrollBehavior: 'auto' });
+    Object.assign(clone.style, { maxHeight: '100px', scrollBehavior: 'auto' });
+    expect(clone.classList.contains('auto-resize')).toBe(true);
+    textarea.scrollTop = 100;
+    await vi.waitFor(() => {
+      expect(clone.scrollTop).toBe(100);
+    });
+  });
+
   it('suggests emojis while typing a shortcode', async () => {
     /** @type {ComponentProps<typeof TextArea>} */
     const props = $state({ value: '', useEmojiAutocomplete: true });
