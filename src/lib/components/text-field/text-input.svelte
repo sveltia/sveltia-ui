@@ -109,9 +109,9 @@
 >
   <input
     bind:this={element}
+    type="text"
     {...restProps}
     {value}
-    type="text"
     {role}
     {dir}
     {name}

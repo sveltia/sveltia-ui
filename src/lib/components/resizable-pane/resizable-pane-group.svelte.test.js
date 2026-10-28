@@ -98,6 +98,49 @@ describe('ResizablePaneGroup', () => {
       .toHaveAttribute('aria-orientation', 'horizontal');
   });
 
+  it('gives the space of a hidden pane to the one next to it, and takes it back when shown', async () => {
+    const onResize = vi.fn();
+    const props = $state({ third: true, onResize });
+    const screen = await render(ResizablePaneFixture, props);
+
+    /**
+     * Get the sizes rounded to whole percentages.
+     * @returns {number[]} Sizes.
+     */
+    const getRoundedSizes = () =>
+      getSizes(screen.container).map((size) => Math.round(Number.parseFloat(size)));
+
+    await vi.waitFor(() => {
+      expect(getRoundedSizes()).toEqual([33, 33, 33]);
+    });
+    expect(onResize).not.toHaveBeenCalled();
+    props.third = false;
+    await vi.waitFor(() => {
+      expect(getRoundedSizes()).toEqual([33, 67]);
+    });
+    await vi.waitFor(() => {
+      expect(onResize).toHaveBeenLastCalledWith({ sizes: [33.3, 66.7] });
+    });
+    props.third = true;
+    await vi.waitFor(() => {
+      expect(getRoundedSizes()).toEqual([33, 33, 33]);
+    });
+
+    // The handle shown again resizes the panes around it
+    const handle = /** @type {HTMLElement} */ (
+      screen.getByRole('separator', { name: 'Resize second' }).element()
+    );
+
+    expect(handle.getAttribute('aria-controls')).toBe(
+      screen.container.querySelector('.resizable-pane.second')?.id,
+    );
+    handle.focus();
+    await userEvent.keyboard('{ArrowRight}');
+    await vi.waitFor(() => {
+      expect(getRoundedSizes()[1]).toBeGreaterThan(33);
+    });
+  });
+
   it('ignores a handle that has no pane after it', async () => {
     const onResize = vi.fn();
     const screen = await render(ResizablePaneFixture, { trailingHandle: true, onResize });

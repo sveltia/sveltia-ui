@@ -79,7 +79,9 @@ export class Tree {
     /** @type {(event: FocusEvent) => void} */
     this._onFocusIn = activateBefore(this, (event) => this.onFocusIn(event));
 
-    // The items can be added or removed at any time, e.g. when a subtree is lazily rendered
+    // The items can be added or removed at any time, e.g. when a subtree is lazily rendered, and
+    // collapsed, hidden or disabled from outside, e.g. with a “collapse all” button, which can take
+    // the tab stop out of reach
     this.observer = new globalThis.MutationObserver(() => {
       this.update();
     });
@@ -110,7 +112,12 @@ export class Tree {
 
     this.activated = true;
     this.update();
-    this.observer.observe(parent, { childList: true, subtree: true });
+    this.observer.observe(parent, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['hidden', 'aria-hidden', 'aria-disabled', 'aria-expanded'],
+    });
     parent.dispatchEvent(new CustomEvent('Initialized'));
   }
 
@@ -181,11 +188,14 @@ export class Tree {
 
         const item = /** @type {HTMLElement} */ (child);
 
-        if (!item.matches('[hidden], [aria-hidden="true"]')) {
-          items.push(item);
+        // A hidden item hides everything below it, and so does a collapsed parent, so there is
+        // nothing to descend into
+        if (item.matches('[hidden], [aria-hidden="true"]')) {
+          return;
         }
 
-        // A collapsed parent hides everything below it, so there is nothing to descend into
+        items.push(item);
+
         if (this.isParent(item) && !this.isExpanded(item)) {
           return;
         }
@@ -560,7 +570,8 @@ export class Tree {
       /** @type {HTMLElement} */ (event.target).closest(ITEM_SELECTOR)
     );
 
-    if (!item) {
+    // A disabled item can still take focus from a click, but it’s never the tab stop
+    if (!item || item.matches('[aria-disabled="true"]')) {
       return;
     }
 
@@ -624,7 +635,12 @@ export class Tree {
       /** @type {HTMLElement} */ (event.target).closest(ITEM_SELECTOR)
     );
 
-    const currentItem = target ?? this.currentItem ?? activeItems[0];
+    // Keys pressed on a disabled item, which a click can focus, act on the tab stop instead
+    const currentItem =
+      (target && activeItems.includes(target) ? target : undefined) ??
+      this.currentItem ??
+      activeItems[0];
+
     const index = activeItems.indexOf(currentItem);
     // In RTL, the Left and Right arrow keys are swapped
     const { prevKey: backwardKey, nextKey: forwardKey } = getArrowKeys('horizontal', isRTL());

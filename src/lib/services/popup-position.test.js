@@ -90,6 +90,32 @@ describe('calculatePopupStyle', () => {
     });
   });
 
+  it('should keep a dropdown on the side with more room when it fits neither', () => {
+    /**
+     * Get the position of a 390px wide dropdown in a 400px wide viewport.
+     * @param {'bottom-left' | 'bottom-right'} position Preferred position.
+     * @param {number} left Left edge of the anchor.
+     * @param {number} right Right edge of the anchor.
+     * @returns {string | undefined} Inset of the result.
+     */
+    const getInset = (position, left, right) =>
+      calculatePopupStyle({
+        position,
+        anchorRect: { top: 100, bottom: 150, left, right },
+        viewport: { width: 400, height: 600 },
+        contentWidth: 390,
+        contentHeight: 100,
+      }).inset;
+
+    // Near the right edge, aligned with the anchor’s right edge: 372px to the left, 92px to the
+    // right. It used to flip over and straight back, ending up with 92px
+    expect(getInset('bottom-left', 300, 380)).toBe('150px 20px auto auto');
+    expect(getInset('bottom-right', 300, 380)).toBe('150px 20px auto auto');
+    // Mirrored, near the left edge
+    expect(getInset('bottom-left', 20, 100)).toBe('150px auto auto 20px');
+    expect(getInset('bottom-right', 20, 100)).toBe('150px auto auto 20px');
+  });
+
   it('should flip a dropdown above the anchor and cap its height', () => {
     // bottomMargin = 500 - 450 - 8 = 42; topMargin = 400 - 8 = 392
     expect(

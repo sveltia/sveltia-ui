@@ -6,7 +6,7 @@
 -->
 <script>
   import { isRTL } from '@sveltia/i18n';
-  import { getContext } from 'svelte';
+  import { getContext, onDestroy } from 'svelte';
   import { getHandleKeyAction } from './sizing.js';
 
   /**
@@ -51,7 +51,20 @@
     throw new Error('<ResizableHandle> must be used inside a <ResizablePaneGroup>');
   }
 
-  const handleIndex = ctx.registerHandle();
+  /**
+   * A reference to the handle element.
+   * @type {HTMLElement | undefined}
+   */
+  let element = $state();
+
+  const handle = ctx.registerHandle(() => element);
+  // The handles are counted in the order they are in the group, which changes as panes are shown
+  // and hidden
+  const handleIndex = $derived(handle.index);
+
+  onDestroy(() => {
+    handle.unregister();
+  });
   const isHorizontal = $derived(ctx.direction === 'horizontal');
   const sizes = $derived(ctx.sizes);
   // The value reported via aria-valuenow is the size of the pane immediately before this handle
@@ -68,11 +81,6 @@
     Math.min(currentPaneConstraints.maxSize, pairSize - nextPaneConstraints.minSize),
   );
 
-  /**
-   * A reference to the handle element.
-   * @type {HTMLElement | undefined}
-   */
-  let element = $state();
   let dragging = $state(false);
   let startScreenPos = $state(0);
   /**

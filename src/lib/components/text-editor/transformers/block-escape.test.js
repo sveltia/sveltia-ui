@@ -152,6 +152,9 @@ describe('unescapeCharacterReferences()', () => {
       unescapeCharacterReferences('&#91;a&#93;(u) &#91;b&#93;[c] &#91;d&#93;: e', inText),
     ).toBe('[a\\](u) [b\\][c] [d\\]: e');
     expect(unescapeCharacterReferences('x&#91;^1&#93; y', inText)).toBe('x\\[^1] y');
+    expect(unescapeCharacterReferences('&#60;1@e.co> &#60;_a@b> &#60;= &#60;3 x', inText)).toBe(
+      '\\<1@e.co> \\<_a@b> <= <3 x',
+    );
   });
 
   it('keeps a character at the end of the node escaped unless a line ends there', () => {

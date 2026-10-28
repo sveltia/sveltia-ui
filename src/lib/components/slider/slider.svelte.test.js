@@ -144,6 +144,24 @@ describe('Slider', () => {
     expect(onChange).toHaveBeenCalledWith({ value: 9 });
   });
 
+  it('follows a change to the range after it’s mounted', async () => {
+    /** @type {ComponentProps<typeof Slider>} */
+    const props = $state({ value: 100, min: 0, max: 100, step: 1 });
+    const screen = await renderSlider(props);
+    const slider = /** @type {HTMLElement} */ (screen.container.querySelector('[role="slider"]'));
+    const base = /** @type {HTMLElement} */ (screen.container.querySelector('.base'));
+
+    await waitForInit(screen.container);
+    props.max = 200;
+    // The value is now in the middle of the track
+    await vi.waitFor(() => {
+      expect(slider.style.insetInlineStart).toBe(`${base.clientWidth / 2}px`);
+    });
+    slider.focus();
+    await userEvent.keyboard('{End}');
+    await expect.element(slider).toHaveAttribute('aria-valuenow', '200');
+  });
+
   it('draws a value between two steps at the nearest one, and moves it to the adjacent step', async () => {
     /** @type {ComponentProps<typeof Slider>} */
     const props = $state({ value: 54, min: 0, max: 100, step: 10 });

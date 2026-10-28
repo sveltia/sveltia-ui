@@ -411,6 +411,23 @@ describe('Popup - hideImmediately', () => {
     expect(popup.hidden).toBe(false);
   });
 
+  it('should only hide the content of a nested popup, not the dialog it shares', async () => {
+    const content = document.createElement('div');
+    const instance = activatePopup(anchor, undefined, 'bottom-left');
+
+    popup.append(content);
+    instance.attachPopupElement(popup, content, { nested: true });
+    anchor.click();
+
+    const hidePromise = instance.hideImmediately();
+
+    expect(content.hidden).toBe(true);
+    expect(popup.hidden).toBe(false);
+    await vi.advanceTimersByTimeAsync(100);
+    await hidePromise;
+    expect(content.hidden).toBe(false);
+  });
+
   it('should be a no-op on the popup element when none is attached', async () => {
     const instance = activatePopup(anchor, undefined, 'bottom-left');
     const hidePromise = instance.hideImmediately();

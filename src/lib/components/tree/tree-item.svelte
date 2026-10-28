@@ -55,10 +55,8 @@
     hidden = false,
     disabled = false,
     label = '',
-    // svelte-ignore state_referenced_locally
-    value = label,
-    // svelte-ignore state_referenced_locally
-    valueType = getValueType(value),
+    value: _value = undefined,
+    valueType: _valueType = undefined,
     children,
     items,
     startIcon,
@@ -72,6 +70,11 @@
   } = $props();
 
   const id = $props.id();
+
+  // The label is the default, followed when it changes, like on a locale switch. A prop fallback
+  // would only take its first value
+  const value = $derived(_value === undefined ? label : _value);
+  const valueType = $derived(_valueType === undefined ? getValueType(value) : _valueType);
   /** Nesting level of the item, starting with 1 for the root level items. */
   const level = /** @type {number} */ (getContext('sui:tree-item-level') ?? 0) + 1;
 

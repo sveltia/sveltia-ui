@@ -4,7 +4,7 @@
   `<ResizablePaneGroup>`.
 -->
 <script>
-  import { getContext, untrack } from 'svelte';
+  import { getContext, onDestroy, untrack } from 'svelte';
 
   /**
    * @import { Snippet } from 'svelte';
@@ -51,11 +51,24 @@
     throw new Error('<ResizablePane> must be used inside a <ResizablePaneGroup>');
   }
 
-  // svelte-ignore state_referenced_locally
-  const { index: paneIndex } = ctx.registerPane({ id, defaultSize, minSize, maxSize });
+  // The sizes are read when they’re needed, so a change to them is followed
+  /* eslint-disable jsdoc/require-jsdoc */
+  const pane = ctx.registerPane({
+    id,
+    get defaultSize() {
+      return defaultSize;
+    },
+    get minSize() {
+      return minSize;
+    },
+    get maxSize() {
+      return maxSize;
+    },
+  });
+  /* eslint-enable jsdoc/require-jsdoc */
 
   const direction = $derived(ctx.direction);
-  const size = $derived(ctx.sizes[paneIndex]);
+  const size = $derived(ctx.sizes[pane.index]);
   /**
    * The size as a flex basis. The percentages are of the space the panes share rather than of the
    * group, while a flex basis is a percentage of the group, so the panes are made shrinkable: the
@@ -63,7 +76,8 @@
    * exactly the intended percentages, and the group is never overflowed.
    */
   const sizeStyle = $derived.by(() => {
-    if (size !== undefined) {
+    // A pane shown after the initial layout has no size until it’s in place
+    if (size !== undefined && !Number.isNaN(size)) {
       return `${size}%`;
     }
 
@@ -74,8 +88,13 @@
     return defaultSize ?? '0%';
   });
 
+  // Leave the group when removed, giving the space to the panes next to it
+  onDestroy(() => {
+    pane.unregister();
+  });
+
   $effect(() => {
-    if (size !== undefined) {
+    if (size !== undefined && !Number.isNaN(size)) {
       untrack(() => onResize?.({ size: Number(size.toFixed(1)) }));
     }
   });

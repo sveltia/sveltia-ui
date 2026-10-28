@@ -176,17 +176,27 @@ export const calculatePopupStyle = ({
     flipVertically('-bottom', '-top', upwardMargin, downwardMargin);
   }
 
-  // If the popup overflows the viewport, change the position
+  // If the popup overflows the viewport, align it with the anchor’s other edge, but only when that
+  // side has more room. Checking each side on its own would flip a popup that fits neither way
+  // over and straight back, leaving it on whichever side was checked last
   if (position.endsWith('-left')) {
-    if (rect.left + contentWidth > viewport.width - 8) {
-      position = /** @type {PopupPosition} */ (position.replace('-left', '-right'));
-    }
-  }
-
-  if (position.endsWith('-right')) {
-    if (rect.right - contentWidth < 8) {
-      position = /** @type {PopupPosition} */ (position.replace('-right', '-left'));
-    }
+    ({ position } = flip({
+      position,
+      from: '-left',
+      to: '-right',
+      size: contentWidth,
+      room: viewport.width - rect.left - 8,
+      otherRoom: rect.right - 8,
+    }));
+  } else if (position.endsWith('-right')) {
+    ({ position } = flip({
+      position,
+      from: '-right',
+      to: '-left',
+      size: contentWidth,
+      room: rect.right - 8,
+      otherRoom: viewport.width - rect.left - 8,
+    }));
   }
 
   // The two checks above align a dropdown that opens below or above its anchor, so neither

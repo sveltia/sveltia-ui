@@ -37,10 +37,8 @@
     class: className,
     disabled = false,
     label,
-    // svelte-ignore state_referenced_locally
-    value = label,
-    // svelte-ignore state_referenced_locally
-    searchValue = label,
+    value: _value = undefined,
+    searchValue: _searchValue = undefined,
     wrap = false,
     children,
     checkIcon,
@@ -57,6 +55,11 @@
    * dropdown is still collapsed and no option has rendered yet.
    */
   const fallbackId = $props.id();
+
+  // The label is the default, followed when it changes, like on a locale switch. A prop fallback
+  // would only take its first value
+  const value = $derived(_value === undefined ? label : _value);
+  const searchValue = $derived(_searchValue === undefined ? label : _searchValue);
 
   /**
    * The registry provided by an ancestor `<Combobox>`. This is `undefined` when the option is used

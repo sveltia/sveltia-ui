@@ -726,6 +726,60 @@ describe('Tree', () => {
       expect(newItem.getAttribute('aria-selected')).toBe('false');
       expect(newItem.getAttribute('aria-setsize')).toBe('5');
     });
+
+    it('should move the tab stop out of a parent collapsed from outside', async () => {
+      await setup();
+      items.documents.focus();
+      keyDown(items.documents, 'ArrowDown');
+      expect(items.reports.tabIndex).toBe(0);
+      items.reports.blur();
+      // Like a “collapse all” button that updates the `expanded` prop
+      items.documents.setAttribute('aria-expanded', 'false');
+      /** @type {HTMLElement} */ (items.documents.querySelector('[role="group"]')).hidden = true;
+      await vi.advanceTimersByTimeAsync(0);
+      expect(items.reports.tabIndex).toBe(-1);
+      expect(tree.querySelectorAll('[tabindex="0"]')).toHaveLength(1);
+      expect(items.documents.tabIndex).toBe(0);
+    });
+
+    it('should move the tab stop off an item disabled or hidden from outside', async () => {
+      await setup();
+      items.readme.focus();
+      items.readme.blur();
+      items.readme.setAttribute('aria-disabled', 'true');
+      await vi.advanceTimersByTimeAsync(0);
+      expect(items.readme.tabIndex).toBe(-1);
+      expect(items.documents.tabIndex).toBe(0);
+      items.documents.hidden = true;
+      await vi.advanceTimersByTimeAsync(0);
+      expect(items.pictures.tabIndex).toBe(0);
+      // The children of a hidden parent are hidden as well
+      expect(tree.querySelectorAll('[tabindex="0"]')).toHaveLength(1);
+    });
+
+    it('should leave out the children of a hidden expanded parent', async () => {
+      await setup();
+      items.documents.hidden = true;
+
+      const instance = new Tree(tree);
+
+      expect(instance.visibleItems).not.toContain(items.reports);
+      expect(instance.visibleItems).not.toContain(items.notes);
+      instance.destroy();
+    });
+  });
+
+  describe('disabled item with focus', () => {
+    it('should not make a disabled item the tab stop or act on it', async () => {
+      await setup();
+      items.archive.focus();
+      expect(items.archive.tabIndex).toBe(-1);
+      keyDown(items.archive, ' ');
+      expect(items.archive.getAttribute('aria-selected')).not.toBe('true');
+      // The keys act on the tab stop, the first item, instead
+      keyDown(items.archive, 'ArrowDown');
+      expect(document.activeElement).toBe(items.reports);
+    });
   });
 
   describe('destroy', () => {

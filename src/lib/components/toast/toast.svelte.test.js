@@ -253,6 +253,33 @@ describe('Toast', () => {
     expect(props.show).toBe(false);
   });
 
+  it('keeps the hold of the focus when the pointer leaves, and the other way around', async () => {
+    /** @type {ComponentProps<typeof Toast>} */
+    const props = $state({
+      show: true,
+      duration: 1000,
+      children: html('<button class="undo">Undo</button>'),
+    });
+
+    await render(Toast, props);
+
+    const toast = /** @type {HTMLElement} */ (getBase()?.querySelector('.sui.toast'));
+    const undo = /** @type {HTMLButtonElement} */ (toast.querySelector('.undo'));
+
+    toast.dispatchEvent(new PointerEvent('pointerenter'));
+    undo.focus();
+    toast.dispatchEvent(new PointerEvent('pointerleave'));
+    await vi.advanceTimersByTimeAsync(5000);
+    expect(props.show).toBe(true);
+    toast.dispatchEvent(new PointerEvent('pointerenter'));
+    undo.blur();
+    await vi.advanceTimersByTimeAsync(5000);
+    expect(props.show).toBe(true);
+    toast.dispatchEvent(new PointerEvent('pointerleave'));
+    await vi.advanceTimersByTimeAsync(1000);
+    expect(props.show).toBe(false);
+  });
+
   it('releases the hold when removed while hovered', async () => {
     /** @type {ComponentProps<typeof Toast>} */
     const props = $state({ show: true, duration: 1000 });

@@ -69,6 +69,12 @@ export const unescapeText = (markdown) =>
  * @type {Record<string, string>}
  */
 const REFERENCED_CHARS = { 38: '&', 60: '<', 91: '[', 93: ']' };
+/**
+ * Regular expression to match the start of an email autolink after its `<`, which can start with a
+ * digit or a symbol, like `<1@example.com>`.
+ * @see https://spec.commonmark.org/0.31.2/#email-autolink
+ */
+const EMAIL_AUTOLINK_START_REGEX = /^[\w.!#$%&'*+/=?^`{|}~-]{1,64}@[A-Za-z\d]/;
 
 /**
  * Replace the numeric character references Lexical exports for `<`, `&`, `[` and `]` in text, so
@@ -91,12 +97,13 @@ const REFERENCED_CHARS = { 38: '&', 60: '<', 91: '[', 93: ']' };
 export const unescapeCharacterReferences = (markdown, { isInLink, isAtLineEnd }) =>
   markdown.replace(/&#(38|60|91|93);/g, (match, code, offset, string) => {
     const char = REFERENCED_CHARS[code];
-    // Enough for the longest numeric reference, without copying the rest of a long text each time
-    const next = string.slice(offset + match.length, offset + match.length + 10);
+    // Enough for the local part of an email address, the longest the checks below need, without
+    // copying the rest of a long text each time
+    const next = string.slice(offset + match.length, offset + match.length + 70);
 
     const isNeeded =
       (!next && !isAtLineEnd) ||
-      (char === '<' && /^[A-Za-z/!?]/.test(next)) ||
+      (char === '<' && (/^[A-Za-z/!?]/.test(next) || EMAIL_AUTOLINK_START_REGEX.test(next))) ||
       (char === '&' && /^#(?:\d{1,7}|[xX][\dA-Fa-f]{1,6});/.test(next)) ||
       (char === '[' && (isInLink || next.startsWith('^'))) ||
       (char === ']' && (isInLink || /^[(:[]/.test(next)));

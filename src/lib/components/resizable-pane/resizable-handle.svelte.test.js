@@ -202,6 +202,28 @@ describe('ResizableHandle', () => {
     });
   });
 
+  it('collapses the pane again rather than restoring a size it was resized from', async () => {
+    const screen = await render(ResizablePaneFixture, { firstMinSize: 10 });
+    const handle = /** @type {HTMLElement} */ (screen.getByRole('separator').element());
+
+    await vi.waitFor(() => {
+      expect(getSizes(screen.container)).toEqual(['50%', '50%']);
+    });
+    handle.focus();
+    await userEvent.keyboard('{Enter}');
+    await vi.waitFor(() => {
+      expect(getSizes(screen.container)).toEqual(['10%', '90%']);
+    });
+    await userEvent.keyboard('{ArrowRight}');
+    await vi.waitFor(() => {
+      expect(getSizes(screen.container)[0]).not.toBe('10%');
+    });
+    await userEvent.keyboard('{Enter}');
+    await vi.waitFor(() => {
+      expect(getSizes(screen.container)).toEqual(['10%', '90%']);
+    });
+  });
+
   it('resizes by dragging', async () => {
     const onResizeStart = vi.fn();
     const onResizeEnd = vi.fn();

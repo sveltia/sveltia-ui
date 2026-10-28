@@ -36,15 +36,23 @@
   const loading = $derived(items.length > loadedItemSize);
 
   /**
-   * The scroll container found for the spinner, kept once found. Looking it up reads the computed
-   * style and the scroll size of every ancestor, which forces a layout each time a chunk has been
-   * rendered. The list only grows from then on, so a container that scrolls keeps doing so.
+   * The scroll container found for the spinner. Looking it up reads the computed style and the
+   * scroll size of every ancestor, which forces a layout each time a chunk has been rendered.
    * @type {HTMLElement | null}
    */
   let scrollContainer = null;
 
   /**
-   * Get the nearest ancestor of the given element that scrolls vertically. An ancestor that can
+   * Whether {@link scrollContainer} is final: the nearest ancestor that can scroll, or the document
+   * if none can. The list only grows from then on, so a container that scrolls keeps doing so.
+   * Until then, a nearer one, like a pane the first chunk didn’t fill or one that was hidden, may
+   * start scrolling, and an outer container kept instead would miss the margin that loads the next
+   * chunk ahead of the view, so it’s looked up again for each chunk.
+   */
+  let isScrollContainerFinal = false;
+
+  /**
+   * Find the nearest ancestor of the given element that scrolls vertically. An ancestor that can
    * scroll but whose content fits, like one growing with the list or a horizontal scroller, doesn’t
    * clip the element, and as the observer’s root it would let every chunk load at once. The heights
    * are rounded separately, so a 1px difference doesn’t count as scrolling.
@@ -52,16 +60,29 @@
    * @returns {HTMLElement | null} Scroll container, or `null` if the document itself scrolls.
    */
   const getScrollContainer = (element) => {
+    if (isScrollContainerFinal) {
+      return scrollContainer;
+    }
+
+    /** @type {HTMLElement | null} */
+    let nearest = null;
+
+    scrollContainer = null;
+
     for (let parent = element.parentElement; parent; parent = parent.parentElement) {
-      if (
-        parent.scrollHeight - parent.clientHeight > 1 &&
-        /^(auto|scroll)$/.test(getComputedStyle(parent).overflowY)
-      ) {
-        return parent;
+      if (/^(auto|scroll)$/.test(getComputedStyle(parent).overflowY)) {
+        nearest ??= parent;
+
+        if (parent.scrollHeight - parent.clientHeight > 1) {
+          scrollContainer = parent;
+          break;
+        }
       }
     }
 
-    return null;
+    isScrollContainerFinal = scrollContainer === nearest;
+
+    return scrollContainer;
   };
 
   // Observe the spinner anew once each chunk is rendered: the observer only reports changes, so a
@@ -88,7 +109,7 @@
           loadedItemSize += itemChunkSize;
         }
       },
-      { root: (scrollContainer ??= getScrollContainer(spinner)), rootMargin: '0px 0px 500px 0px' },
+      { root: getScrollContainer(spinner), rootMargin: '0px 0px 500px 0px' },
     );
 
     observer.observe(spinner);

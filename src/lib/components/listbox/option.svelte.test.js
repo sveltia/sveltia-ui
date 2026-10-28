@@ -26,6 +26,17 @@ describe('Option', () => {
     expect(option.element().querySelector('.icon')).toBeNull();
   });
 
+  it('follows a change to the label it takes the value from', async () => {
+    /** @type {ComponentProps<typeof Option>} */
+    const props = $state({ label: 'Apple' });
+    const screen = await render(Option, props);
+    const option = screen.getByRole('option');
+
+    props.label = 'Green apple';
+    await expect.element(option).toHaveAttribute('data-value', 'Green apple');
+    await expect.element(option).toHaveAttribute('data-search-value', 'Green apple');
+  });
+
   it('uses the given value, search value, ID and wrapping', async () => {
     const screen = await render(Option, {
       label: 'Apple',

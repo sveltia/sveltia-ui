@@ -152,7 +152,7 @@
   // a nested popup shares the `<dialog>` with its parent and only the content is its own.
   $effect(() => {
     if (popupInstance && dialogElement && content) {
-      popupInstance.attachPopupElement(dialogElement, content);
+      popupInstance.attachPopupElement(dialogElement, content, { nested: !!parentDialogElement });
 
       return () => {
         popupInstance?.detachPopupElement();

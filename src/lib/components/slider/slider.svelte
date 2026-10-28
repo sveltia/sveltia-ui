@@ -9,7 +9,7 @@
 -->
 <script>
   import { isRTL } from '@sveltia/i18n';
-  import { onMount } from 'svelte';
+  import { onMount, untrack } from 'svelte';
   import {
     findNearestStepIndex,
     getNearestThumbIndex,
@@ -355,6 +355,15 @@
     void value;
     void values;
     updatePositions();
+  });
+
+  // The steps are worked out from the range, so they have to follow a change to it, or the keys,
+  // the thumbs and the drag would keep using the old range
+  $effect(() => {
+    void min;
+    void max;
+    void step;
+    untrack(init);
   });
 </script>
 

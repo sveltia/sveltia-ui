@@ -53,6 +53,16 @@ describe('TreeItem', () => {
     ).toBe('1');
   });
 
+  it('follows a change to the label it takes the value from', async () => {
+    /** @type {ComponentProps<typeof TreeItem>} */
+    const props = $state({ label: 'Report' });
+    const screen = await render(TreeItem, props);
+    const item = screen.getByRole('treeitem');
+
+    props.label = 'Rapport';
+    await expect.element(item).toHaveAttribute('data-value', 'Rapport');
+  });
+
   it('uses the given value and type, and renders children instead of a label', async () => {
     const screen = await render(TreeItem, { value: 42, children: text('Custom') });
     const item = screen.getByRole('treeitem', { name: 'Custom' });

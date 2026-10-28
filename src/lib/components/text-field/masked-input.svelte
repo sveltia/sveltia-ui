@@ -46,11 +46,6 @@
 
   const id = $props.id();
 
-  /**
-   * Reference to the `<input>` element.
-   * @type {HTMLInputElement | undefined}
-   */
-  let inputElement = $state();
   let show = $state(false);
 
   const labels = $derived(
@@ -64,12 +59,6 @@
           hide: '_sui.secret_input.hide_secret',
         },
   );
-
-  $effect(() => {
-    if (mask === 'type') {
-      inputElement?.setAttribute('type', show ? 'text' : 'password');
-    }
-  });
 </script>
 
 <div
@@ -86,12 +75,11 @@
   words -->
   <TextInput
     dir="ltr"
-    bind:element={inputElement}
     {...mask === 'css' ? { autocomplete: 'off', autocapitalize: 'off', autocorrect: 'off' } : {}}
     {...restProps}
     {id}
     bind:value
-    {...mask === 'type' ? { type: 'password' } : {}}
+    {...mask === 'type' ? { type: show ? 'text' : 'password' } : {}}
     spellcheck="false"
     {flex}
     {monospace}

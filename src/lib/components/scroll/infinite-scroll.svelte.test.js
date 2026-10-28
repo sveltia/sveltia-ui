@@ -1,3 +1,5 @@
+/* eslint-disable max-classes-per-file */
+
 import { expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-svelte';
 import InfiniteScrollFixture from './infinite-scroll-fixture.test.svelte';
@@ -195,6 +197,50 @@ it('only creates an observer while the spinner is mounted, and disconnects it on
   } finally {
     vi.unstubAllGlobals();
     disconnect.mockRestore();
+  }
+});
+
+it('switches to a nearer scroll container once the list fills it', async () => {
+  const { IntersectionObserver: NativeObserver } = globalThis;
+  /** @type {(Element | Document | null | undefined)[]} */
+  const roots = [];
+
+  vi.stubGlobal(
+    'IntersectionObserver',
+    /**
+     * Observer that records its root.
+     */
+    class extends NativeObserver {
+      /**
+       * Record the root of each observer.
+       * @param {IntersectionObserverCallback} callback Callback.
+       * @param {IntersectionObserverInit} [options] Options.
+       */
+      constructor(callback, options) {
+        super(callback, options);
+        roots.push(options?.root);
+      }
+    },
+  );
+
+  try {
+    // The 300px inner scroller overflows the 100px outer one, but the first 5-item chunk, 100px
+    // tall, doesn’t fill it yet, so only the outer one scrolls at first
+    const screen = await render(InfiniteScrollFixture, {
+      items: longItems,
+      itemChunkSize: 5,
+      innerHeight: 300,
+    });
+
+    const inner = screen.container.querySelector('.wrapper');
+    const outer = screen.container.querySelector('.scroller');
+
+    await vi.waitFor(() => {
+      expect(roots.at(-1)).toBe(inner);
+    });
+    expect(roots[0]).toBe(outer);
+  } finally {
+    vi.unstubAllGlobals();
   }
 });
 

@@ -50,11 +50,18 @@
   } = $props();
 
   /**
-   * `ResizablePane` definitions in registration order, populated synchronously by child
-   * `<ResizablePane>` components.
+   * `ResizablePane` definitions in the order of the panes in the group. Child `<ResizablePane>`
+   * components register in the order they’re mounted, which is only the order in the group the
+   * first time; one shown later with `{#if}` comes last until {@link syncOrder} puts it in place.
    * @type {PaneDef[]}
    */
-  const _paneDefs = $state([]);
+  let _paneDefs = $state.raw([]);
+
+  /**
+   * Functions to get the `<ResizableHandle>` elements, in the order of the handles in the group.
+   * @type {(() => HTMLElement | undefined)[]}
+   */
+  let _handles = $state.raw([]);
 
   /** @type {HTMLDivElement | undefined} */
   let element = $state();
@@ -70,8 +77,6 @@
    * @type {(number | undefined)[]}
    */
   const _savedSizes = $state([]);
-
-  let _handleCount = 0;
 
   /**
    * Measure the space the panes share: the group’s size along its direction, less the handles
@@ -120,6 +125,11 @@
     resolvePaneConstraints(_paneDefs[paneIndex], getSizeEnvironment());
 
   /**
+   * The sizes last reported with `onResize`, to report a change only once.
+   */
+  let reportedSizes = '';
+
+  /**
    * Initialize pane sizes from `defaultSize` props. Called once all panes have registered. Panes
    * without `defaultSize` share the remaining space equally, and every size is kept within its
    * pane’s `minSize` and `maxSize`.
@@ -139,6 +149,21 @@
     const constraints = _paneDefs.map((p) => resolvePaneConstraints(p, env));
 
     sizes.splice(0, sizes.length, ...getInitialSizes(resolvedDefaults, constraints));
+    // The initial sizes aren’t reported, only the changes from them
+    reportedSizes = sizes.map((size) => Number(size.toFixed(1))).join();
+  };
+
+  /**
+   * Call `onResize` with the current sizes, if they’ve changed since the last call.
+   */
+  const reportSizes = () => {
+    const rounded = sizes.map((size) => Number(size.toFixed(1)));
+    const key = rounded.join();
+
+    if (key !== reportedSizes) {
+      reportedSizes = key;
+      onResize?.({ sizes: rounded });
+    }
   };
 
   /**
@@ -166,7 +191,7 @@
     sizes[beforeIdx] = prevBefore + delta;
     sizes[afterIdx] = prevAfter - delta;
 
-    onResize?.({ sizes: sizes.map((s) => Number(s.toFixed(1))) });
+    reportSizes();
   };
 
   /**
@@ -177,7 +202,9 @@
   const toggleCollapse = (handleIndex) => {
     const { minSize: minBefore } = getPaneConstraints(handleIndex);
 
-    if (_savedSizes[handleIndex] !== undefined) {
+    // The saved size is only restored while the pane is still collapsed; once it has been resized
+    // since, it’s collapsed again from where it is
+    if (_savedSizes[handleIndex] !== undefined && Math.abs(sizes[handleIndex] - minBefore) < 0.1) {
       const delta = /** @type {number} */ (_savedSizes[handleIndex]) - sizes[handleIndex];
 
       _savedSizes[handleIndex] = undefined;
@@ -185,6 +212,113 @@
     } else {
       _savedSizes[handleIndex] = sizes[handleIndex];
       resize(handleIndex, -(sizes[handleIndex] - minBefore));
+    }
+  };
+
+  /**
+   * Give the given space to the given panes, the first one first, then to the others, as far as
+   * their maximum sizes allow, or take it from them with a negative amount, as far as their minimum
+   * sizes allow.
+   * @param {number[]} neighbors Indexes of the panes to give the space to first.
+   * @param {number} amount Space in percentage points.
+   * @param {number} [exclude] Index of a pane to leave alone.
+   * @returns {number} Space that couldn’t be given or taken.
+   */
+  const shareSpace = (neighbors, amount, exclude) => {
+    let rest = amount;
+
+    [...neighbors, ...sizes.map((_size, index) => index)].forEach((neighbor) => {
+      if (Math.abs(rest) < 0.001 || neighbor === exclude || sizes[neighbor] === undefined) {
+        return;
+      }
+
+      const { minSize, maxSize } = getPaneConstraints(neighbor);
+      const size = Math.min(Math.max(sizes[neighbor] + rest, minSize), maxSize);
+
+      rest -= size - sizes[neighbor];
+      sizes[neighbor] = size;
+    });
+
+    return rest;
+  };
+
+  /**
+   * Put the panes and handles in the order they are in the group, and size a pane shown after the
+   * initial layout, taking its space from the panes next to it.
+   */
+  const syncOrder = () => {
+    // Only called once the group is mounted
+    /* v8 ignore next */
+    if (!element || !sizes.length) return;
+
+    const paneIds = [...element.querySelectorAll(':scope > .resizable-pane')].map(({ id }) => id);
+
+    /**
+     * Get the position of the given pane in the group, or the end if it isn’t in it yet.
+     * @param {PaneDef} def Pane definition.
+     * @returns {number} Position.
+     */
+    const getPosition = (def) => {
+      const position = paneIds.indexOf(def.id);
+
+      return position === -1 ? Infinity : position;
+    };
+
+    const defs = _paneDefs.toSorted((a, b) => getPosition(a) - getPosition(b));
+    const newSizes = defs.map((def) => sizes[_paneDefs.indexOf(def)]);
+    const isReordered = defs.some((def, index) => def !== _paneDefs[index]);
+
+    if (isReordered) {
+      _paneDefs = defs;
+      sizes.splice(0, sizes.length, ...newSizes);
+      _savedSizes.length = 0;
+    }
+
+    sizes.forEach((size, index) => {
+      if (!Number.isNaN(size)) {
+        return;
+      }
+
+      const env = getSizeEnvironment();
+      const def = _paneDefs[index];
+      const { minSize, maxSize } = resolvePaneConstraints(def, env);
+
+      const defaultSize =
+        def.defaultSize === undefined ? NaN : resolveToPercent(def.defaultSize, NaN, env);
+
+      const wanted = Math.min(
+        Math.max(Number.isNaN(defaultSize) ? 100 / sizes.length : defaultSize, minSize),
+        maxSize,
+      );
+
+      sizes[index] = 0;
+      sizes[index] = wanted + shareSpace([index - 1, index + 1], -wanted, index);
+    });
+
+    const handleElements = [...element.querySelectorAll(':scope > .resizable-handle')];
+
+    /**
+     * Get the position of the given handle in the group, or the end if it isn’t in it yet.
+     * @param {() => HTMLElement | undefined} getElement Function to get the handle element.
+     * @returns {number} Position.
+     */
+    const getHandlePosition = (getElement) => {
+      const position = handleElements.indexOf(/** @type {HTMLElement} */ (getElement()));
+
+      return position === -1 ? Infinity : position;
+    };
+
+    const handles = _handles.toSorted((a, b) => getHandlePosition(a) - getHandlePosition(b));
+
+    if (handles.some((handle, index) => handle !== _handles[index])) {
+      _handles = handles;
+      _savedSizes.length = 0;
+    }
+
+    // Reported here rather than as a pane leaves, which also happens when the whole group is
+    // removed: this observer callback doesn’t run then, as the observer is disconnected first
+    if (!sizes.some((size) => Number.isNaN(size))) {
+      reportSizes();
     }
   };
 
@@ -196,25 +330,60 @@
         return direction;
       },
       sizes,
-      registerPane: ({ id, defaultSize, minSize, maxSize }) => {
-        const idx = _paneDefs.length;
+      registerPane: (def) => {
+        _paneDefs = [..._paneDefs, def];
 
-        _paneDefs.push({ id, defaultSize, minSize, maxSize });
+        // A pane shown after the initial layout is sized once it’s in place; see `syncOrder()`
+        if (sizes.length) {
+          sizes.push(NaN);
+        }
 
-        return { index: idx };
+        return {
+          get index() {
+            return _paneDefs.indexOf(def);
+          },
+          unregister: () => {
+            const index = _paneDefs.indexOf(def);
+
+            if (index === -1) {
+              return;
+            }
+
+            _paneDefs = _paneDefs.toSpliced(index, 1);
+
+            // Its space goes to the panes next to it
+            if (sizes.length) {
+              const [size] = sizes.splice(index, 1);
+
+              _savedSizes.length = 0;
+
+              if (sizes.length && !Number.isNaN(size)) {
+                shareSpace([index - 1, index], size);
+              }
+            }
+          },
+        };
       },
-      registerHandle: () => {
-        const idx = _handleCount;
+      registerHandle: (getElement) => {
+        _handles = [..._handles, getElement];
 
-        _handleCount += 1;
-
-        return idx;
+        return {
+          get index() {
+            return _handles.indexOf(getElement);
+          },
+          unregister: () => {
+            _handles = _handles.filter((handle) => handle !== getElement);
+            _savedSizes.length = 0;
+          },
+        };
       },
       resize,
       toggleCollapse,
       getPaneConstraints,
       measurePaneSpace,
-      paneDefs: _paneDefs,
+      get paneDefs() {
+        return _paneDefs;
+      },
     }),
     /* eslint-enable jsdoc/require-jsdoc */
   );
@@ -223,6 +392,21 @@
     if (_paneDefs.length && !sizes.length) {
       initSizes();
     }
+  });
+
+  // Panes and handles can be shown and hidden after the initial layout, with `{#if}` for example
+  $effect(() => {
+    if (!element) {
+      return undefined;
+    }
+
+    const observer = new MutationObserver(() => syncOrder());
+
+    observer.observe(element, { childList: true });
+
+    return () => {
+      observer.disconnect();
+    };
   });
 </script>
 

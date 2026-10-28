@@ -81,6 +81,12 @@ class Popup {
   contentElement = undefined;
 
   /**
+   * Whether the {@link popupElement} is shared with a parent popup, as a submenu’s is.
+   * @type {boolean}
+   */
+  nested = false;
+
+  /**
    * Function that removes the event listeners added to the current {@link popupElement}.
    * @type {(() => void) | undefined}
    */
@@ -217,8 +223,10 @@ class Popup {
    * popup shares this with its parent, so it must not be labelled as belonging to this popup.
    * @param {HTMLElement} [contentElement] Element holding this popup’s content. When omitted, the
    * `popupElement` is assumed to hold the content on its own.
+   * @param {object} [options] Options.
+   * @param {boolean} [options.nested] Whether the `popupElement` is shared with a parent popup.
    */
-  attachPopupElement(popupElement, contentElement) {
+  attachPopupElement(popupElement, contentElement, { nested = false } = {}) {
     if (this.popupElement === popupElement && this.contentElement === contentElement) {
       return;
     }
@@ -226,6 +234,7 @@ class Popup {
     this.detachPopupElement();
     this.popupElement = popupElement;
     this.contentElement = contentElement;
+    this.nested = nested;
     this.viewportResizeObserver.observe(popupElement);
 
     // Identify the popup by the element that actually holds its content. Labelling the `<dialog>`
@@ -372,16 +381,20 @@ class Popup {
    * Hide the popup immediately (when the anchor is being hidden).
    */
   async hideImmediately() {
-    if (this.popupElement) {
-      this.popupElement.hidden = true;
+    // A submenu only hides its own content, not the `<dialog>` it shares with its parent menu,
+    // which would make the whole menu blink and drop the focus in it
+    const element = this.nested ? this.contentElement : this.popupElement;
+
+    if (element) {
+      element.hidden = true;
     }
 
     this.open = false;
     await sleep(50);
 
     // The element may have been unmounted in the meantime
-    if (this.popupElement) {
-      this.popupElement.hidden = false;
+    if (element?.isConnected) {
+      element.hidden = false;
     }
   }
 

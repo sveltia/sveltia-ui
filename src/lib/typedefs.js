@@ -511,9 +511,12 @@
  * @typedef {object} PaneGroupContext
  * @property {'horizontal' | 'vertical'} direction Layout direction of the panes.
  * @property {number[]} sizes Current pane sizes as percentages.
- * @property {(def: ResizablePaneDefinition) => { index: number }} registerPane Register a pane and
- * return its index.
- * @property {() => number} registerHandle Register a resize handle and return its index.
+ * @property {(def: ResizablePaneDefinition) => { index: number, unregister: () => void }}
+ * registerPane Register a pane. The index is its current position among the panes, which changes
+ * as panes are shown and hidden. `unregister` removes the pane, giving its space to the others.
+ * @property {(getElement: () => HTMLElement | undefined) => {
+ * index: number, unregister: () => void }} registerHandle Register a resize handle with a function
+ * to get its element. The index is its current position among the handles.
  * @property {(handleIndex: number, deltaPercent: number) => void} resize Resize panes around a
  * handle by the given delta.
  * @property {(handleIndex: number) => void} toggleCollapse Toggle collapse of the primary pane

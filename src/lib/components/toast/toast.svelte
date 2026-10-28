@@ -245,12 +245,22 @@
    */
   let toast = $state();
   /**
-   * Whether the pointer is over the toast or the focus is inside it. The auto-hide countdown is
-   * held while it is, so a toast with a control in it can’t vanish from under the user (WCAG
-   * 2.2.1).
+   * Whether the pointer is over the toast.
    * @type {boolean}
    */
-  let held = $state(false);
+  let hovered = $state(false);
+  /**
+   * Whether the focus is inside the toast.
+   * @type {boolean}
+   */
+  let focused = $state(false);
+  /**
+   * Whether the pointer is over the toast or the focus is inside it. The auto-hide countdown is
+   * held while it is, so a toast with a control in it can’t vanish from under the user (WCAG
+   * 2.2.1). Both are tracked apart, so the pointer leaving doesn’t release the hold of the focus,
+   * or the other way around.
+   */
+  const held = $derived(hovered || focused);
   /**
    * Whether the content is in the DOM tree. It lags behind {@link show} on the way out, so the
    * toast can fade before the content goes. On the way in, the content is inserted rather than
@@ -304,7 +314,8 @@
       toast.remove();
       // A detached element gets no `pointerleave` or `focusout`, so release the hold here, or the
       // countdown would never start the next time the toast is shown
-      held = false;
+      hovered = false;
+      focused = false;
 
       // Close the base once the last toast is gone
       if (!popover.querySelector('.toast') && popover.matches(':popover-open')) {
@@ -374,16 +385,16 @@
   class={['sui', 'toast', position]}
   aria-hidden={!show}
   onpointerenter={() => {
-    held = true;
+    hovered = true;
   }}
   onpointerleave={() => {
-    held = false;
+    hovered = false;
   }}
   onfocusin={() => {
-    held = true;
+    focused = true;
   }}
   onfocusout={(event) => {
-    held = !!event.relatedTarget && !!toast?.contains(/** @type {Node} */ (event.relatedTarget));
+    focused = !!event.relatedTarget && !!toast?.contains(/** @type {Node} */ (event.relatedTarget));
   }}
 >
   {#if rendered}
