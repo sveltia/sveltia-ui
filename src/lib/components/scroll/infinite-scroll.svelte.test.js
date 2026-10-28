@@ -197,3 +197,28 @@ it('only creates an observer while the spinner is mounted, and disconnects it on
     disconnect.mockRestore();
   }
 });
+
+it('looks up the scroll container once rather than for every chunk', async () => {
+  const getStyle = vi.spyOn(globalThis, 'getComputedStyle');
+
+  try {
+    const screen = await render(InfiniteScrollFixture, { items: longItems, itemChunkSize: 20 });
+    const scroller = /** @type {HTMLElement} */ (screen.container.querySelector('.scroller'));
+
+    await vi.waitFor(() => {
+      expect(screen.container.querySelectorAll('.item')).toHaveLength(40);
+    });
+
+    // Reading the ancestors’ styles forces a layout, so it’s only done for the first chunk
+    const lookups = getStyle.mock.calls.length;
+
+    expect(lookups).toBeGreaterThan(0);
+    scroller.scrollTop = scroller.scrollHeight;
+    await vi.waitFor(() => {
+      expect(screen.container.querySelectorAll('.item')).toHaveLength(80);
+    });
+    expect(getStyle).toHaveBeenCalledTimes(lookups);
+  } finally {
+    getStyle.mockRestore();
+  }
+});

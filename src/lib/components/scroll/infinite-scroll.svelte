@@ -36,6 +36,14 @@
   const loading = $derived(items.length > loadedItemSize);
 
   /**
+   * The scroll container found for the spinner, kept once found. Looking it up reads the computed
+   * style and the scroll size of every ancestor, which forces a layout each time a chunk has been
+   * rendered. The list only grows from then on, so a container that scrolls keeps doing so.
+   * @type {HTMLElement | null}
+   */
+  let scrollContainer = null;
+
+  /**
    * Get the nearest ancestor of the given element that scrolls vertically. An ancestor that can
    * scroll but whose content fits, like one growing with the list or a horizontal scroller, doesn’t
    * clip the element, and as the observer’s root it would let every chunk load at once. The heights
@@ -80,7 +88,7 @@
           loadedItemSize += itemChunkSize;
         }
       },
-      { root: getScrollContainer(spinner), rootMargin: '0px 0px 500px 0px' },
+      { root: (scrollContainer ??= getScrollContainer(spinner)), rootMargin: '0px 0px 500px 0px' },
     );
 
     observer.observe(spinner);

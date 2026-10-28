@@ -2662,3 +2662,97 @@ describe('Group - a standalone menu with no opener anywhere in its ancestry', ()
     expect(document.activeElement).toBe(item);
   });
 });
+
+describe('Group - mutations inside the members', () => {
+  /** @type {HTMLElement} */
+  let menu;
+  /** @type {HTMLElement[]} */
+  let items;
+  /** @type {Group} */
+  let group;
+
+  /**
+   * Create a menu item.
+   * @param {string} label Label.
+   * @returns {HTMLElement} Menu item.
+   */
+  const createItem = (label) => {
+    const item = document.createElement('div');
+
+    item.setAttribute('role', 'menuitem');
+    item.textContent = label;
+
+    return item;
+  };
+
+  beforeEach(async () => {
+    vi.useFakeTimers();
+    menu = document.createElement('div');
+    menu.setAttribute('role', 'menu');
+    items = ['One', 'Two', 'Three'].map((label) => menu.appendChild(createItem(label)));
+    document.body.appendChild(menu);
+    group = new Group(menu);
+    await vi.advanceTimersByTimeAsync(150);
+  });
+
+  afterEach(() => {
+    group.destroy();
+    menu.remove();
+    vi.useRealTimers();
+    vi.restoreAllMocks();
+  });
+
+  it('keeps the member lists when the content of a member changes', async () => {
+    expect(group.allMembers).toEqual(items);
+
+    const query = vi.spyOn(menu, 'querySelectorAll');
+    const icon = document.createElement('img');
+
+    // Read right away, as a key press would, then once the observer has been notified
+    items[1].appendChild(icon);
+    expect(group.allMembers).toEqual(items);
+    icon.setAttribute('aria-hidden', 'true');
+    await Promise.resolve();
+    expect(group.allMembers).toEqual(items);
+    icon.remove();
+    await Promise.resolve();
+    expect(group.activeMembers).toEqual(items);
+    expect(query).not.toHaveBeenCalled();
+  });
+
+  it('updates the member lists when a member is added, removed, disabled or hidden', async () => {
+    const added = createItem('Four');
+
+    // Read right away: the pending mutation is taken into account
+    menu.appendChild(added);
+    expect(group.allMembers).toEqual([...items, added]);
+
+    // A member inside an added subtree counts too
+    const wrapper = document.createElement('div');
+    const nested = wrapper.appendChild(createItem('Five'));
+
+    menu.appendChild(wrapper);
+    expect(group.allMembers).toEqual([...items, added, nested]);
+
+    wrapper.remove();
+    await Promise.resolve();
+    expect(group.allMembers).toEqual([...items, added]);
+
+    items[0].setAttribute('aria-disabled', 'true');
+    await Promise.resolve();
+    expect(group.activeMembers).toEqual([items[1], items[2], added]);
+
+    added.setAttribute('aria-hidden', 'true');
+    expect(group.activeMembers).toEqual([items[1], items[2]]);
+  });
+
+  it('keeps a single tab stop when a member arrives with its own', async () => {
+    const added = createItem('Four');
+
+    added.tabIndex = 0;
+    menu.appendChild(added);
+    // Let the observer notice the new member
+    await Promise.resolve();
+    expect(menu.querySelectorAll('[tabindex="0"]')).toHaveLength(1);
+  });
+});

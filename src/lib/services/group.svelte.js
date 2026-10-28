@@ -362,6 +362,10 @@ export class Group {
     // the cached lists. Only the attributes that decide membership are watched, so the group’s own
     // writes — the selected state and the roving `tabindex` — don’t needlessly discard the cache.
     this.observer = new globalThis.MutationObserver((records) => {
+      if (!this.#affectsMembers(records)) {
+        return;
+      }
+
       this.#memberCache = undefined;
 
       // Members rendered after activation — rows that arrive with the data, say — start out with
@@ -567,7 +571,7 @@ export class Group {
    * @type {{ all: HTMLElement[], active: HTMLElement[] }}
    */
   get #members() {
-    if (this.observer.takeRecords().length) {
+    if (this.#affectsMembers(this.observer.takeRecords())) {
       this.#memberCache = undefined;
     }
 
@@ -581,6 +585,33 @@ export class Group {
     }
 
     return this.#memberCache;
+  }
+
+  /**
+   * Check whether any of the given mutations adds, removes, disables or hides a member. The subtree
+   * is observed as a whole, so most changes happen inside a member — a cell rendering its content,
+   * an image arriving — and leave the member lists as they were. Recomputing the lists, and the
+   * roving tab stop with them, on each of those would cost a query over every member of a widget
+   * that can hold thousands.
+   * @param {MutationRecord[]} records Mutations.
+   * @returns {boolean} Whether the member lists may have changed.
+   */
+  #affectsMembers(records) {
+    const { selector } = this;
+
+    /**
+     * Check whether the given node is a member or holds one.
+     * @param {Node} node Node.
+     * @returns {boolean} Result.
+     */
+    const hasMember = (node) =>
+      node instanceof Element && (node.matches(selector) || !!node.querySelector(selector));
+
+    return records.some(({ type, target, addedNodes, removedNodes }) =>
+      type === 'attributes'
+        ? target instanceof Element && target.matches(selector)
+        : [...addedNodes].some(hasMember) || [...removedNodes].some(hasMember),
+    );
   }
 
   /**
