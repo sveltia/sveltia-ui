@@ -843,6 +843,58 @@ describe('TextEditor Markdown round trip', () => {
     expect(await roundTrip(markdown)).toBe(markdown);
   });
 
+  it('keeps the formatting in an HTML block', async () => {
+    const markdown = ['<div>\n*a*\n</div>', '<pre>\n*a\\_b*\n</pre>', '<!--\n*a*\n-->'].join(
+      '\n\n',
+    );
+
+    expect(await roundTrip(markdown)).toBe(markdown);
+  });
+
+  it('keeps an autolink and the escapes of text that looks like HTML or a link', async () => {
+    const markdown = [
+      '<https://example.com/?a=1&b=2> and <foo@example.com>',
+      '\\<span>x\\</span> \\<!-- not a comment --> \\<https://example.com> \\&#169;',
+      '[a\\](u) and x\\[^1] and [b][r]',
+      '[r]: https://example.com/a_b "T"\n[^1]: Note',
+      '[Note]: **Use** this',
+      'A note[^1] and [^b] but not [^a](u)',
+      '[a\\]b]: u and <https://example.com/\\*x?a=&#60;>',
+    ].join('\n\n');
+
+    expect(await roundTrip(markdown)).toBe(markdown);
+  });
+
+  it('escapes an autolink that would run a script', async () => {
+    expect(await roundTrip('<javascript:alert(1)> and <Data:text/html,x>')).toBe(
+      '\\<javascript:alert(1)> and \\<Data:text/html,x>',
+    );
+  });
+
+  it('leaves the characters that can’t start any syntax unescaped', async () => {
+    expect(await roundTrip('a <= b, AT&T, see [1] and array[0]\n\n- [ ] task\n- [x] done')).toBe(
+      'a <= b, AT&T, see [1] and array[0]\n\n- [ ] task\n- [x] done',
+    );
+  });
+
+  it('keeps an HTML block after a heading', async () => {
+    expect(await roundTrip('# T\n\n<x-foo>\n*a* b\n</x-foo>')).toBe(
+      '# T\n\n<x-foo>\n*a* b\n</x-foo>',
+    );
+  });
+
+  it('splits formatting around a code span and a link across lines', async () => {
+    expect(await roundTrip('**a `c\nd` b** _[e\nf](u)_')).toBe(
+      '**a `c`**\n**`d` b** _[e](u)_\n_[f](u)_',
+    );
+  });
+
+  it('keeps the column alignment of a table', async () => {
+    const markdown = '| a | b | c | d |\n| :--- | ---: | :---: | --- |\n| 1 | 2 | 3 | 4 |';
+
+    expect(await roundTrip(markdown)).toBe(markdown);
+  });
+
   it('keeps a table with an empty header row', async () => {
     const markdown = 'Text\n\n|  |  |\n| --- | --- |\n| a | b |\n| c | d |\n\nEnd';
 

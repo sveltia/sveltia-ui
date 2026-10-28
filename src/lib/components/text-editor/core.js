@@ -122,7 +122,6 @@ import { HR } from './transformers/hr.js';
 import {
   getImportedRawSyntax,
   HTML_BLOCK_PLACEHOLDER,
-  INLINE_HTML_REGEX,
   RAW_HTML,
   RAW_SYNTAX,
 } from './transformers/raw-syntax.js';
@@ -804,17 +803,39 @@ export const $replaceLineBreak = (node) => {
 
   const space = createTextNode(' ');
 
-  if (isTextNode(previous) && isTextNode(next)) {
+  // A link split over lines, like the ones `splitMultilineFormatting()` makes from a link within
+  // formatting, is joined back into one link
+  const isSameLink =
+    isLinkNode(previous) &&
+    isLinkNode(next) &&
+    previous.getURL() === next.getURL() &&
+    previous.getTitle() === next.getTitle() &&
+    previous.getTarget() === next.getTarget() &&
+    previous.getRel() === next.getRel();
+
+  // The text next to the line break, also within an inline element like a link
+  const before = isElementNode(previous) ? previous.getLastDescendant() : previous;
+  const after = isElementNode(next) ? next.getFirstDescendant() : next;
+
+  if (isTextNode(before) && isTextNode(after)) {
     // Keep the formats both sides share, e.g. italic between italic and bold italic text
     TEXT_FORMAT_BUTTON_TYPES.forEach((format) => {
-      if (previous.hasFormat(format) && next.hasFormat(format)) {
+      if (before.hasFormat(format) && after.hasFormat(format)) {
         space.toggleFormat(format);
       }
     });
 
-    if (previous.getStyle() === next.getStyle()) {
-      space.setStyle(previous.getStyle());
+    if (before.getStyle() === after.getStyle()) {
+      space.setStyle(before.getStyle());
     }
+  }
+
+  if (isSameLink) {
+    previous.append(space, ...next.getChildren());
+    next.remove();
+    node.remove();
+
+    return;
   }
 
   node.replace(space);
@@ -1571,8 +1592,10 @@ export const convertMarkdownToLexical = async (editor, value, enabledTransformer
         addCodeSpanSplit(enabledTransformers),
       );
 
-      // The text of raw HTML is restored as well. The lines of an HTML block have a placeholder
-      if (markedValue !== splitValue || INLINE_HTML_REGEX.test(markedValue)) {
+      // The text of raw HTML and raw syntax is restored as well. The lines of an HTML block have a
+      // placeholder. Other raw syntax, like an autolink or a definition label, only differs from
+      // its text if Lexical has decoded an escape or a character reference in it
+      if (markedValue !== splitValue || /[\\&]/.test(markedValue)) {
         removePlaceholders();
       }
     },

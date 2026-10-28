@@ -39,6 +39,18 @@ vi.mock('@lexical/table', () => {
     setHeaderStyles(headerState) {
       this.__headerState = headerState;
     }
+
+    /**
+     * Set the alignment.
+     * @param {string} format Alignment.
+     */
+    setFormat(format) {
+      this.__format = format;
+    }
+
+    getFormatType() {
+      return this.__format ?? '';
+    }
   }
 
   class TableRowNode {
@@ -160,8 +172,14 @@ describe('TABLE transformer', () => {
   });
 
   it('export should serialize table rows to markdown with divider rows', () => {
-    const cellA = { __kind: 'table-cell', __headerState: 0, text: 'Alpha' };
-    const cellB = { __kind: 'table-cell', __headerState: 1, text: 'Beta' };
+    const cellA = {
+      __kind: 'table-cell',
+      __headerState: 0,
+      text: 'Alpha',
+      getFormatType: () => '',
+    };
+
+    const cellB = { __kind: 'table-cell', __headerState: 1, text: 'Beta', getFormatType: () => '' };
 
     const rowA = {
       __kind: 'table-row',
@@ -181,8 +199,8 @@ describe('TABLE transformer', () => {
   });
 
   it('should mark divider rows as header rows when replacing a table', () => {
-    const firstCell = { __kind: 'table-cell', setHeaderStyles: vi.fn() };
-    const secondCell = { __kind: 'table-cell', setHeaderStyles: vi.fn() };
+    const firstCell = { __kind: 'table-cell', setHeaderStyles: vi.fn(), setFormat: vi.fn() };
+    const secondCell = { __kind: 'table-cell', setHeaderStyles: vi.fn(), setFormat: vi.fn() };
 
     const lastRow = {
       __kind: 'table-row',
@@ -237,7 +255,7 @@ describe('TABLE transformer', () => {
     expect(TABLE.export(/** @type {any} */ (fakeNode), () => '')).toBe('| Alpha |');
   });
   it('should skip non-table-cell nodes while setting header styles on divider rows', () => {
-    const firstCell = { __kind: 'table-cell', setHeaderStyles: vi.fn() };
+    const firstCell = { __kind: 'table-cell', setHeaderStyles: vi.fn(), setFormat: vi.fn() };
     const nonCell = { __kind: 'element' };
 
     const lastRow = {
@@ -298,6 +316,7 @@ describe('TABLE transformer', () => {
       getFirstChild: () => ({
         __kind: 'table-row',
         getChildrenSize: () => 2,
+        getChildren: () => [{ getFormatType: () => '' }, { getFormatType: () => '' }],
       }),
     };
 
@@ -401,7 +420,7 @@ describe('TABLE transformer', () => {
   });
 
   it('should skip non-table-cell nodes while setting header styles on divider rows', () => {
-    const firstCell = { __kind: 'table-cell', setHeaderStyles: vi.fn() };
+    const firstCell = { __kind: 'table-cell', setHeaderStyles: vi.fn(), setFormat: vi.fn() };
     const nonCell = { __kind: 'element' };
 
     const lastRow = {
@@ -467,6 +486,7 @@ describe('TABLE transformer', () => {
     const existingRow = {
       __kind: 'table-row',
       getChildrenSize: () => 2,
+      getChildren: () => [{ getFormatType: () => 'center' }, { getFormatType: () => '' }],
     };
 
     const existingTable = {
@@ -487,6 +507,54 @@ describe('TABLE transformer', () => {
 
     expect(existingTable.append).toHaveBeenCalled();
     expect(parentNode.remove).toHaveBeenCalled();
+    // The new cells take the alignment of the header cells
+    expect(
+      existingTable.append.mock.calls[0].map((/** @type {any} */ row) =>
+        row.children.map((/** @type {any} */ cell) => cell.getFormatType()),
+      ),
+    ).toEqual([['center', '']]);
+  });
+
+  it('should keep the column alignment of a divider row', () => {
+    const cells = ['a', 'b', 'c', 'd'].map(() => ({
+      __kind: 'table-cell',
+      setHeaderStyles: vi.fn(),
+      setFormat: vi.fn(),
+    }));
+
+    const table = {
+      __kind: 'table',
+      getChildren: () => [{ __kind: 'table-row', getChildren: () => cells }],
+    };
+
+    const parentNode = { getPreviousSibling: () => table, remove: vi.fn() };
+
+    TABLE.replace(/** @type {any} */ (parentNode), [], ['| :- | -: | :-: | --- |'], true);
+
+    expect(cells.map(({ setFormat }) => setFormat.mock.calls[0][0])).toEqual([
+      'left',
+      'right',
+      'center',
+      '',
+    ]);
+  });
+
+  it('export should write the column alignment to the divider row', () => {
+    const cells = ['left', 'right', 'center', ''].map((format, index) => ({
+      __kind: 'table-cell',
+      __headerState: 1,
+      text: String(index),
+      getFormatType: () => format,
+    }));
+
+    const fakeNode = {
+      __kind: 'table',
+      getChildren: () => [{ __kind: 'table-row', getChildren: () => cells }],
+    };
+
+    expect(TABLE.export(/** @type {any} */ (fakeNode), () => '')).toBe(
+      '| 0 | 1 | 2 | 3 |\n| :--- | ---: | :---: | --- |',
+    );
   });
 
   it('should handle export with non-header cells', () => {

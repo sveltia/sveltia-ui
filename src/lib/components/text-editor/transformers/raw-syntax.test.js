@@ -76,8 +76,25 @@ describe('RAW_HTML', () => {
   });
 
   it('matches a line of an HTML block', () => {
-    expect(matchHtml('\uE007*a* <b>')).toBe('*a* <b>');
+    expect(matchHtml('\uE007a *b* <c>')).toBe('a *b* <c>');
+    // The placeholder is included before a formatting marker, so the line isn’t read as formatting
+    expect(matchHtml('\uE007*a* <b>')).toBe('\uE007*a* <b>');
     expect(matchHtml('*a* \uE007<b>')).toBe('<b>');
+  });
+
+  it('matches an autolink', () => {
+    expect(matchHtml('a <https://e.com/x?a=1&b=2> b')).toBe('<https://e.com/x?a=1&b=2>');
+    expect(matchHtml('a <foo.bar@e.co> b')).toBe('<foo.bar@e.co>');
+    // A script or embedded content is escaped as text instead
+    expect(
+      matchHtml('a <javascript:alert(1)> <JavaScript:x> <data:text/html,x> b'),
+    ).toBeUndefined();
+    expect(matchHtml('a \\<https://e.com> <a@>')).toBeUndefined();
+  });
+
+  it('matches a footnote reference', () => {
+    expect(matchHtml('a note[^1] b')).toBe('[^1]');
+    expect(matchHtml('a \\[^1] [^ b] c')).toBeUndefined();
   });
 
   it('matches inline HTML', () => {
@@ -95,7 +112,7 @@ describe('RAW_HTML', () => {
 
   it('doesn’t match text that only looks like HTML', () => {
     expect(matchHtml('a < b > c')).toBeUndefined();
-    expect(matchHtml('<https://example.com>')).toBeUndefined();
+    expect(matchHtml('<https://example.com x>')).toBeUndefined();
     expect(matchHtml('<a title="x>')).toBeUndefined();
     expect(INLINE_HTML_REGEX.test('<1a>')).toBe(false);
   });

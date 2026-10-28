@@ -31,6 +31,7 @@ import { RAW_HTML, RAW_SYNTAX } from './raw-syntax.js';
 
 /**
  * @import { ElementTransformer, TextMatchTransformer, Transformer } from '@lexical/markdown';
+ * @import { ElementFormatType } from 'lexical';
  */
 
 const TABLE_ROW_REG_EXP = /^(?:\|)(.+)(?:\|)\s?$/;
@@ -40,6 +41,24 @@ const TABLE_ROW_REG_EXP = /^(?:\|)(.+)(?:\|)\s?$/;
  * @see https://github.github.com/gfm/#delimiter-row
  */
 const TABLE_ROW_DIVIDER_REG_EXP = /^(?:\|[ \t]*:?-+:?[ \t]*)+\|\s?$/;
+/**
+ * Delimiter row cell for each column alignment, which is kept as the format of the column’s cells.
+ * @type {Record<string, string>}
+ */
+const ALIGNMENT_DELIMITERS = { left: ':---', center: ':---:', right: '---:' };
+
+/**
+ * Get the alignment of a column from its delimiter row cell, like `:-:`.
+ * @param {string} delimiter Delimiter row cell.
+ * @returns {ElementFormatType} Alignment, or an empty string for the default.
+ */
+const getColumnAlignment = (delimiter) => {
+  const text = delimiter.trim();
+  const left = text.startsWith(':');
+  const right = text.endsWith(':');
+
+  return left && right ? 'center' : left ? 'left' : right ? 'right' : '';
+};
 
 /**
  * Returns the number of columns in the table.
@@ -123,6 +142,8 @@ export const createTableTransformer = (cellTransformers = []) => {
       node.getChildren().forEach((row) => {
         /** @type {string[]} */
         const rowOutput = [];
+        /** @type {TableCellNode[]} */
+        const cells = [];
 
         if (!isTableRowNode(row)) {
           return;
@@ -140,6 +161,7 @@ export const createTableTransformer = (cellTransformers = []) => {
                 .replace(/\n/g, '\\n')
                 .trim(),
             );
+            cells.push(cell);
 
             if (cell.__headerState === TableCellHeaderStates.ROW) {
               isHeaderRow = true;
@@ -150,7 +172,9 @@ export const createTableTransformer = (cellTransformers = []) => {
         output.push(`| ${rowOutput.join(' | ')} |`);
 
         if (isHeaderRow) {
-          output.push(`| ${rowOutput.map(() => '---').join(' | ')} |`);
+          output.push(
+            `| ${cells.map((cell) => ALIGNMENT_DELIMITERS[cell.getFormatType()] ?? '---').join(' | ')} |`,
+          );
         }
       });
 
@@ -173,13 +197,17 @@ export const createTableTransformer = (cellTransformers = []) => {
           return;
         }
 
-        // Add header state to row cells
-        lastRow.getChildren().forEach((cell) => {
+        const alignments = textContent.trim().slice(1, -1).split('|').map(getColumnAlignment);
+
+        // Add header state to row cells, and the column alignment, which the rows that follow take
+        // from the header row
+        lastRow.getChildren().forEach((cell, index) => {
           if (!isTableCellNode(cell)) {
             return;
           }
 
           cell.setHeaderStyles(TableCellHeaderStates.ROW, TableCellHeaderStates.ROW);
+          cell.setFormat(alignments[index] ?? '');
         });
 
         // Remove line
@@ -243,6 +271,18 @@ export const createTableTransformer = (cellTransformers = []) => {
       const previousSibling = parentNode.getPreviousSibling();
 
       if (isTableNode(previousSibling) && getTableColumnsSize(previousSibling) === maxCells) {
+        const headerCells = /** @type {TableRowNode} */ (
+          previousSibling.getFirstChild()
+        ).getChildren();
+
+        table.getChildren().forEach((row) => {
+          /** @type {TableRowNode} */ (row).getChildren().forEach((cell, index) => {
+            /** @type {TableCellNode} */ (cell).setFormat(
+              /** @type {TableCellNode} */ (headerCells[index]).getFormatType(),
+            );
+          });
+        });
+
         previousSibling.append(...table.getChildren());
         parentNode.remove();
       } else {

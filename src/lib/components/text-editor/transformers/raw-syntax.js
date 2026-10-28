@@ -25,14 +25,20 @@ export const HTML_TAG_SOURCE =
   `${TAG_SPACE}*/?>|</[A-Za-z][A-Za-z0-9-]*${TAG_SPACE}*>`;
 
 /**
+ * Regular expression source to match the place before a `<` that isn’t escaped. The lookahead comes
+ * first, so the lookbehind is only tried before a `<`.
+ */
+const UNESCAPED_LT_SOURCE = String.raw`(?=<)(?<!(?:^|[^\\])(?:\\\\)*\\)`;
+
+/**
  * Regular expression to match inline raw HTML on a line: an open tag, a closing tag, a comment, a
  * processing instruction, a declaration or a CDATA section, which isn’t escaped.
  * @see https://spec.commonmark.org/0.31.2/#raw-html
  */
 export const INLINE_HTML_REGEX = new RegExp(
   [
-    // Not escaped. The lookahead comes first, so the lookbehind is only tried before a `<`
-    String.raw`(?=<)(?<!(?:^|[^\\])(?:\\\\)*\\)(?:`,
+    UNESCAPED_LT_SOURCE,
+    '(?:',
     [
       HTML_TAG_SOURCE,
       // Comment
@@ -47,6 +53,42 @@ export const INLINE_HTML_REGEX = new RegExp(
     ')',
   ].join(''),
 );
+
+/**
+ * Regular expression source to match a URI scheme that runs a script or embeds content, in any
+ * case, as a scheme is case-insensitive.
+ */
+const UNSAFE_SCHEME_SOURCE = `(?:${['javascript', 'vbscript', 'data']
+  .map((scheme) => scheme.replace(/[a-z]/g, (char) => `[${char}${char.toUpperCase()}]`))
+  .join('|')})`;
+
+/**
+ * Regular expression to match an autolink, like `<https://example.com>` or `<foo@example.com>`,
+ * which isn’t escaped.
+ * @see https://spec.commonmark.org/0.31.2/#autolinks
+ */
+const AUTOLINK_REGEX = new RegExp(
+  [
+    UNESCAPED_LT_SOURCE,
+    '(?:',
+    [
+      // URI, other than one with a scheme that runs a script or embeds content, which is left to
+      // be escaped as text
+      String.raw`<(?!${UNSAFE_SCHEME_SOURCE}:)[A-Za-z][A-Za-z0-9+.-]{1,31}:[^\s<>]*>`,
+      // Email address
+      String.raw`<[\w.!#$%&'*+/=?^\x60{|}~-]+@[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?` +
+        String.raw`(?:\.[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?)*>`,
+    ].join('|'),
+    ')',
+  ].join(''),
+);
+
+/**
+ * Regular expression to match a footnote reference, like `[^1]`, which isn’t escaped. Footnotes
+ * aren’t supported, but they’re read by GitHub and many other renderers.
+ * @see https://github.github.com/gfm/
+ */
+const FOOTNOTE_REFERENCE_REGEX = /(?<!(?:^|[^\\])(?:\\\\)*\\)\[\^[^\s[\]]+\]/;
 
 /**
  * Block syntax at the start of a line, after up to 3 spaces.
@@ -65,11 +107,19 @@ const BLOCK_SYNTAX = [
   .join('|');
 
 /**
+ * Label of a link reference definition or a footnote definition, like `[foo]:` in
+ * `[foo]: https://example.com` or `[^1]:` in `[^1]: Note`, which isn’t supported. The rest of the
+ * line is left to the other transformers, so a paragraph that only starts like one keeps its
+ * formatting.
+ * @see https://spec.commonmark.org/0.31.2/#link-reference-definitions
+ */
+const DEFINITION_SYNTAX = String.raw`\[(?:[^\\[\]]|\\.)+\]:`;
+/**
  * Regular expression to match the Markdown syntax that the editor imports as text, but that has to
  * be exported as is: the block syntax at the start of a line, which can’t be nested in a blockquote
- * or a list item, or isn’t supported, like the `)` ordered list delimiter.
+ * or a list item, or isn’t supported, like the `)` ordered list delimiter or a definition.
  */
-const RAW_SYNTAX_REGEX = new RegExp(`^ {0,3}(?:${BLOCK_SYNTAX})`);
+const RAW_SYNTAX_REGEX = new RegExp(`^ {0,3}(?:${BLOCK_SYNTAX}|${DEFINITION_SYNTAX})`);
 
 /**
  * State of a text node imported from the {@link RAW_SYNTAX_REGEX raw syntax}, holding the Markdown
@@ -139,11 +189,23 @@ export const RAW_SYNTAX = {
 
 /**
  * Regular expression to match raw HTML: a line of an HTML block after the placeholder that marks
- * it, or inline HTML, like a tag. The placeholder is left out of the match, so an editor component
- * that matches the line after it, which comes first, still takes precedence; see
- * `removePlaceholdersFromMatch()` in `core.js`.
+ * it, inline HTML, like a tag, an autolink or a footnote reference, which would otherwise be
+ * escaped on export as text that only looks like one. The placeholder is left out of the match, so
+ * an editor component that matches the line after it, which comes first, still takes precedence;
+ * see `removePlaceholdersFromMatch()` in `core.js`. It’s included if the line starts with a
+ * formatting marker, though: Lexical prefers formatting to a text match that covers the same text,
+ * so a line like `*foo*` would otherwise be imported as italic. A component pattern doesn’t start
+ * with one.
  */
-const RAW_HTML_REGEX = new RegExp(`(?<=^${HTML_BLOCK_PLACEHOLDER}).+|${INLINE_HTML_REGEX.source}`);
+const RAW_HTML_REGEX = new RegExp(
+  [
+    `^${HTML_BLOCK_PLACEHOLDER}(?=[*_~=]).+`,
+    `(?<=^${HTML_BLOCK_PLACEHOLDER}).+`,
+    INLINE_HTML_REGEX.source,
+    AUTOLINK_REGEX.source,
+    FOOTNOTE_REFERENCE_REGEX.source,
+  ].join('|'),
+);
 
 /**
  * Import-only transformer that marks raw HTML, so it’s exported as is. Neither the Markdown syntax

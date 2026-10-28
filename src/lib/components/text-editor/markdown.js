@@ -125,6 +125,10 @@ const SETEXT_UNDERLINE_REGEX = /^ {0,3}(=+|-+)[ \t]*$/;
  * Regular expression to match an ATX heading, like `## Heading`.
  */
 const ATX_HEADING_REGEX = /^ {0,3}#{1,6}(?:[ \t]|$)/;
+/**
+ * Regular expression to match a thematic break, like `***` or `- - -`.
+ */
+const THEMATIC_BREAK_REGEX = /^ {0,3}([-*_])(?:[ \t]*\1){2,}[ \t]*$/;
 
 /**
  * Names of the HTML elements that start an HTML block that can interrupt a paragraph, as opposed to
@@ -252,10 +256,19 @@ const NON_PARAGRAPH_LINE_REGEX = new RegExp(
     /^ {0,3}(?:>|[-+*](?:[ \t]|$)|\d{1,9}[.)](?:[ \t]|$)|`{3,}|~{3,}|\|)/.source,
     `^ {0,3}${HTML_BLOCK_START_REGEX.source}`,
     /^(?: {4}|\t)/.source,
-    /^ {0,3}([-*_])(?:[ \t]*\1){2,}[ \t]*$/.source,
+    THEMATIC_BREAK_REGEX.source,
     SETEXT_UNDERLINE_REGEX.source,
   ].join('|'),
   'i',
+);
+
+/**
+ * Regular expression to match a line that is a block on its own, so the line after it isn’t in a
+ * paragraph: an ATX heading or a thematic break. A setext heading underline is one as well, but
+ * only after a paragraph line.
+ */
+const SINGLE_LINE_BLOCK_REGEX = new RegExp(
+  [ATX_HEADING_REGEX.source, THEMATIC_BREAK_REGEX.source].join('|'),
 );
 
 /**
@@ -376,88 +389,6 @@ const hasMultilineFormatting = (text) =>
   MULTILINE_FORMATTING_REGEXES.some(([, regex]) => text.search(regex) !== -1);
 
 /**
- * Split multiline formatting into separate lines to prevent Markdown parsing issues. Fenced code
- * blocks are left untouched, as the formatting syntax is not parsed there. Formatting is left as is
- * if a line after the first starts a block, like a heading or a list item, which ends the paragraph
- * and therefore the formatting.
- * @param {string} value Markdown string to process.
- * @returns {string} Processed Markdown string.
- * @see https://github.com/sveltia/sveltia-cms/issues/548
- */
-export const splitMultilineFormatting = (value) =>
-  mapOutsideCodeBlocks(value, (part) => {
-    let result = part;
-    let previous;
-
-    // Split the inner formatting first, so `**_foo\nbar_**` becomes `**_foo_**\n**_bar_**`, not
-    // `**_foo**_\n_**bar_**`. The outer one is split on the next pass. A text can’t have its own
-    // marker, so formatting is nested a few levels deep at most
-    while (result !== previous) {
-      previous = result;
-      result = MULTILINE_FORMATTING_REGEXES.reduce(
-        (current, [marker, regex]) =>
-          current.replace(regex, (match, text) => {
-            if (hasMultilineFormatting(text)) {
-              return match;
-            }
-
-            const lines = splitFormattedLines(text);
-
-            // A line with only markers, like `**` in `_**\n**_` of `**_(a)_**\n**_(b)_**`, means
-            // the match runs from the closing marker of one line to the opening marker of the next,
-            // which isn’t formatting. Splitting it would add markers that match again, without end
-            if (
-              lines.some(({ text: lineText }) => /^[*_~]+$/.test(lineText)) ||
-              lines
-                .slice(1)
-                .some(({ indent, text: lineText }) =>
-                  PARAGRAPH_INTERRUPTION_REGEX.test(`${indent}${lineText}`),
-                )
-            ) {
-              return match;
-            }
-
-            return lines
-              .map(
-                ({ indent, text: lineText, lineEnd }) =>
-                  `${indent}${marker}${lineText}${marker}${lineEnd}`,
-              )
-              .join('\n');
-          }),
-        result,
-      );
-    }
-
-    return (
-      result
-        // Backslashes and spaces are literal in a code span
-        .replace(
-          /(?<=^|[\s\p{P}\p{S}])(?<![`\\])`([^`\n]+?)\n([^`\n]+?)`(?=[\s\p{P}\p{S}]|$)(?!`)/gu,
-          '`$1`\n`$2`',
-        )
-    );
-  });
-
-/**
- * Placeholder put after an escaped backslash at the end of a line; see `addImportPlaceholders()`.
- */
-const ESCAPED_BACKSLASH_PLACEHOLDER = '\uE002';
-/**
- * Placeholder put with a period between a backslash and a formatting marker; see
- * `addImportPlaceholders()`.
- */
-const PUNCTUATION_PLACEHOLDER = '\uE003';
-/**
- * Placeholder put in place of a tab in a code span; see `addImportPlaceholders()`.
- */
-const CODE_TAB_PLACEHOLDER = '\uE005';
-/**
- * Placeholder put in place of a space in a code span made only of spaces; see
- * `addImportPlaceholders()`.
- */
-const CODE_SPACE_PLACEHOLDER = '\uE006';
-
-/**
  * @typedef {object} CodeSpan
  * @property {number} start Index of the opening backticks.
  * @property {number} end Index after the closing backticks.
@@ -502,6 +433,147 @@ export const findCodeSpans = (line) => {
 
   return spans;
 };
+
+/**
+ * Regular expression to match a link whose text spans a line break, like `[foo\nbar](url)`, but not
+ * an image. The text before the line break can’t end with the backslash of a hard line break.
+ */
+const MULTILINE_LINK_REGEX = new RegExp(
+  String.raw`(?<!(?:^|[^\\])(?:\\\\)*[\\!])\[([^[\]\n]*[^[\]\s\\])([ \t]*\n[ \t]*)([^[\]\n]+)\]` +
+    String.raw`\(([^()\s]*(?:[ \t]+"[^"\n]*")?)\)`,
+  'g',
+);
+
+/**
+ * Split a code span whose code spans a line break into one per line, like `` `foo\nbar` `` into
+ * `` `foo`\n`bar` ``, so the formatting around it can be split into separate lines as well.
+ * Backslashes and spaces are literal in a code span.
+ * @param {string} part Part of a Markdown string outside fenced code blocks.
+ * @returns {string} Processed part.
+ */
+const splitMultilineCodeSpans = (part) =>
+  part.replace(
+    /(?<=^|[\s\p{P}\p{S}])(?<![`\\])`([^`\n]+?)\n([^`\n]+?)`(?=[\s\p{P}\p{S}]|$)(?!`)/gu,
+    '`$1`\n`$2`',
+  );
+
+/**
+ * Split a link whose text spans a line break in the text of formatting into one per line, like
+ * `[foo\nbar](url)` into `[foo](url)\n[bar](url)`, so the formatting can be split into separate
+ * lines. Only the formatting needs it, so links elsewhere, including those in raw HTML, are left as
+ * they are. An image is left as is, as it would be duplicated, and so is anything in a code span.
+ * @param {string} text Text matched by one of {@link MULTILINE_FORMATTING_REGEXES}.
+ * @returns {string} Processed text.
+ */
+const splitMultilineLinks = (text) => {
+  if (!text.includes('[')) {
+    return text;
+  }
+
+  const codeSpans = findCodeSpans(text);
+
+  return text.replace(MULTILINE_LINK_REGEX, (match, first, lineBreak, second, target, offset) =>
+    codeSpans.some(({ start, end }) => offset >= start && offset < end)
+      ? match
+      : `[${first}](${target})${lineBreak}[${second}](${target})`,
+  );
+};
+
+/**
+ * Check if the text of formatting that spans line breaks has a line break within a code span or a
+ * link text, which {@link splitMultilineCodeSpans} and {@link splitMultilineLinks} couldn’t split.
+ * @param {string} text Text matched by one of {@link MULTILINE_FORMATTING_REGEXES}.
+ * @returns {boolean} Result.
+ */
+const hasLineBreakInSpan = (text) =>
+  findCodeSpans(text).some(({ start, end }) => text.slice(start, end).includes('\n')) ||
+  // An inline link or a full reference link. The first run can’t have a line break, so a `[`
+  // followed by many lines isn’t matched in quadratic time. A bracket after an escaped backslash,
+  // like `\\[`, isn’t escaped
+  /(?<!(?:^|[^\\])(?:\\\\)*\\)\[[^[\]\n]*\n[^[\]]*\](?=[([])/.test(text);
+
+/**
+ * Split multiline formatting into separate lines to prevent Markdown parsing issues. Fenced code
+ * blocks are left untouched, as the formatting syntax is not parsed there. Formatting is left as is
+ * if a line after the first starts a block, like a heading or a list item, which ends the paragraph
+ * and therefore the formatting.
+ * @param {string} value Markdown string to process.
+ * @returns {string} Processed Markdown string.
+ * @see https://github.com/sveltia/sveltia-cms/issues/548
+ */
+export const splitMultilineFormatting = (value) =>
+  mapOutsideCodeBlocks(value, (part) => {
+    let result = splitMultilineCodeSpans(part);
+    let previous;
+
+    // Split the inner formatting first, so `**_foo\nbar_**` becomes `**_foo_**\n**_bar_**`, not
+    // `**_foo**_\n_**bar_**`. The outer one is split on the next pass. A text can’t have its own
+    // marker, so formatting is nested a few levels deep at most
+    while (result !== previous) {
+      previous = result;
+      result = MULTILINE_FORMATTING_REGEXES.reduce(
+        (current, [marker, regex]) =>
+          current.replace(regex, (match, formattedText) => {
+            if (hasMultilineFormatting(formattedText)) {
+              return match;
+            }
+
+            const text = splitMultilineLinks(formattedText);
+
+            // A line break left within a code span or a link text can’t be split there, as the
+            // markers would become part of the code or the link
+            if (hasLineBreakInSpan(text)) {
+              return match;
+            }
+
+            const lines = splitFormattedLines(text);
+
+            // A line with only markers, like `**` in `_**\n**_` of `**_(a)_**\n**_(b)_**`, means
+            // the match runs from the closing marker of one line to the opening marker of the next,
+            // which isn’t formatting. Splitting it would add markers that match again, without end
+            if (
+              lines.some(({ text: lineText }) => /^[*_~]+$/.test(lineText)) ||
+              lines
+                .slice(1)
+                .some(({ indent, text: lineText }) =>
+                  PARAGRAPH_INTERRUPTION_REGEX.test(`${indent}${lineText}`),
+                )
+            ) {
+              return match;
+            }
+
+            return lines
+              .map(
+                ({ indent, text: lineText, lineEnd }) =>
+                  `${indent}${marker}${lineText}${marker}${lineEnd}`,
+              )
+              .join('\n');
+          }),
+        result,
+      );
+    }
+
+    return result;
+  });
+
+/**
+ * Placeholder put after an escaped backslash at the end of a line; see `addImportPlaceholders()`.
+ */
+const ESCAPED_BACKSLASH_PLACEHOLDER = '\uE002';
+/**
+ * Placeholder put with a period between a backslash and a formatting marker; see
+ * `addImportPlaceholders()`.
+ */
+const PUNCTUATION_PLACEHOLDER = '\uE003';
+/**
+ * Placeholder put in place of a tab in a code span; see `addImportPlaceholders()`.
+ */
+const CODE_TAB_PLACEHOLDER = '\uE005';
+/**
+ * Placeholder put in place of a space in a code span made only of spaces; see
+ * `addImportPlaceholders()`.
+ */
+const CODE_SPACE_PLACEHOLDER = '\uE006';
 
 /**
  * Add placeholders around the backslashes at the end of a line, so Lexical reads them as CommonMark
@@ -681,7 +753,13 @@ const markHtml = (part) => {
         } else if (!isInParagraph && STANDALONE_HTML_TAG_REGEX.test(line)) {
           end = null;
         } else {
-          isInParagraph = !isBlankLine;
+          // A heading or a thematic break doesn’t leave a paragraph open, so a standalone tag
+          // after it starts an HTML block. A line like `===` is a heading underline only after a
+          // paragraph line, and paragraph text otherwise
+          isInParagraph =
+            !isBlankLine &&
+            !SINGLE_LINE_BLOCK_REGEX.test(line) &&
+            !(isInParagraph && SETEXT_UNDERLINE_REGEX.test(line));
 
           return line.includes('\t')
             ? line.replace(GLOBAL_INLINE_HTML_REGEX, (tag) =>

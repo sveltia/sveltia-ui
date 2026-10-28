@@ -182,6 +182,36 @@ describe('single-line editor', () => {
     expect(exported).toBe('**One Two** and _three **four**_');
   });
 
+  it('joins a link split over lines into one link, but not different links', async () => {
+    const { editor, enabledTransformers } = createEditor();
+
+    expect(
+      await convertMarkdownToLexical(
+        editor,
+        '**[a\nb](u)** and [c](v)\n[d](w)',
+        enabledTransformers,
+      ),
+    ).toBe('**[a b](u)** and [c](v) [d](w)');
+  });
+
+  it('formats a space next to a link like the text on both sides', async () => {
+    const { editor, enabledTransformers } = createEditor();
+
+    await convertMarkdownToLexical(editor, '**[a](u)\nb**', enabledTransformers);
+
+    // Lexical closes the formatting around a link on export anyway, so the text nodes are checked
+    expect(
+      editor.getEditorState().read(() =>
+        getRoot()
+          .getAllTextNodes()
+          .map((node) => [node.getTextContent(), node.hasFormat('bold')]),
+      ),
+    ).toEqual([
+      ['a', true],
+      [' b', true],
+    ]);
+  });
+
   it('allows paragraphs and line breaks in a multiline editor', () => {
     const { editor } = createEditor({ multiline: true });
 

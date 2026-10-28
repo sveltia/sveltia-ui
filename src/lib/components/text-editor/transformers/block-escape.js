@@ -65,6 +65,46 @@ export const unescapeText = (markdown) =>
   });
 
 /**
+ * Characters for the numeric character references Lexical exports in place of literal text.
+ * @type {Record<string, string>}
+ */
+const REFERENCED_CHARS = { 38: '&', 60: '<', 91: '[', 93: ']' };
+
+/**
+ * Replace the numeric character references Lexical exports for `<`, `&`, `[` and `]` in text, so
+ * HTML, a character reference or a link isn’t read from it, with the characters themselves where
+ * they can’t start one, so `a <= b`, `see [1]` and the `[ ]` of a task list item stay readable.
+ * The others are escaped with a backslash instead, as the Markdown would be written by hand: a `<`
+ * that could start a tag, a comment or an autolink, a `&` that could start a numeric reference, a
+ * `[` that could start a footnote and a `]` that could end a link text or a link label. One at the
+ * end of the node stays escaped, as the next node may complete the syntax, unless nothing but a
+ * line break follows, which none of them can be followed by. A bracket in a link text stays escaped
+ * too, as unbalanced brackets would end the link text early. Every replacement is punctuation,
+ * like the reference, so the escapes left by `unescapeText()` stay valid.
+ * @param {string} markdown Markdown exported from a text node with its format.
+ * @param {object} context Where the text node is.
+ * @param {boolean} context.isInLink Whether the text node is in a link.
+ * @param {boolean} context.isAtLineEnd Whether the text node is at the end of a line.
+ * @returns {string} Tidied Markdown.
+ * @see https://github.com/facebook/lexical/pull/9481
+ */
+export const unescapeCharacterReferences = (markdown, { isInLink, isAtLineEnd }) =>
+  markdown.replace(/&#(38|60|91|93);/g, (match, code, offset, string) => {
+    const char = REFERENCED_CHARS[code];
+    // Enough for the longest numeric reference, without copying the rest of a long text each time
+    const next = string.slice(offset + match.length, offset + match.length + 10);
+
+    const isNeeded =
+      (!next && !isAtLineEnd) ||
+      (char === '<' && /^[A-Za-z/!?]/.test(next)) ||
+      (char === '&' && /^#(?:\d{1,7}|[xX][\dA-Fa-f]{1,6});/.test(next)) ||
+      (char === '[' && (isInLink || next.startsWith('^'))) ||
+      (char === ']' && (isInLink || /^[(:[]/.test(next)));
+
+    return isNeeded ? `\\${char}` : char;
+  });
+
+/**
  * Check if the given text node is italic and the italic text it’s part of is next to a word
  * character, like `b` in `a*b*c`. The italic text then needs the `*` delimiter instead of `_`,
  * which can’t be used within a word.
@@ -161,10 +201,14 @@ export const BLOCK_SYNTAX_ESCAPE = {
       return markdown.replace(RAW_TEXT, () => rawSyntax);
     }
 
-    markdown = unescapeText(markdown);
-
     const parent = node.getParent();
     const previous = node.getPreviousSibling();
+    const next = node.getNextSibling();
+
+    markdown = unescapeCharacterReferences(unescapeText(markdown), {
+      isInLink: !!parent?.isInline(),
+      isAtLineEnd: !next || isLineBreakNode(next),
+    });
 
     // Text in a link or other inline element, in a code block, which is exported verbatim, or in a
     // heading, whose content is only parsed for inline syntax, or text after the start of a line

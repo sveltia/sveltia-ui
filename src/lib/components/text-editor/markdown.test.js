@@ -28,6 +28,28 @@ describe('splitMultilineFormatting', () => {
     expect(splitMultilineFormatting('  `foo\nbar`  ')).toBe('  `foo`\n`bar`  ');
   });
 
+  it('should split a code span or a link within formatting across lines', () => {
+    expect(splitMultilineFormatting('**a `c\nd` b**')).toBe('**a `c`**\n**`d` b**');
+    expect(splitMultilineFormatting('_a `b\nc`_')).toBe('_a `b`_\n_`c`_');
+    expect(splitMultilineFormatting('**[a\nb](u "t")**')).toBe('**[a](u "t")**\n**[b](u "t")**');
+  });
+
+  it('should leave formatting alone if a line break within a code span or an image remains', () => {
+    expect(splitMultilineFormatting('**a `b\nc\nd` e**')).toBe('**a `b\nc\nd` e**');
+    expect(splitMultilineFormatting('**![a\nb](u)**')).toBe('**![a\nb](u)**');
+  });
+
+  it('should only split a link within formatting, and not in a code span', () => {
+    expect(splitMultilineFormatting('<div>\n[a\nb](u)\n</div>')).toBe('<div>\n[a\nb](u)\n</div>');
+    expect(splitMultilineFormatting('``[a\nb](u)``')).toBe('``[a\nb](u)``');
+    expect(splitMultilineFormatting('**``[a\nb](u)``**')).toBe('**``[a\nb](u)``**');
+    expect(splitMultilineFormatting('**[a\nb][r]**')).toBe('**[a\nb][r]**');
+    // A link after an escaped backslash, which isn’t escaped
+    expect(splitMultilineFormatting('**\\\\[a\nb](u)**')).toBe('**\\\\[a](u)**\n**[b](u)**');
+    expect(splitMultilineFormatting('**x \\\\[a\nb][r]**')).toBe('**x \\\\[a\nb][r]**');
+    expect(splitMultilineFormatting('**\\[a\nb](u)**')).toBe('**\\[a**\n**b](u)**');
+  });
+
   it('should handle multiple formatting types', () => {
     expect(
       splitMultilineFormatting('  _italic\ntext_   **bold\ntext**  ~~strike\nthrough~~  '),
@@ -284,6 +306,14 @@ describe('addImportPlaceholders', () => {
     );
     expect(mark('<pre class="x">\n*a*\n</pre>')).toBe('<H><pre class="x">\n<H>*a*\n<H></pre>');
     expect(mark('<span> a')).toBe('<span> a');
+  });
+
+  it('should mark a line with only a tag after a heading or a thematic break', () => {
+    expect(mark('# T\n<x-foo>\n*a*\n</x-foo>')).toBe('# T\n<H><x-foo>\n<H>*a*\n<H></x-foo>');
+    expect(mark('***\n<x-foo>\n*a*')).toBe('***\n<H><x-foo>\n<H>*a*');
+    expect(mark('a\n===\n<x-foo>\n*a*')).toBe('a\n===\n<H><x-foo>\n<H>*a*');
+    // Not a heading underline without a paragraph line before it, but paragraph text
+    expect(mark('===\n<x-foo>\n*a*')).toBe('===\n<x-foo>\n*a*');
   });
 
   it('should mark the tabs in inline HTML', () => {

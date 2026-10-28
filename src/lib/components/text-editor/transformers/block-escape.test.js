@@ -17,7 +17,12 @@ import {
 } from 'lexical';
 import { describe, expect, it } from 'vitest';
 
-import { BLOCK_SYNTAX_ESCAPE, escapeBlockSyntax, unescapeText } from './block-escape.js';
+import {
+  BLOCK_SYNTAX_ESCAPE,
+  escapeBlockSyntax,
+  unescapeCharacterReferences,
+  unescapeText,
+} from './block-escape.js';
 import { LINK } from './link.js';
 import { RAW_SYNTAX } from './raw-syntax.js';
 
@@ -125,6 +130,43 @@ const roundTrip = (markdown, { asEditor = false } = {}) => {
 
   return editor.read(() => convertToMarkdownString(asEditor ? exportTransformers : transformers));
 };
+
+describe('unescapeCharacterReferences()', () => {
+  const inText = { isInLink: false, isAtLineEnd: false };
+
+  it('restores the characters that can’t start any syntax', () => {
+    expect(unescapeCharacterReferences('a &#60;= b, &#60;3 &#91;1&#93; x', inText)).toBe(
+      'a <= b, <3 [1] x',
+    );
+    expect(unescapeCharacterReferences('&#91; &#93; task', inText)).toBe('[ ] task');
+  });
+
+  it('escapes the characters that could start HTML, a reference or a link', () => {
+    expect(unescapeCharacterReferences('&#60;span>x&#60;/span> &#60;!-- &#60;? x', inText)).toBe(
+      '\\<span>x\\</span> \\<!-- \\<? x',
+    );
+    expect(unescapeCharacterReferences('&#38;#169; &#38;#xA9; x', inText)).toBe(
+      '\\&#169; \\&#xA9; x',
+    );
+    expect(
+      unescapeCharacterReferences('&#91;a&#93;(u) &#91;b&#93;[c] &#91;d&#93;: e', inText),
+    ).toBe('[a\\](u) [b\\][c] [d\\]: e');
+    expect(unescapeCharacterReferences('x&#91;^1&#93; y', inText)).toBe('x\\[^1] y');
+  });
+
+  it('keeps a character at the end of the node escaped unless a line ends there', () => {
+    expect(unescapeCharacterReferences('a&#93;', inText)).toBe('a\\]');
+    expect(unescapeCharacterReferences('a &#60;', inText)).toBe('a \\<');
+    expect(unescapeCharacterReferences('a&#93;', { ...inText, isAtLineEnd: true })).toBe('a]');
+    expect(unescapeCharacterReferences('**a&#93;**', inText)).toBe('**a]**');
+  });
+
+  it('keeps a bracket in a link text escaped', () => {
+    expect(unescapeCharacterReferences('a &#91;b c', { ...inText, isInLink: true })).toBe(
+      'a \\[b c',
+    );
+  });
+});
 
 describe('escapeBlockSyntax()', () => {
   it('escapes an ATX heading', () => {
