@@ -1,8 +1,16 @@
+# cSpell:ignore deepmerge gcqx
+
 allowBuilds:
   '@parcel/watcher': false
   esbuild: false
   svelte-preprocess: true
   unrs-resolver: false
+
+auditConfig:
+  ignoreGhsas:
+    # deepmerge: low severity, unpatched
+    # https://github.com/advisories/GHSA-gcqx-w48m-w2h4
+    - GHSA-gcqx-w48m-w2h4
 
 engineStrict: true
 
