@@ -34,14 +34,16 @@ describe('DateTimeInput', () => {
     await expect.element(screen.getByLabelText('Plain')).toBeVisible();
   });
 
-  it.each([
-    ['date', '2026-10-14'],
-    ['datetime-local', '2026-10-14T13:30'],
-    ['time', '13:30'],
-  ])('supports the %s type', async (type, newValue) => {
+  it.each(
+    /** @type {const} */ ([
+      ['date', '2026-10-14'],
+      ['datetime-local', '2026-10-14T13:30'],
+      ['time', '13:30'],
+    ]),
+  )('supports the %s type', async (type, newValue) => {
     /** @type {ComponentProps<typeof DateTimeInput>} */
     const props = $state({
-      type: /** @type {'date' | 'datetime-local' | 'time'} */ (type),
+      type,
       value: '',
       ariaLabel: 'Field',
     });

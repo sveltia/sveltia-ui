@@ -421,13 +421,15 @@ describe('TextEditorToolbar with tables', () => {
 });
 
 describe('TextEditorToolbar with the alignment menu', () => {
-  it.each([
-    ['in HTML', 'html', true],
-    ['not in Markdown', 'markdown', false],
-  ])('shows the alignment menu %s', async (_name, format, expected) => {
+  it.each(
+    /** @type {const} */ ([
+      ['in HTML', 'html', true],
+      ['not in Markdown', 'markdown', false],
+    ]),
+  )('shows the alignment menu %s', async (_name, format, expected) => {
     const { screen } = await renderToolbar({
       enabledButtons: ['bold', 'align'],
-      format: /** @type {'html' | 'markdown'} */ (format),
+      format,
     });
 
     await expect.element(screen.getByRole('button', { name: 'Bold' })).toBeVisible();

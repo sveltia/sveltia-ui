@@ -117,6 +117,17 @@
     }
   };
 
+  // Kept out of the effect: in SSR output, esrap moves the comments of the dropped effect onto
+  // the next node, where this cast comment wraps a shorthand prop in parentheses, which is invalid
+  /**
+   * Give the list first refusal on the keys it drives. Anything it doesn’t take is left to the
+   * field, and the `keyup` listener below picks up wherever the caret ends up.
+   * @param {Event} event `keydown` event.
+   */
+  const onKeyDown = (event) => {
+    list?.handleKeyDown(/** @type {KeyboardEvent} */ (event));
+  };
+
   $effect(() => {
     if (!element || !list) {
       return undefined;
@@ -129,15 +140,6 @@
      */
     const refresh = () => {
       list?.update(findTrigger());
-    };
-
-    /**
-     * Give the list first refusal on the keys it drives. Anything it doesn’t take is left to the
-     * field, and the `keyup` listener below picks up wherever the caret ends up.
-     * @param {Event} event `keydown` event.
-     */
-    const onKeyDown = (event) => {
-      list?.handleKeyDown(/** @type {KeyboardEvent} */ (event));
     };
 
     /**

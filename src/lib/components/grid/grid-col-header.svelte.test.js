@@ -24,17 +24,19 @@ it('renders the element with the role, classes, attributes and children', async 
   expect(element.querySelector('button')).toBeNull();
 });
 
-it.each([
-  ['ascending', 'arrow_upward', 'descending'],
-  ['descending', 'arrow_downward', 'ascending'],
-  ['none', 'arrow_upward', 'ascending'],
-])('renders a sort button when sorted in %s order', async (sortOrder, iconName, nextSortOrder) => {
+it.each(
+  /** @type {const} */ ([
+    ['ascending', 'arrow_upward', 'descending'],
+    ['descending', 'arrow_downward', 'ascending'],
+    ['none', 'arrow_upward', 'ascending'],
+  ]),
+)('renders a sort button when sorted in %s order', async (sortOrder, iconName, nextSortOrder) => {
   const onSort = vi.fn();
 
   const screen = await render(GridColHeader, {
     class: 'custom',
     'data-x': '1',
-    sortOrder: /** @type {'ascending' | 'descending' | 'none'} */ (sortOrder),
+    sortOrder,
     onSort,
     children: text('Name'),
   });
