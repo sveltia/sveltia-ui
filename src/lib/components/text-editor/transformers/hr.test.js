@@ -1,5 +1,6 @@
 // cSpell:ignore-words horizontalrule
 
+import { $createHorizontalRuleNode as createHorizontalRuleNode } from '@lexical/extension';
 import { describe, expect, it, vi } from 'vitest';
 import { HR } from './hr.js';
 
@@ -8,6 +9,7 @@ vi.mock('@lexical/extension', () => {
   const mockHRNode = {
     __type: 'horizontalrule',
     selectNext: vi.fn(),
+    isAttached: vi.fn(() => true),
   };
 
   return {
@@ -102,5 +104,23 @@ describe('HR transformer', () => {
     HR.replace(/** @type {any} */ (parentNode), [], /** @type {any} */ (['---']), false);
     expect(parentNode.insertBefore).toHaveBeenCalledOnce();
     expect(parentNode.replace).not.toHaveBeenCalled();
+  });
+
+  it('replace should select after the rule only when it is attached', () => {
+    const line = /** @type {any} */ (createHorizontalRuleNode());
+
+    const parentNode = {
+      replace: vi.fn(),
+      insertBefore: vi.fn(),
+      getNextSibling: vi.fn().mockReturnValue(null),
+    };
+
+    HR.replace(/** @type {any} */ (parentNode), [], /** @type {any} */ (['---']), true);
+    expect(line.selectNext).toHaveBeenCalledOnce();
+
+    // A pasted rule is created in a detached container
+    line.isAttached.mockReturnValueOnce(false);
+    HR.replace(/** @type {any} */ (parentNode), [], /** @type {any} */ (['---']), true);
+    expect(line.selectNext).toHaveBeenCalledOnce();
   });
 });

@@ -34,7 +34,10 @@ export const HR = {
       parentNode.insertBefore(line);
     }
 
-    line.selectNext();
+    // A pasted rule is created in a detached container, where there’s nothing to select
+    if (line.isAttached()) {
+      line.selectNext();
+    }
   },
   type: 'element',
 };

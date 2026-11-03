@@ -95,6 +95,11 @@ vi.mock('@sveltia/utils/misc', () => ({
   sleep: vi.fn(() => Promise.resolve()),
 }));
 
+vi.mock('@sveltia/utils/events', () => ({
+  isMac: vi.fn(() => false),
+  matchesShortcuts: vi.fn(() => false),
+}));
+
 vi.mock('@sveltia/utils/string', () => ({
   isURL: vi.fn((str) => /^https?:\/\//.test(str)),
 }));
@@ -194,6 +199,7 @@ vi.mock('@lexical/list', () => ({
 vi.mock('@lexical/markdown', () => ({
   $convertFromMarkdownString: vi.fn(),
   $convertToMarkdownString: vi.fn(() => 'converted'),
+  $generateNodesFromMarkdownString: vi.fn(() => []),
   registerMarkdownShortcuts: vi.fn(() => vi.fn()),
   TRANSFORMERS: [],
   BOLD_ITALIC_STAR: { tag: '***' },
@@ -297,10 +303,12 @@ vi.mock('lexical', () => ({
   HISTORY_MERGE_TAG: 'history-merge',
   INDENT_CONTENT_COMMAND: 'indent',
   INSERT_PARAGRAPH_COMMAND: 'insertParagraph',
+  KEY_DOWN_COMMAND: 'keyDown',
   KEY_ENTER_COMMAND: 'keyEnter',
   $isRangeSelection: vi.fn((selection) => selection?.type === 'range'),
   OUTDENT_CONTENT_COMMAND: 'outdent',
   PASTE_COMMAND: 'paste',
+  PASTE_TAG: 'paste',
   RootNode: class {},
 }));
 
@@ -871,7 +879,7 @@ describe('text editor core', () => {
       enabledButtons: ['link', 'bulleted-list', 'numbered-list'],
     });
 
-    expect(editorState._commands).toHaveLength(5);
+    expect(editorState._commands).toHaveLength(7);
     dispose();
   });
 
@@ -1473,7 +1481,7 @@ describe('text editor core', () => {
       enabledButtons: ['link', 'bulleted-list', 'numbered-list'],
     });
 
-    expect(editorState._commands).toHaveLength(5);
+    expect(editorState._commands).toHaveLength(7);
     expect(editorState._updateListeners).toHaveLength(1);
     expect(editorState._rootListeners).toHaveLength(1);
 
@@ -2022,7 +2030,7 @@ describe('text editor core', () => {
       enabledButtons: ['link', 'bulleted-list', 'numbered-list'],
     });
 
-    expect(editorState._commands).toHaveLength(5);
+    expect(editorState._commands).toHaveLength(7);
     dispose();
   });
 

@@ -33,6 +33,7 @@ import {
   HEADING,
   $convertFromMarkdownString as convertFromMarkdownString,
   $convertToMarkdownString as convertToMarkdownString,
+  $generateNodesFromMarkdownString as generateNodesFromMarkdownString,
   registerMarkdownShortcuts,
 } from '@lexical/markdown';
 import {
@@ -48,6 +49,7 @@ import {
 } from '@lexical/utils';
 import { sleep } from '@sveltia/utils/misc';
 import { isURL } from '@sveltia/utils/string';
+import { isMac, matchesShortcuts } from '@sveltia/utils/events';
 import {
   COMMAND_PRIORITY_HIGH,
   COMMAND_PRIORITY_LOW,
@@ -62,10 +64,12 @@ import {
   $getNearestNodeFromDOMNode as getNearestNodeFromDOMNode,
   $getRoot as getRoot,
   $getSelection as getSelection,
+  $setSelection as setSelection,
   HISTORY_MERGE_TAG,
   INDENT_CONTENT_COMMAND,
   INSERT_LINE_BREAK_COMMAND,
   INSERT_PARAGRAPH_COMMAND,
+  KEY_DOWN_COMMAND,
   KEY_ENTER_COMMAND,
   LineBreakNode,
   $insertNodes as insertNodes,
@@ -76,6 +80,7 @@ import {
   $isTextNode as isTextNode,
   OUTDENT_CONTENT_COMMAND,
   PASTE_COMMAND,
+  PASTE_TAG,
   RootNode,
 } from 'lexical';
 import {
@@ -1242,6 +1247,274 @@ export const removePlaceholdersFromMatch = (transformer) => {
 };
 
 /**
+ * Preload the syntax highlighter for the given programming language.
+ *
+ * Highlighting also works without this — the transform loads whatever it needs and re-highlights
+ * once it arrives — but preloading avoids a visible flash of unhighlighted code.
+ * @param {string} lang Language name, like scss.
+ */
+export const loadCodeHighlighter = async (lang) => {
+  if (isPlainLanguage(lang)) {
+    return;
+  }
+
+  // The grammar and theme loaders are no-ops until the engine is in place
+  await loadEngine();
+
+  await Promise.all([loadCodeLanguage(normalizeCodeLanguage(lang)), loadCodeTheme(getCodeTheme())]);
+};
+
+/**
+ * Remove the placeholders added by `addImportPlaceholders()` from the imported nodes: the text, the
+ * Markdown of raw syntax, and the URL and title of a link. The text of raw syntax is restored from
+ * the Markdown it was imported from, as Lexical has removed its escapes, which are not escapes in
+ * raw HTML; see `RAW_HTML`.
+ * @param {LexicalNode[]} nodes Imported nodes.
+ */
+const removePlaceholders = (nodes) => {
+  nodes
+    .flatMap((node) => (isElementNode(node) ? node.getAllTextNodes() : node))
+    .filter((node) => isTextNode(node))
+    .forEach((node) => {
+      const text = node.getTextContent();
+      const newText = removeImportPlaceholders(getImportedRawSyntax(node) ?? text);
+      const link = node.getParent();
+
+      if (newText !== text) {
+        node.setTextContent(newText);
+      }
+
+      if (isLinkNode(link)) {
+        const url = link.getURL();
+        const title = link.getTitle();
+
+        if (removeImportPlaceholders(url) !== url) {
+          link.setURL(removeImportPlaceholders(url));
+        }
+
+        if (title && removeImportPlaceholders(title) !== title) {
+          link.setTitle(removeImportPlaceholders(title));
+        }
+      }
+    });
+};
+
+/**
+ * Prepare Markdown for the import: convert the syntax Lexical doesn’t support to the one it does,
+ * if the element is enabled, and list the programming languages used in the code blocks.
+ * @param {string} value Markdown.
+ * @param {Transformer[]} enabledTransformers List of enabled Markdown transformers.
+ * @returns {{ markdown: string, languages: string[] }} Normalized Markdown and the languages.
+ */
+const prepareMarkdown = (value, enabledTransformers) => {
+  // Tilde code fences are converted to backtick ones, and setext headings to ATX ones. Otherwise
+  // the syntax is kept as text, as written. A transformer is found by its regular expression,
+  // because the transformers can come wrapped in a `$state` proxy, which leaves a regular
+  // expression as is but not the transformer object itself
+  const hasCodeBlocks = enabledTransformers.some(
+    (transformer) => 'regExpStart' in transformer && transformer.regExpStart === CODE.regExpStart,
+  );
+
+  const hasHeadings = enabledTransformers.some(
+    (transformer) => 'regExp' in transformer && transformer.regExp === HEADING.regExp,
+  );
+
+  const fencedValue = hasCodeBlocks ? convertTildeFences(value) : value;
+  const markdown = hasHeadings ? convertSetextHeadings(fencedValue) : fencedValue;
+
+  return {
+    markdown,
+    // The language is the leading word of the info string, like `js` in ```` ``` js title=x ````;
+    // see `CODE`
+    languages: [...markdown.matchAll(/^`{3,}[ \t]*(?<lang>[\w-]+)/gm)].map(
+      ({ groups: { lang = 'plain' } = {} }) => lang,
+    ),
+  };
+};
+
+/**
+ * Convert Markdown prepared with {@link prepareMarkdown} to Lexical nodes, either replacing the
+ * content of the root or returning the nodes to be inserted somewhere. Called within an editor
+ * update.
+ * @param {string} markdown Markdown.
+ * @param {Transformer[]} enabledTransformers List of enabled Markdown transformers.
+ * @param {object} [options] Options.
+ * @param {boolean} [options.toRoot] Whether to replace the content of the root.
+ * @returns {LexicalNode[]} Imported nodes.
+ */
+const $importMarkdown = (markdown, enabledTransformers, { toRoot = false } = {}) => {
+  // Split multiline formatting into separate lines to prevent Markdown parsing issues
+  const splitValue = splitMultilineFormatting(markdown);
+  // Add placeholders so Lexical reads the backslashes, the tabs in code spans and raw HTML right
+  const markedValue = addImportPlaceholders(splitValue);
+  // Pad blank blockquote lines so they are not imported as literal `>` text
+  const paddedValue = padBlankBlockquoteLines(markedValue);
+  // Keep the formatting around a code span after other formatting
+  const transformers = addCodeSpanSplit(enabledTransformers);
+  /** @type {LexicalNode[]} */
+  let nodes;
+
+  if (toRoot) {
+    convertFromMarkdownString(paddedValue, transformers);
+    nodes = getRoot().getChildren();
+  } else {
+    nodes = generateNodesFromMarkdownString(paddedValue, transformers);
+  }
+
+  // The text of raw HTML and raw syntax is restored as well. The lines of an HTML block have a
+  // placeholder. Other raw syntax, like an autolink or a definition label, only differs from its
+  // text if Lexical has decoded an escape or a character reference in it
+  if (markedValue !== splitValue || /[\\&]/.test(markedValue)) {
+    removePlaceholders(nodes);
+  }
+
+  return nodes;
+};
+
+/**
+ * Insert the given Markdown at the selection, converted to Lexical nodes, as if it were pasted. The
+ * content stays as it is if the editor is read-only or has no selection.
+ * @param {LexicalEditor} editor Editor instance.
+ * @param {string} value Markdown.
+ * @param {Transformer[]} enabledTransformers List of enabled Markdown transformers.
+ * @returns {Promise<void>} Nothing.
+ */
+export const pasteMarkdown = async (editor, value, enabledTransformers) => {
+  const { markdown, languages } = prepareMarkdown(value, enabledTransformers);
+
+  // Preload the highlighter like the import does, but carry on without it if it fails to load: the
+  // code is highlighted once it’s available, if ever
+  await Promise.allSettled(languages.map((lang) => loadCodeHighlighter(lang)));
+
+  if (!editor.isEditable()) {
+    return;
+  }
+
+  editor.update(
+    () => {
+      // The Markdown import moves the selection to the nodes it creates, so keep a copy to insert
+      // the nodes where the caret was
+      const selection = getSelection()?.clone();
+
+      if (!selection) {
+        return;
+      }
+
+      /** @type {LexicalNode[] | undefined} */
+      let nodes;
+
+      try {
+        nodes = $importMarkdown(markdown, enabledTransformers);
+      } catch (ex) {
+        // The browser paste has been canceled, so paste the text as is rather than nothing
+        // eslint-disable-next-line no-console
+        console.error(ex);
+      }
+
+      setSelection(selection);
+
+      if (nodes) {
+        selection.insertNodes(nodes);
+      } else {
+        selection.insertRawText(value);
+      }
+    },
+    { tag: PASTE_TAG },
+  );
+};
+
+/**
+ * How long to wait for the `paste` event after a Paste as Markdown shortcut, in milliseconds.
+ */
+const PASTE_AS_MARKDOWN_TIMEOUT = 1000;
+
+/**
+ * Keyboard shortcuts to paste the text on the clipboard as Markdown: the browser’s own shortcuts to
+ * paste plain text, Accel+Shift+V, plus Command+Option+Shift+V, the macOS Paste and Match Style.
+ * @returns {string} Shortcuts.
+ */
+const getPasteAsMarkdownShortcuts = () =>
+  isMac() ? 'Meta+Shift+V Meta+Alt+Shift+V' : 'Ctrl+Shift+V';
+
+/**
+ * Register the keyboard shortcuts to paste the text on the clipboard as Markdown. A regular paste
+ * prefers the HTML on the clipboard, so text copied from a code editor or a terminal ends up in a
+ * code block, while Markdown pasted as plain text is kept as literal text. The shortcuts make the
+ * browser paste plain text, which is then converted from Markdown. The browser does the paste,
+ * because a script can’t read the clipboard after a key combination in every browser: Firefox
+ * doesn’t allow it after a key pressed with Ctrl, Alt or Command.
+ * @param {LexicalEditor} editor Editor instance.
+ * @param {Transformer[]} enabledTransformers List of enabled Markdown transformers.
+ * @returns {() => void} Cleanup handler.
+ */
+const registerPasteAsMarkdown = (editor, enabledTransformers) => {
+  const shortcuts = getPasteAsMarkdownShortcuts();
+  /** Whether the paste that follows was started with one of the shortcuts. */
+  let pasteAsMarkdown = false;
+  let timer = 0;
+
+  return mergeUnregisters(
+    () => {
+      clearTimeout(timer);
+    },
+    editor.registerCommand(
+      KEY_DOWN_COMMAND,
+      (event) => {
+        // Any other key cancels the shortcut. Chrome on macOS fires the `paste` event in a later
+        // task, so wait a moment for it, but not too long, in case the browser doesn’t paste with
+        // the shortcut, like Safari with Command+Shift+V
+        pasteAsMarkdown = matchesShortcuts(event, shortcuts);
+        clearTimeout(timer);
+
+        if (pasteAsMarkdown) {
+          timer = window.setTimeout(() => {
+            pasteAsMarkdown = false;
+          }, PASTE_AS_MARKDOWN_TIMEOUT);
+        }
+
+        // Let the browser paste
+        return false;
+      },
+      COMMAND_PRIORITY_NORMAL,
+    ),
+    editor.registerCommand(
+      PASTE_COMMAND,
+      (event) => {
+        if (!pasteAsMarkdown) {
+          return false;
+        }
+
+        pasteAsMarkdown = false;
+
+        const isClipboardEvent = objectKlassEquals(event, ClipboardEvent);
+
+        // Safari pastes with an `insertFromPaste` input event instead of a `paste` event
+        const dataTransfer = isClipboardEvent
+          ? /** @type {ClipboardEvent} */ (event).clipboardData
+          : objectKlassEquals(event, InputEvent)
+            ? /** @type {InputEvent} */ (event).dataTransfer
+            : null;
+
+        const text = dataTransfer?.getData('text/plain');
+
+        // Leave a URL to the link paste handler, which links the selected text. It only handles a
+        // `paste` event, so Safari still pastes a URL as Markdown
+        if (!text || (isClipboardEvent && isURL(text.trim()))) {
+          return false;
+        }
+
+        event.preventDefault();
+        pasteMarkdown(editor, text, enabledTransformers);
+
+        return true;
+      },
+      // Before the link paste handler and Lexical’s own one
+      COMMAND_PRIORITY_NORMAL,
+    ),
+  );
+};
+
+/**
  * Initialize the Lexical editor.
  * @param {TextEditorConfig} config Editor configuration.
  * @returns {InitEditorResult} Editor instance and cleanup.
@@ -1399,6 +1672,7 @@ export const initEditor = (config) => {
     registerListCommands(editor, enabledButtons),
     registerUpdateEvent(editor, enabledTransformers, format),
     registerTabIndentation(editor),
+    isCodeEditor ? undefined : registerPasteAsMarkdown(editor, enabledTransformers),
   );
 
   return {
@@ -1412,24 +1686,6 @@ export const initEditor = (config) => {
       editor.dispose();
     },
   };
-};
-
-/**
- * Preload the syntax highlighter for the given programming language.
- *
- * Highlighting also works without this — the transform loads whatever it needs and re-highlights
- * once it arrives — but preloading avoids a visible flash of unhighlighted code.
- * @param {string} lang Language name, like scss.
- */
-export const loadCodeHighlighter = async (lang) => {
-  if (isPlainLanguage(lang)) {
-    return;
-  }
-
-  // The grammar and theme loaders are no-ops until the engine is in place
-  await loadEngine();
-
-  await Promise.all([loadCodeLanguage(normalizeCodeLanguage(lang)), loadCodeTheme(getCodeTheme())]);
 };
 
 /**
@@ -1510,39 +1766,6 @@ const importValue = async (editor, { languages, $import, $export, formatName }) 
 };
 
 /**
- * Remove the placeholders added by `addImportPlaceholders()` from the imported nodes: the text, the
- * Markdown of raw syntax, and the URL and title of a link. The text of raw syntax is restored from
- * the Markdown it was imported from, as Lexical has removed its escapes, which are not escapes in
- * raw HTML; see `RAW_HTML`.
- */
-const removePlaceholders = () => {
-  getRoot()
-    .getAllTextNodes()
-    .forEach((node) => {
-      const text = node.getTextContent();
-      const newText = removeImportPlaceholders(getImportedRawSyntax(node) ?? text);
-      const link = node.getParent();
-
-      if (newText !== text) {
-        node.setTextContent(newText);
-      }
-
-      if (isLinkNode(link)) {
-        const url = link.getURL();
-        const title = link.getTitle();
-
-        if (removeImportPlaceholders(url) !== url) {
-          link.setURL(removeImportPlaceholders(url));
-        }
-
-        if (title && removeImportPlaceholders(title) !== title) {
-          link.setTitle(removeImportPlaceholders(title));
-        }
-      }
-    });
-};
-
-/**
  * Convert Markdown to Lexical nodes.
  * @param {LexicalEditor} editor Editor instance.
  * @param {string} value Current Markdown value.
@@ -1553,51 +1776,15 @@ const removePlaceholders = () => {
  * @throws {Error} Failed to convert the value to Lexical nodes.
  */
 export const convertMarkdownToLexical = async (editor, value, enabledTransformers) => {
-  // Convert the syntax Lexical doesn’t support to the one it does, if the element is enabled: tilde
-  // code fences to backtick ones, and setext headings to ATX ones. Otherwise the syntax is kept as
-  // text, as written. A transformer is found by its regular expression, because the transformers
-  // can come wrapped in a `$state` proxy, which leaves a regular expression as is but not the
-  // transformer object itself
-  const hasCodeBlocks = enabledTransformers.some(
-    (transformer) => 'regExpStart' in transformer && transformer.regExpStart === CODE.regExpStart,
-  );
-
-  const hasHeadings = enabledTransformers.some(
-    (transformer) => 'regExp' in transformer && transformer.regExp === HEADING.regExp,
-  );
-
-  const fencedValue = hasCodeBlocks ? convertTildeFences(value) : value;
-  const normalizedValue = hasHeadings ? convertSetextHeadings(fencedValue) : fencedValue;
+  const { markdown, languages } = prepareMarkdown(value, enabledTransformers);
 
   return importValue(editor, {
-    // The language is the leading word of the info string, like `js` in ```` ``` js title=x ````;
-    // see `CODE`
-    languages: [...normalizedValue.matchAll(/^`{3,}[ \t]*(?<lang>[\w-]+)/gm)].map(
-      ({ groups: { lang = 'plain' } = {} }) => lang,
-    ),
+    languages,
     /**
      * Import the Markdown.
      */
     $import: () => {
-      // Split multiline formatting into separate lines to prevent Markdown parsing issues
-      const splitValue = splitMultilineFormatting(normalizedValue);
-      // Add placeholders so Lexical reads the backslashes, the tabs in code spans and raw HTML
-      // right
-      const markedValue = addImportPlaceholders(splitValue);
-
-      convertFromMarkdownString(
-        // Pad blank blockquote lines so they are not imported as literal `>` text
-        padBlankBlockquoteLines(markedValue),
-        // Keep the formatting around a code span after other formatting
-        addCodeSpanSplit(enabledTransformers),
-      );
-
-      // The text of raw HTML and raw syntax is restored as well. The lines of an HTML block have a
-      // placeholder. Other raw syntax, like an autolink or a definition label, only differs from
-      // its text if Lexical has decoded an escape or a character reference in it
-      if (markedValue !== splitValue || /[\\&]/.test(markedValue)) {
-        removePlaceholders();
-      }
+      $importMarkdown(markdown, enabledTransformers, { toRoot: true });
     },
     /**
      * Export the content as Markdown.

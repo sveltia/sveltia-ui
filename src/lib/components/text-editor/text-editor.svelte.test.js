@@ -1,3 +1,4 @@
+import { isMac } from '@sveltia/utils/events';
 import { sleep } from '@sveltia/utils/misc';
 import {
   $createParagraphNode as createParagraphNode,
@@ -572,6 +573,36 @@ describe('TextEditor', () => {
       setTimeout(resolve, 100);
     });
     expect(document.querySelector('.emoji-suggestions')).toBeNull();
+  });
+
+  it('pastes plain text as Markdown with the Paste as Markdown shortcut', async () => {
+    /** @type {ComponentProps<typeof TextEditor>} */
+    const props = $state({ value: 'Intro' });
+    const screen = await render(TextEditor, props);
+    const root = await waitForContent(screen.container, 'Intro');
+    const clipboardData = new DataTransfer();
+    const mac = isMac();
+
+    clipboardData.setData('text/plain', '- One\n- *Two*');
+    focusEnd(root);
+    // The browser pastes plain text with the shortcut, which a test can’t trigger
+    root.dispatchEvent(
+      new KeyboardEvent('keydown', {
+        key: 'V',
+        code: 'KeyV',
+        ctrlKey: !mac,
+        metaKey: mac,
+        shiftKey: true,
+        bubbles: true,
+        cancelable: true,
+      }),
+    );
+    root.dispatchEvent(
+      new ClipboardEvent('paste', { clipboardData, bubbles: true, cancelable: true }),
+    );
+    await vi.waitFor(() => {
+      expect(props.value).toBe('Intro\n\n- One\n- _Two_');
+    });
   });
 });
 
