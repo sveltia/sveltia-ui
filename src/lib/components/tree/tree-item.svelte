@@ -35,7 +35,8 @@
    * @property {Snippet} [children] Primary slot content, used instead of the `label`.
    * @property {Snippet} [items] Child items slot content, which makes the item a parent node.
    * @property {Snippet} [startIcon] Start icon slot content.
-   * @property {Snippet} [endIcon] End icon slot content.
+   * @property {Snippet} [endIcon] End icon slot content, which is part of the accessible name
+   * unless it’s hidden with `aria-hidden`.
    * @property {Snippet} [chevronIcon] Chevron icon slot content.
    * @property {(event: CustomEvent) => void} [onChange] Custom `Change` event handler, called when
    * the selection state is changed.
@@ -144,7 +145,7 @@
   aria-selected={selected}
   aria-expanded={items ? expanded : undefined}
   aria-level={level}
-  aria-labelledby="{id}-label"
+  aria-labelledby={endIcon ? `${id}-label ${id}-end` : `${id}-label`}
   data-label={label}
   data-value={value}
   data-type={valueType}
@@ -170,7 +171,12 @@
         {@render children?.()}
       {/if}
     </span>
-    {@render endIcon?.()}
+    {#if endIcon}
+      <!-- Part of the name, like a count next to the label -->
+      <span role="none" class="end-icon" id="{id}-end">
+        {@render endIcon()}
+      </span>
+    {/if}
   </div>
   {#if items}
     <div role="group" class="group" hidden={!expanded}>
@@ -180,6 +186,11 @@
 </div>
 
 <style lang="scss">
+  // Leave the layout to the `endIcon` content, as a direct child of the row
+  .end-icon {
+    display: contents;
+  }
+
   [role='treeitem'] {
     display: block;
 

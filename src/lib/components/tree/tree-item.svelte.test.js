@@ -79,7 +79,7 @@ describe('TreeItem', () => {
       endIcon: html('<i class="end">E</i>'),
     });
 
-    const item = screen.getByRole('treeitem', { name: 'Documents' });
+    const item = screen.getByRole('treeitem', { name: 'Documents E', exact: true });
     const element = /** @type {HTMLElement} */ (item.element());
     const group = /** @type {HTMLElement} */ (element.querySelector('[role="group"]'));
 
@@ -91,6 +91,18 @@ describe('TreeItem', () => {
     expect(group.querySelector('.child')).not.toBeNull();
     expect(element.querySelector('.row .start')).not.toBeNull();
     expect(element.querySelector('.row .end')).not.toBeNull();
+  });
+
+  it('includes the end icon in the name, but not the child items', async () => {
+    const screen = await render(TreeItem, {
+      label: 'Posts',
+      items: html('<div role="treeitem">Child</div>'),
+      endIcon: html('<span aria-label="(3 entries)">3</span>'),
+    });
+
+    const item = screen.getByRole('treeitem', { name: 'Posts (3 entries)', exact: true });
+
+    await expect.element(item).toBeInTheDocument();
   });
 
   it('renders a custom chevron, and shows the group while expanded', async () => {
