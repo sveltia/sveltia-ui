@@ -580,7 +580,7 @@
 {#if open && position}
   <!--
     The `mousedown` listener isn’t an interaction with the group: it only keeps the focus where it
-    is when the popup’s background is pressed, as the controls in it take the interactions.
+    is when the popup is pressed, as the controls in it take the interactions.
   -->
   <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
   <div
@@ -593,9 +593,13 @@
     style:bottom={position.bottom}
     style:left={position.left}
     onmousedown={(event) => {
-      // Keep the focus where it is when the popup’s background is pressed, which would otherwise
-      // move it to the page, hiding the popup or blurring the URL field
-      if (event.target === event.currentTarget) {
+      // Keep the focus where it is when the popup’s background or a button is pressed, except for
+      // the URL field, which takes it. Otherwise, the focus would move to the page, hiding the
+      // popup or blurring the URL field. Safari doesn’t focus a button on click, and moves the
+      // focus to the closest focusable ancestor instead, which ends the edit mode before the click
+      // can apply the URL
+      // @see https://github.com/sveltia/sveltia-cms/issues/1148
+      if (!(/** @type {Element} */ (event.target).closest('input'))) {
         event.preventDefault();
       }
     }}

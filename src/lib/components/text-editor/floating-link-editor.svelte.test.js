@@ -268,18 +268,42 @@ describe('FloatingLinkEditor', () => {
     expect(store.inputValue).toBe(original);
   });
 
-  it('keeps the focus when the popup background is pressed', async () => {
-    const { root } = await renderEditor('See [Example](https://example.com/) here');
+  it('keeps the focus when the popup background or a button is pressed', async () => {
+    const { store, root } = await renderEditor('See [Example](https://example.com/) here');
+
+    /**
+     * Press the given element on the popup.
+     * @param {Element | null | undefined} target Element.
+     * @returns {boolean} Whether the default action, moving the focus, was prevented.
+     */
+    const press = (target) => {
+      const event = new MouseEvent('mousedown', { bubbles: true, cancelable: true });
+
+      target?.dispatchEvent(event);
+
+      return event.defaultPrevented;
+    };
 
     placeCaret(root, /** @type {HTMLElement} */ (root.querySelector('a')));
     await vi.waitFor(() => {
       expect(getPopup()).not.toBeNull();
     });
+    expect(press(getPopup())).toBe(true);
+    expect(press(getPopupButton('Edit Link'))).toBe(true);
+    // Including the button’s icon
+    expect(press(getPopupButton('Remove Link').querySelector('.icon'))).toBe(true);
 
-    const event = new MouseEvent('mousedown', { bubbles: true, cancelable: true });
-
-    getPopup()?.dispatchEvent(event);
-    expect(event.defaultPrevented).toBe(true);
+    // Safari doesn’t focus a button on click, but moves the focus to the closest focusable
+    // ancestor instead, which would end the edit mode before the URL is applied
+    // @see https://github.com/sveltia/sveltia-cms/issues/1148
+    store.editor?.dispatchCommand(OPEN_LINK_EDITOR_COMMAND, undefined);
+    await vi.waitFor(() => {
+      expect(document.activeElement).toBe(getPopupInput());
+    });
+    expect(press(getPopupButton('Update'))).toBe(true);
+    expect(press(getPopupButton('Cancel'))).toBe(true);
+    // The URL field takes the focus as usual
+    expect(press(getPopupInput())).toBe(false);
   });
 
   it('removes the link, keeping its text', async () => {
