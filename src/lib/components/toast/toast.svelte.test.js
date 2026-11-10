@@ -148,10 +148,18 @@ describe('Toast', () => {
       expect(two.getAttribute('aria-hidden')).toBe('true');
     });
     await finishTransitions();
-    // The fading toast takes no room, along with its margins, before it’s removed
     expect(two.isConnected).toBe(true);
-    expect(two.getBoundingClientRect().height).toBe(0);
-    expect(one.getBoundingClientRect().top).toBe(top);
+
+    if (CSS.supports('interpolate-size', 'allow-keywords')) {
+      // The fading toast takes no room, along with its margins, before it’s removed
+      expect(two.getBoundingClientRect().height).toBe(0);
+      expect(one.getBoundingClientRect().top).toBe(top);
+    } else {
+      // A browser that can’t transition the height, like Firefox, keeps the full height while the
+      // toast fades out, rather than letting it fade over its neighbor
+      expect(two.getBoundingClientRect().height).toBeGreaterThan(0);
+      expect(one.getBoundingClientRect().top).toBeGreaterThan(top);
+    }
   });
 
   it('moves the toast to the lane of its new position', async () => {

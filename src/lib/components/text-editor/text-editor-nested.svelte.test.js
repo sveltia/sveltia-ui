@@ -174,13 +174,48 @@ it('disables the outer toolbar while an editor component has focus', async () =>
   await expect.element(outerToolbar).toHaveAttribute('aria-disabled', 'false');
 });
 
-it('enables the toolbar once the focus leaves the editor in a modal dialog', async () => {
+it('keeps the outer toolbar disabled when a press in a component moves the focus away', async () => {
   const screen = await render(TextEditor, {
-    value: 'Outer\n\n[field]',
+    value: 'Outer\n\n[nested]',
     buttons: ['bold'],
-    components: [field],
+    components: [nested],
   });
 
+  const [outerToolbar, innerToolbar] = screen.getByRole('toolbar', { name: 'Text Editor' }).all();
+  const outerRoot = /** @type {HTMLElement} */ (screen.getByRole('textbox').first().element());
+  const boldButton = innerToolbar.getByRole('button', { name: 'Bold' }).element();
+
+  /**
+   * Press the Bold button of the nested editor the way Safari does: without focusing the button.
+   */
+  const press = () => {
+    boldButton.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
+  };
+
+  await userEvent.click(screen.getByText('Inner 1', { exact: true }));
+  await expect.element(outerToolbar).toHaveAttribute('aria-disabled', 'true');
+
+  // Safari moves the focus to the closest focusable ancestor, which is the outer editor
+  press();
+  outerRoot.focus();
+  await sleep(50);
+  await expect.element(outerToolbar).toHaveAttribute('aria-disabled', 'true');
+
+  // Or to `<body>`
+  press();
+  outerRoot.blur();
+  await sleep(50);
+  await expect.element(outerToolbar).toHaveAttribute('aria-disabled', 'true');
+
+  // Without a press, the focus moving to the outer editor does leave the component
+  outerRoot.focus();
+  await expect.element(outerToolbar).toHaveAttribute('aria-disabled', 'false');
+});
+
+it('enables the toolbar once the focus leaves the editor in a modal dialog', async () => {
+  /** @type {ComponentProps<typeof TextEditor>} */
+  const props = $state({ value: 'Outer\n\n[field]', buttons: ['bold'], components: [field] });
+  const screen = await render(TextEditor, props);
   const dialog = document.createElement('dialog');
   const otherInput = document.createElement('input');
   const outerToolbar = screen.getByRole('toolbar', { name: 'Text Editor' });
@@ -198,10 +233,12 @@ it('enables the toolbar once the focus leaves the editor in a modal dialog', asy
     await userEvent.click(screen.getByRole('textbox', { name: 'Other Input' }));
     await expect.element(outerToolbar).toHaveAttribute('aria-disabled', 'false');
 
-    // A component field losing focus, e.g. as the component is removed
+    // A component field losing focus as the component is removed, which only Chromium fires the
+    // `focusout` event for
     await userEvent.click(fieldInput);
     await expect.element(outerToolbar).toHaveAttribute('aria-disabled', 'true');
-    fieldInput.element().remove();
+    props.value = 'Outer';
+    await expect.element(fieldInput).not.toBeInTheDocument();
     await expect.element(outerToolbar).toHaveAttribute('aria-disabled', 'false');
   } finally {
     dialog.close();

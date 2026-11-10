@@ -38,7 +38,13 @@ describe('ResizablePaneGroup', () => {
     );
 
     await vi.waitFor(() => {
-      expect(getSizes(screen.container)).toEqual(['33.3333%', '33.3333%', '33.3333%']);
+      // Browsers serialize the percentage with different precision: `33.3333%` in Chromium and
+      // Firefox, `33.333333%` in WebKit
+      expect(getSizes(screen.container).map((size) => parseFloat(size))).toEqual([
+        expect.closeTo(100 / 3, 3),
+        expect.closeTo(100 / 3, 3),
+        expect.closeTo(100 / 3, 3),
+      ]);
     });
 
     // The sizes are percentages of the space left by the two 4px handles, so the panes and handles

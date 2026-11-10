@@ -152,3 +152,17 @@ export const createTestComponent = ({
     ),
   };
 };
+
+/**
+ * Create a `paste` event carrying the given data. The data is set on the event after it’s created,
+ * because Firefox ignores the `clipboardData` given to the `ClipboardEvent` constructor.
+ * @param {DataTransfer} clipboardData Pasted data.
+ * @returns {ClipboardEvent} Event.
+ */
+export const createPasteEvent = (clipboardData) => {
+  const event = new ClipboardEvent('paste', { bubbles: true, cancelable: true });
+
+  Object.defineProperty(event, 'clipboardData', { value: clipboardData });
+
+  return event;
+};

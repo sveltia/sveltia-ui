@@ -9,8 +9,9 @@ it('clamps to a single line by default', async () => {
 
   expect(span.getAttribute('role')).toBe('none');
   expect(span.textContent?.trim()).toBe('Long text');
-  expect(span.getAttribute('style')).toContain('-webkit-line-clamp: 1');
-  expect(span.getAttribute('style')).toContain('line-clamp: 1');
+  // Check the computed value rather than the `style` attribute, which WebKit serializes as the
+  // standard `line-clamp` property with the `-webkit-legacy` keyword
+  expect(getComputedStyle(span).webkitLineClamp).toBe('1');
 });
 
 it('renders an empty span without children', async () => {
@@ -23,5 +24,5 @@ it('clamps to the given number of lines', async () => {
   const screen = await render(TruncatedText, { lines: 3, children: text('Long text') });
   const span = /** @type {HTMLElement} */ (screen.container.querySelector('.sui.truncated-text'));
 
-  expect(span.getAttribute('style')).toContain('line-clamp: 3');
+  expect(getComputedStyle(span).webkitLineClamp).toBe('3');
 });

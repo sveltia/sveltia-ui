@@ -43,16 +43,25 @@ it('declares the fonts as defined in `fonts.js`', async () => {
     expect(cssText).toContain(getCDNFontURL(font));
     expect(cssFace.weight).toBe(expected.weight);
     expect(cssFace.display).toBe(expected.display);
-    expect(cssFace.unicodeRange).toBe(expected.unicodeRange);
-    // `sizeAdjust` isn’t in the TypeScript DOM types yet
-    expect(/** @type {any} */ (cssFace).sizeAdjust).toBe(/** @type {any} */ (expected).sizeAdjust);
+    // WebKit serializes the range of a face created with the `FontFace` constructor in lowercase
+    expect(cssFace.unicodeRange.toUpperCase()).toBe(expected.unicodeRange.toUpperCase());
+    // `sizeAdjust` isn’t in the TypeScript DOM types yet. Firefox serializes the initial value of
+    // a face declared by a `@font-face` rule as `normal` rather than `100%`
+    expect(/** @type {any} */ (cssFace).sizeAdjust.replace('normal', '100%')).toBe(
+      /** @type {any} */ (expected).sizeAdjust,
+    );
   });
 
   screen.unmount();
 });
 
 it('renders with a self-hosted font instead of the CDN one', async () => {
-  setFontURLs(Object.fromEntries(FONTS.map((font) => [getFontFileName(font), LOCAL_FONT_URL])));
+  // Give each font its own URL, because WebKit shares a loaded file between the faces using it
+  setFontURLs(
+    Object.fromEntries(
+      FONTS.map((font) => [getFontFileName(font), `${LOCAL_FONT_URL}?${font.cdnId}`]),
+    ),
+  );
 
   const screen = await render(FontLinks);
   const span = Object.assign(document.createElement('span'), { textContent: 'abc' });
@@ -70,14 +79,16 @@ it('renders with a self-hosted font instead of the CDN one', async () => {
     performance
       .getEntriesByType('resource')
       .map(({ name }) => name)
-      .filter((name) => name.endsWith('.woff2'));
+      .filter((name) => new URL(name).pathname.endsWith('.woff2'));
 
   // Both the `@font-face` rule and the registered face match, but the browser only loads the
   // latter, which was defined last, to render the text
   expect(faces).toHaveLength(2);
   await expect.poll(() => faces.filter(({ status }) => status === 'loaded')).toHaveLength(1);
   expect(faces.filter(({ status }) => status === 'unloaded')).toHaveLength(1);
-  expect(getFetchedFonts()).toEqual([new URL(LOCAL_FONT_URL, window.location.href).href]);
+  expect(getFetchedFonts()).toEqual([
+    new URL(`${LOCAL_FONT_URL}?noto-mono`, window.location.href).href,
+  ]);
   // A font that isn’t used isn’t loaded either
   expect(getFontFaces('Source Sans 3').map(({ status }) => status)).toEqual([
     'unloaded',

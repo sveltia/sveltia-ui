@@ -2,7 +2,7 @@
   import { $getRoot as getRoot, HISTORY_MERGE_TAG } from 'lexical';
   import { getContext, onMount, untrack } from 'svelte';
   import { IMPORT_UPDATE_TAG } from './constants.js';
-  import { handleEditorMouseDown, initEditor } from './core.js';
+  import { handleEditorMouseDown, initEditor, isStaticDecoratorContent } from './core.js';
 
   /**
    * @import { Snippet } from 'svelte';
@@ -147,6 +147,33 @@
   const isOtherDialog = (dialog) => !!dialog && !dialog.contains(lexicalRoot ?? null);
 
   /**
+   * Interactive element in an editor component the pointer has just been pressed on, if any.
+   * @type {Element | undefined}
+   */
+  let pressedComponentElement;
+
+  /**
+   * Track the pointer being pressed on an interactive element within an editor component. Safari
+   * doesn’t focus a button on click, like one on the toolbar of a nested editor, and moves the
+   * focus to the closest focusable ancestor, which is the root, or `<body>` instead. Neither is the
+   * focus leaving the component. A press on its static content, like its label, does move the
+   * focus to the root; see `handleEditorMouseDown()`.
+   * @param {MouseEvent} event `mousedown` event.
+   */
+  const onComponentMouseDown = ({ target }) => {
+    if (
+      target instanceof Element &&
+      target.closest('[data-lexical-decorator]') &&
+      !isStaticDecoratorContent(target)
+    ) {
+      pressedComponentElement = target;
+      window.setTimeout(() => {
+        pressedComponentElement = undefined;
+      });
+    }
+  };
+
+  /**
    * Track the focus, to tell whether it’s in an editor component, like a nested editor or a field
    * of the component, rather than on the editor itself. The focus moving to another dialog doesn’t
    * change anything.
@@ -156,6 +183,11 @@
     const node = /** @type {Node} */ (target);
 
     if (lexicalRoot?.contains(node)) {
+      // Safari moves the focus to the root when a button in a component is pressed; see above
+      if (node === lexicalRoot && pressedComponentElement?.isConnected) {
+        return;
+      }
+
       untrack(() => {
         editorStore.componentHasFocus = node !== lexicalRoot;
       });
@@ -167,21 +199,33 @@
   };
 
   /**
+   * Clear the state if the focus has left the editor component, landing on `<body>`, unless the
+   * pointer has just been pressed within the component, or another modal dialog is open.
+   */
+  const checkComponentFocus = () => {
+    // The update listener below may run within an effect, which mustn’t depend on the state
+    untrack(() => {
+      if (
+        editorStore.componentHasFocus &&
+        document.activeElement === document.body &&
+        !pressedComponentElement?.isConnected &&
+        ![...document.querySelectorAll(':modal')].some(isOtherDialog)
+      ) {
+        editorStore.componentHasFocus = false;
+      }
+    });
+  };
+
+  /**
    * Track the focus leaving a removed element, which doesn’t fire `focusin`. The event also comes
    * without a related target when a dialog opens, which only moves the focus into itself a moment
-   * later, so the state is kept while another modal dialog is open.
+   * later, so the state is kept while another modal dialog is open. Firefox and Safari don’t fire
+   * the event for a removed element at all; see the update listener below.
    * @param {FocusEvent} event `focusout` event.
    */
   const onFocusOut = ({ relatedTarget }) => {
     if (!relatedTarget) {
-      queueMicrotask(() => {
-        if (
-          document.activeElement === document.body &&
-          ![...document.querySelectorAll(':modal')].some(isOtherDialog)
-        ) {
-          editorStore.componentHasFocus = false;
-        }
-      });
+      queueMicrotask(checkComponentFocus);
     }
   };
 
@@ -194,6 +238,7 @@
     lexicalRoot?.addEventListener('Update', onUpdate);
     lexicalRoot?.addEventListener('click', onClick);
     lexicalRoot?.addEventListener('mousedown', onMouseDown);
+    lexicalRoot?.addEventListener('mousedown', onComponentMouseDown);
     document.addEventListener('focusin', onFocusIn);
     document.addEventListener('focusout', onFocusOut);
 
@@ -209,6 +254,10 @@
         ) {
           editorStore.pending = true;
         }
+
+        // An editor component with the focus may have been removed, which doesn’t fire `focusout`
+        // in Firefox and Safari
+        checkComponentFocus();
       },
     );
 
@@ -217,6 +266,7 @@
       lexicalRoot?.removeEventListener('Update', onUpdate);
       lexicalRoot?.removeEventListener('click', onClick);
       lexicalRoot?.removeEventListener('mousedown', onMouseDown);
+      lexicalRoot?.removeEventListener('mousedown', onComponentMouseDown);
       document.removeEventListener('focusin', onFocusIn);
       document.removeEventListener('focusout', onFocusOut);
       dispose();

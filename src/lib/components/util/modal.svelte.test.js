@@ -1,3 +1,4 @@
+import { tick } from 'svelte';
 import { describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-svelte';
 import { getDialog } from '../../test-utils/dialog.js';
@@ -285,7 +286,9 @@ describe('Modal', () => {
     await render(Modal, props);
     await waitFor(() => getDialog()?.classList.contains('active') ?? false);
     props.open = false;
-    await waitFor(() => !getDialog()?.open);
+    // Reopen right away rather than polling, which could take longer than the transition
+    await tick();
+    expect(getDialog()?.open).toBe(false);
     props.open = true;
     await waitFor(() => !!getDialog()?.open);
     await waitFor(() => getDialog()?.classList.contains('active') ?? false);

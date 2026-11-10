@@ -12,7 +12,7 @@ import { render } from 'vitest-browser-svelte';
 import { page, userEvent } from 'vitest/browser';
 import { setCodeHighlighterLoaders } from './shiki/loader.js';
 import TextEditor from './text-editor.svelte';
-import { createTestComponent } from '../../test-utils/editor.js';
+import { createPasteEvent, createTestComponent } from '../../test-utils/editor.js';
 
 /**
  * @import { LexicalEditor } from 'lexical';
@@ -597,9 +597,7 @@ describe('TextEditor', () => {
         cancelable: true,
       }),
     );
-    root.dispatchEvent(
-      new ClipboardEvent('paste', { clipboardData, bubbles: true, cancelable: true }),
-    );
+    root.dispatchEvent(createPasteEvent(clipboardData));
     await vi.waitFor(() => {
       expect(props.value).toBe('Intro\n\n- One\n- _Two_');
     });
@@ -1177,7 +1175,7 @@ describe('TextEditor single line', () => {
     const clipboardData = new DataTransfer();
 
     clipboardData.setData('text/plain', ' three\n\nfour\nfive');
-    root.dispatchEvent(new ClipboardEvent('paste', { clipboardData, bubbles: true }));
+    root.dispatchEvent(createPasteEvent(clipboardData));
     await vi.waitFor(() => {
       expect(props.value).toBe('One two three four five');
     });
@@ -1188,7 +1186,7 @@ describe('TextEditor single line', () => {
     const htmlData = new DataTransfer();
 
     htmlData.setData('text/html', '<p>six</p><h2>seven</h2><ul><li>eight</li></ul>');
-    root.dispatchEvent(new ClipboardEvent('paste', { clipboardData: htmlData, bubbles: true }));
+    root.dispatchEvent(createPasteEvent(htmlData));
     await vi.waitFor(() => {
       expect(props.value).toBe('One two three four five six seven eight');
     });
@@ -1232,8 +1230,13 @@ describe('TextEditor single line', () => {
       expect(props.value).toBe('One two');
     });
 
-    // Pasted text goes through the same `input` event
-    document.execCommand('insertText', false, ' three\n\nfour');
+    // Dropped text goes through the same `input` event. It’s not inserted with `execCommand()`,
+    // which WebKit splits into a `beforeinput` event for each line and line break, cancelling the
+    // line breaks like the Enter key
+    textarea.setRangeText(' three\n\nfour', 7, 7, 'end');
+    textarea.dispatchEvent(
+      new InputEvent('input', { bubbles: true, inputType: 'insertFromDrop', data: null }),
+    );
     await vi.waitFor(() => {
       expect(props.value).toBe('One two three four');
     });

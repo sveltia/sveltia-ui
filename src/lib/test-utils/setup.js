@@ -7,11 +7,15 @@
  * `i18n` service here would leave it cached with the real `@sveltia/i18n` bound to it, defeating
  * the mock in its own unit test. Every locale is registered, not just English, so a test can
  * switch to a right-to-left locale with `locale.set()`, which would otherwise fall back to English.
+ *
+ * Synthetic pointer events are also allowed to capture the pointer in Firefox; see
+ * `allowSyntheticPointerCapture()`.
  */
 
 import { addMessages, init } from '@sveltia/i18n';
 import { afterEach } from 'vitest';
 import { cleanup } from 'vitest-browser-svelte';
+import { allowSyntheticPointerCapture } from './pointer.js';
 // Load the global stylesheet the components are laid out with (see the component for details)
 import './core-styles.svelte';
 
@@ -24,6 +28,7 @@ Object.entries(resources).forEach(([path, strings]) => {
 });
 
 init({ fallbackLocale: 'en-US', initialLocale: 'en-US' });
+allowSyntheticPointerCapture();
 
 afterEach(() => {
   // Unmount whatever the test rendered, then clear anything a component has moved out of its

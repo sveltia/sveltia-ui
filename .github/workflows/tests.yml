@@ -27,25 +27,25 @@ jobs:
           # https://nodejs.org/download/release/v26.13.0/
           runtime: node@26.12.1
           cache: true
-      # The browser is cached per Playwright version, which pins the Chromium build. The tests run
-      # headless, so only the headless shell is installed, not the full browser. The system packages
-      # it needs aren’t cached, and are installed on every run
+      # The browsers are cached per Playwright version, which pins their builds. The tests run
+      # headless, so only the headless shell of Chromium is installed, not the full browser. The
+      # system packages they need aren’t cached, and are installed on every run
       - name: Get the Playwright version
         id: playwright
         if: ${{ matrix.task.browser }}
         run: echo "version=$(node -p "require('playwright/package.json').version")" >> "$GITHUB_OUTPUT"
-      - name: Cache Chromium
-        id: chromium-cache
+      - name: Cache the browsers
+        id: browser-cache
         if: ${{ matrix.task.browser }}
         uses: actions/cache@v6.1.0
         with:
           path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ steps.playwright.outputs.version }}
-      - name: Install Chromium
-        if: ${{ matrix.task.browser && steps.chromium-cache.outputs.cache-hit != 'true' }}
-        run: pnpm exec playwright install chromium --only-shell --with-deps
-      - name: Install Chromium dependencies
-        if: ${{ matrix.task.browser && steps.chromium-cache.outputs.cache-hit == 'true' }}
-        run: pnpm exec playwright install-deps chromium-headless-shell
+          key: playwright-browsers-${{ runner.os }}-${{ steps.playwright.outputs.version }}
+      - name: Install the browsers
+        if: ${{ matrix.task.browser && steps.browser-cache.outputs.cache-hit != 'true' }}
+        run: pnpm exec playwright install chromium firefox webkit --only-shell --with-deps
+      - name: Install the browser dependencies
+        if: ${{ matrix.task.browser && steps.browser-cache.outputs.cache-hit == 'true' }}
+        run: pnpm exec playwright install-deps chromium-headless-shell firefox webkit
       - name: ${{ matrix.task.name }}
         run: ${{ matrix.task.command }}

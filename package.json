@@ -65,7 +65,7 @@
     "prepublishOnly": "npm run build",
     "preview": "vite preview",
     "test": "vitest run",
-    "test:coverage": "vitest run --coverage",
+    "test:coverage": "vitest run --coverage --browser.name=chromium",
     "test:watch": "vitest"
   },
   "dependencies": {

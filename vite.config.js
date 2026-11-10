@@ -59,7 +59,13 @@ export default defineConfig({
             enabled: true,
             headless: true,
             provider: playwright(),
-            instances: [{ browser: 'chromium' }],
+            instances: [
+              { browser: 'chromium' },
+              // Firefox only fires focus events in the page that has the focus, which only one of
+              // the pages running test files at the same time can have
+              { browser: 'firefox', fileParallelism: false },
+              { browser: 'webkit' },
+            ],
           },
         },
       },

@@ -119,3 +119,12 @@ it('sorts the column when the header cell’s padding is clicked', async () => {
   expect(onSort).toHaveBeenCalledOnce();
   expect(onSort.mock.calls[0][0].detail).toEqual({ sortOrder: 'ascending' });
 });
+
+it('focuses the sort button on click, which Safari doesn’t do on its own', async () => {
+  const screen = await render(GridColHeader, { sortOrder: 'none', children: text('Name') });
+  const button = /** @type {HTMLButtonElement} */ (screen.getByRole('button').element());
+
+  // A click without the focus moving, as in Safari
+  button.click();
+  expect(document.activeElement).toBe(button);
+});

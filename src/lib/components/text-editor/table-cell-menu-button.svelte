@@ -182,6 +182,13 @@
   });
 </script>
 
+<!--
+  The `mousedown` listener isn’t an interaction with the element: it only keeps the focus in the
+  editor when the button is pressed. Safari doesn’t focus a button on click, and moves the focus to
+  `<body>` instead, which would hide the button before the click could open the menu.
+  @see https://github.com/sveltia/sveltia-cms/issues/1148
+-->
+<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 <div
   role="none"
   class="table-cell-menu-button"
@@ -189,6 +196,9 @@
   hidden={!show}
   {style}
   bind:this={container}
+  onmousedown={(event) => {
+    event.preventDefault();
+  }}
 >
   {#if show && cellKey}
     {@const key = cellKey}

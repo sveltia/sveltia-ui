@@ -47,6 +47,7 @@
   /**
    * Keep the sort button’s clicks and activation keys from the `<Grid>`, which would otherwise
    * select or focus the header row, or prevent the key’s default action, and call `onSort` instead.
+   * A click also focuses the button, as it does in browsers other than Safari.
    * Native listeners are used because the grid listens on its own element, which a delegated Svelte
    * event handler would only reach after the grid has handled the event. The arrow keys are left
    * alone, so they still move from the header row to the data rows.
@@ -59,6 +60,9 @@
      */
     const onClick = (event) => {
       event.stopPropagation();
+      // Safari doesn’t focus a button on click, but moves the focus to the closest focusable
+      // ancestor instead, which is the header row
+      /** @type {HTMLElement} */ (element).focus();
       onSort?.(
         new CustomEvent('Sort', {
           detail: { sortOrder: sortOrder === 'ascending' ? 'descending' : 'ascending' },

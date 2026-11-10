@@ -111,14 +111,16 @@ describe('TableCellMenuButton', () => {
 
     const button = /** @type {HTMLButtonElement} */ (getButton());
     const cellRect = cell.getBoundingClientRect();
-    const buttonRect = button.getBoundingClientRect();
+    // Measure the element positioning the button rather than the button: the tests don’t load the
+    // icon font, so the button is as wide as the icon name, which overflows the element in Firefox
+    const containerRect = getContainer().getBoundingClientRect();
 
     expect(button.getAttribute('aria-label')).toBe('Show Table Options');
     expect(button.getAttribute('aria-haspopup')).toBe('menu');
-    expect(buttonRect.right).toBeLessThanOrEqual(cellRect.right);
-    expect(buttonRect.right).toBeGreaterThan(cellRect.right - 10);
-    expect(buttonRect.top).toBeGreaterThanOrEqual(cellRect.top);
-    expect(buttonRect.top).toBeLessThan(cellRect.top + 10);
+    expect(containerRect.right).toBeLessThanOrEqual(cellRect.right);
+    expect(containerRect.right).toBeGreaterThan(cellRect.right - 10);
+    expect(containerRect.top).toBeGreaterThanOrEqual(cellRect.top);
+    expect(containerRect.top).toBeLessThan(cellRect.top + 10);
   });
 
   it('shows the button at the top left corner of a cell in a right-to-left table', async () => {
@@ -213,6 +215,14 @@ describe('TableCellMenuButton', () => {
     await vi.waitFor(() => {
       expect(getButton()).not.toBeNull();
     });
+
+    // Pressing the button keeps the focus in the editor. Otherwise, Safari, which doesn’t focus a
+    // button on click, would move it to `<body>`, hiding the button before the click
+    // @see https://github.com/sveltia/sveltia-cms/issues/1148
+    const mousedown = new MouseEvent('mousedown', { bubbles: true, cancelable: true });
+
+    getButton()?.dispatchEvent(mousedown);
+    expect(mousedown.defaultPrevented).toBe(true);
 
     await userEvent.click(/** @type {HTMLButtonElement} */ (getButton()));
 

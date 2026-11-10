@@ -1,6 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-svelte';
-import { userEvent } from 'vitest/browser';
 import ColorInput from './color-input.svelte';
 
 /**
@@ -102,7 +101,10 @@ describe('ColorInput', () => {
     const event = new MouseEvent('click', { bubbles: true, cancelable: true });
 
     expect(element.disabled).toBe(false);
-    await userEvent.tab();
+    // In the tab order, though not checked with the Tab key, which only moves to text fields in
+    // WebKit, as in Safari by default
+    expect(element.tabIndex).toBe(0);
+    element.focus();
     expect(document.activeElement).toBe(element);
     element.dispatchEvent(event);
     expect(event.defaultPrevented).toBe(true);
