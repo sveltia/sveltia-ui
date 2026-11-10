@@ -28,7 +28,7 @@ import {
   $setSelection as setSelection,
 } from 'lexical';
 import { $insertBlockNode } from './block.js';
-import { MAX_TABLE_SIZE } from './constants.js';
+import { MAX_TABLE_SIZE } from '../constants.js';
 
 /**
  * @import { LexicalNode, RangeSelection } from 'lexical';

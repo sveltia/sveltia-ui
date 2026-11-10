@@ -187,35 +187,13 @@
     grid-area: 1 / 1 / 2 / 2;
     display: block;
     margin: 0;
-    border-width: var(--sui-textbox-border-width, 1px);
-    border-color: var(--sui-textbox-border-color);
-    border-radius: var(--sui-textbox-border-radius);
-    padding: var(--sui-textbox-multiline-padding);
     width: 100%;
     min-height: 8em;
-    color: var(--sui-textbox-foreground-color);
-    background-color: var(--sui-textbox-background-color);
-    font-family: var(--sui-textbox-font-family);
-    font-size: var(--sui-textbox-font-size);
-    line-height: var(--sui-textbox-multiline-line-height);
-    font-weight: var(--sui-textbox-font-weight, var(--sui-font-weight-normal, normal));
-    text-align: var(--sui-textbox-text-align, start);
-    text-indent: var(--sui-textbox-text-indent, 0);
-    text-transform: var(--sui-textbox-text-transform, none);
-    letter-spacing: var(--sui-textbox-letter-spacing, normal);
-    word-spacing: var(--sui-word-spacing-normal, normal);
-    transition: all 200ms;
+
+    @include mixins.textbox(multiline);
 
     &.resizing {
       transition-duration: 0ms;
-    }
-
-    &:focus {
-      color: var(--sui-textbox-foreground-color-focus, var(--sui-textbox-foreground-color));
-      background-color: var(
-        --sui-textbox-background-color-focus,
-        var(--sui-textbox-background-color)
-      );
     }
 
     // `:read-only` also matches the clone `<div>`
@@ -230,10 +208,6 @@
     &.auto-resize {
       overflow: hidden;
       resize: none;
-    }
-
-    &[aria-invalid='true'] {
-      border-color: var(--sui-error-border-color);
     }
   }
 

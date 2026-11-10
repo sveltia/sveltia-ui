@@ -15,8 +15,8 @@
   import Icon from '../../icon/icon.svelte';
   import MenuItemCheckbox from '../../menu/menu-item-checkbox.svelte';
   import { AVAILABLE_BUTTONS } from '../constants.js';
-  import { focusEditor } from '../core.js';
-  import { editRawText, setBlockType } from '../raw-markdown.js';
+  import { focusEditor } from '../editing/caret.js';
+  import { editRawText, setBlockType } from '../editing/raw-markdown.js';
 
   /**
    * @import { TextEditorBlockType, TextEditorStore } from '#lib/typedefs.js';

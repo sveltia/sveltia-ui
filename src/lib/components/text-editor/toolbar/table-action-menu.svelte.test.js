@@ -6,7 +6,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-svelte';
 import { getEditorStore } from '../../../test-utils/editor.js';
 import EditorFixture from '../editor-fixture.test.svelte';
-import { $getTableCell as getTableCell } from '../table.js';
+import { $getTableCell as getTableCell } from '../editing/table.js';
 import TableActionMenu from './table-action-menu.svelte';
 
 /**

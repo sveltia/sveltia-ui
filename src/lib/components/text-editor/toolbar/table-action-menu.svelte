@@ -9,13 +9,13 @@
   import Divider from '../../divider/divider.svelte';
   import MenuItem from '../../menu/menu-item.svelte';
   import Menu from '../../menu/menu.svelte';
-  import { focusEditor } from '../core.js';
-  import { isRightToLeftTable, $runTableAction as runTableAction } from '../table.js';
+  import { focusEditor } from '../editing/caret.js';
+  import { isRightToLeftTable, $runTableAction as runTableAction } from '../editing/table.js';
   import { waitForMenuToClose } from './menu.js';
 
   /**
    * @import { TextEditorStore } from '#lib/typedefs.js';
-   * @import { TableAction } from '../table.js';
+   * @import { TableAction } from '../editing/table.js';
    */
 
   /**

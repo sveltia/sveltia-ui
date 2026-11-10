@@ -192,10 +192,10 @@ export const RAW_SYNTAX = {
  * it, inline HTML, like a tag, an autolink or a footnote reference, which would otherwise be
  * escaped on export as text that only looks like one. The placeholder is left out of the match, so
  * an editor component that matches the line after it, which comes first, still takes precedence;
- * see `removePlaceholdersFromMatch()` in `core.js`. It’s included if the line starts with a
- * formatting marker, though: Lexical prefers formatting to a text match that covers the same text,
- * so a line like `*foo*` would otherwise be imported as italic. A component pattern doesn’t start
- * with one.
+ * see `removePlaceholdersFromMatch()` in `editor-components.js`. It’s included if the line starts
+ * with a formatting marker, though: Lexical prefers formatting to a text match that covers the
+ * same text, so a line like `*foo*` would otherwise be imported as italic. A component pattern
+ * doesn’t start with one.
  */
 const RAW_HTML_REGEX = new RegExp(
   [

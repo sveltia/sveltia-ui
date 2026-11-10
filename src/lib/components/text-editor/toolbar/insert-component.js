@@ -1,5 +1,5 @@
 import { $createParagraphNode as createParagraphNode, $insertNodes as insertNodes } from 'lexical';
-import { insertComponent } from '../raw-markdown.js';
+import { insertComponent } from '../editing/raw-markdown.js';
 
 /**
  * @import { TextEditorComponent, TextEditorStore } from '#lib/typedefs.js';

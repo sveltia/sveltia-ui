@@ -3,6 +3,7 @@ import {
   calculatePopupStyle,
   clipRect,
   flip,
+  flipEither,
   isShallowEqual,
   mirrorPosition,
 } from './popup-position.js';
@@ -65,6 +66,52 @@ describe('flip', () => {
       position: 'bottom-left',
       cap: 200,
     });
+  });
+});
+
+describe('flipEither', () => {
+  it('should flip from the first side by a prefix', () => {
+    expect(
+      flipEither({
+        position: 'bottom-left',
+        sides: ['bottom-', 'top-'],
+        size: 300,
+        rooms: [100, 200],
+      }),
+    ).toEqual({ position: 'top-left', cap: 200 });
+  });
+
+  it('should flip from the second side with the rooms swapped', () => {
+    expect(
+      flipEither({
+        position: 'top-left',
+        sides: ['bottom-', 'top-'],
+        size: 300,
+        rooms: [200, 100],
+      }),
+    ).toEqual({ position: 'bottom-left', cap: 200 });
+  });
+
+  it('should match a suffix', () => {
+    expect(
+      flipEither({
+        position: 'bottom-right',
+        sides: ['-left', '-right'],
+        size: 300,
+        rooms: [400, 100],
+      }),
+    ).toEqual({ position: 'bottom-left', cap: 400 });
+  });
+
+  it('should leave a position on neither side alone', () => {
+    expect(
+      flipEither({
+        position: 'right-top',
+        sides: ['bottom-', 'top-'],
+        size: 300,
+        rooms: [100, 200],
+      }),
+    ).toEqual({ position: 'right-top', cap: undefined });
   });
 });
 

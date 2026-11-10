@@ -16,7 +16,7 @@ import {
   TabNode,
   TextNode,
 } from 'lexical';
-import { isPlainLanguage } from './shiki/facade.js';
+import { isPlainLanguage } from '../shiki/facade.js';
 
 /**
  * @import {
@@ -29,7 +29,7 @@ import { isPlainLanguage } from './shiki/facade.js';
  * LexicalEditor,
  * LexicalNode,
  * } from 'lexical';
- * @import { TextEditorComponent } from '../../typedefs.js';
+ * @import { TextEditorComponent } from '../../../typedefs.js';
  */
 
 /**

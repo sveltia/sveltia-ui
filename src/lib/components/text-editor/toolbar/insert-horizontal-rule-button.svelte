@@ -8,11 +8,11 @@
   import { getContext } from 'svelte';
   import Button from '../../button/button.svelte';
   import Icon from '../../icon/icon.svelte';
-  import { $insertHorizontalRule as insertHorizontalRule } from '../block.js';
+  import { $insertHorizontalRule as insertHorizontalRule } from '../editing/block.js';
   import { AVAILABLE_BUTTONS } from '../constants.js';
-  import { focusEditor } from '../core.js';
-  import { editRawText, insertMarkdown } from '../raw-markdown.js';
-  import { HORIZONTAL_RULE_MARKDOWN } from '../transformers/hr.js';
+  import { focusEditor } from '../editing/caret.js';
+  import { editRawText, insertMarkdown } from '../editing/raw-markdown.js';
+  import { HORIZONTAL_RULE_MARKDOWN } from '../conversion/transformers/hr.js';
 
   /**
    * @import { TextEditorStore } from '#lib/typedefs.js';

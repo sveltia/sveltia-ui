@@ -20,8 +20,8 @@
     KEY_TAB_COMMAND,
   } from 'lexical';
   import { getContext } from 'svelte';
-  import { detectEmojiTrigger, getEmojiInsertText } from '../emoji/emoji.js';
-  import EmojiSuggestions from '../emoji/emoji-suggestions.svelte';
+  import { detectEmojiTrigger, getEmojiInsertText } from '../../emoji/emoji.js';
+  import EmojiSuggestions from '../../emoji/emoji-suggestions.svelte';
 
   /**
    * @import { EmojiAnchorRect, EmojiEntry, EmojiTrigger, TextEditorStore } from '#lib/typedefs.js';

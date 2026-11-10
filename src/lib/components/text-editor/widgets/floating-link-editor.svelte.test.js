@@ -2,11 +2,11 @@ import { describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-svelte';
 import { userEvent } from 'vitest/browser';
 import { $getSelection as getSelection } from 'lexical';
-import { getEditorStore } from '../../test-utils/editor.js';
-import { OPEN_LINK_EDITOR_COMMAND } from './constants.js';
-import EditorFixture from './editor-fixture.test.svelte';
+import { getEditorStore } from '../../../test-utils/editor.js';
+import { OPEN_LINK_EDITOR_COMMAND } from '../constants.js';
+import EditorFixture from '../editor-fixture.test.svelte';
 import FloatingLinkEditor from './floating-link-editor.svelte';
-import TextEditor from './text-editor.svelte';
+import TextEditor from '../text-editor.svelte';
 
 /**
  * @import { ComponentProps } from 'svelte';

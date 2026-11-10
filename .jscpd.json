@@ -1,0 +1,19 @@
+{
+  "path": ["src/lib"],
+  "formatsExts": {
+    "javascript": ["js"],
+    "markup": ["svelte"]
+  },
+  "ignore": [
+    "**/*.test.js",
+    "**/*.test.svelte",
+    "**/generated.js",
+    "**/locales/**",
+    "**/test-utils/**"
+  ],
+  "minLines": 8,
+  "minTokens": 70,
+  "threshold": 5,
+  "gitignore": true,
+  "reporters": ["console"]
+}

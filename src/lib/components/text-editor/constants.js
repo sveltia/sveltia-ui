@@ -18,9 +18,9 @@ import {
 import { HeadingNode, QuoteNode } from '@lexical/rich-text';
 import { createCommand } from 'lexical';
 
-import { CODE } from './transformers/code.js';
-import { LEADING_INLINE_CODE } from './transformers/inline-code.js';
-import { LINK } from './transformers/link.js';
+import { CODE } from './conversion/transformers/code.js';
+import { LEADING_INLINE_CODE } from './conversion/transformers/inline-code.js';
+import { LINK } from './conversion/transformers/link.js';
 
 /**
  * @import { EditorThemeClasses, LexicalCommand } from 'lexical';

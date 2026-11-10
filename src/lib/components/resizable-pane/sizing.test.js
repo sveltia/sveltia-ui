@@ -5,6 +5,7 @@ import {
   getInitialSizes,
   resolvePaneConstraints,
   resolveToPercent,
+  shareSpaceAmongPanes,
 } from './sizing.js';
 
 const env = { containerSize: 1000, viewportWidth: 2000, viewportHeight: 500 };
@@ -267,5 +268,43 @@ describe('getHandleKeyAction', () => {
     expect(
       getHandleKeyAction({ key: 'a', shiftKey: false, isHorizontal: true, rtl: false }),
     ).toBeUndefined();
+  });
+});
+
+describe('shareSpaceAmongPanes', () => {
+  /**
+   * Get the same constraints for every pane.
+   * @returns {{ minSize: number, maxSize: number }} Constraints.
+   */
+  const getConstraints = () => ({ minSize: 10, maxSize: 60 });
+
+  it('gives the space to the neighbors first', () => {
+    const sizes = [30, 30, 40];
+
+    expect(shareSpaceAmongPanes(sizes, { neighbors: [1], amount: 20, getConstraints })).toBe(0);
+    expect(sizes).toEqual([30, 50, 40]);
+  });
+
+  it('passes the space on to the other panes once a neighbor hits its maximum', () => {
+    const sizes = [30, 50, 20];
+
+    expect(shareSpaceAmongPanes(sizes, { neighbors: [1], amount: 30, getConstraints })).toBe(0);
+    expect(sizes).toEqual([50, 60, 20]);
+  });
+
+  it('takes the space with a negative amount, as far as the minimum sizes allow', () => {
+    const sizes = [20, 20, 60];
+
+    expect(
+      shareSpaceAmongPanes(sizes, { neighbors: [0, 1], amount: -30, exclude: 2, getConstraints }),
+    ).toBe(-10);
+    expect(sizes).toEqual([10, 10, 60]);
+  });
+
+  it('skips missing panes', () => {
+    const sizes = [40, 40];
+
+    expect(shareSpaceAmongPanes(sizes, { neighbors: [-1, 2], amount: 10, getConstraints })).toBe(0);
+    expect(sizes).toEqual([50, 40]);
   });
 });

@@ -6,6 +6,7 @@
   @see https://www.w3.org/WAI/ARIA/apg/patterns/radio/
 -->
 <script>
+  import { getToggleLabelAttrs } from '../../services/label.js';
   import Button from '../button/button.svelte';
 
   /**
@@ -66,13 +67,13 @@
    */
   let buttonElement = $state();
 
-  /**
-   * Accessible name given as a prop or as a plain `aria-label` attribute. It takes the place of the
-   * visible label, which the button otherwise points at — but only when there is one to point at.
-   * @type {string | undefined}
-   */
-  const accessibleLabel = $derived(ariaLabel ?? restProps['aria-label']);
-  const hasVisibleLabel = $derived(!!(children || label));
+  const labelAttrs = $derived(
+    getToggleLabelAttrs({
+      id,
+      ariaLabel: ariaLabel ?? restProps['aria-label'],
+      hasVisibleLabel: !!(children || label),
+    }),
+  );
 
   /**
    * Check if the radio button belongs to a read-only `<RadioGroup>`.
@@ -121,8 +122,7 @@
     {value}
     {valueType}
     aria-checked={checked}
-    aria-label={accessibleLabel || undefined}
-    aria-labelledby={!accessibleLabel && hasVisibleLabel ? `${id}-label` : undefined}
+    {...labelAttrs}
     onclick={(event) => {
       event.preventDefault();
 

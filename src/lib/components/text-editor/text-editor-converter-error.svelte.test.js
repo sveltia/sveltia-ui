@@ -2,7 +2,7 @@ import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-svelte';
 import TextEditor from './text-editor.svelte';
 
-vi.mock('./core.js', async (importOriginal) => ({
+vi.mock('./conversion/import.js', async (importOriginal) => ({
   .../** @type {object} */ (await importOriginal()),
   /**
    * Fail to convert the Markdown.

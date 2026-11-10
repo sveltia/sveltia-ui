@@ -1,6 +1,6 @@
 <!--
   @component
-  The interactive version of `<TableThead>`.
+  The interactive version of `<TableHead>`.
   @see https://developer.mozilla.org/en-US/docs/Web/HTML/Element/thead
   @see https://w3c.github.io/aria/#rowgroup
 -->

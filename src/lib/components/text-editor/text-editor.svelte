@@ -9,15 +9,19 @@
   import TextArea from '../text-field/text-area.svelte';
   import Toast from '../toast/toast.svelte';
   import { BLOCK_BUTTON_TYPES, INLINE_BUTTON_TYPES } from './constants.js';
-  import { loadCodeHighlighter } from './core.js';
-  import EmojiAutocomplete from './emoji-autocomplete.svelte';
-  import FloatingLinkEditor from './floating-link-editor.svelte';
+  import { loadCodeHighlighter } from './shiki/preload.js';
+  import EmojiAutocomplete from './widgets/emoji-autocomplete.svelte';
+  import FloatingLinkEditor from './widgets/floating-link-editor.svelte';
   import LexicalRoot from './lexical-root.svelte';
-  import TableCellMenuButton from './table-cell-menu-button.svelte';
-  import { getBlockType, getRawTextState, registerRawTextSingleLine } from './raw-markdown.js';
+  import TableCellMenuButton from './widgets/table-cell-menu-button.svelte';
+  import {
+    getBlockType,
+    getRawTextState,
+    registerRawTextSingleLine,
+  } from './editing/raw-markdown.js';
   import { highlightCodeToTokens } from './shiki/facade.js';
   import { getCodeTheme, onCodeThemeChange } from './shiki/theme.js';
-  import { createEditorStore } from './store.svelte.js';
+  import { createEditorStore, syncEditorProps } from './store.svelte.js';
   import TextEditorToolbar from './toolbar/text-editor-toolbar.svelte';
 
   /**
@@ -284,44 +288,28 @@
     return registerRawTextSingleLine(textArea);
   });
 
-  $effect(() => {
-    pending = editorStore.pending;
-  });
-
-  // An editor removed right after a change never converts it, so don’t leave a bound `pending` set
-  // for good, which would hold up anything waiting for the change
-  $effect(() => () => {
-    pending = false;
-  });
-
-  $effect(() => {
-    // The root initializes the editor before these effects first run, and stays initialized
-    /* v8 ignore next */
-    if (!editorStore.initialized) {
-      return;
-    }
-
-    const newValue = value;
-
-    untrack(() => {
-      editorStore.inputValue = newValue;
-    });
-  });
-
-  $effect(() => {
-    // The root initializes the editor before these effects first run, and stays initialized
-    /* v8 ignore next */
-    if (!editorStore.initialized) {
-      return;
-    }
-
-    const newValue = editorStore.inputValue;
-
-    untrack(() => {
+  syncEditorProps(editorStore, {
+    /**
+     * Pass the value to the editor.
+     * @returns {string} Value.
+     */
+    getInputValue: () => value,
+    /**
+     * Update the value with the editor’s.
+     * @param {string} newValue New value.
+     */
+    setValue: (newValue) => {
       if (value !== newValue) {
         value = newValue;
       }
-    });
+    },
+    /**
+     * Update the `pending` prop.
+     * @param {boolean} newValue New value.
+     */
+    setPending: (newValue) => {
+      pending = newValue;
+    },
   });
 </script>
 

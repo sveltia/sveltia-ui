@@ -12,7 +12,7 @@
   import MenuItemRadio from '../../menu/menu-item-radio.svelte';
   import Menu from '../../menu/menu.svelte';
   import { ALIGNMENT_OPTIONS } from '../constants.js';
-  import { focusEditor } from '../core.js';
+  import { focusEditor } from '../editing/caret.js';
   import { waitForMenuToClose } from './menu.js';
 
   /**

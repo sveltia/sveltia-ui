@@ -85,7 +85,7 @@ export { default as Placeholder } from './components/util/placeholder.svelte';
 export { default as Popup } from './components/util/popup.svelte';
 export { default as VisibilityObserver } from './components/util/visibility-observer.svelte';
 export { IMPORT_UPDATE_TAG } from './components/text-editor/constants.js';
-export { loadCodeHighlighter } from './components/text-editor/core.js';
+export { loadCodeHighlighter } from './components/text-editor/shiki/preload.js';
 export { setCodeHighlighterCacheEnabled } from './components/text-editor/shiki/cache.js';
 export { highlightCodeToHTML } from './components/text-editor/shiki/facade.js';
 export { setCodeHighlighterLoaders } from './components/text-editor/shiki/loader.js';

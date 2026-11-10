@@ -111,6 +111,39 @@ export const flip = ({ position, from, to, size, room, otherRoom }) => {
 };
 
 /**
+ * Apply {@link flip} to whichever of the two opposite sides the position is on, if any.
+ * @internal
+ * @param {object} args Arguments.
+ * @param {PopupPosition} args.position Current position.
+ * @param {[string, string]} args.sides Parts of the position denoting the two sides, either both
+ * prefixes like `bottom-` or both suffixes like `-left`.
+ * @param {number} args.size Content size along the axis.
+ * @param {[number, number]} args.rooms Room on each side, in the same order as `sides`.
+ * @returns {{ position: PopupPosition, cap: number | undefined }} New position, and the size limit
+ * if the content doesn’t fit, `undefined` otherwise or if the position is on neither side.
+ */
+export const flipEither = ({ position, sides, size, rooms }) => {
+  /**
+   * Check if the position is on the given side.
+   * @param {string} side Prefix or suffix.
+   * @returns {boolean} Result.
+   */
+  const isOn = (side) => (side.endsWith('-') ? position.startsWith(side) : position.endsWith(side));
+  const [sideA, sideB] = sides;
+  const [roomA, roomB] = rooms;
+
+  if (isOn(sideA)) {
+    return flip({ position, from: sideA, to: sideB, size, room: roomA, otherRoom: roomB });
+  }
+
+  if (isOn(sideB)) {
+    return flip({ position, from: sideB, to: sideA, size, room: roomB, otherRoom: roomA });
+  }
+
+  return { position, cap: undefined };
+};
+
+/**
  * Calculate the popup’s inset and size from the anchor’s rect, the viewport size and the content’s
  * natural size. The position may be altered if the space is limited.
  * @internal
@@ -145,84 +178,48 @@ export const calculatePopupStyle = ({
   let height;
 
   /**
-   * Apply {@link flip} vertically, keeping any height limit already set if the content fits.
-   * @param {string} from Current side.
-   * @param {string} to Opposite side.
-   * @param {number} room Room on the current side.
-   * @param {number} otherRoom Room on the opposite side.
+   * Apply {@link flipEither} vertically, keeping any height limit already set if the content fits.
+   * @param {[string, string]} sides Parts of the position denoting the two sides.
+   * @param {[number, number]} rooms Room on each side.
    */
-  const flipVertically = (from, to, room, otherRoom) => {
-    const result = flip({ position, from, to, size: contentHeight, room, otherRoom });
+  const flipVertically = (sides, rooms) => {
+    const result = flipEither({ position, sides, size: contentHeight, rooms });
 
     position = result.position;
     height = result.cap ?? height;
   };
 
   // Alter the position if the space is limited
-  if (position.startsWith('bottom-')) {
-    flipVertically('bottom-', 'top-', bottomMargin, topMargin);
-  } else if (position.startsWith('top-')) {
-    flipVertically('top-', 'bottom-', topMargin, bottomMargin);
-  }
+  flipVertically(['bottom-', 'top-'], [bottomMargin, topMargin]);
 
   // Only a popup that opens beside its anchor carries a `-top`/`-bottom` suffix, and it grows
   // away from the edge it’s aligned with: down from the anchor’s top, or up from its bottom. It
   // gets the same treatment as the dropdown above — align with the other edge when the content
   // doesn’t fit and that edge has more room, and cap it either way, so a long submenu scrolls
   // instead of running past the viewport
-  if (position.endsWith('-top')) {
-    flipVertically('-top', '-bottom', downwardMargin, upwardMargin);
-  } else if (position.endsWith('-bottom')) {
-    flipVertically('-bottom', '-top', upwardMargin, downwardMargin);
-  }
+  flipVertically(['-top', '-bottom'], [downwardMargin, upwardMargin]);
 
   // If the popup overflows the viewport, align it with the anchor’s other edge, but only when that
   // side has more room. Checking each side on its own would flip a popup that fits neither way
   // over and straight back, leaving it on whichever side was checked last
-  if (position.endsWith('-left')) {
-    ({ position } = flip({
-      position,
-      from: '-left',
-      to: '-right',
-      size: contentWidth,
-      room: viewport.width - rect.left - 8,
-      otherRoom: rect.right - 8,
-    }));
-  } else if (position.endsWith('-right')) {
-    ({ position } = flip({
-      position,
-      from: '-right',
-      to: '-left',
-      size: contentWidth,
-      room: rect.right - 8,
-      otherRoom: viewport.width - rect.left - 8,
-    }));
-  }
+  ({ position } = flipEither({
+    position,
+    sides: ['-left', '-right'],
+    size: contentWidth,
+    rooms: [viewport.width - rect.left - 8, rect.right - 8],
+  }));
 
   // The two checks above align a dropdown that opens below or above its anchor, so neither
   // covers a popup that opens beside one — a submenu — running off the edge it opens towards.
   // That gets the same treatment as the vertical flip above: switch to the other side, but only
   // when it has more room, so a submenu with nowhere to go stays where the caller put it. The
   // width isn’t capped here; that’s done with `maxWidth` below.
-  if (position.startsWith('right-')) {
-    ({ position } = flip({
-      position,
-      from: 'right-',
-      to: 'left-',
-      size: contentWidth,
-      room: rightMargin,
-      otherRoom: leftMargin,
-    }));
-  } else if (position.startsWith('left-')) {
-    ({ position } = flip({
-      position,
-      from: 'left-',
-      to: 'right-',
-      size: contentWidth,
-      room: leftMargin,
-      otherRoom: rightMargin,
-    }));
-  }
+  ({ position } = flipEither({
+    position,
+    sides: ['right-', 'left-'],
+    size: contentWidth,
+    rooms: [rightMargin, leftMargin],
+  }));
 
   const top = position.startsWith('bottom-')
     ? `${Math.round(rect.bottom)}px`

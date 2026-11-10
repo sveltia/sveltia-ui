@@ -17,7 +17,7 @@ import {
   TEXT_FORMAT_BUTTON_TYPES,
   TRANSFORMER_MAP,
 } from './constants.js';
-import { LEADING_INLINE_CODE } from './transformers/inline-code.js';
+import { LEADING_INLINE_CODE } from './conversion/transformers/inline-code.js';
 
 describe('AVAILABLE_BUTTONS', () => {
   it('should contain all expected button keys', () => {

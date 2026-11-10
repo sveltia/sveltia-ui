@@ -5,8 +5,12 @@
   import Button from '../../button/button.svelte';
   import Icon from '../../icon/icon.svelte';
   import { AVAILABLE_BUTTONS } from '../constants.js';
-  import { focusEditor } from '../core.js';
-  import { editRawText, registerRawTextShortcut, toggleInlineFormat } from '../raw-markdown.js';
+  import { focusEditor } from '../editing/caret.js';
+  import {
+    editRawText,
+    registerRawTextShortcut,
+    toggleInlineFormat,
+  } from '../editing/raw-markdown.js';
 
   /**
    * @import { TextEditorFormatType, TextEditorStore } from '#lib/typedefs.js';

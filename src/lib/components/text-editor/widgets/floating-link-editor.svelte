@@ -12,8 +12,6 @@
 -->
 <script>
   import { $isLinkNode as isLinkNode, TOGGLE_LINK_COMMAND } from '@lexical/link';
-  import { createDOMRange } from '@lexical/selection';
-  import { $findMatchingParent as findMatchingParent } from '@lexical/utils';
   import { _, isRTL } from '@sveltia/i18n';
   import { matchesShortcuts } from '@sveltia/utils/events';
   import { isURL } from '@sveltia/utils/string';
@@ -28,12 +26,17 @@
     $setSelection as setSelection,
   } from 'lexical';
   import { getContext, onMount, tick, untrack } from 'svelte';
-  import Button from '../button/button.svelte';
-  import { getSuggestionListPosition } from '../emoji/position.js';
-  import Icon from '../icon/icon.svelte';
-  import TextInput from '../text-field/text-input.svelte';
-  import { OPEN_LINK_EDITOR_COMMAND } from './constants.js';
-  import { focusEditor, isSafeLinkURL } from './core.js';
+  import Button from '../../button/button.svelte';
+  import { getSuggestionListPosition } from '../../emoji/position.js';
+  import Icon from '../../icon/icon.svelte';
+  import TextInput from '../../text-field/text-input.svelte';
+  import { OPEN_LINK_EDITOR_COMMAND } from '../constants.js';
+  import { focusEditor } from '../editing/caret.js';
+  import {
+    $findSelectedLink as findSelectedLink,
+    getLinkAnchorRect,
+    isSafeLinkURL,
+  } from '../editing/link.js';
 
   /**
    * @import { LexicalEditor, RangeSelection } from 'lexical';
@@ -138,70 +141,20 @@
   );
 
   /**
-   * Find the link that contains the whole selection. This must be called within an editor state
-   * read.
-   * @returns {import('@lexical/link').LinkNode | null} Link, if any.
-   */
-  const findLink = () => {
-    const selection = getSelection();
-
-    if (!isRangeSelection(selection)) {
-      return null;
-    }
-
-    const link = findMatchingParent(selection.anchor.getNode(), isLinkNode);
-
-    return link && findMatchingParent(selection.focus.getNode(), isLinkNode) === link
-      ? /** @type {import('@lexical/link').LinkNode} */ (link)
-      : null;
-  };
-
-  /**
    * Get the viewport-relative bounds of what the popup is anchored to: the text being linked in the
    * edit mode for a new link, or the link otherwise.
    * @param {LexicalEditor} editor Editor instance.
    * @returns {EmojiAnchorRect | undefined} Bounds, or `undefined` if they can’t be determined.
    */
-  const getAnchorRect = (editor) => {
-    /** @type {DOMRect | undefined} */
-    let rect;
-
-    if (editTarget && 'selection' in editTarget) {
-      const { selection } = editTarget;
-
-      editor.getEditorState().read(() => {
-        const [start, end] = selection.isBackward()
-          ? [selection.focus, selection.anchor]
-          : [selection.anchor, selection.focus];
-
-        // The selected nodes may be gone, e.g. after an undo
-        /* v8 ignore else */
-        if (start.getNode().isAttached() && end.getNode().isAttached()) {
-          rect = createDOMRange(
-            editor,
-            start.getNode(),
-            start.offset,
-            end.getNode(),
-            end.offset,
-          )?.getBoundingClientRect();
-        }
-      });
-    } else {
-      const key = editTarget && 'linkKey' in editTarget ? editTarget.linkKey : currentLink?.key;
-
-      rect = key ? editor.getElementByKey(key)?.getBoundingClientRect() : undefined;
-    }
-
-    // The link or text may not be laid out, e.g. while the editor is hidden
-    /* v8 ignore next */
-    if (!rect || !(rect.top || rect.bottom || rect.left || rect.width || rect.height)) {
-      return undefined;
-    }
-
-    const { top, bottom, left, right } = rect;
-
-    return { top, bottom, left, right };
-  };
+  const getAnchorRect = (editor) =>
+    getLinkAnchorRect(
+      editor,
+      editTarget && 'selection' in editTarget
+        ? editTarget
+        : {
+            linkKey: editTarget && 'linkKey' in editTarget ? editTarget.linkKey : currentLink?.key,
+          },
+    );
 
   /**
    * Follow the link when the page or an ancestor is scrolled, the window is resized, or the
@@ -265,7 +218,7 @@
     let newTab = false;
 
     editorStore.editor?.getEditorState().read(() => {
-      const link = findLink();
+      const link = findSelectedLink();
 
       if (link) {
         target = { linkKey: link.getKey() };
@@ -446,7 +399,7 @@
 
     const unregisterUpdateListener = editor.registerUpdateListener(({ editorState }) => {
       editorState.read(() => {
-        const link = findLink();
+        const link = findSelectedLink();
 
         currentLink = link
           ? { key: link.getKey(), url: link.getURL(), target: link.getTarget() }
@@ -704,6 +657,8 @@
 {/if}
 
 <style lang="scss">
+  @use '../../../styles/mixins';
+
   .floating-link-editor {
     position: fixed;
     inset: auto;
@@ -712,20 +667,14 @@
     align-items: center;
     gap: 4px;
     margin: 0;
-    border-width: var(--sui-listbox-border-width, 1px);
-    border-style: var(--sui-listbox-border-style, solid);
-    border-color: var(--sui-listbox-border-color, var(--sui-secondary-border-color));
-    border-radius: var(--sui-listbox-border-radius, 4px);
     padding: 4px;
     width: min(400px, calc(100vw - 16px));
-    color: var(--sui-primary-foreground-color);
-    background-color: var(--sui-secondary-background-color-translucent);
-    box-shadow: 0 8px 16px var(--sui-popup-shadow-color);
-    -webkit-backdrop-filter: blur(16px);
-    backdrop-filter: blur(16px);
     font-family: var(--sui-control-font-family);
     font-size: var(--sui-control-font-size);
     line-height: var(--sui-control-line-height);
+
+    @include mixins.popup-border;
+    @include mixins.popup-surface;
 
     :global {
       .sui.text-input {

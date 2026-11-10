@@ -18,16 +18,12 @@ import {
   KEY_ENTER_COMMAND,
 } from 'lexical';
 import { afterEach, describe, expect, it } from 'vitest';
-import {
-  $joinIntoSingleParagraph,
-  $replaceLineBreak,
-  convertMarkdownToLexical,
-  initEditor,
-  isInlineComponent,
-  limitToSingleLine,
-} from './core.js';
-import { HR } from './transformers/hr.js';
-import { expectLinearTime } from '../../test-utils/complexity.js';
+import { initEditor } from '../core.js';
+import { isInlineComponent } from '../conversion/editor-components.js';
+import { convertMarkdownToLexical } from '../conversion/import.js';
+import { $joinIntoSingleParagraph, $replaceLineBreak, limitToSingleLine } from './single-line.js';
+import { HR } from '../conversion/transformers/hr.js';
+import { expectLinearTime } from '../../../test-utils/complexity.js';
 
 /**
  * @import { LexicalEditor } from 'lexical';

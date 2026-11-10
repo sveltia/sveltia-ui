@@ -5,8 +5,11 @@ import {
   $setSelection as setSelection,
 } from 'lexical';
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
-import { convertMarkdownToLexical, exportMarkdown, initEditor, pasteMarkdown } from './core.js';
-import { setCodeHighlighterLoaders } from './shiki/loader.js';
+import { initEditor } from '../core.js';
+import { convertMarkdownToLexical } from './import.js';
+import { pasteMarkdown } from './paste.js';
+import { exportMarkdown } from './update.js';
+import { setCodeHighlighterLoaders } from '../shiki/loader.js';
 
 /**
  * @import { TextEditorConfig } from '#lib/typedefs.js';

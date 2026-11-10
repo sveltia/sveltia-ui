@@ -2,7 +2,8 @@
   import { $getRoot as getRoot, HISTORY_MERGE_TAG } from 'lexical';
   import { getContext, onMount, untrack } from 'svelte';
   import { IMPORT_UPDATE_TAG } from './constants.js';
-  import { handleEditorMouseDown, initEditor, isStaticDecoratorContent } from './core.js';
+  import { handleEditorMouseDown, isStaticDecoratorContent } from './editing/caret.js';
+  import { initEditor } from './core.js';
 
   /**
    * @import { Snippet } from 'svelte';

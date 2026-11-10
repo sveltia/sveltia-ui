@@ -255,25 +255,22 @@
 {/if}
 
 <style lang="scss">
+  @use '../../styles/mixins';
+
   .content {
     position: absolute;
     overflow-y: auto;
     outline-width: 0 !important;
     width: auto;
-    color: var(--sui-primary-foreground-color);
-    background-color: var(--sui-secondary-background-color-translucent);
-    box-shadow: 0 8px 16px var(--sui-popup-shadow-color);
-    -webkit-backdrop-filter: blur(16px);
-    backdrop-filter: blur(16px);
     transition-property: opacity, transform;
+
+    @include mixins.popup-surface;
 
     // Move the border and padding of the widget inside to the popup itself
     @each $widget in menu, listbox, tree {
       &.#{$widget} {
-        border-width: var(--sui-#{$widget}-border-width, 1px);
-        border-style: var(--sui-#{$widget}-border-style, solid);
-        border-color: var(--sui-#{$widget}-border-color, var(--sui-secondary-border-color));
-        border-radius: var(--sui-#{$widget}-border-radius, 4px);
+        @include mixins.popup-border($widget);
+
         padding: var(--sui-#{$widget}-padding, 4px);
 
         :global {

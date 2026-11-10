@@ -13,9 +13,13 @@
   import Icon from '../../icon/icon.svelte';
   import NumberInput from '../../text-field/number-input.svelte';
   import { AVAILABLE_BUTTONS, DEFAULT_TABLE_SIZE, MAX_TABLE_SIZE } from '../constants.js';
-  import { focusEditor } from '../core.js';
-  import { editRawText, insertMarkdown } from '../raw-markdown.js';
-  import { $insertTable as insertTable, createTableMarkdown, parseTableSize } from '../table.js';
+  import { focusEditor } from '../editing/caret.js';
+  import { editRawText, insertMarkdown } from '../editing/raw-markdown.js';
+  import {
+    $insertTable as insertTable,
+    createTableMarkdown,
+    parseTableSize,
+  } from '../editing/table.js';
 
   /**
    * @import { TextEditorStore } from '#lib/typedefs.js';

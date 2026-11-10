@@ -9,7 +9,7 @@ import {
   trimBlankBlockquoteLines,
 } from './markdown.js';
 import { INFO_BACKTICK } from './transformers/code.js';
-import { expectLinearTime } from '../../test-utils/complexity.js';
+import { expectLinearTime } from '../../../test-utils/complexity.js';
 
 describe('splitMultilineFormatting', () => {
   it('should split italic formatting across lines', () => {

@@ -8,13 +8,13 @@
 <script>
   import { _ } from '@sveltia/i18n';
   import { getContext, onMount } from 'svelte';
-  import Icon from '../icon/icon.svelte';
-  import MenuButton from '../menu/menu-button.svelte';
+  import Icon from '../../icon/icon.svelte';
+  import MenuButton from '../../menu/menu-button.svelte';
   import {
     $getSelectedTableCellKey as getSelectedTableCellKey,
     isRightToLeftTable,
-  } from './table.js';
-  import TableActionMenu from './toolbar/table-action-menu.svelte';
+  } from '../editing/table.js';
+  import TableActionMenu from '../toolbar/table-action-menu.svelte';
 
   /**
    * @import { PopupPosition, TextEditorStore } from '#lib/typedefs.js';

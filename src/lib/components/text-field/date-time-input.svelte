@@ -89,48 +89,20 @@
 />
 
 <style lang="scss">
+  @use '../../styles/mixins';
+
   .date-time-input {
     display: inline-block;
     margin: var(--sui-focus-ring-width);
-    border-width: var(--sui-textbox-border-width, 1px);
-    border-color: var(--sui-textbox-border-color);
-    border-radius: var(--sui-textbox-border-radius);
-    padding: var(--sui-textbox-singleline-padding);
     width: auto;
     min-width: 0;
     height: var(--sui-textbox-height);
-    color: var(--sui-textbox-foreground-color);
-    background-color: var(--sui-textbox-background-color);
-    font-family: var(--sui-textbox-font-family);
-    font-size: var(--sui-textbox-font-size);
-    line-height: var(--sui-textbox-singleline-line-height);
-    font-weight: var(--sui-textbox-font-weight, var(--sui-font-weight-normal, normal));
     // Show the AM/PM marker in uppercase, whatever the locale’s default case is
     text-transform: var(--sui-date-time-input-text-transform, uppercase);
-    letter-spacing: var(--sui-textbox-letter-spacing, normal);
     font-variant-numeric: tabular-nums;
-    transition: all 200ms;
 
-    &:focus {
-      color: var(--sui-textbox-foreground-color-focus, var(--sui-textbox-foreground-color));
-      background-color: var(
-        --sui-textbox-background-color-focus,
-        var(--sui-textbox-background-color)
-      );
-    }
-
-    &:read-only {
-      color: var(--sui-secondary-foreground-color);
-      border-color: var(--sui-textbox-border-color) !important;
-    }
-
-    &:is(:disabled, :read-only) {
-      background-color: var(--sui-disabled-background-color);
-    }
-
-    &[aria-invalid='true'] {
-      border-color: var(--sui-error-border-color);
-    }
+    @include mixins.textbox($text-formatting: false);
+    @include mixins.textbox-disabled;
 
     &::-webkit-calendar-picker-indicator {
       cursor: pointer;

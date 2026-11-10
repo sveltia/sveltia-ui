@@ -403,6 +403,8 @@
 {/if}
 
 <style lang="scss">
+  @use '../../styles/mixins';
+
   .emoji-suggestions {
     position: fixed;
     inset: auto;
@@ -411,22 +413,16 @@
     flex-direction: column;
     overflow-y: auto;
     margin: 0;
-    border-width: var(--sui-listbox-border-width, 1px);
-    border-style: var(--sui-listbox-border-style, solid);
-    border-color: var(--sui-listbox-border-color, var(--sui-secondary-border-color));
-    border-radius: var(--sui-listbox-border-radius, 4px);
     padding: var(--sui-listbox-padding, 4px);
     width: 280px;
-    color: var(--sui-primary-foreground-color);
-    background-color: var(--sui-secondary-background-color-translucent);
-    box-shadow: 0 8px 16px var(--sui-popup-shadow-color);
-    -webkit-backdrop-filter: blur(16px);
-    backdrop-filter: blur(16px);
     font-family: var(--sui-control-font-family);
     font-size: var(--sui-control-font-size);
     line-height: var(--sui-control-line-height);
     -webkit-user-select: none;
     user-select: none;
+
+    @include mixins.popup-border;
+    @include mixins.popup-surface;
   }
 
   .option {

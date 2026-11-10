@@ -19,8 +19,9 @@ import {
   $isRangeSelection as isRangeSelection,
 } from 'lexical';
 import { afterEach, describe, expect, it } from 'vitest';
-import { BLOCK_BUTTON_TYPES, INLINE_BUTTON_TYPES } from './constants.js';
-import { convertHtmlToLexical, convertMarkdownToLexical, initEditor } from './core.js';
+import { BLOCK_BUTTON_TYPES, INLINE_BUTTON_TYPES } from '../constants.js';
+import { initEditor } from '../core.js';
+import { convertHtmlToLexical, convertMarkdownToLexical } from './import.js';
 import { exportHtml, findUnsupportedNode } from './html.js';
 
 /**

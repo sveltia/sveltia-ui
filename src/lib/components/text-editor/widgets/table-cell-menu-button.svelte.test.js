@@ -2,8 +2,8 @@ import { describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-svelte';
 import { page, userEvent } from 'vitest/browser';
 import { $getRoot as getRoot } from 'lexical';
-import { getEditorStore } from '../../test-utils/editor.js';
-import EditorFixture from './editor-fixture.test.svelte';
+import { getEditorStore } from '../../../test-utils/editor.js';
+import EditorFixture from '../editor-fixture.test.svelte';
 import TableCellMenuButton from './table-cell-menu-button.svelte';
 
 /**

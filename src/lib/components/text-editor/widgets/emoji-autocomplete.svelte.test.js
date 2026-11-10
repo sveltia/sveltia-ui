@@ -1,9 +1,9 @@
 import { describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-svelte';
 import { userEvent } from 'vitest/browser';
-import EditorFixture from './editor-fixture.test.svelte';
+import EditorFixture from '../editor-fixture.test.svelte';
 import EmojiAutocomplete from './emoji-autocomplete.svelte';
-import { getEditorStore } from '../../test-utils/editor.js';
+import { getEditorStore } from '../../../test-utils/editor.js';
 
 /**
  * @import { ComponentProps } from 'svelte';

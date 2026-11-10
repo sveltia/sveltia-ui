@@ -24,6 +24,57 @@
   }
 }
 
+// The box of a `<TextInput>`, `<TextArea>` or `<DateTimeInput>`. `$line-mode` is `singleline` or
+// `multiline`, picking the padding and line height. `$text-formatting` adds the alignment, indent,
+// case and word spacing options, which don’t apply to a date/time input. The read-only and disabled
+// styles are left to `textbox-disabled`, because a `<TextArea>` clone also matches `:read-only`.
+// Include this after the other declarations, since it ends with nested rules.
+@mixin textbox($line-mode: singleline, $text-formatting: true) {
+  border-width: var(--sui-textbox-border-width, 1px);
+  border-color: var(--sui-textbox-border-color);
+  border-radius: var(--sui-textbox-border-radius);
+  padding: var(--sui-textbox-#{$line-mode}-padding);
+  color: var(--sui-textbox-foreground-color);
+  background-color: var(--sui-textbox-background-color);
+  font-family: var(--sui-textbox-font-family);
+  font-size: var(--sui-textbox-font-size);
+  line-height: var(--sui-textbox-#{$line-mode}-line-height);
+  font-weight: var(--sui-textbox-font-weight, var(--sui-font-weight-normal, normal));
+  letter-spacing: var(--sui-textbox-letter-spacing, normal);
+  transition: all 200ms;
+
+  @if $text-formatting {
+    text-align: var(--sui-textbox-text-align, start);
+    text-indent: var(--sui-textbox-text-indent, 0);
+    text-transform: var(--sui-textbox-text-transform, none);
+    word-spacing: var(--sui-word-spacing-normal, normal);
+  }
+
+  &:focus {
+    color: var(--sui-textbox-foreground-color-focus, var(--sui-textbox-foreground-color));
+    background-color: var(
+      --sui-textbox-background-color-focus,
+      var(--sui-textbox-background-color)
+    );
+  }
+
+  &[aria-invalid="true"] {
+    border-color: var(--sui-error-border-color);
+  }
+}
+
+// The read-only and disabled states of a single-line text box, e.g. `<TextInput>`.
+@mixin textbox-disabled {
+  &:read-only {
+    color: var(--sui-secondary-foreground-color);
+    border-color: var(--sui-textbox-border-color) !important;
+  }
+
+  &:is(:disabled, :read-only) {
+    background-color: var(--sui-disabled-background-color);
+  }
+}
+
 // A square button attached to the end of a text field, sharing its border. `$size-property` is the
 // dimension tied to the field height (`width` or `height`), the other one following the aspect
 // ratio.
@@ -45,6 +96,24 @@
   .icon {
     font-size: var(--sui-font-size-xx-large);
   }
+}
+
+// The translucent, blurred and shadowed surface of a floating panel, like a `<Popup>`.
+@mixin popup-surface {
+  color: var(--sui-primary-foreground-color);
+  background-color: var(--sui-secondary-background-color-translucent);
+  box-shadow: 0 8px 16px var(--sui-popup-shadow-color);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+}
+
+// The border of a floating panel, customizable with the CSS variables of `$widget`, e.g. `listbox`
+// or `menu`.
+@mixin popup-border($widget: listbox) {
+  border-width: var(--sui-#{$widget}-border-width, 1px);
+  border-style: var(--sui-#{$widget}-border-style, solid);
+  border-color: var(--sui-#{$widget}-border-color, var(--sui-secondary-border-color));
+  border-radius: var(--sui-#{$widget}-border-radius, 4px);
 }
 
 // The label wrapper of a checkbox or radio button.

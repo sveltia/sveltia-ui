@@ -10,7 +10,7 @@
   import MenuButton from '../../menu/menu-button.svelte';
   import Menu from '../../menu/menu.svelte';
   import { AVAILABLE_BUTTONS, BLOCK_BUTTON_TYPES, INLINE_BUTTON_TYPES } from '../constants.js';
-  import { isInlineComponent } from '../core.js';
+  import { isInlineComponent } from '../conversion/editor-components.js';
   import CodeLanguageSwitcher from './code-language-switcher.svelte';
   import AlignMenuButton from './align-menu-button.svelte';
   import FormatTextButton from './format-text-button.svelte';

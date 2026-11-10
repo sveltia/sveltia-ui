@@ -4,12 +4,12 @@
 -->
 <script>
   import { _ } from '@sveltia/i18n';
-  import { setContext, untrack } from 'svelte';
+  import { setContext } from 'svelte';
   import Alert from '../alert/alert.svelte';
   import Toast from '../toast/toast.svelte';
   import { parseCodeBlock, toCodeBlock } from './code-editor.js';
   import LexicalRoot from './lexical-root.svelte';
-  import { createEditorStore } from './store.svelte.js';
+  import { createEditorStore, syncEditorProps } from './store.svelte.js';
   import CodeEditorToolbar from './toolbar/code-editor-toolbar.svelte';
 
   /**
@@ -90,42 +90,18 @@
 
   setContext('editorStore', editorStore);
 
-  $effect(() => {
-    pending = editorStore.pending;
-  });
-
-  // An editor removed right after a change never converts it, so don’t leave a bound `pending` set
-  // for good, which would hold up anything waiting for the change
-  $effect(() => () => {
-    pending = false;
-  });
-
-  $effect(() => {
-    // The root initializes the editor before these effects first run, and stays initialized
-    /* v8 ignore next */
-    if (!editorStore.initialized) {
-      return;
-    }
-
-    void code;
-    void lang;
-
-    untrack(() => {
-      editorStore.inputValue = toCodeBlock(lang, code);
-    });
-  });
-
-  $effect(() => {
-    // The root initializes the editor before these effects first run, and stays initialized
-    /* v8 ignore next */
-    if (!editorStore.initialized) {
-      return;
-    }
-
-    void editorStore.inputValue;
-
-    untrack(() => {
-      const { lang: _lang, code: _code } = parseCodeBlock(editorStore.inputValue);
+  syncEditorProps(editorStore, {
+    /**
+     * Wrap the code in a fenced code block for the editor.
+     * @returns {string} Code block.
+     */
+    getInputValue: () => toCodeBlock(lang, code),
+    /**
+     * Take the editor’s code block apart into the language and the code.
+     * @param {string} inputValue Code block.
+     */
+    setValue: (inputValue) => {
+      const { lang: _lang, code: _code } = parseCodeBlock(inputValue);
 
       if (lang !== _lang) {
         lang = _lang;
@@ -134,7 +110,14 @@
       if (code !== _code) {
         code = _code;
       }
-    });
+    },
+    /**
+     * Update the `pending` prop.
+     * @param {boolean} newValue New value.
+     */
+    setPending: (newValue) => {
+      pending = newValue;
+    },
   });
 </script>
 

@@ -18,7 +18,7 @@ import {
   createEditor,
 } from 'lexical';
 import { describe, expect, it } from 'vitest';
-import { MAX_TABLE_SIZE } from './constants.js';
+import { MAX_TABLE_SIZE } from '../constants.js';
 import {
   $ensureParagraphAfterTable,
   $getSelectedTableCellKey,

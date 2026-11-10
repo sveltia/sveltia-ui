@@ -208,6 +208,37 @@ export const clampResizeDelta = (
 };
 
 /**
+ * Give the given space to the given panes, the first one first, then to the others, as far as
+ * their maximum sizes allow, or take it from them with a negative amount, as far as their minimum
+ * sizes allow. The sizes are updated in place.
+ * @param {number[]} sizes Pane sizes in percentages.
+ * @param {object} args Arguments.
+ * @param {number[]} args.neighbors Indexes of the panes to give the space to first.
+ * @param {number} args.amount Space in percentage points.
+ * @param {number} [args.exclude] Index of a pane to leave alone.
+ * @param {(index: number) => PaneConstraints} args.getConstraints Function to get the constraints
+ * of a pane.
+ * @returns {number} Space that couldn’t be given or taken.
+ */
+export const shareSpaceAmongPanes = (sizes, { neighbors, amount, exclude, getConstraints }) => {
+  let rest = amount;
+
+  [...neighbors, ...sizes.map((_size, index) => index)].forEach((neighbor) => {
+    if (Math.abs(rest) < 0.001 || neighbor === exclude || sizes[neighbor] === undefined) {
+      return;
+    }
+
+    const { minSize, maxSize } = getConstraints(neighbor);
+    const size = Math.min(Math.max(sizes[neighbor] + rest, minSize), maxSize);
+
+    rest -= size - sizes[neighbor];
+    sizes[neighbor] = size;
+  });
+
+  return rest;
+};
+
+/**
  * Interpret a key pressed on a resize handle. Arrow keys move the handle by 1%, or 10% with Shift.
  * Enter collapses or restores the pane before the handle. Home and End move it to its minimum and
  * maximum; the delta for those is oversized, and gets clamped by {@link clampResizeDelta}.

@@ -1,11 +1,4 @@
-import {
-  CodeExtension,
-  CodeHighlightNode,
-  CodeNode,
-  $createCodeNode as createCodeNode,
-  $isCodeHighlightNode as isCodeHighlightNode,
-  $isCodeNode as isCodeNode,
-} from '@lexical/code-core';
+import { CodeExtension, CodeHighlightNode, CodeNode } from '@lexical/code-core';
 import { registerDragonSupport } from '@lexical/dragon';
 import {
   buildEditorFromExtensions,
@@ -13,144 +6,44 @@ import {
   HorizontalRuleNode,
 } from '@lexical/extension';
 import { createEmptyHistoryState, registerHistory } from '@lexical/history';
-import { $generateNodesFromDOM as generateNodesFromDOM } from '@lexical/html';
-import {
-  $isLinkNode as isLinkNode,
-  LinkNode,
-  TOGGLE_LINK_COMMAND,
-  $toggleLink as toggleLink,
-} from '@lexical/link';
-import {
-  $handleListInsertParagraph as handleListInsertParagraph,
-  INSERT_ORDERED_LIST_COMMAND,
-  INSERT_UNORDERED_LIST_COMMAND,
-  $insertList as insertList,
-  $isListItemNode as isListItemNode,
-  $isListNode as isListNode,
-  ListNode,
-} from '@lexical/list';
-import {
-  HEADING,
-  $convertFromMarkdownString as convertFromMarkdownString,
-  $convertToMarkdownString as convertToMarkdownString,
-  $generateNodesFromMarkdownString as generateNodesFromMarkdownString,
-  registerMarkdownShortcuts,
-} from '@lexical/markdown';
-import {
-  $isHeadingNode as isHeadingNode,
-  $isQuoteNode as isQuoteNode,
-  registerRichText,
-} from '@lexical/rich-text';
+import { registerMarkdownShortcuts } from '@lexical/markdown';
+import { registerRichText } from '@lexical/rich-text';
 import { TableCellNode, TableExtension, TableNode, TableRowNode } from '@lexical/table';
-import {
-  $getNearestNodeOfType as getNearestNodeOfType,
-  objectKlassEquals,
-  $unwrapNode as unwrapNode,
-} from '@lexical/utils';
-import { sleep } from '@sveltia/utils/misc';
-import { isURL } from '@sveltia/utils/string';
-import { isMac, matchesShortcuts } from '@sveltia/utils/events';
-import {
-  COMMAND_PRIORITY_HIGH,
-  COMMAND_PRIORITY_LOW,
-  COMMAND_PRIORITY_NORMAL,
-  configExtension,
-  createEditor,
-  defineExtension,
-  DELETE_CHARACTER_COMMAND,
-  $createParagraphNode as createParagraphNode,
-  $createTextNode as createTextNode,
-  ElementNode,
-  $getNearestNodeFromDOMNode as getNearestNodeFromDOMNode,
-  $getRoot as getRoot,
-  $getSelection as getSelection,
-  $setSelection as setSelection,
-  HISTORY_MERGE_TAG,
-  INDENT_CONTENT_COMMAND,
-  INSERT_LINE_BREAK_COMMAND,
-  INSERT_PARAGRAPH_COMMAND,
-  KEY_DOWN_COMMAND,
-  KEY_ENTER_COMMAND,
-  LineBreakNode,
-  $insertNodes as insertNodes,
-  $isDecoratorNode as isDecoratorNode,
-  $isElementNode as isElementNode,
-  $isParagraphNode as isParagraphNode,
-  $isRangeSelection as isRangeSelection,
-  $isTextNode as isTextNode,
-  OUTDENT_CONTENT_COMMAND,
-  PASTE_COMMAND,
-  PASTE_TAG,
-  RootNode,
-} from 'lexical';
-import {
-  BLOCK_BUTTON_TYPES,
-  DISABLED_MARKDOWN_TAGS,
-  EDITOR_THEME,
-  IMPORT_UPDATE_TAG,
-  INLINE_BUTTON_TYPES,
-  NODE_MAP,
-  TEXT_FORMAT_BUTTON_TYPES,
-  TRANSFORMER_MAP,
-} from './constants.js';
+import { configExtension, defineExtension } from 'lexical';
+import { EDITOR_THEME, NODE_MAP, TRANSFORMER_MAP } from './constants.js';
 import {
   editorComponents,
-  exportHtml,
-  findUnsupportedNode,
-  getCodeLanguage,
   HTML_CODE_IMPORT_MAP,
   HTML_EXPORT_MAP,
   HTML_IMPORT_MAP,
-} from './html.js';
-import {
-  addImportPlaceholders,
-  convertSetextHeadings,
-  convertTildeFences,
-  padBlankBlockquoteLines,
-  removeImportPlaceholders,
-  splitMultilineFormatting,
-  trimBlankBlockquoteLines,
-} from './markdown.js';
-import {
-  isPlainLanguage,
-  loadCodeLanguage,
-  loadCodeTheme,
-  loadEngine,
-  normalizeCodeLanguage,
-} from './shiki/facade.js';
+} from './conversion/html.js';
 import { registerCodeHighlighting, shikiTokenizer } from './shiki/highlighter.js';
 import { getCodeTheme, observeCodeTheme } from './shiki/theme.js';
-import { BLOCK_SYNTAX_ESCAPE } from './transformers/block-escape.js';
-import { CODE } from './transformers/code.js';
-import { addCodeSpanSplit } from './transformers/formatted-code.js';
-import { HR } from './transformers/hr.js';
+import { CODE } from './conversion/transformers/code.js';
+import { HR } from './conversion/transformers/hr.js';
+import { RAW_HTML, RAW_SYNTAX } from './conversion/transformers/raw-syntax.js';
+import { $ensureParagraphAfterTable, $normalizeTableHeaders } from './editing/table.js';
+import { createTableTransformer } from './conversion/transformers/table.js';
+import { limitToSingleLine, registerSingleLine } from './editing/single-line.js';
+import { removePlaceholdersFromMatch } from './conversion/editor-components.js';
 import {
-  getImportedRawSyntax,
-  HTML_BLOCK_PLACEHOLDER,
-  RAW_HTML,
-  RAW_SYNTAX,
-} from './transformers/raw-syntax.js';
-import { $getSelectedAlignment } from './alignment.js';
-import {
-  $ensureParagraphAfterTable,
-  $getSelectedTableCellKey,
-  $normalizeTableHeaders,
-} from './table.js';
-import { createTableTransformer } from './transformers/table.js';
+  registerCodeEditorCommands,
+  registerListCommands,
+  registerTabIndentation,
+} from './editing/commands.js';
+import { mergeUnregisters } from './utils.js';
+import { registerLinkCommands } from './editing/link.js';
+import { registerUpdateEvent } from './conversion/update.js';
+import { registerPasteAsMarkdown } from './conversion/paste.js';
 
 /**
- * @import { LexicalEditor, LexicalNode } from 'lexical';
- * @import { LinkAttributes } from '@lexical/link';
- * @import { ListType } from '@lexical/list';
+ * @import { LexicalEditor } from 'lexical';
  * @import { TextMatchTransformer, Transformer } from '@lexical/markdown';
  * @import {
- * TextEditorBlockType,
  * TextEditorComponent,
  * TextEditorConfig,
- * TextEditorInlineType,
  * TextEditorNodeType,
  * TextEditorValueFormat,
- * TextEditorSelectionState,
  * } from '#lib/typedefs.js';
  */
 
@@ -162,8 +55,20 @@ import { createTableTransformer } from './transformers/table.js';
  */
 
 /**
- * Payload of `TOGGLE_LINK_COMMAND` with the URL and the link attributes, like `target`.
- * @typedef {LinkAttributes & { url: string }} LinkAttributesWithURL
+ * Editor configuration with the defaults applied, and the features derived from it.
+ * @typedef {object} EditorSetup
+ * @property {TextEditorNodeType[]} enabledButtons Enabled buttons.
+ * @property {TextEditorComponent[]} components Editor components.
+ * @property {boolean | undefined} useMarkdownShortcuts Whether to enable Markdown shortcuts.
+ * @property {boolean} isCodeEditor Whether the editor is a code editor.
+ * @property {string} defaultLanguage Default code block language.
+ * @property {TextEditorValueFormat} format Value format.
+ * @property {boolean} multiline Whether the editor accepts multiple lines.
+ * @property {boolean} hasCodeBlock Whether to support code blocks.
+ * @property {boolean} hasTable Whether to support table editing.
+ * @property {boolean} hasHorizontalRule Whether to support selecting a horizontal rule.
+ * @property {boolean} hasBlockSyntax Whether to support horizontal rules and tables in Markdown,
+ * even without their buttons.
  */
 
 /**
@@ -172,1354 +77,11 @@ import { createTableTransformer } from './transformers/table.js';
 const HISTORY_MAX_DEPTH = 200;
 
 /**
- * Selector for the elements in a decorator node, like an editor component, that handle a click on
- * their own.
- */
-const DECORATOR_INTERACTIVE_SELECTOR = [
-  'input',
-  'textarea',
-  'select',
-  'button',
-  'a[href]',
-  // A label moves the focus to its control on click
-  'label',
-  'summary',
-  'video[controls]',
-  'audio[controls]',
-  '[tabindex]',
-  '[draggable="true"]',
-  '[contenteditable]:not([contenteditable="false"])',
-].join(', ');
-
-/**
- * Whether a click on the given element would put the caret on the static content of a decorator
- * node, like the label or padding of an editor component. The editor cannot map such a position to
- * a node, so the caret appears there but typing does nothing.
- * @param {EventTarget | null} target Event target.
- * @returns {boolean} Result.
- */
-export const isStaticDecoratorContent = (target) => {
-  if (!(target instanceof Element)) {
-    return false;
-  }
-
-  const decorator = target.closest('[data-lexical-decorator]');
-
-  if (!decorator) {
-    return false;
-  }
-
-  const interactive = target.closest(DECORATOR_INTERACTIVE_SELECTOR);
-
-  // An interactive element outside the decorator is the editor root or one of its ancestors
-  return !interactive || !decorator.contains(interactive);
-};
-
-/**
- * Move a caret placed directly on the root node into a block: the adjacent paragraph or other
- * block, or a new paragraph if the adjacent nodes are decorators, where nothing can be typed.
- * @returns {boolean} Whether the selection has been moved.
- */
-const $moveCaretIntoBlock = () => {
-  const selection = getSelection();
-
-  if (
-    !isRangeSelection(selection) ||
-    !selection.isCollapsed() ||
-    selection.anchor.type !== 'element'
-  ) {
-    return false;
-  }
-
-  const root = getRoot();
-
-  if (!selection.anchor.getNode().is(root)) {
-    return false;
-  }
-
-  const { offset } = selection.anchor;
-  const before = root.getChildAtIndex(offset - 1);
-  const after = root.getChildAtIndex(offset);
-
-  if (isElementNode(after)) {
-    after.selectStart();
-  } else if (isElementNode(before)) {
-    before.selectEnd();
-  } else {
-    const paragraph = createParagraphNode();
-
-    if (before) {
-      before.insertAfter(paragraph);
-    } else if (after) {
-      after.insertBefore(paragraph);
-    } else {
-      root.append(paragraph);
-    }
-
-    paragraph.select();
-  }
-
-  return true;
-};
-
-/**
- * Move the focus to the editor, and run the given function with the node of the given element
- * within an editor update.
- * @param {LexicalEditor} editor Editor instance.
- * @param {Element} element Element of the node.
- * @param {(node: ReturnType<typeof getNearestNodeFromDOMNode>) => void} callback Function to be
- * called with the node.
- */
-const updateNodeWithFocus = (editor, element, callback) => {
-  editor.getRootElement()?.focus({ preventScroll: true });
-
-  editor.update(() => {
-    callback(getNearestNodeFromDOMNode(element));
-  });
-};
-
-/**
- * Move the focus to the editor, and the caret to right after the given decorator node, like an
- * editor component: the start of the next block, or a new paragraph if there’s none to type in.
- * @param {LexicalEditor} editor Editor instance.
- * @param {Element} decorator Element of the decorator node.
- */
-const placeCaretAfterDecorator = (editor, decorator) => {
-  updateNodeWithFocus(editor, decorator, (node) => {
-    // The element has been found by its `data-lexical-decorator` attribute
-    /* v8 ignore next 3 */
-    if (!isDecoratorNode(node)) {
-      return;
-    }
-
-    node.selectNext();
-    $moveCaretIntoBlock();
-  });
-};
-
-/**
- * Move the focus to the editor, and the caret to the end of the given block.
- * @param {LexicalEditor} editor Editor instance.
- * @param {Element} block Element of the block node.
- */
-const placeCaretAtBlockEnd = (editor, block) => {
-  updateNodeWithFocus(editor, block, (node) => {
-    /* v8 ignore next 3 */
-    if (!isElementNode(node)) {
-      return;
-    }
-
-    node.selectEnd();
-  });
-};
-
-/**
- * Handle a `mousedown` event on the editor, placing the caret where the user expects, rather than
- * leaving it to the browser, when the pointer is not on any editable text. Browsers disagree on
- * where the caret goes in these cases, and some put it within a decorator node, like an editor
- * component, where the editor cannot map it to a node, so typing does nothing:
- *
- * - The static content of a decorator, like its label or padding, places the caret after it.
- * - The empty area of the editor, outside any block, places the caret after the decorator above
- * the pointer, or at the end of the block above the pointer.
- * @param {LexicalEditor} editor Editor instance.
- * @param {MouseEvent} event `mousedown` event.
- * @returns {boolean} Whether the event has been handled.
- */
-export const handleEditorMouseDown = (editor, event) => {
-  const { target, button, shiftKey, clientY } = event;
-  const root = editor.getRootElement();
-
-  // Leave the primary button with Shift, which extends the selection, and other buttons alone.
-  // Leave a read-only editor alone as well, as a paragraph may be added, and an event already
-  // handled by a nested editor, like one in an editor component
-  if (
-    !root ||
-    !editor.isEditable() ||
-    event.defaultPrevented ||
-    button !== 0 ||
-    shiftKey ||
-    !(target instanceof Element)
-  ) {
-    return false;
-  }
-
-  if (isStaticDecoratorContent(target)) {
-    const decorator = /** @type {Element} */ (target.closest('[data-lexical-decorator]'));
-
-    // A decorator of a nested editor, like one in an editor component, is handled by that editor
-    if (decorator.parentElement?.closest('[data-lexical-editor]') !== root) {
-      return false;
-    }
-
-    event.preventDefault();
-    placeCaretAfterDecorator(editor, decorator);
-
-    return true;
-  }
-
-  if (target !== root) {
-    return false;
-  }
-
-  // Find the last block starting above the pointer. Lexical adds a hidden element to the root
-  // after a decorator, which has no size
-  const block = [...root.children]
-    .filter((element) => !element.hasAttribute('data-lexical-decorator-boundary'))
-    .findLast((element) => element.getBoundingClientRect().top <= clientY);
-
-  if (!block) {
-    return false;
-  }
-
-  if (block.hasAttribute('data-lexical-decorator')) {
-    event.preventDefault();
-    placeCaretAfterDecorator(editor, block);
-
-    return true;
-  }
-
-  // Beside a block, the browser can find the nearest text on its own
-  if (clientY <= block.getBoundingClientRect().bottom) {
-    return false;
-  }
-
-  event.preventDefault();
-  placeCaretAtBlockEnd(editor, block);
-
-  return true;
-};
-
-/**
- * URL schemes allowed in a link, the same as the ones Lexical renders as is.
- */
-const SAFE_LINK_URL_SCHEMES = ['http', 'https', 'mailto', 'sms', 'tel'];
-
-/**
- * Whether the given URL is safe to be used as a link, meaning it’s either relative or uses one of
- * the {@link SAFE_LINK_URL_SCHEMES}. This keeps a URL like `javascript:alert(1)` out of the
- * Markdown, where the site that renders it may not sanitize it.
- * @param {string} url URL.
- * @returns {boolean} Result.
- */
-export const isSafeLinkURL = (url) => {
-  // Browsers ignore control characters and spaces around a URL as well as tabs and newlines within
-  // it, e.g. `java\tscript:`, so strip them all before looking for the scheme
-  // eslint-disable-next-line no-control-regex
-  const normalizedURL = url.replace(/[\u0000-\u0020]/g, '');
-
-  // Markdown decodes character references and backslash escapes in a link destination, so a scheme
-  // can be hidden with them, e.g. `&#106;avascript:`, `javascript&colon;` or `javascript\:`. Reject
-  // any of them before the path, query or fragment.
-  if (/^[^/?#]*[&\\]/.test(normalizedURL)) {
-    return false;
-  }
-
-  const scheme = /^([a-z][a-z\d+.-]*):/i.exec(normalizedURL)?.[1];
-
-  return !scheme || SAFE_LINK_URL_SCHEMES.includes(scheme.toLowerCase());
-};
-
-/**
- * Get the given node itself if it’s an element node, or its nearest element node ancestor.
- * @param {LexicalNode} node Node.
- * @returns {ElementNode | null} Element node.
- */
-const getNearestElementNode = (node) =>
-  node instanceof ElementNode ? node : getNearestNodeOfType(node, ElementNode);
-
-/**
- * Get the current selection’s block node key as well as block and inline level types.
- * @internal
- * @returns {TextEditorSelectionState} Current selection state.
- */
-export const getSelectionTypes = () => {
-  const selection = getSelection();
-
-  if (!isRangeSelection(selection)) {
-    return {
-      blockNodeKey: null,
-      blockType: 'paragraph',
-      inlineTypes: [],
-      // Several cells can be selected at once
-      tableCellKey: $getSelectedTableCellKey(),
-      alignment: '',
-    };
-  }
-
-  const anchor = selection.anchor.getNode();
-  /** @type {ElementNode | null} */
-  let parent = null;
-  /** @type {TextEditorInlineType[]} */
-  const inlineTypes = TEXT_FORMAT_BUTTON_TYPES.filter((type) => selection.hasFormat(type));
-
-  if (anchor.getType() !== 'root') {
-    parent = getNearestElementNode(anchor);
-
-    if (isLinkNode(parent)) {
-      inlineTypes.push('link');
-      // `getNearestNodeOfType()` would return the link itself, so start from its parent to find the
-      // block the link is in
-      parent = parent.getParent();
-    }
-
-    if (isListItemNode(parent)) {
-      parent = getNearestNodeOfType(parent, ListNode);
-    }
-  }
-
-  const blockType = /** @type {TextEditorBlockType} */ (
-    (() => {
-      if (!parent) {
-        return 'paragraph';
-      }
-
-      if (isHeadingNode(parent)) {
-        return `heading-${parent.getTag().match(/\d/)?.[0]}`;
-      }
-
-      if (isListNode(parent)) {
-        return parent.getListType() === 'bullet' ? 'bulleted-list' : 'numbered-list';
-      }
-
-      if (isQuoteNode(parent)) {
-        return 'blockquote';
-      }
-
-      if (isCodeNode(parent) || isCodeHighlightNode(parent)) {
-        return 'code-block';
-      }
-
-      const type = parent.getType();
-
-      if (BLOCK_BUTTON_TYPES.includes(/** @type {any} */ (type))) {
-        return type;
-      }
-
-      return 'paragraph';
-    })()
-  );
-
-  return {
-    blockNodeKey: parent?.getKey() ?? null,
-    blockType,
-    inlineTypes,
-    tableCellKey: $getSelectedTableCellKey(),
-    alignment: $getSelectedAlignment(),
-  };
-};
-
-/**
- * Convert the editor content to Markdown. Call this within an editor update or read.
- * @internal
- * @param {Transformer[]} enabledTransformers Enabled Markdown transformers.
- * @returns {string} Markdown value.
- */
-export const exportMarkdown = (enabledTransformers) => {
-  const transformers = [
-    ...enabledTransformers.filter(
-      (/** @type {any} */ { tag }) => !DISABLED_MARKDOWN_TAGS.includes(tag),
-    ),
-    // Tidy up the escapes in text and escape the block syntax at the start of a line. Last, so a
-    // transformer of the editor’s own, such as a link, comes first
-    BLOCK_SYNTAX_ESCAPE,
-  ];
-
-  return trimBlankBlockquoteLines(
-    convertToMarkdownString(transformers)
-      // Remove the line breaks left by empty paragraphs at the end, which have no content. One
-      // may be added just by clicking below a block decorator; see `$moveCaretIntoBlock()`
-      .replace(/\n+$/, ''),
-  );
-};
-
-/**
- * Listen to changes made on the editor and trigger the Update event.
- * @internal
- * @param {LexicalEditor} editor Editor instance.
- * @param {Transformer[]} enabledTransformers Enabled Markdown transformers.
- * @param {string} [cachedValue] Value from a previous call, to be reused instead of converting the
- * whole document again when only the selection has changed.
- * @param {TextEditorValueFormat} [format] Value format.
- * @returns {string} Markdown or HTML value.
- */
-export const onEditorUpdate = (editor, enabledTransformers, cachedValue, format = 'markdown') => {
-  const value =
-    cachedValue ?? (format === 'html' ? exportHtml(editor) : exportMarkdown(enabledTransformers));
-
-  editor.getRootElement()?.dispatchEvent(
-    new CustomEvent('Update', {
-      detail: {
-        value,
-        selection: getSelectionTypes(),
-      },
-    }),
-  );
-
-  return value;
-};
-
-/**
- * Get the Markdown of a new instance of the given editor component, to insert it in the plain text
- * mode. The component’s own `createMarkdown` function is used if any. Otherwise, a new node is
- * created in a temporary editor and exported with the component’s transformer, just like the rich
- * text editor does.
- * @param {TextEditorComponent} component Editor component.
- * @returns {string} Markdown. It can be empty, for example if the component’s output depends on a
- * field value that is not set yet.
- */
-export const getComponentMarkdown = ({ node, createNode, transformer, createMarkdown }) => {
-  if (createMarkdown) {
-    return createMarkdown().trim();
-  }
-
-  const editor = createEditor({
-    namespace: 'component',
-    nodes: node ? [/** @type {any} */ (node)] : [],
-    /**
-     * Throw an error, so the export below fails as a whole.
-     * @param {Error} error Error.
-     * @throws {Error} Always.
-     */
-    onError: (error) => {
-      throw error;
-    },
-  });
-
-  let markdown = '';
-
-  try {
-    editor.update(
-      () => {
-        const newNode = createNode();
-
-        // An inline node needs a paragraph to live in
-        getRoot().append(newNode.isInline() ? createParagraphNode().append(newNode) : newNode);
-
-        markdown = onEditorUpdate(editor, [transformer]);
-      },
-      { discrete: true },
-    );
-  } catch {
-    // The component cannot be created or exported outside the rich text editor
-  }
-
-  return markdown.trim();
-};
-
-/**
- * Combine the given cleanup handlers into one, which calls them in the given order. Missing
- * handlers, like those of the features that are not enabled, are skipped.
- * @param {...((() => void) | undefined | null)} unregisters Cleanup handlers.
- * @returns {() => void} Combined cleanup handler.
- */
-const mergeUnregisters = (...unregisters) => {
-  const handlers = unregisters.filter((unregister) => typeof unregister === 'function');
-
-  return () => {
-    handlers.forEach((unregister) => unregister());
-  };
-};
-
-/**
- * Register the commands and transform specific to the code editor, which only holds a single code
- * block.
- * @param {LexicalEditor} editor Editor instance.
- * @param {string} defaultLanguage Default language of the code block.
- * @returns {() => void} Cleanup handler.
- */
-const registerCodeEditorCommands = (editor, defaultLanguage) =>
-  mergeUnregisters(
-    // Pressing Backspace at the very beginning of a code block converts it to a paragraph by
-    // default (`CodeNode.collapseAtStart()`), which makes no sense when the editor only holds a
-    // single code block, so ignore it
-    editor.registerCommand(
-      DELETE_CHARACTER_COMMAND,
-      (isBackward) => {
-        const selection = getSelection();
-
-        if (!isBackward || !isRangeSelection(selection) || !selection.isCollapsed()) {
-          return false;
-        }
-
-        const { offset } = selection.anchor;
-        const node = selection.anchor.getNode();
-        const codeNode = isCodeNode(node) ? node : getNearestNodeOfType(node, CodeNode);
-
-        return (
-          !!codeNode &&
-          offset === 0 &&
-          (node.is(codeNode) || !!codeNode.getFirstDescendant()?.is(node))
-        );
-      },
-      COMMAND_PRIORITY_LOW,
-    ),
-    // Pressing Enter after two blank lines at the end of a code block exits it by default
-    // (`CodeExtension`), adding a paragraph after it, which would be left out of the code. Insert a
-    // new line instead, which `CodeNode.insertNewAfter()` does without exiting when the extension
-    // is in place. This has to take priority over the extension’s own handler
-    editor.registerCommand(
-      KEY_ENTER_COMMAND,
-      (event) => {
-        const selection = getSelection();
-
-        if (!isRangeSelection(selection)) {
-          return false;
-        }
-
-        event?.preventDefault();
-
-        return editor.dispatchCommand(INSERT_PARAGRAPH_COMMAND, undefined);
-      },
-      COMMAND_PRIORITY_NORMAL,
-    ),
-    // Make sure the editor always has a single code block. This runs within the same update that
-    // made the change, so the user never gets a chance to type in anything else
-    editor.registerNodeTransform(RootNode, (root) => {
-      const children = root.getChildren();
-
-      if (children.length === 1 && isCodeNode(children[0])) {
-        return;
-      }
-
-      const [firstChild] = children;
-
-      if (children.length === 1 && isElementNode(firstChild)) {
-        const node = createCodeNode(defaultLanguage);
-
-        // Keep the content and the selection
-        firstChild.replace(node, true);
-      } else if (children.length === 0) {
-        const node = createCodeNode(defaultLanguage);
-
-        root.append(node);
-        node.selectStart();
-      }
-    }),
-  );
-
-/**
- * Check if the given editor component is inline, which means its Markdown is matched within a line
- * of text by a text match transformer. Only an inline component can be inserted into a Markdown
- * table cell or a single-line editor.
- * @param {TextEditorComponent} component Editor component.
- * @returns {boolean} Result.
- */
-export const isInlineComponent = ({ transformer }) => transformer.type === 'text-match';
-
-/**
- * Limit the given editor configuration to what a single-line editor can hold, if it’s one: only
- * the inline buttons and components, and no plain text mode for HTML, whose source can’t be kept to
- * a single paragraph by keeping it on a single line. Any other configuration is returned as is.
+ * Apply the defaults to the editor configuration, and derive the features from it.
  * @param {TextEditorConfig} config Editor configuration.
- * @returns {TextEditorConfig} Limited configuration.
+ * @returns {EditorSetup} Editor setup.
  */
-export const limitToSingleLine = (config) => {
-  if (config.multiline !== false || config.isCodeEditor) {
-    return config;
-  }
-
-  return {
-    ...config,
-    modes: config.format === 'html' ? ['rich-text'] : config.modes,
-    enabledButtons: (config.enabledButtons ?? []).filter((button) =>
-      /** @type {TextEditorNodeType[]} */ (INLINE_BUTTON_TYPES).includes(button),
-    ),
-    components: (config.components ?? []).filter(isInlineComponent),
-  };
-};
-
-/**
- * Get the inline content of the given top-level node, looking into any block within it.
- * @param {LexicalNode} node Node.
- * @returns {LexicalNode[]} Inline nodes, or an empty array for a block that has no inline content,
- * like a horizontal rule.
- */
-const getInlineContent = (node) => {
-  if (isElementNode(node) && !node.isInline()) {
-    return node.getChildren().flatMap(getInlineContent);
-  }
-
-  return node.isInline() ? [node] : [];
-};
-
-/**
- * Join the top-level nodes of the given root into a single paragraph, with a space between the
- * content of each, for a single-line editor.
- * @param {RootNode} root Root node.
- */
-export const $joinIntoSingleParagraph = (root) => {
-  const children = root.getChildren();
-  const [firstChild] = children;
-
-  if (!firstChild || (children.length === 1 && isParagraphNode(firstChild))) {
-    return;
-  }
-
-  const paragraph = isParagraphNode(firstChild) ? firstChild : createParagraphNode();
-
-  if (paragraph !== firstChild) {
-    firstChild.insertBefore(paragraph);
-  }
-
-  // Keep track of the last character rather than reading the growing text of the paragraph again
-  // for each block, which would take quadratic time on a long pasted document
-  let lastChar = paragraph.getTextContent().at(-1) ?? '';
-
-  children
-    .filter((child) => child !== paragraph)
-    .forEach((child) => {
-      const content = getInlineContent(child);
-      const text = content.map((node) => node.getTextContent()).join('');
-
-      // Add a space between the content of each block, unless there’s one already
-      if (content.length && paragraph.getChildrenSize() && !/\s/.test(lastChar + text.charAt(0))) {
-        paragraph.append(createTextNode(' '));
-      }
-
-      paragraph.append(...content);
-      lastChar = text.at(-1) ?? lastChar;
-      // Lexical moves the selection out of a removed node on its own
-      child.remove();
-    });
-};
-
-/**
- * Replace the given line break with a space for a single-line editor, with the formats the text on
- * both sides shares, so a line break within bold text doesn’t split it. With a space on either side
- * already, or nothing at all, the line break is just removed.
- * @param {LineBreakNode} node Line break.
- */
-export const $replaceLineBreak = (node) => {
-  const previous = node.getPreviousSibling();
-  const next = node.getNextSibling();
-
-  // A line break at either end of the paragraph separates nothing, so it leaves no space
-  if (
-    !previous ||
-    !next ||
-    /\s$/.test(previous.getTextContent()) ||
-    /^\s/.test(next.getTextContent())
-  ) {
-    node.remove();
-
-    return;
-  }
-
-  const space = createTextNode(' ');
-
-  // A link split over lines, like the ones `splitMultilineFormatting()` makes from a link within
-  // formatting, is joined back into one link
-  const isSameLink =
-    isLinkNode(previous) &&
-    isLinkNode(next) &&
-    previous.getURL() === next.getURL() &&
-    previous.getTitle() === next.getTitle() &&
-    previous.getTarget() === next.getTarget() &&
-    previous.getRel() === next.getRel();
-
-  // The text next to the line break, also within an inline element like a link
-  const before = isElementNode(previous) ? previous.getLastDescendant() : previous;
-  const after = isElementNode(next) ? next.getFirstDescendant() : next;
-
-  if (isTextNode(before) && isTextNode(after)) {
-    // Keep the formats both sides share, e.g. italic between italic and bold italic text
-    TEXT_FORMAT_BUTTON_TYPES.forEach((format) => {
-      if (before.hasFormat(format) && after.hasFormat(format)) {
-        space.toggleFormat(format);
-      }
-    });
-
-    if (before.getStyle() === after.getStyle()) {
-      space.setStyle(before.getStyle());
-    }
-  }
-
-  if (isSameLink) {
-    previous.append(space, ...next.getChildren());
-    next.remove();
-    node.remove();
-
-    return;
-  }
-
-  node.replace(space);
-};
-
-/**
- * Register the commands and transforms that keep a single-line editor on one line. Neither a new
- * paragraph nor a line break can be inserted, and any content that brings them in anyway, like
- * pasted text or an imported value, is joined into a single paragraph with spaces.
- * @param {LexicalEditor} editor Editor instance.
- * @returns {() => void} Cleanup handler.
- */
-const registerSingleLine = (editor) =>
-  mergeUnregisters(
-    // The emoji autocomplete, which selects an emoji with the Enter key, takes priority
-    editor.registerCommand(
-      KEY_ENTER_COMMAND,
-      (event) => {
-        event?.preventDefault();
-
-        return true;
-      },
-      COMMAND_PRIORITY_HIGH,
-    ),
-    editor.registerCommand(INSERT_PARAGRAPH_COMMAND, () => true, COMMAND_PRIORITY_HIGH),
-    editor.registerCommand(INSERT_LINE_BREAK_COMMAND, () => true, COMMAND_PRIORITY_HIGH),
-    editor.registerNodeTransform(LineBreakNode, $replaceLineBreak),
-    editor.registerNodeTransform(RootNode, $joinIntoSingleParagraph),
-  );
-
-/**
- * Register the link command, the paste handler that turns a pasted URL into a link, and the
- * transform that removes a link with an unsafe URL.
- * @param {LexicalEditor} editor Editor instance.
- * @returns {() => void} Cleanup handler.
- * @see https://github.com/facebook/lexical/blob/main/packages/lexical-link/src/LexicalLinkExtension.ts
- */
-const registerLinkCommands = (editor) =>
-  mergeUnregisters(
-    // A link can also be created by importing the value or pasting rich text, which bypass the
-    // command below. Unwrap a link with an unsafe URL, keeping its text, so the URL never reaches
-    // the Markdown or HTML value
-    editor.registerNodeTransform(LinkNode, (node) => {
-      if (!isSafeLinkURL(node.getURL())) {
-        unwrapNode(node);
-      }
-    }),
-    editor.registerCommand(
-      TOGGLE_LINK_COMMAND,
-      (payload) => {
-        // The payload is the URL, or an object with the URL and attributes like `target`
-        const url = typeof payload === 'string' ? payload : (payload?.url ?? null);
-
-        // Ignore an unsafe URL rather than linking to it
-        if (url !== null && !isSafeLinkURL(url)) {
-          return true;
-        }
-
-        toggleLink(url === null ? null : /** @type {string | LinkAttributesWithURL} */ (payload));
-
-        return true;
-      },
-      COMMAND_PRIORITY_NORMAL,
-    ),
-    editor.registerCommand(
-      PASTE_COMMAND,
-      (event) => {
-        const selection = getSelection();
-
-        if (
-          !isRangeSelection(selection) ||
-          !objectKlassEquals(event, ClipboardEvent) ||
-          !event.clipboardData ||
-          /** @type {HTMLElement} */ (event.target).matches('input, textarea')
-        ) {
-          return false;
-        }
-
-        const clipboardText = event.clipboardData.getData('text').trim();
-
-        // Paste an unsafe URL as plain text rather than as a link
-        if (!isURL(clipboardText) || !isSafeLinkURL(clipboardText)) {
-          return false;
-        }
-
-        if (selection.isCollapsed()) {
-          insertNodes([createTextNode(clipboardText)]);
-        }
-
-        if (
-          !selection
-            .getNodes()
-            .some((node) => isElementNode(node) || (isTextNode(node) && !node.isSimpleText()))
-        ) {
-          editor.dispatchCommand(TOGGLE_LINK_COMMAND, clipboardText);
-          event.preventDefault();
-          return true;
-        }
-
-        return false;
-      },
-      COMMAND_PRIORITY_LOW,
-    ),
-  );
-
-/**
- * List buttons, along with the command to insert the list and its type.
- * @type {[TextEditorBlockType, typeof INSERT_UNORDERED_LIST_COMMAND, ListType][]}
- */
-const LIST_COMMANDS = [
-  ['bulleted-list', INSERT_UNORDERED_LIST_COMMAND, 'bullet'],
-  ['numbered-list', INSERT_ORDERED_LIST_COMMAND, 'number'],
-];
-
-/**
- * Register the commands for the enabled list buttons.
- * @param {LexicalEditor} editor Editor instance.
- * @param {TextEditorConfig['enabledButtons']} enabledButtons Enabled buttons.
- * @returns {() => void} Cleanup handler.
- */
-const registerListCommands = (editor, enabledButtons = []) => {
-  const enabledLists = LIST_COMMANDS.filter(([button]) => enabledButtons.includes(button));
-
-  return mergeUnregisters(
-    ...enabledLists.map(([, command, listType]) =>
-      editor.registerCommand(
-        command,
-        () => {
-          insertList(listType);
-
-          return true;
-        },
-        COMMAND_PRIORITY_NORMAL,
-      ),
-    ),
-    // https://github.com/facebook/lexical/blob/main/packages/lexical-react/src/shared/useList.ts
-    enabledLists.length
-      ? editor.registerCommand(
-          INSERT_PARAGRAPH_COMMAND,
-          () => handleListInsertParagraph(),
-          COMMAND_PRIORITY_NORMAL,
-        )
-      : undefined,
-  );
-};
-
-/**
- * Register an update listener that triggers the Update event with the Markdown or HTML value,
- * debounced so only the latest update in a burst triggers it.
- * @param {LexicalEditor} editor Editor instance.
- * @param {Transformer[]} enabledTransformers Enabled Markdown transformers.
- * @param {TextEditorValueFormat} format Value format.
- * @returns {() => void} Cleanup handler.
- */
-const registerUpdateEvent = (editor, enabledTransformers, format) => {
-  /** Incremented on every update, so only the latest one in a burst triggers the Update event. */
-  let updateCount = 0;
-  /** Whether the content has changed since the Update event was last triggered. */
-  let contentChanged = true;
-  /** @type {string | undefined} */
-  let lastValue = undefined;
-  let disposed = false;
-
-  return mergeUnregisters(
-    () => {
-      disposed = true;
-    },
-    editor.registerUpdateListener(({ dirtyElements, dirtyLeaves } = /** @type {any} */ ({})) => {
-      // An update that only moves the selection leaves no dirty nodes. Remember whether any update
-      // in the burst changed the content, so the document is only converted again when needed.
-      // This includes the updates made while composing, which are otherwise skipped.
-      contentChanged ||= !dirtyElements || dirtyElements.size > 0 || dirtyLeaves.size > 0;
-
-      if (editor?.isComposing()) {
-        return;
-      }
-
-      updateCount += 1;
-
-      const currentCount = updateCount;
-
-      (async () => {
-        await sleep(100);
-
-        // Skip if a newer update has been made in the meantime, or the editor has been disposed
-        if (currentCount !== updateCount || disposed) {
-          return;
-        }
-
-        editor.update(() => {
-          lastValue = onEditorUpdate(
-            editor,
-            enabledTransformers,
-            contentChanged ? undefined : lastValue,
-            format,
-          );
-          contentChanged = false;
-        });
-      })();
-    }),
-  );
-};
-
-/**
- * Register a handler for the Tab key that indents a list item, or unindents it with Shift.
- * `editor.registerCommand(KEY_TAB_COMMAND, listener, priority)` doesn’t work for some reason, so
- * listen to the `keydown` event on the root element instead.
- * @param {LexicalEditor} editor Editor instance.
- * @returns {() => void} Cleanup handler.
- */
-const registerTabIndentation = (editor) =>
-  editor.registerRootListener((root) => {
-    if (!root) {
-      return undefined;
-    }
-
-    /**
-     * Handle Tab indentation shortcuts.
-     * @param {KeyboardEvent} event Keydown event.
-     */
-    const onKeydown = (event) => {
-      editor.update(() => {
-        if (event.key === 'Tab') {
-          const selection = getSelection();
-
-          if (!isRangeSelection(selection)) {
-            return;
-          }
-
-          const parent = getNearestElementNode(selection.anchor.getNode());
-
-          if (isListItemNode(parent) && parent.canIndent()) {
-            if (!event.shiftKey) {
-              event.preventDefault();
-              editor.dispatchCommand(INDENT_CONTENT_COMMAND, undefined);
-            } else if (parent.getIndent() > 0) {
-              event.preventDefault();
-              editor.dispatchCommand(OUTDENT_CONTENT_COMMAND, undefined);
-            }
-          }
-        }
-      });
-    };
-
-    root.addEventListener('keydown', onKeydown);
-
-    return () => {
-      root.removeEventListener('keydown', onKeydown);
-    };
-  });
-
-/**
- * Remove the placeholders added by `addImportPlaceholders()` from a regular expression match.
- * @param {RegExpMatchArray} match Match.
- * @returns {RegExpMatchArray} Match without the placeholders, with the same index and input.
- */
-const cleanMatch = (match) => {
-  /**
-   * Remove the placeholders from a captured string, if any.
-   * @param {string | undefined} value Captured string.
-   * @returns {string | undefined} Cleaned string.
-   */
-  const clean = (value) => (value === undefined ? value : removeImportPlaceholders(value));
-
-  return /** @type {RegExpMatchArray} */ (
-    Object.assign(match.map(clean), {
-      index: match.index,
-      input: match.input,
-      groups: match.groups
-        ? Object.fromEntries(
-            Object.entries(match.groups).map(([key, value]) => [key, clean(value)]),
-          )
-        : undefined,
-    })
-  );
-};
-
-/**
- * Make a regular expression match the text after the placeholder at the start of a line of an HTML
- * block, if any, so the pattern of an editor component, like `^<aside>`, still matches the line.
- * @param {RegExp} regExp Regular expression without the `g` flag.
- * @param {boolean} isLineStart Whether Lexical takes the match as the start of the line and removes
- * it by its length, like that of an element transformer, in which case the match includes the
- * placeholder. Otherwise its index is moved past the placeholder.
- * @returns {RegExp} Regular expression.
- */
-const skipHtmlBlockPlaceholder = (regExp, isLineStart) =>
-  // Lexical matches the text with `String.prototype.match()`, which calls this method
-  Object.assign(new RegExp(regExp), {
-    /**
-     * Match the text after the placeholder at its start, if any.
-     * @param {string} text Text.
-     * @returns {RegExpMatchArray | null} Match.
-     */
-    [Symbol.match]: (text) => {
-      const offset = text.startsWith(HTML_BLOCK_PLACEHOLDER) ? 1 : 0;
-      const match = text.slice(offset).match(regExp);
-
-      if (!match || !offset) {
-        return match;
-      }
-
-      match.input = text;
-
-      if (isLineStart && match.index === 0) {
-        match[0] = `${HTML_BLOCK_PLACEHOLDER}${match[0]}`;
-      } else {
-        // The pattern has no `g` flag, so the match has an index
-        /** @type {number} */ (match.index) += offset;
-      }
-
-      return match;
-    },
-  });
-
-/**
- * Remove the placeholders added by `addImportPlaceholders()` from an argument of a transformer’s
- * `replace()`: a regular expression match, or the lines of a multiline element.
- * @param {any} arg Argument.
- * @returns {any} Argument without the placeholders.
- */
-const cleanReplaceArg = (arg) => {
-  if (!Array.isArray(arg)) {
-    return arg;
-  }
-
-  if ('index' in arg) {
-    return cleanMatch(/** @type {RegExpMatchArray} */ (arg));
-  }
-
-  return arg.every((item) => typeof item === 'string')
-    ? arg.map((line) => removeImportPlaceholders(line))
-    : arg;
-};
-
-/**
- * Make an editor component’s transformer import the Markdown without the placeholders added by
- * `addImportPlaceholders()`, which `removePlaceholders()` can’t remove from the properties of the
- * component node it creates, like the alt text of an image. The line of an HTML block starts with
- * a placeholder, so the patterns of a component, like `^<aside>`, are matched after it.
- * @param {Transformer} transformer Transformer.
- * @returns {Transformer} Transformer.
- */
-export const removePlaceholdersFromMatch = (transformer) => {
-  /** @type {any} */
-  const {
-    type,
-    handleImportAfterStartMatch,
-    importRegExp,
-    regExp,
-    regExpStart,
-    regExpEnd,
-    replace,
-  } = transformer;
-
-  /** @type {Record<string, any>} */
-  const overrides = {};
-
-  if (handleImportAfterStartMatch) {
-    /**
-     * Import the lines without the placeholders.
-     * @param {{ lines: string[] }} args Arguments.
-     * @returns {any} Result.
-     */
-    overrides.handleImportAfterStartMatch = (args) =>
-      handleImportAfterStartMatch({
-        ...args,
-        lines: args.lines.map((line) => removeImportPlaceholders(line)),
-      });
-  }
-
-  if (importRegExp) {
-    overrides.importRegExp = skipHtmlBlockPlaceholder(importRegExp, false);
-  }
-
-  // The regular expression of an element is matched against the start of a line on import
-  if (type === 'element' && regExp) {
-    overrides.regExp = skipHtmlBlockPlaceholder(regExp, true);
-  }
-
-  if (regExpStart) {
-    overrides.regExpStart = skipHtmlBlockPlaceholder(regExpStart, true);
-  }
-
-  if (regExpEnd instanceof RegExp) {
-    overrides.regExpEnd = skipHtmlBlockPlaceholder(regExpEnd, true);
-  } else if (regExpEnd?.regExp) {
-    overrides.regExpEnd = {
-      ...regExpEnd,
-      regExp: skipHtmlBlockPlaceholder(regExpEnd.regExp, true),
-    };
-  }
-
-  if (replace) {
-    /**
-     * Import the match and the lines without the placeholders.
-     * @param {...any} args Arguments.
-     * @returns {any} Result.
-     */
-    overrides.replace = (...args) => replace(...args.map(cleanReplaceArg));
-  }
-
-  return /** @type {Transformer} */ ({ ...transformer, ...overrides });
-};
-
-/**
- * Preload the syntax highlighter for the given programming language.
- *
- * Highlighting also works without this — the transform loads whatever it needs and re-highlights
- * once it arrives — but preloading avoids a visible flash of unhighlighted code.
- * @param {string} lang Language name, like scss.
- */
-export const loadCodeHighlighter = async (lang) => {
-  if (isPlainLanguage(lang)) {
-    return;
-  }
-
-  // The grammar and theme loaders are no-ops until the engine is in place
-  await loadEngine();
-
-  await Promise.all([loadCodeLanguage(normalizeCodeLanguage(lang)), loadCodeTheme(getCodeTheme())]);
-};
-
-/**
- * Remove the placeholders added by `addImportPlaceholders()` from the imported nodes: the text, the
- * Markdown of raw syntax, and the URL and title of a link. The text of raw syntax is restored from
- * the Markdown it was imported from, as Lexical has removed its escapes, which are not escapes in
- * raw HTML; see `RAW_HTML`.
- * @param {LexicalNode[]} nodes Imported nodes.
- */
-const removePlaceholders = (nodes) => {
-  nodes
-    .flatMap((node) => (isElementNode(node) ? node.getAllTextNodes() : node))
-    .filter((node) => isTextNode(node))
-    .forEach((node) => {
-      const text = node.getTextContent();
-      const newText = removeImportPlaceholders(getImportedRawSyntax(node) ?? text);
-      const link = node.getParent();
-
-      if (newText !== text) {
-        node.setTextContent(newText);
-      }
-
-      if (isLinkNode(link)) {
-        const url = link.getURL();
-        const title = link.getTitle();
-
-        if (removeImportPlaceholders(url) !== url) {
-          link.setURL(removeImportPlaceholders(url));
-        }
-
-        if (title && removeImportPlaceholders(title) !== title) {
-          link.setTitle(removeImportPlaceholders(title));
-        }
-      }
-    });
-};
-
-/**
- * Prepare Markdown for the import: convert the syntax Lexical doesn’t support to the one it does,
- * if the element is enabled, and list the programming languages used in the code blocks.
- * @param {string} value Markdown.
- * @param {Transformer[]} enabledTransformers List of enabled Markdown transformers.
- * @returns {{ markdown: string, languages: string[] }} Normalized Markdown and the languages.
- */
-const prepareMarkdown = (value, enabledTransformers) => {
-  // Tilde code fences are converted to backtick ones, and setext headings to ATX ones. Otherwise
-  // the syntax is kept as text, as written. A transformer is found by its regular expression,
-  // because the transformers can come wrapped in a `$state` proxy, which leaves a regular
-  // expression as is but not the transformer object itself
-  const hasCodeBlocks = enabledTransformers.some(
-    (transformer) => 'regExpStart' in transformer && transformer.regExpStart === CODE.regExpStart,
-  );
-
-  const hasHeadings = enabledTransformers.some(
-    (transformer) => 'regExp' in transformer && transformer.regExp === HEADING.regExp,
-  );
-
-  const fencedValue = hasCodeBlocks ? convertTildeFences(value) : value;
-  const markdown = hasHeadings ? convertSetextHeadings(fencedValue) : fencedValue;
-
-  return {
-    markdown,
-    // The language is the leading word of the info string, like `js` in ```` ``` js title=x ````;
-    // see `CODE`
-    languages: [...markdown.matchAll(/^`{3,}[ \t]*(?<lang>[\w-]+)/gm)].map(
-      ({ groups: { lang = 'plain' } = {} }) => lang,
-    ),
-  };
-};
-
-/**
- * Convert Markdown prepared with {@link prepareMarkdown} to Lexical nodes, either replacing the
- * content of the root or returning the nodes to be inserted somewhere. Called within an editor
- * update.
- * @param {string} markdown Markdown.
- * @param {Transformer[]} enabledTransformers List of enabled Markdown transformers.
- * @param {object} [options] Options.
- * @param {boolean} [options.toRoot] Whether to replace the content of the root.
- * @returns {LexicalNode[]} Imported nodes.
- */
-const $importMarkdown = (markdown, enabledTransformers, { toRoot = false } = {}) => {
-  // Split multiline formatting into separate lines to prevent Markdown parsing issues
-  const splitValue = splitMultilineFormatting(markdown);
-  // Add placeholders so Lexical reads the backslashes, the tabs in code spans and raw HTML right
-  const markedValue = addImportPlaceholders(splitValue);
-  // Pad blank blockquote lines so they are not imported as literal `>` text
-  const paddedValue = padBlankBlockquoteLines(markedValue);
-  // Keep the formatting around a code span after other formatting
-  const transformers = addCodeSpanSplit(enabledTransformers);
-  /** @type {LexicalNode[]} */
-  let nodes;
-
-  if (toRoot) {
-    convertFromMarkdownString(paddedValue, transformers);
-    nodes = getRoot().getChildren();
-  } else {
-    nodes = generateNodesFromMarkdownString(paddedValue, transformers);
-  }
-
-  // The text of raw HTML and raw syntax is restored as well. The lines of an HTML block have a
-  // placeholder. Other raw syntax, like an autolink or a definition label, only differs from its
-  // text if Lexical has decoded an escape or a character reference in it
-  if (markedValue !== splitValue || /[\\&]/.test(markedValue)) {
-    removePlaceholders(nodes);
-  }
-
-  return nodes;
-};
-
-/**
- * Insert the given Markdown at the selection, converted to Lexical nodes, as if it were pasted. The
- * content stays as it is if the editor is read-only or has no selection.
- * @param {LexicalEditor} editor Editor instance.
- * @param {string} value Markdown.
- * @param {Transformer[]} enabledTransformers List of enabled Markdown transformers.
- * @returns {Promise<void>} Nothing.
- */
-export const pasteMarkdown = async (editor, value, enabledTransformers) => {
-  const { markdown, languages } = prepareMarkdown(value, enabledTransformers);
-
-  // Preload the highlighter like the import does, but carry on without it if it fails to load: the
-  // code is highlighted once it’s available, if ever
-  await Promise.allSettled(languages.map((lang) => loadCodeHighlighter(lang)));
-
-  if (!editor.isEditable()) {
-    return;
-  }
-
-  editor.update(
-    () => {
-      // The Markdown import moves the selection to the nodes it creates, so keep a copy to insert
-      // the nodes where the caret was
-      const selection = getSelection()?.clone();
-
-      if (!selection) {
-        return;
-      }
-
-      /** @type {LexicalNode[] | undefined} */
-      let nodes;
-
-      try {
-        nodes = $importMarkdown(markdown, enabledTransformers);
-      } catch (ex) {
-        // The browser paste has been canceled, so paste the text as is rather than nothing
-        // eslint-disable-next-line no-console
-        console.error(ex);
-      }
-
-      setSelection(selection);
-
-      if (nodes) {
-        selection.insertNodes(nodes);
-      } else {
-        selection.insertRawText(value);
-      }
-    },
-    { tag: PASTE_TAG },
-  );
-};
-
-/**
- * How long to wait for the `paste` event after a Paste as Markdown shortcut, in milliseconds.
- */
-const PASTE_AS_MARKDOWN_TIMEOUT = 1000;
-
-/**
- * Keyboard shortcuts to paste the text on the clipboard as Markdown: the browser’s own shortcuts to
- * paste plain text, Accel+Shift+V, plus Command+Option+Shift+V, the macOS Paste and Match Style.
- * @returns {string} Shortcuts.
- */
-const getPasteAsMarkdownShortcuts = () =>
-  isMac() ? 'Meta+Shift+V Meta+Alt+Shift+V' : 'Ctrl+Shift+V';
-
-/**
- * Register the keyboard shortcuts to paste the text on the clipboard as Markdown. A regular paste
- * prefers the HTML on the clipboard, so text copied from a code editor or a terminal ends up in a
- * code block, while Markdown pasted as plain text is kept as literal text. The shortcuts make the
- * browser paste plain text, which is then converted from Markdown. The browser does the paste,
- * because a script can’t read the clipboard after a key combination in every browser: Firefox
- * doesn’t allow it after a key pressed with Ctrl, Alt or Command.
- * @param {LexicalEditor} editor Editor instance.
- * @param {Transformer[]} enabledTransformers List of enabled Markdown transformers.
- * @returns {() => void} Cleanup handler.
- */
-const registerPasteAsMarkdown = (editor, enabledTransformers) => {
-  const shortcuts = getPasteAsMarkdownShortcuts();
-  /** Whether the paste that follows was started with one of the shortcuts. */
-  let pasteAsMarkdown = false;
-  let timer = 0;
-
-  return mergeUnregisters(
-    () => {
-      clearTimeout(timer);
-    },
-    editor.registerCommand(
-      KEY_DOWN_COMMAND,
-      (event) => {
-        // Any other key cancels the shortcut. Chrome on macOS fires the `paste` event in a later
-        // task, so wait a moment for it, but not too long, in case the browser doesn’t paste with
-        // the shortcut, like Safari with Command+Shift+V
-        pasteAsMarkdown = matchesShortcuts(event, shortcuts);
-        clearTimeout(timer);
-
-        if (pasteAsMarkdown) {
-          timer = window.setTimeout(() => {
-            pasteAsMarkdown = false;
-          }, PASTE_AS_MARKDOWN_TIMEOUT);
-        }
-
-        // Let the browser paste
-        return false;
-      },
-      COMMAND_PRIORITY_NORMAL,
-    ),
-    editor.registerCommand(
-      PASTE_COMMAND,
-      (event) => {
-        if (!pasteAsMarkdown) {
-          return false;
-        }
-
-        pasteAsMarkdown = false;
-
-        const isClipboardEvent = objectKlassEquals(event, ClipboardEvent);
-
-        // Safari pastes with an `insertFromPaste` input event instead of a `paste` event
-        const dataTransfer = isClipboardEvent
-          ? /** @type {ClipboardEvent} */ (event).clipboardData
-          : objectKlassEquals(event, InputEvent)
-            ? /** @type {InputEvent} */ (event).dataTransfer
-            : null;
-
-        const text = dataTransfer?.getData('text/plain');
-
-        // Leave a URL to the link paste handler, which links the selected text. It only handles a
-        // `paste` event, so Safari still pastes a URL as Markdown
-        if (!text || (isClipboardEvent && isURL(text.trim()))) {
-          return false;
-        }
-
-        event.preventDefault();
-        pasteMarkdown(editor, text, enabledTransformers);
-
-        return true;
-      },
-      // Before the link paste handler and Lexical’s own one
-      COMMAND_PRIORITY_NORMAL,
-    ),
-  );
-};
-
-/**
- * Initialize the Lexical editor.
- * @param {TextEditorConfig} config Editor configuration.
- * @returns {InitEditorResult} Editor instance and cleanup.
- */
-export const initEditor = (config) => {
+const getEditorSetup = (config) => {
   const {
     enabledButtons = [],
     components = [],
@@ -1530,13 +92,53 @@ export const initEditor = (config) => {
     multiline = true,
   } = limitToSingleLine(config);
 
-  const hasCodeBlock = enabledButtons.includes('code-block') || isCodeEditor;
-  const hasTable = enabledButtons.includes('table') && !isCodeEditor;
-  const hasHorizontalRule = enabledButtons.includes('horizontal-rule') && !isCodeEditor;
-  /** Whether to support horizontal rules and tables in Markdown, even without their buttons. */
-  const hasBlockSyntax = !isCodeEditor && multiline;
+  return {
+    enabledButtons,
+    components,
+    useMarkdownShortcuts,
+    isCodeEditor,
+    defaultLanguage,
+    format,
+    multiline,
+    hasCodeBlock: enabledButtons.includes('code-block') || isCodeEditor,
+    hasTable: enabledButtons.includes('table') && !isCodeEditor,
+    hasHorizontalRule: enabledButtons.includes('horizontal-rule') && !isCodeEditor,
+    hasBlockSyntax: !isCodeEditor && multiline,
+  };
+};
 
-  const editorExtension = defineExtension({
+/**
+ * Get the unique items of a map keyed by button type, for the enabled buttons.
+ * @template T
+ * @param {Partial<Record<TextEditorNodeType, T[]>>} map Items by button type.
+ * @param {TextEditorNodeType[]} enabledButtons Enabled buttons.
+ * @returns {T[]} Items.
+ */
+const pickForButtons = (map, enabledButtons) => [
+  ...new Set(
+    Object.entries(map)
+      .filter(([button]) => enabledButtons.includes(/** @type {TextEditorNodeType} */ (button)))
+      .flatMap(([, items]) => /** @type {T[]} */ (items)),
+  ),
+];
+
+/**
+ * Define the Lexical extension the editor is built from, with the nodes and the dependencies the
+ * enabled features need.
+ * @param {EditorSetup} setup Editor setup.
+ * @returns {ReturnType<typeof defineExtension>} Extension.
+ */
+const createEditorExtension = ({
+  enabledButtons,
+  components,
+  isCodeEditor,
+  format,
+  hasCodeBlock,
+  hasTable,
+  hasHorizontalRule,
+  hasBlockSyntax,
+}) =>
+  defineExtension({
     name: '@sveltia/ui/editor',
     namespace: 'editor',
     dependencies: [
@@ -1564,11 +166,7 @@ export const initEditor = (config) => {
     $initialEditorState: null,
     nodes: [
       ...components.map(({ node }) => node),
-      ...new Set(
-        Object.entries(NODE_MAP)
-          .filter(([button]) => enabledButtons.includes(/** @type {TextEditorNodeType} */ (button)))
-          .flatMap(([, nodes]) => nodes),
-      ),
+      ...pickForButtons(NODE_MAP, enabledButtons),
       ...(isCodeEditor ? [CodeNode, CodeHighlightNode] : []),
       // We haven’t implemented buttons for horizontal rules and tables yet, but we still want to
       // support them in Markdown, so always include them in the node list, unless the editor is
@@ -1595,23 +193,24 @@ export const initEditor = (config) => {
     },
   });
 
+/**
+ * Get the Markdown transformers for the enabled features, in the order they have to be applied.
+ * @param {EditorSetup} setup Editor setup.
+ * @returns {Transformer[]} Transformers.
+ */
+const getEnabledTransformers = ({ enabledButtons, components, isCodeEditor, hasBlockSyntax }) => {
   const componentTransformers = components.map(({ transformer }) =>
     removePlaceholdersFromMatch(transformer),
   );
 
-  /** @type {Transformer[]} */
-  const enabledTransformers = [
+  return [
     ...componentTransformers,
     // Raw HTML comes before the editor’s own syntax, so a line of an HTML block that starts like a
     // link, for example, is still raw HTML. Only an editor component takes precedence
     ...(isCodeEditor ? [] : [RAW_HTML]),
-    ...new Set(
-      Object.entries(TRANSFORMER_MAP)
-        .filter(([button]) => enabledButtons.includes(/** @type {TextEditorNodeType} */ (button)))
-        .flatMap(([, transformers]) => transformers),
-    ),
+    ...pickForButtons(TRANSFORMER_MAP, enabledButtons),
     ...(isCodeEditor ? [CODE] : []),
-    // See the comment above for why we always include horizontal rules and tables
+    // Horizontal rules and tables are always supported in Markdown; see `createEditorExtension()`
     ...(hasBlockSyntax
       ? [
           HR,
@@ -1627,14 +226,31 @@ export const initEditor = (config) => {
     // Last, so the syntax of the editor’s own comes first
     ...(isCodeEditor ? [] : [RAW_SYNTAX]),
   ];
+};
 
-  const editor = buildEditorFromExtensions(editorExtension);
-
-  // Let the HTML import tell the elements the components import
-  editorComponents.set(editor, components);
-
+/**
+ * Register the Lexical listeners for the enabled features.
+ * @param {LexicalEditor} editor Editor instance.
+ * @param {EditorSetup} setup Editor setup.
+ * @param {Transformer[]} enabledTransformers Enabled Markdown transformers.
+ * @returns {() => void} Function to unregister them all.
+ */
+const registerEditorListeners = (
+  editor,
+  {
+    enabledButtons,
+    useMarkdownShortcuts,
+    isCodeEditor,
+    defaultLanguage,
+    format,
+    multiline,
+    hasCodeBlock,
+    hasTable,
+  },
+  enabledTransformers,
+) =>
   // The order matters, as listeners with the same priority are called in the registration order
-  const unregister = mergeUnregisters(
+  mergeUnregisters(
     registerRichText(editor),
     registerDragonSupport(editor),
     // Cap the undo stack, as each entry holds a snapshot of the whole document
@@ -1675,6 +291,21 @@ export const initEditor = (config) => {
     isCodeEditor ? undefined : registerPasteAsMarkdown(editor, enabledTransformers),
   );
 
+/**
+ * Initialize the Lexical editor.
+ * @param {TextEditorConfig} config Editor configuration.
+ * @returns {InitEditorResult} Editor instance and cleanup.
+ */
+export const initEditor = (config) => {
+  const setup = getEditorSetup(config);
+  const enabledTransformers = getEnabledTransformers(setup);
+  const editor = buildEditorFromExtensions(createEditorExtension(setup));
+
+  // Let the HTML import tell the elements the components import
+  editorComponents.set(editor, setup.components);
+
+  const unregister = registerEditorListeners(editor, setup, enabledTransformers);
+
   return {
     editor,
     enabledTransformers,
@@ -1687,195 +318,3 @@ export const initEditor = (config) => {
     },
   };
 };
-
-/**
- * Number of the latest import started for each editor.
- * @type {WeakMap<LexicalEditor, number>}
- */
-const latestImports = new WeakMap();
-
-/**
- * Import a value to the editor, replacing the current content.
- * @param {LexicalEditor} editor Editor instance.
- * @param {object} args Arguments.
- * @param {string[]} args.languages Programming languages used in the code blocks.
- * @param {() => void} args.$import Function to convert the value to Lexical nodes, called within an
- * editor update.
- * @param {() => string} args.$export Function to convert the editor content back to the value.
- * @param {string} args.formatName Name of the value format, used in the error message.
- * @returns {Promise<string | undefined>} The value as the editor exports it once imported, which
- * can differ in style from the given value. `undefined` if another import has been started for the
- * same editor in the meantime, in which case this value is skipped.
- * @throws {Error} Failed to convert the value to Lexical nodes.
- */
-const importValue = async (editor, { languages, $import, $export, formatName }) => {
-  const importId = (latestImports.get(editor) ?? 0) + 1;
-
-  latestImports.set(editor, importId);
-
-  /**
-   * Check if a newer import has been started while waiting for the highlighter. Imports can finish
-   * out of order, as only those with code blocks have to wait, and an older value must not
-   * overwrite a newer one.
-   * @returns {boolean} Result.
-   */
-  const isSuperseded = () => latestImports.get(editor) !== importId;
-
-  try {
-    // Preload the highlighter for every language used in the document, so code blocks are
-    // highlighted as soon as they appear rather than a moment later
-    await Promise.all(languages.map(async (lang) => loadCodeHighlighter(lang)));
-  } catch (ex) {
-    if (isSuperseded()) {
-      return undefined;
-    }
-
-    throw ex;
-  }
-
-  if (isSuperseded()) {
-    return undefined;
-  }
-
-  // Lexical commits an empty state when the root element is attached, and the history keeps it as
-  // the current entry. An empty state can’t be restored, so undoing to it throws an error. Merge
-  // the first import into that entry instead of pushing it onto the undo stack
-  const isEmpty = editor.getEditorState().isEmpty();
-  /** @type {unknown} */
-  let error;
-
-  editor.update(
-    () => {
-      try {
-        $import();
-      } catch (ex) {
-        error = ex;
-      }
-    },
-    // Tell the import from a change made by the user, and commit it right away, so the node
-    // transforms, e.g. the one giving a code block its default language, have run by the time the
-    // content is exported below
-    { tag: isEmpty ? [IMPORT_UPDATE_TAG, HISTORY_MERGE_TAG] : IMPORT_UPDATE_TAG, discrete: true },
-  );
-
-  if (error) {
-    throw new Error(`Failed to convert ${formatName}`, { cause: error });
-  }
-
-  return editor.read($export);
-};
-
-/**
- * Convert Markdown to Lexical nodes.
- * @param {LexicalEditor} editor Editor instance.
- * @param {string} value Current Markdown value.
- * @param {Transformer[]} enabledTransformers List of enabled Markdown transformers.
- * @returns {Promise<string | undefined>} The value as the editor exports it once imported, which
- * can differ in style from the given value, e.g. `_text_` for `*text*`. `undefined` if another
- * import has been started for the same editor in the meantime, in which case this value is skipped.
- * @throws {Error} Failed to convert the value to Lexical nodes.
- */
-export const convertMarkdownToLexical = async (editor, value, enabledTransformers) => {
-  const { markdown, languages } = prepareMarkdown(value, enabledTransformers);
-
-  return importValue(editor, {
-    languages,
-    /**
-     * Import the Markdown.
-     */
-    $import: () => {
-      $importMarkdown(markdown, enabledTransformers, { toRoot: true });
-    },
-    /**
-     * Export the content as Markdown.
-     * @returns {string} Markdown.
-     */
-    $export: () => exportMarkdown(enabledTransformers),
-    formatName: 'Markdown',
-  });
-};
-
-/**
- * Convert HTML to Lexical nodes. Inline content outside any block, like bare text, is wrapped with
- * a paragraph. An element that none of the registered nodes can import, like `<img>` or a heading
- * with the heading buttons disabled, as well as a comment, causes an error instead of being
- * silently dropped.
- * @param {LexicalEditor} editor Editor instance.
- * @param {string} value Current HTML value.
- * @returns {Promise<string | undefined>} The value as the editor exports it once imported, which
- * can differ in style from the given value, e.g. `<strong>` for `<b>`. `undefined` if another
- * import has been started for the same editor in the meantime, in which case this value is skipped.
- * @throws {Error} Failed to convert the value to Lexical nodes.
- */
-export const convertHtmlToLexical = async (editor, value) => {
-  const dom = new DOMParser().parseFromString(value, 'text/html');
-
-  return importValue(editor, {
-    languages: [...dom.querySelectorAll('pre > code')]
-      .map(getCodeLanguage)
-      .filter((lang) => lang !== undefined),
-    /**
-     * Import the HTML.
-     * @throws {Error} The HTML has an element the editor cannot handle.
-     */
-    $import: () => {
-      const unsupportedNode = findUnsupportedNode(editor, dom);
-
-      if (unsupportedNode) {
-        throw new Error(
-          unsupportedNode.nodeType === Node.COMMENT_NODE
-            ? 'Unsupported comment'
-            : `Unsupported element: <${/** @type {Element} */ (unsupportedNode).localName}>`,
-        );
-      }
-
-      const root = getRoot();
-      /** @type {ElementNode | null} */
-      let paragraph = null;
-
-      root.clear();
-
-      generateNodesFromDOM(editor, dom).forEach((node) => {
-        if (isElementNode(node) ? !node.isInline() : isDecoratorNode(node) && !node.isInline()) {
-          paragraph = null;
-          root.append(node);
-        } else {
-          if (!paragraph) {
-            paragraph = createParagraphNode();
-            root.append(paragraph);
-          }
-
-          paragraph.append(node);
-        }
-      });
-
-      // Like the Markdown import, there should be at least one paragraph
-      // @see https://github.com/facebook/lexical/issues/2308
-      if (root.isEmpty()) {
-        root.append(createParagraphNode());
-      }
-
-      if (getSelection() !== null) {
-        root.selectStart();
-      }
-    },
-    /**
-     * Export the content as HTML.
-     * @returns {string} HTML.
-     */
-    $export: () => exportHtml(editor),
-    formatName: 'HTML',
-  });
-};
-
-/**
- * Move focus to the editor so the user can start editing immediately.
- * @param {LexicalEditor} editor Editor instance.
- * @returns {Promise<void>} Nothing.
- */
-export const focusEditor = async (editor) =>
-  new Promise((resolve) => {
-    editor.focus(() => {
-      resolve(undefined);
-    });
-  });

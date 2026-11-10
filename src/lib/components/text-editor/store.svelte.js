@@ -1,5 +1,7 @@
 import { generateElementId } from '@sveltia/utils/element';
-import { convertHtmlToLexical, convertMarkdownToLexical, limitToSingleLine } from './core.js';
+import { untrack } from 'svelte';
+import { convertHtmlToLexical, convertMarkdownToLexical } from './conversion/import.js';
+import { limitToSingleLine } from './editing/single-line.js';
 
 /**
  * @import { LexicalEditor } from 'lexical';
@@ -255,4 +257,56 @@ export const createEditorStore = () => {
     getImportedValue: (value) => (lastImport?.exported === value ? lastImport.source : undefined),
     /* eslint-enable jsdoc/require-jsdoc */
   };
+};
+
+/**
+ * Keep the bindable props of a `<TextEditor>` or `<CodeEditor>` in sync with its editor store: the
+ * `pending` flag, and the value going into and coming out of the editor. This must be called
+ * during the component initialization, after the store is created.
+ * @param {TextEditorStore} editorStore Editor store.
+ * @param {object} args Arguments.
+ * @param {() => string} args.getInputValue Read the props and return them as the editor input
+ * value. The props read here are tracked, so the editor is updated whenever they change.
+ * @param {(inputValue: string) => void} args.setValue Update the props with the editor input value
+ * when it changes.
+ * @param {(pending: boolean) => void} args.setPending Update the `pending` prop.
+ */
+export const syncEditorProps = (editorStore, { getInputValue, setValue, setPending }) => {
+  $effect(() => {
+    setPending(editorStore.pending);
+  });
+
+  // An editor removed right after a change never converts it, so don’t leave a bound `pending` set
+  // for good, which would hold up anything waiting for the change
+  $effect(() => () => {
+    setPending(false);
+  });
+
+  $effect(() => {
+    // The root initializes the editor before these effects first run, and stays initialized
+    /* v8 ignore next */
+    if (!editorStore.initialized) {
+      return;
+    }
+
+    const newValue = getInputValue();
+
+    untrack(() => {
+      editorStore.inputValue = newValue;
+    });
+  });
+
+  $effect(() => {
+    // The root initializes the editor before these effects first run, and stays initialized
+    /* v8 ignore next */
+    if (!editorStore.initialized) {
+      return;
+    }
+
+    const newValue = editorStore.inputValue;
+
+    untrack(() => {
+      setValue(newValue);
+    });
+  });
 };

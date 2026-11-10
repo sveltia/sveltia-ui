@@ -8,7 +8,7 @@ import {
 import { $getRoot as getRoot, createEditor } from 'lexical';
 import { describe, expect, it } from 'vitest';
 
-import { DISABLED_MARKDOWN_TAGS } from '../constants.js';
+import { DISABLED_MARKDOWN_TAGS } from '../../constants.js';
 import { BLOCK_SYNTAX_ESCAPE } from './block-escape.js';
 import { LEADING_INLINE_CODE } from './inline-code.js';
 import { LINK } from './link.js';

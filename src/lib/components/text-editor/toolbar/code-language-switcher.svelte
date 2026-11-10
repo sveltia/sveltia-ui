@@ -6,7 +6,8 @@
   import Option from '../../listbox/option.svelte';
   import Select from '../../select/select.svelte';
   import { getBackgroundUpdateTags } from '../background-update.js';
-  import { focusEditor, loadCodeHighlighter } from '../core.js';
+  import { focusEditor } from '../editing/caret.js';
+  import { loadCodeHighlighter } from '../shiki/preload.js';
   import { LANGUAGES } from '../shiki/generated.js';
 
   /**

@@ -22,13 +22,14 @@
   import Icon from '../../icon/icon.svelte';
   import TextInput from '../../text-field/text-input.svelte';
   import { AVAILABLE_BUTTONS, OPEN_LINK_EDITOR_COMMAND } from '../constants.js';
-  import { focusEditor, isSafeLinkURL } from '../core.js';
+  import { focusEditor } from '../editing/caret.js';
+  import { isSafeLinkURL } from '../editing/link.js';
   import {
     editRawText,
     getRawTextState,
     insertLink,
     registerRawTextShortcut,
-  } from '../raw-markdown.js';
+  } from '../editing/raw-markdown.js';
 
   /**
    * @import { TextEditorStore } from '#lib/typedefs.js';

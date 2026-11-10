@@ -7,7 +7,7 @@
  */
 
 import { isMac, matchesShortcuts } from '@sveltia/utils/events';
-import { getComponentMarkdown } from './core.js';
+import { getComponentMarkdown } from '../conversion/editor-components.js';
 
 /**
  * @import {

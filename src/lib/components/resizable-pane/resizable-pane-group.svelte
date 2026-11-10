@@ -11,6 +11,7 @@
     getInitialSizes,
     resolvePaneConstraints,
     resolveToPercent,
+    shareSpaceAmongPanes,
   } from './sizing.js';
 
   /**
@@ -216,31 +217,15 @@
   };
 
   /**
-   * Give the given space to the given panes, the first one first, then to the others, as far as
-   * their maximum sizes allow, or take it from them with a negative amount, as far as their minimum
-   * sizes allow.
+   * Give the given space to the given panes, then to the others, or take it from them with a
+   * negative amount; see {@link shareSpaceAmongPanes}.
    * @param {number[]} neighbors Indexes of the panes to give the space to first.
    * @param {number} amount Space in percentage points.
    * @param {number} [exclude] Index of a pane to leave alone.
    * @returns {number} Space that couldn’t be given or taken.
    */
-  const shareSpace = (neighbors, amount, exclude) => {
-    let rest = amount;
-
-    [...neighbors, ...sizes.map((_size, index) => index)].forEach((neighbor) => {
-      if (Math.abs(rest) < 0.001 || neighbor === exclude || sizes[neighbor] === undefined) {
-        return;
-      }
-
-      const { minSize, maxSize } = getPaneConstraints(neighbor);
-      const size = Math.min(Math.max(sizes[neighbor] + rest, minSize), maxSize);
-
-      rest -= size - sizes[neighbor];
-      sizes[neighbor] = size;
-    });
-
-    return rest;
-  };
+  const shareSpace = (neighbors, amount, exclude) =>
+    shareSpaceAmongPanes(sizes, { neighbors, amount, exclude, getConstraints: getPaneConstraints });
 
   /**
    * Put the panes and handles in the order they are in the group, and size a pane shown after the
