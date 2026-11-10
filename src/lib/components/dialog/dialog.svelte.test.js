@@ -63,6 +63,22 @@ describe('Dialog', () => {
     expect(dialog.querySelector('.header button')?.getAttribute('aria-label')).toBe('Close');
   });
 
+  it('does not scroll a body whose text fits, even when its glyphs are taller than a line', async () => {
+    // A font like Source Sans 3 draws glyphs taller than the compact line height; Chrome counts the
+    // excess as scrollable overflow, which showed a scrollbar beside a single line of text
+    await render(Dialog, {
+      open: true,
+      title: 'T',
+      children: html('<div style="line-height: 0.8">Are you sure?</div>'),
+    });
+
+    await waitForOpen();
+
+    const body = /** @type {HTMLElement} */ (getDialog()?.querySelector('.body'));
+
+    expect(body.scrollHeight).toBe(body.clientHeight);
+  });
+
   it('applies the x-small size class', async () => {
     await render(Dialog, { open: true, title: 'T', size: 'x-small' });
     await waitForOpen();

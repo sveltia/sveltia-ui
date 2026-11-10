@@ -313,12 +313,15 @@
 
   .body {
     overflow: auto;
-    margin: var(--sui-dialog-body-margin, 24px 24px);
+    // Padding rather than margin: glyphs drawn taller than the compact line height, as Source Sans
+    // 3 does, overflow the content box, which Chrome turns into a scrollbar unless the padding
+    // takes the excess. `--sui-dialog-body-margin` is still honoured for backward compatibility
+    padding: var(--sui-dialog-body-padding, var(--sui-dialog-body-margin, 24px 24px));
     white-space: normal;
     line-height: var(--sui-line-height-compact);
 
     @media (width < 768px) {
-      margin: var(--sui-dialog-body-margin, 16px 16px);
+      padding: var(--sui-dialog-body-padding, var(--sui-dialog-body-margin, 16px 16px));
     }
   }
 </style>
