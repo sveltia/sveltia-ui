@@ -1,0 +1,174 @@
+# Dialog action button labels
+ok: OK
+cancel: Cancelar
+close: Cerrar
+
+# Button to clear content, e.g. search input or calendar date
+clear: Limpiar
+
+# Text editor dialog buttons for link/image insertion
+insert: Insertar
+update: Actualizar
+remove: Quitar
+
+# Combobox dropdown toggle button aria-labels
+collapse: Contraer
+expand: Expandir
+
+# Infobar/toast dismiss button label
+dismiss: Descartar
+
+# Alert & infobar status, read out by screen readers before the message (visually hidden)
+alert:
+  error: Error
+  warning: Advertencia
+  info: Información
+  success: Éxito
+
+# Role descriptions, read out by screen readers in place of the generic “group” role
+role_descriptions:
+  disclosure: sección desplegable
+  option_group: grupo de opciones
+  menu_item_group: grupo de elementos de menú
+  checkbox_group: grupo de casillas de verificación
+  table_head: encabezado de tabla
+  table_body: cuerpo de tabla
+  table_foot: pie de tabla
+  grid_head: encabezado de cuadrícula
+  grid_body: cuerpo de cuadrícula
+  grid_foot: pie de cuadrícula
+
+# Emoji suggestion listbox aria-label, shared by the text fields and the text editor
+emoji_suggestions: Sugerencias de emojis
+
+# Calendar component
+calendar:
+  # View switcher group aria-labels and navigation button aria-labels
+  year: Año
+  previous_decade: Década anterior
+  next_decade: Década siguiente
+  month: Mes
+  previous_month: Mes anterior
+  next_month: Mes siguiente
+  # “Today” button label in footer
+  today: Hoy
+
+# Split button component
+split_button:
+  # Wrapper aria-label, e.g. “Save Options” when primary button is “Save”
+  x_options: Opciones de {$name}
+  # Dropdown toggle aria-label
+  more_options: Más opciones
+
+# Combobox component
+combobox:
+  # Placeholder when no option is selected
+  select_an_option: Selecciona una opción…
+  # Filter input aria-label
+  filter_options: Filtrar opciones
+  # Empty state message when filter has no matches
+  no_matching_options: No se han encontrado opciones que coincidan
+
+# Number input component
+number_input:
+  # Spin button aria-labels for incrementing/decrementing the number value
+  increase: Aumentar
+  decrease: Disminuir
+  # Description of the allowed range when the number can’t be stepped, e.g. “From 1 to 10”
+  range: De {$min} a {$max}
+  # Description of the minimum value when the number can’t be stepped
+  min: Mínimo {$min}
+  # Description of the maximum value when the number can’t be stepped
+  max: Máximo {$max}
+
+# Password input component
+password_input:
+  # Visibility toggle button aria-labels
+  show_password: Mostrar la contraseña
+  hide_password: Ocultar la contraseña
+
+# Secret input component (API keys, tokens, etc.)
+secret_input:
+  # Visibility toggle button aria-labels
+  show_secret: Mostrar el secreto
+  hide_secret: Ocultar el secreto
+
+# Select tags component (multi-select)
+select_tags:
+  # Listbox aria-label
+  selected_options: Opciones seleccionadas
+  # Remove button aria-label, e.g. “Remove Option 1”
+  remove_x: Quitar {$name}
+
+# Text editor component
+text_editor:
+  # Toolbar aria-labels
+  text_editor: Editor de texto
+  code_editor: Editor de código
+  # Block style menu button and menu aria-labels
+  text_style_options: Opciones de estilo de texto
+  show_text_style_options: Mostrar las opciones de estilo de texto
+  # Block style menu items
+  paragraph: Párrafo
+  heading_1: Encabezado 1
+  heading_2: Encabezado 2
+  heading_3: Encabezado 3
+  heading_4: Encabezado 4
+  heading_5: Encabezado 5
+  heading_6: Encabezado 6
+  bulleted_list: Lista con viñetas
+  numbered_list: Lista numerada
+  blockquote: Cita
+  code_block: Bloque de código
+  # Inline style button aria-labels
+  bold: Negrita
+  italic: Cursiva
+  strikethrough: Tachado
+  code: Código
+  link: Enlace
+  # Link dialog title
+  insert_link: Insertar enlace
+  # Floating link editor button aria-labels
+  edit_link: Editar enlace
+  remove_link: Quitar enlace
+  # Link dialog input field labels
+  text: Texto
+  url: URL
+  # Link dialog checkbox label and floating link editor button aria-label
+  open_in_new_tab: Abrir en una pestaña nueva
+  # Table dialog title
+  insert_table: Insertar tabla
+  # Table dialog input field labels
+  rows: Filas
+  columns: Columnas
+  # Table menu button and menu aria-labels
+  table_options: Opciones de tabla
+  show_table_options: Mostrar las opciones de tabla
+  # Table menu items
+  insert_row_above: Insertar fila arriba
+  insert_row_below: Insertar fila abajo
+  insert_column_left: Insertar columna a la izquierda
+  insert_column_right: Insertar columna a la derecha
+  delete_row: Eliminar fila
+  delete_column: Eliminar columna
+  delete_table: Eliminar tabla
+  # Horizontal rule button aria-label
+  insert_horizontal_rule: Insertar línea horizontal
+  # Alignment menu button and menu aria-labels
+  alignment_options: Opciones de alineación
+  show_alignment_options: Mostrar las opciones de alineación
+  # Alignment menu items
+  align_left: Alinear a la izquierda
+  align_center: Centrar
+  align_right: Alinear a la derecha
+  align_justify: Justificar
+  # Markdown mode toggle button aria-label
+  edit_in_markdown: Editar en Markdown
+  # HTML mode toggle button aria-label
+  edit_in_html: Editar en HTML
+  # Error message when rich text conversion fails
+  converter_error: No se ha podido activar el modo de texto enriquecido. Usa el editor de texto sin formato en su lugar.
+  # Language selector aria-label
+  language: Idioma
+  # Plain text mode option in language selector
+  plain_text: Texto sin formato
