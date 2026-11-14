@@ -16,6 +16,11 @@
   let openLargeDialog = $state(false);
   let openExtraLargeDialog = $state(false);
   let openCloseOnlyDialog = $state(false);
+  let openNonModalDialog = $state(false);
+  let openMovableDialog = $state(false);
+  let openNonModalMovableDialog = $state(false);
+  let openNonModalBackdropDialog = $state(false);
+  let nonModalClicks = $state(0);
   let openMenuDialog = $state(false);
   let promptValue = $state('');
   let openToastDialog = $state(false);
@@ -149,6 +154,91 @@
         }}
       />
       <Dialog bind:open={openExtraLargeDialog} title="Greeting" size="x-large">Hello World!</Dialog>
+    </div>
+  </Example>
+</section>
+
+<section>
+  <h3>Non-Modal and Movable</h3>
+  <Example>
+    <div role="none">
+      <Button
+        variant="secondary"
+        label="Show Non-Modal Dialog"
+        onclick={() => {
+          openNonModalDialog = true;
+        }}
+      />
+      <!-- The page stays usable while the dialog is open: it can be scrolled, and the button below
+      can still be clicked. There is no backdrop, and Escape only closes the dialog while the focus
+      is within it. -->
+      <Dialog bind:open={openNonModalDialog} title="Greeting" modal={false}>
+        Hello World! Try clicking the counter button on the page.
+      </Dialog>
+    </div>
+    <div role="none">
+      <Button
+        variant="secondary"
+        label="Show Movable Dialog"
+        onclick={() => {
+          openMovableDialog = true;
+        }}
+      />
+      <!-- Drag the header to move the dialog. It stays within the viewport, and goes back to the
+      center when opened again or when the window is resized. -->
+      <Dialog bind:open={openMovableDialog} title="Greeting" movable showClose>
+        Hello World! Drag the header to move this dialog.
+      </Dialog>
+    </div>
+    <div role="none">
+      <Button
+        variant="secondary"
+        label="Show Non-Modal, Movable Confirmation Dialog"
+        onclick={() => {
+          openNonModalMovableDialog = true;
+        }}
+      />
+      <!-- Both options together let the user move the dialog out of the way and look at the page
+      before answering, e.g. to compare a saved draft with the current content. -->
+      <ConfirmationDialog
+        bind:open={openNonModalMovableDialog}
+        title="Restore Draft"
+        okLabel="Restore"
+        cancelLabel="Discard"
+        modal={false}
+        movable
+      >
+        This entry has a backup from 10:30 AM. Do you want to restore the edited draft?
+      </ConfirmationDialog>
+    </div>
+    <div role="none">
+      <Button
+        variant="secondary"
+        label="Show Non-Modal Dialog with Backdrop"
+        onclick={() => {
+          openNonModalBackdropDialog = true;
+        }}
+      />
+      <!-- The backdrop dims the page to make the dialog stand out, but the page can still be
+      scrolled and clicked, as with any non-modal dialog. -->
+      <Dialog
+        bind:open={openNonModalBackdropDialog}
+        title="Greeting"
+        modal={false}
+        showBackdrop
+        movable
+      >
+        Hello World! The page behind is dimmed, but you can still click the counter button.
+      </Dialog>
+    </div>
+    <div role="none">
+      <Button
+        variant="tertiary"
+        label="Clicked {nonModalClicks} times"
+        onclick={() => {
+          nonModalClicks += 1;
+        }}
+      />
     </div>
   </Example>
 </section>

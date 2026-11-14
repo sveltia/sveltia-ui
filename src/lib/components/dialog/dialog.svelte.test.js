@@ -345,4 +345,189 @@ describe('Dialog', () => {
       expect(onOk).toHaveBeenCalledOnce();
     });
   });
+
+  it('opens without a backdrop when not modal', async () => {
+    await render(Dialog, { open: true, title: 'T', modal: false });
+    await waitForOpen();
+
+    const dialog = /** @type {HTMLDialogElement} */ (getDialog());
+
+    expect(dialog.matches(':modal')).toBe(false);
+    expect(dialog.classList.contains('backdrop')).toBe(false);
+    expect(dialog.querySelector('.header')?.classList.contains('movable')).toBe(false);
+  });
+
+  it('can have a backdrop when not modal, which leaves the page usable', async () => {
+    await render(Dialog, { open: true, title: 'T', modal: false, showBackdrop: true });
+    await waitForOpen();
+
+    const dialog = /** @type {HTMLDialogElement} */ (getDialog());
+
+    expect(dialog.matches(':modal')).toBe(false);
+    expect(dialog.classList.contains('backdrop')).toBe(true);
+    await vi.waitFor(() => {
+      expect(dialog.classList.contains('active')).toBe(true);
+    });
+    // The backdrop doesn’t catch the clicks meant for the page
+    expect(getComputedStyle(dialog).pointerEvents).toBe('none');
+  });
+
+  it('follows the modal option for the backdrop unless told otherwise', async () => {
+    /** @type {ComponentProps<typeof Dialog>} */
+    const props = $state({ open: true, title: 'T', modal: true });
+
+    await render(Dialog, props);
+    await waitForOpen();
+    expect(getDialog()?.classList.contains('backdrop')).toBe(true);
+
+    props.open = false;
+    await vi.waitFor(() => {
+      expect(getDialog()).toBeNull();
+    });
+    props.modal = false;
+    props.open = true;
+    await waitForOpen();
+    expect(getDialog()?.classList.contains('backdrop')).toBe(false);
+  });
+
+  it('can do without a backdrop when modal', async () => {
+    await render(Dialog, { open: true, title: 'T', showBackdrop: false });
+    await waitForOpen();
+
+    const dialog = /** @type {HTMLDialogElement} */ (getDialog());
+
+    expect(dialog.matches(':modal')).toBe(true);
+    expect(dialog.classList.contains('backdrop')).toBe(false);
+  });
+
+  it('can be moved by dragging the header, within the viewport', async () => {
+    /** @type {ComponentProps<typeof Dialog>} */
+    const props = $state({ open: true, title: 'T', movable: true, showClose: true });
+
+    await render(Dialog, props);
+    await waitForOpen();
+    await vi.waitFor(() => {
+      expect(getDialog()?.classList.contains('active')).toBe(true);
+    });
+
+    const dialog = /** @type {HTMLDialogElement} */ (getDialog());
+    const header = /** @type {HTMLElement} */ (dialog.querySelector('.header'));
+    const content = /** @type {HTMLElement} */ (dialog.querySelector('.content'));
+    const title = /** @type {HTMLElement} */ (dialog.querySelector('.title'));
+    const { left, top } = content.getBoundingClientRect();
+
+    /**
+     * Get how far the dialog has been moved from where it opened.
+     * @returns {[number, number]} Horizontal and vertical distance.
+     */
+    const getMoved = () => {
+      const rect = content.getBoundingClientRect();
+
+      return [Math.round(rect.left - left), Math.round(rect.top - top)];
+    };
+
+    /**
+     * Fire a pointer event on the header.
+     * @param {string} type Event type.
+     * @param {number} x Client X.
+     * @param {number} y Client Y.
+     * @param {object} [init] Other event properties.
+     * @param {HTMLElement} [target] Event target.
+     */
+    const fire = (type, x, y, init = {}, target = title) => {
+      target.dispatchEvent(
+        new PointerEvent(type, {
+          bubbles: true,
+          cancelable: true,
+          pointerId: 1,
+          isPrimary: true,
+          clientX: x,
+          clientY: y,
+          // The primary button is held while moving
+          buttons: type === 'pointermove' ? 1 : 0,
+          ...init,
+        }),
+      );
+    };
+
+    // A synthetic pointer isn’t an active one the browser could capture
+    header.setPointerCapture = vi.fn();
+    expect(header.classList.contains('movable')).toBe(true);
+    expect(getMoved()).toEqual([0, 0]);
+
+    // A move without a drag does nothing
+    fire('pointermove', 50, 50);
+    expect(getMoved()).toEqual([0, 0]);
+
+    fire('pointerdown', 100, 100);
+    expect(header.setPointerCapture).toHaveBeenCalledWith(1);
+    // Another pointer doesn’t move it
+    fire('pointermove', 200, 200, { pointerId: 2 });
+    fire('pointerup', 200, 200, { pointerId: 2 });
+    expect(getMoved()).toEqual([0, 0]);
+    fire('pointermove', 90, 120);
+    await vi.waitFor(() => {
+      expect(getMoved()).toEqual([-10, 20]);
+    });
+    // Kept within the viewport
+    fire('pointermove', -10000, -10000);
+    await vi.waitFor(() => {
+      expect(content.getBoundingClientRect()).toMatchObject({ left: 0, top: 0 });
+    });
+    fire('pointerup', -10000, -10000);
+    fire('pointermove', 100, 100);
+    expect(content.getBoundingClientRect()).toMatchObject({ left: 0, top: 0 });
+
+    // Neither a secondary button nor the Close button starts a drag
+    fire('pointerdown', 100, 100, { button: 2 });
+    fire('pointermove', 200, 200);
+    fire('pointercancel', 200, 200);
+    fire('pointerdown', 100, 100, {}, /** @type {HTMLElement} */ (header.querySelector('button')));
+    fire('pointermove', 200, 200);
+    fire('pointercancel', 200, 200);
+    expect(content.getBoundingClientRect()).toMatchObject({ left: 0, top: 0 });
+
+    // Back to the center when the viewport is resized
+    window.dispatchEvent(new Event('resize'));
+    await vi.waitFor(() => {
+      expect(getMoved()).toEqual([0, 0]);
+    });
+    fire('pointerdown', 100, 100);
+    fire('pointermove', 90, 120);
+    fire('pointerup', 90, 120);
+    await vi.waitFor(() => {
+      expect(getMoved()).toEqual([-10, 20]);
+    });
+
+    // A move without the button held ends a drag that lost its `pointerup`
+    fire('pointerdown', 100, 100);
+    fire('pointermove', 100, 110, { buttons: 0 });
+    fire('pointermove', 100, 130);
+    await expect.poll(getMoved).toEqual([-10, 20]);
+
+    // Back to the center when opened again
+    props.open = false;
+    await vi.waitFor(() => {
+      expect(getDialog()).toBeNull();
+    });
+    props.open = true;
+    await waitForOpen();
+    await vi.waitFor(() => {
+      expect(getDialog()?.querySelector('.content')?.getBoundingClientRect().left).toBe(left);
+    });
+  });
+
+  it('is not movable by default', async () => {
+    await render(Dialog, { open: true, title: 'T' });
+    await waitForOpen();
+
+    const content = /** @type {HTMLElement} */ (getDialog()?.querySelector('.content'));
+
+    expect(content.style.translate).toBe('');
+    window.dispatchEvent(new Event('resize'));
+    getDialog()
+      ?.querySelector('.title')
+      ?.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, pointerId: 1, clientX: 1 }));
+    expect(content.style.translate).toBe('');
+  });
 });

@@ -37,6 +37,7 @@
     dialog = $bindable(),
     class: className,
     role = 'dialog',
+    modal = true,
     showBackdrop = false,
     lightDismiss = false,
     escapeDismiss = true,
@@ -60,6 +61,19 @@
    */
   export const focus = () => {
     dialog?.focus();
+  };
+
+  /**
+   * Show the `<dialog>` element, as a modal unless {@link modal} is disabled. A non-modal dialog
+   * leaves the rest of the page usable: it isn’t put in the top layer and doesn’t make the page
+   * `inert`.
+   */
+  const showDialog = () => {
+    if (modal) {
+      dialog?.showModal();
+    } else {
+      dialog?.show();
+    }
   };
 
   /**
@@ -268,7 +282,7 @@
 
     if (gen !== generation || !dialog || dialog.open) return;
 
-    dialog.showModal();
+    showDialog();
     onOpen?.(new CustomEvent('Open'));
     // Force a style recalculation, so the browser has a state to transition from. This is required
     // because the element may have just been added to the DOM tree.
@@ -410,6 +424,7 @@
       {role}
       class="sui modal {className}"
       class:backdrop={showBackdrop}
+      class:non-modal={!modal}
       class:open={setOpenClass}
       class:active={setActiveClass}
       onpointerdown={({ target }) => {
@@ -425,22 +440,30 @@
           return;
         }
 
-        if (
-          dialog &&
-          lightDismiss &&
-          /** @type {HTMLElement | undefined} */ (target)?.matches('dialog')
-        ) {
-          dialog.returnValue = 'cancel';
-          open = false;
+        if (lightDismiss && /** @type {HTMLElement | undefined} */ (target)?.matches('dialog')) {
+          close('cancel');
+        }
+      }}
+      onkeydown={(event) => {
+        // A non-modal dialog gets no `cancel` event from the browser when Escape is pressed, so the
+        // key is handled here instead, as long as the focus is within the dialog. Escape that
+        // cancels an IME composition is left to the input method, as the browser does for a modal
+        if (modal || event.key !== 'Escape' || event.isComposing || event.defaultPrevented) {
+          return;
+        }
+
+        event.preventDefault();
+
+        if (escapeDismiss) {
+          close('cancel');
         }
       }}
       oncancel={(event) => {
         event.preventDefault();
 
         // Escape key is pressed
-        if (dialog && escapeDismiss) {
-          dialog.returnValue = 'cancel';
-          open = false;
+        if (escapeDismiss) {
+          close('cancel');
         }
       }}
       onclose={() => {
@@ -454,7 +477,7 @@
         // activation in between. Show the dialog again if it shouldn’t be dismissed with Escape,
         // otherwise bring the state in line, so the usual closing steps run.
         if (!escapeDismiss) {
-          dialog.showModal();
+          showDialog();
         } else {
           open = false;
         }
@@ -497,6 +520,16 @@
 
     &.backdrop {
       background-color: var(--sui-popup-backdrop-color);
+    }
+
+    // The element still covers the viewport to lay out its content, but only the content takes
+    // pointer events, so the page around it can be scrolled and clicked
+    &.non-modal {
+      pointer-events: none;
+
+      &.active > :global(*) {
+        pointer-events: auto;
+      }
     }
 
     &.open {

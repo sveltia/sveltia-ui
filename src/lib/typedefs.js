@@ -53,7 +53,13 @@
  * @property {'dialog' | 'alertdialog' | 'none'} [role] The `role` attribute on the `<dialog>`
  * element.
  * @property {boolean} [open] Whether to show the modal.
- * @property {boolean} [showBackdrop] Whether to show the backdrop.
+ * @property {boolean} [modal] Whether to show the `<dialog>` element as a modal, which makes the
+ * rest of the page `inert` until it’s closed. Default: `true`. If `false`, the page can still be
+ * scrolled and used while the dialog is open, and the Escape key only dismisses the dialog while
+ * the focus is within it. `lightDismiss` has no effect then, as clicks outside the content go to
+ * the page.
+ * @property {boolean} [showBackdrop] Whether to show the backdrop. Default: `false` on a bare
+ * modal; components built on it, like `<Dialog>`, may choose another.
  * @property {boolean} [lightDismiss] Whether to close the modal when the backdrop (outside of the
  * modal) is clicked.
  * @property {boolean} [escapeDismiss] Whether to close the modal when the Escape key is pressed.
@@ -85,6 +91,15 @@
  * @property {'x-small' | 'small' | 'medium' | 'large' | 'x-large'} [size] Width of the dialog.
  * @property {string} [class] The `class` attribute on the `<dialog>` element.
  * @property {boolean} [open] Whether to open the dialog.
+ * @property {boolean} [modal] Whether to open the dialog as a modal, which makes the rest of the
+ * page `inert` and dims it with a backdrop. Default: `true`. If `false`, the page can still be
+ * scrolled and used while the dialog is open, so the user can refer to it before answering.
+ * @property {boolean} [showBackdrop] Whether to dim the page behind the dialog. Default: the value
+ * of `modal`. A non-modal dialog can have one as well to make it stand out, while the page behind
+ * it can still be scrolled and used.
+ * @property {boolean} [movable] Whether the user can move the dialog around by dragging its header,
+ * so as to see what’s behind it. The dialog is kept within the viewport, and goes back to the
+ * center whenever it’s opened or the viewport is resized. Default: `false`.
  * @property {boolean} [showClose] Whether to show the Close button on the header.
  * @property {boolean} [showOk] Whether to show the OK button on the footer.
  * @property {boolean} [showCancel] Whether to show the Cancel button on the footer.

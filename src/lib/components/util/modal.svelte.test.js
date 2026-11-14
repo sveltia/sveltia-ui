@@ -187,6 +187,91 @@ describe('Modal', () => {
     expect(getDialog()).toBeNull();
   });
 
+  it('leaves the rest of the page usable when not modal', async () => {
+    const onCancel = vi.fn();
+    /** @type {ComponentProps<typeof Modal>} */
+    const props = $state({ open: true, modal: false, onCancel, children: html('<p>Body</p>') });
+
+    await render(Modal, props);
+    await waitFor(() => !!getDialog()?.open);
+
+    const dialog = /** @type {HTMLDialogElement} */ (getDialog());
+
+    expect(dialog.matches(':modal')).toBe(false);
+    expect(dialog.classList.contains('non-modal')).toBe(true);
+    expect(document.body.inert).toBe(false);
+    await waitFor(() => dialog.classList.contains('active'));
+    // Only the content takes pointer events
+    expect(getComputedStyle(dialog).pointerEvents).toBe('none');
+    expect(
+      getComputedStyle(/** @type {HTMLElement} */ (dialog.querySelector('p'))).pointerEvents,
+    ).toBe('auto');
+
+    // Another key is left alone, and so is Escape cancelling an IME composition
+    dialog.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+    dialog.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', isComposing: true }));
+    expect(props.open).toBe(true);
+
+    // The browser fires no `cancel` event for a non-modal dialog, so Escape is handled directly
+    const event = new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true });
+
+    dialog.dispatchEvent(event);
+    expect(event.defaultPrevented).toBe(true);
+    expect(props.open).toBe(false);
+    await waitFor(() => onCancel.mock.calls.length === 1);
+  });
+
+  it('leaves Escape to whatever has handled it already, or keeps a non-modal dialog open', async () => {
+    /** @type {ComponentProps<typeof Modal>} */
+    const props = $state({ open: true, modal: false });
+
+    await render(Modal, props);
+    await waitFor(() => !!getDialog()?.open);
+
+    const dialog = /** @type {HTMLDialogElement} */ (getDialog());
+
+    const handled = new KeyboardEvent('keydown', {
+      key: 'Escape',
+      bubbles: true,
+      cancelable: true,
+    });
+
+    handled.preventDefault();
+    dialog.dispatchEvent(handled);
+    expect(props.open).toBe(true);
+
+    props.escapeDismiss = false;
+
+    const event = new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true });
+
+    dialog.dispatchEvent(event);
+    expect(event.defaultPrevented).toBe(true);
+    expect(props.open).toBe(true);
+
+    // Shown again, still non-modal, when the browser closes it all the same
+    dialog.close();
+    await new Promise((resolve) => {
+      setTimeout(resolve, 50);
+    });
+    expect(dialog.open).toBe(true);
+    expect(dialog.matches(':modal')).toBe(false);
+  });
+
+  it('ignores the keys pressed in a modal dialog, which gets the cancel event', async () => {
+    /** @type {ComponentProps<typeof Modal>} */
+    const props = $state({ open: true });
+
+    await render(Modal, props);
+    await waitFor(() => !!getDialog()?.open);
+    expect(getDialog()?.matches(':modal')).toBe(true);
+
+    const event = new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true });
+
+    getDialog()?.dispatchEvent(event);
+    expect(event.defaultPrevented).toBe(false);
+    expect(props.open).toBe(true);
+  });
+
   it('dismisses when the backdrop is clicked only with light dismiss enabled', async () => {
     const onCancel = vi.fn();
     /** @type {ComponentProps<typeof Modal>} */

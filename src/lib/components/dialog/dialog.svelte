@@ -4,6 +4,18 @@
   @see https://w3c.github.io/aria/#dialog
   @see https://www.w3.org/WAI/ARIA/apg/patterns/dialog-modal/
 -->
+<script module>
+  /**
+   * Keep the distance a dialog is dragged within the room it has on either side.
+   * @param {number} distance Distance moved.
+   * @param {number} before Room on the left or top.
+   * @param {number} after Room on the right or bottom.
+   * @returns {number} Clamped distance.
+   */
+  const clamp = (distance, before, after) =>
+    Math.min(Math.max(distance, -before), Math.max(after, 0));
+</script>
+
 <script>
   import { _ } from '@sveltia/i18n';
   import { sleep } from '@sveltia/utils/misc';
@@ -27,6 +39,9 @@
     ariaLabelledby = undefined,
     role = 'dialog',
     size = 'medium',
+    modal = true,
+    showBackdrop = undefined,
+    movable = false,
     class: className,
     showClose = false,
     showOk = true,
@@ -66,11 +81,127 @@
    * A reference to the modal component.
    * @type {Modal | undefined}
    */
-  let modal = $state();
+  let modalComponent = $state();
   /**
    * @type {HTMLElement | undefined}
    */
   let content = $state();
+
+  /**
+   * How far the user has moved the dialog from the center of the viewport by dragging its header.
+   * @type {{ x: number, y: number }}
+   */
+  let offset = $state({ x: 0, y: 0 });
+  /**
+   * Where the current drag started, if the user is dragging the header.
+   * @type {{ pointerId: number, x: number, y: number, offset: { x: number, y: number }, rect:
+   * DOMRect } | undefined}
+   */
+  let dragStart;
+
+  /**
+   * Move the dialog back to the center of the viewport, ending a drag if any.
+   */
+  const recenter = () => {
+    offset = { x: 0, y: 0 };
+    dragStart = undefined;
+  };
+
+  $effect(() => {
+    if (!open) {
+      return undefined;
+    }
+
+    // Start from the center whenever the dialog is opened again
+    recenter();
+
+    if (!movable) {
+      return undefined;
+    }
+
+    // A moved dialog could end up outside a smaller viewport, so bring it back to the center
+    window.addEventListener('resize', recenter);
+
+    return () => {
+      window.removeEventListener('resize', recenter);
+    };
+  });
+
+  /**
+   * Start moving the dialog when the header is pressed, unless a button or another control in the
+   * header is. Only bound when the dialog is {@link movable}.
+   * @param {PointerEvent} event `pointerdown` event.
+   */
+  const onHeaderPointerDown = (event) => {
+    const { button, pointerId, clientX, clientY, currentTarget, target } = event;
+    const headerElement = /** @type {HTMLElement} */ (currentTarget);
+
+    // Look for the control within the header only: the `<dialog>` around it has `tabindex` as well
+    const control = /** @type {HTMLElement} */ (target).closest(
+      'button, input, select, textarea, a, [tabindex]',
+    );
+
+    if (button !== 0 || (control && headerElement.contains(control))) {
+      return;
+    }
+
+    event.preventDefault();
+    headerElement.setPointerCapture(pointerId);
+    dragStart = {
+      pointerId,
+      x: clientX,
+      y: clientY,
+      offset: { ...offset },
+      // The header is rendered within the content
+      rect: /** @type {HTMLElement} */ (content).getBoundingClientRect(),
+    };
+  };
+
+  /**
+   * Move the dialog along with the pointer, keeping it within the viewport.
+   * @param {PointerEvent} event `pointermove` event.
+   */
+  const onHeaderPointerMove = ({ pointerId, buttons, clientX, clientY }) => {
+    if (!dragStart || dragStart.pointerId !== pointerId) {
+      return;
+    }
+
+    // The drag can end without a `pointerup` reaching the header, e.g. when the dialog is closed
+    // halfway, so a move without the primary button pressed ends it. The primary button is the
+    // lowest bit of `buttons`
+    if (buttons % 2 === 0) {
+      dragStart = undefined;
+
+      return;
+    }
+
+    const { x, y, offset: startOffset, rect } = dragStart;
+
+    offset = {
+      x: startOffset.x + clamp(clientX - x, rect.left, window.innerWidth - rect.right),
+      y: startOffset.y + clamp(clientY - y, rect.top, window.innerHeight - rect.bottom),
+    };
+  };
+
+  /**
+   * Stop moving the dialog.
+   * @param {PointerEvent} event `pointerup` or `pointercancel` event.
+   */
+  const onHeaderPointerUp = ({ pointerId }) => {
+    if (dragStart?.pointerId === pointerId) {
+      dragStart = undefined;
+    }
+  };
+
+  /**
+   * Event handlers that let the user move the dialog by dragging its header.
+   */
+  const dragHandlers = {
+    onpointerdown: onHeaderPointerDown,
+    onpointermove: onHeaderPointerMove,
+    onpointerup: onHeaderPointerUp,
+    onpointercancel: onHeaderPointerUp,
+  };
 
   $effect(() => {
     if (open && content) {
@@ -102,7 +233,7 @@
         } else {
           // Fall back to the `<dialog>` element itself, so the focus is never left outside the
           // modal, e.g. when the dialog has no input field or primary button
-          modal?.focus();
+          modalComponent?.focus();
         }
       })();
 
@@ -116,7 +247,7 @@
 </script>
 
 <Modal
-  bind:this={modal}
+  bind:this={modalComponent}
   {...restProps}
   {role}
   {id}
@@ -125,11 +256,17 @@
   aria-labelledby={labelledby}
   aria-describedby="{id}-body"
   bind:open
-  showBackdrop
+  {modal}
+  showBackdrop={showBackdrop ?? modal}
 >
-  <div bind:this={content} role="none" class={['content', className, size]}>
+  <div
+    bind:this={content}
+    role="none"
+    class={['content', className, size]}
+    style:translate={movable ? `${offset.x}px ${offset.y}px` : undefined}
+  >
     {#if title || showClose || header || headerExtra}
-      <div role="none" class="header">
+      <div role="none" class="header" class:movable {...movable ? dragHandlers : {}}>
         {#if header}
           {@render header()}
         {:else}
@@ -143,7 +280,7 @@
               controls={id}
               {closeIcon}
               onClose={() => {
-                modal?.close('close');
+                modalComponent?.close('close');
               }}
             />
           {/if}
@@ -167,7 +304,7 @@
               keyShortcuts={okShortcuts}
               disabled={okDisabled}
               onclick={() => {
-                modal?.close('ok');
+                modalComponent?.close('ok');
               }}
             />
           {/if}
@@ -178,7 +315,7 @@
               keyShortcuts={cancelShortcuts}
               disabled={cancelDisabled}
               onclick={() => {
-                modal?.close('cancel');
+                modalComponent?.close('cancel');
               }}
             />
           {/if}
@@ -296,6 +433,10 @@
     border-color: var(--sui-dialog-header-border-color, var(--sui-secondary-border-color));
     padding: var(--sui-dialog-header-padding, 16px 8px);
     height: var(--sui-dialog-header-height, 32px);
+
+    &.movable {
+      cursor: move;
+    }
 
     .title {
       font-size: var(--sui-font-size-large);
