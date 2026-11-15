@@ -118,6 +118,7 @@ text_editor:
   heading_6: 제목 6
   bulleted_list: 글머리 기호 목록
   numbered_list: 번호 매기기 목록
+  task_list: 할 일 목록
   blockquote: 인용 블록
   code_block: 코드 블록
   # Inline style button aria-labels

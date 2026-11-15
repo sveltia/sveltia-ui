@@ -16,6 +16,7 @@ import {
   HTML_CODE_IMPORT_MAP,
   HTML_EXPORT_MAP,
   HTML_IMPORT_MAP,
+  HTML_TASK_LIST_IMPORT_MAP,
 } from './conversion/html.js';
 import { registerCodeHighlighting, shikiTokenizer } from './shiki/highlighter.js';
 import { getCodeTheme, observeCodeTheme } from './shiki/theme.js';
@@ -181,7 +182,11 @@ const createEditorExtension = ({
       format === 'html'
         ? {
             export: HTML_EXPORT_MAP,
-            import: { ...HTML_IMPORT_MAP, ...(hasCodeBlock ? HTML_CODE_IMPORT_MAP : {}) },
+            import: {
+              ...HTML_IMPORT_MAP,
+              ...(hasCodeBlock ? HTML_CODE_IMPORT_MAP : {}),
+              ...(enabledButtons.includes('task-list') ? HTML_TASK_LIST_IMPORT_MAP : {}),
+            },
           }
         : undefined,
     /**

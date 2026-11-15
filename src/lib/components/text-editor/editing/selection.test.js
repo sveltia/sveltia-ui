@@ -348,6 +348,12 @@ describe('getSelectionTypes', () => {
     const result = getSelectionTypes();
 
     expect(result.blockType).toBe('numbered-list');
+
+    // A check list is a task list
+    vi.mocked(getNearestNodeOfType).mockReturnValueOnce(
+      /** @type {any} */ ({ ...mockParent, getListType: () => 'check' }),
+    );
+    expect(getSelectionTypes().blockType).toBe('task-list');
   });
 
   it('returns code-block type when parent is CodeHighlightNode', () => {

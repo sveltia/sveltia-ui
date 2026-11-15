@@ -118,6 +118,7 @@ text_editor:
   heading_6: Encabezado 6
   bulleted_list: Lista con viñetas
   numbered_list: Lista numerada
+  task_list: Lista de tareas
   blockquote: Cita
   code_block: Bloque de código
   # Inline style button aria-labels

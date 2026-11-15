@@ -34,6 +34,7 @@ vi.mock('@lexical/table', () => getMock('@lexical/table'));
 vi.mock('@lexical/utils', () => getMock('@lexical/utils'));
 vi.mock('lexical', () => getMock('lexical'));
 
+import { $insertList as insertList, ListNode, registerCheckList } from '@lexical/list';
 import { $getNearestNodeOfType as getNearestNodeOfType } from '@lexical/utils';
 import { ElementNode, TextNode } from 'lexical';
 import {
@@ -198,6 +199,55 @@ describe('editor commands', () => {
       transform(plain);
       expect(underlined.toggleFormat).toHaveBeenCalledWith('underline');
       expect(plain.toggleFormat).not.toHaveBeenCalled();
+      dispose();
+    });
+  });
+
+  describe('task lists', () => {
+    /**
+     * Initialize the editor with the given buttons.
+     * @param {any[]} enabledButtons Enabled buttons.
+     * @returns {() => void} Cleanup.
+     */
+    const init = (enabledButtons) =>
+      initEditor({
+        components: [],
+        useMarkdownShortcuts: false,
+        isCodeEditor: false,
+        modes: [],
+        enabledButtons,
+      }).dispose;
+
+    it('inserts a check list and lets the items be toggled with the task list button', () => {
+      const dispose = init(['task-list']);
+      const command = editorState._commands.find(({ command: name }) => name === 'insertCheckList');
+
+      expect(command?.listener()).toBe(true);
+      expect(insertList).toHaveBeenCalledWith('check');
+      expect(registerCheckList).toHaveBeenCalledWith(editorState);
+      // A task list is kept as is
+      expect(editorState._transforms.find(({ klass }) => klass === ListNode)).toBeUndefined();
+      dispose();
+    });
+
+    it('turns a check list into a bulleted list without the task list button', () => {
+      const dispose = init(['bulleted-list']);
+      const transform = editorState._transforms.find(({ klass }) => klass === ListNode)?.listener;
+      const checkList = { getListType: () => 'check', setListType: vi.fn() };
+      const bulletedList = { getListType: () => 'bullet', setListType: vi.fn() };
+
+      expect(registerCheckList).not.toHaveBeenCalled();
+      transform(checkList);
+      transform(bulletedList);
+      expect(checkList.setListType).toHaveBeenCalledWith('bullet');
+      expect(bulletedList.setListType).not.toHaveBeenCalled();
+      dispose();
+    });
+
+    it('registers nothing for lists without any list button, as `ListNode` is not registered', () => {
+      const dispose = init(['bold']);
+
+      expect(editorState._transforms.find(({ klass }) => klass === ListNode)).toBeUndefined();
       dispose();
     });
   });

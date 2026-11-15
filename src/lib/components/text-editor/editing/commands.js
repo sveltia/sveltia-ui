@@ -10,10 +10,10 @@ import {
 } from '@lexical/code-core';
 import {
   $handleListInsertParagraph as handleListInsertParagraph,
-  INSERT_ORDERED_LIST_COMMAND,
-  INSERT_UNORDERED_LIST_COMMAND,
   $insertList as insertList,
   $isListItemNode as isListItemNode,
+  ListNode,
+  registerCheckList,
 } from '@lexical/list';
 import { $getNearestNodeOfType as getNearestNodeOfType } from '@lexical/utils';
 import {
@@ -34,17 +34,12 @@ import {
   TextNode,
 } from 'lexical';
 import { getNearestElementNode } from './selection.js';
-import { HTML_ONLY_FORMAT_TYPES, isHtmlOnlyButton } from '../constants.js';
+import { HTML_ONLY_FORMAT_TYPES, isHtmlOnlyButton, LIST_TYPES } from '../constants.js';
 import { mergeUnregisters } from '../utils.js';
 
 /**
  * @import { LexicalEditor, TextFormatType } from 'lexical';
- * @import { ListType } from '@lexical/list';
- * @import {
- * TextEditorBlockType,
- * TextEditorConfig,
- * TextEditorValueFormat,
- * } from '#lib/typedefs.js';
+ * @import { TextEditorConfig, TextEditorValueFormat } from '#lib/typedefs.js';
  */
 
 /**
@@ -125,25 +120,19 @@ export const registerCodeEditorCommands = (editor, defaultLanguage) =>
   );
 
 /**
- * List buttons, along with the command to insert the list and its type.
- * @type {[TextEditorBlockType, typeof INSERT_UNORDERED_LIST_COMMAND, ListType][]}
- */
-const LIST_COMMANDS = [
-  ['bulleted-list', INSERT_UNORDERED_LIST_COMMAND, 'bullet'],
-  ['numbered-list', INSERT_ORDERED_LIST_COMMAND, 'number'],
-];
-
-/**
- * Register the commands for the enabled list buttons.
+ * Register the commands for the enabled list buttons. With the task list button, a check box can be
+ * toggled with a click or the Space key. Without it, a task list that comes in anyway, like one in
+ * pasted HTML, becomes a bulleted list, as it couldn’t be toggled.
  * @param {LexicalEditor} editor Editor instance.
  * @param {TextEditorConfig['enabledButtons']} enabledButtons Enabled buttons.
  * @returns {() => void} Cleanup handler.
  */
 export const registerListCommands = (editor, enabledButtons = []) => {
-  const enabledLists = LIST_COMMANDS.filter(([button]) => enabledButtons.includes(button));
+  const enabledLists = LIST_TYPES.filter(({ type }) => enabledButtons.includes(type));
+  const hasTaskList = enabledButtons.includes('task-list');
 
   return mergeUnregisters(
-    ...enabledLists.map(([, command, listType]) =>
+    ...enabledLists.map(({ command, listType }) =>
       editor.registerCommand(
         command,
         () => {
@@ -161,6 +150,15 @@ export const registerListCommands = (editor, enabledButtons = []) => {
           () => handleListInsertParagraph(),
           COMMAND_PRIORITY_NORMAL,
         )
+      : undefined,
+    hasTaskList ? registerCheckList(editor) : undefined,
+    // `ListNode` is only registered with a list button
+    enabledLists.length && !hasTaskList
+      ? editor.registerNodeTransform(ListNode, (list) => {
+          if (list.getListType() === 'check') {
+            list.setListType('bullet');
+          }
+        })
       : undefined,
   );
 };
@@ -191,11 +189,10 @@ const $removeFormat = (type) => {
 /**
  * Keep the HTML-only text formats, like underline, out of the editor unless their buttons are
  * enabled for HTML. Lexical applies underline with the Ctrl/Cmd+U shortcut on its own, and pasted
- * HTML can bring it in as well.
- * - For Markdown, which has no syntax for them and would drop them when saved, the formats are
- *   removed from any text that gets them, and the shortcut does nothing.
- * - For HTML without the button, the shortcut can only remove an existing format, like one in the
- *   stored value or in pasted text, which would otherwise have no button to undo it.
+ * HTML can bring it in as well. For Markdown, which has no syntax for them and would drop them when
+ * saved, the formats are removed from any text that gets them, and the shortcut does nothing. For
+ * HTML without the button, the shortcut can only remove an existing format, like one in the stored
+ * value or in pasted text, which would otherwise have no button to undo it.
  * @param {LexicalEditor} editor Editor instance.
  * @param {object} args Arguments.
  * @param {TextEditorValueFormat} args.format Value format.

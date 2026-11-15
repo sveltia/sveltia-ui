@@ -8,6 +8,7 @@
 
 import { isMac, matchesShortcuts } from '@sveltia/utils/events';
 import { getComponentMarkdown } from '../conversion/editor-components.js';
+import { TASK_LIST_ITEM_REGEX } from '../conversion/transformers/task-list.js';
 
 /**
  * @import {
@@ -48,9 +49,12 @@ const INLINE_MARKERS = {
 };
 
 /**
- * Prefix of a heading, list item or blockquote line.
+ * Prefix of a heading, list item or blockquote line, including the check box of a task list item,
+ * which can only be one or two spaces after the marker; see `TASK_LIST_ITEM_REGEX`.
  */
-const BLOCK_PREFIX_REGEX = /^(?:#{1,6}[ \t]+|>[ \t]?|[-*+][ \t]+|\d+[.)][ \t]+)/;
+const BLOCK_PREFIX_REGEX =
+  /^(?:#{1,6}[ \t]+|>[ \t]?|[-*+](?:[ \t]{1,2}\[[ xX]\][ \t]+|[ \t]+)|\d+[.)][ \t]+)/;
+
 const CODE_FENCE_REGEX = /^[ \t]*(?:```|~~~)/;
 
 /**
@@ -111,9 +115,13 @@ const findCodeBlock = (lines, lineIndex) => {
 /**
  * Get the type of the block where the selection starts.
  * @param {RawTextState} state Current state.
+ * @param {object} [options] Options.
+ * @param {boolean} [options.hasTaskList] Whether the task list button is enabled, which it isn’t
+ * by default. Without it, a task list item is a bulleted list item, as the rich text editor imports
+ * it.
  * @returns {TextEditorBlockType} Block type.
  */
-export const getBlockType = (state) => {
+export const getBlockType = (state, { hasTaskList = false } = {}) => {
   const lines = state.value.split('\n');
   const lineIndex = getStartLineIndex(state);
   const line = lines[lineIndex];
@@ -126,6 +134,10 @@ export const getBlockType = (state) => {
 
   if (hashes) {
     return /** @type {TextEditorBlockType} */ (`heading-${hashes.length}`);
+  }
+
+  if (hasTaskList && TASK_LIST_ITEM_REGEX.test(line)) {
+    return 'task-list';
   }
 
   if (/^[-*+][ \t]/.test(line)) {
@@ -271,6 +283,10 @@ export const setBlockType = (state, type) => {
 
     if (type === 'bulleted-list') {
       return line.trim() ? '- ' : '';
+    }
+
+    if (type === 'task-list') {
+      return line.trim() ? '- [ ] ' : '';
     }
 
     if (type === 'numbered-list') {

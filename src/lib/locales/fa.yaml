@@ -118,6 +118,7 @@ text_editor:
   heading_6: سرتیتر ۶
   bulleted_list: فهرست نشانه‌دار
   numbered_list: فهرست شماره‌دار
+  task_list: فهرست کارها
   blockquote: نقل‌قول
   code_block: بلوک کد
   # Inline style button aria-labels

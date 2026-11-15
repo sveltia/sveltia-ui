@@ -118,6 +118,7 @@ text_editor:
   heading_6: Tiêu đề 6
   bulleted_list: Dấu đầu dòng
   numbered_list: Đánh số
+  task_list: Danh sách công việc
   blockquote: Trích dẫn
   code_block: Khối mã
   # Inline style button aria-labels

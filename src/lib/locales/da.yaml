@@ -118,6 +118,7 @@ text_editor:
   heading_6: Overskrift 6
   bulleted_list: Punktopstilling
   numbered_list: Nummereret liste
+  task_list: Opgaveliste
   blockquote: Citat
   code_block: Kodeblok
   # Inline style button aria-labels

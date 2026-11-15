@@ -118,6 +118,7 @@ text_editor:
   heading_6: عنوان 6
   bulleted_list: قائمة نقطية
   numbered_list: قائمة مرقمة
+  task_list: قائمة مهام
   blockquote: اقتباس
   code_block: كتلة برمجية
   # Inline style button aria-labels

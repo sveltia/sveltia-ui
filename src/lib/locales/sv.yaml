@@ -118,6 +118,7 @@ text_editor:
   heading_6: Rubrik 6
   bulleted_list: Punktlista
   numbered_list: Numrerad lista
+  task_list: Uppgiftslista
   blockquote: Blockcitat
   code_block: Kodblock
   # Inline style button aria-labels

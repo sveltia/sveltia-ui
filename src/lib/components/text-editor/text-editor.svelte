@@ -263,7 +263,9 @@
         blockNodeKey: null,
         blockType:
           document.activeElement === textArea
-            ? getBlockType(getRawTextState(textArea))
+            ? getBlockType(getRawTextState(textArea), {
+                hasTaskList: editorStore.config.enabledButtons.includes('task-list'),
+              })
             : 'paragraph',
         inlineTypes: [],
       };

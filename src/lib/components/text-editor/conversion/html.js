@@ -2,7 +2,7 @@ import { CodeHighlightNode, CodeNode, $createCodeNode as createCodeNode } from '
 import { HorizontalRuleNode } from '@lexical/extension';
 import { $generateHtmlFromNodes as generateHtmlFromNodes } from '@lexical/html';
 import { LinkNode } from '@lexical/link';
-import { ListItemNode, ListNode } from '@lexical/list';
+import { $isListNode as isListNode, ListItemNode, ListNode } from '@lexical/list';
 import { HeadingNode, QuoteNode } from '@lexical/rich-text';
 import { TableCellNode, TableNode } from '@lexical/table';
 import {
@@ -448,6 +448,84 @@ const exportTableNode = (editor, node) => {
 };
 
 /**
+ * Export an element node with {@link exportElementNode}, then update the cleaned-up element with
+ * the given function, like adding the classes and check boxes of a GitHub Flavored Markdown task
+ * list. GitHub and markdown-it render a task list the same way, which Lexical imports back as a
+ * task list.
+ * @param {LexicalEditor} editor Editor instance.
+ * @param {ElementNode} node Element node.
+ * @param {(element: HTMLElement) => void} decorate Function to update the exported element.
+ * @returns {DOMExportOutput} Export output.
+ * @example
+ * <ul class="contains-task-list">
+ *   <li class="task-list-item"><input type="checkbox" disabled checked> Done</li>
+ * </ul>
+ */
+const exportDecoratedElementNode = (editor, node, decorate) => {
+  const output = exportElementNode(editor, node);
+
+  return {
+    ...output,
+    /**
+     * Update the element once it’s been cleaned up.
+     * @param {HTMLElement | DocumentFragment | Text | null | undefined} element Exported element.
+     * @returns {HTMLElement | DocumentFragment | Text | null | undefined} New element, if any.
+     */
+    after: (element) => {
+      const newElement = output.after?.(element);
+      const target = newElement ?? element;
+
+      if (isHTMLElement(target)) {
+        decorate(target);
+      }
+
+      return newElement;
+    },
+  };
+};
+
+/**
+ * Export a list node, adding the class of a task list to a check list.
+ * @param {LexicalEditor} editor Editor instance.
+ * @param {ListNode} node List node.
+ * @returns {DOMExportOutput} Export output.
+ */
+const exportListNode = (editor, node) =>
+  exportDecoratedElementNode(editor, node, (element) => {
+    if (node.getListType() === 'check') {
+      element.classList.add('contains-task-list');
+    }
+  });
+
+/**
+ * Export a list item node, adding the class and a disabled check box to an item of a check list.
+ * An item that only holds a nested list has neither, as it’s merged into the previous item.
+ * @param {LexicalEditor} editor Editor instance.
+ * @param {ListItemNode} node List item node.
+ * @returns {DOMExportOutput} Export output.
+ */
+const exportListItemNode = (editor, node) =>
+  exportDecoratedElementNode(editor, node, (element) => {
+    const parent = node.getParent();
+
+    if (
+      !isListNode(parent) ||
+      parent.getListType() !== 'check' ||
+      isListNode(node.getFirstChild())
+    ) {
+      return;
+    }
+
+    const checkbox = element.ownerDocument.createElement('input');
+
+    checkbox.type = 'checkbox';
+    checkbox.disabled = true;
+    checkbox.toggleAttribute('checked', !!node.getChecked());
+    element.classList.add('task-list-item');
+    element.prepend(checkbox, ' ');
+  });
+
+/**
  * Map of Lexical node classes and functions to export them to clean HTML. A class only takes effect
  * if the node is registered with the editor. Other nodes, including the ones of editor components,
  * are exported with their own `exportDOM` method.
@@ -461,8 +539,8 @@ export const HTML_EXPORT_MAP = new Map(
     [ParagraphNode, exportParagraphNode],
     [HeadingNode, exportElementNode],
     [QuoteNode, exportElementNode],
-    [ListNode, exportElementNode],
-    [ListItemNode, exportElementNode],
+    [ListNode, exportListNode],
+    [ListItemNode, exportListItemNode],
     [LinkNode, exportElementNode],
     [HorizontalRuleNode, exportElementNode],
     [CodeNode, exportCodeNode],
@@ -751,6 +829,42 @@ export const HTML_CODE_IMPORT_MAP = {
 };
 
 /**
+ * Check whether the given element is the check box of a task list item, like the `<input>` in
+ * `<li class="task-list-item"><input type="checkbox" disabled> Item</li>`, as GitHub and
+ * markdown-it render a GitHub Flavored Markdown task list. Lexical imports the item as a check list
+ * item, taking its state from the first `<input>` in it.
+ * @param {Element} element Element.
+ * @returns {boolean} Result.
+ */
+export const isTaskListCheckbox = (element) =>
+  element.localName === 'input' &&
+  element.getAttribute('type')?.toLowerCase() === 'checkbox' &&
+  !!element.parentElement?.matches('li.task-list-item') &&
+  element.parentElement.querySelector(':scope > input') === element;
+
+/**
+ * Drop an element without importing it.
+ * @returns {DOMConversionOutput} Conversion output.
+ */
+const dropElement = () => ({ node: null });
+
+/**
+ * Additional DOM conversions to import HTML with task lists. The check box of a task list item is
+ * dropped, as Lexical has already taken its state for the item. Any other `<input>` is still
+ * reported by {@link findUnsupportedNode}.
+ * @type {DOMConversionMap}
+ */
+export const HTML_TASK_LIST_IMPORT_MAP = {
+  /**
+   * Get the conversion for an `<input>` element.
+   * @param {HTMLElement} element Element.
+   * @returns {DOMConversion | null} Conversion.
+   */
+  input: (element) =>
+    isTaskListCheckbox(element) ? { conversion: dropElement, priority: 1 } : null,
+};
+
+/**
  * Get the names of the elements only editor components import, which no other node handles.
  * @param {LexicalEditor} editor Editor instance.
  * @returns {Set<string>} Tag names.
@@ -826,7 +940,10 @@ export const findUnsupportedNode = (editor, dom) => {
       if (
         !DOCUMENT_TAGS.includes(tagName) &&
         !PASSTHROUGH_TAGS.includes(tagName) &&
-        (!editor._htmlConversions.has(tagName) || componentOnlyTagNames.has(tagName))
+        (!editor._htmlConversions.has(tagName) ||
+          componentOnlyTagNames.has(tagName) ||
+          // Only the check box of a task list item can be imported
+          (tagName === 'input' && !isTaskListCheckbox(element)))
       ) {
         found = element;
 

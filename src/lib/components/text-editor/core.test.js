@@ -58,8 +58,9 @@ describe('initEditor', () => {
     expect(editor).toBe(editorState);
     // No format guard for the code editor
     expect(editorState._commands).toHaveLength(7);
-    // The root transform for the code editor, and the link transform
-    expect(editorState._transforms).toHaveLength(2);
+    // The root transform for the code editor, the link transform, and the list transform that turns
+    // a task list into a bulleted list without the task list button
+    expect(editorState._transforms).toHaveLength(3);
     expect(editorState._updateListeners).toHaveLength(1);
     expect(editorState._rootListeners).toHaveLength(1);
 

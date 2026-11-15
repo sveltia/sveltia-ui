@@ -118,6 +118,7 @@ text_editor:
   heading_6: Kop 6
   bulleted_list: Opsommingslijst
   numbered_list: Genummerde lijst
+  task_list: Takenlijst
   blockquote: Citaatblok
   code_block: Codeblok
   # Inline style button aria-labels

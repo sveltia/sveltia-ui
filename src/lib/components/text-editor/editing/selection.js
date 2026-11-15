@@ -19,7 +19,7 @@ import {
   $getSelection as getSelection,
   $isRangeSelection as isRangeSelection,
 } from 'lexical';
-import { BLOCK_BUTTON_TYPES, TEXT_FORMAT_BUTTON_TYPES } from '../constants.js';
+import { BLOCK_BUTTON_TYPES, LIST_TYPES, TEXT_FORMAT_BUTTON_TYPES } from '../constants.js';
 import { $getSelectedAlignment } from './alignment.js';
 import { $getSelectedTableCellKey } from './table.js';
 
@@ -91,7 +91,11 @@ export const getSelectionTypes = () => {
       }
 
       if (isListNode(parent)) {
-        return parent.getListType() === 'bullet' ? 'bulleted-list' : 'numbered-list';
+        const listType = parent.getListType();
+
+        return /** @type {TextEditorBlockType} */ (
+          LIST_TYPES.find((list) => list.listType === listType)?.type
+        );
       }
 
       if (isQuoteNode(parent)) {

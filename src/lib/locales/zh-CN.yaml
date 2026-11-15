@@ -118,6 +118,7 @@ text_editor:
   heading_6: 六级标题
   bulleted_list: 无序列表
   numbered_list: 有序列表
+  task_list: 任务列表
   blockquote: 引用块
   code_block: 代码块
   # Inline style button aria-labels

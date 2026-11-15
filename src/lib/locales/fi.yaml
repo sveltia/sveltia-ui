@@ -118,6 +118,7 @@ text_editor:
   heading_6: Otsikko 6
   bulleted_list: Luettelomerkitty luettelo
   numbered_list: Numeroitu luettelo
+  task_list: Tehtäväluettelo
   blockquote: Lainaus
   code_block: Koodilohko
   # Inline style button aria-labels

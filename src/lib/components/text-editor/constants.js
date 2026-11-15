@@ -1,6 +1,12 @@
 import { CodeHighlightNode, CodeNode } from '@lexical/code-core';
 import { LinkNode } from '@lexical/link';
-import { ListItemNode, ListNode } from '@lexical/list';
+import {
+  INSERT_CHECK_LIST_COMMAND,
+  INSERT_ORDERED_LIST_COMMAND,
+  INSERT_UNORDERED_LIST_COMMAND,
+  ListItemNode,
+  ListNode,
+} from '@lexical/list';
 import {
   BOLD_ITALIC_STAR,
   BOLD_ITALIC_UNDERSCORE,
@@ -21,9 +27,11 @@ import { createCommand } from 'lexical';
 import { CODE } from './conversion/transformers/code.js';
 import { LEADING_INLINE_CODE } from './conversion/transformers/inline-code.js';
 import { LINK } from './conversion/transformers/link.js';
+import { TASK_LIST } from './conversion/transformers/task-list.js';
 
 /**
  * @import { EditorThemeClasses, LexicalCommand } from 'lexical';
+ * @import { ListType } from '@lexical/list';
  * @import { Transformer } from '@lexical/markdown';
  * @import {
  * TextEditorBlockType,
@@ -52,6 +60,9 @@ export const EDITOR_THEME = {
     nested: {
       listitem: 'nested',
     },
+    // Task list items, drawn with a check box; see `lexical-root.svelte`
+    listitemChecked: 'task-list-item checked',
+    listitemUnchecked: 'task-list-item',
   },
   code: 'code-block',
   // Lexical wraps a table with an element to scroll it horizontally when the table button is
@@ -141,6 +152,11 @@ export const AVAILABLE_BUTTONS = {
     icon: 'format_list_numbered',
     inline: false,
   },
+  'task-list': {
+    labelKey: 'task_list',
+    icon: 'checklist',
+    inline: false,
+  },
   blockquote: {
     labelKey: 'blockquote',
     icon: 'format_quote',
@@ -186,6 +202,7 @@ export const BLOCK_BUTTON_TYPES = [
   'heading-6',
   'bulleted-list',
   'numbered-list',
+  'task-list',
   'blockquote',
   'code-block',
 ];
@@ -212,12 +229,29 @@ export const isHtmlOnlyButton = (type) =>
 export const HTML_ONLY_FORMAT_TYPES = TEXT_FORMAT_BUTTON_TYPES.filter(isHtmlOnlyButton);
 
 /**
- * Buttons enabled by default: all the inline and block level buttons but the HTML-only ones.
+ * Buttons not enabled by default: the HTML-only ones and the task list, a GitHub Flavored Markdown
+ * extension that not every Markdown renderer supports.
+ * @type {TextEditorNodeType[]}
+ */
+export const OPTIONAL_BUTTON_TYPES = [...HTML_ONLY_BUTTON_TYPES, 'task-list'];
+
+/**
+ * Buttons enabled by default: all the inline and block level buttons but the optional ones.
  * @type {TextEditorNodeType[]}
  */
 export const DEFAULT_BUTTON_TYPES = [...INLINE_BUTTON_TYPES, ...BLOCK_BUTTON_TYPES].filter(
-  (type) => !isHtmlOnlyButton(type),
+  (type) => !OPTIONAL_BUTTON_TYPES.includes(type),
 );
+
+/**
+ * List block types, with their Lexical list type and the command to insert the list.
+ * @type {{ type: TextEditorBlockType, listType: ListType, command: LexicalCommand<void> }[]}
+ */
+export const LIST_TYPES = [
+  { type: 'bulleted-list', listType: 'bullet', command: INSERT_UNORDERED_LIST_COMMAND },
+  { type: 'numbered-list', listType: 'number', command: INSERT_ORDERED_LIST_COMMAND },
+  { type: 'task-list', listType: 'check', command: INSERT_CHECK_LIST_COMMAND },
+];
 
 /**
  * Map of Lexical nodes for each block type. The `paragraph` block type is excluded because it is
@@ -233,6 +267,7 @@ export const NODE_MAP = {
   'heading-6': [HeadingNode],
   'bulleted-list': [ListNode, ListItemNode],
   'numbered-list': [ListNode, ListItemNode],
+  'task-list': [ListNode, ListItemNode],
   blockquote: [QuoteNode],
   'code-block': [CodeNode, CodeHighlightNode],
   link: [LinkNode],
@@ -252,6 +287,8 @@ export const TRANSFORMER_MAP = {
   'heading-4': [HEADING],
   'heading-5': [HEADING],
   'heading-6': [HEADING],
+  // Before the bulleted list, as `- [ ] item` matches both
+  'task-list': [TASK_LIST],
   'bulleted-list': [UNORDERED_LIST],
   'numbered-list': [ORDERED_LIST],
   blockquote: [QUOTE],

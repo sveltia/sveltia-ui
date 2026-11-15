@@ -123,6 +123,7 @@ text_editor:
   heading_6: כותרת 6
   bulleted_list: רשימת תבליטים
   numbered_list: רשימה ממוספרת
+  task_list: רשימת משימות
   blockquote: ציטוט
   code_block: קטע קוד
   # Inline style button aria-labels

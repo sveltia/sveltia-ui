@@ -118,6 +118,7 @@ text_editor:
   heading_6: Başlık 6
   bulleted_list: Madde İşaretli Liste
   numbered_list: Numaralı Liste
+  task_list: Görev Listesi
   blockquote: Alıntı
   code_block: Kod Bloğu
   # Inline style button aria-labels

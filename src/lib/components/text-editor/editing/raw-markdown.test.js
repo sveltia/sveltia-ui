@@ -93,6 +93,15 @@ describe('getBlockType', () => {
     expect(getBlockType(state('####### |Not a heading'))).toBe('paragraph');
     expect(getBlockType(state('- |Item'))).toBe('bulleted-list');
     expect(getBlockType(state('* |Item'))).toBe('bulleted-list');
+    expect(getBlockType(state('- [ ] |Item'), { hasTaskList: true })).toBe('task-list');
+    expect(getBlockType(state('* [X] |Item'), { hasTaskList: true })).toBe('task-list');
+    // Not a task list item without the space after the check box, or without the task list button
+    expect(getBlockType(state('- [x]|Item'), { hasTaskList: true })).toBe('bulleted-list');
+    // Nor with more than two spaces after the marker, which Lexical imports as a bulleted list item
+    expect(getBlockType(state('-   [ ] |Item'), { hasTaskList: true })).toBe('bulleted-list');
+    // Nor with indentation, like any other block
+    expect(getBlockType(state('  - [ ] |Item'), { hasTaskList: true })).toBe('paragraph');
+    expect(getBlockType(state('- [ ] |Item'))).toBe('bulleted-list');
     expect(getBlockType(state('12. |Item'))).toBe('numbered-list');
     expect(getBlockType(state('> |Quote'))).toBe('blockquote');
   });
@@ -132,6 +141,15 @@ describe('setBlockType', () => {
     expect(change('|One\n\nTwo|', 'blockquote')).toBe('> |One\n>\n> Two|');
     expect(change('|One\n\nTwo|', 'numbered-list')).toBe('1. |One\n\n2. Two|');
     expect(change('|One\n\nTwo|', 'heading-2')).toBe('## |One\n\n## Two|');
+  });
+
+  it('turns lines into task list items and back, replacing the whole prefix', () => {
+    expect(change('|One\n\nTwo|', 'task-list')).toBe('- [ ] |One\n\n- [ ] Two|');
+    expect(change('|- One\n1. Two|', 'task-list')).toBe('- [ ] |One\n- [ ] Two|');
+    expect(change('|- [x] One\n- [ ] Two|', 'bulleted-list')).toBe('- |One\n- Two|');
+    expect(change('- [x] |One', 'paragraph')).toBe('|One');
+    // `[ ]` is text after more than two spaces, so it’s kept
+    expect(change('-   [ ] |One', 'paragraph')).toBe('[ ] |One');
   });
 
   it('ignores a line only selected at its very start', () => {

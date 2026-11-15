@@ -388,6 +388,57 @@
         list-style-type: none;
       }
 
+      // Task list items; see `EDITOR_THEME`. The `::before` pseudo-element draws the check box,
+      // which Lexical hit-tests to toggle the item on click, so it must stay at the start of the
+      // item and hold the box only. Lexical also gives the class to an item that only holds a
+      // nested list, which has no check box
+      li.task-list-item:not(.nested) {
+        position: relative;
+        padding-inline-start: 1.5em;
+        list-style-type: none;
+
+        &::before {
+          position: absolute;
+          inset-block-start: calc((1lh - 1em) / 2);
+          inset-inline-start: 0;
+          border: var(--sui-checkbox-border-width, 1.5px) solid var(--sui-checkbox-border-color);
+          border-radius: var(--sui-checkbox-border-radius);
+          width: 1em;
+          height: 1em;
+          background-color: var(--sui-checkbox-background-color);
+          content: '';
+          cursor: pointer;
+        }
+
+        &.checked {
+          &::before {
+            border-color: var(--sui-checkbox-border-color-checked, var(--sui-primary-accent-color));
+            background-color: var(
+              --sui-checkbox-background-color-checked,
+              var(--sui-primary-accent-color)
+            );
+          }
+
+          // Check mark
+          &::after {
+            position: absolute;
+            inset-block-start: calc((1lh - 1em) / 2 + 0.15em);
+            inset-inline-start: 0.35em;
+            border-width: 0 2px 2px 0;
+            border-style: solid;
+            border-color: var(
+              --sui-checkbox-foreground-color-checked,
+              var(--sui-primary-accent-color-inverted)
+            );
+            width: 0.3em;
+            height: 0.55em;
+            content: '';
+            transform: rotate(45deg);
+            pointer-events: none;
+          }
+        }
+      }
+
       .code-block {
         position: relative;
         display: block;

@@ -118,6 +118,7 @@ text_editor:
   heading_6: Encapçalament 6
   bulleted_list: Llista amb pics
   numbered_list: Llista numerada
+  task_list: Llista de tasques
   blockquote: Bloc de cita
   code_block: Bloc de codi
   # Inline style button aria-labels

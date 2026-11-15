@@ -118,6 +118,7 @@ text_editor:
   heading_6: Заглавие 6
   bulleted_list: Неномериран списък
   numbered_list: Номериран списък
+  task_list: Списък със задачи
   blockquote: Цитат
   code_block: Блок с код
   # Inline style button aria-labels

@@ -195,11 +195,13 @@ editorMocks['@lexical/link'] = {
 
 editorMocks['@lexical/list'] = {
   $handleListInsertParagraph: vi.fn(),
+  INSERT_CHECK_LIST_COMMAND: 'insertCheckList',
   INSERT_ORDERED_LIST_COMMAND: 'insertOrderedList',
   INSERT_UNORDERED_LIST_COMMAND: 'insertUnorderedList',
   $insertList: vi.fn(),
   $isListItemNode: vi.fn(() => mockState.listItemNode),
   $isListNode: vi.fn(() => mockState.listNode),
+  registerCheckList: vi.fn(() => vi.fn()),
   ListItemNode: class {},
   ListNode: class {
     getListType() {
@@ -218,6 +220,7 @@ editorMocks['@lexical/markdown'] = {
   BOLD_ITALIC_UNDERSCORE: { tag: '___' },
   BOLD_STAR: { tag: '**' },
   BOLD_UNDERSCORE: { tag: '__' },
+  CHECK_LIST: { tag: '- [ ]' },
   CODE: { tag: 'code', regExpStart: /^```/ },
   HEADING: { tag: '#', regExp: /^#/ },
   INLINE_CODE: { tag: '`' },

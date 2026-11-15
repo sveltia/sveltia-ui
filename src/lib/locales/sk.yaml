@@ -118,6 +118,7 @@ text_editor:
   heading_6: Nadpis 6
   bulleted_list: Zoznam s odrážkami
   numbered_list: Číslovaný zoznam
+  task_list: Zoznam úloh
   blockquote: Citácia
   code_block: Blok kódu
   # Inline style button aria-labels

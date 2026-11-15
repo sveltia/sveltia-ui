@@ -118,6 +118,7 @@ text_editor:
   heading_6: Naslov 6
   bulleted_list: Popis s grafičkim oznakama
   numbered_list: Numerirani popis
+  task_list: Popis zadataka
   blockquote: Citat
   code_block: Blok koda
   # Inline style button aria-labels

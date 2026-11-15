@@ -118,6 +118,7 @@ text_editor:
   heading_6: Επικεφαλίδα 6
   bulleted_list: Λίστα με κουκίδες
   numbered_list: Αριθμημένη λίστα
+  task_list: Λίστα εργασιών
   blockquote: Παράθεση
   code_block: Μπλόκ κώδικα
   # Inline style button aria-labels

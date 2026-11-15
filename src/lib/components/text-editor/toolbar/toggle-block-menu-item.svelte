@@ -1,6 +1,5 @@
 <script>
   import { $createCodeNode as createCodeNode } from '@lexical/code-core';
-  import { INSERT_ORDERED_LIST_COMMAND, INSERT_UNORDERED_LIST_COMMAND } from '@lexical/list';
   import {
     $createHeadingNode as createHeadingNode,
     $createQuoteNode as createQuoteNode,
@@ -14,14 +13,14 @@
   import { getContext } from 'svelte';
   import Icon from '../../icon/icon.svelte';
   import MenuItemCheckbox from '../../menu/menu-item-checkbox.svelte';
-  import { AVAILABLE_BUTTONS } from '../constants.js';
+  import { AVAILABLE_BUTTONS, LIST_TYPES } from '../constants.js';
   import { focusEditor } from '../editing/caret.js';
   import { editRawText, setBlockType } from '../editing/raw-markdown.js';
 
   /**
    * @import { TextEditorBlockType, TextEditorStore } from '#lib/typedefs.js';
    * @import { HeadingTagType } from '@lexical/rich-text';
-   * @import { ElementNode, LexicalCommand } from 'lexical';
+   * @import { ElementNode } from 'lexical';
    */
 
   /**
@@ -33,15 +32,6 @@
     paragraph: createParagraphNode,
     blockquote: createQuoteNode,
     'code-block': createCodeNode,
-  };
-
-  /**
-   * Commands for the list block types, which are toggled by the list plugin instead.
-   * @type {Record<string, LexicalCommand<void>>}
-   */
-  const LIST_COMMANDS = {
-    'bulleted-list': INSERT_UNORDERED_LIST_COMMAND,
-    'numbered-list': INSERT_ORDERED_LIST_COMMAND,
   };
 
   /**
@@ -93,8 +83,11 @@
       });
     }
 
-    if (type in LIST_COMMANDS) {
-      editorStore.editor.dispatchCommand(LIST_COMMANDS[type], undefined);
+    // A list is toggled by its command instead
+    const list = LIST_TYPES.find((item) => item.type === type);
+
+    if (list) {
+      editorStore.editor.dispatchCommand(list.command, undefined);
     }
   };
 </script>

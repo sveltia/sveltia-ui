@@ -889,3 +889,98 @@ describe('findUnsupportedNode', () => {
     ).toBeUndefined();
   });
 });
+
+describe('task lists', () => {
+  const TASK_LIST_HTML =
+    '<ul class="contains-task-list">' +
+    '<li class="task-list-item"><input type="checkbox" disabled=""> To do</li>' +
+    '<li class="task-list-item"><input type="checkbox" disabled="" checked=""> Done</li>' +
+    '</ul>';
+
+  it('should export a task list the way GitHub renders it, and import it back', async () => {
+    expect(await markdownToHtml('- [ ] To do\n- [x] Done')).toBe(TASK_LIST_HTML);
+    expect(await roundTrip(TASK_LIST_HTML)).toBe(TASK_LIST_HTML);
+  });
+
+  it('should import the HTML of GitHub and markdown-it, with other attributes on the check box', async () => {
+    expect(
+      await roundTrip(
+        '<ul class="contains-task-list">\n' +
+          '<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox" ' +
+          'checked disabled> Done</li>\n</ul>',
+      ),
+    ).toBe(
+      '<ul class="contains-task-list">' +
+        '<li class="task-list-item"><input type="checkbox" disabled="" checked=""> Done</li></ul>',
+    );
+  });
+
+  it('should only add a check box to the items that have content, not to a nested list', async () => {
+    expect(await markdownToHtml('- [ ] One\n  - [x] Two')).toBe(
+      '<ul class="contains-task-list">' +
+        '<li class="task-list-item"><input type="checkbox" disabled=""> One' +
+        '<ul class="contains-task-list">' +
+        '<li class="task-list-item"><input type="checkbox" disabled="" checked=""> Two</li>' +
+        '</ul></li></ul>',
+    );
+  });
+
+  it('should keep a paragraph that only starts like a task list item', async () => {
+    expect(await markdownToHtml('[x] Agreed\n\n[] Empty\n\n- [] Empty')).toBe(
+      '<p>[x] Agreed</p><p>[] Empty</p><ul><li>[] Empty</li></ul>',
+    );
+  });
+
+  it('should turn a task list into a bulleted list without the task list button', async () => {
+    const enabledButtons = [...INLINE_BUTTON_TYPES, ...BLOCK_BUTTON_TYPES].filter(
+      (type) => type !== 'task-list',
+    );
+
+    expect(await roundTrip('<ul><li aria-checked="true">Done</li></ul>', { enabledButtons })).toBe(
+      '<ul><li>Done</li></ul>',
+    );
+  });
+});
+
+describe('findUnsupportedNode with task lists', () => {
+  /**
+   * Parse the given HTML.
+   * @param {string} html HTML.
+   * @returns {Document} Document.
+   */
+  const parse = (html) => new DOMParser().parseFromString(html, 'text/html');
+
+  it('should accept the check box of a task list item, but no other `<input>`', () => {
+    const { editor } = createEditor();
+
+    expect(
+      findUnsupportedNode(
+        editor,
+        parse('<ul><li class="task-list-item"><input type="checkbox"> a</li></ul>'),
+      ),
+    ).toBeUndefined();
+
+    [
+      // Not in a task list item, like the output of marked
+      '<ul><li><input type="checkbox"> a</li></ul>',
+      // Not a check box
+      '<ul><li class="task-list-item"><input type="text"> a</li></ul>',
+      // A second `<input>`, which Lexical doesn’t take the state from
+      '<ul><li class="task-list-item"><input type="checkbox"><input type="checkbox"> a</li></ul>',
+      '<p><input type="checkbox"></p>',
+    ].forEach((html) => {
+      expect(findUnsupportedNode(editor, parse(html))?.nodeName).toBe('INPUT');
+    });
+  });
+
+  it('should not accept any `<input>` without the task list button', () => {
+    const { editor } = createEditor({ enabledButtons: ['bulleted-list'] });
+
+    expect(
+      findUnsupportedNode(
+        editor,
+        parse('<ul><li class="task-list-item"><input type="checkbox"> a</li></ul>'),
+      )?.nodeName,
+    ).toBe('INPUT');
+  });
+});

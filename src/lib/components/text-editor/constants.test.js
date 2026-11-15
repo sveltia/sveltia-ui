@@ -18,10 +18,13 @@ import {
   HTML_ONLY_FORMAT_TYPES,
   INLINE_BUTTON_TYPES,
   isHtmlOnlyButton,
+  LIST_TYPES,
+  OPTIONAL_BUTTON_TYPES,
   TEXT_FORMAT_BUTTON_TYPES,
   TRANSFORMER_MAP,
 } from './constants.js';
 import { LEADING_INLINE_CODE } from './conversion/transformers/inline-code.js';
+import { TASK_LIST } from './conversion/transformers/task-list.js';
 
 describe('AVAILABLE_BUTTONS', () => {
   it('should contain all expected button keys', () => {
@@ -41,6 +44,7 @@ describe('AVAILABLE_BUTTONS', () => {
       'heading-6',
       'bulleted-list',
       'numbered-list',
+      'task-list',
       'blockquote',
       'code-block',
     ];
@@ -104,11 +108,41 @@ describe('HTML_ONLY_FORMAT_TYPES', () => {
   });
 });
 
+describe('OPTIONAL_BUTTON_TYPES', () => {
+  it('should include the HTML-only buttons and the task list', () => {
+    expect(OPTIONAL_BUTTON_TYPES).toEqual(['underline', 'align', 'task-list']);
+  });
+});
+
+describe('LIST_TYPES', () => {
+  it('should only hold block types, each with its own list type and command', () => {
+    LIST_TYPES.forEach(({ type }) => {
+      expect(BLOCK_BUTTON_TYPES).toContain(type);
+    });
+    expect(new Set(LIST_TYPES.map(({ listType }) => listType)).size).toBe(LIST_TYPES.length);
+    expect(new Set(LIST_TYPES.map(({ command }) => command)).size).toBe(LIST_TYPES.length);
+  });
+});
+
 describe('DEFAULT_BUTTON_TYPES', () => {
-  it('should include the inline and block level buttons but the HTML-only ones', () => {
+  it('should include the inline and block level buttons but the HTML-only ones and the task list', () => {
     expect(DEFAULT_BUTTON_TYPES).toEqual([
-      ...INLINE_BUTTON_TYPES.filter((type) => type !== 'underline'),
-      ...BLOCK_BUTTON_TYPES,
+      'bold',
+      'italic',
+      'strikethrough',
+      'code',
+      'link',
+      'paragraph',
+      'heading-1',
+      'heading-2',
+      'heading-3',
+      'heading-4',
+      'heading-5',
+      'heading-6',
+      'bulleted-list',
+      'numbered-list',
+      'blockquote',
+      'code-block',
     ]);
   });
 });
@@ -141,12 +175,20 @@ describe('BLOCK_BUTTON_TYPES', () => {
   it('should include list, blockquote, and code-block types', () => {
     expect(BLOCK_BUTTON_TYPES).toContain('bulleted-list');
     expect(BLOCK_BUTTON_TYPES).toContain('numbered-list');
+    expect(BLOCK_BUTTON_TYPES).toContain('task-list');
     expect(BLOCK_BUTTON_TYPES).toContain('blockquote');
     expect(BLOCK_BUTTON_TYPES).toContain('code-block');
   });
 });
 
 describe('TRANSFORMER_MAP', () => {
+  it('should check for a task list item before a bulleted list item, which both match `- [ ]`', () => {
+    const keys = Object.keys(TRANSFORMER_MAP);
+
+    expect(TRANSFORMER_MAP['task-list']).toEqual([TASK_LIST]);
+    expect(keys.indexOf('task-list')).toBeLessThan(keys.indexOf('bulleted-list'));
+  });
+
   it('should include all expected transformers for bold', () => {
     expect(TRANSFORMER_MAP.bold).toEqual([
       BOLD_STAR,
