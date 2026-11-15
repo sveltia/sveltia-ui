@@ -25,7 +25,7 @@ vi.mock('@lexical/extension', () => getMock('@lexical/extension'));
 vi.mock('@lexical/html', () => getMock('@lexical/html'));
 vi.mock('./editing/alignment.js', () => getMock('./editing/alignment.js'));
 vi.mock('./editing/table.js', () => getMock('./editing/table.js'));
-vi.mock('./conversion/html.js', () => getMock('./conversion/html.js'));
+vi.mock('./conversion/html/index.js', () => getMock('./conversion/html/index.js'));
 vi.mock('@lexical/history', () => getMock('@lexical/history'));
 vi.mock('@lexical/link', () => getMock('@lexical/link'));
 vi.mock('@lexical/list', () => getMock('@lexical/list'));
@@ -58,9 +58,8 @@ describe('initEditor', () => {
     expect(editor).toBe(editorState);
     // No format guard for the code editor
     expect(editorState._commands).toHaveLength(7);
-    // The root transform for the code editor, the link transform, and the list transform that turns
-    // a task list into a bulleted list without the task list button
-    expect(editorState._transforms).toHaveLength(3);
+    // The root transform for the code editor, and the link transform. The code editor has no guards
+    expect(editorState._transforms).toHaveLength(2);
     expect(editorState._updateListeners).toHaveLength(1);
     expect(editorState._rootListeners).toHaveLength(1);
 

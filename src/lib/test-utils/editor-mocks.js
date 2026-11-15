@@ -171,14 +171,12 @@ editorMocks['./editing/table.js'] = {
   $normalizeTableHeaders: vi.fn(),
 };
 
-editorMocks['./conversion/html.js'] = {
+editorMocks['./conversion/html/index.js'] = {
   editorComponents: new WeakMap(),
   exportHtml: vi.fn(() => '<p>converted</p>'),
   findUnsupportedNode: vi.fn(() => undefined),
   getCodeLanguage: vi.fn(() => undefined),
-  HTML_CODE_IMPORT_MAP: {},
-  HTML_EXPORT_MAP: new Map(),
-  HTML_IMPORT_MAP: {},
+  getHtmlConfig: vi.fn(() => ({ export: new Map(), import: {} })),
 };
 
 editorMocks['@lexical/history'] = {

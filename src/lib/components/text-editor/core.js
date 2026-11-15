@@ -11,13 +11,7 @@ import { registerRichText } from '@lexical/rich-text';
 import { TableCellNode, TableExtension, TableNode, TableRowNode } from '@lexical/table';
 import { configExtension, defineExtension } from 'lexical';
 import { EDITOR_THEME, NODE_MAP, TRANSFORMER_MAP } from './constants.js';
-import {
-  editorComponents,
-  HTML_CODE_IMPORT_MAP,
-  HTML_EXPORT_MAP,
-  HTML_IMPORT_MAP,
-  HTML_TASK_LIST_IMPORT_MAP,
-} from './conversion/html.js';
+import { editorComponents, getHtmlConfig } from './conversion/html/index.js';
 import { registerCodeHighlighting, shikiTokenizer } from './shiki/highlighter.js';
 import { getCodeTheme, observeCodeTheme } from './shiki/theme.js';
 import { CODE } from './conversion/transformers/code.js';
@@ -29,10 +23,10 @@ import { limitToSingleLine, registerSingleLine } from './editing/single-line.js'
 import { removePlaceholdersFromMatch } from './conversion/editor-components.js';
 import {
   registerCodeEditorCommands,
-  registerFormatGuard,
   registerListCommands,
   registerTabIndentation,
 } from './editing/commands.js';
+import { registerGuards } from './editing/guards.js';
 import { mergeUnregisters } from './utils.js';
 import { registerLinkCommands } from './editing/link.js';
 import { registerUpdateEvent } from './conversion/update.js';
@@ -176,18 +170,9 @@ const createEditorExtension = ({
       ...(hasBlockSyntax ? [HorizontalRuleNode, TableNode, TableCellNode, TableRowNode] : []),
     ],
     theme: EDITOR_THEME,
-    // Export clean HTML without the attributes and elements only meant for the editor, and import
-    // code blocks with their language. The export map also applies to copying
     html:
       format === 'html'
-        ? {
-            export: HTML_EXPORT_MAP,
-            import: {
-              ...HTML_IMPORT_MAP,
-              ...(hasCodeBlock ? HTML_CODE_IMPORT_MAP : {}),
-              ...(enabledButtons.includes('task-list') ? HTML_TASK_LIST_IMPORT_MAP : {}),
-            },
-          }
+        ? getHtmlConfig({ hasCodeBlock, hasTaskList: enabledButtons.includes('task-list') })
         : undefined,
     /**
      * Log an error like `createEditor` does by default, instead of throwing it.
@@ -292,7 +277,7 @@ const registerEditorListeners = (
         })
       : undefined,
     registerListCommands(editor, enabledButtons),
-    isCodeEditor ? undefined : registerFormatGuard(editor, { format, enabledButtons }),
+    isCodeEditor ? undefined : registerGuards(editor, { format, enabledButtons }),
     registerUpdateEvent(editor, enabledTransformers, format),
     registerTabIndentation(editor),
     isCodeEditor ? undefined : registerPasteAsMarkdown(editor, enabledTransformers),

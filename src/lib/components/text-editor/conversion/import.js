@@ -19,7 +19,7 @@ import {
   $isTextNode as isTextNode,
 } from 'lexical';
 import { IMPORT_UPDATE_TAG } from '../constants.js';
-import { exportHtml, findUnsupportedNode, getCodeLanguage } from './html.js';
+import { exportHtml, findUnsupportedNode, getCodeLanguage } from './html/index.js';
 import {
   addImportPlaceholders,
   convertSetextHeadings,
