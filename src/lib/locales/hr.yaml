@@ -123,6 +123,7 @@ text_editor:
   # Inline style button aria-labels
   bold: Podebljano
   italic: Kurziv
+  underline: Podcrtano
   strikethrough: Precrtano
   code: Kod
   link: Poveznica

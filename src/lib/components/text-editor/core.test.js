@@ -56,6 +56,7 @@ describe('initEditor', () => {
     });
 
     expect(editor).toBe(editorState);
+    // No format guard for the code editor
     expect(editorState._commands).toHaveLength(7);
     // The root transform for the code editor, and the link transform
     expect(editorState._transforms).toHaveLength(2);
@@ -195,7 +196,7 @@ describe('initEditor', () => {
       enabledButtons: ['link', 'bulleted-list', 'numbered-list'],
     });
 
-    expect(editorState._commands).toHaveLength(7);
+    expect(editorState._commands).toHaveLength(8);
     dispose();
   });
 
@@ -277,7 +278,7 @@ describe('initEditor', () => {
       enabledButtons: ['link', 'bulleted-list', 'numbered-list'],
     });
 
-    expect(editorState._commands).toHaveLength(7);
+    expect(editorState._commands).toHaveLength(8);
     expect(editorState._updateListeners).toHaveLength(1);
     expect(editorState._rootListeners).toHaveLength(1);
 
@@ -329,7 +330,7 @@ describe('initEditor', () => {
       enabledButtons: ['link', 'bulleted-list', 'numbered-list'],
     });
 
-    expect(editorState._commands).toHaveLength(7);
+    expect(editorState._commands).toHaveLength(8);
     dispose();
   });
 

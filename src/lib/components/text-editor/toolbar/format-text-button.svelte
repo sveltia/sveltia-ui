@@ -4,7 +4,7 @@
   import { getContext } from 'svelte';
   import Button from '../../button/button.svelte';
   import Icon from '../../icon/icon.svelte';
-  import { AVAILABLE_BUTTONS } from '../constants.js';
+  import { AVAILABLE_BUTTONS, isHtmlOnlyButton } from '../constants.js';
   import { focusEditor } from '../editing/caret.js';
   import {
     editRawText,
@@ -47,6 +47,12 @@
     const { editor, textArea, useRichText } = editorStore;
 
     if (!useRichText) {
+      // The `<textarea>` is only there for Markdown, which hides the HTML-only formats
+      /* v8 ignore next 3 */
+      if (isHtmlOnlyButton(type)) {
+        return;
+      }
+
       // The button is only enabled while the `<textarea>` is there
       editRawText(textArea, (state) => toggleInlineFormat(state, type));
 

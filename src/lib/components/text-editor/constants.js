@@ -39,11 +39,14 @@ import { LINK } from './conversion/transformers/link.js';
 export const EDITOR_THEME = {
   text: {
     /**
-     * Enable bold+italic and strikethrough styling.
+     * Enable bold+italic, underline and strikethrough styling. Lexical only uses the combined
+     * class for text that is both underlined and struck through.
      * @see https://github.com/facebook/lexical/discussions/4381
      */
     italic: 'italic',
+    underline: 'underline',
     strikethrough: 'strikethrough',
+    underlineStrikethrough: 'underline strikethrough',
   },
   list: {
     nested: {
@@ -71,6 +74,11 @@ export const AVAILABLE_BUTTONS = {
   italic: {
     labelKey: 'italic',
     icon: 'format_italic',
+    inline: true,
+  },
+  underline: {
+    labelKey: 'underline',
+    icon: 'format_underlined',
     inline: true,
   },
   strikethrough: {
@@ -158,7 +166,7 @@ export const AVAILABLE_BUTTONS = {
 /**
  * @type {TextEditorFormatType[]}
  */
-export const TEXT_FORMAT_BUTTON_TYPES = ['bold', 'italic', 'strikethrough', 'code'];
+export const TEXT_FORMAT_BUTTON_TYPES = ['bold', 'italic', 'underline', 'strikethrough', 'code'];
 
 /**
  * @type {TextEditorInlineType[]}
@@ -183,6 +191,35 @@ export const BLOCK_BUTTON_TYPES = [
 ];
 
 /**
+ * Buttons only available for HTML, as Markdown has no syntax for them: the underline format and the
+ * alignment menu. They’re hidden for Markdown and in the plain text mode, which shows the HTML
+ * source, and they’re not enabled by default.
+ * @type {('underline' | 'align')[]}
+ */
+export const HTML_ONLY_BUTTON_TYPES = ['underline', 'align'];
+
+/**
+ * Check whether the given button is only available for HTML. See {@link HTML_ONLY_BUTTON_TYPES}.
+ * @param {string} type Button type.
+ * @returns {type is 'underline' | 'align'} Result.
+ */
+export const isHtmlOnlyButton = (type) =>
+  /** @type {string[]} */ (HTML_ONLY_BUTTON_TYPES).includes(type);
+
+/**
+ * Text formats only available for HTML, like underline. See {@link HTML_ONLY_BUTTON_TYPES}.
+ */
+export const HTML_ONLY_FORMAT_TYPES = TEXT_FORMAT_BUTTON_TYPES.filter(isHtmlOnlyButton);
+
+/**
+ * Buttons enabled by default: all the inline and block level buttons but the HTML-only ones.
+ * @type {TextEditorNodeType[]}
+ */
+export const DEFAULT_BUTTON_TYPES = [...INLINE_BUTTON_TYPES, ...BLOCK_BUTTON_TYPES].filter(
+  (type) => !isHtmlOnlyButton(type),
+);
+
+/**
  * Map of Lexical nodes for each block type. The `paragraph` block type is excluded because it is
  * the default block type.
  * @type {Record<Exclude<TextEditorBlockType | 'link', 'paragraph'>, any[]>}
@@ -202,10 +239,10 @@ export const NODE_MAP = {
 };
 
 /**
- * Map of Lexical transformers for each block type. The `paragraph` block type is excluded because
- * it is the default block type.
- * @type {Record<Exclude<TextEditorNodeType, 'paragraph' | 'table' | 'horizontal-rule' | 'align'>,
- * Transformer[]>}
+ * Map of Lexical transformers for each button type. The `paragraph` block type has none because it
+ * is the default block type, and neither have the HTML-only buttons. Horizontal rules and tables
+ * are always supported in Markdown, so their transformers are added in `core.js`.
+ * @type {Partial<Record<TextEditorNodeType, Transformer[]>>}
  */
 export const TRANSFORMER_MAP = {
   // ELEMENT_TRANSFORMERS

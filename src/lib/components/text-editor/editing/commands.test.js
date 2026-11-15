@@ -35,7 +35,7 @@ vi.mock('@lexical/utils', () => getMock('@lexical/utils'));
 vi.mock('lexical', () => getMock('lexical'));
 
 import { $getNearestNodeOfType as getNearestNodeOfType } from '@lexical/utils';
-import { ElementNode } from 'lexical';
+import { ElementNode, TextNode } from 'lexical';
 import {
   editorState,
   mockState,
@@ -108,6 +108,98 @@ describe('editor commands', () => {
 
     expect(keydown.defaultPrevented).toBe(false);
     dispose();
+  });
+
+  describe('format guard', () => {
+    /**
+     * Initialize the editor and get the guard’s command and transform listeners.
+     * @param {'html' | 'markdown'} format Value format.
+     * @param {any[]} enabledButtons Enabled buttons.
+     * @returns {{ command: any, transform: any, dispose: () => void }} Listeners and cleanup.
+     */
+    const initGuard = (format, enabledButtons) => {
+      const { dispose } = initEditor({
+        components: [],
+        useMarkdownShortcuts: false,
+        isCodeEditor: false,
+        modes: [],
+        format,
+        enabledButtons,
+      });
+
+      return {
+        command: editorState._commands.find((cmd) => cmd.command === 'formatText')?.listener,
+        transform: editorState._transforms.find(({ klass }) => klass === TextNode)?.listener,
+        dispose,
+      };
+    };
+
+    /**
+     * Create a range selection holding the given text nodes.
+     * @param {object} args Arguments.
+     * @param {boolean} [args.hasFormat] Whether the selection has the format.
+     * @param {boolean[]} [args.nodeFormats] Whether each selected node has the format.
+     * @returns {any} Selection.
+     */
+    const createSelection = ({ hasFormat = false, nodeFormats = [] } = {}) => ({
+      type: 'range',
+      hasFormat: () => hasFormat,
+      getNodes: () => nodeFormats.map((value) => ({ type: 'text', hasFormat: () => value })),
+      formatText: vi.fn(),
+    });
+
+    it('leaves underline to Lexical in HTML with the button', () => {
+      const { command, transform, dispose } = initGuard('html', ['underline']);
+
+      expect(command('underline')).toBe(false);
+      expect(command('bold')).toBe(false);
+      expect(transform).toBeUndefined();
+      dispose();
+    });
+
+    it.each([
+      ['the selection', { hasFormat: true }],
+      ['a partly selected node', { nodeFormats: [false, true] }],
+    ])(
+      'only removes an existing underline in HTML without the button, from %s',
+      (_name, options) => {
+        const { command, dispose } = initGuard('html', ['bold']);
+        const selection = createSelection(options);
+
+        selectionState.value = selection;
+        expect(command('underline')).toBe(true);
+        expect(selection.formatText).toHaveBeenCalledWith('underline', 0);
+        // Any other format is left to Lexical
+        expect(command('bold')).toBe(false);
+        dispose();
+      },
+    );
+
+    it('applies no underline in HTML without the button', () => {
+      const { command, dispose } = initGuard('html', ['bold']);
+      const selection = createSelection({ nodeFormats: [false] });
+
+      selectionState.value = selection;
+      expect(command('underline')).toBe(true);
+      expect(selection.formatText).not.toHaveBeenCalled();
+      selectionState.value = null;
+      expect(command('underline')).toBe(true);
+      dispose();
+    });
+
+    it('removes underline from any text in Markdown, and ignores the shortcut', () => {
+      const { command, transform, dispose } = initGuard('markdown', ['underline']);
+      const underlined = { hasFormat: vi.fn(() => true), toggleFormat: vi.fn() };
+      const plain = { hasFormat: vi.fn(() => false), toggleFormat: vi.fn() };
+
+      expect(command('underline')).toBe(true);
+      expect(command('bold')).toBe(false);
+      transform(underlined);
+      transform(plain);
+      expect(underlined.toggleFormat).toHaveBeenCalledWith('underline');
+      expect(plain.toggleFormat).not.toHaveBeenCalled();
+      dispose();
+    });
   });
 
   it('registers INSERT_UNORDERED_LIST_COMMAND and triggers it', () => {

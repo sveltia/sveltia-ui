@@ -123,6 +123,7 @@ text_editor:
   # Inline style button aria-labels
   bold: عريض
   italic: مائل
+  underline: تسطير
   strikethrough: يتوسطه خط
   code: كود
   link: رابط

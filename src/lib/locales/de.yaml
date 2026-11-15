@@ -123,6 +123,7 @@ text_editor:
   # Inline style button aria-labels
   bold: Fett
   italic: Kursiv
+  underline: Unterstrichen
   strikethrough: Durchgestrichen
   code: Code
   link: Link

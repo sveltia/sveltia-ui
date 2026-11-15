@@ -8,7 +8,7 @@
   import Alert from '../alert/alert.svelte';
   import TextArea from '../text-field/text-area.svelte';
   import Toast from '../toast/toast.svelte';
-  import { BLOCK_BUTTON_TYPES, INLINE_BUTTON_TYPES } from './constants.js';
+  import { DEFAULT_BUTTON_TYPES } from './constants.js';
   import { loadCodeHighlighter } from './shiki/preload.js';
   import EmojiAutocomplete from './widgets/emoji-autocomplete.svelte';
   import FloatingLinkEditor from './widgets/floating-link-editor.svelte';
@@ -52,7 +52,8 @@
    * @property {'ltr' | 'rtl' | 'auto'} [dir] The `dir` attribute on the editable text box, both
    * the rich text editor and the `<textarea>` element of the plain text mode.
    * @property {TextEditorMode[]} [modes] Enabled modes.
-   * @property {TextEditorNodeType[]} [buttons] Enabled buttons.
+   * @property {TextEditorNodeType[]} [buttons] Enabled buttons. All the inline and block level
+   * buttons by default, except the HTML-only `underline`.
    * @property {TextEditorComponent[]} [components] Editor components.
    * @property {boolean} [multiline] Whether the content can span multiple paragraphs and lines.
    * With `false`, the content is kept in a single paragraph: the Enter key does nothing, and the
@@ -95,7 +96,7 @@
     flex = false,
     dir = undefined,
     modes = ['rich-text', 'plain-text'],
-    buttons = [...INLINE_BUTTON_TYPES, ...BLOCK_BUTTON_TYPES],
+    buttons = [...DEFAULT_BUTTON_TYPES],
     components = [],
     multiline = true,
     minimal = false,

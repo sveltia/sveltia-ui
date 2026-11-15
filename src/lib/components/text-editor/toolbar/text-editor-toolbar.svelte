@@ -9,7 +9,12 @@
   import Icon from '../../icon/icon.svelte';
   import MenuButton from '../../menu/menu-button.svelte';
   import Menu from '../../menu/menu.svelte';
-  import { AVAILABLE_BUTTONS, BLOCK_BUTTON_TYPES, INLINE_BUTTON_TYPES } from '../constants.js';
+  import {
+    AVAILABLE_BUTTONS,
+    BLOCK_BUTTON_TYPES,
+    INLINE_BUTTON_TYPES,
+    isHtmlOnlyButton,
+  } from '../constants.js';
   import { isInlineComponent } from '../conversion/editor-components.js';
   import CodeLanguageSwitcher from './code-language-switcher.svelte';
   import AlignMenuButton from './align-menu-button.svelte';
@@ -69,13 +74,16 @@
    */
   const canFormat = $derived(editorStore.useRichText || !isHtml);
 
-  const hasTable = $derived(editorStore.config.enabledButtons.includes('table'));
   /**
-   * Whether the alignment menu is available. Markdown has no syntax for alignment, so it’s only
-   * available for HTML, and only in the rich text mode, as the plain text mode shows the source.
+   * Whether the HTML-only buttons, like underline and the alignment menu, are available. Markdown
+   * has no syntax for them, so they’re only available for HTML, and only in the rich text mode, as
+   * the plain text mode shows the source.
    */
+  const canUseHtmlOnlyButtons = $derived(isHtml && editorStore.useRichText);
+
+  const hasTable = $derived(editorStore.config.enabledButtons.includes('table'));
   const canAlign = $derived(
-    isHtml && editorStore.useRichText && editorStore.config.enabledButtons.includes('align'),
+    canUseHtmlOnlyButtons && editorStore.config.enabledButtons.includes('align'),
   );
   const hasHorizontalRule = $derived(editorStore.config.enabledButtons.includes('horizontal-rule'));
   /**
@@ -116,13 +124,16 @@
   const canChangeBlock = $derived(canFormat && !inMarkdownTable);
 
   /**
-   * Enabled inline level buttons.
+   * Enabled inline level buttons, leaving out the HTML-only ones, like underline, when they’re not
+   * available.
    * @type {TextEditorInlineType[]}
    */
   const inlineLevelButtons = $derived(
     unique(
-      editorStore.config.enabledButtons.filter((type) =>
-        INLINE_BUTTON_TYPES.includes(/** @type {any} */ (type)),
+      editorStore.config.enabledButtons.filter(
+        (type) =>
+          INLINE_BUTTON_TYPES.includes(/** @type {any} */ (type)) &&
+          (canUseHtmlOnlyButtons || !isHtmlOnlyButton(type)),
       ),
     ),
   );

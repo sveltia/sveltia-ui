@@ -307,7 +307,8 @@
  */
 
 /**
- * @typedef {'bold' | 'italic' | 'strikethrough' | 'code'} TextEditorFormatType
+ * Inline text format. `underline` is only available for HTML, as Markdown has no syntax for it.
+ * @typedef {'bold' | 'italic' | 'underline' | 'strikethrough' | 'code'} TextEditorFormatType
  */
 
 /**

@@ -12,8 +12,12 @@ import { describe, expect, it } from 'vitest';
 import {
   AVAILABLE_BUTTONS,
   BLOCK_BUTTON_TYPES,
+  DEFAULT_BUTTON_TYPES,
   DISABLED_MARKDOWN_TAGS,
+  HTML_ONLY_BUTTON_TYPES,
+  HTML_ONLY_FORMAT_TYPES,
   INLINE_BUTTON_TYPES,
+  isHtmlOnlyButton,
   TEXT_FORMAT_BUTTON_TYPES,
   TRANSFORMER_MAP,
 } from './constants.js';
@@ -24,6 +28,7 @@ describe('AVAILABLE_BUTTONS', () => {
     const expectedKeys = [
       'bold',
       'italic',
+      'underline',
       'strikethrough',
       'code',
       'link',
@@ -64,8 +69,47 @@ describe('AVAILABLE_BUTTONS', () => {
 });
 
 describe('TEXT_FORMAT_BUTTON_TYPES', () => {
-  it('should include bold, italic, strikethrough, code', () => {
-    expect(TEXT_FORMAT_BUTTON_TYPES).toEqual(['bold', 'italic', 'strikethrough', 'code']);
+  it('should include bold, italic, underline, strikethrough, code', () => {
+    expect(TEXT_FORMAT_BUTTON_TYPES).toEqual([
+      'bold',
+      'italic',
+      'underline',
+      'strikethrough',
+      'code',
+    ]);
+  });
+});
+
+describe('HTML_ONLY_BUTTON_TYPES', () => {
+  it('should include underline and align, which have no Markdown transformer', () => {
+    expect(HTML_ONLY_BUTTON_TYPES).toEqual(['underline', 'align']);
+    HTML_ONLY_BUTTON_TYPES.forEach((type) => {
+      expect(TRANSFORMER_MAP).not.toHaveProperty(type);
+    });
+  });
+});
+
+describe('isHtmlOnlyButton', () => {
+  it('should tell the HTML-only buttons from the others', () => {
+    expect(isHtmlOnlyButton('underline')).toBe(true);
+    expect(isHtmlOnlyButton('align')).toBe(true);
+    expect(isHtmlOnlyButton('bold')).toBe(false);
+    expect(isHtmlOnlyButton('heading-1')).toBe(false);
+  });
+});
+
+describe('HTML_ONLY_FORMAT_TYPES', () => {
+  it('should only include underline, the HTML-only text format', () => {
+    expect(HTML_ONLY_FORMAT_TYPES).toEqual(['underline']);
+  });
+});
+
+describe('DEFAULT_BUTTON_TYPES', () => {
+  it('should include the inline and block level buttons but the HTML-only ones', () => {
+    expect(DEFAULT_BUTTON_TYPES).toEqual([
+      ...INLINE_BUTTON_TYPES.filter((type) => type !== 'underline'),
+      ...BLOCK_BUTTON_TYPES,
+    ]);
   });
 });
 
@@ -129,11 +173,9 @@ describe('TRANSFORMER_MAP', () => {
     expect(TRANSFORMER_MAP.code).toEqual([INLINE_CODE, LEADING_INLINE_CODE]);
   });
 
-  it('should have entries for all text format button types', () => {
-    TEXT_FORMAT_BUTTON_TYPES.forEach((type) => {
-      expect(TRANSFORMER_MAP).toHaveProperty(type);
-      expect(Array.isArray(TRANSFORMER_MAP[type])).toBe(true);
-      expect(TRANSFORMER_MAP[type].length).toBeGreaterThan(0);
+  it('should have entries for all text format button types but the HTML-only ones', () => {
+    TEXT_FORMAT_BUTTON_TYPES.filter((type) => !isHtmlOnlyButton(type)).forEach((type) => {
+      expect(TRANSFORMER_MAP[type]?.length).toBeGreaterThan(0);
     });
   });
 });

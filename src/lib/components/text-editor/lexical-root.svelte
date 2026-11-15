@@ -372,8 +372,16 @@
         font-style: italic;
       }
 
+      .underline {
+        text-decoration: underline;
+      }
+
       .strikethrough {
         text-decoration: line-through;
+      }
+
+      .underline.strikethrough {
+        text-decoration: underline line-through;
       }
 
       li.nested {

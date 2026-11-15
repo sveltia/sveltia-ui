@@ -123,6 +123,7 @@ text_editor:
   # Inline style button aria-labels
   bold: Lihavointi
   italic: Kursivointi
+  underline: Alleviivaus
   strikethrough: Yliviivaus
   code: Koodi
   link: Linkki

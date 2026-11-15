@@ -123,6 +123,7 @@ text_editor:
   # Inline style button aria-labels
   bold: 굵게
   italic: 기울임꼴
+  underline: 밑줄
   strikethrough: 취소선
   code: 코드
   link: 링크

@@ -123,6 +123,7 @@ text_editor:
   # Inline style button aria-labels
   bold: Жирний
   italic: Курсив
+  underline: Підкреслений
   strikethrough: Закреслений
   code: Код
   link: Посилання

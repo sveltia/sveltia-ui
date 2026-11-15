@@ -123,6 +123,7 @@ text_editor:
   # Inline style button aria-labels
   bold: In đậm
   italic: In nghiêng
+  underline: Gạch chân
   strikethrough: Gạch ngang
   code: Mã
   link: Liên kết

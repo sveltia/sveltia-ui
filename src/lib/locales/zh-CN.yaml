@@ -123,6 +123,7 @@ text_editor:
   # Inline style button aria-labels
   bold: 加粗
   italic: 斜体
+  underline: 下划线
   strikethrough: 删除线
   code: 代码
   link: 链接

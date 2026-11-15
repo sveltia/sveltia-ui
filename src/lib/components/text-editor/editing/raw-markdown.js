@@ -37,8 +37,8 @@ import { getComponentMarkdown } from '../conversion/editor-components.js';
  */
 
 /**
- * Markdown markers for the inline formats.
- * @type {Record<TextEditorFormatType, string>}
+ * Markdown markers for the inline formats. Markdown has no syntax for underline.
+ * @type {Record<Exclude<TextEditorFormatType, 'underline'>, string>}
  */
 const INLINE_MARKERS = {
   bold: '**',
@@ -147,7 +147,7 @@ export const getBlockType = (state) => {
  * Wrap the selection with the Markdown markers of the given inline format, or unwrap it if it’s
  * already formatted. Without a selection, the markers are inserted with the caret in between.
  * @param {RawTextState} state Current state.
- * @param {TextEditorFormatType} type Format type.
+ * @param {Exclude<TextEditorFormatType, 'underline'>} type Format type.
  * @returns {RawTextEdit} Edit.
  */
 export const toggleInlineFormat = ({ value, start, end }, type) => {

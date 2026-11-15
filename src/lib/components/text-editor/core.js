@@ -28,6 +28,7 @@ import { limitToSingleLine, registerSingleLine } from './editing/single-line.js'
 import { removePlaceholdersFromMatch } from './conversion/editor-components.js';
 import {
   registerCodeEditorCommands,
+  registerFormatGuard,
   registerListCommands,
   registerTabIndentation,
 } from './editing/commands.js';
@@ -286,6 +287,7 @@ const registerEditorListeners = (
         })
       : undefined,
     registerListCommands(editor, enabledButtons),
+    isCodeEditor ? undefined : registerFormatGuard(editor, { format, enabledButtons }),
     registerUpdateEvent(editor, enabledTransformers, format),
     registerTabIndentation(editor),
     isCodeEditor ? undefined : registerPasteAsMarkdown(editor, enabledTransformers),

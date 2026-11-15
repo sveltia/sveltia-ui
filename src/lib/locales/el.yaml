@@ -123,6 +123,7 @@ text_editor:
   # Inline style button aria-labels
   bold: Έντονα
   italic: Πλάγια
+  underline: Υπογράμμιση
   strikethrough: Διακριτή διαγραφή
   code: Κώδικας
   link: Σύνδεσμος

@@ -123,6 +123,7 @@ text_editor:
   # Inline style button aria-labels
   bold: ضخیم
   italic: مورب
+  underline: زیرخط
   strikethrough: خط‌خورده
   code: کد
   link: پیوند

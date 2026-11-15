@@ -123,6 +123,7 @@ text_editor:
   # Inline style button aria-labels
   bold: Kalın
   italic: İtalik
+  underline: Altı Çizili
   strikethrough: Üstü Çizili
   code: Kod
   link: Bağlantı

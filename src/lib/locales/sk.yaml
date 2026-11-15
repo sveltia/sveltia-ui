@@ -123,6 +123,7 @@ text_editor:
   # Inline style button aria-labels
   bold: Tučné
   italic: Kurzíva
+  underline: Podčiarknuté
   strikethrough: Prečiarknuté
   code: Kód
   link: Odkaz
