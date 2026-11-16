@@ -796,6 +796,18 @@ describe('TextEditor Markdown round trip', () => {
     expect(await roundTrip(markdown)).toBe(markdown);
   });
 
+  it('keeps inline code with formatting syntax in the rows of a table', async () => {
+    const markdown = [
+      '| Format | Syntax | Example output |',
+      '| --- | --- | --- |',
+      '| Bold | `**bold**` | Some **bold** text |',
+      '| Strikethrough | `~~deleted~~` | Some ~~deleted~~ text |',
+      '| Code | `` `code` `` | Some `code` text |',
+    ].join('\n');
+
+    expect(await roundTrip(markdown)).toBe(markdown);
+  });
+
   it('keeps the backslashes in inline code in a table cell', async () => {
     const markdown = [
       '| Artifact | Location |',

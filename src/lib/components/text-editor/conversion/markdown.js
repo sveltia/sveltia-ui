@@ -263,6 +263,11 @@ const NON_PARAGRAPH_LINE_REGEX = new RegExp(
 );
 
 /**
+ * Regular expression to match a table row, which starts with a pipe.
+ */
+const TABLE_ROW_LINE_REGEX = /^ {0,3}\|/;
+
+/**
  * Regular expression to match a line that is a block on its own, so the line after it isn’t in a
  * paragraph: an ATX heading or a thematic break. A setext heading underline is one as well, but
  * only after a paragraph line.
@@ -445,17 +450,131 @@ const MULTILINE_LINK_REGEX = new RegExp(
 );
 
 /**
+ * Find the lines of a part of a Markdown string that are in an HTML block, which is raw HTML,
+ * without any Markdown syntax.
+ * @param {string[]} lines Lines of a part of a Markdown string outside fenced code blocks.
+ * @returns {boolean[]} Whether each line is in an HTML block.
+ * @see https://spec.commonmark.org/0.31.2/#html-blocks
+ */
+const findHtmlBlockLines = (lines) => {
+  /**
+   * End condition of the current HTML block: a regular expression, `null` for a blank line, or
+   * `undefined` if the line is not in an HTML block.
+   * @type {RegExp | null | undefined}
+   */
+  let end;
+  let isInParagraph = false;
+
+  return lines.map((line) => {
+    const isBlankLine = !line.trim();
+
+    if (end === null && isBlankLine) {
+      end = undefined;
+    }
+
+    if (end === undefined) {
+      const condition = HTML_BLOCK_CONDITIONS.find(([start]) => start.test(line));
+
+      if (condition) {
+        [, end] = condition;
+      } else if (!isInParagraph && STANDALONE_HTML_TAG_REGEX.test(line)) {
+        end = null;
+      } else {
+        // A heading or a thematic break doesn’t leave a paragraph open, so a standalone tag after
+        // it starts an HTML block. A line like `===` is a heading underline only after a
+        // paragraph line, and paragraph text otherwise
+        isInParagraph =
+          !isBlankLine &&
+          !SINGLE_LINE_BLOCK_REGEX.test(line) &&
+          !(isInParagraph && SETEXT_UNDERLINE_REGEX.test(line));
+
+        return false;
+      }
+    }
+
+    if (end?.test(line)) {
+      end = undefined;
+    }
+
+    isInParagraph = false;
+
+    return true;
+  });
+};
+
+/**
  * Split a code span whose code spans a line break into one per line, like `` `foo\nbar` `` into
  * `` `foo`\n`bar` ``, so the formatting around it can be split into separate lines as well.
- * Backslashes and spaces are literal in a code span.
+ * Backslashes and spaces are literal in a code span. The backticks are paired as Lexical pairs
+ * them, within a paragraph, so the closing backtick of a code span isn’t taken as the opening one
+ * of another, like in table rows such as `` | `**a**` | b |\n| `*c*` | d | ``, which would get
+ * stray backticks otherwise. A code span can’t span a blank line or the start of another block,
+ * like a list item, a heading or a table row.
  * @param {string} part Part of a Markdown string outside fenced code blocks.
  * @returns {string} Processed part.
+ * @see https://github.com/sveltia/sveltia-cms/issues/1168
  */
-const splitMultilineCodeSpans = (part) =>
-  part.replace(
-    /(?<=^|[\s\p{P}\p{S}])(?<![`\\])`([^`\n]+?)\n([^`\n]+?)`(?=[\s\p{P}\p{S}]|$)(?!`)/gu,
-    '`$1`\n`$2`',
-  );
+const splitMultilineCodeSpans = (part) => {
+  if (!part.includes('`')) {
+    return part;
+  }
+
+  const lines = part.split('\n');
+  // An HTML block is raw HTML, which is kept as is, so each of its lines is left on its own
+  const htmlBlockLines = part.includes('<') ? findHtmlBlockLines(lines) : [];
+  /** @type {string[][]} */
+  const paragraphs = [];
+
+  lines.forEach((line, index) => {
+    const previous = lines[index - 1];
+
+    if (
+      index === 0 ||
+      htmlBlockLines[index] ||
+      htmlBlockLines[index - 1] ||
+      !previous.trim() ||
+      !line.trim() ||
+      PARAGRAPH_INTERRUPTION_REGEX.test(line) ||
+      SINGLE_LINE_BLOCK_REGEX.test(previous) ||
+      // Lexical reads a table row as a line of its own, so a code span can’t continue after it
+      TABLE_ROW_LINE_REGEX.test(previous)
+    ) {
+      paragraphs.push([line]);
+    } else {
+      paragraphs[paragraphs.length - 1].push(line);
+    }
+  });
+
+  return paragraphs
+    .map((paragraphLines) => {
+      if (paragraphLines.length === 1) {
+        return paragraphLines[0];
+      }
+
+      const paragraph = paragraphLines.join('\n');
+      let result = '';
+      let last = 0;
+
+      findCodeSpans(paragraph).forEach(({ start, end, fenceLength }) => {
+        const code = paragraph.slice(start, end);
+
+        if (
+          fenceLength === 1 &&
+          /^`[^\n]+\n[ \t]*[^\s`][^\n]*`$/.test(code) &&
+          /^$|[\s\p{P}\p{S}]/u.test(paragraph.slice(start - 1, start)) &&
+          /^$|[\s\p{P}\p{S}]/u.test(paragraph.slice(end, end + 1))
+        ) {
+          // The indentation of the next line isn’t part of the code, so it goes before the
+          // opening backtick
+          result += `${paragraph.slice(last, start)}${code.replace(/\n([ \t]*)/, '`\n$1`')}`;
+          last = end;
+        }
+      });
+
+      return `${result}${paragraph.slice(last)}`;
+    })
+    .join('\n');
+};
 
 /**
  * Split a link whose text spans a line break in the text of formatting into one per line, like
@@ -728,54 +847,20 @@ const markCodeSpanWhitespace = (line) => {
  * @see https://github.com/sveltia/sveltia-cms/issues/1106
  */
 const markHtml = (part) => {
-  /**
-   * End condition of the current HTML block: a regular expression, `null` for a blank line, or
-   * `undefined` if the line is not in an HTML block.
-   * @type {RegExp | null | undefined}
-   */
-  let end;
-  let isInParagraph = false;
+  const lines = part.split('\n');
+  const htmlBlockLines = findHtmlBlockLines(lines);
 
-  return part
-    .split('\n')
-    .map((line) => {
-      const isBlankLine = !line.trim();
-
-      if (end === null && isBlankLine) {
-        end = undefined;
+  return lines
+    .map((line, index) => {
+      if (htmlBlockLines[index]) {
+        return `${HTML_BLOCK_PLACEHOLDER}${line.replaceAll('\t', CODE_TAB_PLACEHOLDER)}`;
       }
 
-      if (end === undefined) {
-        const condition = HTML_BLOCK_CONDITIONS.find(([start]) => start.test(line));
-
-        if (condition) {
-          [, end] = condition;
-        } else if (!isInParagraph && STANDALONE_HTML_TAG_REGEX.test(line)) {
-          end = null;
-        } else {
-          // A heading or a thematic break doesn’t leave a paragraph open, so a standalone tag
-          // after it starts an HTML block. A line like `===` is a heading underline only after a
-          // paragraph line, and paragraph text otherwise
-          isInParagraph =
-            !isBlankLine &&
-            !SINGLE_LINE_BLOCK_REGEX.test(line) &&
-            !(isInParagraph && SETEXT_UNDERLINE_REGEX.test(line));
-
-          return line.includes('\t')
-            ? line.replace(GLOBAL_INLINE_HTML_REGEX, (tag) =>
-                tag.replaceAll('\t', CODE_TAB_PLACEHOLDER),
-              )
-            : line;
-        }
-      }
-
-      if (end?.test(line)) {
-        end = undefined;
-      }
-
-      isInParagraph = false;
-
-      return `${HTML_BLOCK_PLACEHOLDER}${line.replaceAll('\t', CODE_TAB_PLACEHOLDER)}`;
+      return line.includes('\t')
+        ? line.replace(GLOBAL_INLINE_HTML_REGEX, (tag) =>
+            tag.replaceAll('\t', CODE_TAB_PLACEHOLDER),
+          )
+        : line;
     })
     .join('\n');
 };

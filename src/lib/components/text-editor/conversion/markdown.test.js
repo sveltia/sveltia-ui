@@ -28,6 +28,59 @@ describe('splitMultilineFormatting', () => {
     expect(splitMultilineFormatting('  `foo\nbar`  ')).toBe('  `foo`\n`bar`  ');
   });
 
+  it('should pair the backticks of code spans before splitting them across lines', () => {
+    // The closing backtick of a code span isn’t the opening one of another
+    // @see https://github.com/sveltia/sveltia-cms/issues/1168
+    [
+      '| Bold | `**bold**` | Some **bold** text |\n| Italic | `*italic*` | Some *italic* text |',
+      'a `b` c\nd `e` f',
+      'a \\`b c\nd` e',
+      '`a\n\nb`',
+      '``a\nb``',
+      'a`b\nc`d',
+    ].forEach((value) => {
+      expect(splitMultilineFormatting(value)).toBe(value);
+    });
+
+    expect(splitMultilineFormatting('a `b` `c\nd` e')).toBe('a `b` `c`\n`d` e');
+    expect(splitMultilineFormatting('a `b\n\n`c\nd`')).toBe('a `b\n\n`c`\n`d`');
+    expect(splitMultilineFormatting('**`a` `b\nc`**')).toBe('**`a` `b`**\n**`c`**');
+  });
+
+  it('should not split a code span across the start of another block', () => {
+    [
+      '- a `b\n- c` d',
+      '# a `b\nc` d',
+      'a `b\n# c` d',
+      '> a `b\n> c` d',
+      '| a | `b |\n| c` | d |',
+      'a `b\n| c` | d |',
+      '`a\n***\nb`',
+      '<div>\n`a\nb`\n</div>',
+      '<span>\nx `a\nb` y',
+      '<pre>\nx\n\n`a\nb`\n</pre>',
+      '<div>\n- `a\nb`\n</div>',
+    ].forEach((value) => {
+      expect(splitMultilineFormatting(value)).toBe(value);
+    });
+
+    // A list item continues on an indented line
+    expect(splitMultilineFormatting('- a `b\n  c` d')).toBe('- a `b`\n  `c` d');
+  });
+
+  it('should pair the backticks of code spans in linear time', () => {
+    expectLinearTime(
+      (size) => `${'`a\nb` '.repeat(size)}`,
+      (value) => splitMultilineFormatting(value),
+      2000,
+    );
+    expectLinearTime(
+      (size) => `${'`` a\n'.repeat(size)}\`b\nc\``,
+      (value) => splitMultilineFormatting(value),
+      2000,
+    );
+  });
+
   it('should split a code span or a link within formatting across lines', () => {
     expect(splitMultilineFormatting('**a `c\nd` b**')).toBe('**a `c`**\n**`d` b**');
     expect(splitMultilineFormatting('_a `b\nc`_')).toBe('_a `b`_\n_`c`_');
