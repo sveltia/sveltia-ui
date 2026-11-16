@@ -36,7 +36,7 @@
   let {
     /* eslint-disable prefer-const */
     open = $bindable(false),
-    dialog = $bindable(),
+    dialog: boundDialog = $bindable(),
     class: className,
     role = 'dialog',
     modal = true,
@@ -56,6 +56,15 @@
     ...restProps
     /* eslint-enable prefer-const */
   } = $props();
+
+  /**
+   * A reference to the `<dialog>` element. This is kept apart from the bindable `dialog` prop: when
+   * the consumer doesn’t bind that prop, Svelte discards the value assigned to it locally as soon
+   * as any of the props spread onto this component changes, such as the labelling attributes of a
+   * `<Dialog>` whose title has been updated, which would leave the modal unable to open or close.
+   * @type {HTMLDialogElement | undefined}
+   */
+  let dialog = $state.raw();
 
   /**
    * Focus the `<dialog>` element. It has `tabindex="-1"`, so it can receive focus programmatically,
@@ -417,7 +426,13 @@
 {#snippet dialogSnippet()}
   {#if mounted}
     <dialog
-      bind:this={dialog}
+      bind:this={
+        () => dialog,
+        (element) => {
+          dialog = element;
+          boundDialog = element;
+        }
+      }
       tabindex="-1"
       {...restProps}
       inert={!setOpenClass}

@@ -517,6 +517,41 @@ describe('Dialog', () => {
     });
   });
 
+  it('still closes and reopens after its title has changed', async () => {
+    /** @type {ComponentProps<typeof Dialog>} */
+    const props = $state({ open: true, title: 'Large File' });
+
+    await render(Dialog, props);
+    await waitForOpen();
+
+    // A new title is passed down to the modal with the other labelling attributes, which must not
+    // cost the modal its reference to the `<dialog>` element
+    props.title = 'Invalid File';
+    await vi.waitFor(() => {
+      expect(getDialog()?.querySelector('.title')?.textContent?.trim()).toBe('Invalid File');
+    });
+    /** @type {HTMLButtonElement} */ (
+      /** @type {HTMLDialogElement} */ (getDialog()).querySelector('button.primary')
+    ).click();
+    expect(props.open).toBe(false);
+    await vi.waitFor(() => {
+      expect(getDialog()).toBeNull();
+    });
+
+    // Reopen it with yet another title while it’s still closing
+    props.open = true;
+    await waitForOpen();
+    /** @type {HTMLButtonElement} */ (
+      /** @type {HTMLDialogElement} */ (getDialog()).querySelector('button.primary')
+    ).click();
+    props.title = 'Files Cannot Be Uploaded';
+    props.open = true;
+    await vi.waitFor(() => {
+      expect(getDialog()?.open).toBe(true);
+      expect(getDialog()?.inert).toBe(false);
+    });
+  });
+
   it('is not movable by default', async () => {
     await render(Dialog, { open: true, title: 'T' });
     await waitForOpen();
