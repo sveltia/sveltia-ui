@@ -7,8 +7,8 @@ import {
   $createParagraphNode as createParagraphNode,
   $getRoot as getRoot,
 } from 'lexical';
-import { removeImportPlaceholders } from './markdown.js';
-import { HTML_BLOCK_PLACEHOLDER } from './transformers/raw-syntax.js';
+import { removeImportPlaceholders } from './markdown/index.js';
+import { HTML_BLOCK_PLACEHOLDER } from './placeholder-chars.js';
 import { onEditorUpdate } from './update.js';
 
 /**

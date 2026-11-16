@@ -1,19 +1,16 @@
 import { $getState as getState, $setState as setState, createState } from 'lexical';
 
+import { CODE_TAB_PLACEHOLDER, HTML_BLOCK_PLACEHOLDER } from '../placeholder-chars.js';
+
 /**
  * @import { TextMatchTransformer } from '@lexical/markdown';
  * @import { TextNode } from 'lexical';
  */
 
 /**
- * Placeholder put at the start of a line of an HTML block; see `addImportPlaceholders()`.
- */
-export const HTML_BLOCK_PLACEHOLDER = '\uE007';
-
-/**
  * Whitespace within an HTML tag, including the placeholder of a tab; see `addImportPlaceholders()`.
  */
-const TAG_SPACE = '[ \\t\\uE005]';
+const TAG_SPACE = `[ \\t${CODE_TAB_PLACEHOLDER}]`;
 
 /**
  * Regular expression source to match an HTML open tag or closing tag.
@@ -21,7 +18,8 @@ const TAG_SPACE = '[ \\t\\uE005]';
  */
 export const HTML_TAG_SOURCE =
   `<[A-Za-z][A-Za-z0-9-]*(?:${TAG_SPACE}+[A-Za-z_:][\\w.:-]*` +
-  `(?:${TAG_SPACE}*=${TAG_SPACE}*(?:[^\\s"'=<>\`\\uE005]+|'[^'\\n]*'|"[^"\\n]*"))?)*` +
+  `(?:${TAG_SPACE}*=${TAG_SPACE}*` +
+  `(?:[^\\s"'=<>\`${CODE_TAB_PLACEHOLDER}]+|'[^'\\n]*'|"[^"\\n]*"))?)*` +
   `${TAG_SPACE}*/?>|</[A-Za-z][A-Za-z0-9-]*${TAG_SPACE}*>`;
 
 /**

@@ -6,7 +6,7 @@ import { $convertToMarkdownString as convertToMarkdownString } from '@lexical/ma
 import { sleep } from '@sveltia/utils/misc';
 import { DISABLED_MARKDOWN_TAGS } from '../constants.js';
 import { exportHtml } from './html/index.js';
-import { trimBlankBlockquoteLines } from './markdown.js';
+import { trimBlankBlockquoteLines } from './markdown/index.js';
 import { BLOCK_SYNTAX_ESCAPE } from './transformers/block-escape.js';
 import { getSelectionTypes } from '../editing/selection.js';
 import { mergeUnregisters } from '../utils.js';

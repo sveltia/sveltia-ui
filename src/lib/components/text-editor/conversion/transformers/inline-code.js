@@ -5,6 +5,8 @@ import {
   $isTextNode as isTextNode,
 } from 'lexical';
 
+import { WHITESPACE_CODE_PLACEHOLDER } from '../placeholder-chars.js';
+
 /**
  * @import { TextMatchTransformer } from '@lexical/markdown';
  * @import { ElementNode, LexicalNode, TextNode } from 'lexical';
@@ -52,7 +54,7 @@ export const getFormatExportNode = (node) => {
              * Get a placeholder instead of the whitespace.
              * @returns {string} Placeholder.
              */
-            value: () => '\uE004',
+            value: () => WHITESPACE_CODE_PLACEHOLDER,
           },
         })
       : target;

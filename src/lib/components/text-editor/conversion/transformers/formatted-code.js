@@ -1,4 +1,4 @@
-import { findCodeSpans } from '../markdown.js';
+import { findCodeSpans } from '../markdown/index.js';
 
 /**
  * @import { TextFormatTransformer, TextMatchTransformer, Transformer } from '@lexical/markdown';

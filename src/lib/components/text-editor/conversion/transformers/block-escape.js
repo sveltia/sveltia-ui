@@ -1,5 +1,6 @@
 import { $isLineBreakNode as isLineBreakNode, $isTextNode as isTextNode } from 'lexical';
 
+import { RAW_TEXT_PLACEHOLDER } from '../placeholder-chars.js';
 import { getFormatExportNode } from './inline-code.js';
 import { getRawSyntax } from './raw-syntax.js';
 
@@ -150,11 +151,6 @@ const isItalicWithinWord = (node) => {
 };
 
 /**
- * Placeholder for the text of a raw syntax node, which Lexical doesn’t escape.
- */
-const RAW_TEXT = '\uE000';
-
-/**
  * Export-only transformer that tidies up the Markdown of a text node that isn’t inline code, which
  * Lexical exports verbatim. It removes the unnecessary escapes Lexical adds; see `unescapeText()`.
  * It uses `*` instead of `_` for italic text within a word, like `a*b*c`, which would otherwise be
@@ -188,7 +184,9 @@ export const BLOCK_SYNTAX_ESCAPE = {
     // drops the closing syntax due after it, before a link for example, leaving `**_a_ **[b](u)**`.
     // Export a placeholder instead to get the closing syntax, which goes before the whitespace
     if (node.getFormat() && /^\s+$/.test(text)) {
-      return `${exportFormat(getFormatExportNode(node), RAW_TEXT).replace(RAW_TEXT, '')}${text}`;
+      const syntax = exportFormat(getFormatExportNode(node), RAW_TEXT_PLACEHOLDER);
+
+      return `${syntax.replace(RAW_TEXT_PLACEHOLDER, '')}${text}`;
     }
 
     const rawSyntax = getRawSyntax(node);
@@ -196,7 +194,7 @@ export const BLOCK_SYNTAX_ESCAPE = {
     // Raw syntax is exported as is, but with the syntax of its format, if any
     let markdown = exportFormat(
       getFormatExportNode(node),
-      rawSyntax === undefined ? text : RAW_TEXT,
+      rawSyntax === undefined ? text : RAW_TEXT_PLACEHOLDER,
     );
 
     if (isItalicWithinWord(node)) {
@@ -205,7 +203,7 @@ export const BLOCK_SYNTAX_ESCAPE = {
     }
 
     if (rawSyntax !== undefined) {
-      return markdown.replace(RAW_TEXT, () => rawSyntax);
+      return markdown.replace(RAW_TEXT_PLACEHOLDER, () => rawSyntax);
     }
 
     const parent = node.getParent();

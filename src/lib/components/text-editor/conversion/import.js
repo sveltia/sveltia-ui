@@ -21,13 +21,10 @@ import {
 import { IMPORT_UPDATE_TAG } from '../constants.js';
 import { exportHtml, findUnsupportedNode, getCodeLanguage } from './html/index.js';
 import {
-  addImportPlaceholders,
-  convertSetextHeadings,
-  convertTildeFences,
-  padBlankBlockquoteLines,
+  convertBlockSyntax,
+  toLexicalMarkdown,
   removeImportPlaceholders,
-  splitMultilineFormatting,
-} from './markdown.js';
+} from './markdown/index.js';
 import { loadCodeHighlighter } from '../shiki/preload.js';
 import { CODE } from './transformers/code.js';
 import { addCodeSpanSplit } from './transformers/formatted-code.js';
@@ -82,10 +79,9 @@ const removePlaceholders = (nodes) => {
  * @returns {{ markdown: string, languages: string[] }} Normalized Markdown and the languages.
  */
 export const prepareMarkdown = (value, enabledTransformers) => {
-  // Tilde code fences are converted to backtick ones, and setext headings to ATX ones. Otherwise
-  // the syntax is kept as text, as written. A transformer is found by its regular expression,
-  // because the transformers can come wrapped in a `$state` proxy, which leaves a regular
-  // expression as is but not the transformer object itself
+  // A transformer is found by its regular expression, because the transformers can come wrapped
+  // in a `$state` proxy, which leaves a regular expression as is but not the transformer object
+  // itself
   const hasCodeBlocks = enabledTransformers.some(
     (transformer) => 'regExpStart' in transformer && transformer.regExpStart === CODE.regExpStart,
   );
@@ -94,8 +90,7 @@ export const prepareMarkdown = (value, enabledTransformers) => {
     (transformer) => 'regExp' in transformer && transformer.regExp === HEADING.regExp,
   );
 
-  const fencedValue = hasCodeBlocks ? convertTildeFences(value) : value;
-  const markdown = hasHeadings ? convertSetextHeadings(fencedValue) : fencedValue;
+  const markdown = convertBlockSyntax(value, { hasCodeBlocks, hasHeadings });
 
   return {
     markdown,
@@ -118,28 +113,23 @@ export const prepareMarkdown = (value, enabledTransformers) => {
  * @returns {LexicalNode[]} Imported nodes.
  */
 export const $importMarkdown = (markdown, enabledTransformers, { toRoot = false } = {}) => {
-  // Split multiline formatting into separate lines to prevent Markdown parsing issues
-  const splitValue = splitMultilineFormatting(markdown);
-  // Add placeholders so Lexical reads the backslashes, the tabs in code spans and raw HTML right
-  const markedValue = addImportPlaceholders(splitValue);
-  // Pad blank blockquote lines so they are not imported as literal `>` text
-  const paddedValue = padBlankBlockquoteLines(markedValue);
+  const { markdown: preparedValue, hasPlaceholders } = toLexicalMarkdown(markdown);
   // Keep the formatting around a code span after other formatting
   const transformers = addCodeSpanSplit(enabledTransformers);
   /** @type {LexicalNode[]} */
   let nodes;
 
   if (toRoot) {
-    convertFromMarkdownString(paddedValue, transformers);
+    convertFromMarkdownString(preparedValue, transformers);
     nodes = getRoot().getChildren();
   } else {
-    nodes = generateNodesFromMarkdownString(paddedValue, transformers);
+    nodes = generateNodesFromMarkdownString(preparedValue, transformers);
   }
 
   // The text of raw HTML and raw syntax is restored as well. The lines of an HTML block have a
   // placeholder. Other raw syntax, like an autolink or a definition label, only differs from its
   // text if Lexical has decoded an escape or a character reference in it
-  if (markedValue !== splitValue || /[\\&]/.test(markedValue)) {
+  if (hasPlaceholders || /[\\&]/.test(preparedValue)) {
     removePlaceholders(nodes);
   }
 

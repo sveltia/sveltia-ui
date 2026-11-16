@@ -8,7 +8,8 @@ import {
 import { createEditor } from 'lexical';
 import { describe, expect, it } from 'vitest';
 
-import { CODE, INFO_BACKTICK } from './code.js';
+import { CODE } from './code.js';
+import { INFO_BACKTICK } from '../placeholder-chars.js';
 
 /**
  * Import Markdown and export it again.

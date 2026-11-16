@@ -1,17 +1,11 @@
 import { CODE as LEXICAL_CODE } from '@lexical/markdown';
 
+import { INFO_BACKTICK } from '../placeholder-chars.js';
+
 /**
  * @import { MultilineElementTransformer } from '@lexical/markdown';
  * @import { ElementNode, LexicalNode } from 'lexical';
  */
-
-/**
- * Placeholder for a backtick in the info string of a code block fenced with tildes, which is
- * converted to one fenced with backticks before the Markdown is imported; see
- * `convertTildeFences()`. Unlike that of a tilde fence, the info string of a backtick fence can’t
- * contain a backtick.
- */
-export const INFO_BACKTICK = '\uE001';
 
 /**
  * Regular expression to match the opening fence of a code block and its info string, if any. Like
