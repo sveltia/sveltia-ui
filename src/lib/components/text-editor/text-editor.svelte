@@ -8,31 +8,28 @@
   import Alert from '../alert/alert.svelte';
   import TextArea from '../text-field/text-area.svelte';
   import Toast from '../toast/toast.svelte';
+  import { getEditorSetup } from './config.js';
   import { DEFAULT_BUTTON_TYPES } from './constants.js';
-  import { loadCodeHighlighter } from './shiki/preload.js';
   import EmojiAutocomplete from './widgets/emoji-autocomplete.svelte';
   import FloatingLinkEditor from './widgets/floating-link-editor.svelte';
   import LexicalRoot from './lexical-root.svelte';
   import TableCellMenuButton from './widgets/table-cell-menu-button.svelte';
-  import {
-    getBlockType,
-    getRawTextState,
-    registerRawTextSingleLine,
-  } from './editing/raw-markdown.js';
-  import { highlightCodeToTokens } from './shiki/facade.js';
-  import { getCodeTheme, onCodeThemeChange } from './shiki/theme.js';
+  import { registerRawTextSelection, registerRawTextSingleLine } from './editing/raw-markdown.js';
+  import { createSourceHighlighter } from './shiki/source-highlight.svelte.js';
   import { createEditorStore, syncEditorProps } from './store.svelte.js';
   import TextEditorToolbar from './toolbar/text-editor-toolbar.svelte';
 
   /**
-   * @import { Snippet } from 'svelte';
    * @import {
+   * EditorCommonProps,
+   * FormFieldStateProps,
    * TextEditorComponent,
    * TextEditorMode,
    * TextEditorNodeType,
    * TextEditorValueFormat,
+   * WidgetStateProps,
    * } from '#lib/typedefs.js';
-   * @import { HighlightedToken } from '#lib/typedefs.js';
+   * @import { NormalizedEditorConfig } from './config.js';
    */
 
   /**
@@ -48,7 +45,6 @@
    * @property {boolean} [pending] Whether the user has changed the rich text content, and the
    * editor has yet to update {@link value}, which it does a moment later. Bind it to wait for the
    * change before reading the value, for example to save it. Read-only.
-   * @property {boolean} [flex] Make the text input container flexible.
    * @property {'ltr' | 'rtl' | 'auto'} [dir] The `dir` attribute on the editable text box, both
    * the rich text editor and the `<textarea>` element of the plain text mode.
    * @property {TextEditorMode[]} [modes] Enabled modes.
@@ -67,26 +63,11 @@
    * rich text editor.
    * @property {boolean} [useEmojiAutocomplete] Whether to autocomplete emojis when the user
    * types a shortcode, like `:smi`.
-   * @property {string} [class] The `class` attribute on the wrapper element.
-   * @property {boolean} [hidden] Whether to hide the widget.
-   * @property {boolean} [disabled] Whether to disable the widget. An alias of the `aria-disabled`
-   * attribute.
-   * @property {boolean} [readonly] Whether to make the widget read-only. An alias of the
-   * `aria-readonly` attribute.
-   * @property {boolean} [required] Whether to mark the widget required. An alias of the
-   * `aria-required` attribute.
-   * @property {boolean} [invalid] Whether to mark the widget invalid. An alias of the
-   * `aria-invalid` attribute.
-   * @property {string} [ariaLabel] The `aria-label` attribute on the editable text box. Either
-   * this or `ariaLabelledby` is required for the editor to have an accessible name.
-   * @property {string} [ariaLabelledby] The `aria-labelledby` attribute on the editable text box.
-   * @property {string} [ariaDescribedby] The `aria-describedby` attribute on the editable text
-   * box.
-   * @property {Snippet} [children] Primary slot content.
    */
 
   /**
-   * @type {Props & Record<string, any>}
+   * @type {EditorCommonProps & WidgetStateProps & FormFieldStateProps & Props &
+   * Record<string, any>}
    */
   let {
     /* eslint-disable prefer-const */
@@ -113,7 +94,8 @@
     'aria-label': ariaLabelAttr = undefined,
     'aria-labelledby': ariaLabelledbyAttr = undefined,
     'aria-describedby': ariaDescribedbyAttr = undefined,
-    children,
+    // Not rendered, but kept out of `restProps`, which go on the wrapper element
+    children: _children,
     ...restProps
     /* eslint-enable prefer-const */
   } = $props();
@@ -127,6 +109,9 @@
     'aria-labelledby': ariaLabelledby ?? ariaLabelledbyAttr,
     'aria-describedby': ariaDescribedby ?? ariaDescribedbyAttr,
   });
+
+  /** Whether the user can change the content, which the widgets below are only shown for. */
+  const editable = $derived(!disabled && !readonly);
 
   const editorStore = createEditorStore();
 
@@ -144,21 +129,10 @@
 
   setContext('editorStore', editorStore);
 
-  /** Language of the source shown in the plain text mode. */
-  // svelte-ignore state_referenced_locally
-  const sourceLanguage = format === 'html' ? 'html' : 'markdown';
-
-  /**
-   * Maximum length of the Markdown or HTML source to highlight in the plain text mode. The whole
-   * source is tokenized on every keystroke, so highlighting a longer one would make typing
-   * sluggish.
-   */
-  const MAX_HIGHLIGHT_LENGTH = 20_000;
-
-  /** Syntax highlighting theme matching the app’s appearance. */
-  let codeTheme = $state(getCodeTheme());
-  /** Incremented whenever the highlighter has loaded something, to highlight the text again. */
-  let highlighterLoadCount = $state(0);
+  /** Features derived from the editor configuration, which the store holds normalized. */
+  const setup = $derived(
+    getEditorSetup(/** @type {NormalizedEditorConfig} */ (editorStore.config)),
+  );
 
   const usePlainText = $derived(!editorStore.useRichText && !hidden);
   /**
@@ -168,81 +142,24 @@
    * document slow. As nobody sees the `<textarea>` meanwhile, it only gets `auto` once it’s shown.
    */
   const textAreaDir = $derived(dir === 'auto' && editorStore.useRichText ? undefined : dir);
-  /**
-   * Comma-separated languages used in the fenced code blocks of the Markdown source, which are
-   * highlighted as well. It’s a string rather than an array, so the highlighter isn’t reloaded on
-   * every keystroke.
-   */
-  const codeLanguages = $derived.by(() => {
-    if (
-      !usePlainText ||
-      sourceLanguage !== 'markdown' ||
-      editorStore.inputValue.length > MAX_HIGHLIGHT_LENGTH
-    ) {
-      return '';
-    }
 
-    return [
-      ...new Set(
-        [...editorStore.inputValue.matchAll(/^[ \t]*(?:```|~~~)[ \t]*(?<lang>[\w+#-]+)/gm)].map(
-          ({ groups }) => groups?.lang,
-        ),
-      ),
-    ].join(',');
-  });
+  /** Language of the source shown in the plain text mode. */
+  // svelte-ignore state_referenced_locally
+  const sourceLanguage = format === 'html' ? 'html' : 'markdown';
 
-  /**
-   * Highlight the Markdown or HTML source in the plain text mode.
-   * @param {string} source Markdown or HTML source.
-   * @returns {HighlightedToken[][] | undefined} Tokens, or `undefined` while the highlighter is
-   * still loading.
-   */
-  const highlightSource = (source) => {
-    void highlighterLoadCount;
-
-    // Don’t waste time on tokenizing the source while the rich text mode is shown
-    if (!usePlainText || source.length > MAX_HIGHLIGHT_LENGTH) {
-      return undefined;
-    }
-
-    return highlightCodeToTokens(source, sourceLanguage, { theme: codeTheme });
-  };
-
-  $effect(() =>
-    onCodeThemeChange(async () => {
-      const theme = getCodeTheme();
-
-      // Keep the current highlighting until the new theme is ready, so the text doesn’t flash
-      if (usePlainText) {
-        await loadCodeHighlighter(sourceLanguage);
-      }
-
-      // Ignore an outdated change, in case the appearance has changed again while loading
-      if (theme === getCodeTheme()) {
-        codeTheme = theme;
-      }
-    }),
-  );
-
-  $effect(() => {
-    // Load the highlighter only when the plain text mode is actually shown
-    if (!usePlainText) {
-      return;
-    }
-
-    const languages = codeLanguages ? codeLanguages.split(',') : [];
-
-    void codeTheme;
-
-    untrack(() => {
-      // The Markdown or HTML grammar is loaded first, because the engine has to be in place before
-      // anything else can be loaded
-      loadCodeHighlighter(sourceLanguage).then(async () => {
-        highlighterLoadCount += 1;
-        await Promise.all(languages.map((lang) => loadCodeHighlighter(lang)));
-        highlighterLoadCount += 1;
-      });
-    });
+  /** Highlighter of the Markdown or HTML source shown in the plain text mode. */
+  const highlightSource = createSourceHighlighter({
+    language: sourceLanguage,
+    /**
+     * Check if the plain text mode is shown.
+     * @returns {boolean} Result.
+     */
+    isActive: () => usePlainText,
+    /**
+     * Get the Markdown or HTML source.
+     * @returns {string} Source.
+     */
+    getSource: () => editorStore.inputValue,
   });
 
   $effect(() => {
@@ -254,31 +171,22 @@
       return undefined;
     }
 
-    /**
-     * Update the selection state. Until the `<textarea>` gets the focus, its caret is at the end of
-     * the value rather than where the user would expect, so the block type is not detected yet.
-     */
-    const update = () => {
-      editorStore.selection = {
-        blockNodeKey: null,
-        blockType:
-          document.activeElement === textArea
-            ? getBlockType(getRawTextState(textArea), {
-                hasTaskList: editorStore.config.enabledButtons.includes('task-list'),
-              })
-            : 'paragraph',
-        inlineTypes: [],
-      };
-    };
-
-    const events = ['selectionchange', 'select', 'input', 'keyup', 'mouseup', 'focus'];
-
-    untrack(update);
-    events.forEach((type) => textArea.addEventListener(type, update));
-
-    return () => {
-      events.forEach((type) => textArea.removeEventListener(type, update));
-    };
+    return untrack(() =>
+      registerRawTextSelection(
+        textArea,
+        (blockType) => {
+          editorStore.selection = { blockNodeKey: null, blockType, inlineTypes: [] };
+        },
+        {
+          /**
+           * Tell whether the task list button is enabled. It’s read on every change rather than
+           * once, so a change to the buttons is followed.
+           * @returns {boolean} Result.
+           */
+          hasTaskList: () => setup.hasTaskList,
+        },
+      ),
+    );
   });
 
   $effect(() => {
@@ -354,13 +262,13 @@
     {required}
     {invalid}
   />
-  {#if editorStore.config.useEmojiAutocomplete && !disabled && !readonly}
+  {#if editorStore.config.useEmojiAutocomplete && editable}
     <EmojiAutocomplete />
   {/if}
-  {#if editorStore.config.enabledButtons.includes('link') && !disabled && !readonly}
+  {#if setup.hasLink && editable}
     <FloatingLinkEditor />
   {/if}
-  {#if editorStore.config.enabledButtons.includes('table') && !disabled && !readonly}
+  {#if setup.hasTable && editable}
     <TableCellMenuButton />
   {/if}
 </div>

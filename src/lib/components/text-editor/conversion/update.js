@@ -1,5 +1,5 @@
 /**
- * Exporting the editor content, and the Update event fired on changes.
+ * Exporting the editor content, and passing it on as it changes.
  */
 
 import { $convertToMarkdownString as convertToMarkdownString } from '@lexical/markdown';
@@ -14,7 +14,14 @@ import { mergeUnregisters } from '../utils.js';
 /**
  * @import { LexicalEditor } from 'lexical';
  * @import { Transformer } from '@lexical/markdown';
- * @import { TextEditorValueFormat } from '#lib/typedefs.js';
+ * @import { TextEditorSelectionState, TextEditorValueFormat } from '#lib/typedefs.js';
+ */
+
+/**
+ * Value exported from the editor, and the selection state at the time.
+ * @typedef {object} ExportDetail
+ * @property {string} value Markdown or HTML value.
+ * @property {TextEditorSelectionState} selection Selection state.
  */
 
 /**
@@ -42,96 +49,72 @@ export const exportMarkdown = (enabledTransformers) => {
 };
 
 /**
- * Listen to changes made on the editor and trigger the Update event.
+ * Export the editor content as Markdown or HTML. Call this within an editor update or read.
  * @internal
  * @param {LexicalEditor} editor Editor instance.
  * @param {Transformer[]} enabledTransformers Enabled Markdown transformers.
- * @param {string} [cachedValue] Value from a previous call, to be reused instead of converting the
- * whole document again when only the selection has changed.
  * @param {TextEditorValueFormat} [format] Value format.
  * @returns {string} Markdown or HTML value.
  */
-export const onEditorUpdate = (editor, enabledTransformers, cachedValue, format = 'markdown') => {
-  const value =
-    cachedValue ?? (format === 'html' ? exportHtml(editor) : exportMarkdown(enabledTransformers));
-
-  editor.getRootElement()?.dispatchEvent(
-    new CustomEvent('Update', {
-      detail: {
-        value,
-        selection: getSelectionTypes(),
-      },
-    }),
-  );
-
-  return value;
-};
+export const exportValue = (editor, enabledTransformers, format = 'markdown') =>
+  format === 'html' ? exportHtml(editor) : exportMarkdown(enabledTransformers);
 
 /**
- * Functions triggering the Update event an editor has scheduled, keyed by the editor.
- * @type {WeakMap<LexicalEditor, () => void>}
- */
-const flushers = new WeakMap();
-
-/**
- * Trigger the Update event the given editor has scheduled right away, instead of after the delay,
- * so the value reflects what was just typed. Call this before acting on the value, like when the
- * focus leaves the editor or before switching to the Markdown or HTML source. Does nothing if no
- * Update event is scheduled.
- * @param {LexicalEditor | undefined} editor Editor instance.
- */
-export const flushUpdateEvent = (editor) => {
-  if (editor) {
-    flushers.get(editor)?.();
-  }
-};
-
-/**
- * Register an update listener that triggers the Update event with the Markdown or HTML value,
- * debounced so only the latest update in a burst triggers it. See also {@link flushUpdateEvent}.
+ * Register an update listener that exports the editor content as Markdown or HTML, and passes it
+ * on along with the selection state, debounced so only the latest update in a burst is exported.
  * @param {LexicalEditor} editor Editor instance.
  * @param {Transformer[]} enabledTransformers Enabled Markdown transformers.
  * @param {TextEditorValueFormat} format Value format.
- * @returns {() => void} Cleanup handler.
+ * @param {(detail: ExportDetail) => void} onExport Function to call with the exported value. It’s
+ * called within an editor update.
+ * @returns {{ flush: () => void, unregister: () => void }} `flush` exports the content scheduled
+ * to be exported right away, instead of after the delay, so the value reflects what was just
+ * typed. Call it before acting on the value, like when the focus leaves the editor or before
+ * switching to the Markdown or HTML source. It does nothing if nothing is scheduled. `unregister`
+ * removes the listener.
  */
-export const registerUpdateEvent = (editor, enabledTransformers, format) => {
-  /** Incremented on every update, so only the latest one in a burst triggers the Update event. */
+export const registerValueExport = (editor, enabledTransformers, format, onExport) => {
+  /** Incremented on every update, so only the latest one in a burst is exported. */
   let updateCount = 0;
-  /** Whether the content has changed since the Update event was last triggered. */
+  /** Whether the content has changed since it was last exported. */
   let contentChanged = true;
   /** @type {string | undefined} */
   let lastValue = undefined;
   let disposed = false;
-  /** Whether the Update event is scheduled, and hasn’t been triggered yet. */
+  /** Whether an export is scheduled, and hasn’t been made yet. */
   let scheduled = false;
 
   /**
-   * Trigger the Update event with the current value.
+   * Export the current value, and pass it on.
    */
-  const triggerUpdate = () => {
+  const triggerExport = () => {
     scheduled = false;
 
     editor.update(() => {
-      lastValue = onEditorUpdate(
-        editor,
-        enabledTransformers,
-        contentChanged ? undefined : lastValue,
-        format,
-      );
+      // Reuse the value when only the selection has changed, instead of converting the whole
+      // document again
+      const value =
+        (contentChanged ? undefined : lastValue) ??
+        exportValue(editor, enabledTransformers, format);
+
+      onExport({ value, selection: getSelectionTypes() });
+      lastValue = value;
       contentChanged = false;
     });
   };
 
-  flushers.set(editor, () => {
+  /**
+   * Export the scheduled value right away.
+   */
+  const flush = () => {
     if (scheduled && !disposed && !editor.isComposing()) {
-      triggerUpdate();
+      triggerExport();
     }
-  });
+  };
 
-  return mergeUnregisters(
+  const unregister = mergeUnregisters(
     () => {
       disposed = true;
-      flushers.delete(editor);
     },
     editor.registerUpdateListener(({ dirtyElements, dirtyLeaves } = /** @type {any} */ ({})) => {
       // An update that only moves the selection leaves no dirty nodes. Remember whether any update
@@ -151,14 +134,16 @@ export const registerUpdateEvent = (editor, enabledTransformers, format) => {
       (async () => {
         await sleep(100);
 
-        // Skip if a newer update has been made in the meantime, the event has been triggered
-        // already with `flushUpdateEvent()`, or the editor has been disposed
+        // Skip if a newer update has been made in the meantime, the value has been exported
+        // already with `flush()`, or the editor has been disposed
         if (currentCount !== updateCount || !scheduled || disposed) {
           return;
         }
 
-        triggerUpdate();
+        triggerExport();
       })();
     }),
   );
+
+  return { flush, unregister };
 };

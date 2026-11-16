@@ -22,6 +22,7 @@
   import { getContext } from 'svelte';
   import { detectEmojiTrigger, getEmojiInsertText } from '../../emoji/emoji.js';
   import EmojiSuggestions from '../../emoji/emoji-suggestions.svelte';
+  import { mergeUnregisters } from '../utils.js';
 
   /**
    * @import { EmojiAnchorRect, EmojiEntry, EmojiTrigger, TextEditorStore } from '#lib/typedefs.js';
@@ -135,7 +136,7 @@
    * shortcodes. The shortcuts are registered with the highest priority, so they take precedence
    * over the editor’s own handling while the list is open, and return `false` otherwise to leave
    * the editor alone.
-   * @returns {Array<() => void>} Cleanup handlers.
+   * @returns {() => void} Cleanup handler.
    */
   const registerCommands = () => {
     const { editor } = editorStore;
@@ -143,7 +144,7 @@
     // Only called from the effect below, once the editor is there
     /* v8 ignore next */
     if (!editor) {
-      return [];
+      return mergeUnregisters();
     }
 
     /**
@@ -162,7 +163,7 @@
       return true;
     };
 
-    return [
+    return mergeUnregisters(
       editor.registerCommand(
         KEY_ARROW_DOWN_COMMAND,
         whileOpen(() => list?.moveSelection(1)),
@@ -198,7 +199,7 @@
 
         list?.update(trigger);
       }),
-    ];
+    );
   };
 
   $effect(() => {
@@ -208,10 +209,10 @@
       return undefined;
     }
 
-    const unregisters = registerCommands();
+    const unregister = registerCommands();
 
     return () => {
-      unregisters.forEach((unregister) => unregister());
+      unregister();
       list?.close();
     };
   });

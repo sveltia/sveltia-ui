@@ -12,14 +12,11 @@
 
   /**
    * @import { Snippet } from 'svelte';
+   * @import { ContainerProps, WidgetStateProps } from '#lib/typedefs.js';
    */
 
   /**
    * @typedef {object} Props
-   * @property {string} [class] The `class` attribute on the wrapper element.
-   * @property {boolean} [hidden] Whether to hide the widget.
-   * @property {boolean} [disabled] Whether to disable the widget. An alias of the `aria-disabled`
-   * attribute.
    * @property {boolean} [checked] Whether to check the widget. An alias of the `aria-checked`
    * attribute.
    * @property {string} [name] The `data-name` attribute on the `<button>` element.
@@ -33,14 +30,13 @@
    * buttons. It works in the same way as the [`<input
    * bind:group>`](https://svelte.dev/docs/svelte/bind#input-bind:group) of Svelte: it can hold any
    * type of value, including `undefined` before a choice is made.
-   * @property {Snippet} [children] Primary slot content.
    * @property {Snippet} [default] Default slot content.
    * @property {(event: CustomEvent) => void} [onChange] Custom `Change` event handler.
    * @property {(event: CustomEvent) => void} [onSelect] Custom `Select` event handler.
    */
 
   /**
-   * @type {Props & Record<string, any>}
+   * @type {ContainerProps & WidgetStateProps & Props & Record<string, any>}
    */
   let {
     /* eslint-disable prefer-const */

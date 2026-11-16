@@ -2,29 +2,14 @@ import { $isCodeNode as isCodeNode } from '@lexical/code-core';
 import { CODE as LEXICAL_CODE } from '@lexical/markdown';
 import { $isTextNode as isTextNode } from 'lexical';
 
-import { findCodeBlocks } from '../markdown/code-blocks.js';
+import { getCodeBlocks, parseOpeningFence } from '../markdown/code-blocks.js';
 import { INFO_BACKTICK } from '../placeholder-chars.js';
 
 /**
  * @import { MultilineElementTransformer } from '@lexical/markdown';
  * @import { ElementNode, LexicalNode } from 'lexical';
+ * @import { OpeningFence } from '../markdown/code-blocks.js';
  */
-
-/**
- * Regular expression to match the opening fence of a code block and its info string, if any. Like
- * Lexical, the language is the leading word of the info string, and the rest is metadata. Unlike
- * Lexical’s, the word runs to the next whitespace, so a language with symbols, like `c#` or `c++`,
- * isn’t cut off. Like Lexical’s, it must start with a word character; otherwise, like `{.js}`, the
- * text is part of the code.
- */
-const OPENING_FENCE_REGEX = /^([ \t]*`{3,})[ \t]*([\w-][^\s`]*)?[ \t]*/;
-/**
- * Code blocks starting in a list item, found in the lines of the Markdown being imported. Lexical
- * passes the same array of lines for every fence line of an import, so the lines are only scanned
- * once per import rather than once per fence line.
- * @type {WeakMap<string[], { start: number, end: number }[]>}
- */
-const listItemCodeBlockCache = new WeakMap();
 
 /**
  * Check if the given line is within a code block starting in a list item, after its opening fence,
@@ -33,21 +18,18 @@ const listItemCodeBlockCache = new WeakMap();
  * @param {number} index Index of the line.
  * @returns {boolean} Result.
  */
-const isInListItemCodeBlock = (lines, index) => {
-  let blocks = listItemCodeBlockCache.get(lines);
-
-  if (!blocks) {
-    blocks = findCodeBlocks(lines).filter(({ start }) => !/^[ \t]*[`~]/.test(lines[start]));
-    listItemCodeBlockCache.set(lines, blocks);
-  }
-
-  return blocks.some(({ start, end }) => start < index && index <= end);
-};
+const isInListItemCodeBlock = (lines, index) =>
+  // Lexical passes the same array of lines for every fence line of an import, so the lines are only
+  // scanned once per import rather than once per fence line
+  getCodeBlocks(lines).some(
+    ({ start, end }) => start < index && index <= end && !/^[ \t]*[`~]/.test(lines[start]),
+  );
 
 /**
  * For each line of the Markdown being imported, the length of the longest line made only of
- * backticks, which can close a code block, from that line to the end; see
- * {@link listItemCodeBlockCache} for why it’s cached.
+ * backticks, which can close a code block, from that line to the end. Lexical passes the same array
+ * of lines for every fence line of an import, so it’s only computed once per import. Unlike the
+ * closing fence of `getCodeBlocks()`, it’s Lexical’s, which can’t be followed by whitespace.
  * @type {WeakMap<string[], number[]>}
  */
 const closingFenceLengthCache = new WeakMap();
@@ -139,9 +121,11 @@ export const CODE = {
       return null;
     }
 
-    const openingLine = lines[startLineIndex];
-    const startMatch = /** @type {RegExpMatchArray} */ (openingLine.match(OPENING_FENCE_REGEX));
-    const fence = startMatch[1].trim();
+    // The language runs to the next whitespace, unlike Lexical’s; see `parseOpeningFence()`
+    const { fence, match: startMatch } = /** @type {OpeningFence} */ (
+      parseOpeningFence(lines[startLineIndex])
+    );
+
     // Lexical only reads the metadata of a code block with a closing fence, so close it at the end
     // of the Markdown if it isn’t closed
     const isClosed = hasClosingFence(lines, startLineIndex, fence);

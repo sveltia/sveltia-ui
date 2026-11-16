@@ -414,6 +414,48 @@ describe('Slider', () => {
     expect(props.value).toBe(6);
   });
 
+  it('ends a mouse drag once the primary button is no longer held down', async () => {
+    /** @type {ComponentProps<typeof Slider>} */
+    const props = $state({ value: 0, min: 0, max: 10, step: 1 });
+    const screen = await renderSlider(props);
+
+    await waitForInit(screen.container);
+
+    const base = /** @type {HTMLElement} */ (screen.container.querySelector('.base'));
+    const thumb = /** @type {HTMLElement} */ (base.querySelector('[role="slider"]'));
+    const { left, width, top, height } = base.getBoundingClientRect();
+    const y = top + height / 2;
+
+    /**
+     * Make a mouse pointer event at the given fraction of the track.
+     * @param {string} type Event type.
+     * @param {number} fraction Position along the track.
+     * @param {number} buttons Buttons held down.
+     * @returns {PointerEvent} Event.
+     */
+    const at = (type, fraction, buttons) =>
+      new PointerEvent(type, {
+        bubbles: true,
+        clientX: left + width * fraction,
+        clientY: y,
+        screenX: left + width * fraction,
+        screenY: y,
+        pointerId: 1,
+        pointerType: 'mouse',
+        button: 0,
+        buttons,
+      });
+
+    thumb.dispatchEvent(at('pointerdown', 0, 1));
+    document.dispatchEvent(at('pointermove', 0.3, 1));
+    expect(props.value).toBe(3);
+    // The `pointerup` event was lost, but the button has been released
+    document.dispatchEvent(at('pointermove', 0.5, 0));
+    expect(props.value).toBe(3);
+    document.dispatchEvent(at('pointermove', 0.8, 1));
+    expect(props.value).toBe(3);
+  });
+
   it('stops listening to the pointer when unmounted in the middle of a drag', async () => {
     /** @type {ComponentProps<typeof Slider>} */
     const props = $state({ value: 0, min: 0, max: 10, step: 1 });

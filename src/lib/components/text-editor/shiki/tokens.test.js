@@ -52,15 +52,12 @@ vi.mock('./loader.js', () => ({
 }));
 
 // eslint-disable-next-line import/first
-import {
-  getHighlightNodes,
-  highlightCodeToHTML,
-  highlightCodeToTokens,
-  loadEngine,
-} from './facade.js';
+import { highlightCodeToHTML, highlightCodeToTokens, loadEngine } from './engine.js';
+// eslint-disable-next-line import/first
+import { getHighlightNodes } from './lexical.js';
 
 /**
- * Tokenize the given text through the facade, inside an editor context.
+ * Tokenize the given text through the engine and the Lexical glue, inside an editor context.
  * @param {string} text Code content.
  * @param {any[][]} tokens Tokens the fake engine should return.
  * @param {string} [language] Language identifier.
@@ -106,7 +103,7 @@ const tokenize = (text, tokens, language = 'javascript') => {
   return result;
 };
 
-describe('facade tokenizing', () => {
+describe('tokenizing into Lexical nodes', () => {
   beforeEach(async () => {
     await loadEngine();
   });

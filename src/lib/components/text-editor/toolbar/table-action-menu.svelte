@@ -9,11 +9,12 @@
   import Divider from '../../divider/divider.svelte';
   import MenuItem from '../../menu/menu-item.svelte';
   import Menu from '../../menu/menu.svelte';
-  import { focusEditor } from '../editing/caret.js';
   import { isRightToLeftTable, $runTableAction as runTableAction } from '../editing/table.js';
+  import { runEditorAction } from './actions.js';
   import { waitForMenuToClose } from './menu.js';
 
   /**
+   * @import { LexicalEditor } from 'lexical';
    * @import { TextEditorStore } from '#lib/typedefs.js';
    * @import { TableAction } from '../editing/table.js';
    */
@@ -57,26 +58,27 @@
    * Run the given operation on the cell, then move the focus back to the editor.
    * @param {TableAction} action Operation.
    * @param {HTMLElement} item Menu item chosen.
+   * @returns {Promise<void>} Nothing.
    */
-  const runAction = async (action, item) => {
-    const { editor } = editorStore;
+  const runAction = (action, item) =>
+    // The menu is only shown for a cell in the rich text editor
+    runEditorAction(editorStore, {
+      /**
+       * Run the operation, and wait for the menu to close.
+       * @param {LexicalEditor} editor Editor instance.
+       * @returns {Promise<void>} Nothing.
+       */
+      rich: async (editor) => {
+        const cell = editor.getElementByKey(cellKey);
+        const rtl = !!cell && isRightToLeftTable(cell);
 
-    // The menu is only shown for a cell in the editor
-    /* v8 ignore next 3 */
-    if (!editor) {
-      return;
-    }
+        editor.update(() => {
+          runTableAction(action, cellKey, { rtl });
+        });
 
-    const cell = editor.getElementByKey(cellKey);
-    const rtl = !!cell && isRightToLeftTable(cell);
-
-    editor.update(() => {
-      runTableAction(action, cellKey, { rtl });
+        await waitForMenuToClose(item);
+      },
     });
-
-    await waitForMenuToClose(item);
-    await focusEditor(editor);
-  };
 </script>
 
 <Menu ariaLabel={_('_sui.text_editor.table_options')}>

@@ -2,13 +2,19 @@ import { flushSync } from 'svelte';
 import { describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-svelte';
 import { userEvent } from 'vitest/browser';
-import { $getRoot as getRoot, $getSelection as getSelection } from 'lexical';
+import { $createHeadingNode as createHeadingNode } from '@lexical/rich-text';
+import {
+  $createTextNode as createTextNode,
+  $getRoot as getRoot,
+  $getSelection as getSelection,
+} from 'lexical';
 import EditorFixture from './editor-fixture.test.svelte';
 import LexicalRoot from './lexical-root.svelte';
 import { createTestComponent, getEditorStore } from '../../test-utils/editor.js';
 
 /**
  * @import { ComponentProps } from 'svelte';
+ * @import { LexicalEditor } from 'lexical';
  * @import { TextEditorStore } from '#lib/typedefs.js';
  */
 
@@ -83,26 +89,43 @@ describe('LexicalRoot', () => {
   it('syncs the store with editor updates', async () => {
     /** @type {ComponentProps<typeof EditorFixture>} */
     const props = $state({ store: undefined });
-    const screen = await render(EditorFixture, props);
+
+    await render(EditorFixture, props);
+
     const store = getEditorStore(props);
-    const root = /** @type {HTMLElement} */ (screen.container.querySelector('.lexical-root'));
 
     await vi.waitFor(() => {
       expect(store.initialized).toBe(true);
     });
 
-    const selection = { blockNodeKey: '1', blockType: 'heading-1', inlineTypes: ['bold'] };
+    const { editor } = /** @type {{ editor: LexicalEditor }} */ (store);
 
-    root.dispatchEvent(new CustomEvent('Update', { detail: { value: '# Hi', selection } }));
+    /**
+     * Replace the content with a heading of the given text, with the caret at its end.
+     * @param {string} text Text.
+     */
+    const setHeading = (text) => {
+      editor.update(
+        () => {
+          const heading = createHeadingNode('h1').append(createTextNode(text));
+
+          getRoot().clear().append(heading);
+          heading.selectEnd();
+        },
+        { discrete: true },
+      );
+    };
+
+    setHeading('Hi');
+    store.flushExport();
     expect(store.inputValue).toBe('# Hi');
-    expect(store.selection).toEqual(selection);
+    expect(store.selection.blockType).toBe('heading-1');
     expect(store.useRichText).toBe(true);
 
     // Updates are ignored in plain text mode
     store.useRichText = false;
-    root.dispatchEvent(
-      new CustomEvent('Update', { detail: { value: 'Other', selection: store.selection } }),
-    );
+    setHeading('Other');
+    store.flushExport();
     expect(store.inputValue).toBe('# Hi');
   });
 

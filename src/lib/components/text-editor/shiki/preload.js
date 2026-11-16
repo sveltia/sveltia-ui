@@ -8,7 +8,7 @@ import {
   loadCodeTheme,
   loadEngine,
   normalizeCodeLanguage,
-} from './facade.js';
+} from './engine.js';
 import { getCodeTheme } from './theme.js';
 
 /**

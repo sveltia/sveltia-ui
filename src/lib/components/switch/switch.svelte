@@ -6,29 +6,18 @@
 -->
 <script>
   /**
-   * @import { Snippet } from 'svelte';
+   * @import { ContainerProps, FormFieldStateProps, WidgetStateProps } from '#lib/typedefs.js';
    */
 
   /**
    * @typedef {object} Props
    * @property {string} [label] Text label displayed next to the switch.
-   * @property {string} [class] The `class` attribute on the wrapper element.
-   * @property {boolean} [hidden] Whether to hide the widget.
-   * @property {boolean} [disabled] Whether to disable the widget. An alias of the `aria-disabled`
-   * attribute.
-   * @property {boolean} [readonly] Whether to make the widget read-only. An alias of the
-   * `aria-readonly` attribute.
-   * @property {boolean} [required] Whether to mark the widget required. An alias of the
-   * `aria-required` attribute.
-   * @property {boolean} [invalid] Whether to mark the widget invalid. An alias of the
-   * `aria-invalid` attribute.
    * @property {string} [ariaLabel] The `aria-label` attribute on the wrapper element.
-   * @property {Snippet} [children] Primary slot content.
    * @property {(event: CustomEvent) => void} [onChange] Custom `Change` event handler.
    */
 
   /**
-   * @type {Props & Record<string, any>}
+   * @type {ContainerProps & WidgetStateProps & FormFieldStateProps & Props & Record<string, any>}
    */
   let {
     /* eslint-disable prefer-const */

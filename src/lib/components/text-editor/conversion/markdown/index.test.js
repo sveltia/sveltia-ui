@@ -8,7 +8,6 @@ describe('index', () => {
   it('should export the Markdown processing functions', () => {
     expect(Object.keys(markdown).sort()).toEqual([
       'convertBlockSyntax',
-      'findCodeSpans',
       'removeImportPlaceholders',
       'toLexicalMarkdown',
       'trimBlankBlockquoteLines',

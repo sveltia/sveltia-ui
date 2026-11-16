@@ -1,5 +1,13 @@
 import { $isLineBreakNode as isLineBreakNode, $isTextNode as isTextNode } from 'lexical';
 
+import {
+  ATX_HEADING_MARKER,
+  isWordChar,
+  MARKER_END,
+  ORDERED_LIST_DELIMITER,
+  ORDERED_LIST_NUMBER,
+  SETEXT_UNDERLINE,
+} from '../markdown/syntax.js';
 import { RAW_TEXT_PLACEHOLDER } from '../placeholder-chars.js';
 import { getFormatExportNode } from './inline-code.js';
 import { getRawSyntax } from './raw-syntax.js';
@@ -10,6 +18,24 @@ import { getRawSyntax } from './raw-syntax.js';
  */
 
 /**
+ * Regular expression to match the block syntax at the start of a line that is escaped with a
+ * backslash before its first character: an ATX heading, a bullet list item, a blockquote, a setext
+ * heading underline or a thematic break. A `*` bullet is left out, as Lexical already escapes it. A
+ * single `-` is a list item rather than a setext heading underline, which comes after it.
+ */
+const BLOCK_SYNTAX_REGEX = new RegExp(
+  `^( {0,3})(${ATX_HEADING_MARKER}${MARKER_END}|[-+]${MARKER_END}|>|${SETEXT_UNDERLINE})`,
+);
+
+/**
+ * Regular expression to match an ordered list item at the start of a line, whose number can’t be
+ * escaped, unlike the delimiter after it.
+ */
+const ORDERED_LIST_ITEM_REGEX = new RegExp(
+  `^( {0,3}${ORDERED_LIST_NUMBER})(${ORDERED_LIST_DELIMITER})${MARKER_END}`,
+);
+
+/**
  * Escape the Markdown block syntax at the start of a line, so text that only looks like a heading,
  * a list item, a blockquote, a setext heading underline or a thematic break stays text when the
  * Markdown is read again. Lexical already escapes the inline syntax characters, including `*`, `_`,
@@ -18,20 +44,7 @@ import { getRawSyntax } from './raw-syntax.js';
  * @returns {string} Escaped Markdown.
  */
 export const escapeBlockSyntax = (text) =>
-  text
-    // ATX heading, bullet list item, blockquote, setext heading underline or thematic break
-    .replace(/^( {0,3})(#{1,6}(?=[ \t]|$)|[-+](?=[ \t]|$)|>|=+[ \t]*$|-{2,}[ \t]*$)/, '$1\\$2')
-    // Ordered list item, whose number can’t be escaped, unlike the delimiter after it
-    .replace(/^( {0,3}\d{1,9})([.)])(?=[ \t]|$)/, '$1\\$2');
-
-/**
- * Check if the given character is a word character, which is neither whitespace nor punctuation
- * (or a symbol). An underscore next to one on both sides can’t open or close emphasis.
- * @param {string | undefined} char Character.
- * @returns {boolean} Result.
- * @see https://spec.commonmark.org/0.31.2/#left-flanking-delimiter-run
- */
-const isWordChar = (char) => !!char && /[^\s\p{P}\p{S}]/u.test(char);
+  text.replace(BLOCK_SYNTAX_REGEX, '$1\\$2').replace(ORDERED_LIST_ITEM_REGEX, '$1\\$2');
 
 /**
  * Remove the backslashes Lexical adds before underscores and backslashes in text, where they’re not

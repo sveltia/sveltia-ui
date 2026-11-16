@@ -8,26 +8,6 @@
    * @type {symbol}
    */
   const RETAINER_KEY = Symbol('sui-modal-retainer');
-
-  /**
-   * The modal `<dialog>` elements shown by this component, in the order they were opened, the
-   * topmost last. The elements are placed in the document in the order the components are mounted,
-   * which tells nothing about which one is on top, so others like `<Toast>` can look here instead.
-   * @type {HTMLDialogElement[]}
-   */
-  export const openModalDialogs = [];
-
-  /**
-   * Remove the given `<dialog>` element from {@link openModalDialogs}.
-   * @param {HTMLDialogElement | undefined} dialog Element.
-   */
-  const forgetModalDialog = (dialog) => {
-    const index = dialog ? openModalDialogs.indexOf(dialog) : -1;
-
-    if (index > -1) {
-      openModalDialogs.splice(index, 1);
-    }
-  };
 </script>
 
 <script>
@@ -41,7 +21,9 @@
     unmount,
     untrack,
   } from 'svelte';
-  import { getTransitionTimeout } from './modal.js';
+  // Aliased, since the component has a `restoreFocus` prop of its own
+  import { restoreFocus as returnFocus } from '../../services/focus.js';
+  import { forgetModalDialog, getTransitionTimeout, rememberModalDialog } from './modal.js';
   import Placeholder from './placeholder.svelte';
 
   /**
@@ -93,8 +75,7 @@
       dialog?.showModal();
 
       if (dialog) {
-        forgetModalDialog(dialog);
-        openModalDialogs.push(dialog);
+        rememberModalDialog(dialog);
       }
     } else {
       dialog?.show();
@@ -227,17 +208,7 @@
     // synchronously would let the Enter key that submitted the modal activate the button that
     // opened it, immediately reopening the modal.
     restoreFocusTimer = window.setTimeout(() => {
-      const { activeElement } = document;
-
-      if (!element.isConnected) {
-        return;
-      }
-
-      // Only take the focus back if it’s still inside the modal, or nowhere because the modal took
-      // it down with itself. If it has already moved on, pulling it back would undo what happened.
-      if (!activeElement || activeElement === document.body || dialog?.contains(activeElement)) {
-        element.focus();
-      }
+      returnFocus(element, dialog);
     });
   };
 

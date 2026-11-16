@@ -3,21 +3,29 @@
  * headings, the HTML blocks and the lines that end a paragraph.
  */
 
-import { HTML_TAG_SOURCE } from '../transformers/raw-syntax.js';
+import {
+  ATX_HEADING_MARKER,
+  CODE_FENCE,
+  HTML_TAG_SOURCE,
+  LIST_MARKER,
+  MARKER_END,
+  SETEXT_UNDERLINE,
+  THEMATIC_BREAK,
+} from './syntax.js';
 
 /**
  * Regular expression to match a setext heading underline, like `===` or `---`.
  */
-export const SETEXT_UNDERLINE_REGEX = /^ {0,3}(=+|-+)[ \t]*$/;
+export const SETEXT_UNDERLINE_REGEX = new RegExp(`^ {0,3}${SETEXT_UNDERLINE}`);
 /**
  * Regular expression to match an ATX heading, like `## Heading`.
  */
-export const ATX_HEADING_REGEX = /^ {0,3}#{1,6}(?:[ \t]|$)/;
+export const ATX_HEADING_REGEX = new RegExp(`^ {0,3}${ATX_HEADING_MARKER}${MARKER_END}`);
 
 /**
  * Regular expression to match a thematic break, like `***` or `- - -`.
  */
-const THEMATIC_BREAK_REGEX = /^ {0,3}([-*_])(?:[ \t]*\1){2,}[ \t]*$/;
+const THEMATIC_BREAK_REGEX = new RegExp(`^ {0,3}${THEMATIC_BREAK}`);
 
 /**
  * Names of the HTML elements that start an HTML block that can interrupt a paragraph, as opposed to
@@ -137,7 +145,7 @@ const STANDALONE_HTML_TAG_REGEX = new RegExp(
 const NON_PARAGRAPH_LINE_REGEX = new RegExp(
   [
     ATX_HEADING_REGEX.source,
-    /^ {0,3}(?:>|[-+*](?:[ \t]|$)|\d{1,9}[.)](?:[ \t]|$)|`{3,}|~{3,}|\|)/.source,
+    `^ {0,3}(?:>|${LIST_MARKER}${MARKER_END}|${CODE_FENCE}|\\|)`,
     `^ {0,3}${HTML_BLOCK_START_REGEX.source}`,
     /^(?: {4}|\t)/.source,
     THEMATIC_BREAK_REGEX.source,

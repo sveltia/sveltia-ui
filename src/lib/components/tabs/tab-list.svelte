@@ -10,25 +10,20 @@
   import { getIndicatorStyle } from './tab-list.js';
 
   /**
-   * @import { Snippet } from 'svelte';
+   * @import { ContainerProps, WidgetStateProps } from '#lib/typedefs.js';
    */
 
   /**
    * @typedef {object} Props
-   * @property {string} [class] The `class` attribute on the wrapper element.
-   * @property {boolean} [hidden] Whether to hide the widget.
-   * @property {boolean} [disabled] Whether to disable the widget. An alias of the `aria-disabled`
-   * attribute.
    * @property {'horizontal' | 'vertical'} [orientation] Orientation of the widget. An alias of the
    * `aria-orientation` attribute.
    * @property {string} [name] The `data-name` attribute on the wrapper element.
    * @property {string} [ariaLabel] The `aria-label` attribute on the wrapper element.
-   * @property {Snippet} [children] Primary slot content.
    * @property {(event: CustomEvent) => void} [onChange] Custom `Change` event handler.
    */
 
   /**
-   * @type {Props & Record<string, any>}
+   * @type {ContainerProps & WidgetStateProps & Props & Record<string, any>}
    */
   let {
     /* eslint-disable prefer-const */

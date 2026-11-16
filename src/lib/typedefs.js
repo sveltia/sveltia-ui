@@ -5,6 +5,29 @@
  */
 
 /**
+ * @typedef {object} ContainerProps
+ * @property {string} [class] The `class` attribute on the wrapper element.
+ * @property {Snippet} [children] Primary slot content.
+ */
+
+/**
+ * @typedef {object} WidgetStateProps
+ * @property {boolean} [hidden] Whether to hide the widget.
+ * @property {boolean} [disabled] Whether to disable the widget. An alias of the `aria-disabled`
+ * attribute.
+ */
+
+/**
+ * @typedef {object} FormFieldStateProps
+ * @property {boolean} [readonly] Whether to make the widget read-only. An alias of the
+ * `aria-readonly` attribute.
+ * @property {boolean} [required] Whether to mark the widget required. An alias of the
+ * `aria-required` attribute.
+ * @property {boolean} [invalid] Whether to mark the widget invalid. An alias of the `aria-invalid`
+ * attribute.
+ */
+
+/**
  * @typedef {object} ButtonProps
  * @property {HTMLButtonElement} [element] Reference to the `<button>` element.
  * @property {string} [class] The `class` attribute on the `<button>` element.
@@ -82,11 +105,23 @@
  */
 
 /**
- * @typedef {object} DialogProps
- * @property {string} [title] Text label displayed on the header. Required. With a custom `header`
- * snippet, it’s used as the dialog’s `aria-label` instead.
- * @property {string} [ariaLabelledby] ID of the element that labels the dialog, typically a heading
+ * Props labelling a modal with a header, like `<Dialog>` and `<Drawer>`.
+ * @typedef {object} ModalLabelProps
+ * @property {string} [title] Text label displayed on the header. Either this or `ariaLabelledby` is
+ * required for the modal to have an accessible name. With a custom `header` snippet, it’s used as
+ * the modal’s `aria-label` instead.
+ * @property {string} [ariaLabelledby] ID of the element that labels the modal, typically a heading
  * inside a custom `header` snippet. Takes precedence over `title` for the accessible name.
+ */
+
+/**
+ * Props of `<Dialog>`, including those labelling it.
+ * @typedef {ModalLabelProps & DialogOwnProps} DialogProps
+ */
+
+/**
+ * Props of `<Dialog>` other than those labelling it; see {@link DialogProps}.
+ * @typedef {object} DialogOwnProps
  * @property {'dialog' | 'alertdialog'} [role] The `role` attribute on the `<dialog>` element.
  * @property {'x-small' | 'small' | 'medium' | 'large' | 'x-large'} [size] Width of the dialog.
  * @property {string} [class] The `class` attribute on the `<dialog>` element.
@@ -371,6 +406,19 @@
  */
 
 /**
+ * Props shared by `<TextEditor>` and `<CodeEditor>`.
+ * @typedef {object} EditorCommonProps
+ * @property {boolean} [flex] Make the text input container flexible.
+ * @property {string} [class] The `class` attribute on the wrapper element.
+ * @property {string} [ariaLabel] The `aria-label` attribute on the editable text box. Either this
+ * or `ariaLabelledby` is required for the editor to have an accessible name.
+ * @property {string} [ariaLabelledby] The `aria-labelledby` attribute on the editable text box.
+ * @property {string} [ariaDescribedby] The `aria-describedby` attribute on the editable text box.
+ * @property {Snippet} [children] Primary slot content. Not rendered, as the editor has no room for
+ * it; kept for compatibility.
+ */
+
+/**
  * @typedef {object} EmojiEntry
  * @property {string} emoji Emoji character, e.g. `🎉`.
  * @property {string} name Canonical shortcode, e.g. `tada`.
@@ -499,6 +547,11 @@
  * @property {(value: string) => string | undefined} getImportedValue Function to get the
  * {@link TextEditorStore.inputValue} last imported if the given value, exported by the editor, is
  * only that value written in the editor’s own Markdown or HTML style, e.g. `_text_` for `*text*`.
+ * @property {(value: string) => void} setExportedValue Function to set
+ * {@link TextEditorStore.inputValue} to the value exported from the Lexical editor, without
+ * importing it back into the editor, which would reset its nodes and selection.
+ * @property {() => void} flushExport Function to export the content of the Lexical editor right
+ * away, if it’s scheduled to be exported. The editor root sets this while the editor is there.
  */
 
 /**

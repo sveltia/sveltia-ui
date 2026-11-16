@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { loadCodeLanguage, loadCodeTheme, loadEngine } from './facade.js';
+import { loadCodeLanguage, loadCodeTheme, loadEngine } from './engine.js';
 import { loadCodeHighlighter } from './preload.js';
 
-vi.mock('./facade.js', () => ({
+vi.mock('./engine.js', () => ({
   isPlainLanguage: vi.fn((lang) => ['', 'plain', 'plaintext', 'text', 'txt'].includes(lang ?? '')),
   loadEngine: vi.fn(() => Promise.resolve()),
   loadCodeLanguage: vi.fn(() => Promise.resolve()),

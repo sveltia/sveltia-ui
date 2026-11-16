@@ -2,31 +2,13 @@ import { describe, expect, it, vi } from 'vitest';
 import {
   getDecimalSeparator,
   getInputMode,
-  getMaximumFractionDigits,
   isAtMax,
   isAtMin,
   isInvalidNumber,
   normalizeNumber,
-  normalizeStep,
   parseNumber,
   stepNumber,
 } from './number-input.js';
-
-describe('normalizeStep', () => {
-  it('should keep a positive step', () => {
-    expect(normalizeStep(1)).toBe(1);
-    expect(normalizeStep(0.5)).toBe(0.5);
-  });
-
-  it('should fall back to 1 for a step that isn’t a positive number', () => {
-    expect(normalizeStep(0)).toBe(1);
-    expect(normalizeStep(-2)).toBe(1);
-    expect(normalizeStep(null)).toBe(1);
-    expect(normalizeStep(undefined)).toBe(1);
-    expect(normalizeStep(Number.NaN)).toBe(1);
-    expect(normalizeStep(Infinity)).toBe(1);
-  });
-});
 
 describe('getInputMode', () => {
   it('should use the text keyboard when a negative number is allowed', () => {
@@ -37,26 +19,6 @@ describe('getInputMode', () => {
   it('should use the numeric or decimal keypad for a non-negative number', () => {
     expect(getInputMode({ fractional: false, min: 0 })).toBe('numeric');
     expect(getInputMode({ fractional: true, min: 1 })).toBe('decimal');
-  });
-});
-
-describe('getMaximumFractionDigits', () => {
-  it('should return 0 for an integer step', () => {
-    expect(getMaximumFractionDigits(1)).toBe(0);
-    expect(getMaximumFractionDigits(10)).toBe(0);
-  });
-
-  it('should count the fraction digits of a decimal step', () => {
-    expect(getMaximumFractionDigits(0.1)).toBe(1);
-    expect(getMaximumFractionDigits(0.25)).toBe(2);
-    expect(getMaximumFractionDigits(2.005)).toBe(3);
-  });
-
-  it('should count the fraction digits of a step in exponent notation', () => {
-    expect(getMaximumFractionDigits(1e-7)).toBe(7);
-    expect(getMaximumFractionDigits(1.5e-7)).toBe(8);
-    expect(getMaximumFractionDigits(1e21)).toBe(0);
-    expect(stepNumber('0', { step: 1e-7, direction: 1 })).toBe('0.0000001');
   });
 });
 
@@ -151,6 +113,10 @@ describe('stepNumber', () => {
     expect(stepNumber('5', { step: 1, direction: 1 })).toBe('6');
     expect(stepNumber('5', { step: 1, direction: -1 })).toBe('4');
     expect(stepNumber('20', { step: 10, direction: 1 })).toBe('30');
+  });
+
+  it('should keep the fraction digits of a step in exponent notation', () => {
+    expect(stepNumber('0', { step: 1e-7, direction: 1 })).toBe('0.0000001');
   });
 
   it('should step from zero when the field is empty', () => {

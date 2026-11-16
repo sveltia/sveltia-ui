@@ -1,5 +1,11 @@
-import { describe, expect, it } from 'vitest';
-import { getLongestTime, getTransitionTimeout } from './modal.js';
+import { afterEach, describe, expect, it } from 'vitest';
+import {
+  forgetModalDialog,
+  getLongestTime,
+  getTransitionTimeout,
+  openModalDialogs,
+  rememberModalDialog,
+} from './modal.js';
 
 describe('getLongestTime', () => {
   it('should convert a single time to milliseconds', () => {
@@ -28,5 +34,35 @@ describe('getTransitionTimeout', () => {
 
   it('should fall back to the margin alone without a transition', () => {
     expect(getTransitionTimeout({ transitionDuration: '0s', transitionDelay: '0s' })).toBe(100);
+  });
+});
+
+describe('openModalDialogs', () => {
+  afterEach(() => {
+    openModalDialogs.length = 0;
+  });
+
+  it('remembers the dialogs in the order they were opened, the topmost last', () => {
+    const first = document.createElement('dialog');
+    const second = document.createElement('dialog');
+
+    rememberModalDialog(first);
+    rememberModalDialog(second);
+    expect(openModalDialogs).toEqual([first, second]);
+    // A dialog opened again goes back on top
+    rememberModalDialog(first);
+    expect(openModalDialogs).toEqual([second, first]);
+  });
+
+  it('forgets a dialog, and ignores one it doesn’t know', () => {
+    const first = document.createElement('dialog');
+    const second = document.createElement('dialog');
+
+    rememberModalDialog(first);
+    forgetModalDialog(second);
+    forgetModalDialog(undefined);
+    expect(openModalDialogs).toEqual([first]);
+    forgetModalDialog(first);
+    expect(openModalDialogs).toEqual([]);
   });
 });

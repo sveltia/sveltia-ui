@@ -14,13 +14,13 @@
   import Icon from '../../icon/icon.svelte';
   import MenuItemCheckbox from '../../menu/menu-item-checkbox.svelte';
   import { AVAILABLE_BUTTONS, LIST_TYPES } from '../constants.js';
-  import { focusEditor } from '../editing/caret.js';
   import { editRawText, setBlockType } from '../editing/raw-markdown.js';
+  import { runEditorAction } from './actions.js';
 
   /**
    * @import { TextEditorBlockType, TextEditorStore } from '#lib/typedefs.js';
    * @import { HeadingTagType } from '@lexical/rich-text';
-   * @import { ElementNode } from 'lexical';
+   * @import { ElementNode, LexicalEditor } from 'lexical';
    */
 
   /**
@@ -54,42 +54,43 @@
 
   /**
    * Change the current selection’s type to {@link type}.
+   * @returns {Promise<void>} Nothing.
    */
-  const changeBlockType = async () => {
-    if (!editorStore.useRichText) {
-      // The item is only clickable while the `<textarea>` is there
-      editRawText(editorStore.textArea, (state) => setBlockType(state, type));
+  const changeBlockType = () =>
+    runEditorAction(editorStore, {
+      /**
+       * Change the block type in the Markdown.
+       * @param {HTMLTextAreaElement} textArea `<textarea>` element.
+       * @returns {void | Promise<void>} Nothing.
+       */
+      raw: (textArea) => editRawText(textArea, (state) => setBlockType(state, type)),
+      /**
+       * Change the block type of the selection.
+       * @param {LexicalEditor} editor Editor instance.
+       */
+      rich: (editor) => {
+        const [, headingLevel] = type.match(/^heading-(\d)$/) ?? [];
 
-      return;
-    }
+        const createNode = headingLevel
+          ? () => createHeadingNode(/** @type {HeadingTagType} */ (`h${headingLevel}`))
+          : NODE_FACTORIES[type];
 
-    // The item is only clickable while the editor is there
-    /* v8 ignore next */
-    if (!editorStore.editor) {
-      return;
-    }
+        if (createNode) {
+          editor.update(() => {
+            setBlocksType(getSelection(), createNode);
+          });
+        }
 
-    await focusEditor(editorStore.editor);
+        // A list is toggled by its command instead
+        const list = LIST_TYPES.find((item) => item.type === type);
 
-    const [, headingLevel] = type.match(/^heading-(\d)$/) ?? [];
-
-    const createNode = headingLevel
-      ? () => createHeadingNode(/** @type {HeadingTagType} */ (`h${headingLevel}`))
-      : NODE_FACTORIES[type];
-
-    if (createNode) {
-      editorStore.editor.update(() => {
-        setBlocksType(getSelection(), createNode);
-      });
-    }
-
-    // A list is toggled by its command instead
-    const list = LIST_TYPES.find((item) => item.type === type);
-
-    if (list) {
-      editorStore.editor.dispatchCommand(list.command, undefined);
-    }
-  };
+        if (list) {
+          editor.dispatchCommand(list.command, undefined);
+        }
+      },
+      // The block type applies to the selection, which the focus restores
+      focus: 'before',
+    });
 </script>
 
 {#key selectionTypeMatches}

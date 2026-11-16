@@ -26,17 +26,19 @@
     $setSelection as setSelection,
   } from 'lexical';
   import { getContext, onMount, tick, untrack } from 'svelte';
+  import { on } from 'svelte/events';
   import Button from '../../button/button.svelte';
   import { getSuggestionListPosition } from '../../emoji/position.js';
   import Icon from '../../icon/icon.svelte';
   import TextInput from '../../text-field/text-input.svelte';
   import { OPEN_LINK_EDITOR_COMMAND } from '../constants.js';
-  import { focusEditor } from '../editing/caret.js';
   import {
     $findSelectedLink as findSelectedLink,
     getLinkAnchorRect,
     isSafeLinkURL,
   } from '../editing/link.js';
+  import { refocusEditor } from '../toolbar/actions.js';
+  import { mergeUnregisters } from '../utils.js';
 
   /**
    * @import { LexicalEditor, RangeSelection } from 'lexical';
@@ -195,17 +197,6 @@
   };
 
   /**
-   * Move the focus back to the editor, where the selection is restored, after the popup is done.
-   */
-  const refocusEditor = async () => {
-    // The editor is there for as long as the popup can be shown
-    /* v8 ignore else */
-    if (editorStore.editor) {
-      await focusEditor(editorStore.editor);
-    }
-  };
-
-  /**
    * Start editing the link at the selection, or start linking the selected text. This is the
    * handler for {@link OPEN_LINK_EDITOR_COMMAND}.
    * @returns {boolean} Whether there is anything to edit. If not, the Link button opens the dialog
@@ -302,7 +293,8 @@
       );
     }
 
-    await refocusEditor();
+    // Move the focus back to the editor, where the selection is restored
+    await refocusEditor(editorStore);
   };
 
   /**
@@ -310,7 +302,7 @@
    */
   const cancelEditing = async () => {
     stopEditing();
-    await refocusEditor();
+    await refocusEditor(editorStore);
   };
 
   /**
@@ -338,7 +330,7 @@
       }
     });
 
-    await refocusEditor();
+    await refocusEditor(editorStore);
   };
 
   /**
@@ -432,12 +424,12 @@
       }
     });
 
-    return () => {
-      unregisterCommand();
-      unregisterEscape();
-      unregisterUpdateListener();
-      unregisterEditableListener();
-    };
+    return mergeUnregisters(
+      unregisterCommand,
+      unregisterEscape,
+      unregisterUpdateListener,
+      unregisterEditableListener,
+    );
   });
 
   // The rich text editor can be swapped for the plain text one at any time, in which case there is
@@ -516,17 +508,12 @@
       }
     };
 
-    window.addEventListener('scroll', reposition, { capture: true, passive: true });
-    window.addEventListener('resize', reposition, { passive: true });
-    document.addEventListener('focusin', onFocusIn);
-    document.addEventListener('focusout', onFocusOut);
-
-    return () => {
-      window.removeEventListener('scroll', reposition, { capture: true });
-      window.removeEventListener('resize', reposition);
-      document.removeEventListener('focusin', onFocusIn);
-      document.removeEventListener('focusout', onFocusOut);
-    };
+    return mergeUnregisters(
+      on(window, 'scroll', reposition, { capture: true, passive: true }),
+      on(window, 'resize', reposition, { passive: true }),
+      on(document, 'focusin', onFocusIn),
+      on(document, 'focusout', onFocusOut),
+    );
   });
 </script>
 

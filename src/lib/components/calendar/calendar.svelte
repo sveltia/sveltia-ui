@@ -5,20 +5,22 @@
 <script>
   import { _, isRTL } from '@sveltia/i18n';
   import { tick } from 'svelte';
-  import { activateGroup } from '../../services/group.svelte.js';
+  import { activateGroup, setFocusedMember } from '../../services/group.svelte.js';
+  import { hasModifier } from '../../services/navigation.js';
   import Button from '../button/button.svelte';
   import Divider from '../divider/divider.svelte';
   import Spacer from '../divider/spacer.svelte';
   import Icon from '../icon/icon.svelte';
   import {
-    addDays,
     addMonths,
     formatDate,
     getArrowKeyDayOffset,
     getCalendarDays,
+    getCursorDate,
     getFirstDayOfMonth,
     getToday,
     MONTH_NAMES,
+    parseDateValue,
     toDateString,
   } from './calendar.js';
 
@@ -37,18 +39,10 @@
   const todayString = toDateString(today);
 
   /**
-   * Date given as the {@link value}, or today if it’s empty or invalid. A value that doesn’t make
-   * a valid date, like `2024-13-01`, or that rolls over into another day, like `2024-02-30` turning
-   * into March 1, is treated like no value rather than crashing or showing an unexpected month.
+   * Date given as the {@link value}, or today if it’s empty or invalid.
    * @type {Date}
    */
-  const date = $derived.by(() => {
-    const parsed = value ? new Date(value) : undefined;
-
-    return parsed && !Number.isNaN(parsed.getTime()) && toDateString(parsed) === value
-      ? parsed
-      : today;
-  });
+  const date = $derived(parseDateValue(value, today));
   /**
    * First day of the month being displayed. Follows the {@link value}, and is reassigned by the
    * month navigation below.
@@ -75,10 +69,9 @@
    * @param {KeyboardEvent} event `keydown` event.
    */
   const onGridKeyDown = (event) => {
-    const { key, shiftKey, altKey, ctrlKey, metaKey } = event;
-    const offset = getArrowKeyDayOffset(key, isRTL());
+    const offset = getArrowKeyDayOffset(event.key, isRTL());
 
-    if (offset === undefined || shiftKey || altKey || ctrlKey || metaKey) {
+    if (offset === undefined || hasModifier(event)) {
       return;
     }
 
@@ -90,21 +83,14 @@
       grid?.querySelector('[role="option"].focused')
     );
 
-    // Without a cursor, start from the selected day only if it’s on the grid. After browsing to
-    // another month, it isn’t, and moving from it would bring that month back. Land on today if
-    // it’s in the month displayed, or on the first of the month otherwise.
-    const cursor =
-      focused?.value ||
-      (value && dayList.some(({ day }) => toDateString(day) === value) ? value : undefined);
-
-    if (cursor) {
-      value = toDateString(addDays(new Date(cursor), offset));
-    } else {
-      value =
-        getFirstDayOfMonth(today).getTime() === firstDay.getTime()
-          ? todayString
-          : toDateString(firstDay);
-    }
+    value = getCursorDate({
+      focusedValue: focused?.value,
+      value,
+      days: dayList.map(({ day }) => day),
+      firstDay,
+      today,
+      offset,
+    });
   };
 
   // Keep the keyboard cursor on the selected day. The group service tracks the cursor with the
@@ -123,17 +109,15 @@
     const listbox = grid;
 
     tick().then(() => {
-      const option = listbox.querySelector('[role="option"][aria-selected="true"]');
+      const option = /** @type {HTMLElement | null} */ (
+        listbox.querySelector('[role="option"][aria-selected="true"]')
+      );
 
       if (!option || option.classList.contains('focused')) {
         return;
       }
 
-      listbox.querySelectorAll('.focused').forEach((element) => {
-        element.classList.remove('focused');
-      });
-      option.classList.add('focused');
-      listbox.setAttribute('aria-activedescendant', option.id);
+      setFocusedMember(listbox, option);
     });
   });
 </script>

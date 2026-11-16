@@ -15,8 +15,8 @@
     INLINE_BUTTON_TYPES,
     isHtmlOnlyButton,
   } from '../constants.js';
+  import { getEditorSetup } from '../config.js';
   import { isInlineComponent } from '../conversion/editor-components.js';
-  import { flushUpdateEvent } from '../conversion/update.js';
   import CodeLanguageSwitcher from './code-language-switcher.svelte';
   import AlignMenuButton from './align-menu-button.svelte';
   import FormatTextButton from './format-text-button.svelte';
@@ -30,12 +30,16 @@
   import ToolbarWrapper from './toolbar-wrapper.svelte';
 
   /**
-   * @import { TextEditorBlockType, TextEditorInlineType, TextEditorStore } from '#lib/typedefs.js';
+   * @import {
+   * TextEditorBlockType,
+   * TextEditorInlineType,
+   * TextEditorStore,
+   * } from '#lib/typedefs.js';
+   * @import { NormalizedEditorConfig } from '../config.js';
    */
 
   /**
    * @typedef {object} Props
-   * @property {boolean} [hidden] Whether to hide the widget.
    * @property {boolean} [disabled] Whether to disable the widget. An alias of the `aria-disabled`
    * attribute.
    * @property {boolean} [readonly] Whether to make the widget read-only. An alias of the
@@ -82,11 +86,13 @@
    */
   const canUseHtmlOnlyButtons = $derived(isHtml && editorStore.useRichText);
 
-  const hasTable = $derived(editorStore.config.enabledButtons.includes('table'));
+  // The store holds the configuration normalized
+  const { hasTable, hasHorizontalRule } = $derived(
+    getEditorSetup(/** @type {NormalizedEditorConfig} */ (editorStore.config)),
+  );
   const canAlign = $derived(
     canUseHtmlOnlyButtons && editorStore.config.enabledButtons.includes('align'),
   );
-  const hasHorizontalRule = $derived(editorStore.config.enabledButtons.includes('horizontal-rule'));
   /**
    * Key of the table cell the caret is in, if any. The table menu only works with the rich text
    * editor.
@@ -228,7 +234,7 @@
       onclick={() => {
         // The source shows the value, which has to include what was just typed
         if (editorStore.useRichText) {
-          flushUpdateEvent(editorStore.editor);
+          editorStore.flushExport();
         }
 
         editorStore.useRichText = !editorStore.useRichText;

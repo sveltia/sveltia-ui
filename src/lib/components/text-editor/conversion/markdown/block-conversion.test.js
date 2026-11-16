@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { expectLinearTime } from '../../../../test-utils/complexity.js';
 import { INFO_BACKTICK } from '../placeholder-chars.js';
 import {
   convertSetextHeadings,
@@ -183,6 +184,14 @@ describe('convertSetextHeadings', () => {
   it('should leave the lines in a code block alone', () => {
     expect(convertSetextHeadings('```\nTitle\n===\n```\n~~~\nSub\n---\n~~~')).toBe(
       '```\nTitle\n===\n```\n~~~\nSub\n---\n~~~',
+    );
+  });
+
+  it('should convert a long paragraph with many underlines in linear time', () => {
+    expectLinearTime(
+      (size) => `${'a\n'.repeat(size)}===\n${'b\n'.repeat(size)}---\n${'- c\n---\n'.repeat(size)}`,
+      (value) => convertSetextHeadings(value),
+      2000,
     );
   });
 });

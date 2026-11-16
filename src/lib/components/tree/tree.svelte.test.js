@@ -105,6 +105,21 @@ describe('Tree', () => {
     expect(props.selected).toBe(false);
   });
 
+  it('follows a change to the expand on select option after creation', async () => {
+    /** @type {ComponentProps<typeof TreeFixture>} */
+    const props = $state({ expanded: false, expandOnSelect: true });
+    const screen = await renderTree(props);
+    const documents = screen.getByRole('treeitem', { name: 'Documents' });
+
+    props.expandOnSelect = false;
+    await documents.click();
+    await expect.element(documents).toHaveAttribute('aria-selected', 'true');
+    await expect.element(documents).toHaveAttribute('aria-expanded', 'false');
+    props.expandOnSelect = true;
+    await documents.click();
+    await expect.element(documents).toHaveAttribute('aria-expanded', 'true');
+  });
+
   it('toggles a parent item with its chevron without selecting it', async () => {
     /** @type {ComponentProps<typeof TreeFixture>} */
     const props = $state({ expanded: false, selected: false });

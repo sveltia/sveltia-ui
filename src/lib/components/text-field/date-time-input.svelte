@@ -11,7 +11,11 @@
 -->
 <script>
   /**
-   * @import { CommonEventHandlers, InputEventHandlers } from '#lib/typedefs.js';
+   * @import {
+   * CommonEventHandlers,
+   * FormFieldStateProps,
+   * InputEventHandlers,
+   * } from '#lib/typedefs.js';
    */
 
   /**
@@ -28,17 +32,12 @@
    * @property {string} [class] The `class` attribute on the `<input>` element.
    * @property {boolean} [disabled] Whether to disable the widget. An alias of the `aria-disabled`
    * attribute.
-   * @property {boolean} [readonly] Whether to make the widget read-only. An alias of the
-   * `aria-readonly` attribute.
-   * @property {boolean} [required] Whether to mark the widget required. An alias of the
-   * `aria-required` attribute.
-   * @property {boolean} [invalid] Whether to mark the widget invalid. An alias of the
-   * `aria-invalid` attribute.
    * @property {string} [ariaLabel] `aria-label` attribute.
    */
 
   /**
-   * @type {CommonEventHandlers & InputEventHandlers & Props & Record<string, any>}
+   * @type {CommonEventHandlers & InputEventHandlers & FormFieldStateProps & Props &
+   * Record<string, any>}
    */
   let {
     /* eslint-disable prefer-const */

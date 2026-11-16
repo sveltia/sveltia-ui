@@ -1,15 +1,10 @@
 import { isRTL } from '@sveltia/i18n';
 import { generateElementId } from '@sveltia/utils/element';
+import { CompositeWidget, createWidgetAttachment } from './composite-widget.svelte.js';
 import { getArrowKeys } from './navigation.js';
 import { scrollIntoViewIfNeeded } from './scroll.js';
-import { normalize } from './text.js';
-import { getSelectedItemDetail } from './select.svelte.js';
-import { findTypeAheadMatch, TypeAhead } from './type-ahead.js';
-import { activateBefore, activateLater } from './widget.js';
-
-/**
- * @import { Attachment } from 'svelte/attachments';
- */
+import { getItemLabel } from './text.js';
+import { isPrintableKey } from './type-ahead.js';
 
 /**
  * CSS selector to retrieve the tree items.
@@ -23,13 +18,7 @@ const ITEM_SELECTOR = '[role="treeitem"]';
  * expanding and collapsing parent nodes.
  * @see https://www.w3.org/WAI/ARIA/apg/patterns/treeview/
  */
-export class Tree {
-  /**
-   * Keystroke buffer for type-ahead.
-   * @type {TypeAhead}
-   */
-  #typeAhead = new TypeAhead();
-
+export class Tree extends CompositeWidget {
   /**
    * Initialize a new `Tree` instance.
    * @param {HTMLElement} parent Parent element.
@@ -40,44 +29,36 @@ export class Tree {
    * @param {boolean} [options.expandOnSelect] Whether to expand or collapse a parent item when the
    * item itself, rather than its chevron, is clicked or activated.
    */
-  constructor(parent, { clickToSelect = true, selectionFollowsFocus, expandOnSelect = true } = {}) {
-    parent.dispatchEvent(new CustomEvent('Initializing'));
+  constructor(parent, options = {}) {
+    super(parent);
 
-    this.parent = parent;
     this.id = generateElementId('tree');
-    this.clickToSelect = clickToSelect;
-    this.expandOnSelect = expandOnSelect;
+
+    /**
+     * Whether to select an item by clicking on it.
+     * @type {boolean}
+     */
+    this.clickToSelect = true;
+
+    /**
+     * Whether to expand or collapse a parent item when the item itself is clicked or activated.
+     * @type {boolean}
+     */
+    this.expandOnSelect = true;
 
     /**
      * Whether the selection follows the focus. `undefined` means auto detect.
      * @type {boolean | undefined}
      */
-    this.selectionFollowsFocusOption = selectionFollowsFocus;
+    this.selectionFollowsFocusOption = undefined;
+
+    this.onUpdate(options);
 
     /**
      * Item used as the starting point of a range selection.
      * @type {HTMLElement | undefined}
      */
     this.anchor = undefined;
-
-    /**
-     * Whether {@link activate} has run.
-     * @type {boolean}
-     */
-    this.activated = false;
-
-    /**
-     * Whether {@link destroy} has run, so a pending {@link activate} must not set anything up.
-     * @type {boolean}
-     */
-    this.destroyed = false;
-
-    /** @type {(event: MouseEvent) => void} */
-    this._onClick = activateBefore(this, (event) => this.onClick(event));
-    /** @type {(event: KeyboardEvent) => void} */
-    this._onKeyDown = activateBefore(this, (event) => this.onKeyDown(event));
-    /** @type {(event: FocusEvent) => void} */
-    this._onFocusIn = activateBefore(this, (event) => this.onFocusIn(event));
 
     // The items can be added or removed at any time, e.g. when a subtree is lazily rendered, and
     // collapsed, hidden or disabled from outside, e.g. with a “collapse all” button, which can take
@@ -91,34 +72,40 @@ export class Tree {
 
     // Listen right away: a click, a key press or a focus that comes before the activation below
     // activates the items first, rather than being lost
-    parent.addEventListener('click', this._onClick);
-    parent.addEventListener('keydown', this._onKeyDown);
-    parent.addEventListener('focusin', this._onFocusIn);
-
-    // Wait a bit before the child components are mounted. If the widget is unmounted in the
-    // meantime, the observer set up by `activate()` would never be disconnected.
-    activateLater(this, () => this.destroyed);
+    this.listen('click', (event) => this.onClick(event));
+    this.listen('keydown', (event) => this.onKeyDown(event));
+    this.listen('focusin', (event) => this.onFocusIn(event));
   }
 
   /**
-   * Activate the items, unless they already are.
+   * Set up the items on activation. The observer is only connected here, rather than in the
+   * constructor, so a widget unmounted before its activation leaves nothing to disconnect.
+   * @override
    */
-  activate() {
-    if (this.activated) {
-      return;
-    }
-
-    const { parent } = this;
-
-    this.activated = true;
+  setUp() {
     this.update();
-    this.observer.observe(parent, {
+    this.observer.observe(this.parent, {
       childList: true,
       subtree: true,
       attributes: true,
       attributeFilter: ['hidden', 'aria-hidden', 'aria-disabled', 'aria-expanded'],
     });
-    parent.dispatchEvent(new CustomEvent('Initialized'));
+  }
+
+  /**
+   * Called whenever the params are updated, as well as on creation. Apply the options.
+   * @override
+   * @param {object} params Updated params.
+   * @param {boolean} [params.clickToSelect] Whether to select an item by clicking on it.
+   * @param {boolean} [params.selectionFollowsFocus] Whether to select an item as soon as it
+   * receives focus. Default: `true` on a single-select tree, `false` on a multi-select tree.
+   * @param {boolean} [params.expandOnSelect] Whether to expand or collapse a parent item when the
+   * item itself, rather than its chevron, is clicked or activated.
+   */
+  onUpdate({ clickToSelect = true, selectionFollowsFocus, expandOnSelect = true }) {
+    this.clickToSelect = clickToSelect;
+    this.selectionFollowsFocusOption = selectionFollowsFocus;
+    this.expandOnSelect = expandOnSelect;
   }
 
   /**
@@ -135,22 +122,6 @@ export class Tree {
    */
   get selectionFollowsFocus() {
     return this.selectionFollowsFocusOption ?? !this.multi;
-  }
-
-  /**
-   * Whether the widget is disabled.
-   * @type {boolean}
-   */
-  get isDisabled() {
-    return this.parent.matches('[aria-disabled="true"]');
-  }
-
-  /**
-   * Whether the widget is read-only.
-   * @type {boolean}
-   */
-  get isReadOnly() {
-    return this.parent.matches('[aria-readonly="true"]');
   }
 
   /**
@@ -329,7 +300,7 @@ export class Tree {
    * @returns {string} Label.
    */
   getLabel(item) {
-    return item.dataset.label ?? item.querySelector('.label')?.textContent ?? '';
+    return getItemLabel(item, { textFallback: false });
   }
 
   /**
@@ -372,14 +343,6 @@ export class Tree {
   }
 
   /**
-   * Scroll the given element into view if needed.
-   * @param {HTMLElement} element Element to be scrolled into view.
-   */
-  scrollIntoView(element) {
-    scrollIntoViewIfNeeded(element);
-  }
-
-  /**
    * Put exactly one item in the tab order. Only the items actually in it are touched: writing a
    * `tabindex` to every item costs a pass over the whole widget on each arrow key, and all but one
    * of those writes set the value the item already had.
@@ -411,7 +374,7 @@ export class Tree {
     this.setTabStop(item);
     item.focus();
     item.dispatchEvent(new CustomEvent('Focus'));
-    this.scrollIntoView(item);
+    scrollIntoViewIfNeeded(item);
 
     if (select) {
       this.selectItem(item);
@@ -481,7 +444,7 @@ export class Tree {
       this.anchor = item;
     }
 
-    this.parent.dispatchEvent(new CustomEvent('Change', { detail: getSelectedItemDetail(item) }));
+    this.dispatchChange(item);
   }
 
   /**
@@ -497,7 +460,7 @@ export class Tree {
       this.setSelected(element, true);
     });
 
-    this.parent.dispatchEvent(new CustomEvent('Change', { detail: getSelectedItemDetail(item) }));
+    this.dispatchChange(item);
   }
 
   /**
@@ -549,9 +512,9 @@ export class Tree {
   typeAhead(char, currentItem) {
     const items = this.activeItems;
 
-    const index = findTypeAheadMatch(
-      items.map((item) => normalize(this.getLabel(item))),
-      this.#typeAhead.push(char),
+    const index = this.typeAheadBuffer.match(
+      items.map((item) => this.getLabel(item)),
+      char,
       items.indexOf(currentItem),
     );
 
@@ -751,33 +714,23 @@ export class Tree {
       return;
     }
 
-    if (key.length === 1 && key.trim()) {
+    if (isPrintableKey(event)) {
       this.typeAhead(key, currentItem);
     }
   }
 
   /**
-   * Clean up event listeners.
+   * Clean up event listeners and the observer.
+   * @override
    */
   destroy() {
-    this.destroyed = true;
-    this.#typeAhead.reset();
+    super.destroy();
     this.observer.disconnect();
-    this.parent.removeEventListener('click', this._onClick);
-    this.parent.removeEventListener('keydown', this._onKeyDown);
-    this.parent.removeEventListener('focusin', this._onFocusIn);
   }
 }
 
 /**
- * Activate a new tree.
- * @param {object} [params] Params to be passed to the `Tree` constructor.
- * @returns {Attachment} Attachment.
+ * Activate a new tree. Takes the params to be passed to the `Tree` constructor, or a getter
+ * function for reactive params, and returns an attachment.
  */
-export const activateTree = (params) => (parent) => {
-  const tree = new Tree(/** @type {HTMLElement} */ (parent), params);
-
-  return () => {
-    tree.destroy();
-  };
-};
+export const activateTree = createWidgetAttachment(Tree);

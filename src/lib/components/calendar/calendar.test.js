@@ -7,9 +7,11 @@ import {
   formatDate,
   getArrowKeyDayOffset,
   getCalendarDays,
+  getCursorDate,
   getFirstDayOfMonth,
   getToday,
   MONTH_NAMES,
+  parseDateValue,
   toDateString,
 } from './calendar.js';
 
@@ -205,5 +207,106 @@ describe('getToday', () => {
     const now = new Date();
 
     expect(getToday().getUTCDate()).toBe(now.getDate());
+  });
+});
+
+describe('parseDateValue', () => {
+  const today = new Date(Date.UTC(2025, 5, 15));
+
+  it('should parse a valid date', () => {
+    expect(parseDateValue('2024-02-29', today)).toEqual(new Date(Date.UTC(2024, 1, 29)));
+    expect(parseDateValue('2024-12-31', today)).toEqual(new Date(Date.UTC(2024, 11, 31)));
+  });
+
+  it('should fall back to today for an empty value', () => {
+    expect(parseDateValue(undefined, today)).toBe(today);
+    expect(parseDateValue('', today)).toBe(today);
+  });
+
+  it('should fall back to today for an invalid date', () => {
+    expect(parseDateValue('foo', today)).toBe(today);
+    expect(parseDateValue('2024-13-01', today)).toBe(today);
+  });
+
+  it('should fall back to today for a date that rolls over into another day', () => {
+    expect(parseDateValue('2024-02-30', today)).toBe(today);
+    expect(parseDateValue('2023-02-29', today)).toBe(today);
+  });
+
+  it('should fall back to today for a value that isn’t in the `YYYY-MM-DD` format', () => {
+    expect(parseDateValue('2024-02-29T00:00:00Z', today)).toBe(today);
+  });
+});
+
+describe('getCursorDate', () => {
+  const today = new Date(Date.UTC(2025, 5, 15));
+  const juneFirst = new Date(Date.UTC(2025, 5, 1));
+  const mayFirst = new Date(Date.UTC(2025, 4, 1));
+  const juneDays = getCalendarDays(juneFirst);
+  const mayDays = getCalendarDays(mayFirst);
+
+  it('should move from the focused day', () => {
+    expect(
+      getCursorDate({
+        focusedValue: '2025-06-10',
+        value: '2025-06-20',
+        days: juneDays,
+        firstDay: juneFirst,
+        today,
+        offset: 7,
+      }),
+    ).toBe('2025-06-17');
+  });
+
+  it('should move across months', () => {
+    expect(
+      getCursorDate({
+        focusedValue: '2025-06-01',
+        value: undefined,
+        days: juneDays,
+        firstDay: juneFirst,
+        today,
+        offset: -1,
+      }),
+    ).toBe('2025-05-31');
+  });
+
+  it('should move from the selected day without a cursor if it’s on the grid', () => {
+    expect(
+      getCursorDate({
+        focusedValue: undefined,
+        value: '2025-06-20',
+        days: juneDays,
+        firstDay: juneFirst,
+        today,
+        offset: 1,
+      }),
+    ).toBe('2025-06-21');
+  });
+
+  it('should land on today without a cursor if the selected day is off the grid', () => {
+    expect(
+      getCursorDate({
+        focusedValue: '',
+        value: '2024-01-10',
+        days: juneDays,
+        firstDay: juneFirst,
+        today,
+        offset: 1,
+      }),
+    ).toBe('2025-06-15');
+  });
+
+  it('should land on the first of the month without a cursor in another month', () => {
+    expect(
+      getCursorDate({
+        focusedValue: undefined,
+        value: undefined,
+        days: mayDays,
+        firstDay: mayFirst,
+        today,
+        offset: 7,
+      }),
+    ).toBe('2025-05-01');
   });
 });

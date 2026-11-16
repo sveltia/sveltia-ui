@@ -834,6 +834,21 @@ describe('Tree', () => {
       expect(document.activeElement).toBe(items.pictures);
       instance.destroy();
     });
+
+    it('should apply updated options', async () => {
+      await setup();
+
+      const instance = new Tree(tree, { clickToSelect: false, selectionFollowsFocus: true });
+
+      expect(instance.clickToSelect).toBe(false);
+      expect(instance.selectionFollowsFocus).toBe(true);
+      expect(instance.expandOnSelect).toBe(true);
+      instance.onUpdate({ expandOnSelect: false });
+      expect(instance.clickToSelect).toBe(true);
+      expect(instance.selectionFollowsFocusOption).toBeUndefined();
+      expect(instance.expandOnSelect).toBe(false);
+      instance.destroy();
+    });
   });
 });
 

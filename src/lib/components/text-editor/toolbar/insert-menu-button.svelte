@@ -5,7 +5,7 @@
   import MenuButton from '../../menu/menu-button.svelte';
   import MenuItem from '../../menu/menu-item.svelte';
   import Menu from '../../menu/menu.svelte';
-  import { insertEditorComponent } from './insert-component.js';
+  import { insertEditorComponent } from './actions.js';
 
   /**
    * @import { TextEditorComponent, TextEditorStore } from '#lib/typedefs.js';

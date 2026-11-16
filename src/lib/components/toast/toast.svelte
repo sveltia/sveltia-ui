@@ -6,7 +6,7 @@
   @see https://github.com/whatwg/html/issues/9936
 -->
 <script module>
-  import { openModalDialogs } from '../util/modal.svelte';
+  import { openModalDialogs } from '../util/modal.js';
 
   /**
    * Modal dialogs currently open, the topmost last. While a modal dialog is open, the rest of the

@@ -1,22 +1,17 @@
 import { isRTL } from '@sveltia/i18n';
 import { generateElementId } from '@sveltia/utils/element';
-import { sleep } from '@sveltia/utils/misc';
-import { untrack } from 'svelte';
+import { CompositeWidget, createWidgetAttachment } from './composite-widget.svelte.js';
 import { scrollIntoViewIfNeeded } from './scroll.js';
-import { getSelectedItemDetail } from './select.svelte.js';
-import { normalize } from './text.js';
-import { getArrowKeys, getGridTargetIndex, getLinearTargetIndex } from './navigation.js';
-import { findTypeAheadMatch, TypeAhead } from './type-ahead.js';
-import { activateBefore, activateLater } from './widget.js';
-
-/**
- * @import { Attachment } from 'svelte/attachments';
- */
-
-/**
- * CSS selector matching the members that are disabled or hidden, which are left out of navigation.
- */
-const INACTIVE_MEMBER_SELECTOR = '[aria-disabled="true"], [aria-hidden="true"]';
+import { getItemLabel, normalize } from './text.js';
+import { isPrintableKey } from './type-ahead.js';
+import { handleMenuKey } from './menu.js';
+import {
+  getArrowKeys,
+  getGridTargetIndex,
+  getLinearTargetIndex,
+  hasModifier,
+  INACTIVE_MEMBER_SELECTOR,
+} from './navigation.js';
 
 /**
  * Set an element’s `tabindex` attribute, leaving the DOM alone if it already holds that value.
@@ -100,80 +95,6 @@ const config = {
 };
 
 /**
- * Selector for the elements that can hold focus.
- */
-const FOCUSABLE_SELECTOR = 'a[href], button, input, select, textarea, summary, [tabindex]';
-
-/**
- * Move focus to the tab stop next to the given element in document order. Positive `tabindex`
- * values, which reorder the sequence, are not accounted for; they’re discouraged and absent from
- * this library.
- *
- * The candidates are narrowed by attribute alone before any of them is measured, and the measuring
- * — `getClientRects()`, which forces the browser to lay the page out — then walks outward from the
- * element and stops at the first candidate that is actually rendered. Measuring every focusable
- * element in the document up front is what a menu sitting on a large page cannot afford.
- * @internal
- * @param {HTMLElement} element Element to start from.
- * @param {boolean} backwards Whether to move to the previous tab stop rather than the next.
- */
-const focusAdjacentTabStop = (element, backwards) => {
-  const candidates = /** @type {HTMLElement[]} */ ([
-    ...document.querySelectorAll(FOCUSABLE_SELECTOR),
-  ]).filter(
-    (candidate) =>
-      candidate === element ||
-      (candidate.tabIndex >= 0 &&
-        !candidate.matches(':disabled, [aria-disabled="true"], [hidden], [inert], [inert] *')),
-  );
-
-  const index = candidates.indexOf(element);
-
-  if (index === -1) {
-    return;
-  }
-
-  const step = backwards ? -1 : 1;
-
-  for (let i = index + step; i >= 0 && i < candidates.length; i += step) {
-    if (candidates[i].getClientRects().length) {
-      candidates[i].focus();
-
-      return;
-    }
-  }
-};
-
-/**
- * Find the element that opens the menu the given element belongs to. A menu lives outside its
- * opener in the DOM tree, so the link runs the other way: the opener points at the menu’s container
- * with `aria-controls`.
- * @internal
- * @param {HTMLElement} element Element within the menu.
- * @returns {HTMLElement | null} Menu button or parent menu item, if any.
- */
-const getMenuOpener = (element) => {
-  /** @type {HTMLElement | null} */
-  let current = element;
-
-  while (current) {
-    if (current.id) {
-      const opener = /** @type {HTMLElement | null} */ (
-        document.querySelector(`[aria-haspopup="menu"][aria-controls="${CSS.escape(current.id)}"]`)
-      );
-
-      if (opener) {
-        return opener;
-      }
-    }
-
-    current = current.parentElement;
-  }
-
-  return null;
-};
-
-/**
  * Check whether the given member can hold a selected state. A plain menu item is an action, not a
  * choice, so it has no checked state, and a member marked with `data-selectable="false"`, such as
  * the caption row of a collapsible row group in a grid, can be focused but not selected.
@@ -186,26 +107,32 @@ const isSelectable = (element, role = element.getAttribute('role')) =>
   role !== 'menuitem' && element.dataset.selectable !== 'false';
 
 /**
+ * Move the cursor of a composite widget that keeps focus on itself, such as a listbox, onto the
+ * given member: mark the member with the `focused` class, taking it off any other, and point the
+ * widget’s `aria-activedescendant` at it.
+ * @param {HTMLElement} parent Widget root element.
+ * @param {HTMLElement} element Member element.
+ */
+export const setFocusedMember = (parent, element) => {
+  parent.querySelectorAll('.focused').forEach((member) => {
+    if (member !== element) {
+      member.classList.remove('focused');
+    }
+  });
+
+  element.classList.add('focused');
+  parent.setAttribute('aria-activedescendant', element.id);
+};
+
+/**
  * Implement keyboard and mouse interactions for a grouping composite widget.
  */
-export class Group {
-  /**
-   * Whether {@link activate} has run. Until then, members are left as they are rendered.
-   * @type {boolean}
-   */
-  activated = false;
-
+export class Group extends CompositeWidget {
   /**
    * Observer of the members’ selected state, for the widgets whose panels or tab stop follow it.
    * @type {MutationObserver | undefined}
    */
   selectionObserver = undefined;
-
-  /**
-   * Whether {@link destroy} has run, so a pending {@link activate} must not run.
-   * @type {boolean}
-   */
-  #destroyed = false;
 
   /**
    * Timer for the pending {@link scrollIntoViewLater} call, if any.
@@ -237,12 +164,6 @@ export class Group {
   #hiddenState = new WeakMap();
 
   /**
-   * Keystroke buffer for type-ahead.
-   * @type {TypeAhead}
-   */
-  #typeAhead = new TypeAhead();
-
-  /**
    * Whether {@link selectTarget} is clicking a radio button to have its component check it, so the
    * click that comes back to {@link onClick} is not handled as a second selection.
    * @type {boolean}
@@ -256,12 +177,7 @@ export class Group {
    * @returns {string} Normalized search value.
    */
   #getNormalizedSearchValue(member) {
-    const raw =
-      member.dataset.searchValue ??
-      member.dataset.label ??
-      member.querySelector('.label')?.textContent ??
-      /** @type {string} */ (member.textContent);
-
+    const raw = member.dataset.searchValue ?? getItemLabel(member);
     const cached = this.#searchValueCache.get(member);
 
     if (cached?.raw === raw) {
@@ -306,19 +222,13 @@ export class Group {
    * @param {boolean} [options.clickToSelect] Whether to select an item by clicking on it.
    */
   constructor(parent, { clickToSelect = true } = {}) {
-    parent.dispatchEvent(new CustomEvent('Initializing'));
+    super(parent);
 
-    this.parent = parent;
     this.role = /** @type {string} */ (parent.getAttribute('role'));
     this.multi = this.parent.getAttribute('aria-multiselectable') === 'true';
     this.id = generateElementId(this.role);
     this.parentGroupSelector = `[role="group"], [role="${this.role}"]`;
     this.clickToSelect = clickToSelect;
-
-    /** @type {(event: MouseEvent) => void} */
-    this._onClick = activateBefore(this, (event) => this.onClick(event));
-    /** @type {(event: KeyboardEvent) => void} */
-    this._onKeyDown = activateBefore(this, (event) => this.onKeyDown(event));
 
     const {
       orientation,
@@ -402,24 +312,16 @@ export class Group {
 
     // Listen right away: a click or a key press that comes before the activation below activates
     // the members first, rather than being lost
-    parent.addEventListener('click', this._onClick);
-    parent.addEventListener('keydown', this._onKeyDown);
-
-    // Wait a bit before the relevant components, including the `aria-controls` target are mounted
-    activateLater(this, () => this.#destroyed);
+    this.listen('click', (event) => this.onClick(event));
+    this.listen('keydown', (event) => this.onKeyDown(event));
   }
 
   /**
-   * Activate the members, unless they already are.
+   * Set up the members on activation.
+   * @override
    */
-  activate() {
-    if (this.activated) {
-      return;
-    }
-
-    const { parent, allMembers, selected: defaultSelected } = this;
-
-    this.activated = true;
+  setUp() {
+    const { allMembers, selected: defaultSelected } = this;
 
     allMembers.forEach((element, index) => {
       // Select the first one if no member has the `selected` attribute
@@ -448,7 +350,6 @@ export class Group {
     });
 
     this.updateTabStop();
-    parent.dispatchEvent(new CustomEvent('Initialized'));
   }
 
   /**
@@ -631,123 +532,6 @@ export class Group {
   }
 
   /**
-   * The element that opens this menu, either a menu button or a menu item in the menu above.
-   * @type {HTMLElement | null}
-   */
-  get opener() {
-    return getMenuOpener(this.parent);
-  }
-
-  /**
-   * The menu item that opens this menu, when this menu is a submenu. A menu button is deliberately
-   * excluded, because closing a top-level menu is not what “back to the parent item” means.
-   * @type {HTMLElement | null}
-   */
-  get parentMenuItem() {
-    const { opener } = this;
-
-    return opener?.matches('[role^="menuitem"]') ? opener : null;
-  }
-
-  /**
-   * Close this menu along with every menu above it.
-   * @returns {HTMLElement | null} The element that opens the outermost menu, so the caller can
-   * hand focus back to it.
-   */
-  closeMenuChain() {
-    const { opener: innermost } = this;
-    /** @type {HTMLElement | null} */
-    let opener = innermost;
-    /** @type {HTMLElement | null} */
-    let outermost = null;
-
-    // Bounded, so a malformed `aria-controls` cycle can’t hang the page
-    for (let i = 0; i < 10 && opener; i += 1) {
-      outermost = opener;
-
-      if (opener.getAttribute('aria-expanded') === 'true') {
-        opener.click();
-      }
-
-      const menu = /** @type {HTMLElement | null} */ (
-        opener.closest('[role="menu"], [role="menubar"]')
-      );
-
-      opener = menu ? getMenuOpener(menu) : null;
-    }
-
-    return outermost;
-  }
-
-  /**
-   * Leave the menu the way Tab should: close it along with every menu above it, then carry focus on
-   * to whatever follows the outermost opener. The browser can’t be left to do this itself, because
-   * a modal `<dialog>` confines Tab to its own contents.
-   * @param {boolean} backwards Whether to move to the previous tab stop instead, as Shift+Tab.
-   */
-  async leaveMenu(backwards) {
-    const opener = this.closeMenuChain();
-
-    if (!opener) {
-      return;
-    }
-
-    // Somewhere to stand while the menu is torn down, and the fallback if there’s nothing beyond
-    opener.focus();
-    await sleep(50);
-    focusAdjacentTabStop(opener, backwards);
-  }
-
-  /**
-   * Open the submenu of the given menu item if needed, and move focus onto its first item.
-   * @param {HTMLElement} item Menu item with `aria-haspopup="menu"`.
-   */
-  async enterSubmenu(item) {
-    const submenuId = item.getAttribute('aria-controls');
-
-    if (!submenuId) {
-      return;
-    }
-
-    if (item.getAttribute('aria-expanded') !== 'true') {
-      item.click();
-    }
-
-    const submenu = document.getElementById(submenuId);
-
-    // The submenu is revealed and positioned asynchronously, and an element that is still hidden
-    // or invisible cannot take focus, so keep trying for a few frames
-    for (let i = 0; i < 20; i += 1) {
-      const first = /** @type {HTMLElement | undefined} */ (
-        [...(submenu?.querySelectorAll(this.selector) ?? [])].find(
-          (element) => !element.matches(INACTIVE_MEMBER_SELECTOR),
-        )
-      );
-
-      first?.focus();
-
-      if (first && document.activeElement === first) {
-        return;
-      }
-
-      // eslint-disable-next-line no-await-in-loop
-      await sleep(20);
-    }
-  }
-
-  /**
-   * Close this submenu and move focus back onto the menu item that opens it.
-   * @param {HTMLElement} item Menu item with `aria-haspopup="menu"`.
-   */
-  leaveSubmenu(item) {
-    if (item.getAttribute('aria-expanded') === 'true') {
-      item.click();
-    }
-
-    item.focus();
-  }
-
-  /**
    * Get the currently selected member.
    * @type {HTMLElement | undefined}
    */
@@ -755,22 +539,6 @@ export class Group {
     return this.activeMembers.find(
       (element) => element.getAttribute(this.childSelectedAttr) === 'true',
     );
-  }
-
-  /**
-   * Whether the parent is disabled.
-   * @type {boolean}
-   */
-  get isDisabled() {
-    return this.parent.matches('[aria-disabled="true"]');
-  }
-
-  /**
-   * Whether the parent is read-only.
-   * @type {boolean}
-   */
-  get isReadOnly() {
-    return this.parent.matches('[aria-readonly="true"]');
   }
 
   /**
@@ -874,14 +642,6 @@ export class Group {
   #moveCursor(element, isTarget, scrollTargets) {
     const controlTarget = this.#getControlTarget(element);
 
-    if (!this.focusChild) {
-      element.classList.toggle('focused', isTarget);
-
-      if (isTarget) {
-        element.dispatchEvent(new CustomEvent('Focus'));
-      }
-    }
-
     if (controlTarget) {
       this.#setPanelShown(controlTarget, isTarget);
 
@@ -890,10 +650,18 @@ export class Group {
       }
     }
 
-    if (isTarget) {
-      this.parent.setAttribute('aria-activedescendant', element.id);
-      scrollTargets.push(element);
+    if (!isTarget) {
+      return;
     }
+
+    if (this.focusChild) {
+      this.parent.setAttribute('aria-activedescendant', element.id);
+    } else {
+      setFocusedMember(this.parent, element);
+      element.dispatchEvent(new CustomEvent('Focus'));
+    }
+
+    scrollTargets.push(element);
   }
 
   /**
@@ -996,9 +764,7 @@ export class Group {
     }
 
     if (changed) {
-      this.parent.dispatchEvent(
-        new CustomEvent('Change', { detail: getSelectedItemDetail(newTarget) }),
-      );
+      this.dispatchChange(newTarget);
     }
   }
 
@@ -1053,29 +819,10 @@ export class Group {
    * @param {KeyboardEvent} event `keydown` event.
    */
   onKeyDown(event) {
-    const { key, ctrlKey, metaKey, shiftKey, altKey } = event;
-    const hasModifier = shiftKey || altKey || ctrlKey || metaKey;
+    const { key } = event;
     const isMenu = this.childRoles.includes('menuitem');
-
-    // Tab leaves the menu entirely rather than stepping through it. Shift is allowed through here,
-    // unlike the keys below, because Shift+Tab leaves the menu just the same. A menu rendered
-    // inline, with no opener to return to, leaves Tab to the browser to move focus on as usual.
-    if (key === 'Tab' && isMenu && !ctrlKey && !metaKey && !altKey) {
-      if (this.opener) {
-        event.preventDefault();
-        this.leaveMenu(shiftKey);
-      }
-
-      return;
-    }
-
-    if (hasModifier) {
-      return;
-    }
-
     // eslint-disable-next-line prefer-destructuring
     const target = /** @type {HTMLElement} */ (event.target);
-    const { activeMembers } = this;
 
     // A field the user is typing in keeps its keys: the caret moves, the text changes. Escape and
     // Tab still reach the group, so a menu holding a field can be left the usual ways.
@@ -1089,6 +836,16 @@ export class Group {
     }
 
     const currentTarget = this.#getCurrentTarget(target);
+
+    if (isMenu && handleMenuKey(this, event, currentTarget)) {
+      return;
+    }
+
+    if (hasModifier(event)) {
+      return;
+    }
+
+    const { activeMembers } = this;
 
     if (['Enter', ' ', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(key)) {
       event.preventDefault();
@@ -1119,7 +876,7 @@ export class Group {
     // been typed so far, as in a native `<select>` and per the Listbox and Menu patterns. This goes
     // by the visible label, not the search value, which may hold synonyms for filtering — and by
     // the label element rather than the whole text, which would take in icon ligature names.
-    if (key.length === 1 && key !== ' ' && fromMember && (this.role === 'listbox' || isMenu)) {
+    if (isPrintableKey(event) && fromMember && (this.role === 'listbox' || isMenu)) {
       // Swallow the key whether or not it matches, as a native `<select>` does. Left to the
       // browser, a printable key on a non-editable element starts Firefox’s find-as-you-type.
       event.preventDefault();
@@ -1147,46 +904,7 @@ export class Group {
       return;
     }
 
-    // Escape in a submenu dismisses just that submenu. Propagation is stopped so the popup, whose
-    // own Escape handler sits on the `<dialog>` this submenu shares with its parent, doesn’t go on
-    // to close the whole stack.
-    if (key === 'Escape' && isMenu) {
-      const { parentMenuItem } = this;
-
-      if (parentMenuItem) {
-        event.preventDefault();
-        event.stopPropagation();
-        this.leaveSubmenu(parentMenuItem);
-
-        return;
-      }
-    }
-
-    const rtl = isRTL();
-
-    // Submenu traversal. In a vertical menu the inline arrows are free, so they step into a submenu
-    // and back out again, as the Menu pattern expects. Mirrored for RTL.
-    if (this.orientation === 'vertical' && isMenu) {
-      const { prevKey: outOfSubmenuKey, nextKey: intoSubmenuKey } = getArrowKeys('horizontal', rtl);
-
-      if (key === intoSubmenuKey && currentTarget?.getAttribute('aria-haspopup') === 'menu') {
-        this.enterSubmenu(currentTarget);
-
-        return;
-      }
-
-      if (key === outOfSubmenuKey) {
-        const { parentMenuItem } = this;
-
-        if (parentMenuItem) {
-          this.leaveSubmenu(parentMenuItem);
-
-          return;
-        }
-      }
-    }
-
-    const newTarget = this.#getArrowTarget(key, currentTarget, rtl);
+    const newTarget = this.#getArrowTarget(key, currentTarget, isRTL());
 
     if (newTarget && newTarget !== currentTarget) {
       this.selectTarget(event, newTarget);
@@ -1221,18 +939,9 @@ export class Group {
   #getTypeAheadTarget(key, currentTarget) {
     const { activeMembers } = this;
 
-    const labels = activeMembers.map((member) =>
-      normalize(
-        member.dataset.label ??
-          member.querySelector('.label')?.textContent ??
-          member.textContent ??
-          '',
-      ),
-    );
-
-    const index = findTypeAheadMatch(
-      labels,
-      this.#typeAhead.push(key),
+    const index = this.typeAheadBuffer.match(
+      activeMembers.map((member) => getItemLabel(member)),
+      key,
       currentTarget ? activeMembers.indexOf(currentTarget) : -1,
     );
 
@@ -1307,23 +1016,36 @@ export class Group {
   }
 
   /**
-   * Clean up event listeners.
+   * Clean up event listeners and observers.
+   * @override
    */
   destroy() {
-    this.#destroyed = true;
+    super.destroy();
     globalThis.clearTimeout(this.#scrollTimer);
-    this.#typeAhead.reset();
     this.observer.disconnect();
     this.selectionObserver?.disconnect();
-    this.parent.removeEventListener('click', this._onClick);
-    this.parent.removeEventListener('keydown', this._onKeyDown);
   }
 
   /**
-   * Called whenever the params are updated. Filter the items based on the search terms.
-   * @param {{ searchTerms: string }} params Updated params.
+   * Called whenever the params are updated. Apply `clickToSelect` if given, and filter the items
+   * based on the search terms if given.
+   * @override
+   * @param {object} params Updated params.
+   * @param {string} [params.searchTerms] Search terms.
+   * @param {boolean} [params.clickToSelect] Whether to select an item by clicking on it.
    */
-  onUpdate({ searchTerms }) {
+  onUpdate(params) {
+    const { searchTerms } = params;
+
+    if ('clickToSelect' in params) {
+      this.clickToSelect = params.clickToSelect ?? true;
+    }
+
+    // Only a filterable widget, such as a listbox, passes search terms
+    if (typeof searchTerms !== 'string') {
+      return;
+    }
+
     const terms = normalize(searchTerms);
     const _terms = terms ? terms.split(/\s+/) : [];
     const { allMembers, parent } = this;
@@ -1351,27 +1073,7 @@ export class Group {
 }
 
 /**
- * Activate a new group.
- * @param {object | (() => object)} [paramsOrGetter] Params object or a getter function for reactive
- * params.
- * @returns {Attachment} Attachment.
+ * Activate a new group. Takes a params object, or a getter function for reactive params, and
+ * returns an attachment.
  */
-export const activateGroup = (paramsOrGetter) => (parent) => {
-  const isGetter = typeof paramsOrGetter === 'function';
-  // Read the params without tracking them: attachments run in an effect, so a tracked read would
-  // destroy and recreate the whole group whenever they change, e.g. on every search keystroke.
-  // Changes are handled by `onUpdate()` below instead.
-  const initialParams = isGetter ? untrack(() => paramsOrGetter()) : paramsOrGetter;
-  const group = new Group(/** @type {HTMLElement} */ (parent), initialParams);
-
-  /* v8 ignore next 4 */
-  if (isGetter) {
-    $effect(() => {
-      group.onUpdate(paramsOrGetter());
-    });
-  }
-
-  return () => {
-    group.destroy();
-  };
-};
+export const activateGroup = createWidgetAttachment(Group);

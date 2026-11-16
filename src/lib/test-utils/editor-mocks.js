@@ -134,7 +134,7 @@ editorMocks['./shiki/highlighter.js'] = {
   },
 };
 
-editorMocks['./shiki/facade.js'] = {
+editorMocks['./shiki/engine.js'] = {
   isPlainLanguage: vi.fn((lang) => ['', 'plain', 'plaintext', 'text', 'txt'].includes(lang ?? '')),
   loadEngine: vi.fn(() => Promise.resolve()),
   loadCodeLanguage: vi.fn(() => Promise.resolve()),
@@ -343,9 +343,9 @@ export const resetEditorMocks = () => {
   mockState.listNode = false;
   mockState.quoteNode = false;
   mockState.listIndent = 0;
-  editorMocks['./shiki/facade.js'].loadEngine.mockClear();
-  editorMocks['./shiki/facade.js'].loadCodeLanguage.mockClear();
-  editorMocks['./shiki/facade.js'].loadCodeTheme.mockClear();
+  editorMocks['./shiki/engine.js'].loadEngine.mockClear();
+  editorMocks['./shiki/engine.js'].loadCodeLanguage.mockClear();
+  editorMocks['./shiki/engine.js'].loadCodeTheme.mockClear();
 };
 
 export { editorState, ElementNodeClass, mockState, nearestNodeState, rootState, selectionState };

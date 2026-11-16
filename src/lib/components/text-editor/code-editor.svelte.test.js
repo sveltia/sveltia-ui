@@ -91,6 +91,28 @@ describe('CodeEditor', () => {
     expect(select.element().textContent).toContain('Plain Text');
   });
 
+  it('disables the toolbar and the switcher while disabled or read-only', async () => {
+    /** @type {ComponentProps<typeof CodeEditor>} */
+    const props = $state({ code: 'x', showLanguageSwitcher: true, readonly: true });
+    const screen = await render(CodeEditor, props);
+    const toolbar = screen.getByRole('toolbar', { name: 'Code Editor' });
+    const select = screen.getByRole('combobox', { name: 'Language' });
+
+    await expect.element(toolbar).toHaveAttribute('aria-disabled', 'true');
+    await expect.element(select).toHaveAttribute('aria-disabled', 'true');
+
+    props.readonly = false;
+    props.disabled = true;
+    await expect.element(toolbar).toHaveAttribute('aria-disabled', 'true');
+    await expect.element(select).toHaveAttribute('aria-disabled', 'true');
+
+    props.disabled = false;
+    await vi.waitFor(() => {
+      expect(toolbar.element().getAttribute('aria-disabled')).toBe('false');
+    });
+    await expect.element(select).toHaveAttribute('aria-disabled', 'false');
+  });
+
   it('updates the code as the user types, and follows values set from outside', async () => {
     /** @type {ComponentProps<typeof CodeEditor>} */
     const props = $state({ code: 'one', lang: 'plain' });

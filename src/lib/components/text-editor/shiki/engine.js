@@ -1,5 +1,6 @@
 /**
- * Thin wrapper around a Shiki highlighter instance.
+ * Thin wrapper around a Shiki highlighter instance, independent of any editor. The Lexical glue
+ * that turns tokens into nodes and refreshes code blocks lives in `lexical.js`.
  *
  * Adapted from Lexical’s `FacadeShiki.ts` (MIT licensed). Two things differ from upstream, both to
  * keep Shiki out of the consumer’s bundle. First, the engine is loaded on demand rather than
@@ -10,26 +11,12 @@
  * @see https://github.com/sveltia/sveltia-cms/issues/587
  */
 
-import {
-  $isCodeNode as isCodeNode,
-  $createCodeHighlightNode as createCodeHighlightNode,
-} from '@lexical/code-core';
-import {
-  $createLineBreakNode as createLineBreakNode,
-  $createTabNode as createTabNode,
-  $getNodeByKey as getNodeByKey,
-  HISTORY_MERGE_TAG,
-  tokenizeRawText,
-} from 'lexical';
-import { getBackgroundUpdateTags } from '../background-update.js';
 import { cachePayload, getCachedPayload } from './cache.js';
 import { LANGUAGES, THEMES } from './generated.js';
 import { getCodeHighlighterLoaders } from './loader.js';
 import { getCodeTheme } from './theme.js';
 
 /**
- * @import { CodeNode } from '@lexical/code-core';
- * @import { LexicalEditor, LexicalNode, NodeKey } from 'lexical';
  * @import { HighlightedToken } from '#lib/typedefs.js';
  */
 
@@ -103,56 +90,31 @@ export const isCodeLanguageLoaded = (language) => {
 };
 
 /**
- * Mark a code node dirty so the highlighting transform runs again once an async load has completed.
- * @param {LexicalEditor} editor Editor instance.
- * @param {NodeKey} codeNodeKey Key of the code node to refresh.
- */
-const refreshCodeNode = (editor, codeNodeKey) => {
-  editor.update(
-    () => {
-      const codeNode = getNodeByKey(codeNodeKey);
-
-      if (!isCodeNode(codeNode)) {
-        return;
-      }
-
-      const language = codeNode.getLanguage();
-
-      if (language && isCodeLanguageLoaded(language) && !codeNode.getIsSyntaxHighlightSupported()) {
-        codeNode.setIsSyntaxHighlightSupported(true);
-      }
-
-      codeNode.markDirty();
-    },
-    { tag: getBackgroundUpdateTags(editor, [HISTORY_MERGE_TAG]) },
-  );
-};
-
-/**
  * In-flight loads, keyed by what is being loaded.
- * @type {Map<string, { promise: Promise<void>, targets: Map<NodeKey, LexicalEditor> }>}
+ * @type {Map<string, { promise: Promise<void>, callbacks: Set<() => void> }>}
  */
 const pendingLoads = new Map();
 
 /**
- * Run an asynchronous load once, however many callers ask for it while it is in flight, and refresh
- * each waiting code node exactly once when it completes.
+ * Run an asynchronous load once, however many callers ask for it while it is in flight, and call
+ * each distinct callback exactly once when it completes.
  *
- * The transform fires on every keystroke, so without this a burst of typing during a load would
- * start a download per keystroke and then flood the editor with one update each. That storm is
- * enough to starve the final re-highlight, leaving a block tokenized as of an earlier keystroke.
+ * The editor transform fires on every keystroke, so without this a burst of typing during a load
+ * would start a download per keystroke and then flood the editor with one update each. That storm
+ * is enough to starve the final re-highlight, leaving a block tokenized as of an earlier keystroke.
+ * Callers that want a single notification for repeated requests should therefore pass the same
+ * callback each time.
  * @param {string} key Cache key identifying the load.
  * @param {() => Promise<void>} run Work to perform on the first call.
- * @param {LexicalEditor} [editor] Editor instance to refresh once the load completes.
- * @param {NodeKey} [codeNodeKey] Key of the code node to refresh.
+ * @param {() => void} [onLoaded] Function to call once the load completes.
  * @returns {Promise<void>} Promise resolving when the load has completed.
  */
-const loadOnce = (key, run, editor, codeNodeKey) => {
+const loadOnce = (key, run, onLoaded) => {
   let entry = pendingLoads.get(key);
 
   if (!entry) {
-    /** @type {Map<NodeKey, LexicalEditor>} */
-    const targets = new Map();
+    /** @type {Set<() => void>} */
+    const callbacks = new Set();
 
     const promise = (async () => {
       try {
@@ -162,32 +124,32 @@ const loadOnce = (key, run, editor, codeNodeKey) => {
       }
 
       pendingLoads.delete(key);
-      targets.forEach((target, nodeKey) => refreshCodeNode(target, nodeKey));
+      callbacks.forEach((callback) => callback());
     })();
 
-    entry = { promise, targets };
+    entry = { promise, callbacks };
     pendingLoads.set(key, entry);
   }
 
-  if (editor && codeNodeKey) {
-    entry.targets.set(codeNodeKey, editor);
+  if (onLoaded) {
+    entry.callbacks.add(onLoaded);
   }
 
   return entry.promise;
 };
 
 /**
- * Load the syntax highlighting engine, then refresh the given code node.
+ * Load the syntax highlighting engine, then call the given function.
  *
  * Tokenizing is synchronous because it runs inside a Lexical node transform, so the engine has to
  * be resident before any highlighting can happen. The transform bails out while this is in flight
- * and is re-run by `refreshCodeNode()`, the same mechanism upstream already uses for grammars.
- * @param {LexicalEditor} [editor] Editor instance to refresh once the engine is ready.
- * @param {NodeKey} [codeNodeKey] Key of the code node to refresh.
+ * and is re-run by the callback, the same mechanism upstream already uses for grammars.
+ * @param {() => void} [onLoaded] Function to call once the load has completed, whether or not it
+ * succeeded.
  * @returns {Promise<void> | undefined} Promise resolving when the engine is ready, or `undefined`
  * when it is already loaded or known to be unavailable.
  */
-export const loadEngine = (editor, codeNodeKey) => {
+export const loadEngine = (onLoaded) => {
   if (highlighter || engineUnavailable) {
     return undefined;
   }
@@ -207,8 +169,7 @@ export const loadEngine = (editor, codeNodeKey) => {
         engineUnavailable = true;
       }
     },
-    editor,
-    codeNodeKey,
+    onLoaded,
   );
 };
 
@@ -244,15 +205,14 @@ const resolvePayload = async (kind, id, load) => {
 };
 
 /**
- * Load a grammar or theme into the highlighter once, then refresh the given code node. The
- * configured loader and the highlighter share the method name for each kind.
+ * Load a grammar or theme into the highlighter once, then call the given function. The configured
+ * loader and the highlighter share the method name for each kind.
  * @param {'lang' | 'theme'} kind Payload kind.
  * @param {string} id Language or theme ID.
- * @param {LexicalEditor} [editor] Editor instance to refresh once the payload is loaded.
- * @param {NodeKey} [codeNodeKey] Key of the code node to refresh.
+ * @param {() => void} [onLoaded] Function to call once the load has completed.
  * @returns {Promise<void>} Promise resolving when the payload is loaded.
  */
-const loadAsset = (kind, id, editor, codeNodeKey) => {
+const loadAsset = (kind, id, onLoaded) => {
   const method = kind === 'lang' ? 'loadLanguage' : 'loadTheme';
 
   return loadOnce(
@@ -264,8 +224,7 @@ const loadAsset = (kind, id, editor, codeNodeKey) => {
         await highlighter[method](payload);
       }
     },
-    editor,
-    codeNodeKey,
+    onLoaded,
   );
 };
 
@@ -287,14 +246,13 @@ const findLanguage = (language) =>
 export const normalizeCodeLanguage = (language) => findLanguage(language)?.id ?? language;
 
 /**
- * Load the grammar for the given language, then refresh the given code node.
+ * Load the grammar for the given language, then call the given function.
  * @param {string} language Language identifier, like `scss` or `diff-js`.
- * @param {LexicalEditor} [editor] Editor instance to refresh once the grammar is ready.
- * @param {NodeKey} [codeNodeKey] Key of the code node to refresh.
+ * @param {() => void} [onLoaded] Function to call once the load has completed.
  * @returns {Promise<void> | undefined} Promise resolving when the grammar is ready, or `undefined`
  * when it is already loaded or the language is not supported.
  */
-export const loadCodeLanguage = (language, editor, codeNodeKey) => {
+export const loadCodeLanguage = (language, onLoaded) => {
   const id = getDiffedLanguage(language) ?? language;
 
   if (!highlighter || isCodeLanguageLoaded(id)) {
@@ -307,7 +265,7 @@ export const loadCodeLanguage = (language, editor, codeNodeKey) => {
     return undefined;
   }
 
-  return loadAsset('lang', info.id, editor, codeNodeKey);
+  return loadAsset('lang', info.id, onLoaded);
 };
 
 /**
@@ -324,14 +282,13 @@ export const isCodeThemeLoaded = (theme) => {
 };
 
 /**
- * Load the given theme, then refresh the given code node.
+ * Load the given theme, then call the given function.
  * @param {string} theme Theme identifier, like `github-light`.
- * @param {LexicalEditor} [editor] Editor instance to refresh once the theme is ready.
- * @param {NodeKey} [codeNodeKey] Key of the code node to refresh.
+ * @param {() => void} [onLoaded] Function to call once the load has completed.
  * @returns {Promise<void> | undefined} Promise resolving when the theme is ready, or `undefined`
  * when it is already loaded or unknown.
  */
-export const loadCodeTheme = (theme, editor, codeNodeKey) => {
+export const loadCodeTheme = (theme, onLoaded) => {
   if (!highlighter || isCodeThemeLoaded(theme)) {
     return undefined;
   }
@@ -340,92 +297,32 @@ export const loadCodeTheme = (theme, editor, codeNodeKey) => {
     return undefined;
   }
 
-  return loadAsset('theme', theme, editor, codeNodeKey);
+  return loadAsset('theme', theme, onLoaded);
 };
 
 /**
- * Convert Shiki tokens to Lexical nodes.
- * @param {any[][]} tokens Tokens, one array per line.
- * @param {boolean} diff Whether the language is a `diff-*` language.
- * @returns {LexicalNode[]} Lexical nodes.
+ * Tokenize a snippet of code with the raw Shiki tokens, for building editor nodes. The engine, the
+ * grammar and the theme must all be loaded.
+ * @param {string} code Code to tokenize.
+ * @param {string} language Language identifier, like `scss` or `diff-js`.
+ * @param {string} [theme] Shiki theme ID.
+ * @returns {{ tokens: any[][], diff: boolean }} Tokens, one array per line, and whether the
+ * language is a `diff-*` language, in which case the code is tokenized with the language it wraps.
  */
-const mapTokensToLexicalStructure = (tokens, diff) => {
-  /** @type {LexicalNode[]} */
-  const nodes = [];
-
-  tokens.forEach((line, lineIndex) => {
-    if (lineIndex) {
-      nodes.push(createLineBreakNode());
-    }
-
-    line.forEach((token, tokenIndex) => {
-      let { content: text } = token;
-
-      // Implement `diff-*` languages
-      if (diff && tokenIndex === 0 && text.length > 0) {
-        const prefixes = ['+', '-', '>', '<', ' '];
-        const prefixTypes = ['inserted', 'deleted', 'inserted', 'deleted', 'unchanged'];
-        const prefixIndex = prefixes.indexOf(text[0]);
-
-        if (prefixIndex !== -1) {
-          nodes.push(createCodeHighlightNode(prefixes[prefixIndex], prefixTypes[prefixIndex]));
-          text = text.slice(1);
-        }
-      }
-
-      const style = engine.stringifyTokenStyle(
-        token.htmlStyle || engine.getTokenStyleObject(token),
-      );
-
-      tokenizeRawText(text, {
-        /**
-         * Append a line break node.
-         * @returns {number} New node count.
-         */
-        linebreak: () => nodes.push(createLineBreakNode()),
-        /**
-         * Append a tab node.
-         * @returns {number} New node count.
-         */
-        tab: () => nodes.push(createTabNode()),
-        /**
-         * Create a highlight node carrying the token’s colour.
-         * @param {string} part Text fragment.
-         */
-        text: (part) => {
-          const node = createCodeHighlightNode(part);
-
-          node.setStyle(style);
-          nodes.push(node);
-        },
-      });
-    });
-  });
-
-  return nodes;
-};
-
-/**
- * Tokenize a code node’s content into Lexical nodes.
- *
- * Unlike upstream, the theme’s background and foreground colours are not copied onto the code node.
- * The block’s own colours come from `--sui-code-background-color` so that plain and highlighted
- * blocks look alike and follow the app’s theme rather than Shiki’s; only the per-token colours are
- * taken from the theme.
- * @param {CodeNode} codeNode Code node to tokenize.
- * @param {string} language Language identifier.
- * @returns {LexicalNode[]} Lexical nodes.
- */
-export const getHighlightNodes = (codeNode, language) => {
+export const tokenizeCode = (code, language, theme) => {
   const diffedLanguage = getDiffedLanguage(language);
+  const { tokens } = highlighter.codeToTokens(code, { lang: diffedLanguage ?? language, theme });
 
-  const { tokens } = highlighter.codeToTokens(codeNode.getTextContent(), {
-    lang: diffedLanguage ?? language,
-    theme: codeNode.getTheme(),
-  });
-
-  return mapTokensToLexicalStructure(tokens, !!diffedLanguage);
+  return { tokens, diff: !!diffedLanguage };
 };
+
+/**
+ * Get the inline style of a Shiki token, preferring its own inline style over the derived one.
+ * @param {any} token Token returned by {@link tokenizeCode}.
+ * @returns {string} CSS declarations.
+ */
+export const getTokenStyle = (token) =>
+  engine.stringifyTokenStyle(token.htmlStyle || engine.getTokenStyleObject(token));
 
 /**
  * Get the theme to highlight a snippet of code with, if it can be highlighted synchronously: the

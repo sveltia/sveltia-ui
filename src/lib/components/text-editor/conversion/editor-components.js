@@ -9,7 +9,7 @@ import {
 } from 'lexical';
 import { removeImportPlaceholders } from './markdown/index.js';
 import { HTML_BLOCK_PLACEHOLDER } from './placeholder-chars.js';
-import { onEditorUpdate } from './update.js';
+import { exportValue } from './update.js';
 
 /**
  * @import { Transformer } from '@lexical/markdown';
@@ -53,7 +53,7 @@ export const getComponentMarkdown = ({ node, createNode, transformer, createMark
         // An inline node needs a paragraph to live in
         getRoot().append(newNode.isInline() ? createParagraphNode().append(newNode) : newNode);
 
-        markdown = onEditorUpdate(editor, [transformer]);
+        markdown = exportValue(editor, [transformer]);
       },
       { discrete: true },
     );

@@ -4,6 +4,19 @@
  */
 
 /**
+ * CSS selector matching the members that are disabled or hidden, which are left out of navigation.
+ */
+export const INACTIVE_MEMBER_SELECTOR = '[aria-disabled="true"], [aria-hidden="true"]';
+
+/**
+ * Check whether any modifier key — Shift, Alt, Control or Meta — is held down with a key press.
+ * @param {KeyboardEvent} event `keydown` event.
+ * @returns {boolean} Result.
+ */
+export const hasModifier = ({ shiftKey, altKey, ctrlKey, metaKey }) =>
+  shiftKey || altKey || ctrlKey || metaKey;
+
+/**
  * Get the arrow keys that move to the previous and next member along the given orientation. In a
  * right-to-left layout, the inline arrows are mirrored: ArrowLeft moves forward, ArrowRight back.
  * @param {string} orientation `horizontal` or `vertical`.

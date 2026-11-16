@@ -76,6 +76,16 @@ export const resolveToPercent = (value, fallback, env) => {
 };
 
 /**
+ * Resolve a pane’s default size to a percentage.
+ * @param {{ defaultSize?: ResizablePaneSize }} paneDef Pane definition.
+ * @param {SizeEnvironment} env Sizes the lengths are relative to.
+ * @returns {number} Size in percentage points, or `NaN` if the pane has no default size, or it
+ * can’t be resolved.
+ */
+export const resolveDefaultSize = ({ defaultSize }, env) =>
+  defaultSize === undefined ? NaN : resolveToPercent(defaultSize, NaN, env);
+
+/**
  * Resolve a pane’s size constraints to percentages, clamped to the `0`–`100` range, with the
  * maximum never below the minimum.
  * @param {{ minSize: ResizablePaneSize, maxSize: ResizablePaneSize } | undefined} paneDef Pane
@@ -177,6 +187,43 @@ export const getInitialSizes = (resolvedDefaults, constraints) => {
 };
 
 /**
+ * Get the size wanted for a pane shown after the initial layout: its default size, or an equal
+ * share of the group if it has none, within its constraints.
+ * @param {object} args Arguments.
+ * @param {number} args.defaultSize Default size of the pane, or `NaN` if it has none.
+ * @param {PaneConstraints} args.constraints Constraints of the pane.
+ * @param {number} args.paneCount Number of panes in the group, including the new one.
+ * @returns {number} Size.
+ */
+export const getNewPaneSize = ({ defaultSize, constraints: { minSize, maxSize }, paneCount }) =>
+  Math.min(Math.max(Number.isNaN(defaultSize) ? 100 / paneCount : defaultSize, minSize), maxSize);
+
+/**
+ * Sort items, such as panes or handles, in the order of their keys in the given list, which is
+ * usually the order of the elements in the DOM. Items whose key isn’t in the list go last, in their
+ * current order.
+ * @template T, K
+ * @param {T[]} items Items to sort. The array is left as is.
+ * @param {K[]} order Keys in the order wanted.
+ * @param {(item: T) => K} getKey Function to get the key of an item.
+ * @returns {T[]} Sorted copy of the items.
+ */
+export const sortByDomOrder = (items, order, getKey) => {
+  /**
+   * Get the position of the given item in the list, or the end if it isn’t in it.
+   * @param {T} item Item.
+   * @returns {number} Position.
+   */
+  const getPosition = (item) => {
+    const position = order.indexOf(getKey(item));
+
+    return position === -1 ? Infinity : position;
+  };
+
+  return items.toSorted((a, b) => getPosition(a) - getPosition(b));
+};
+
+/**
  * Clamp the delta a handle is moved by, so neither of the two panes around it leaves its size
  * constraints. A positive delta grows the pane before the handle at the expense of the one after
  * it, and a negative delta does the opposite.
@@ -205,6 +252,42 @@ export const clampResizeDelta = (
   );
 
   return deltaPercent > 0 ? Math.min(deltaPercent, canGrow) : -Math.min(-deltaPercent, canShrink);
+};
+
+/**
+ * Get the range a handle can move the pane before it in, as only the space between the panes on
+ * either side of the handle can be moved, and only as far as both panes’ constraints allow.
+ * @param {object} panes The panes around the handle.
+ * @param {number} panes.sizeBefore Current size of the pane before the handle.
+ * @param {number} panes.sizeAfter Current size of the pane after the handle.
+ * @param {PaneConstraints} panes.constraintsBefore Constraints of the pane before the handle.
+ * @param {PaneConstraints} panes.constraintsAfter Constraints of the pane after the handle.
+ * @returns {{ min: number, max: number }} Minimum and maximum size of the pane before the handle.
+ */
+export const getHandleRange = ({ sizeBefore, sizeAfter, constraintsBefore, constraintsAfter }) => {
+  const pairSize = sizeBefore + sizeAfter;
+
+  return {
+    min: Math.max(constraintsBefore.minSize, pairSize - constraintsAfter.maxSize),
+    max: Math.min(constraintsBefore.maxSize, pairSize - constraintsAfter.minSize),
+  };
+};
+
+/**
+ * Convert the distance a handle has been dragged to a delta for the pane before it.
+ * @param {object} args Arguments.
+ * @param {number} args.delta Distance in pixels along the group’s direction, from the top or the
+ * physical left.
+ * @param {number} args.containerSize Space the panes share in pixels. Must not be `0`.
+ * @param {boolean} args.isHorizontal Whether the panes are laid out horizontally.
+ * @param {boolean} args.rtl Whether the layout is right-to-left, in which case a horizontal drag
+ * to the left grows the pane before the handle.
+ * @returns {number} Delta in percentage points.
+ */
+export const pixelDeltaToPercent = ({ delta, containerSize, isHorizontal, rtl }) => {
+  const percentDelta = (delta / containerSize) * 100;
+
+  return isHorizontal && rtl ? -percentDelta : percentDelta;
 };
 
 /**

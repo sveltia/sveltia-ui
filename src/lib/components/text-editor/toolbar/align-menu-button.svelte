@@ -12,10 +12,11 @@
   import MenuItemRadio from '../../menu/menu-item-radio.svelte';
   import Menu from '../../menu/menu.svelte';
   import { ALIGNMENT_OPTIONS } from '../constants.js';
-  import { focusEditor } from '../editing/caret.js';
+  import { runEditorAction } from './actions.js';
   import { waitForMenuToClose } from './menu.js';
 
   /**
+   * @import { LexicalEditor } from 'lexical';
    * @import { TextEditorStore } from '#lib/typedefs.js';
    */
 
@@ -35,20 +36,21 @@
    * Align the selected blocks, then move the focus back to the editor.
    * @param {(typeof ALIGNMENT_OPTIONS)[number]['type']} type Alignment.
    * @param {HTMLElement} item Menu item chosen.
+   * @returns {Promise<void>} Nothing.
    */
-  const align = async (type, item) => {
-    const { editor } = editorStore;
-
-    // The menu is only shown in the rich text mode, where the editor is there
-    /* v8 ignore next 3 */
-    if (!editor) {
-      return;
-    }
-
-    editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, type);
-    await waitForMenuToClose(item);
-    await focusEditor(editor);
-  };
+  const align = (type, item) =>
+    // The menu is only shown in the rich text mode
+    runEditorAction(editorStore, {
+      /**
+       * Align the selected blocks, and wait for the menu to close.
+       * @param {LexicalEditor} editor Editor instance.
+       * @returns {Promise<void>} Nothing.
+       */
+      rich: async (editor) => {
+        editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, type);
+        await waitForMenuToClose(item);
+      },
+    });
 </script>
 
 <MenuButton

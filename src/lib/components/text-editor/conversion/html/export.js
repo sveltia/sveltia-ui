@@ -17,7 +17,7 @@ import {
   TabNode,
   TextNode,
 } from 'lexical';
-import { isPlainLanguage } from '../../shiki/facade.js';
+import { isPlainLanguage } from '../../shiki/engine.js';
 import { decorateTaskList, decorateTaskListItem } from './task-list.js';
 import { splitParagraphAroundBlocks } from './paragraph.js';
 import { TEXT_FORMAT_TAGS } from './utils.js';

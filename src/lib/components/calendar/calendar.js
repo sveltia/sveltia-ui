@@ -129,3 +129,46 @@ export const toDateString = (date) => date.toJSON().split('T')[0];
  */
 export const getToday = (now = new Date()) =>
   new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
+
+/**
+ * Get the date given as the `value` of the calendar. A value that doesn’t make a valid date, like
+ * `2024-13-01`, or that rolls over into another day, like `2024-02-30` turning into March 1, is
+ * treated like no value rather than crashing or showing an unexpected month.
+ * @param {string | undefined} value Date in the `YYYY-MM-DD` format.
+ * @param {Date} today Today’s date, as returned by {@link getToday}.
+ * @returns {Date} Parsed date, or `today` if the value is empty or invalid.
+ */
+export const parseDateValue = (value, today) => {
+  const parsed = value ? new Date(value) : undefined;
+
+  return parsed && !Number.isNaN(parsed.getTime()) && toDateString(parsed) === value
+    ? parsed
+    : today;
+};
+
+/**
+ * Get the day the keyboard cursor moves to on an arrow key. Without a cursor, it starts from the
+ * selected day only if it’s on the grid. After browsing to another month, it isn’t, and moving from
+ * it would bring that month back. The cursor then lands on today if it’s in the month displayed, or
+ * on the first of the month otherwise.
+ * @param {object} options Options.
+ * @param {string | undefined} options.focusedValue Value of the day the cursor is on, if any.
+ * @param {string | undefined} options.value Selected day, in the `YYYY-MM-DD` format.
+ * @param {Date[]} options.days Days on the grid, as returned by {@link getCalendarDays}.
+ * @param {Date} options.firstDay First day of the month being displayed.
+ * @param {Date} options.today Today’s date, as returned by {@link getToday}.
+ * @param {number} options.offset Number of days the key moves the cursor by.
+ * @returns {string} Day to move to, in the `YYYY-MM-DD` format.
+ */
+export const getCursorDate = ({ focusedValue, value, days, firstDay, today, offset }) => {
+  const cursor =
+    focusedValue || (value && days.some((day) => toDateString(day) === value) ? value : undefined);
+
+  if (cursor) {
+    return toDateString(addDays(new Date(cursor), offset));
+  }
+
+  return getFirstDayOfMonth(today).getTime() === firstDay.getTime()
+    ? toDateString(today)
+    : toDateString(firstDay);
+};

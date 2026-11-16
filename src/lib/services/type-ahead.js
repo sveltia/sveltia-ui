@@ -3,7 +3,7 @@
  * listbox and menu groups.
  */
 
-import { fold } from './text.js';
+import { fold, normalize } from './text.js';
 
 /**
  * How long, in milliseconds, successive keystrokes keep adding up to one type-ahead prefix.
@@ -11,43 +11,15 @@ import { fold } from './text.js';
 export const TYPE_AHEAD_TIMEOUT = 500;
 
 /**
- * Keystroke buffer behind type-ahead: printable keys typed in quick succession make up a prefix,
- * which is dropped again after a short pause.
+ * Check whether a key press types a character that type-ahead goes by: a single printable
+ * character other than whitespace, typed with Shift at most. A shortcut, with Alt, Control or Meta
+ * held down, is left alone, and so is Space, which selects. Callers that ignore Shift as well check
+ * for it themselves beforehand.
+ * @param {KeyboardEvent} event `keydown` event.
+ * @returns {boolean} Result.
  */
-export class TypeAhead {
-  /** @type {string} */
-  #prefix = '';
-
-  /** @type {number} */
-  #timer = 0;
-
-  /**
-   * Add a keystroke to the prefix.
-   * @param {string} key Printable key.
-   * @returns {string} Current prefix.
-   */
-  push(key) {
-    globalThis.clearTimeout(this.#timer);
-    this.#prefix += fold(key);
-    this.#timer = /** @type {number} */ (
-      /** @type {unknown} */ (
-        globalThis.setTimeout(() => {
-          this.#prefix = '';
-        }, TYPE_AHEAD_TIMEOUT)
-      )
-    );
-
-    return this.#prefix;
-  }
-
-  /**
-   * Drop the prefix.
-   */
-  reset() {
-    globalThis.clearTimeout(this.#timer);
-    this.#prefix = '';
-  }
-}
+export const isPrintableKey = ({ key, altKey, ctrlKey, metaKey }) =>
+  key.length === 1 && !!key.trim() && !altKey && !ctrlKey && !metaKey;
 
 /**
  * Find the item that a type-ahead prefix lands on, the way a native `<select>` does. A single
@@ -81,3 +53,53 @@ export const findTypeAheadMatch = (labels, prefix, currentIndex) => {
 
   return -1;
 };
+
+/**
+ * Keystroke buffer behind type-ahead: printable keys typed in quick succession make up a prefix,
+ * which is dropped again after a short pause.
+ */
+export class TypeAhead {
+  /** @type {string} */
+  #prefix = '';
+
+  /** @type {number} */
+  #timer = 0;
+
+  /**
+   * Add a keystroke to the prefix.
+   * @param {string} key Printable key.
+   * @returns {string} Current prefix.
+   */
+  push(key) {
+    globalThis.clearTimeout(this.#timer);
+    this.#prefix += fold(key);
+    this.#timer = /** @type {number} */ (
+      /** @type {unknown} */ (
+        globalThis.setTimeout(() => {
+          this.#prefix = '';
+        }, TYPE_AHEAD_TIMEOUT)
+      )
+    );
+
+    return this.#prefix;
+  }
+
+  /**
+   * Add a keystroke to the prefix, and find the item it lands on. See {@link findTypeAheadMatch}.
+   * @param {string[]} labels Item labels, in order. They’re normalized here.
+   * @param {string} key Printable key.
+   * @param {number} currentIndex Index of the current item, or `-1` if there is none.
+   * @returns {number} Index of the matching item, or `-1` if nothing matches.
+   */
+  match(labels, key, currentIndex) {
+    return findTypeAheadMatch(labels.map(normalize), this.push(key), currentIndex);
+  }
+
+  /**
+   * Drop the prefix.
+   */
+  reset() {
+    globalThis.clearTimeout(this.#timer);
+    this.#prefix = '';
+  }
+}

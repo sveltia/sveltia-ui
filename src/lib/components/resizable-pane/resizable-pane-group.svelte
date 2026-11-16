@@ -9,21 +9,20 @@
   import {
     clampResizeDelta,
     getInitialSizes,
+    getNewPaneSize,
+    resolveDefaultSize,
     resolvePaneConstraints,
-    resolveToPercent,
     shareSpaceAmongPanes,
+    sortByDomOrder,
   } from './sizing.js';
 
   /**
-   * @import { Snippet } from 'svelte';
-   * @import { PaneGroupContext, ResizablePaneSize } from '#lib/typedefs.js';
+   * @import { ContainerProps, PaneGroupContext, ResizablePaneSize } from '#lib/typedefs.js';
    */
 
   /**
    * @typedef {object} Props
    * @property {'horizontal' | 'vertical'} [direction] Layout direction of the panes.
-   * @property {string} [class] The `class` attribute on the wrapper element.
-   * @property {Snippet} [children] Primary slot content.
    * @property {(detail: { sizes: number[] }) => void} [onResize] `resize` event handler, called
    * whenever the pane sizes change.
    */
@@ -38,7 +37,7 @@
    */
 
   /**
-   * @type {Props & Record<string, any>}
+   * @type {ContainerProps & Props & Record<string, any>}
    */
   let {
     /* eslint-disable prefer-const */
@@ -133,6 +132,12 @@
   let reportedSizes = '';
 
   /**
+   * Get the current sizes rounded to one decimal place, as they are reported.
+   * @returns {number[]} Rounded sizes.
+   */
+  const roundSizes = () => sizes.map((size) => Number(size.toFixed(1)));
+
+  /**
    * Initialize pane sizes from `defaultSize` props. Called once all panes have registered. Panes
    * without `defaultSize` share the remaining space equally, and every size is kept within its
    * pane’s `minSize` and `maxSize`.
@@ -143,24 +148,20 @@
     if (!_paneDefs.length) return;
 
     const env = getSizeEnvironment();
-
     // Resolve each pane’s defaultSize to a percentage (NaN if unspecified or unresolvable)
-    const resolvedDefaults = _paneDefs.map((p) =>
-      p.defaultSize === undefined ? NaN : resolveToPercent(p.defaultSize, NaN, env),
-    );
-
+    const resolvedDefaults = _paneDefs.map((p) => resolveDefaultSize(p, env));
     const constraints = _paneDefs.map((p) => resolvePaneConstraints(p, env));
 
     sizes.splice(0, sizes.length, ...getInitialSizes(resolvedDefaults, constraints));
     // The initial sizes aren’t reported, only the changes from them
-    reportedSizes = sizes.map((size) => Number(size.toFixed(1))).join();
+    reportedSizes = roundSizes().join();
   };
 
   /**
    * Call `onResize` with the current sizes, if they’ve changed since the last call.
    */
   const reportSizes = () => {
-    const rounded = sizes.map((size) => Number(size.toFixed(1)));
+    const rounded = roundSizes();
     const key = rounded.join();
 
     if (key !== reportedSizes) {
@@ -241,19 +242,7 @@
     if (!element || !sizes.length) return;
 
     const paneIds = [...element.querySelectorAll(':scope > .resizable-pane')].map(({ id }) => id);
-
-    /**
-     * Get the position of the given pane in the group, or the end if it isn’t in it yet.
-     * @param {PaneDef} def Pane definition.
-     * @returns {number} Position.
-     */
-    const getPosition = (def) => {
-      const position = paneIds.indexOf(def.id);
-
-      return position === -1 ? Infinity : position;
-    };
-
-    const defs = _paneDefs.toSorted((a, b) => getPosition(a) - getPosition(b));
+    const defs = sortByDomOrder(_paneDefs, paneIds, (def) => def.id);
     const newSizes = defs.map((def) => sizes[_paneDefs.indexOf(def)]);
     const isReordered = defs.some((def, index) => def !== _paneDefs[index]);
 
@@ -263,41 +252,34 @@
       _savedSizes.length = 0;
     }
 
+    /**
+     * Sizes the lengths are relative to, measured once for all the new panes, and only if there
+     * are any, as measuring makes the browser lay out the page.
+     * @type {import('./sizing.js').SizeEnvironment | undefined}
+     */
+    let env;
+
     sizes.forEach((size, index) => {
       if (!Number.isNaN(size)) {
         return;
       }
 
-      const env = getSizeEnvironment();
+      env ??= getSizeEnvironment();
+
       const def = _paneDefs[index];
-      const { minSize, maxSize } = resolvePaneConstraints(def, env);
 
-      const defaultSize =
-        def.defaultSize === undefined ? NaN : resolveToPercent(def.defaultSize, NaN, env);
-
-      const wanted = Math.min(
-        Math.max(Number.isNaN(defaultSize) ? 100 / sizes.length : defaultSize, minSize),
-        maxSize,
-      );
+      const wanted = getNewPaneSize({
+        defaultSize: resolveDefaultSize(def, env),
+        constraints: resolvePaneConstraints(def, env),
+        paneCount: sizes.length,
+      });
 
       sizes[index] = 0;
       sizes[index] = wanted + shareSpace([index - 1, index + 1], -wanted, index);
     });
 
     const handleElements = [...element.querySelectorAll(':scope > .resizable-handle')];
-
-    /**
-     * Get the position of the given handle in the group, or the end if it isn’t in it yet.
-     * @param {() => HTMLElement | undefined} getElement Function to get the handle element.
-     * @returns {number} Position.
-     */
-    const getHandlePosition = (getElement) => {
-      const position = handleElements.indexOf(/** @type {HTMLElement} */ (getElement()));
-
-      return position === -1 ? Infinity : position;
-    };
-
-    const handles = _handles.toSorted((a, b) => getHandlePosition(a) - getHandlePosition(b));
+    const handles = sortByDomOrder(_handles, handleElements, (getElement) => getElement());
 
     if (handles.some((handle, index) => handle !== _handles[index])) {
       _handles = handles;

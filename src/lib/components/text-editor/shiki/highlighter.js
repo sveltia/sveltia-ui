@@ -35,7 +35,6 @@ import {
 } from 'lexical';
 import { getBackgroundUpdateTags } from '../background-update.js';
 import {
-  getHighlightNodes,
   isCodeLanguageLoaded,
   isCodeThemeLoaded,
   isEngineLoaded,
@@ -44,7 +43,8 @@ import {
   loadCodeLanguage,
   loadCodeTheme,
   loadEngine,
-} from './facade.js';
+} from './engine.js';
+import { getCodeNodeRefresher, getHighlightNodes } from './lexical.js';
 import { CODE_THEME_LIGHT } from './theme.js';
 
 /**
@@ -321,12 +321,12 @@ const codeNodeTransform = (editor, tokenizer, transformState, node) => {
     }
   } else if (!isEngineLoaded()) {
     // Dynamic load of the engine itself
-    loadEngine(editor, nodeKey);
+    loadEngine(getCodeNodeRefresher(editor, nodeKey));
     inFlight = true;
   } else {
     // Dynamic load of themes
     if (!isCodeThemeLoaded(theme)) {
-      loadCodeTheme(theme, editor, nodeKey);
+      loadCodeTheme(theme, getCodeNodeRefresher(editor, nodeKey));
       inFlight = true;
     }
 
@@ -336,7 +336,7 @@ const codeNodeTransform = (editor, tokenizer, transformState, node) => {
         node.setIsSyntaxHighlightSupported(true);
       }
     } else {
-      const loadingTask = loadCodeLanguage(language, editor, nodeKey);
+      const loadingTask = loadCodeLanguage(language, getCodeNodeRefresher(editor, nodeKey));
 
       // If the language is not supported, no download will occur
       if (!loadingTask && node.getIsSyntaxHighlightSupported()) {

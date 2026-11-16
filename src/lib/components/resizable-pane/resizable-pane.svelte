@@ -7,8 +7,7 @@
   import { getContext, onDestroy, untrack } from 'svelte';
 
   /**
-   * @import { Snippet } from 'svelte';
-   * @import { PaneGroupContext, ResizablePaneSize } from '#lib/typedefs.js';
+   * @import { ContainerProps, PaneGroupContext, ResizablePaneSize } from '#lib/typedefs.js';
    */
 
   /**
@@ -21,14 +20,12 @@
    * lengths. Defaults to `0`.
    * @property {ResizablePaneSize} [maxSize] Maximum size. Numbers are percentages, strings are CSS
    * lengths. Defaults to `100`.
-   * @property {string} [class] The `class` attribute on the wrapper element.
-   * @property {Snippet} [children] Primary slot content.
    * @property {(detail: { size: number }) => void} [onResize] Called whenever this pane’s size (in
    * percent) changes.
    */
 
   /**
-   * @type {Props & Record<string, any>}
+   * @type {ContainerProps & Props & Record<string, any>}
    */
   let {
     /* eslint-disable prefer-const */

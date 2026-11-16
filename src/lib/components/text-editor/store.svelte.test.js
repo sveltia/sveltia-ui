@@ -168,6 +168,26 @@ describe('createEditorStore', () => {
     expect(store.inputValue).toBe('same');
   });
 
+  it('should set the exported value without importing it back into the editor', () => {
+    const store = createEditorStore();
+    const mockEditor = /** @type {any} */ ({ getEditorState: () => ({ isEmpty: () => false }) });
+
+    store.editor = mockEditor;
+    store.initialized = true;
+    store.setExportedValue('Exported');
+    expect(store.inputValue).toBe('Exported');
+    expect(store.useRichText).toBe(true);
+    expect(store.importing).toBe(false);
+
+    // Setting the input value does import it
+    store.inputValue = 'Given';
+    expect(store.importing).toBe(true);
+  });
+
+  it('should do nothing when flushing the export without an editor', () => {
+    expect(() => createEditorStore().flushExport()).not.toThrow();
+  });
+
   it('should expose convertToLexical as a function', () => {
     const store = createEditorStore();
 

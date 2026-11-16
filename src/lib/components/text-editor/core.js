@@ -19,7 +19,8 @@ import { HR } from './conversion/transformers/hr.js';
 import { RAW_HTML, RAW_SYNTAX } from './conversion/transformers/raw-syntax.js';
 import { $ensureParagraphAfterTable, $normalizeTableHeaders } from './editing/table.js';
 import { createTableTransformer } from './conversion/transformers/table.js';
-import { limitToSingleLine, registerSingleLine } from './editing/single-line.js';
+import { registerSingleLine } from './editing/single-line.js';
+import { getEditorSetup, normalizeConfig } from './config.js';
 import { removePlaceholdersFromMatch } from './conversion/editor-components.js';
 import {
   registerCodeEditorCommands,
@@ -29,79 +30,37 @@ import {
 import { registerGuards } from './editing/guards.js';
 import { mergeUnregisters } from './utils.js';
 import { registerLinkCommands } from './editing/link.js';
-import { registerUpdateEvent } from './conversion/update.js';
+import { registerValueExport } from './conversion/update.js';
 import { registerPasteAsMarkdown } from './conversion/paste.js';
 
 /**
  * @import { LexicalEditor } from 'lexical';
  * @import { TextMatchTransformer, Transformer } from '@lexical/markdown';
- * @import {
- * TextEditorComponent,
- * TextEditorConfig,
- * TextEditorNodeType,
- * TextEditorValueFormat,
- * } from '#lib/typedefs.js';
+ * @import { TextEditorConfig, TextEditorNodeType } from '#lib/typedefs.js';
+ * @import { EditorSetup } from './config.js';
+ * @import { ExportDetail } from './conversion/update.js';
  */
 
 /**
  * @typedef {object} InitEditorResult
  * @property {LexicalEditor} editor Editor instance.
  * @property {Transformer[]} enabledTransformers List of enabled Markdown transformers.
+ * @property {() => void} flush Export the content scheduled to be exported right away, instead
+ * of after the delay, so the value reflects what was just typed. Does nothing if nothing is
+ * scheduled.
  * @property {() => void} dispose Remove all registered Lexical listeners.
  */
 
 /**
- * Editor configuration with the defaults applied, and the features derived from it.
- * @typedef {object} EditorSetup
- * @property {TextEditorNodeType[]} enabledButtons Enabled buttons.
- * @property {TextEditorComponent[]} components Editor components.
- * @property {boolean | undefined} useMarkdownShortcuts Whether to enable Markdown shortcuts.
- * @property {boolean} isCodeEditor Whether the editor is a code editor.
- * @property {string} defaultLanguage Default code block language.
- * @property {TextEditorValueFormat} format Value format.
- * @property {boolean} multiline Whether the editor accepts multiple lines.
- * @property {boolean} hasCodeBlock Whether to support code blocks.
- * @property {boolean} hasTable Whether to support table editing.
- * @property {boolean} hasHorizontalRule Whether to support selecting a horizontal rule.
- * @property {boolean} hasBlockSyntax Whether to support horizontal rules and tables in Markdown,
- * even without their buttons.
+ * @typedef {object} InitEditorOptions
+ * @property {(detail: ExportDetail) => void} [onExport] Function to call with the Markdown or HTML
+ * value and the selection state, a moment after the editor content or selection has changed.
  */
 
 /**
  * Maximum number of entries in the undo stack.
  */
 const HISTORY_MAX_DEPTH = 200;
-
-/**
- * Apply the defaults to the editor configuration, and derive the features from it.
- * @param {TextEditorConfig} config Editor configuration.
- * @returns {EditorSetup} Editor setup.
- */
-const getEditorSetup = (config) => {
-  const {
-    enabledButtons = [],
-    components = [],
-    useMarkdownShortcuts,
-    isCodeEditor = false,
-    defaultLanguage = 'plain',
-    format = 'markdown',
-    multiline = true,
-  } = limitToSingleLine(config);
-
-  return {
-    enabledButtons,
-    components,
-    useMarkdownShortcuts,
-    isCodeEditor,
-    defaultLanguage,
-    format,
-    multiline,
-    hasCodeBlock: enabledButtons.includes('code-block') || isCodeEditor,
-    hasTable: enabledButtons.includes('table') && !isCodeEditor,
-    hasHorizontalRule: enabledButtons.includes('horizontal-rule') && !isCodeEditor,
-    hasBlockSyntax: !isCodeEditor && multiline,
-  };
-};
 
 /**
  * Get the unique items of a map keyed by button type, for the enabled buttons.
@@ -132,6 +91,7 @@ const createEditorExtension = ({
   hasCodeBlock,
   hasTable,
   hasHorizontalRule,
+  hasTaskList,
   hasBlockSyntax,
 }) =>
   defineExtension({
@@ -170,10 +130,7 @@ const createEditorExtension = ({
       ...(hasBlockSyntax ? [HorizontalRuleNode, TableNode, TableCellNode, TableRowNode] : []),
     ],
     theme: EDITOR_THEME,
-    html:
-      format === 'html'
-        ? getHtmlConfig({ hasCodeBlock, hasTaskList: enabledButtons.includes('task-list') })
-        : undefined,
+    html: format === 'html' ? getHtmlConfig({ hasCodeBlock, hasTaskList }) : undefined,
     /**
      * Log an error like `createEditor` does by default, instead of throwing it.
      * @param {Error} error Error.
@@ -224,7 +181,9 @@ const getEnabledTransformers = ({ enabledButtons, components, isCodeEditor, hasB
  * @param {LexicalEditor} editor Editor instance.
  * @param {EditorSetup} setup Editor setup.
  * @param {Transformer[]} enabledTransformers Enabled Markdown transformers.
- * @returns {() => void} Function to unregister them all.
+ * @param {(detail: ExportDetail) => void} onExport Function to call with the exported value.
+ * @returns {{ flush: () => void, unregister: () => void }} Function to export the value right
+ * away, and function to unregister them all.
  */
 const registerEditorListeners = (
   editor,
@@ -237,11 +196,13 @@ const registerEditorListeners = (
     multiline,
     hasCodeBlock,
     hasTable,
+    hasLink,
   },
   enabledTransformers,
-) =>
+  onExport,
+) => {
   // The order matters, as listeners with the same priority are called in the registration order
-  mergeUnregisters(
+  const unregisterFeatures = mergeUnregisters(
     registerRichText(editor),
     registerDragonSupport(editor),
     // Cap the undo stack, as each entry holds a snapshot of the whole document
@@ -264,7 +225,7 @@ const registerEditorListeners = (
         })
       : undefined,
     hasCodeBlock ? observeCodeTheme(editor) : undefined,
-    enabledButtons.includes('link') ? registerLinkCommands(editor) : undefined,
+    hasLink ? registerLinkCommands(editor) : undefined,
     hasTable
       ? editor.registerNodeTransform(TableNode, (table) => {
           $ensureParagraphAfterTable(table);
@@ -278,29 +239,46 @@ const registerEditorListeners = (
       : undefined,
     registerListCommands(editor, enabledButtons),
     isCodeEditor ? undefined : registerGuards(editor, { format, enabledButtons }),
-    registerUpdateEvent(editor, enabledTransformers, format),
+  );
+
+  const valueExport = registerValueExport(editor, enabledTransformers, format, onExport);
+
+  const unregisterInput = mergeUnregisters(
     registerTabIndentation(editor),
     isCodeEditor ? undefined : registerPasteAsMarkdown(editor, enabledTransformers),
   );
 
+  return {
+    flush: valueExport.flush,
+    unregister: mergeUnregisters(unregisterFeatures, valueExport.unregister, unregisterInput),
+  };
+};
+
 /**
  * Initialize the Lexical editor.
- * @param {TextEditorConfig} config Editor configuration.
+ * @param {Partial<TextEditorConfig>} config Editor configuration.
+ * @param {InitEditorOptions} [options] Options.
  * @returns {InitEditorResult} Editor instance and cleanup.
  */
-export const initEditor = (config) => {
-  const setup = getEditorSetup(config);
+export const initEditor = (config, { onExport = () => {} } = {}) => {
+  const setup = getEditorSetup(normalizeConfig(config));
   const enabledTransformers = getEnabledTransformers(setup);
   const editor = buildEditorFromExtensions(createEditorExtension(setup));
 
   // Let the HTML import tell the elements the components import
   editorComponents.set(editor, setup.components);
 
-  const unregister = registerEditorListeners(editor, setup, enabledTransformers);
+  const { flush, unregister } = registerEditorListeners(
+    editor,
+    setup,
+    enabledTransformers,
+    onExport,
+  );
 
   return {
     editor,
     enabledTransformers,
+    flush,
     /**
      * Remove all registered Lexical listeners.
      */

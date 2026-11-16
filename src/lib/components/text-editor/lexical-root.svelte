@@ -1,46 +1,34 @@
 <script>
   import { $getRoot as getRoot, HISTORY_MERGE_TAG } from 'lexical';
   import { getContext, onMount, untrack } from 'svelte';
+  import { on } from 'svelte/events';
   import { IMPORT_UPDATE_TAG } from './constants.js';
-  import { flushUpdateEvent } from './conversion/update.js';
   import { handleEditorMouseDown, isStaticDecoratorContent } from './editing/caret.js';
   import { initEditor } from './core.js';
+  import { mergeUnregisters } from './utils.js';
 
   /**
-   * @import { Snippet } from 'svelte';
-   * @import { TextEditorStore } from '#lib/typedefs.js';
+   * @import { ExportDetail } from './conversion/update.js';
+   * @import { FormFieldStateProps, TextEditorStore, WidgetStateProps } from '#lib/typedefs.js';
    */
 
   /**
    * @typedef {object} Props
-   * @property {string} [class] The `class` attribute on the wrapper element.
    * @property {'ltr' | 'rtl' | 'auto'} [dir] Direction of the text. With `auto` or no value, each
    * paragraph takes the direction of its own text.
-   * @property {boolean} [hidden] Whether to hide the widget.
-   * @property {boolean} [disabled] Whether to disable the widget. An alias of the `aria-disabled`
-   * attribute.
-   * @property {boolean} [readonly] Whether to make the widget read-only. An alias of the
-   * `aria-readonly` attribute.
-   * @property {boolean} [required] Whether to mark the widget required. An alias of the
-   * `aria-required` attribute.
-   * @property {boolean} [invalid] Whether to mark the widget invalid. An alias of the
-   * `aria-invalid` attribute.
-   * @property {Snippet} [children] Primary slot content.
    */
 
   /**
-   * @type {Props & Record<string, any>}
+   * @type {WidgetStateProps & FormFieldStateProps & Props & Record<string, any>}
    */
   let {
     /* eslint-disable prefer-const */
-    class: className,
     dir = undefined,
     hidden = false,
     disabled = false,
     readonly = false,
     required = false,
     invalid = false,
-    children,
     ...restProps
     /* eslint-enable prefer-const */
   } = $props();
@@ -81,10 +69,10 @@
   });
 
   /**
-   * Update {@link value} and other state variables whenever the editor content is updated.
-   * @param {Event} event `Update` custom event.
+   * Update the input value and the selection state whenever the editor exports its content.
+   * @param {ExportDetail} detail Exported value and selection state.
    */
-  const onUpdate = (event) => {
+  const onExport = ({ value: exportedValue, selection }) => {
     const { hasConverterError, useRichText, inputValue } = editorStore;
 
     // The content has been converted, if it has changed at all
@@ -96,18 +84,13 @@
       return;
     }
 
-    const { value: exportedValue, selection } = /** @type {CustomEvent} */ (event).detail;
     // Keep the value as given when the content is the one last imported, which the editor only
     // writes in its own Markdown style, e.g. `_text_` for `*text*`: that’s not a change, whether
     // the content is untouched or the user has undone their changes to it
     const newValue = editorStore.getImportedValue(exportedValue) ?? exportedValue;
 
     if (inputValue !== newValue) {
-      // Temporarily disable rich text to prevent unnecessary Markdown conversion that resets
-      // Lexical nodes and selection, then restore the state
-      editorStore.useRichText = false;
-      editorStore.inputValue = newValue;
-      editorStore.useRichText = true;
+      editorStore.setExportedValue(newValue);
     }
 
     editorStore.selection = selection;
@@ -242,30 +225,34 @@
     if (!lexicalRoot?.contains(/** @type {Node | null} */ (relatedTarget))) {
       // The root may be being removed; see above
       untrack(() => {
-        flushUpdateEvent(editorStore.editor);
+        editorStore.flushExport();
       });
     }
   };
 
   onMount(() => {
-    const { editor, enabledTransformers, dispose } = initEditor(editorStore.config);
+    const { editor, enabledTransformers, flush, dispose } = initEditor(editorStore.config, {
+      onExport,
+    });
 
     editorStore.editor = editor;
     editorStore.enabledTransformers = enabledTransformers;
+    editorStore.flushExport = flush;
 
-    lexicalRoot?.addEventListener('Update', onUpdate);
-    lexicalRoot?.addEventListener('focusout', onRootFocusOut);
-    lexicalRoot?.addEventListener('click', onClick);
-    lexicalRoot?.addEventListener('mousedown', onMouseDown);
-    lexicalRoot?.addEventListener('mousedown', onComponentMouseDown);
-    document.addEventListener('focusin', onFocusIn);
-    document.addEventListener('focusout', onFocusOut);
+    // The root is bound before this runs
+    const root = /** @type {HTMLElement} */ (lexicalRoot);
 
-    // A change made by the user is converted to Markdown a moment later, so report it as pending
-    // until then. An import, or an update that only changes how the content looks, e.g. the code
-    // highlighting, isn’t a change
-    const unregisterUpdateListener = editor.registerUpdateListener(
-      ({ dirtyElements, dirtyLeaves, tags }) => {
+    const unregister = mergeUnregisters(
+      on(root, 'focusout', onRootFocusOut),
+      on(root, 'click', onClick),
+      on(root, 'mousedown', onMouseDown),
+      on(root, 'mousedown', onComponentMouseDown),
+      on(document, 'focusin', onFocusIn),
+      on(document, 'focusout', onFocusOut),
+      // A change made by the user is converted to Markdown a moment later, so report it as pending
+      // until then. An import, or an update that only changes how the content looks, e.g. the code
+      // highlighting, isn’t a change
+      editor.registerUpdateListener(({ dirtyElements, dirtyLeaves, tags }) => {
         if (
           (dirtyElements.size || dirtyLeaves.size) &&
           !tags.has(IMPORT_UPDATE_TAG) &&
@@ -277,21 +264,14 @@
         // An editor component with the focus may have been removed, which doesn’t fire `focusout`
         // in Firefox and Safari
         checkComponentFocus();
-      },
+      }),
     );
 
     return () => {
       // Pass on what was just typed, as Firefox and Safari don’t fire `focusout` when the focused
       // root is removed. This does nothing if the change has been passed on already
-      flushUpdateEvent(editor);
-      unregisterUpdateListener();
-      lexicalRoot?.removeEventListener('Update', onUpdate);
-      lexicalRoot?.removeEventListener('focusout', onRootFocusOut);
-      lexicalRoot?.removeEventListener('click', onClick);
-      lexicalRoot?.removeEventListener('mousedown', onMouseDown);
-      lexicalRoot?.removeEventListener('mousedown', onComponentMouseDown);
-      document.removeEventListener('focusin', onFocusIn);
-      document.removeEventListener('focusout', onFocusOut);
+      flush();
+      unregister();
       dispose();
       editor.setRootElement(null);
       editorStore.initialized = false;

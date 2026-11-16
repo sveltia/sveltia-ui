@@ -19,6 +19,7 @@
 <script>
   import { _ } from '@sveltia/i18n';
   import { sleep } from '@sveltia/utils/misc';
+  import { getModalLabelAttrs } from '../../services/label.js';
   import Button from '../button/button.svelte';
   import Spacer from '../divider/spacer.svelte';
   import Modal from '../util/modal.svelte';
@@ -71,12 +72,11 @@
   const id = $props.id();
 
   /**
-   * Accessible name for the `<dialog>`. The built-in header renders the title in an element the
-   * dialog can point at; with a custom header the title is only text, so it becomes `aria-label`
-   * unless the consumer names the labelling element.
+   * Labelling attributes for the `<dialog>`, giving it an accessible name.
    */
-  const labelledby = $derived(ariaLabelledby ?? (!header && title ? `${id}-title` : undefined));
-  const label = $derived(labelledby ? undefined : title || undefined);
+  const labelAttrs = $derived(
+    getModalLabelAttrs({ id, title, ariaLabelledby, hasCustomHeader: !!header }),
+  );
   /**
    * A reference to the modal component.
    * @type {Modal | undefined}
@@ -252,8 +252,7 @@
   {role}
   {id}
   class="dialog"
-  aria-label={label}
-  aria-labelledby={labelledby}
+  {...labelAttrs}
   aria-describedby="{id}-body"
   bind:open
   {modal}

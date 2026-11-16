@@ -17,7 +17,7 @@ vi.mock('@sveltia/utils/events', () => getMock('@sveltia/utils/events'));
 vi.mock('@sveltia/utils/string', () => getMock('@sveltia/utils/string'));
 vi.mock('@lexical/code-core', () => getMock('@lexical/code-core'));
 vi.mock('../shiki/highlighter.js', () => getMock('./shiki/highlighter.js'));
-vi.mock('../shiki/facade.js', () => getMock('./shiki/facade.js'));
+vi.mock('../shiki/engine.js', () => getMock('./shiki/engine.js'));
 vi.mock('../shiki/theme.js', () => getMock('./shiki/theme.js'));
 vi.mock('@lexical/dragon', () => getMock('@lexical/dragon'));
 vi.mock('@lexical/extension', () => getMock('@lexical/extension'));
@@ -35,7 +35,7 @@ vi.mock('@lexical/utils', () => getMock('@lexical/utils'));
 vi.mock('lexical', () => getMock('lexical'));
 
 import { resetEditorMocks } from '#lib/test-utils/editor-mocks.js';
-import { loadEngine } from '../shiki/facade.js';
+import { loadEngine } from '../shiki/engine.js';
 import { convertMarkdownToLexical, prepareMarkdown } from './import.js';
 
 describe('convertMarkdownToLexical', () => {
@@ -290,5 +290,12 @@ describe('convertMarkdownToLexical', () => {
 describe('prepareMarkdown', () => {
   it('should list a code block language with symbols whole', () => {
     expect(prepareMarkdown('```c#\nx\n```\n\n```c++\ny\n```', []).languages).toEqual(['c#', 'c++']);
+  });
+
+  it('should only list the languages of the opening fences of code blocks', () => {
+    expect(
+      prepareMarkdown('```js\n```py\n```\n\n  ```ts\nx\n  ```\n\n- ```rb\n  y\n  ```', [])
+        .languages,
+    ).toEqual(['js', 'ts']);
   });
 });

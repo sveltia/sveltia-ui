@@ -10,7 +10,16 @@ import {
   TABLE_ROW_LINE_REGEX,
 } from './block-structure.js';
 import { mapOutsideCodeBlocks } from './code-blocks.js';
-import { findCodeSpans } from './code-spans.js';
+import { findCodeSpans, mapCodeSpans } from './code-spans.js';
+import {
+  countBackslashesBefore,
+  UNESCAPED_LOOKBEHIND,
+  WHITESPACE_OR_PUNCTUATION,
+} from './syntax.js';
+
+/**
+ * @import { CodeSpan } from './code-spans.js';
+ */
 
 /**
  * Get the blockquote markers at the start of a line, like `> >` in `> > foo`, without the
@@ -50,7 +59,7 @@ const createMultilineFormattingRegex = (char, length) => {
   const unit = String.raw`(?:\\[^\s]|[^${char}\\\n])`;
   const edgeUnit = String.raw`(?:\\[^\s]|[^${char}\s\\])`;
   const text = `${edgeUnit}(?:${unit}*?${edgeUnit})?`;
-  const boundary = String.raw`[\s\p{P}\p{S}]`;
+  const boundary = WHITESPACE_OR_PUNCTUATION;
   const isWithinWordAllowed = char === '*';
 
   const opening = isWithinWordAllowed
@@ -116,17 +125,12 @@ const splitFormattedLines = (text) =>
     // Not a regular expression like `[ \t]*$`, which would take quadratic time on a long run of
     // whitespace within the line
     let end = line.length;
-    let backslashes = 0;
 
     while (end > start && /[ \t]/.test(line[end - 1])) {
       end -= 1;
     }
 
-    while (line[end - backslashes - 1] === '\\') {
-      backslashes += 1;
-    }
-
-    if (backslashes % 2) {
+    if (countBackslashesBefore(line, end) % 2) {
       end -= 1;
     }
 
@@ -227,6 +231,64 @@ const splitMultilineLinks = (text) => {
 };
 
 /**
+ * Regular expression to match the character before or after a code span that can be split into
+ * lines, which isn’t a word character, or the start or the end of the paragraph.
+ */
+const SPAN_BOUNDARY_REGEX = new RegExp(`^$|${WHITESPACE_OR_PUNCTUATION}`, 'u');
+
+/**
+ * Split a code span whose code spans one or more line breaks into one per line; see
+ * {@link splitMultilineSpans}.
+ * @param {string} paragraph Paragraph.
+ * @param {CodeSpan} span Code span in the paragraph.
+ * @returns {string} Code spans, one per line, or the code span as is if it can’t be split.
+ */
+const splitCodeSpan = (paragraph, { start, end, fenceLength }) => {
+  const codeSpan = paragraph.slice(start, end);
+  let code = codeSpan.slice(fenceLength, -fenceLength);
+
+  if (
+    !code.includes('\n') ||
+    !SPAN_BOUNDARY_REGEX.test(paragraph.slice(start - 1, start)) ||
+    !SPAN_BOUNDARY_REGEX.test(paragraph.slice(end, end + 1))
+  ) {
+    return codeSpan;
+  }
+
+  // Like CommonMark, strip a space from both ends of the code if it starts and ends with one, like
+  // in `` ` foo\nbar ` ``, as it would otherwise be kept at the end of a single line
+  if (code.startsWith(' ') && code.endsWith(' ')) {
+    code = code.slice(1, -1);
+  }
+
+  // The blockquote markers and the indentation of a line after the first aren’t part of the code,
+  // so they go before the opening backticks
+  const codeLines = code.split('\n').map((line, index) => {
+    const indent = index ? (/^(?: {0,3}>)*[ \t]*/.exec(line)?.[0] ?? '') : '';
+
+    return { indent, text: line.slice(indent.length) };
+  });
+
+  // A line without code, like the first one of `` `\nfoo` ``, can’t be a code span
+  if (codeLines.some(({ text }) => !/\S/.test(text))) {
+    return codeSpan;
+  }
+
+  const fence = '`'.repeat(fenceLength);
+
+  return codeLines
+    .map(({ indent, text }) => {
+      // A backtick next to the fence would become part of it, and a space at both ends would be
+      // stripped, so the code is padded with a space on both sides, which is stripped from it
+      // instead, like in ``` `` `foo` `` ```
+      const padding = /^`|`$|^ [^]* $/.test(text) ? ' ' : '';
+
+      return `${indent}${fence}${padding}${text}${padding}${fence}`;
+    })
+    .join('\n');
+};
+
+/**
  * Split a code span whose code spans one or more line breaks into one per line, like
  * `` `foo\nbar` `` into `` `foo`\n`bar` ``, or ``` ``foo\nbar`` ``` into ``` ``foo``\n``bar`` ```,
  * so the formatting around it can be split into separate lines as well, then do the same with a
@@ -282,59 +344,30 @@ const splitMultilineSpans = (part) => {
       }
 
       const paragraph = paragraphLines.join('\n');
-      let result = '';
-      let last = 0;
 
-      findCodeSpans(paragraph).forEach(({ start, end, fenceLength }) => {
-        let code = paragraph.slice(start + fenceLength, end - fenceLength);
-
-        if (
-          !code.includes('\n') ||
-          !/^$|[\s\p{P}\p{S}]/u.test(paragraph.slice(start - 1, start)) ||
-          !/^$|[\s\p{P}\p{S}]/u.test(paragraph.slice(end, end + 1))
-        ) {
-          return;
-        }
-
-        // Like CommonMark, strip a space from both ends of the code if it starts and ends with one,
-        // like in `` ` foo\nbar ` ``, as it would otherwise be kept at the end of a single line
-        if (code.startsWith(' ') && code.endsWith(' ')) {
-          code = code.slice(1, -1);
-        }
-
-        // The blockquote markers and the indentation of a line after the first aren’t part of the
-        // code, so they go before the opening backticks
-        const codeLines = code.split('\n').map((line, index) => {
-          const indent = index ? (/^(?: {0,3}>)*[ \t]*/.exec(line)?.[0] ?? '') : '';
-
-          return { indent, text: line.slice(indent.length) };
-        });
-
-        // A line without code, like the first one of `` `\nfoo` ``, can’t be a code span
-        if (codeLines.some(({ text }) => !/\S/.test(text))) {
-          return;
-        }
-
-        const fence = '`'.repeat(fenceLength);
-
-        result += paragraph.slice(last, start);
-        result += codeLines
-          .map(({ indent, text }) => {
-            // A backtick next to the fence would become part of it, and a space at both ends would
-            // be stripped, so the code is padded with a space on both sides, which is stripped from
-            // it instead, like in ``` `` `foo` `` ```
-            const padding = /^`|`$|^ [^]* $/.test(text) ? ' ' : '';
-
-            return `${indent}${fence}${padding}${text}${padding}${fence}`;
-          })
-          .join('\n');
-        last = end;
-      });
-
-      return splitMultilineLinks(`${result}${paragraph.slice(last)}`);
+      return splitMultilineLinks(
+        mapCodeSpans(paragraph, {
+          /**
+           * Split a code span of the paragraph.
+           * @param {string} _codeSpan Code span, with its backticks.
+           * @param {CodeSpan} span Position of the code span.
+           * @returns {string} Processed code span.
+           */
+          inside: (_codeSpan, span) => splitCodeSpan(paragraph, span),
+        }),
+      );
     })
     .join('\n');
 };
+
+/**
+ * Regular expression to match an inline link or a full reference link whose text spans one or more
+ * line breaks. The first run can’t have a line break, so a `[` followed by many lines isn’t matched
+ * in quadratic time. A bracket after an escaped backslash, like `\\[`, isn’t escaped.
+ */
+const HAS_MULTILINE_LINK_TEXT_REGEX = new RegExp(
+  String.raw`${UNESCAPED_LOOKBEHIND}\[[^[\]\n]*\n[^[\]]*\](?=[([])`,
+);
 
 /**
  * Check if the text of formatting that spans line breaks has a line break within a code span or a
@@ -344,10 +377,7 @@ const splitMultilineSpans = (part) => {
  */
 const hasLineBreakInSpan = (text) =>
   findCodeSpans(text).some(({ start, end }) => text.slice(start, end).includes('\n')) ||
-  // An inline link or a full reference link. The first run can’t have a line break, so a `[`
-  // followed by many lines isn’t matched in quadratic time. A bracket after an escaped backslash,
-  // like `\\[`, isn’t escaped
-  /(?<!(?:^|[^\\])(?:\\\\)*\\)\[[^[\]\n]*\n[^[\]]*\](?=[([])/.test(text);
+  HAS_MULTILINE_LINK_TEXT_REGEX.test(text);
 
 /**
  * Split multiline formatting into separate lines to prevent Markdown parsing issues. Fenced code

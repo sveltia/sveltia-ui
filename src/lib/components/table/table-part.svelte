@@ -5,7 +5,7 @@
 -->
 <script>
   /**
-   * @import { Snippet } from 'svelte';
+   * @import { ContainerProps } from '#lib/typedefs.js';
    */
 
   /**
@@ -17,12 +17,10 @@
    * @property {string} role The `role` attribute on the wrapper element.
    * @property {`table-${PartName}` | `grid-${PartName}`} kind The component class name, which also
    * determines the `display` style.
-   * @property {string} [class] The `class` attribute on the wrapper element.
-   * @property {Snippet} [children] Primary slot content.
    */
 
   /**
-   * @type {Props & Record<string, any>}
+   * @type {ContainerProps & Props & Record<string, any>}
    */
   let {
     /* eslint-disable prefer-const */

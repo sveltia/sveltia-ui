@@ -8,11 +8,11 @@ import {
   convertTildeFences,
   padBlankBlockquoteLines,
 } from './block-conversion.js';
+import { withLineCache } from './code-blocks.js';
 import { splitMultilineFormatting } from './formatting.js';
 import { addImportPlaceholders } from './placeholders.js';
 
 export { trimBlankBlockquoteLines } from './block-conversion.js';
-export { findCodeSpans } from './code-spans.js';
 export { removeImportPlaceholders } from './placeholders.js';
 
 /**
@@ -25,11 +25,12 @@ export { removeImportPlaceholders } from './placeholders.js';
  * @param {boolean} features.hasHeadings Whether headings are supported.
  * @returns {string} Converted Markdown.
  */
-export const convertBlockSyntax = (value, { hasCodeBlocks, hasHeadings }) => {
-  const fencedValue = hasCodeBlocks ? convertTildeFences(value) : value;
+export const convertBlockSyntax = (value, { hasCodeBlocks, hasHeadings }) =>
+  withLineCache(() => {
+    const fencedValue = hasCodeBlocks ? convertTildeFences(value) : value;
 
-  return hasHeadings ? convertSetextHeadings(fencedValue) : fencedValue;
-};
+    return hasHeadings ? convertSetextHeadings(fencedValue) : fencedValue;
+  });
 
 /**
  * Get the Markdown Lexical reads as CommonMark does, from Markdown converted with
@@ -42,12 +43,13 @@ export const convertBlockSyntax = (value, { hasCodeBlocks, hasHeadings }) => {
  * @returns {{ markdown: string, hasPlaceholders: boolean }} Markdown to import, and whether any
  * placeholder has been added.
  */
-export const toLexicalMarkdown = (value) => {
-  const splitValue = splitMultilineFormatting(value);
-  const markedValue = addImportPlaceholders(splitValue);
+export const toLexicalMarkdown = (value) =>
+  withLineCache(() => {
+    const splitValue = splitMultilineFormatting(value);
+    const markedValue = addImportPlaceholders(splitValue);
 
-  return {
-    markdown: padBlankBlockquoteLines(markedValue),
-    hasPlaceholders: markedValue !== splitValue,
-  };
-};
+    return {
+      markdown: padBlankBlockquoteLines(markedValue),
+      hasPlaceholders: markedValue !== splitValue,
+    };
+  });

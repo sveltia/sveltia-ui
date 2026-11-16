@@ -30,8 +30,10 @@
     insertLink,
     registerRawTextShortcut,
   } from '../editing/raw-markdown.js';
+  import { refocusEditor, runEditorAction } from './actions.js';
 
   /**
+   * @import { LexicalEditor } from 'lexical';
    * @import { TextEditorStore } from '#lib/typedefs.js';
    */
 
@@ -128,61 +130,55 @@
    * @see https://github.com/facebook/lexical/discussions/3013
    */
   const onDialogClose = async (event) => {
-    const { textArea, useRichText } = editorStore;
-
-    if (!useRichText) {
-      // The dialog can only be opened from the button, which needs the `<textarea>`
-      /* v8 ignore else */
-      if (textArea) {
-        if (event.detail.returnValue !== 'cancel') {
+    if (event.detail.returnValue === 'cancel') {
+      // The dialog leaves the focus alone (see `restoreFocus` below), so bring it back here
+      await refocusEditor(editorStore);
+    } else {
+      await runEditorAction(editorStore, {
+        /**
+         * Insert the link’s Markdown.
+         * @param {HTMLTextAreaElement} textArea `<textarea>` element.
+         * @returns {void | Promise<void>} Nothing.
+         */
+        raw: (textArea) =>
           editRawText(textArea, (state) =>
             insertLink(state, { url: anchorURL.trim(), text: hasAnchor ? undefined : anchorText }),
+          ),
+        /**
+         * Insert the link text if needed, and link the selection.
+         * @param {LexicalEditor} editor Editor instance.
+         * @returns {Promise<void>} Nothing.
+         */
+        rich: async (editor) => {
+          await new Promise((resolve) => {
+            editor.update(async () => {
+              let _selection = getSelection() ?? getPreviousSelection()?.clone();
+
+              if (!isRangeSelection(_selection)) {
+                _selection = createRangeSelection();
+              }
+
+              if (!hasAnchor) {
+                anchorText = anchorText.trim();
+                anchorText ||= anchorURL;
+                insertNodes([createTextNode(anchorText)]);
+              }
+
+              setSelection(_selection);
+              resolve(undefined);
+            });
+          });
+
+          // The link applies to the selection, which the focus restores
+          await focusEditor(editor);
+          editor.dispatchCommand(
+            TOGGLE_LINK_COMMAND,
+            canSetTarget && openInNewTab ? { url: anchorURL, target: '_blank' } : anchorURL,
           );
-        } else {
-          textArea.focus();
-        }
-      }
-
-      anchorURL = '';
-      anchorText = '';
-
-      return;
-    }
-
-    if (event.detail.returnValue !== 'cancel') {
-      // The dialog can only be opened from the button, which needs the editor
-      /* v8 ignore next */
-      if (!editorStore.editor) {
-        return;
-      }
-
-      await new Promise((resolve) => {
-        editorStore.editor?.update(async () => {
-          let _selection = getSelection() ?? getPreviousSelection()?.clone();
-
-          if (!isRangeSelection(_selection)) {
-            _selection = createRangeSelection();
-          }
-
-          if (!hasAnchor) {
-            anchorText = anchorText.trim();
-            anchorText ||= anchorURL;
-            insertNodes([createTextNode(anchorText)]);
-          }
-
-          setSelection(_selection);
-          resolve(undefined);
-        });
+        },
+        // Moved within the edit above, between inserting the text and linking it
+        focus: false,
       });
-
-      await focusEditor(editorStore.editor);
-      editorStore.editor.dispatchCommand(
-        TOGGLE_LINK_COMMAND,
-        canSetTarget && openInNewTab ? { url: anchorURL, target: '_blank' } : anchorURL,
-      );
-    } else /* v8 ignore else */ if (editorStore.editor) {
-      // The dialog leaves the focus alone (see `restoreFocus` below), so bring it back here
-      await focusEditor(editorStore.editor);
     }
 
     anchorURL = '';

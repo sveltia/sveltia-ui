@@ -6,23 +6,17 @@
   import { _ } from '@sveltia/i18n';
 
   /**
-   * @import { Snippet } from 'svelte';
+   * @import { ContainerProps, WidgetStateProps } from '#lib/typedefs.js';
    */
 
   /**
    * @typedef {object} Props
-   * @property {string} [class] The `class` attribute on the wrapper element.
-   * @property {boolean} [hidden] Whether to hide the widget. An alias of the `aria-hidden`
-   * attribute.
-   * @property {boolean} [disabled] Whether to disable the widget. An alias of the `aria-disabled`
-   * attribute.
    * @property {'horizontal'|'vertical'} [orientation] Orientation of the widget.
    * @property {string} [ariaLabel] The `aria-label` attribute on the wrapper element.
-   * @property {Snippet} [children] Primary slot content.
    */
 
   /**
-   * @type {Props & Record<string, any>}
+   * @type {ContainerProps & WidgetStateProps & Props & Record<string, any>}
    */
   let {
     /* eslint-disable prefer-const */

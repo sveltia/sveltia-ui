@@ -6,13 +6,7 @@ import {
 } from 'lexical';
 import { describe, expect, it } from 'vitest';
 
-import {
-  getImportedRawSyntax,
-  getRawSyntax,
-  INLINE_HTML_REGEX,
-  RAW_HTML,
-  RAW_SYNTAX,
-} from './raw-syntax.js';
+import { getImportedRawSyntax, getRawSyntax, RAW_HTML, RAW_SYNTAX } from './raw-syntax.js';
 
 /**
  * Get the text matched as raw syntax in the given text.
@@ -121,7 +115,6 @@ describe('RAW_HTML', () => {
     expect(matchHtml('a < b > c')).toBeUndefined();
     expect(matchHtml('<https://example.com x>')).toBeUndefined();
     expect(matchHtml('<a title="x>')).toBeUndefined();
-    expect(INLINE_HTML_REGEX.test('<1a>')).toBe(false);
   });
 
   it('marks the node as raw syntax, which isn’t merged into the text before it', () => {

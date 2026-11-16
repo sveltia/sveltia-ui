@@ -2,6 +2,8 @@ import { $isLinkNode as isLinkNode } from '@lexical/link';
 import { LINK as LEXICAL_LINK } from '@lexical/markdown';
 import { $isLineBreakNode as isLineBreakNode, $isTextNode as isTextNode } from 'lexical';
 
+import { WHITESPACE_OR_PUNCTUATION_REGEX } from '../markdown/syntax.js';
+
 /**
  * @import { TextMatchTransformer } from '@lexical/markdown';
  * @import { ElementNode, LexicalNode, TextFormatType, TextNode } from 'lexical';
@@ -81,7 +83,7 @@ const getOuterFormats = (node) => {
     // Lexical puts the delimiters of the text inside its whitespace, which keeps them apart
     return formats.some((format) => sibling.hasFormat(format))
       ? /\s/.test(char)
-      : /[\s\p{P}\p{S}]/u.test(char);
+      : WHITESPACE_OR_PUNCTUATION_REGEX.test(char);
   };
 
   return formats.length &&

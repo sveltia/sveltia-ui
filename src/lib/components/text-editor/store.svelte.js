@@ -1,7 +1,7 @@
 import { generateElementId } from '@sveltia/utils/element';
 import { untrack } from 'svelte';
 import { convertHtmlToLexical, convertMarkdownToLexical } from './conversion/import.js';
-import { limitToSingleLine } from './editing/single-line.js';
+import { normalizeConfig } from './config.js';
 
 /**
  * @import { LexicalEditor } from 'lexical';
@@ -29,17 +29,8 @@ export const createEditorStore = () => {
   let editor = $state();
   /** @type {Transformer[]} */
   let enabledTransformers = $state([]);
-
   /** @type {TextEditorConfig} */
-  let config = $state({
-    modes: [],
-    enabledButtons: [],
-    components: [],
-    useMarkdownShortcuts: true,
-    isCodeEditor: false,
-    useEmojiAutocomplete: false,
-  });
-
+  let config = $state(normalizeConfig({ useMarkdownShortcuts: true }));
   /** @type {string} */
   let inputValue = $state('');
   /** @type {TextEditorSelectionState} */
@@ -162,7 +153,7 @@ export const createEditorStore = () => {
       return config;
     },
     set config(newValue) {
-      config = limitToSingleLine(newValue);
+      config = normalizeConfig(newValue);
       useRichText = config.modes[0] === 'rich-text' || config.isCodeEditor;
     },
     get inputValue() {
@@ -171,10 +162,7 @@ export const createEditorStore = () => {
     set inputValue(newValue) {
       const hasChange = inputValue !== newValue;
 
-      if (hasChange) {
-        inputValue = newValue;
-        inputValueListeners.get(store)?.(newValue);
-      }
+      store.setExportedValue(newValue);
 
       if (useRichText && (hasChange || editor?.getEditorState().isEmpty())) {
         convertToLexical();
@@ -264,6 +252,22 @@ export const createEditorStore = () => {
      * @returns {string | undefined} Imported value, or `undefined` if the content has changed.
      */
     getImportedValue: (value) => (lastImport?.exported === value ? lastImport.source : undefined),
+    /**
+     * Set the input value to the one exported from the Lexical editor, without importing it back
+     * into the editor, which would reset its nodes and selection.
+     * @param {string} value Exported value.
+     */
+    setExportedValue: (value) => {
+      if (inputValue !== value) {
+        inputValue = value;
+        inputValueListeners.get(store)?.(value);
+      }
+    },
+    /**
+     * Export the content of the Lexical editor right away, if it’s scheduled to be exported. The
+     * editor root sets this while the editor is there.
+     */
+    flushExport: () => {},
     /* eslint-enable jsdoc/require-jsdoc */
   };
 

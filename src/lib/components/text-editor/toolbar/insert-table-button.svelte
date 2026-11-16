@@ -13,15 +13,16 @@
   import Icon from '../../icon/icon.svelte';
   import NumberInput from '../../text-field/number-input.svelte';
   import { AVAILABLE_BUTTONS, DEFAULT_TABLE_SIZE, MAX_TABLE_SIZE } from '../constants.js';
-  import { focusEditor } from '../editing/caret.js';
   import { editRawText, insertMarkdown } from '../editing/raw-markdown.js';
   import {
     $insertTable as insertTable,
     createTableMarkdown,
     parseTableSize,
   } from '../editing/table.js';
+  import { refocusEditor, runEditorAction } from './actions.js';
 
   /**
+   * @import { LexicalEditor } from 'lexical';
    * @import { TextEditorStore } from '#lib/typedefs.js';
    */
 
@@ -85,41 +86,39 @@
   };
 
   /**
-   * Insert the table into the rich text editor, then move the focus back to it, where the caret is
-   * in the first cell.
+   * Insert the table: a table node into the rich text editor, then move the focus back to it, or
+   * the table’s Markdown into the `<textarea>`. Either way, the caret ends up in the first cell.
    * @param {TableSize} size Table size.
+   * @returns {Promise<void>} Nothing.
    */
-  const insertRichText = async ({ rows: rowSize, columns: columnSize }) => {
-    const { editor } = editorStore;
+  const insert = ({ rows: rowSize, columns: columnSize }) =>
+    runEditorAction(editorStore, {
+      /**
+       * Insert the table’s Markdown, with the caret in the first cell.
+       * @param {HTMLTextAreaElement} textArea `<textarea>` element.
+       * @returns {void | Promise<void>} Nothing.
+       */
+      raw: (textArea) => {
+        const markdown = createTableMarkdown(rowSize, columnSize);
 
-    // The button is only enabled while the editor is there
-    /* v8 ignore next 3 */
-    if (!editor) {
-      return;
-    }
+        return editRawText(textArea, (state) => {
+          const edit = insertMarkdown(state, markdown, { block: true });
+          // Right after the leading pipe and space of the first cell
+          const caret = edit.start + edit.text.indexOf(markdown) + 2;
 
-    editor.update(() => {
-      insertTable(rowSize, columnSize);
+          return { ...edit, selectionStart: caret, selectionEnd: caret };
+        });
+      },
+      /**
+       * Insert a table node.
+       * @param {LexicalEditor} editor Editor instance.
+       */
+      rich: (editor) => {
+        editor.update(() => {
+          insertTable(rowSize, columnSize);
+        });
+      },
     });
-
-    await focusEditor(editor);
-  };
-
-  /**
-   * Insert the table’s Markdown into the `<textarea>`, with the caret in the first cell.
-   * @param {TableSize} size Table size.
-   */
-  const insertPlainText = async ({ rows: rowSize, columns: columnSize }) => {
-    const markdown = createTableMarkdown(rowSize, columnSize);
-
-    await editRawText(editorStore.textArea, (state) => {
-      const edit = insertMarkdown(state, markdown, { block: true });
-      // Right after the leading pipe and space of the first cell
-      const caret = edit.start + edit.text.indexOf(markdown) + 2;
-
-      return { ...edit, selectionStart: caret, selectionEnd: caret };
-    });
-  };
 
   /**
    * Handle `close` event fired on the dialog. Insert the table unless the dialog has been canceled.
@@ -129,26 +128,10 @@
     const canceled = event.detail.returnValue === 'cancel';
 
     if (!canceled && rowCount && columnCount) {
-      const size = { rows: rowCount, columns: columnCount };
-
-      if (editorStore.useRichText) {
-        await insertRichText(size);
-      } else {
-        await insertPlainText(size);
-      }
-
-      return;
-    }
-
-    // The dialog leaves the focus alone (see `restoreFocus` below), so bring it back here
-    if (editorStore.useRichText) {
-      // The button is only enabled while the editor is there
-      /* v8 ignore else */
-      if (editorStore.editor) {
-        await focusEditor(editorStore.editor);
-      }
+      await insert({ rows: rowCount, columns: columnCount });
     } else {
-      editorStore.textArea?.focus();
+      // The dialog leaves the focus alone (see `restoreFocus` below), so bring it back here
+      await refocusEditor(editorStore);
     }
   };
 </script>

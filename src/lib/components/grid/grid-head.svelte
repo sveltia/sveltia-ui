@@ -8,19 +8,14 @@
   import { _ } from '@sveltia/i18n';
   import { setContext } from 'svelte';
   import TablePart from '../table/table-part.svelte';
+  import { UNSELECTABLE_ROWS_KEY } from './grid.js';
 
   /**
-   * @import { Snippet } from 'svelte';
+   * @import { ContainerProps } from '#lib/typedefs.js';
    */
 
   /**
-   * @typedef {object} Props
-   * @property {string} [class] The `class` attribute on the wrapper element.
-   * @property {Snippet} [children] Primary slot content.
-   */
-
-  /**
-   * @type {Props & Record<string, any>}
+   * @type {ContainerProps & Record<string, any>}
    */
   let {
     /* eslint-disable prefer-const */
@@ -29,7 +24,7 @@
   } = $props();
 
   // Tell the `<GridRow>`s inside that they are header rows, which can be focused but not selected
-  setContext('sui:grid-unselectable-rows', true);
+  setContext(UNSELECTABLE_ROWS_KEY, true);
 </script>
 
 <TablePart

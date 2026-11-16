@@ -10,11 +10,12 @@
   import Icon from '../../icon/icon.svelte';
   import { $insertHorizontalRule as insertHorizontalRule } from '../editing/block.js';
   import { AVAILABLE_BUTTONS } from '../constants.js';
-  import { focusEditor } from '../editing/caret.js';
   import { editRawText, insertMarkdown } from '../editing/raw-markdown.js';
   import { HORIZONTAL_RULE_MARKDOWN } from '../conversion/transformers/hr.js';
+  import { runEditorAction } from './actions.js';
 
   /**
+   * @import { LexicalEditor } from 'lexical';
    * @import { TextEditorStore } from '#lib/typedefs.js';
    */
 
@@ -25,30 +26,29 @@
 
   /**
    * Insert a horizontal rule, then move the focus back to the editor.
+   * @returns {Promise<void>} Nothing.
    */
-  const insert = async () => {
-    const { editor, textArea, useRichText } = editorStore;
-
-    if (!useRichText) {
-      await editRawText(textArea, (state) =>
-        insertMarkdown(state, HORIZONTAL_RULE_MARKDOWN, { block: true }),
-      );
-
-      return;
-    }
-
-    // The button is only enabled while the editor is there
-    /* v8 ignore next 3 */
-    if (!editor) {
-      return;
-    }
-
-    editor.update(() => {
-      insertHorizontalRule();
+  const insert = () =>
+    runEditorAction(editorStore, {
+      /**
+       * Insert the Markdown.
+       * @param {HTMLTextAreaElement} textArea `<textarea>` element.
+       * @returns {void | Promise<void>} Nothing.
+       */
+      raw: (textArea) =>
+        editRawText(textArea, (state) =>
+          insertMarkdown(state, HORIZONTAL_RULE_MARKDOWN, { block: true }),
+        ),
+      /**
+       * Insert a horizontal rule node.
+       * @param {LexicalEditor} editor Editor instance.
+       */
+      rich: (editor) => {
+        editor.update(() => {
+          insertHorizontalRule();
+        });
+      },
     });
-
-    await focusEditor(editor);
-  };
 </script>
 
 <Button

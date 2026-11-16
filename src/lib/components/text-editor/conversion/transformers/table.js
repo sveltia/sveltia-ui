@@ -24,7 +24,8 @@ import {
 } from '@lexical/table';
 import { $isParagraphNode as isParagraphNode, $isTextNode as isTextNode } from 'lexical';
 
-import { findCodeSpans } from '../markdown/index.js';
+import { mapCodeSpans } from '../markdown/code-spans.js';
+import { UNESCAPED_LOOKBEHIND } from '../markdown/syntax.js';
 import { BLOCK_SYNTAX_ESCAPE } from './block-escape.js';
 import { LEADING_INLINE_CODE } from './inline-code.js';
 import { LINK } from './link.js';
@@ -63,27 +64,14 @@ const getColumnAlignment = (delimiter) => {
 
 /**
  * Regular expression to match `\n` in a cell, which stands for a line break unless its backslash is
- * escaped, like `\\n`. The backslashes before it, if any, are captured in pairs.
+ * escaped, like `\\n`. The lookahead comes first, so the lookbehind is only tried before a `\n`.
  */
-const CELL_LINE_BREAK_REG_EXP = /(?<!\\)((?:\\\\)*)\\n/g;
-
+const CELL_LINE_BREAK_REG_EXP = new RegExp(String.raw`(?=\\n)${UNESCAPED_LOOKBEHIND}\\n`, 'g');
 /**
- * Replace the given text in a cell except within code spans, where it’s literal.
- * @param {string} text Markdown of a cell.
- * @param {(text: string) => string} replace Function to replace the text outside code spans.
- * @returns {string} Replaced Markdown.
+ * Regular expression to match a pipe that isn’t escaped, which separates the cells of a row. The
+ * lookahead comes first, so the lookbehind is only tried before a pipe.
  */
-const replaceOutsideCodeSpans = (text, replace) => {
-  let result = '';
-  let index = 0;
-
-  findCodeSpans(text).forEach(({ start, end }) => {
-    result += replace(text.slice(index, start)) + text.slice(start, end);
-    index = end;
-  });
-
-  return result + replace(text.slice(index));
-};
+const UNESCAPED_PIPE_REG_EXP = new RegExp(String.raw`(?=\|)${UNESCAPED_LOOKBEHIND}\|`);
 
 /**
  * Returns the number of columns in the table.
@@ -107,9 +95,9 @@ const createTableCell = (textContent, transformers) => {
   // `\n` is a line break in the cell, except within inline code, where it’s literal, or after an
   // escaped backslash. An escaped pipe is part of the cell, even within inline code, like GitHub
   // Flavored Markdown. The spaces around the content only separate it from the pipes
-  textContent = replaceOutsideCodeSpans(textContent.trim(), (text) =>
-    text.replace(CELL_LINE_BREAK_REG_EXP, '$1\n'),
-  ).replace(/\\\|/g, '|');
+  textContent = mapCodeSpans(textContent.trim(), {
+    outside: (text) => text.replace(CELL_LINE_BREAK_REG_EXP, '\n'),
+  }).replace(/\\\|/g, '|');
 
   const cell = createTableCellNode(TableCellHeaderStates.NO_STATUS);
 
@@ -133,8 +121,8 @@ export const mapToTableCells = (textContent, transformers) => {
   }
 
   // Split the row at the pipes that are not escaped, which are preceded by an even number of
-  // backslashes
-  return match.split(/(?<=(?<!\\)(?:\\\\)*)\|/).map((text) => createTableCell(text, transformers));
+  // backslashes, if any
+  return match.split(UNESCAPED_PIPE_REG_EXP).map((text) => createTableCell(text, transformers));
 };
 
 /**
@@ -157,9 +145,9 @@ const exportTableRow = (row, transformers) => {
         // A backslash followed by `n` in text, like that in `C:\new`, is escaped, so it’s not read
         // as a line break; it means the same in Markdown. Inline code is left as is, as `\n` is
         // literal there
-        replaceOutsideCodeSpans(convertToMarkdownString(transformers, cell), (text) =>
-          text.replace(CELL_LINE_BREAK_REG_EXP, '$1\\\\n'),
-        )
+        mapCodeSpans(convertToMarkdownString(transformers, cell), {
+          outside: (text) => text.replace(CELL_LINE_BREAK_REG_EXP, '\\\\n'),
+        })
           // Escape a pipe, which would otherwise end the cell, even within inline code
           .replace(/\|/g, '\\|')
           .replace(/\n/g, '\\n')

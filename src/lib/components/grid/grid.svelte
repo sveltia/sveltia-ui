@@ -7,25 +7,24 @@
 <script>
   import { setContext } from 'svelte';
   import { activateGroup } from '../../services/group.svelte.js';
+  import { UNSELECTABLE_ROWS_KEY } from './grid.js';
 
   /**
-   * @import { Snippet } from 'svelte';
+   * @import { ContainerProps } from '#lib/typedefs.js';
    */
 
   /**
    * @typedef {object} Props
-   * @property {string} [class] The `class` attribute on the wrapper element.
    * @property {boolean} [multiple] Whether to allow selecting more than one `<GridRow>` and/or
    * `<GridCell>`. An alias of the `aria-multiselectable` attribute.
    * @property {boolean} [clickToSelect] Whether to select a row by clicking on it.
    * @property {HTMLElement} [element] A reference to the wrapper element.
    * @property {string} [ariaLabel] The `aria-label` attribute on the wrapper element.
-   * @property {Snippet} [children] Primary slot content.
    * @property {(event: CustomEvent) => void} [onChange] Custom `Change` event handler.
    */
 
   /**
-   * @type {Props & Record<string, any>}
+   * @type {ContainerProps & Props & Record<string, any>}
    */
   let {
     /* eslint-disable prefer-const */
@@ -42,7 +41,7 @@
 
   // A grid nested in a header or footer cell of another grid has data rows of its own, so the
   // outer grid’s `<GridHead>` or `<GridFoot>` doesn’t make them unselectable
-  setContext('sui:grid-unselectable-rows', false);
+  setContext(UNSELECTABLE_ROWS_KEY, false);
 </script>
 
 <div
@@ -55,7 +54,7 @@
   onChange={(/** @type {CustomEvent} */ event) => {
     onChange?.(event);
   }}
-  {@attach activateGroup({ clickToSelect })}
+  {@attach activateGroup(() => ({ clickToSelect }))}
 >
   {@render children?.()}
 </div>

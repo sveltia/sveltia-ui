@@ -1,22 +1,10 @@
 import { getArrowKeys } from '../../services/navigation.js';
-import { normalizeStep } from '../text-field/number-input.js';
+import { getMaximumFractionDigits, normalizeStep } from '../../services/number.js';
 
 /**
  * Geometry and keyboard logic behind `<Slider>`, kept apart from the component so the value
  * calculations can be tested without a rendered track.
  */
-
-/**
- * Count the fraction digits of a number, including one written in exponential notation, such as
- * `1e-7`.
- * @param {number} num Number.
- * @returns {number} Number of fraction digits, `0` for an integer.
- */
-const countFractionDigits = (num) => {
-  const [mantissa, exponent = '0'] = String(num).split('e');
-
-  return Math.min(Math.max((mantissa.split('.')[1] ?? '').length - Number(exponent), 0), 100);
-};
 
 /**
  * Get the values a thumb can take and where each of them sits along the track.
@@ -39,9 +27,14 @@ export const getSliderSteps = ({ min, max, step: _step, barWidth }) => {
   const stepCount = Math.floor(stepRatio + 1e-9) + 1;
   const stepWidth = barWidth / stepRatio;
   const emptyArray = Array.from({ length: stepCount });
+
   // Round the values to the precision of the minimum and the step, e.g. `3 * 0.1` is
-  // `0.30000000000000004`, which would otherwise never match the `0.3` value
-  const decimals = Math.max(countFractionDigits(min), countFractionDigits(step));
+  // `0.30000000000000004`, which would otherwise never match the `0.3` value. `toFixed()` accepts
+  // up to 100 digits
+  const decimals = Math.min(
+    Math.max(getMaximumFractionDigits(min), getMaximumFractionDigits(step)),
+    100,
+  );
 
   return {
     valueList: emptyArray.map((_, index) => Number((index * step + min).toFixed(decimals))),

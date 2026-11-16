@@ -14,16 +14,12 @@
   /**
    * @import { Snippet } from 'svelte';
    * @import { Attachment } from 'svelte/attachments';
-   * @import { CommonEventHandlers } from '#lib/typedefs.js';
+   * @import { CommonEventHandlers, WidgetStateProps } from '#lib/typedefs.js';
    */
 
   /**
    * @typedef {object} Props
    * @property {string} [class] The `class` attribute on the wrapper element.
-   * @property {boolean} [hidden] Whether to hide the widget. An alias of the `aria-hidden`
-   * attribute.
-   * @property {boolean} [disabled] Whether to disable the widget. An alias of the `aria-disabled`
-   * attribute.
    * @property {boolean} [selected] Whether to select the item. An alias of the `aria-selected`
    * attribute.
    * @property {boolean} [expanded] Whether to expand the item. An alias of the `aria-expanded`
@@ -46,7 +42,7 @@
    */
 
   /**
-   * @type {CommonEventHandlers & Props & Record<string, any>}
+   * @type {CommonEventHandlers & WidgetStateProps & Props & Record<string, any>}
    */
   let {
     /* eslint-disable prefer-const */

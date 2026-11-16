@@ -10,10 +10,15 @@
   import { parseCodeBlock, toCodeBlock } from './code-editor.js';
   import LexicalRoot from './lexical-root.svelte';
   import { createEditorStore, syncEditorProps } from './store.svelte.js';
-  import CodeEditorToolbar from './toolbar/code-editor-toolbar.svelte';
+  import CodeLanguageSwitcher from './toolbar/code-language-switcher.svelte';
+  import ToolbarWrapper from './toolbar/toolbar-wrapper.svelte';
 
   /**
-   * @import { Snippet } from 'svelte';
+   * @import {
+   * EditorCommonProps,
+   * FormFieldStateProps,
+   * WidgetStateProps,
+   * } from '#lib/typedefs.js';
    */
 
   /**
@@ -24,27 +29,11 @@
    * update {@link code}, which it does a moment later. Bind it to wait for the change before
    * reading the code, for example to save it. Read-only.
    * @property {boolean} [showLanguageSwitcher] Whether to show the language selector.
-   * @property {boolean} [flex] Make the text input container flexible.
-   * @property {string} [class] The `class` attribute on the wrapper element.
-   * @property {boolean} [hidden] Whether to hide the widget.
-   * @property {boolean} [disabled] Whether to disable the widget. An alias of the `aria-disabled`
-   * attribute.
-   * @property {boolean} [readonly] Whether to make the widget read-only. An alias of the
-   * `aria-readonly` attribute.
-   * @property {boolean} [required] Whether to mark the widget required. An alias of the
-   * `aria-required` attribute.
-   * @property {boolean} [invalid] Whether to mark the widget invalid. An alias of the
-   * `aria-invalid` attribute.
-   * @property {string} [ariaLabel] The `aria-label` attribute on the editable text box. Either
-   * this or `ariaLabelledby` is required for the editor to have an accessible name.
-   * @property {string} [ariaLabelledby] The `aria-labelledby` attribute on the editable text box.
-   * @property {string} [ariaDescribedby] The `aria-describedby` attribute on the editable text
-   * box.
-   * @property {Snippet} [children] Primary slot content.
    */
 
   /**
-   * @type {Props & Record<string, any>}
+   * @type {EditorCommonProps & WidgetStateProps & FormFieldStateProps & Props &
+   * Record<string, any>}
    */
   let {
     /* eslint-disable prefer-const */
@@ -64,7 +53,8 @@
     'aria-label': ariaLabelAttr = undefined,
     'aria-labelledby': ariaLabelledbyAttr = undefined,
     'aria-describedby': ariaDescribedbyAttr = undefined,
-    children,
+    // Not rendered, but kept out of `restProps`, which go on the wrapper element
+    children: _children,
     ...restProps
     /* eslint-enable prefer-const */
   } = $props();
@@ -130,7 +120,9 @@
   style:--sui-text-editor-toolbar-height="{editorStore.toolbarHeight}px"
 >
   {#if showLanguageSwitcher}
-    <CodeEditorToolbar {disabled} {readonly} />
+    <ToolbarWrapper disabled={disabled || readonly} ariaLabel={_('_sui.text_editor.code_editor')}>
+      <CodeLanguageSwitcher disabled={disabled || readonly} />
+    </ToolbarWrapper>
   {/if}
   <LexicalRoot {...labelAttrs} {hidden} {disabled} {readonly} {required} {invalid} />
 </div>

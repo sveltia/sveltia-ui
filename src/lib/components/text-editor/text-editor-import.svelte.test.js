@@ -9,7 +9,7 @@ import TextEditor from './text-editor.svelte';
  */
 
 /**
- * These control when the syntax highlighter engine loads, which the facade keeps in module state,
+ * These control when the syntax highlighter engine loads, which the engine keeps in module state,
  * hence a separate file from the other editor tests.
  */
 

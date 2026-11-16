@@ -5,19 +5,17 @@
 -->
 <script>
   /**
-   * @import { Snippet } from 'svelte';
+   * @import { ContainerProps } from '#lib/typedefs.js';
    */
 
   /**
    * @typedef {object} Props
-   * @property {string} [class] The `class` attribute on the wrapper element.
    * @property {'horizontal' | 'vertical'} [orientation] Orientation of the widget. This is
    * typically contrary to `<TabList>`’s `orientation`.
-   * @property {Snippet} [children] Primary slot content.
    */
 
   /**
-   * @type {Props & Record<string, any>}
+   * @type {ContainerProps & Props & Record<string, any>}
    */
   let {
     /* eslint-disable prefer-const */

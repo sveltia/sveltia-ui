@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { getArrowKeys, getGridTargetIndex, getLinearTargetIndex } from './navigation.js';
+import {
+  getArrowKeys,
+  getGridTargetIndex,
+  getLinearTargetIndex,
+  hasModifier,
+} from './navigation.js';
 
 describe('getArrowKeys', () => {
   it('uses the inline arrows for a horizontal layout, mirrored for RTL', () => {
@@ -111,5 +116,15 @@ describe('getGridTargetIndex', () => {
   it('ignores the other keys', () => {
     expect(move('Enter', -1)).toBe(-1);
     expect(move('Enter', 3)).toBe(-1);
+  });
+});
+
+describe('hasModifier', () => {
+  it('detects any of the modifier keys', () => {
+    expect(hasModifier(new KeyboardEvent('keydown', { key: 'a' }))).toBe(false);
+
+    ['shiftKey', 'altKey', 'ctrlKey', 'metaKey'].forEach((modifier) => {
+      expect(hasModifier(new KeyboardEvent('keydown', { key: 'a', [modifier]: true }))).toBe(true);
+    });
   });
 });

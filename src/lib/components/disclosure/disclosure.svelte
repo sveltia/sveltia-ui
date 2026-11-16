@@ -11,25 +11,20 @@
 
   /**
    * @import { Snippet } from 'svelte';
+   * @import { ContainerProps, WidgetStateProps } from '#lib/typedefs.js';
    */
 
   /**
    * @typedef {object} Props
-   * @property {string} [class] The `class` attribute on the wrapper element.
-   * @property {boolean} [hidden] Whether to hide the widget. An alias of the `aria-hidden`
-   * attribute.
-   * @property {boolean} [disabled] Whether to disable the widget. An alias of the `aria-disabled`
-   * attribute.
    * @property {boolean} [expanded] Whether to show the content. An alias of the `aria-expanded`
    * attribute.
    * @property {string} [label] Text label displayed next to the expander.
-   * @property {Snippet} [children] Primary slot content.
    * @property {Snippet} [chevronIcon] Chevron slot content.
    * @property {(event: CustomEvent) => void} [onChange] Custom `Change` event handler.
    */
 
   /**
-   * @type {Props & Record<string, any>}
+   * @type {ContainerProps & WidgetStateProps & Props & Record<string, any>}
    */
   let {
     /* eslint-disable prefer-const */

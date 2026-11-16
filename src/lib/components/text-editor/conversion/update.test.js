@@ -17,7 +17,7 @@ vi.mock('@sveltia/utils/events', () => getMock('@sveltia/utils/events'));
 vi.mock('@sveltia/utils/string', () => getMock('@sveltia/utils/string'));
 vi.mock('@lexical/code-core', () => getMock('@lexical/code-core'));
 vi.mock('../shiki/highlighter.js', () => getMock('./shiki/highlighter.js'));
-vi.mock('../shiki/facade.js', () => getMock('./shiki/facade.js'));
+vi.mock('../shiki/engine.js', () => getMock('./shiki/engine.js'));
 vi.mock('../shiki/theme.js', () => getMock('./shiki/theme.js'));
 vi.mock('@lexical/dragon', () => getMock('@lexical/dragon'));
 vi.mock('@lexical/extension', () => getMock('@lexical/extension'));
@@ -36,15 +36,15 @@ vi.mock('lexical', () => getMock('lexical'));
 
 import { editorState, resetEditorMocks } from '#lib/test-utils/editor-mocks.js';
 import { initEditor } from '../core.js';
-import { flushUpdateEvent, onEditorUpdate } from './update.js';
+import { exportValue } from './update.js';
 import { BLOCK_SYNTAX_ESCAPE } from './transformers/block-escape.js';
 
-describe('Update event', () => {
+describe('Value export', () => {
   beforeEach(() => {
     resetEditorMocks();
   });
 
-  it('only triggers the Update event for the latest update in a burst', async () => {
+  it('only exports the latest update in a burst', async () => {
     const { $convertToMarkdownString } = await import('@lexical/markdown');
     const originalUpdate = editorState.update;
     const update = vi.fn((/** @type {any} */ callback) => callback());
@@ -79,37 +79,35 @@ describe('Update event', () => {
 
   it('reuses the Markdown value when only the selection has changed', async () => {
     const { $convertToMarkdownString } = await import('@lexical/markdown');
-    const dispatchEvent = vi.fn();
-    const originalGetRootElement = editorState.getRootElement;
+    const onExport = vi.fn();
 
     editorState.isComposing = () => false;
-    editorState.getRootElement = () => ({ dispatchEvent });
     vi.mocked($convertToMarkdownString).mockClear();
 
-    try {
-      const { dispose } = initEditor({
+    const { dispose } = initEditor(
+      {
         components: [],
         useMarkdownShortcuts: false,
         isCodeEditor: false,
         modes: [],
         enabledButtons: [],
-      });
+      },
+      { onExport },
+    );
 
-      editorState._updateListeners[0]({
-        dirtyElements: new Map([['root', true]]),
-        dirtyLeaves: new Set(),
-      });
-      await Promise.resolve();
-      editorState._updateListeners[0]({ dirtyElements: new Map(), dirtyLeaves: new Set() });
-      await Promise.resolve();
+    editorState._updateListeners[0]({
+      dirtyElements: new Map([['root', true]]),
+      dirtyLeaves: new Set(),
+    });
+    await Promise.resolve();
+    editorState._updateListeners[0]({ dirtyElements: new Map(), dirtyLeaves: new Set() });
+    await Promise.resolve();
 
-      expect($convertToMarkdownString).toHaveBeenCalledTimes(1);
-      expect(dispatchEvent).toHaveBeenCalledTimes(2);
-      expect(dispatchEvent.mock.calls[1][0].detail.value).toBe('converted');
-      dispose();
-    } finally {
-      editorState.getRootElement = originalGetRootElement;
-    }
+    expect($convertToMarkdownString).toHaveBeenCalledTimes(1);
+    expect(onExport).toHaveBeenCalledTimes(2);
+    expect(onExport.mock.calls[1][0].value).toBe('converted');
+    expect(onExport.mock.calls[1][0]).toHaveProperty('selection');
+    dispose();
   });
 
   it('converts the document again after a composition that changed it', async () => {
@@ -143,7 +141,7 @@ describe('Update event', () => {
     dispose();
   });
 
-  it('skips the pending Update event once disposed', async () => {
+  it('skips the scheduled export once disposed', async () => {
     const originalUpdate = editorState.update;
     const update = vi.fn();
 
@@ -169,7 +167,7 @@ describe('Update event', () => {
     }
   });
 
-  it('triggers the scheduled Update event right away when flushed', async () => {
+  it('exports the scheduled value right away when flushed', async () => {
     const originalUpdate = editorState.update;
     const update = vi.fn((/** @type {any} */ callback) => callback());
     /** @type {any} */
@@ -179,7 +177,7 @@ describe('Update event', () => {
     editorState.update = update;
 
     try {
-      const { editor, dispose } = initEditor({
+      const { flush, dispose } = initEditor({
         components: [],
         useMarkdownShortcuts: false,
         isCodeEditor: false,
@@ -188,22 +186,22 @@ describe('Update event', () => {
       });
 
       // Nothing is scheduled yet
-      flushUpdateEvent(editor);
+      flush();
       expect(update).not.toHaveBeenCalled();
 
       editorState._updateListeners[0](dirty);
-      flushUpdateEvent(editor);
+      flush();
       expect(update).toHaveBeenCalledTimes(1);
 
-      // The delayed event is not triggered again, nor is a second flush
-      flushUpdateEvent(editor);
+      // The delayed export is not made again, nor is a second flush
+      flush();
       await Promise.resolve();
       expect(update).toHaveBeenCalledTimes(1);
 
       // Nor once disposed
       editorState._updateListeners[0](dirty);
       dispose();
-      flushUpdateEvent(editor);
+      flush();
       await Promise.resolve();
       expect(update).toHaveBeenCalledTimes(1);
     } finally {
@@ -211,7 +209,7 @@ describe('Update event', () => {
     }
   });
 
-  it('does not flush the Update event while composing, or without an editor', () => {
+  it('does not flush the export while composing', () => {
     const originalUpdate = editorState.update;
     const update = vi.fn((/** @type {any} */ callback) => callback());
     let composing = false;
@@ -220,7 +218,7 @@ describe('Update event', () => {
     editorState.update = update;
 
     try {
-      const { editor, dispose } = initEditor({
+      const { flush, dispose } = initEditor({
         components: [],
         useMarkdownShortcuts: false,
         isCodeEditor: false,
@@ -230,8 +228,7 @@ describe('Update event', () => {
 
       editorState._updateListeners[0]();
       composing = true;
-      flushUpdateEvent(editor);
-      flushUpdateEvent(undefined);
+      flush();
       expect(update).not.toHaveBeenCalled();
       dispose();
     } finally {
@@ -257,51 +254,23 @@ describe('Update event', () => {
     expect(editorState.isComposing).toHaveBeenCalled();
   });
 
-  it('dispatches Update event through onEditorUpdate', () => {
-    const mockRootElement = {
-      dispatchEvent: vi.fn(),
-    };
+  it('exports the content as Markdown', () => {
+    const mockEditor = /** @type {any} */ ({});
 
-    const mockEditor = /** @type {any} */ ({
-      getRootElement: vi.fn(() => mockRootElement),
-    });
-
-    onEditorUpdate(mockEditor, []);
-
-    expect(mockRootElement.dispatchEvent).toHaveBeenCalledWith(
-      expect.objectContaining({
-        type: 'Update',
-      }),
-    );
+    expect(exportValue(mockEditor, [])).toBe('converted');
+    expect(exportValue(mockEditor, [], 'markdown')).toBe('converted');
   });
 
-  it('includes correct markdown value in the Update event detail', () => {
-    const mockRootElement = {
-      dispatchEvent: vi.fn((event) => {
-        expect(event.detail).toHaveProperty('value');
-        expect(event.detail).toHaveProperty('selection');
-      }),
-    };
-
-    const mockEditor = /** @type {any} */ ({
-      getRootElement: vi.fn(() => mockRootElement),
-    });
-
-    onEditorUpdate(mockEditor, []);
-    expect(mockRootElement.dispatchEvent).toHaveBeenCalled();
+  it('exports the content as HTML with the HTML format', () => {
+    expect(exportValue(/** @type {any} */ ({}), [], 'html')).toBe('<p>converted</p>');
   });
 
-  it('trims blank blockquote lines in the Update event value', async () => {
+  it('trims blank blockquote lines in the exported value', async () => {
     const { $convertToMarkdownString } = await import('@lexical/markdown');
 
     vi.mocked($convertToMarkdownString).mockReturnValueOnce('> a\n> \n> b');
 
-    const mockRootElement = { dispatchEvent: vi.fn() };
-    const mockEditor = /** @type {any} */ ({ getRootElement: vi.fn(() => mockRootElement) });
-
-    onEditorUpdate(mockEditor, []);
-
-    expect(mockRootElement.dispatchEvent.mock.calls[0][0].detail.value).toBe('> a\n>\n> b');
+    expect(exportValue(/** @type {any} */ ({}), [])).toBe('> a\n>\n> b');
   });
 
   it('removes the line breaks left by empty paragraphs at the end', async () => {
@@ -309,12 +278,7 @@ describe('Update event', () => {
 
     vi.mocked($convertToMarkdownString).mockReturnValueOnce(':::note\nHi\n:::\n\n\n');
 
-    const mockRootElement = { dispatchEvent: vi.fn() };
-    const mockEditor = /** @type {any} */ ({ getRootElement: vi.fn(() => mockRootElement) });
-
-    onEditorUpdate(mockEditor, []);
-
-    expect(mockRootElement.dispatchEvent.mock.calls[0][0].detail.value).toBe(':::note\nHi\n:::');
+    expect(exportValue(/** @type {any} */ ({}), [])).toBe(':::note\nHi\n:::');
   });
 
   it('filters out transformers with disabled markdown tags when converting to markdown', async () => {
@@ -325,13 +289,7 @@ describe('Update event', () => {
     mockConvertFn.mockClear();
     mockConvertFn.mockReturnValue('converted');
 
-    const mockRootElement = {
-      dispatchEvent: vi.fn(),
-    };
-
-    const mockEditor = /** @type {any} */ ({
-      getRootElement: vi.fn(() => mockRootElement),
-    });
+    const mockEditor = /** @type {any} */ ({});
 
     const transformers = /** @type {any[]} */ ([
       { tag: '**' }, // BOLD_STAR - should be kept
@@ -343,7 +301,7 @@ describe('Update event', () => {
       { tag: '___' }, // BOLD_ITALIC_UNDERSCORE - should be filtered out
     ]);
 
-    onEditorUpdate(mockEditor, transformers);
+    exportValue(mockEditor, transformers);
 
     // Verify that convertToMarkdownString was called with filtered transformers
     expect(mockConvertFn).toHaveBeenCalled();

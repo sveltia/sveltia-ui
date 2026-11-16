@@ -1,4 +1,5 @@
-import { findCodeSpans } from '../markdown/index.js';
+import { findCodeSpans } from '../markdown/code-spans.js';
+import { countBackslashesBefore } from '../markdown/syntax.js';
 
 /**
  * @import { TextFormatTransformer, TextMatchTransformer, Transformer } from '@lexical/markdown';
@@ -29,22 +30,6 @@ const WHITESPACE = /\s/;
  * ASCII punctuation, as Lexical reads it. Unlike CommonMark, Lexical leaves out the backslash.
  */
 const PUNCTUATION = /[!"#$%&'()*+,\-./:;<=>?@[\]^_`{|}~]/;
-
-/**
- * Check if the character at the given index is escaped with a backslash.
- * @param {string} text Text.
- * @param {number} index Index.
- * @returns {boolean} Result.
- */
-const isEscaped = (text, index) => {
-  let count = 0;
-
-  while (text[index - count - 1] === '\\') {
-    count += 1;
-  }
-
-  return count % 2 === 1;
-};
 
 /**
  * Check if a delimiter run is left-flanking or right-flanking, like Lexical does.
@@ -117,7 +102,7 @@ const findDelimiters = (text, chars, codeSpans) => {
 
     if (span && span.start <= index) {
       index = span.end;
-    } else if (!chars.has(char) || isEscaped(text, index)) {
+    } else if (!chars.has(char) || countBackslashesBefore(text, index) % 2 === 1) {
       index += 1;
     } else {
       let length = 1;

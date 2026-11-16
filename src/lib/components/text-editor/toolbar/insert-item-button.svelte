@@ -2,7 +2,7 @@
   import { getContext } from 'svelte';
   import Button from '../../button/button.svelte';
   import Icon from '../../icon/icon.svelte';
-  import { insertEditorComponent } from './insert-component.js';
+  import { insertEditorComponent } from './actions.js';
 
   /**
    * @import { TextEditorComponent, TextEditorStore } from '#lib/typedefs.js';

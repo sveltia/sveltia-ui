@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { getToggleLabelAttrs } from './label.js';
+import { getModalLabelAttrs, getToggleLabelAttrs } from './label.js';
 
 describe('getToggleLabelAttrs', () => {
   it('points at the visible label when there is no accessible name', () => {
@@ -21,5 +21,54 @@ describe('getToggleLabelAttrs', () => {
       'aria-label': undefined,
       'aria-labelledby': undefined,
     });
+  });
+});
+
+describe('getModalLabelAttrs', () => {
+  it('points at the title in the built-in header', () => {
+    expect(
+      getModalLabelAttrs({
+        id: 'd1',
+        title: 'Title',
+        ariaLabelledby: undefined,
+        hasCustomHeader: false,
+      }),
+    ).toEqual({ 'aria-label': undefined, 'aria-labelledby': 'd1-title' });
+  });
+
+  it('uses the title as the accessible name with a custom header', () => {
+    expect(
+      getModalLabelAttrs({
+        id: 'd1',
+        title: 'Title',
+        ariaLabelledby: undefined,
+        hasCustomHeader: true,
+      }),
+    ).toEqual({ 'aria-label': 'Title', 'aria-labelledby': undefined });
+  });
+
+  it('points at the labelling element named by the consumer', () => {
+    expect(
+      getModalLabelAttrs({ id: 'd1', title: 'Title', ariaLabelledby: 'x', hasCustomHeader: true }),
+    ).toEqual({ 'aria-label': undefined, 'aria-labelledby': 'x' });
+    expect(
+      getModalLabelAttrs({
+        id: 'd1',
+        title: undefined,
+        ariaLabelledby: 'x',
+        hasCustomHeader: false,
+      }),
+    ).toEqual({ 'aria-label': undefined, 'aria-labelledby': 'x' });
+  });
+
+  it('sets neither attribute without any title', () => {
+    expect(
+      getModalLabelAttrs({
+        id: 'd1',
+        title: '',
+        ariaLabelledby: undefined,
+        hasCustomHeader: false,
+      }),
+    ).toEqual({ 'aria-label': undefined, 'aria-labelledby': undefined });
   });
 });

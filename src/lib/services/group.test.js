@@ -2,7 +2,7 @@
 
 import { locale } from '@sveltia/i18n';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { activateGroup, Group } from './group.svelte.js';
+import { activateGroup, Group, setFocusedMember } from './group.svelte.js';
 
 describe('Group - tablist', () => {
   /** @type {HTMLElement} */
@@ -267,6 +267,39 @@ describe('Group - input before activation', () => {
     await vi.advanceTimersByTimeAsync(150);
     expect(onInitialized).not.toHaveBeenCalled();
     expect(options[1].getAttribute('aria-selected')).not.toBe('true');
+  });
+});
+
+describe('Group - onUpdate (click to select)', () => {
+  it('should follow clickToSelect and leave the filter alone without search terms', async () => {
+    vi.useFakeTimers();
+
+    const grid = document.createElement('div');
+    const row = document.createElement('div');
+    const onFilter = vi.fn();
+
+    grid.setAttribute('role', 'grid');
+    row.setAttribute('role', 'row');
+    grid.appendChild(row);
+    document.body.appendChild(grid);
+    grid.addEventListener('Filter', onFilter);
+
+    const group = new Group(grid, { clickToSelect: false });
+
+    await vi.advanceTimersByTimeAsync(150);
+    row.click();
+    expect(row.getAttribute('aria-selected')).toBe('false');
+    group.onUpdate({ clickToSelect: true });
+    row.click();
+    expect(row.getAttribute('aria-selected')).toBe('true');
+    group.onUpdate({ clickToSelect: undefined });
+    expect(group.clickToSelect).toBe(true);
+    group.onUpdate({});
+    expect(group.clickToSelect).toBe(true);
+    expect(onFilter).not.toHaveBeenCalled();
+    group.destroy();
+    grid.remove();
+    vi.useRealTimers();
   });
 });
 
@@ -2391,52 +2424,6 @@ describe('Group - submenu traversal', () => {
   });
 });
 
-describe('Group - enterSubmenu/leaveSubmenu edge cases', () => {
-  /** @type {HTMLElement} */
-  let menu;
-  /** @type {HTMLElement} */
-  let opener;
-  /** @type {any} */
-  let group;
-
-  beforeEach(() => {
-    menu = document.createElement('div');
-    menu.setAttribute('role', 'menu');
-    opener = document.createElement('div');
-    opener.setAttribute('role', 'menuitem');
-    opener.setAttribute('aria-haspopup', 'menu');
-    opener.tabIndex = -1;
-    opener.textContent = 'Opener';
-    menu.appendChild(opener);
-    document.body.appendChild(menu);
-    group = new Group(menu);
-  });
-
-  afterEach(() => {
-    menu.remove();
-  });
-
-  it('should give up gracefully when aria-controls references a non-existent element', async () => {
-    opener.setAttribute('aria-controls', 'does-not-exist');
-    opener.setAttribute('aria-expanded', 'true');
-
-    // document.getElementById() resolves to null, so the retry loop searches an empty list on
-    // every iteration; it should exhaust without throwing
-    await expect(group.enterSubmenu(opener)).resolves.toBeUndefined();
-  }, 10000);
-
-  it('should not click an already-collapsed item when leaving its submenu', () => {
-    const clicked = vi.fn();
-
-    opener.addEventListener('click', clicked);
-    opener.setAttribute('aria-expanded', 'false');
-    group.leaveSubmenu(opener);
-
-    expect(clicked).not.toHaveBeenCalled();
-    expect(document.activeElement).toBe(opener);
-  });
-});
-
 describe('Group - leaving a menu', () => {
   /** @type {HTMLElement} */
   let before;
@@ -2854,5 +2841,29 @@ describe('Group - mutations inside the members', () => {
     // Let the observer notice the new member
     await Promise.resolve();
     expect(menu.querySelectorAll('[tabindex="0"]')).toHaveLength(1);
+  });
+});
+
+describe('setFocusedMember', () => {
+  it('moves the focused class and the active descendant onto the member', () => {
+    const listbox = document.createElement('div');
+
+    const [first, second] = ['a', 'b'].map((id) => {
+      const option = document.createElement('div');
+
+      option.id = id;
+      option.setAttribute('role', 'option');
+      listbox.appendChild(option);
+
+      return option;
+    });
+
+    setFocusedMember(listbox, first);
+    expect(first.classList.contains('focused')).toBe(true);
+    expect(listbox.getAttribute('aria-activedescendant')).toBe('a');
+    setFocusedMember(listbox, second);
+    expect(first.classList.contains('focused')).toBe(false);
+    expect(second.classList.contains('focused')).toBe(true);
+    expect(listbox.getAttribute('aria-activedescendant')).toBe('b');
   });
 });

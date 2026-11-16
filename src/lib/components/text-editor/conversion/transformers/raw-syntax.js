@@ -1,6 +1,18 @@
 import { $getState as getState, $setState as setState, createState } from 'lexical';
 
-import { CODE_TAB_PLACEHOLDER, HTML_BLOCK_PLACEHOLDER } from '../placeholder-chars.js';
+import {
+  ATX_HEADING_MARKER,
+  AUTOLINK_REGEX,
+  CODE_FENCE,
+  FOOTNOTE_REFERENCE_REGEX,
+  INLINE_HTML_REGEX,
+  LIST_MARKER,
+  MARKER_END,
+  NAMED_CHARACTER_REFERENCE_REGEX,
+  SETEXT_UNDERLINE,
+  THEMATIC_BREAK,
+} from '../markdown/syntax.js';
+import { HTML_BLOCK_PLACEHOLDER } from '../placeholder-chars.js';
 
 /**
  * @import { TextMatchTransformer } from '@lexical/markdown';
@@ -8,109 +20,19 @@ import { CODE_TAB_PLACEHOLDER, HTML_BLOCK_PLACEHOLDER } from '../placeholder-cha
  */
 
 /**
- * Whitespace within an HTML tag, including the placeholder of a tab; see `addImportPlaceholders()`.
- */
-const TAG_SPACE = `[ \\t${CODE_TAB_PLACEHOLDER}]`;
-
-/**
- * Regular expression source to match an HTML open tag or closing tag.
- * @see https://spec.commonmark.org/0.31.2/#raw-html
- */
-export const HTML_TAG_SOURCE =
-  `<[A-Za-z][A-Za-z0-9-]*(?:${TAG_SPACE}+[A-Za-z_:][\\w.:-]*` +
-  `(?:${TAG_SPACE}*=${TAG_SPACE}*` +
-  `(?:[^\\s"'=<>\`${CODE_TAB_PLACEHOLDER}]+|'[^'\\n]*'|"[^"\\n]*"))?)*` +
-  `${TAG_SPACE}*/?>|</[A-Za-z][A-Za-z0-9-]*${TAG_SPACE}*>`;
-
-/**
- * Regular expression source to match the place before a `<` that isn’t escaped. The lookahead comes
- * first, so the lookbehind is only tried before a `<`.
- */
-const UNESCAPED_LT_SOURCE = String.raw`(?=<)(?<!(?:^|[^\\])(?:\\\\)*\\)`;
-
-/**
- * Regular expression to match inline raw HTML on a line: an open tag, a closing tag, a comment, a
- * processing instruction, a declaration or a CDATA section, which isn’t escaped.
- * @see https://spec.commonmark.org/0.31.2/#raw-html
- */
-export const INLINE_HTML_REGEX = new RegExp(
-  [
-    UNESCAPED_LT_SOURCE,
-    '(?:',
-    [
-      HTML_TAG_SOURCE,
-      // Comment
-      String.raw`<!-->|<!--->|<!--.*?-->`,
-      // Processing instruction
-      String.raw`<\?.*?\?>`,
-      // Declaration
-      String.raw`<![A-Za-z][^>]*>`,
-      // CDATA section
-      String.raw`<!\[CDATA\[.*?\]\]>`,
-    ].join('|'),
-    ')',
-  ].join(''),
-);
-
-/**
- * Regular expression source to match a URI scheme that runs a script or embeds content, in any
- * case, as a scheme is case-insensitive.
- */
-const UNSAFE_SCHEME_SOURCE = `(?:${['javascript', 'vbscript', 'data']
-  .map((scheme) => scheme.replace(/[a-z]/g, (char) => `[${char}${char.toUpperCase()}]`))
-  .join('|')})`;
-
-/**
- * Regular expression to match an autolink, like `<https://example.com>` or `<foo@example.com>`,
- * which isn’t escaped.
- * @see https://spec.commonmark.org/0.31.2/#autolinks
- */
-const AUTOLINK_REGEX = new RegExp(
-  [
-    UNESCAPED_LT_SOURCE,
-    '(?:',
-    [
-      // URI, other than one with a scheme that runs a script or embeds content, which is left to
-      // be escaped as text
-      String.raw`<(?!${UNSAFE_SCHEME_SOURCE}:)[A-Za-z][A-Za-z0-9+.-]{1,31}:[^\s<>]*>`,
-      // Email address
-      String.raw`<[\w.!#$%&'*+/=?^\x60{|}~-]+@[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?` +
-        String.raw`(?:\.[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?)*>`,
-    ].join('|'),
-    ')',
-  ].join(''),
-);
-
-/**
- * Regular expression to match a footnote reference, like `[^1]`, which isn’t escaped. Footnotes
- * aren’t supported, but they’re read by GitHub and many other renderers.
- * @see https://github.github.com/gfm/
- */
-const FOOTNOTE_REFERENCE_REGEX = /(?<!(?:^|[^\\])(?:\\\\)*\\)\[\^[^\s[\]]+\]/;
-/**
- * Regular expression to match a named character reference, like `&copy;`, which isn’t escaped.
- * Lexical imports it as text, the same as the escaped `\&copy;`, which is exported escaped; see
- * `escapeNamedCharacterReferences()`. The lookahead comes first, so the lookbehind is only tried
- * before a `&`.
- * @see https://spec.commonmark.org/0.31.2/#entity-and-numeric-character-references
- */
-const NAMED_CHARACTER_REFERENCE_REGEX = /(?=&)(?<!(?:^|[^\\])(?:\\\\)*\\)&[A-Za-z][A-Za-z\d]*;/;
-
-/**
  * Block syntax at the start of a line, after up to 3 spaces.
  */
 const BLOCK_SYNTAX = [
   // Thematic break, which comes first as it can start like a bullet list item
-  /([-*_])(?:[ \t]*\1){2,}[ \t]*$/,
+  THEMATIC_BREAK,
+  // ATX heading, bullet list item or ordered list item, which comes before a setext heading
+  // underline, as a single `-` is a list item
+  `(?:${ATX_HEADING_MARKER}|${LIST_MARKER})${MARKER_END}`,
   // Setext heading underline
-  /(?:=+|-{2,})[ \t]*$/,
-  // ATX heading, bullet list item or ordered list item
-  /(?:#{1,6}|[-+*]|\d{1,9}[.)])(?=[ \t]|$)/,
+  SETEXT_UNDERLINE,
   // Blockquote or code fence
-  />|`{3,}|~{3,}/,
-]
-  .map(({ source }) => source)
-  .join('|');
+  `>|${CODE_FENCE}`,
+].join('|');
 
 /**
  * Label of a link reference definition or a footnote definition, like `[foo]:` in

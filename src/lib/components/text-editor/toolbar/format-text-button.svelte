@@ -5,14 +5,15 @@
   import Button from '../../button/button.svelte';
   import Icon from '../../icon/icon.svelte';
   import { AVAILABLE_BUTTONS, isHtmlOnlyButton } from '../constants.js';
-  import { focusEditor } from '../editing/caret.js';
   import {
     editRawText,
     registerRawTextShortcut,
     toggleInlineFormat,
   } from '../editing/raw-markdown.js';
+  import { runEditorAction } from './actions.js';
 
   /**
+   * @import { LexicalEditor } from 'lexical';
    * @import { TextEditorFormatType, TextEditorStore } from '#lib/typedefs.js';
    */
 
@@ -42,30 +43,31 @@
 
   /**
    * Format the selection.
+   * @returns {Promise<void>} Nothing.
    */
-  const format = async () => {
-    const { editor, textArea, useRichText } = editorStore;
-
-    if (!useRichText) {
-      // The `<textarea>` is only there for Markdown, which hides the HTML-only formats
-      /* v8 ignore next 3 */
-      if (isHtmlOnlyButton(type)) {
-        return;
-      }
-
-      // The button is only enabled while the `<textarea>` is there
-      editRawText(textArea, (state) => toggleInlineFormat(state, type));
-
-      return;
-    }
-
-    // The button is only enabled while the editor is there
-    /* v8 ignore else */
-    if (editor) {
-      await focusEditor(editor);
-      editor.dispatchCommand(FORMAT_TEXT_COMMAND, type);
-    }
-  };
+  const format = () =>
+    runEditorAction(editorStore, {
+      /**
+       * Format the selected Markdown.
+       * @param {HTMLTextAreaElement} textArea `<textarea>` element.
+       */
+      raw: (textArea) => {
+        // The `<textarea>` is only there for Markdown, which hides the HTML-only formats
+        /* v8 ignore else */
+        if (!isHtmlOnlyButton(type)) {
+          editRawText(textArea, (state) => toggleInlineFormat(state, type));
+        }
+      },
+      /**
+       * Format the selection.
+       * @param {LexicalEditor} editor Editor instance.
+       */
+      rich: (editor) => {
+        editor.dispatchCommand(FORMAT_TEXT_COMMAND, type);
+      },
+      // The format applies to the selection, which the focus restores
+      focus: 'before',
+    });
 
   $effect(() => {
     const { textArea } = editorStore;

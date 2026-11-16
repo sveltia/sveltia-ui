@@ -8,9 +8,9 @@
 <script>
   import { _ } from '@sveltia/i18n';
   import { onMount } from 'svelte';
-  import { normalize } from '../../services/text.js';
+  import { setFocusedMember } from '../../services/group.svelte.js';
   import { createOptionRegistry, getSelectedItemDetail } from '../../services/select.svelte.js';
-  import { findTypeAheadMatch, TypeAhead } from '../../services/type-ahead.js';
+  import { isPrintableKey, TypeAhead } from '../../services/type-ahead.js';
   import Button from '../button/button.svelte';
   import Icon from '../icon/icon.svelte';
   import Listbox from '../listbox/listbox.svelte';
@@ -71,8 +71,6 @@
    * @type {HTMLElement | undefined}
    */
   let listboxSlot = $state();
-  /** @type {string} */
-  let label = $state('');
   /** @type {boolean} */
   let showFilter = $state(false);
   /** @type {string} */
@@ -109,17 +107,10 @@
   const registry = createOptionRegistry();
 
   /**
-   * Update the {@link label} and selected option when the {@link value} is changed. A value that
-   * matches no option, including `undefined`, clears both, so the previous option doesn’t stay
-   * selected.
+   * Label of the option matching the {@link value}. A value that matches no option, including
+   * `undefined`, gives an empty label.
    */
-  const _onChange = () => {
-    const entry = registry.find(value);
-
-    label = entry?.label ?? '';
-    // With no matching entry, this deselects every option
-    registry.selectOnly(value);
-  };
+  const label = $derived(registry.find(value)?.label ?? '');
 
   /**
    * Raise a `Change` event for an option known only through its registry entry. There is no option
@@ -142,8 +133,6 @@
     const detail = getSelectedItemDetail(target);
 
     value = detail.value;
-
-    _onChange();
     onChange?.(new CustomEvent('Change', { detail }));
   };
 
@@ -156,7 +145,6 @@
     const { target } = /** @type {Event & { target: HTMLInputElement }} */ (event);
 
     value = target.value;
-    _onChange();
     restProps.oninput?.(event);
     onChange?.(
       new CustomEvent('Change', {
@@ -182,18 +170,9 @@
    * @param {KeyboardEvent} event The `keydown` event.
    */
   const onComboboxKeyDown = (event) => {
-    const { key, ctrlKey, metaKey, altKey } = event;
+    const { key } = event;
 
-    if (
-      disabled ||
-      readonly ||
-      isPopupOpen ||
-      key.length !== 1 ||
-      key === ' ' ||
-      ctrlKey ||
-      metaKey ||
-      altKey
-    ) {
+    if (disabled || readonly || isPopupOpen || !isPrintableKey(event)) {
       return;
     }
 
@@ -210,9 +189,9 @@
 
     const entries = registry.entries.filter((entry) => !entry.disabled);
 
-    const index = findTypeAheadMatch(
-      entries.map((entry) => normalize(entry.label ?? '')),
-      typeAhead.push(key),
+    const index = typeAhead.match(
+      entries.map((entry) => entry.label ?? ''),
+      key,
       entries.findIndex((entry) => entry.value === value),
     );
 
@@ -227,7 +206,6 @@
     }
 
     value = entry.value;
-    _onChange();
     dispatchEntryChange(entry);
   };
 
@@ -257,8 +235,7 @@
     }
 
     // `<Group>` tracks the focused member with this class, and moves it on from there
-    option.classList.add('focused');
-    listbox.setAttribute('aria-activedescendant', option.id);
+    setFocusedMember(listbox, option);
 
     option.scrollIntoView(true);
   };
@@ -317,15 +294,15 @@
     }
 
     value = entry.value;
-    label = entry.label;
 
     // There is no element to report while the dropdown has never been expanded
     dispatchEntryChange(entry);
   });
 
+  // Mark the option matching the value as selected. A value that matches no option, including
+  // `undefined`, deselects every option, so the previous option doesn’t stay selected.
   $effect(() => {
-    void value;
-    _onChange();
+    registry.selectOnly(value);
   });
 </script>
 

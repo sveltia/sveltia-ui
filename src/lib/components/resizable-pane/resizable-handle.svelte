@@ -7,7 +7,8 @@
 <script>
   import { isRTL } from '@sveltia/i18n';
   import { getContext, onDestroy } from 'svelte';
-  import { getHandleKeyAction } from './sizing.js';
+  import { startPointerDrag } from '../../services/pointer-drag.js';
+  import { getHandleKeyAction, getHandleRange, pixelDeltaToPercent } from './sizing.js';
 
   /**
    * @import { Snippet } from 'svelte';
@@ -69,27 +70,33 @@
   const sizes = $derived(ctx.sizes);
   // The value reported via aria-valuenow is the size of the pane immediately before this handle
   const currentPaneSize = $derived(sizes[handleIndex] ?? 0);
-  const currentPaneConstraints = $derived(ctx.getPaneConstraints(handleIndex));
-  const nextPaneConstraints = $derived(ctx.getPaneConstraints(handleIndex + 1));
   // The handle only moves space between the panes either side of it, so its range is bound by
   // what those two panes can take
-  const pairSize = $derived(currentPaneSize + (sizes[handleIndex + 1] ?? 0));
-  const currentPaneMin = $derived(
-    Math.max(currentPaneConstraints.minSize, pairSize - nextPaneConstraints.maxSize),
-  );
-  const currentPaneMax = $derived(
-    Math.min(currentPaneConstraints.maxSize, pairSize - nextPaneConstraints.minSize),
+  const range = $derived(
+    getHandleRange({
+      sizeBefore: currentPaneSize,
+      sizeAfter: sizes[handleIndex + 1] ?? 0,
+      constraintsBefore: ctx.getPaneConstraints(handleIndex),
+      constraintsAfter: ctx.getPaneConstraints(handleIndex + 1),
+    }),
   );
 
   let dragging = $state(false);
-  let startScreenPos = $state(0);
+  /**
+   * Pointer position along the group’s direction when the drag began.
+   */
+  let startScreenPos = 0;
   /**
    * Size of the pane before the handle when the drag began. Each move sets the pane to this plus
    * the distance from where the drag began, rather than adding the latest step to the current
    * size, so the handle stays under the pointer after it has been held back at a limit.
    */
   let startPaneSize = 0;
-  let targetPointerId = $state(0);
+  /**
+   * Function to stop following the pointer in the middle of a drag.
+   * @type {(() => void) | undefined}
+   */
+  let stopDrag;
   /**
    * Whether the handle is being resized via keyboard (at least one step fired).
    */
@@ -105,63 +112,40 @@
   let containerSize = 0;
 
   /**
-   * Handle pointer move events (attached to `document` while dragging).
+   * Handle pointer move events while dragging.
    * @param {PointerEvent} event `pointermove` event.
    */
   const onPointerMove = (event) => {
-    const { screenX, screenY, pointerId, pointerType, buttons } = event;
-
-    if (disabled || !dragging || pointerId !== targetPointerId) return;
-
-    // The `pointerup` event may never come, for example when a context menu opened during the drag
-    // swallowed it, so a mouse moved without the primary button held down ends the drag instead of
-    // carrying on resizing
-    if (pointerType === 'mouse' && buttons % 2 === 0) {
-      // eslint-disable-next-line no-use-before-define
-      onPointerUp(event);
-
-      return;
-    }
+    if (disabled) return;
 
     event.preventDefault();
     event.stopPropagation();
 
+    const { screenX, screenY } = event;
     const screenPos = isHorizontal ? screenX : screenY;
-    const pixelDelta = screenPos - startScreenPos;
 
     // A group that has no size, because it isn’t laid out, can’t be resized
     /* v8 ignore next */
     if (!containerSize) return;
 
-    let percentDelta = (pixelDelta / containerSize) * 100;
-
-    // In RTL with a horizontal layout, the visual direction is reversed
-    if (isHorizontal && isRTL()) {
-      percentDelta = -percentDelta;
-    }
+    const percentDelta = pixelDeltaToPercent({
+      delta: screenPos - startScreenPos,
+      containerSize,
+      isHorizontal,
+      rtl: isRTL(),
+    });
 
     ctx.resize(handleIndex, startPaneSize + percentDelta - (sizes[handleIndex] ?? 0));
   };
 
   /**
-   * Handle pointer up/cancel events (attached to `document` while dragging).
-   * @param {PointerEvent} event `pointerup` or `pointercancel` event.
+   * Handle the end of a drag.
    */
-  const onPointerUp = (event) => {
-    const { pointerId } = event;
-
-    if (!dragging || pointerId !== targetPointerId) return;
-
-    element?.releasePointerCapture(pointerId);
+  const onDragEnd = () => {
     dragging = false;
-    startScreenPos = 0;
-    targetPointerId = 0;
+    stopDrag = undefined;
 
     onResizeEnd?.();
-
-    document.removeEventListener('pointermove', onPointerMove);
-    document.removeEventListener('pointerup', onPointerUp);
-    document.removeEventListener('pointercancel', onPointerUp);
   };
 
   /**
@@ -175,20 +159,20 @@
     event.preventDefault();
     event.stopPropagation();
 
-    const { screenX, screenY, pointerId } = event;
+    const { screenX, screenY } = event;
 
+    // A pointer pressed while another one is dragging takes over
+    stopDrag?.();
     dragging = true;
     startScreenPos = isHorizontal ? screenX : screenY;
     startPaneSize = sizes[handleIndex] ?? 0;
-    targetPointerId = pointerId;
     containerSize = ctx.measurePaneSpace();
-    element?.setPointerCapture(pointerId);
+    stopDrag = startPointerDrag(/** @type {HTMLElement} */ (element), event, {
+      onMove: onPointerMove,
+      onEnd: onDragEnd,
+    });
 
     onResizeStart?.();
-
-    document.addEventListener('pointermove', onPointerMove);
-    document.addEventListener('pointerup', onPointerUp);
-    document.addEventListener('pointercancel', onPointerUp);
   };
 
   /**
@@ -234,9 +218,7 @@
 
   $effect(() => () => {
     // Stop listening if the handle is removed in the middle of a drag
-    document.removeEventListener('pointermove', onPointerMove);
-    document.removeEventListener('pointerup', onPointerUp);
-    document.removeEventListener('pointercancel', onPointerUp);
+    stopDrag?.();
   });
 </script>
 
@@ -248,8 +230,8 @@
   tabindex={disabled ? -1 : 0}
   aria-orientation={isHorizontal ? 'vertical' : 'horizontal'}
   aria-valuenow={Math.round(currentPaneSize)}
-  aria-valuemin={currentPaneMin}
-  aria-valuemax={currentPaneMax}
+  aria-valuemin={range.min}
+  aria-valuemax={range.max}
   aria-controls={ctx.paneDefs[handleIndex]?.id}
   aria-disabled={disabled || undefined}
   aria-label={ariaLabel}

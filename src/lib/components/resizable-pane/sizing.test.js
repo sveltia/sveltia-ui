@@ -2,10 +2,15 @@ import { describe, expect, it } from 'vitest';
 import {
   clampResizeDelta,
   getHandleKeyAction,
+  getHandleRange,
   getInitialSizes,
+  getNewPaneSize,
+  pixelDeltaToPercent,
+  resolveDefaultSize,
   resolvePaneConstraints,
   resolveToPercent,
   shareSpaceAmongPanes,
+  sortByDomOrder,
 } from './sizing.js';
 
 const env = { containerSize: 1000, viewportWidth: 2000, viewportHeight: 500 };
@@ -306,5 +311,118 @@ describe('shareSpaceAmongPanes', () => {
 
     expect(shareSpaceAmongPanes(sizes, { neighbors: [-1, 2], amount: 10, getConstraints })).toBe(0);
     expect(sizes).toEqual([50, 40]);
+  });
+});
+
+describe('getHandleRange', () => {
+  const unconstrained = { minSize: 0, maxSize: 100 };
+
+  it('spans the space of both panes when they are unconstrained', () => {
+    expect(
+      getHandleRange({
+        sizeBefore: 30,
+        sizeAfter: 40,
+        constraintsBefore: unconstrained,
+        constraintsAfter: unconstrained,
+      }),
+    ).toEqual({ min: 0, max: 70 });
+  });
+
+  it('is bound by the constraints of the pane before the handle', () => {
+    expect(
+      getHandleRange({
+        sizeBefore: 30,
+        sizeAfter: 40,
+        constraintsBefore: { minSize: 10, maxSize: 50 },
+        constraintsAfter: unconstrained,
+      }),
+    ).toEqual({ min: 10, max: 50 });
+  });
+
+  it('is bound by the constraints of the pane after the handle', () => {
+    expect(
+      getHandleRange({
+        sizeBefore: 30,
+        sizeAfter: 40,
+        constraintsBefore: unconstrained,
+        constraintsAfter: { minSize: 20, maxSize: 50 },
+      }),
+    ).toEqual({ min: 20, max: 50 });
+  });
+});
+
+describe('pixelDeltaToPercent', () => {
+  it('converts pixels to percentage points of the container', () => {
+    expect(
+      pixelDeltaToPercent({ delta: 50, containerSize: 500, isHorizontal: true, rtl: false }),
+    ).toBe(10);
+    expect(
+      pixelDeltaToPercent({ delta: -50, containerSize: 500, isHorizontal: false, rtl: false }),
+    ).toBe(-10);
+  });
+
+  it('flips a horizontal delta in RTL', () => {
+    expect(
+      pixelDeltaToPercent({ delta: 50, containerSize: 500, isHorizontal: true, rtl: true }),
+    ).toBe(-10);
+  });
+
+  it('leaves a vertical delta alone in RTL', () => {
+    expect(
+      pixelDeltaToPercent({ delta: 50, containerSize: 500, isHorizontal: false, rtl: true }),
+    ).toBe(10);
+  });
+});
+
+describe('resolveDefaultSize', () => {
+  it('resolves the default size to a percentage', () => {
+    expect(resolveDefaultSize({ defaultSize: 30 }, env)).toBe(30);
+    expect(resolveDefaultSize({ defaultSize: '250px' }, env)).toBe(25);
+  });
+
+  it('returns NaN without a default size, or with one that can’t be resolved', () => {
+    expect(resolveDefaultSize({}, env)).toBeNaN();
+    expect(resolveDefaultSize({ defaultSize: undefined }, env)).toBeNaN();
+    expect(resolveDefaultSize({ defaultSize: '3em' }, env)).toBeNaN();
+  });
+});
+
+describe('getNewPaneSize', () => {
+  const unconstrained = { minSize: 0, maxSize: 100 };
+
+  it('uses the default size', () => {
+    expect(getNewPaneSize({ defaultSize: 30, constraints: unconstrained, paneCount: 3 })).toBe(30);
+  });
+
+  it('falls back to an equal share of the group', () => {
+    expect(getNewPaneSize({ defaultSize: NaN, constraints: unconstrained, paneCount: 4 })).toBe(25);
+  });
+
+  it('keeps the size within the constraints', () => {
+    const constraints = { minSize: 20, maxSize: 40 };
+
+    expect(getNewPaneSize({ defaultSize: 10, constraints, paneCount: 3 })).toBe(20);
+    expect(getNewPaneSize({ defaultSize: 60, constraints, paneCount: 3 })).toBe(40);
+    expect(getNewPaneSize({ defaultSize: NaN, constraints, paneCount: 10 })).toBe(20);
+  });
+});
+
+describe('sortByDomOrder', () => {
+  it('sorts the items in the order of their keys', () => {
+    const items = [{ id: 'b' }, { id: 'c' }, { id: 'a' }];
+
+    expect(sortByDomOrder(items, ['a', 'b', 'c'], (item) => item.id)).toEqual([
+      { id: 'a' },
+      { id: 'b' },
+      { id: 'c' },
+    ]);
+    // The original array is left as is
+    expect(items.map(({ id }) => id)).toEqual(['b', 'c', 'a']);
+  });
+
+  it('puts the items missing from the list last, in their current order', () => {
+    const items = ['x', 'b', 'y', 'a'];
+
+    expect(sortByDomOrder(items, ['a', 'b'], (item) => item)).toEqual(['a', 'b', 'x', 'y']);
   });
 });

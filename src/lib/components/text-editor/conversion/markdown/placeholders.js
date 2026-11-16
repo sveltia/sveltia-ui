@@ -10,10 +10,14 @@ import {
   HTML_BLOCK_PLACEHOLDER,
   PUNCTUATION_PLACEHOLDER,
 } from '../placeholder-chars.js';
-import { INLINE_HTML_REGEX } from '../transformers/raw-syntax.js';
 import { findHtmlBlockLines } from './block-structure.js';
 import { mapLinesOutsideCodeBlocks, mapOutsideCodeBlocks } from './code-blocks.js';
-import { findCodeSpans } from './code-spans.js';
+import { findCodeSpans, mapCodeSpans } from './code-spans.js';
+import { countBackslashesBefore, INLINE_HTML_REGEX } from './syntax.js';
+
+/**
+ * @import { CodeSpan } from './code-spans.js';
+ */
 
 /**
  * Global version of `INLINE_HTML_REGEX`.
@@ -53,15 +57,12 @@ const markLineEndBackslashes = (line) => {
   const index = [true, false]
     .map((hasHardLineBreak) => {
       let end = line.length - (hasHardLineBreak && line.endsWith('\\') ? 1 : 0);
-      let backslashes = 0;
 
       while (end > 0 && '*_~'.includes(line[end - 1])) {
         end -= 1;
       }
 
-      while (line[end - backslashes - 1] === '\\') {
-        backslashes += 1;
-      }
+      const backslashes = countBackslashesBefore(line, end);
 
       return backslashes && backslashes % 2 === 0 ? end : -1;
     })
@@ -145,21 +146,24 @@ const markCodeSpanWhitespace = (line) => {
     return line;
   }
 
-  let result = '';
-  let index = 0;
+  return mapCodeSpans(line, {
+    /**
+     * Replace the whitespace in the code of a code span.
+     * @param {string} codeSpan Code span, with its backticks.
+     * @param {CodeSpan} span Position of the code span.
+     * @returns {string} Processed code span.
+     */
+    inside: (codeSpan, { fenceLength }) => {
+      const fence = codeSpan.slice(0, fenceLength);
+      const content = codeSpan.slice(fenceLength, -fenceLength);
 
-  findCodeSpans(line).forEach(({ start, end, fenceLength }) => {
-    const content = line.slice(start + fenceLength, end - fenceLength);
-
-    result += `${line.slice(index, start + fenceLength)}${
-      /^ +$/.test(content)
-        ? CODE_SPACE_PLACEHOLDER.repeat(content.length)
-        : content.replaceAll('\t', CODE_TAB_PLACEHOLDER)
-    }`;
-    index = end - fenceLength;
+      return `${fence}${
+        /^ +$/.test(content)
+          ? CODE_SPACE_PLACEHOLDER.repeat(content.length)
+          : content.replaceAll('\t', CODE_TAB_PLACEHOLDER)
+      }${fence}`;
+    },
   });
-
-  return result + line.slice(index);
 };
 
 /**

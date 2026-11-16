@@ -7,25 +7,24 @@
 <script>
   import { getContext } from 'svelte';
   import TablePart from '../table/table-part.svelte';
+  import { UNSELECTABLE_ROWS_KEY } from './grid.js';
 
   /**
-   * @import { Snippet } from 'svelte';
    * @import { Attachment } from 'svelte/attachments';
+   * @import { ContainerProps } from '#lib/typedefs.js';
    */
 
   /**
    * @typedef {object} Props
-   * @property {string} [class] The `class` attribute on the wrapper element.
    * @property {boolean} [selected] Whether to select the widget. An alias of the `aria-selected`
    * attribute. Ignored on a header or footer row inside `<GridHead>` or `<GridFoot>`, which can
    * never be selected.
-   * @property {Snippet} [children] Primary slot content.
    * @property {(event: CustomEvent) => void} [onChange] Custom `Change` event handler.
    * @property {(event: CustomEvent) => void} [onSelect] Custom `Select` event handler.
    */
 
   /**
-   * @type {Props & Record<string, any>}
+   * @type {ContainerProps & Props & Record<string, any>}
    */
   let {
     /* eslint-disable prefer-const */
@@ -39,7 +38,7 @@
    * keys still land on it, but it can’t be selected, so it has no `aria-selected` state, even one
    * passed as an attribute, and is marked for the group service to leave out of the selection.
    */
-  const isUnselectableRow = getContext('sui:grid-unselectable-rows') === true;
+  const isUnselectableRow = getContext(UNSELECTABLE_ROWS_KEY) === true;
 
   const attributes = $derived.by(() => {
     if (!isUnselectableRow) {

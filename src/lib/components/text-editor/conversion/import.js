@@ -25,6 +25,7 @@ import {
   toLexicalMarkdown,
   removeImportPlaceholders,
 } from './markdown/index.js';
+import { findCodeBlocks, parseOpeningFence } from './markdown/code-blocks.js';
 import { loadCodeHighlighter } from '../shiki/preload.js';
 import { CODE } from './transformers/code.js';
 import { addCodeSpanSplit } from './transformers/formatted-code.js';
@@ -72,6 +73,25 @@ const removePlaceholders = (nodes) => {
 };
 
 /**
+ * Get the programming languages used in the code blocks of Markdown: the leading word of the info
+ * string of each opening backtick fence, like `js` in the info string ` js title=x`, as `CODE`
+ * reads it. A code block in a list item, like `- ~~~`, is left out, as it’s imported as the text
+ * of the item, and so is one with a tilde fence, which is only imported as a code block once
+ * converted.
+ * @param {string} markdown Markdown.
+ * @returns {string[]} Languages.
+ */
+const getCodeBlockLanguages = (markdown) => {
+  const lines = markdown.split('\n');
+
+  return findCodeBlocks(lines).flatMap(({ start }) => {
+    const { fence = '', language } = parseOpeningFence(lines[start]) ?? {};
+
+    return fence.startsWith('`') && language ? [language] : [];
+  });
+};
+
+/**
  * Prepare Markdown for the import: convert the syntax Lexical doesn’t support to the one it does,
  * if the element is enabled, and list the programming languages used in the code blocks.
  * @param {string} value Markdown.
@@ -94,11 +114,7 @@ export const prepareMarkdown = (value, enabledTransformers) => {
 
   return {
     markdown,
-    // The language is the leading word of the info string, like `js` in ```` ``` js title=x ````;
-    // see `CODE`
-    languages: [...markdown.matchAll(/^`{3,}[ \t]*(?<lang>[\w-][^\s`]*)/gm)].map(
-      ({ groups: { lang = 'plain' } = {} }) => lang,
-    ),
+    languages: getCodeBlockLanguages(markdown),
   };
 };
 

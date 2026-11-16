@@ -5,7 +5,16 @@
 
 import { INFO_BACKTICK } from '../placeholder-chars.js';
 import { ATX_HEADING_REGEX, isParagraphLine, SETEXT_UNDERLINE_REGEX } from './block-structure.js';
-import { findCodeBlocks, mapLinesOutsideCodeBlocks, mapOutsideCodeBlocks } from './code-blocks.js';
+import {
+  findCodeBlocks,
+  mapLinesOutsideCodeBlocks,
+  mapOutsideCodeBlocks,
+  parseOpeningFence,
+} from './code-blocks.js';
+
+/**
+ * @import { OpeningFence } from './code-blocks.js';
+ */
 
 /**
  * Convert the fenced code blocks using tildes, like `~~~`, to ones using backticks, because Lexical
@@ -40,12 +49,13 @@ export const convertTildeFences = (value) => {
 
       const backticks = '`'.repeat(longestFence + 1);
 
-      // Unlike that of a tilde fence, the info string of a backtick fence can’t contain a backtick
-      lines[start] = lines[start].replace(
-        /^([ \t]*)~+([ \t]*[\w-]+)?(.*)$/,
-        (_, indent, language, rest) =>
-          `${indent}${backticks}${language ?? ''}${rest.replaceAll('`', language ? INFO_BACKTICK : '')}`,
+      const { indent, info, language } = /** @type {OpeningFence} */ (
+        parseOpeningFence(lines[start])
       );
+
+      // Unlike that of a tilde fence, the info string of a backtick fence can’t contain a backtick.
+      // The language can’t contain one either, so only the metadata after it is replaced
+      lines[start] = `${indent}${backticks}${info.replaceAll('`', language ? INFO_BACKTICK : '')}`;
 
       if (closed) {
         lines[end] = lines[end].replace(/^([ \t]*)~+[ \t]*$/, `$1${backticks}`);
@@ -54,6 +64,11 @@ export const convertTildeFences = (value) => {
 
   return lines.join('\n');
 };
+
+/**
+ * Multiline version of `SETEXT_UNDERLINE_REGEX`, which matches at the start of any line.
+ */
+const SETEXT_UNDERLINE_MULTILINE_REGEX = new RegExp(SETEXT_UNDERLINE_REGEX.source, 'm');
 
 /**
  * Convert setext headings, underlined with `===` or `---`, to ATX headings, like `# Heading`,
@@ -66,30 +81,30 @@ export const convertTildeFences = (value) => {
  * @returns {string} Processed Markdown string.
  */
 export const convertSetextHeadings = (value) => {
-  if (!/^ {0,3}(?:=+|-+)[ \t]*$/m.test(value)) {
+  if (!SETEXT_UNDERLINE_MULTILINE_REGEX.test(value)) {
     return value;
   }
 
   return mapOutsideCodeBlocks(value, (part) => {
     /** @type {string[]} */
     const lines = [];
+    // Index of the first of the paragraph lines at the end of `lines`, tracked as the lines are
+    // added rather than found by walking back, which would take quadratic time on a long paragraph
+    let start = 0;
 
     part.split('\n').forEach((line) => {
-      const [, underline] = line.match(SETEXT_UNDERLINE_REGEX) ?? [];
-      let start = lines.length;
-
-      while (start > 0 && isParagraphLine(lines[start - 1])) {
-        start -= 1;
-      }
-
       const previous = lines[start - 1];
 
       if (
-        !underline ||
+        !SETEXT_UNDERLINE_REGEX.test(line) ||
         start === lines.length ||
         (previous !== undefined && previous.trim() && !ATX_HEADING_REGEX.test(previous))
       ) {
         lines.push(line);
+
+        if (!isParagraphLine(line)) {
+          start = lines.length;
+        }
 
         return;
       }
@@ -99,7 +114,8 @@ export const convertSetextHeadings = (value) => {
         .map((paragraphLine) => paragraphLine.trim())
         .join(' ');
 
-      lines.push(`${underline.startsWith('=') ? '#' : '##'} ${text}`);
+      lines.push(`${line.trimStart().startsWith('=') ? '#' : '##'} ${text}`);
+      start = lines.length;
     });
 
     return lines.join('\n');

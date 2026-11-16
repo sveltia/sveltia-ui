@@ -9,18 +9,12 @@
   import { activateTree } from '../../services/tree.svelte.js';
 
   /**
-   * @import { Snippet } from 'svelte';
-   * @import { CommonEventHandlers } from '#lib/typedefs.js';
+   * @import { CommonEventHandlers, ContainerProps, WidgetStateProps } from '#lib/typedefs.js';
    */
 
   /**
    * @typedef {object} Props
    * @property {HTMLElement} [element] A reference to the wrapper element.
-   * @property {string} [class] The `class` attribute on the wrapper element.
-   * @property {boolean} [hidden] Whether to hide the widget. An alias of the `aria-hidden`
-   * attribute.
-   * @property {boolean} [disabled] Whether to disable the widget. An alias of the `aria-disabled`
-   * attribute.
    * @property {boolean} [readonly] Whether to make the widget read-only. An alias of the
    * `aria-readonly` attribute.
    * @property {boolean} [multiple] Whether to allow selecting more than one `<TreeItem>`. An alias
@@ -32,12 +26,11 @@
    * itself, rather than its chevron, is clicked or activated with the Enter key.
    * @property {string} [ariaLabel] The `aria-label` attribute on the wrapper element. Required
    * unless the `aria-labelledby` attribute is provided.
-   * @property {Snippet} [children] Primary slot content.
    * @property {(event: CustomEvent) => void} [onChange] Custom `Change` event handler.
    */
 
   /**
-   * @type {CommonEventHandlers & Props & Record<string, any>}
+   * @type {CommonEventHandlers & ContainerProps & WidgetStateProps & Props & Record<string, any>}
    */
   let {
     /* eslint-disable prefer-const */
@@ -78,7 +71,7 @@
   onChange={(/** @type {CustomEvent} */ event) => {
     onChange?.(event);
   }}
-  {@attach activateTree({ clickToSelect, selectionFollowsFocus, expandOnSelect })}
+  {@attach activateTree(() => ({ clickToSelect, selectionFollowsFocus, expandOnSelect }))}
 >
   <div role="none" class="inner" inert={disabled}>
     {@render children?.()}

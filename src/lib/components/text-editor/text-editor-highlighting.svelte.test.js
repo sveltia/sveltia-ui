@@ -9,7 +9,7 @@ import TextEditor from './text-editor.svelte';
 
 /**
  * These run against the real Shiki engine, bundled locally rather than fetched from the CDN. The
- * facade keeps the engine in module state, hence a separate file from the other editor tests, which
+ * engine keeps its state in module scope, hence a separate file from the other editor tests, which
  * run without an engine.
  */
 

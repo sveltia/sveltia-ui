@@ -20,3 +20,33 @@ export const getLongestTime = (value) =>
  */
 export const getTransitionTimeout = ({ transitionDuration, transitionDelay }) =>
   getLongestTime(transitionDuration) + getLongestTime(transitionDelay) + 100;
+
+/**
+ * The modal `<dialog>` elements shown by `<Modal>`, in the order they were opened, the topmost
+ * last. The elements are placed in the document in the order the components are mounted, which
+ * tells nothing about which one is on top, so others like `<Toast>` can look here instead.
+ * @type {HTMLDialogElement[]}
+ */
+export const openModalDialogs = [];
+
+/**
+ * Remove the given `<dialog>` element from {@link openModalDialogs}.
+ * @param {HTMLDialogElement | undefined} dialog Element.
+ */
+export const forgetModalDialog = (dialog) => {
+  const index = dialog ? openModalDialogs.indexOf(dialog) : -1;
+
+  if (index > -1) {
+    openModalDialogs.splice(index, 1);
+  }
+};
+
+/**
+ * Add the given `<dialog>` element to {@link openModalDialogs} as the topmost one, moving it there
+ * if it’s already in the list.
+ * @param {HTMLDialogElement} dialog Element.
+ */
+export const rememberModalDialog = (dialog) => {
+  forgetModalDialog(dialog);
+  openModalDialogs.push(dialog);
+};

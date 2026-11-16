@@ -12,19 +12,17 @@
   import TablePart from '../table/table-part.svelte';
 
   /**
-   * @import { Snippet } from 'svelte';
    * @import { Attachment } from 'svelte/attachments';
+   * @import { ContainerProps } from '#lib/typedefs.js';
    */
 
   /**
    * @typedef {object} Props
-   * @property {string} [class] The `class` attribute on the wrapper element.
    * @property {'ascending' | 'descending' | 'none'} [sortOrder] The order the column is sorted in,
    * or `none` if it can be sorted but currently isn’t. An alias of the `aria-sort` attribute, which
    * is only set on the sorted column, as the sortable table pattern recommends. When set, the
    * content is rendered in a button that requests a new order with `onSort`; the button covers the
    * whole cell, padding included. Leave it out for a header that can’t be sorted.
-   * @property {Snippet} [children] Primary slot content.
    * @property {(event: CustomEvent<{ sortOrder: 'ascending' | 'descending' }>) => void} [onSort]
    * Custom `Sort` event handler, called when the sort button is clicked. `detail.sortOrder` is the
    * suggested next order: `descending` if the column is currently sorted in ascending order,
@@ -32,7 +30,7 @@
    */
 
   /**
-   * @type {Props & Record<string, any>}
+   * @type {ContainerProps & Props & Record<string, any>}
    */
   let {
     /* eslint-disable prefer-const */

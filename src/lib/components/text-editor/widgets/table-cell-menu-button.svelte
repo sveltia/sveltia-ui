@@ -8,6 +8,7 @@
 <script>
   import { _ } from '@sveltia/i18n';
   import { getContext, onMount } from 'svelte';
+  import { on } from 'svelte/events';
   import Icon from '../../icon/icon.svelte';
   import MenuButton from '../../menu/menu-button.svelte';
   import {
@@ -15,6 +16,7 @@
     isRightToLeftTable,
   } from '../editing/table.js';
   import TableActionMenu from '../toolbar/table-action-menu.svelte';
+  import { mergeUnregisters } from '../utils.js';
 
   /**
    * @import { PopupPosition, TextEditorStore } from '#lib/typedefs.js';
@@ -140,44 +142,38 @@
       return undefined;
     }
 
-    const unregisterUpdateListener = editor.registerUpdateListener(({ editorState }) => {
-      cellKey = editorState.read(getSelectedTableCellKey);
-      reposition();
-    });
+    return mergeUnregisters(
+      editor.registerUpdateListener(({ editorState }) => {
+        cellKey = editorState.read(getSelectedTableCellKey);
+        reposition();
+      }),
+      // Follow the cell when a wide table is scrolled, or the editor is resized
+      editor.registerRootListener((root) => {
+        if (!root) {
+          return undefined;
+        }
 
-    // Follow the cell when a wide table is scrolled, or the editor is resized
-    const unregisterRootListener = editor.registerRootListener((root) => {
-      if (!root) {
-        return undefined;
-      }
+        const resizeObserver = new ResizeObserver(reposition);
 
-      const resizeObserver = new ResizeObserver(reposition);
+        resizeObserver.observe(root);
 
-      root.addEventListener('scroll', reposition, { capture: true });
-      resizeObserver.observe(root);
-
-      return () => {
-        root.removeEventListener('scroll', reposition, { capture: true });
-        resizeObserver.disconnect();
-      };
-    });
-
-    return () => {
-      unregisterUpdateListener();
-      unregisterRootListener();
-    };
+        return mergeUnregisters(on(root, 'scroll', reposition, { capture: true }), () => {
+          resizeObserver.disconnect();
+        });
+      }),
+    );
   });
 
   onMount(() => {
-    window.addEventListener('resize', reposition);
-    document.addEventListener('focusin', updateFocus);
-    document.addEventListener('focusout', updateFocus);
+    const unregister = mergeUnregisters(
+      on(window, 'resize', reposition),
+      on(document, 'focusin', updateFocus),
+      on(document, 'focusout', updateFocus),
+    );
 
     return () => {
       window.clearTimeout(focusTimer);
-      window.removeEventListener('resize', reposition);
-      document.removeEventListener('focusin', updateFocus);
-      document.removeEventListener('focusout', updateFocus);
+      unregister();
     };
   });
 </script>

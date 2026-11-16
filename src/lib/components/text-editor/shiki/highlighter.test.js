@@ -15,27 +15,31 @@ import {
 } from 'lexical';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const facadeState = vi.hoisted(() => ({
+const engineState = vi.hoisted(() => ({
   engineLoaded: true,
   engineUnavailable: false,
   /** @type {Set<string>} */ languages: new Set(['javascript']),
   /** @type {Set<string>} */ themes: new Set(['github-light']),
 }));
 
-vi.mock('./facade.js', async () => {
+vi.mock('./engine.js', () => ({
+  isEngineLoaded: vi.fn(() => engineState.engineLoaded),
+  isEngineUnavailable: vi.fn(() => engineState.engineUnavailable),
+  isPlainLanguage: vi.fn((language) =>
+    ['', 'plain', 'plaintext', 'text', 'txt'].includes(language ?? ''),
+  ),
+  isCodeLanguageLoaded: vi.fn((language) => engineState.languages.has(language)),
+  isCodeThemeLoaded: vi.fn((theme) => engineState.themes.has(theme)),
+  loadEngine: vi.fn(),
+  loadCodeLanguage: vi.fn(),
+  loadCodeTheme: vi.fn(),
+}));
+
+vi.mock('./lexical.js', async () => {
   const { $createCodeHighlightNode: createCodeHighlightNode } = await import('@lexical/code-core');
 
   return {
-    isEngineLoaded: vi.fn(() => facadeState.engineLoaded),
-    isEngineUnavailable: vi.fn(() => facadeState.engineUnavailable),
-    isPlainLanguage: vi.fn((language) =>
-      ['', 'plain', 'plaintext', 'text', 'txt'].includes(language ?? ''),
-    ),
-    isCodeLanguageLoaded: vi.fn((language) => facadeState.languages.has(language)),
-    isCodeThemeLoaded: vi.fn((theme) => facadeState.themes.has(theme)),
-    loadEngine: vi.fn(),
-    loadCodeLanguage: vi.fn(),
-    loadCodeTheme: vi.fn(),
+    getCodeNodeRefresher: vi.fn(() => vi.fn()),
     // Stand in for Shiki: one highlight node per whitespace-separated word
     getHighlightNodes: vi.fn((codeNode) =>
       codeNode
@@ -54,13 +58,9 @@ vi.mock('./facade.js', async () => {
 });
 
 // eslint-disable-next-line import/first
-import {
-  getHighlightNodes,
-  isCodeLanguageLoaded,
-  loadCodeLanguage,
-  loadCodeTheme,
-  loadEngine,
-} from './facade.js';
+import { isCodeLanguageLoaded, loadCodeLanguage, loadCodeTheme, loadEngine } from './engine.js';
+// eslint-disable-next-line import/first
+import { getHighlightNodes } from './lexical.js';
 // eslint-disable-next-line import/first
 import { registerCodeHighlighting, shikiTokenizer } from './highlighter.js';
 
@@ -208,10 +208,10 @@ const mount = (editor) => {
 
 describe('shiki highlighter', () => {
   beforeEach(() => {
-    facadeState.engineLoaded = true;
-    facadeState.engineUnavailable = false;
-    facadeState.languages = new Set(['javascript']);
-    facadeState.themes = new Set(['github-light']);
+    engineState.engineLoaded = true;
+    engineState.engineUnavailable = false;
+    engineState.languages = new Set(['javascript']);
+    engineState.themes = new Set(['github-light']);
     vi.clearAllMocks();
   });
 
@@ -272,7 +272,7 @@ describe('shiki highlighter', () => {
   });
 
   it('requests the engine and holds off highlighting until it arrives', () => {
-    facadeState.engineLoaded = false;
+    engineState.engineLoaded = false;
 
     const editor = createTestEditor();
     const tokenizer = createTestTokenizer();
@@ -287,14 +287,14 @@ describe('shiki highlighter', () => {
   });
 
   it('highlights once the engine becomes available', () => {
-    facadeState.engineLoaded = false;
+    engineState.engineLoaded = false;
 
     const editor = createTestEditor();
 
     registerCodeHighlighting(editor, createTestTokenizer());
     insertCodeBlock(editor, 'const a');
 
-    facadeState.engineLoaded = true;
+    engineState.engineLoaded = true;
 
     editor.update(
       () => {
@@ -311,37 +311,29 @@ describe('shiki highlighter', () => {
   });
 
   it('requests a grammar that is not loaded', () => {
-    facadeState.languages = new Set();
+    engineState.languages = new Set();
 
     const editor = createTestEditor();
 
     registerCodeHighlighting(editor, createTestTokenizer());
     insertCodeBlock(editor, 'const a');
 
-    expect(loadCodeLanguage).toHaveBeenCalledWith(
-      'javascript',
-      expect.anything(),
-      expect.any(String),
-    );
+    expect(loadCodeLanguage).toHaveBeenCalledWith('javascript', expect.any(Function));
   });
 
   it('requests a theme that is not loaded', () => {
-    facadeState.themes = new Set();
+    engineState.themes = new Set();
 
     const editor = createTestEditor();
 
     registerCodeHighlighting(editor, createTestTokenizer());
     insertCodeBlock(editor, 'const a');
 
-    expect(loadCodeTheme).toHaveBeenCalledWith(
-      'github-light',
-      expect.anything(),
-      expect.any(String),
-    );
+    expect(loadCodeTheme).toHaveBeenCalledWith('github-light', expect.any(Function));
   });
 
   it('marks an unsupported language as not highlighted', () => {
-    facadeState.languages = new Set();
+    engineState.languages = new Set();
     vi.mocked(loadCodeLanguage).mockReturnValue(undefined);
 
     const editor = createTestEditor();
@@ -385,11 +377,7 @@ describe('shiki highlighter', () => {
       { discrete: true },
     );
 
-    expect(loadCodeLanguage).toHaveBeenCalledWith(
-      'nonexistent',
-      expect.anything(),
-      expect.any(String),
-    );
+    expect(loadCodeLanguage).toHaveBeenCalledWith('nonexistent', expect.any(Function));
     expect(readCodeBlock(editor).supported).toBe(false);
   });
 
@@ -431,8 +419,8 @@ describe('shiki highlighter', () => {
   });
 
   it('falls back to plain text when the engine could not be fetched', () => {
-    facadeState.engineLoaded = false;
-    facadeState.engineUnavailable = true;
+    engineState.engineLoaded = false;
+    engineState.engineUnavailable = true;
 
     const editor = createTestEditor();
     const tokenizer = createTestTokenizer();
@@ -936,7 +924,7 @@ describe('shiki highlighter', () => {
 
 describe('shikiTokenizer', () => {
   beforeEach(() => {
-    facadeState.engineLoaded = true;
+    engineState.engineLoaded = true;
     vi.clearAllMocks();
   });
 
@@ -974,7 +962,7 @@ describe('shikiTokenizer', () => {
   });
 
   it('does not consult Shiki before the engine is loaded', () => {
-    facadeState.engineLoaded = false;
+    engineState.engineLoaded = false;
     vi.mocked(isCodeLanguageLoaded).mockReturnValue(true);
 
     const editor = createTestEditor();

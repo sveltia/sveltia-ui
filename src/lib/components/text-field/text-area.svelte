@@ -7,10 +7,17 @@
 -->
 <script>
   import EmojiAutocomplete from './emoji-autocomplete.svelte';
+  import { getHighlightedTokens } from './text-area.js';
 
   /**
-   * @import { Snippet } from 'svelte';
-   * @import { CommonEventHandlers, HighlightedToken, InputEventHandlers } from '#lib/typedefs.js';
+   * @import {
+   * CommonEventHandlers,
+   * ContainerProps,
+   * FormFieldStateProps,
+   * HighlightedToken,
+   * InputEventHandlers,
+   * WidgetStateProps,
+   * } from '#lib/typedefs.js';
    */
 
   /**
@@ -29,21 +36,11 @@
    * `undefined` to show the text as is, for example while a grammar is still loading. The tokens
    * are painted behind the text, which is made transparent, so the `<textarea>` keeps working as
    * usual. Only styles that keep the text width can be applied, so the glyphs stay aligned.
-   * @property {string} [class] The `class` attribute on the wrapper element.
-   * @property {boolean} [hidden] Whether to hide the widget.
-   * @property {boolean} [disabled] Whether to disable the widget. An alias of the `aria-disabled`
-   * attribute.
-   * @property {boolean} [readonly] Whether to make the widget read-only. An alias of the
-   * `aria-readonly` attribute.
-   * @property {boolean} [required] Whether to mark the widget required. An alias of the
-   * `aria-required` attribute.
-   * @property {boolean} [invalid] Whether to mark the widget invalid. An alias of the
-   * `aria-invalid` attribute.
-   * @property {Snippet} [children] Primary slot content.
    */
 
   /**
-   * @type {CommonEventHandlers & InputEventHandlers & Props & Record<string, any>}
+   * @type {CommonEventHandlers & InputEventHandlers & ContainerProps & WidgetStateProps &
+   * FormFieldStateProps & Props & Record<string, any>}
    */
   let {
     /* eslint-disable prefer-const */
@@ -79,17 +76,7 @@
    * stale tokens would show text different from what’s being edited.
    * @type {HighlightedToken[] | undefined}
    */
-  const highlightedTokens = $derived.by(() => {
-    const lines = highlight?.(value ?? '');
-
-    if (!lines) {
-      return undefined;
-    }
-
-    const tokens = lines.flatMap((line) => [...line, { content: '\n' }]);
-
-    return tokens.map(({ content }) => content).join('') === cloneValue ? tokens : undefined;
-  });
+  const highlightedTokens = $derived(getHighlightedTokens(value, highlight));
   /** A reference to the clone element. */
   let cloneElement = $state();
 

@@ -7,17 +7,17 @@
 <script>
   import { _, locale } from '@sveltia/i18n';
   import { untrack } from 'svelte';
+  import { hasModifier } from '../../services/navigation.js';
+  import { getMaximumFractionDigits, normalizeStep } from '../../services/number.js';
   import Button from '../button/button.svelte';
   import Icon from '../icon/icon.svelte';
   import {
     STEP_DISABLED,
     getInputMode,
-    getMaximumFractionDigits,
     isAtMax,
     isAtMin,
     isInvalidNumber,
     normalizeNumber,
-    normalizeStep,
     parseNumber,
     stepNumber,
   } from './number-input.js';
@@ -69,7 +69,6 @@
     children,
     increaseIcon,
     decreaseIcon,
-    onChange,
     onkeydown,
     oninput,
     ...restProps
@@ -244,10 +243,9 @@
     inputmode={inputmode ?? getInputMode({ fractional: isFractional, min })}
     aria-describedby={describedBy}
     onkeydown={(event) => {
-      const { key, ctrlKey, metaKey, altKey, shiftKey } = event;
-      const hasModifier = shiftKey || altKey || ctrlKey || metaKey;
+      const { key } = event;
       // A read-only field can’t be stepped, just like the spin buttons
-      const canStep = stepEnabled && !disabled && !readonly && !hasModifier;
+      const canStep = stepEnabled && !disabled && !readonly && !hasModifier(event);
 
       if (key === 'ArrowDown' && canStep) {
         event.preventDefault();
@@ -272,7 +270,6 @@
 
       oninput?.(event);
     }}
-    {onChange}
   />
 </div>
 

@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { findTypeAheadMatch, TYPE_AHEAD_TIMEOUT, TypeAhead } from './type-ahead.js';
+import { findTypeAheadMatch, isPrintableKey, TYPE_AHEAD_TIMEOUT, TypeAhead } from './type-ahead.js';
 
 describe('TypeAhead', () => {
   beforeEach(() => {
@@ -8,6 +8,18 @@ describe('TypeAhead', () => {
 
   afterEach(() => {
     vi.useRealTimers();
+  });
+
+  it('matches normalized labels against the accumulated prefix', () => {
+    const typeAhead = new TypeAhead();
+    const labels = [' Apple', 'Banana', 'Äpfel', 'Blueberry']; // cspell:disable-line
+
+    expect(typeAhead.match(labels, 'b', -1)).toBe(1);
+    expect(typeAhead.match(labels, 'l', 1)).toBe(3);
+    typeAhead.reset();
+    expect(typeAhead.match(labels, 'a', 0)).toBe(2);
+    typeAhead.reset();
+    expect(typeAhead.match(labels, 'z', 0)).toBe(-1);
   });
 
   it('accumulates quick keystrokes into a lowercase prefix', () => {
@@ -67,5 +79,29 @@ describe('findTypeAheadMatch', () => {
     expect(findTypeAheadMatch(labels, 'z', 0)).toBe(-1);
     expect(findTypeAheadMatch(labels, '', 0)).toBe(-1);
     expect(findTypeAheadMatch([], 'a', -1)).toBe(-1);
+  });
+});
+
+describe('isPrintableKey', () => {
+  /**
+   * Create a `keydown` event.
+   * @param {string} key Key.
+   * @param {KeyboardEventInit} [init] Other properties.
+   * @returns {KeyboardEvent} Event.
+   */
+  const keyDown = (key, init = {}) => new KeyboardEvent('keydown', { key, ...init });
+
+  it('accepts a single character, with or without Shift', () => {
+    expect(isPrintableKey(keyDown('a'))).toBe(true);
+    expect(isPrintableKey(keyDown('A', { shiftKey: true }))).toBe(true);
+    expect(isPrintableKey(keyDown('é'))).toBe(true);
+  });
+
+  it('rejects named keys, whitespace and shortcuts', () => {
+    expect(isPrintableKey(keyDown('Enter'))).toBe(false);
+    expect(isPrintableKey(keyDown(' '))).toBe(false);
+    expect(isPrintableKey(keyDown('a', { altKey: true }))).toBe(false);
+    expect(isPrintableKey(keyDown('a', { ctrlKey: true }))).toBe(false);
+    expect(isPrintableKey(keyDown('a', { metaKey: true }))).toBe(false);
   });
 });

@@ -9,6 +9,7 @@ import {
   insertLink,
   insertMarkdown,
   joinLines,
+  registerRawTextSelection,
   registerRawTextShortcut,
   registerRawTextSingleLine,
   setBlockType,
@@ -396,6 +397,86 @@ describe('joinLines', () => {
     });
     expect(joinLines({ value: 'One\nTwo', caret: 2 })).toEqual({ value: 'One Two', caret: 2 });
     expect(joinLines({ value: 'One', caret: 3 })).toEqual({ value: 'One', caret: 3 });
+  });
+});
+
+describe('registerRawTextSelection', () => {
+  it('reports the block type at the caret while the `<textarea>` is focused', () => {
+    const textArea = document.createElement('textarea');
+    const onChange = vi.fn();
+
+    textArea.value = 'Intro\n\n- [ ] Task';
+    document.body.append(textArea);
+
+    const unregister = registerRawTextSelection(textArea, onChange, {
+      /**
+       * Enable the task list button.
+       * @returns {boolean} Result.
+       */
+      hasTaskList: () => true,
+    });
+
+    // Reported right away, as a paragraph until the `<textarea>` is focused
+    expect(onChange).toHaveBeenLastCalledWith('paragraph');
+
+    textArea.focus();
+    textArea.setSelectionRange(textArea.value.length, textArea.value.length);
+    textArea.dispatchEvent(new Event('keyup'));
+    expect(onChange).toHaveBeenLastCalledWith('task-list');
+
+    textArea.setSelectionRange(0, 0);
+    textArea.dispatchEvent(new Event('mouseup'));
+    expect(onChange).toHaveBeenLastCalledWith('paragraph');
+
+    const count = onChange.mock.calls.length;
+
+    unregister();
+    textArea.dispatchEvent(new Event('select'));
+    expect(onChange).toHaveBeenCalledTimes(count);
+    textArea.remove();
+  });
+
+  it('reports a task list item as a bulleted list item without the task list button', () => {
+    const textArea = document.createElement('textarea');
+    const onChange = vi.fn();
+
+    textArea.value = '- [ ] Task';
+    document.body.append(textArea);
+    textArea.focus();
+    textArea.setSelectionRange(3, 3);
+
+    const unregister = registerRawTextSelection(textArea, onChange);
+
+    expect(onChange).toHaveBeenLastCalledWith('bulleted-list');
+    unregister();
+    textArea.remove();
+  });
+
+  it('follows a change to whether the task list button is enabled', () => {
+    const textArea = document.createElement('textarea');
+    const onChange = vi.fn();
+    let hasTaskList = false;
+
+    textArea.value = '- [ ] Task';
+    document.body.append(textArea);
+    textArea.focus();
+    textArea.setSelectionRange(3, 3);
+
+    const unregister = registerRawTextSelection(textArea, onChange, {
+      /**
+       * Tell whether the task list button is enabled.
+       * @returns {boolean} Result.
+       */
+      hasTaskList: () => hasTaskList,
+    });
+
+    expect(onChange).toHaveBeenLastCalledWith('bulleted-list');
+
+    hasTaskList = true;
+    textArea.dispatchEvent(new Event('keyup'));
+    expect(onChange).toHaveBeenLastCalledWith('task-list');
+    unregister();
+    textArea.remove();
   });
 });
 

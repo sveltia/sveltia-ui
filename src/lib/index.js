@@ -87,7 +87,7 @@ export { default as VisibilityObserver } from './components/util/visibility-obse
 export { IMPORT_UPDATE_TAG } from './components/text-editor/constants.js';
 export { loadCodeHighlighter } from './components/text-editor/shiki/preload.js';
 export { setCodeHighlighterCacheEnabled } from './components/text-editor/shiki/cache.js';
-export { highlightCodeToHTML } from './components/text-editor/shiki/facade.js';
+export { highlightCodeToHTML } from './components/text-editor/shiki/engine.js';
 export { setCodeHighlighterLoaders } from './components/text-editor/shiki/loader.js';
 export { setFontURLs } from './components/util/fonts.js';
 export { initLocales, strings } from './services/i18n.js';

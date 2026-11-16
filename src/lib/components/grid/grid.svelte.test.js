@@ -64,6 +64,24 @@ it('leaves the selection alone when click to select is disabled', async () => {
   await expect.element(beta).toHaveAttribute('aria-selected', 'false');
 });
 
+it('follows a change to the click to select option after creation', async () => {
+  /** @type {ComponentProps<typeof GridFixture>} */
+  const props = $state({ clickToSelect: true });
+  const activated = whenActivated();
+  const screen = await render(GridFixture, props);
+
+  await activated;
+
+  const [alpha, beta] = screen.getByRole('row').all();
+
+  props.clickToSelect = false;
+  await beta.click();
+  await expect.element(beta).toHaveAttribute('aria-selected', 'false');
+  props.clickToSelect = true;
+  await alpha.click();
+  await expect.element(alpha).toHaveAttribute('aria-selected', 'true');
+});
+
 it('allows selecting several rows when multiple', async () => {
   const activated = whenActivated();
   const screen = await render(GridFixture, { multiple: true });

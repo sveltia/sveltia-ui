@@ -6,6 +6,7 @@
 -->
 <script>
   import { untrack } from 'svelte';
+  import { getModalLabelAttrs } from '../../services/label.js';
   import Spacer from '../divider/spacer.svelte';
   import ModalCloseButton from '../dialog/modal-close-button.svelte';
   import Modal from '../util/modal.svelte';
@@ -19,7 +20,7 @@
 
   /**
    * @import { Snippet } from 'svelte';
-   * @import { ModalProps } from '#lib/typedefs.js';
+   * @import { ModalLabelProps, ModalProps } from '#lib/typedefs.js';
    * @import { SwipeState } from './drawer.js';
    */
 
@@ -27,11 +28,6 @@
    * @typedef {object} Props
    * @property {string} [class] The `class` attribute on the content element.
    * @property {boolean} [open] Whether to open the drawer.
-   * @property {string} [title] Title text displayed on the header. With a custom `header` snippet,
-   * it’s used as the drawer’s `aria-label` instead.
-   * @property {string} [ariaLabelledby] ID of the element that labels the drawer, typically a
-   * heading inside a custom `header` snippet. Takes precedence over `title` for the accessible
-   * name.
    * @property {'top' | 'right' | 'bottom' | 'left'} [position] Position of the drawer.
    * @property {'small' | 'medium' | 'large' | 'x-large' | 'full'} [size] Width or height of the
    * drawer.
@@ -50,7 +46,7 @@
    */
 
   /**
-   * @type {ModalProps & Props & Record<string, any>}
+   * @type {ModalProps & ModalLabelProps & Props & Record<string, any>}
    */
   let {
     /* eslint-disable prefer-const */
@@ -96,7 +92,7 @@
 
   /**
    * A reference to the modal component.
-   * @type {any}
+   * @type {Modal | undefined}
    */
   let modal = $state();
 
@@ -208,24 +204,25 @@
   });
 
   /**
-   * Accessible name for the `<dialog>`, resolved the same way as `<Dialog>`: the built-in header
-   * renders the title in an element the dialog can point at; with a custom header the title is
-   * only text, so it becomes `aria-label` unless the consumer names the labelling element.
+   * Labelling attributes for the `<dialog>`, giving it an accessible name.
    */
-  const labelledby = $derived(ariaLabelledby ?? (!header && title ? `${id}-title` : undefined));
-  const label = $derived(labelledby ? undefined : title || undefined);
+  const labelAttrs = $derived(
+    getModalLabelAttrs({ id, title, ariaLabelledby, hasCustomHeader: !!header }),
+  );
 </script>
 
-<Modal
-  bind:this={modal}
-  {...restProps}
-  bind:open
-  {id}
-  class="drawer"
-  aria-label={label}
-  aria-labelledby={labelledby}
-  showBackdrop
->
+{#snippet closeButton()}
+  <ModalCloseButton
+    class="close"
+    controls={id}
+    {closeIcon}
+    onClose={() => {
+      modal?.close('close');
+    }}
+  />
+{/snippet}
+
+<Modal bind:this={modal} {...restProps} bind:open {id} class="drawer" {...labelAttrs} showBackdrop>
   <div
     bind:this={content}
     role="none"
@@ -249,14 +246,7 @@
     {/if}
     <div role="none" class="extra-control">
       {#if showClose === 'outside'}
-        <ModalCloseButton
-          class="close"
-          controls={id}
-          {closeIcon}
-          onClose={() => {
-            modal?.close('close');
-          }}
-        />
+        {@render closeButton()}
       {/if}
     </div>
     {#if title || showClose === 'inside' || header || headerExtra}
@@ -270,14 +260,7 @@
           <Spacer flex={true} />
           {@render headerExtra?.()}
           {#if showClose === 'inside'}
-            <ModalCloseButton
-              class="close"
-              controls={id}
-              {closeIcon}
-              onClose={() => {
-                modal?.close('close');
-              }}
-            />
+            {@render closeButton()}
           {/if}
         </div>
       {/if}

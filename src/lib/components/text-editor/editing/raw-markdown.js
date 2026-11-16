@@ -2,8 +2,9 @@
  * Markdown editing helpers for the plain text mode of the text editor, where the toolbar buttons
  * edit the Markdown source in the `<textarea>` instead of Lexical nodes. Apart from
  * {@link getRawTextState}, {@link applyRawTextEdit}, {@link editRawText},
- * {@link registerRawTextShortcut} and {@link insertComponent}, everything here is pure: a function
- * takes the current value and selection, and returns the edit to apply.
+ * {@link registerRawTextShortcut}, {@link insertComponent} and the other functions that register
+ * listeners, everything here is pure: a function takes the current value and selection, and returns
+ * the edit to apply.
  */
 
 import { isMac, matchesShortcuts } from '@sveltia/utils/events';
@@ -652,5 +653,48 @@ export const registerRawTextSingleLine = (textArea) => {
   return () => {
     textArea.removeEventListener('beforeinput', onBeforeInput);
     textArea.removeEventListener('input', onInput, { capture: true });
+  };
+};
+
+/**
+ * Events after which the selection of the `<textarea>` may have changed.
+ */
+const SELECTION_EVENT_TYPES = ['selectionchange', 'select', 'input', 'keyup', 'mouseup', 'focus'];
+
+/**
+ * Keep track of the type of the block where the selection of the `<textarea>` starts, so the
+ * toolbar can reflect it like in the rich text mode. Until the `<textarea>` gets the focus, its
+ * caret is at the end of the value rather than where the user would expect, so the block type is
+ * not detected yet, and is reported as a paragraph.
+ * @param {HTMLTextAreaElement} textArea `<textarea>` element.
+ * @param {(blockType: TextEditorBlockType) => void} onChange Function to call with the block type,
+ * right away and whenever the selection may have changed.
+ * @param {object} [options] Options.
+ * @param {() => boolean} [options.hasTaskList] Function that tells whether the task list button is
+ * enabled; see {@link getBlockType}. It’s called on every change, so it can follow the editor
+ * configuration.
+ * @returns {() => void} Function to stop tracking the selection.
+ */
+export const registerRawTextSelection = (
+  textArea,
+  onChange,
+  { hasTaskList = () => false } = {},
+) => {
+  /**
+   * Report the block type.
+   */
+  const update = () => {
+    onChange(
+      document.activeElement === textArea
+        ? getBlockType(getRawTextState(textArea), { hasTaskList: hasTaskList() })
+        : 'paragraph',
+    );
+  };
+
+  update();
+  SELECTION_EVENT_TYPES.forEach((type) => textArea.addEventListener(type, update));
+
+  return () => {
+    SELECTION_EVENT_TYPES.forEach((type) => textArea.removeEventListener(type, update));
   };
 };

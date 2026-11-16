@@ -2,6 +2,8 @@ import { isRTL } from '@sveltia/i18n';
 import { generateElementId } from '@sveltia/utils/element';
 import { sleep } from '@sveltia/utils/misc';
 import { on } from 'svelte/events';
+import { restoreFocus } from './focus.js';
+import { hasModifier } from './navigation.js';
 import { calculatePopupStyle, isShallowEqual, mirrorPosition } from './popup-position.js';
 
 /**
@@ -35,18 +37,7 @@ class Popup {
     } else if (this.anchorElement.getAttribute('aria-expanded') === 'true') {
       // Wait for the popup to close before focusing the anchor, otherwise the focus will be lost
       window.requestAnimationFrame(() => {
-        const { activeElement } = document;
-
-        // Only take focus back if it’s still inside the popup, or nowhere because the popup took it
-        // down with itself. If it has already moved on — the user tabbed out of the menu, say —
-        // pulling it back would undo what they just did.
-        if (
-          !activeElement ||
-          activeElement === document.body ||
-          this.popupElement?.contains(activeElement)
-        ) {
-          this.anchorElement.focus();
-        }
+        restoreFocus(this.anchorElement, this.popupElement);
       });
     }
 
@@ -87,17 +78,24 @@ class Popup {
   nested = false;
 
   /**
-   * Function that removes the event listeners added to the current {@link popupElement}.
-   * @type {(() => void) | undefined}
+   * Controller whose signal removes the event listeners added to the current {@link popupElement}.
+   * @type {AbortController | undefined}
    */
-  #removeEventListeners = undefined;
+  #popupListeners = undefined;
 
   /**
-   * Functions that remove the event listeners added to the {@link anchorElement}, which may outlive
-   * this instance.
-   * @type {(() => void)[]}
+   * Controller whose signal removes the event listeners added to the {@link anchorElement}, which
+   * may outlive this instance.
+   * @type {AbortController}
    */
-  #removeAnchorListeners = [];
+  #anchorListeners = new AbortController();
+
+  /**
+   * Whether the {@link anchorElement} is a text field, which keeps its clicks and its Enter and
+   * Space keys.
+   * @type {boolean}
+   */
+  #anchorIsTextField = false;
 
   /**
    * ID of the animation frame requested to recalculate the position after a resize.
@@ -127,63 +125,13 @@ class Popup {
     // A text field, such as the input of an editable combobox, needs its clicks to place the caret
     // and its Enter and Space keys to type, so it’s not toggled by them. Its consumer provides a
     // separate control, typically an expand button, while the arrow keys still open the popup.
-    const isTextField = anchorElement.matches('input, textarea, [contenteditable="true"]');
+    this.#anchorIsTextField = anchorElement.matches('input, textarea, [contenteditable="true"]');
 
-    const removeClickListener = on(anchorElement, 'click', (event) => {
-      if (!isTextField && !this.isDisabled && !this.isReadOnly) {
-        // A menu item’s submenu may already have been opened by hovering, which also happens right
-        // before a tap on a touch screen, so a pointer click only opens it rather than toggling it
-        // closed. A scripted click, which has no `detail`, still toggles it: that’s how the
-        // keyboard navigation closes a submenu.
-        this.open = event.detail && anchorElement.matches('[role="menuitem"]') ? true : !this.open;
-      }
-    });
+    const { signal } = this.#anchorListeners;
 
-    const removeKeyDownListener = on(anchorElement, 'keydown', (event) => {
-      const { key, ctrlKey, metaKey, shiftKey, altKey } = event;
-      const hasModifier = shiftKey || altKey || ctrlKey || metaKey;
-
-      if (this.isDisabled || this.isReadOnly) {
-        return;
-      }
-
-      if (!isTextField && ['Enter', ' '].includes(key) && !hasModifier) {
-        event.preventDefault();
-        event.stopPropagation();
-        this.open = !this.open;
-
-        return;
-      }
-
-      // The arrow keys open a listbox or menu, the way they do a native `<select>`; Alt+Down is the
-      // combobox convention (APG Select-Only Combobox, Menu Button). They never close one: inside
-      // the popup they belong to the list. A menu item that opens a submenu is left alone: there
-      // the arrows move through the parent menu, and the submenu opens with the inline arrow.
-      if (
-        ['ArrowDown', 'ArrowUp'].includes(key) &&
-        !(shiftKey || ctrlKey || metaKey) &&
-        (!altKey || key === 'ArrowDown') &&
-        ['listbox', 'menu'].includes(anchorElement.getAttribute('aria-haspopup') ?? '') &&
-        !anchorElement.matches('[role^="menuitem"]') &&
-        !this.open
-      ) {
-        event.preventDefault();
-        event.stopPropagation();
-        this.open = true;
-      }
-    });
-
-    const removeTransitionStartListener = on(anchorElement, 'transitionstart', () => {
-      if (this.anchorElement.closest('.hiding, .hidden, [hidden]')) {
-        this.hideImmediately();
-      }
-    });
-
-    this.#removeAnchorListeners = [
-      removeClickListener,
-      removeKeyDownListener,
-      removeTransitionStartListener,
-    ];
+    on(anchorElement, 'click', (event) => this.#onAnchorClick(event), { signal });
+    on(anchorElement, 'keydown', (event) => this.#onAnchorKeyDown(event), { signal });
+    on(anchorElement, 'transitionstart', () => this.#onAnchorTransitionStart(), { signal });
 
     // A busy browser can report several changes at once, oldest first, so only the last entry tells
     // whether the anchor is visible now
@@ -250,39 +198,107 @@ class Popup {
     identifiedElement.id = this.id;
     this.anchorElement.setAttribute('aria-controls', this.id);
 
-    // Close the popup when the backdrop, a menu item or an option is clicked
-    const removeClickListener = on(popupElement, 'click', (event) => {
+    this.#popupListeners = new AbortController();
+
+    const { signal } = this.#popupListeners;
+
+    on(popupElement, 'click', (event) => this.#onPopupClick(event), { signal });
+    on(popupElement, 'keydown', (event) => this.#onPopupKeyDown(event), { signal });
+  }
+
+  /**
+   * Handle the `click` event on the anchor: toggle the popup.
+   * @param {MouseEvent} event `click` event.
+   */
+  #onAnchorClick(event) {
+    if (!this.#anchorIsTextField && !this.isDisabled && !this.isReadOnly) {
+      // A menu item’s submenu may already have been opened by hovering, which also happens right
+      // before a tap on a touch screen, so a pointer click only opens it rather than toggling it
+      // closed. A scripted click, which has no `detail`, still toggles it: that’s how the keyboard
+      // navigation closes a submenu.
+      this.open =
+        event.detail && this.anchorElement.matches('[role="menuitem"]') ? true : !this.open;
+    }
+  }
+
+  /**
+   * Handle the `keydown` event on the anchor: toggle the popup with Enter or Space, and open it
+   * with the arrow keys.
+   * @param {KeyboardEvent} event `keydown` event.
+   */
+  #onAnchorKeyDown(event) {
+    const { key, ctrlKey, metaKey, shiftKey, altKey } = event;
+    const { anchorElement } = this;
+
+    if (this.isDisabled || this.isReadOnly) {
+      return;
+    }
+
+    if (!this.#anchorIsTextField && ['Enter', ' '].includes(key) && !hasModifier(event)) {
+      event.preventDefault();
       event.stopPropagation();
+      this.open = !this.open;
 
-      // eslint-disable-next-line prefer-destructuring
-      const target = /** @type {HTMLElement} */ (event.target);
+      return;
+    }
 
-      if (
-        this.open &&
-        (target === this.popupElement || target.matches('[role^="menuitem"], [role="option"]'))
-      ) {
-        this.open = false;
-      }
-    });
+    // The arrow keys open a listbox or menu, the way they do a native `<select>`; Alt+Down is the
+    // combobox convention (APG Select-Only Combobox, Menu Button). They never close one: inside the
+    // popup they belong to the list. A menu item that opens a submenu is left alone: there the
+    // arrows move through the parent menu, and the submenu opens with the inline arrow.
+    if (
+      ['ArrowDown', 'ArrowUp'].includes(key) &&
+      !(shiftKey || ctrlKey || metaKey) &&
+      (!altKey || key === 'ArrowDown') &&
+      ['listbox', 'menu'].includes(anchorElement.getAttribute('aria-haspopup') ?? '') &&
+      !anchorElement.matches('[role^="menuitem"]') &&
+      !this.open
+    ) {
+      event.preventDefault();
+      event.stopPropagation();
+      this.open = true;
+    }
+  }
 
-    const removeKeyDownListener = on(popupElement, 'keydown', (event) => {
-      const { key, ctrlKey, metaKey, shiftKey, altKey } = event;
-      const hasModifier = shiftKey || altKey || ctrlKey || metaKey;
+  /**
+   * Handle the `transitionstart` event on the anchor: hide the popup right away when the anchor is
+   * being hidden.
+   */
+  #onAnchorTransitionStart() {
+    if (this.anchorElement.closest('.hiding, .hidden, [hidden]')) {
+      this.hideImmediately();
+    }
+  }
 
-      if (key === 'Escape' && !hasModifier) {
-        event.preventDefault();
-        event.stopPropagation();
-        this.open = false;
-      }
-    });
+  /**
+   * Handle the `click` event on the popup: close it when the backdrop, a menu item or an option is
+   * clicked.
+   * @param {MouseEvent} event `click` event.
+   */
+  #onPopupClick(event) {
+    event.stopPropagation();
 
-    /**
-     * Remove the listeners added above.
-     */
-    this.#removeEventListeners = () => {
-      removeClickListener();
-      removeKeyDownListener();
-    };
+    // eslint-disable-next-line prefer-destructuring
+    const target = /** @type {HTMLElement} */ (event.target);
+
+    if (
+      this.open &&
+      (target === this.popupElement || target.matches('[role^="menuitem"], [role="option"]'))
+    ) {
+      this.open = false;
+    }
+  }
+
+  /**
+   * Handle the `keydown` event on the popup: close it with Escape.
+   * @param {KeyboardEvent} event `keydown` event.
+   */
+  #onPopupKeyDown(event) {
+    if (event.key === 'Escape' && !hasModifier(event)) {
+      event.preventDefault();
+      event.stopPropagation();
+      this.open = false;
+    }
   }
 
   /**
@@ -290,8 +306,8 @@ class Popup {
    * `aria-controls` attribute is removed as well, since the content is leaving the DOM tree.
    */
   detachPopupElement() {
-    this.#removeEventListeners?.();
-    this.#removeEventListeners = undefined;
+    this.#popupListeners?.abort();
+    this.#popupListeners = undefined;
 
     if (this.popupElement) {
       this.viewportResizeObserver.unobserve(this.popupElement);
@@ -408,8 +424,7 @@ class Popup {
    */
   destroy() {
     this.detachPopupElement();
-    this.#removeAnchorListeners.forEach((removeListener) => removeListener());
-    this.#removeAnchorListeners = [];
+    this.#anchorListeners.abort();
     this.intersectionObserver?.disconnect();
     this.resizeObserver?.disconnect();
     this.viewportResizeObserver?.disconnect();

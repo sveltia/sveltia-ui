@@ -30,8 +30,8 @@
    */
 
   /**
-   * @type {ModalProps & DialogProps & CommonEventHandlers & InputEventHandlers & Props &
-   * Record<string, any>}
+   * @type {ModalProps & DialogProps & CommonEventHandlers & InputEventHandlers &
+   * Props & Record<string, any>}
    */
   let {
     /* eslint-disable prefer-const */

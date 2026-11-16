@@ -10,6 +10,8 @@
 <script>
   import { isRTL } from '@sveltia/i18n';
   import { onMount, untrack } from 'svelte';
+  import { hasModifier } from '../../services/navigation.js';
+  import { startPointerDrag } from '../../services/pointer-drag.js';
   import {
     clampThumbIndex,
     findNearestStepIndex,
@@ -22,7 +24,7 @@
   } from './slider.js';
 
   /**
-   * @import { Snippet } from 'svelte';
+   * @import { ContainerProps, WidgetStateProps } from '#lib/typedefs.js';
    */
 
   /**
@@ -39,21 +41,16 @@
    * @property {(string[] | number[])} [optionLabels] Visible labels on the slider. When there is
    * one per step, the current one is also read out as the value (`aria-valuetext`).
    * @property {boolean} [flex] Make the text input container flexible.
-   * @property {string} [class] The `class` attribute on the wrapper element.
-   * @property {boolean} [hidden] Whether to hide the widget.
-   * @property {boolean} [disabled] Whether to disable the widget. An alias of the `aria-disabled`
-   * attribute.
    * @property {boolean} [readonly] Whether to make the widget read-only. An alias of the
    * `aria-readonly` attribute.
    * @property {boolean} [invalid] Whether to mark the widget invalid. An alias of the
    * `aria-invalid` attribute.
-   * @property {Snippet} [children] Primary slot content.
    * @property {(detail: { values?: number[], value?: number }) => void} [onChange] `change` event
    * handler.
    */
 
   /**
-   * @type {Props & Record<string, any>}
+   * @type {ContainerProps & WidgetStateProps & Props & Record<string, any>}
    */
   let {
     /* eslint-disable prefer-const */
@@ -105,9 +102,12 @@
   let startScreenX = $state(0);
   // eslint-disable-next-line prefer-const
   let sliderPositions = $state([0, 0]);
-  let dragging = $state(false);
-  let targetPointerId = $state(0);
   let targetValueIndex = $state(0);
+  /**
+   * Function to stop following the pointer in the middle of a drag.
+   * @type {(() => void) | undefined}
+   */
+  let stopDrag;
 
   /**
    * Set the value of a thumb, and fire the `change` event if it’s actually changed. This is only
@@ -163,10 +163,9 @@
    * @param {number} [valueIndex] Index in the {@link values} array to be used to get/set the value.
    */
   const onKeyDown = (event, valueIndex = 0) => {
-    const { key, ctrlKey, metaKey, shiftKey, altKey } = event;
-    const hasModifier = shiftKey || altKey || ctrlKey || metaKey;
+    const { key } = event;
 
-    if (disabled || readonly || hasModifier) {
+    if (disabled || readonly || hasModifier(event)) {
       return;
     }
 
@@ -217,20 +216,18 @@
   };
 
   /**
-   * Handle the `pointermove` event fired anywhere on the page.
+   * Handle the `pointermove` event fired anywhere on the page while dragging.
    * @param {PointerEvent} event `pointermove` event.
    */
   const onPointerMove = (event) => {
-    const { screenX, pointerId } = event;
-
-    if (disabled || readonly || !dragging || pointerId !== targetPointerId) {
+    if (disabled || readonly) {
       return;
     }
 
     event.preventDefault();
     event.stopPropagation();
 
-    const screenDiff = screenX - startScreenX;
+    const screenDiff = event.screenX - startScreenX;
     // Calculate new physical position from left edge
     const physicalX = startX + screenDiff;
 
@@ -238,40 +235,35 @@
   };
 
   /**
-   * Handle the `pointerup` and `pointercancel` events fired anywhere on the page.
-   * @param {PointerEvent} event `pointerup` or `pointercancel` event.
+   * Handle the end of a drag.
+   * @param {PointerEvent} event `pointerup` or `pointercancel` event, or `pointermove` event of a
+   * mouse that no longer has the primary button held down.
    */
-  const onPointerUp = (event) => {
-    const { pointerId, target } = event;
+  const onDragEnd = (event) => {
+    stopDrag = undefined;
 
-    if (disabled || readonly || !dragging || pointerId !== targetPointerId) {
+    if (disabled || readonly) {
       return;
     }
 
     event.stopPropagation();
 
-    const slider = /** @type {HTMLElement} */ (target);
-
-    // Handle a click on the bars
-    if (slider.matches('.base-bar, .slider-bar')) {
+    // Handle a click on the bars, but not a drag ended by a mouse moved without the button held
+    if (
+      event.type !== 'pointermove' &&
+      /** @type {HTMLElement} */ (event.target).matches('.base-bar, .slider-bar')
+    ) {
       const rect = /** @type {HTMLElement} */ (base).getBoundingClientRect();
       // Get physical X position from left edge
-      const physicalX = /** @type {any} */ (event).clientX - rect.left;
+      const physicalX = event.clientX - rect.left;
 
       moveThumb(physicalX);
     }
 
     // Reset everything
-    slider.releasePointerCapture(pointerId);
-    dragging = false;
     startX = 0;
     startScreenX = 0;
-    targetPointerId = 0;
     targetValueIndex = 0;
-
-    document.removeEventListener('pointermove', onPointerMove);
-    document.removeEventListener('pointerup', onPointerUp);
-    document.removeEventListener('pointercancel', onPointerUp);
   };
 
   /**
@@ -288,26 +280,23 @@
     event.preventDefault();
     event.stopPropagation();
 
-    dragging = true;
-
-    const { clientX, screenX, pointerId, target } = event;
-    const slider = /** @type {HTMLElement} */ (target);
+    const { clientX, screenX, target } = event;
     const rect = /** @type {HTMLElement} */ (base).getBoundingClientRect();
 
+    // A pointer pressed while another one is dragging takes over
+    stopDrag?.();
     // Store physical X position from left edge (same in LTR and RTL)
     startX = clientX - rect.left;
     startScreenX = screenX;
-    targetPointerId = pointerId;
     targetValueIndex =
       valueIndex ??
       (multiThumb
         ? getNearestThumbIndex(sliderPositions, toLogicalX(startX, barWidth, isRTL()))
         : 0);
-    slider.setPointerCapture(pointerId);
-
-    document.addEventListener('pointermove', onPointerMove);
-    document.addEventListener('pointerup', onPointerUp);
-    document.addEventListener('pointercancel', onPointerUp);
+    stopDrag = startPointerDrag(/** @type {HTMLElement} */ (target), event, {
+      onMove: onPointerMove,
+      onEnd: onDragEnd,
+    });
   };
 
   /**
@@ -359,9 +348,7 @@
       observer.disconnect();
       query.removeEventListener('change', init);
       // Stop listening if the slider is removed in the middle of a drag
-      document.removeEventListener('pointermove', onPointerMove);
-      document.removeEventListener('pointerup', onPointerUp);
-      document.removeEventListener('pointercancel', onPointerUp);
+      stopDrag?.();
     };
   });
 
@@ -383,7 +370,8 @@
 
 <svelte:body
   onclick={() => {
-    dragging = false;
+    stopDrag?.();
+    stopDrag = undefined;
   }}
 />
 

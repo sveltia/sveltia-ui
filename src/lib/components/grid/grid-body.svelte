@@ -14,24 +14,23 @@
   /**
    * @import { Snippet } from 'svelte';
    * @import { Attachment } from 'svelte/attachments';
+   * @import { ContainerProps } from '#lib/typedefs.js';
    */
 
   /**
    * @typedef {object} Props
-   * @property {string} [class] The `class` attribute on the wrapper element.
    * @property {string} [label] Display label for the row group.
    * @property {boolean} [collapsible] Whether the rows can be hidden with an expander in the
    * caption. Requires `label`.
    * @property {boolean} [expanded] Whether the rows are shown. Only applies when `collapsible`. An
    * alias of the `aria-expanded` attribute on the expander button.
-   * @property {Snippet} [children] Primary slot content.
    * @property {Snippet} [chevronIcon] Chevron slot content for the expander.
    * @property {(event: CustomEvent) => void} [onChange] Custom `Change` event handler, called with
    * the new `expanded` state in `detail` when the expander is toggled.
    */
 
   /**
-   * @type {Props & Record<string, any>}
+   * @type {ContainerProps & Props & Record<string, any>}
    */
   let {
     /* eslint-disable prefer-const */
