@@ -1073,6 +1073,53 @@ describe('Group - radiogroup keyboard navigation', () => {
     expect(radios[1].getAttribute('aria-checked')).toBe('false');
   });
 
+  it('should also navigate with ArrowDown and ArrowUp in a horizontal radio group', () => {
+    radios[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+    expect(radios[1].getAttribute('aria-checked')).toBe('true');
+    radios[1].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true }));
+    expect(radios[0].getAttribute('aria-checked')).toBe('true');
+  });
+
+  it('should navigate with all four arrow keys in a vertical radio group', async () => {
+    // Start over with a group that is vertical from the outset
+    radiogroup.remove();
+    radiogroup = document.createElement('div');
+    radiogroup.setAttribute('role', 'radiogroup');
+    radiogroup.setAttribute('aria-orientation', 'vertical');
+    radios = ['A', 'B', 'C'].map((label) => {
+      const radio = document.createElement('div');
+
+      radio.setAttribute('role', 'radio');
+      radio.textContent = label;
+      radiogroup.appendChild(radio);
+
+      return radio;
+    });
+    document.body.appendChild(radiogroup);
+    activateGroup()(radiogroup);
+    await vi.advanceTimersByTimeAsync(150);
+    radios[0].click();
+    radios[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+    expect(radios[1].getAttribute('aria-checked')).toBe('true');
+    radios[1].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+    expect(radios[2].getAttribute('aria-checked')).toBe('true');
+    radios[2].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true }));
+    expect(radios[1].getAttribute('aria-checked')).toBe('true');
+    radios[1].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true }));
+    expect(radios[0].getAttribute('aria-checked')).toBe('true');
+  });
+
+  it('should mirror ArrowLeft and ArrowRight in a right-to-left radio group', () => {
+    locale.set('ar');
+    radios[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true }));
+    expect(radios[1].getAttribute('aria-checked')).toBe('true');
+    radios[1].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+    expect(radios[2].getAttribute('aria-checked')).toBe('true');
+    radios[2].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+    expect(radios[1].getAttribute('aria-checked')).toBe('true');
+    locale.set('en');
+  });
+
   it('should fire a single Change per arrow key', () => {
     const onChange = vi.fn();
 
@@ -1194,11 +1241,47 @@ describe('Group - grid listbox navigation', () => {
   });
 
   it('should skip a disabled option during grid navigation', () => {
+    options[1].setAttribute('aria-disabled', 'true');
+    // ArrowRight from options[0] steps over the disabled options[1] onto options[2], and ArrowLeft
+    // steps back over it again
+    listbox.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+    expect(options[2].getAttribute('aria-selected')).toBe('true');
+    expect(options[1].getAttribute('aria-selected')).not.toBe('true');
+    listbox.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true }));
+    expect(options[0].getAttribute('aria-selected')).toBe('true');
+  });
+
+  it('should skip a disabled option in the same column on ArrowDown and ArrowUp', () => {
+    // Nine options in three rows of three, with the middle of the first column disabled
+    [6, 7, 8].forEach((i) => {
+      const opt = document.createElement('div');
+
+      opt.setAttribute('role', 'option');
+      opt.textContent = `Item ${i + 1}`;
+      opt.getClientRects = () => /** @type {DOMRectList} */ (/** @type {unknown} */ ([{}]));
+      opt.getBoundingClientRect = () =>
+        /** @type {DOMRect} */ ({ top: Math.floor(i / 3) * 100, left: (i % 3) * 100 });
+      listbox.appendChild(opt);
+      options.push(opt);
+    });
     options[3].setAttribute('aria-disabled', 'true');
     listbox.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
-    // options[3] is disabled → newTarget set to undefined → no navigation
-    expect(options[0].getAttribute('aria-selected')).toBe('true');
+    expect(options[6].getAttribute('aria-selected')).toBe('true');
     expect(options[3].getAttribute('aria-selected')).not.toBe('true');
+    listbox.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true }));
+    expect(options[0].getAttribute('aria-selected')).toBe('true');
+  });
+
+  it('should stay put when only disabled options lie ahead in the grid', () => {
+    options[5].click();
+    options[4].setAttribute('aria-disabled', 'true');
+    options[3].setAttribute('aria-disabled', 'true');
+    options[2].setAttribute('aria-disabled', 'true');
+    options[1].setAttribute('aria-disabled', 'true');
+    options[0].setAttribute('aria-disabled', 'true');
+    listbox.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true }));
+    listbox.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true }));
+    expect(options[5].getAttribute('aria-selected')).toBe('true');
   });
 
   it('should navigate grid forward (index+1) on ArrowLeft in RTL (branch 56)', () => {
@@ -2660,6 +2743,23 @@ describe('Group - a standalone menu with no opener anywhere in its ancestry', ()
     item.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }));
     // No opener to close or hand focus to; leaveMenu() returns immediately without throwing
     expect(document.activeElement).toBe(item);
+  });
+
+  it('should leave Tab to the browser, so focus can move on from an inline menu', () => {
+    const event = new KeyboardEvent('keydown', { key: 'Tab', bubbles: true, cancelable: true });
+
+    const shiftEvent = new KeyboardEvent('keydown', {
+      key: 'Tab',
+      shiftKey: true,
+      bubbles: true,
+      cancelable: true,
+    });
+
+    item.focus();
+    item.dispatchEvent(event);
+    item.dispatchEvent(shiftEvent);
+    expect(event.defaultPrevented).toBe(false);
+    expect(shiftEvent.defaultPrevented).toBe(false);
   });
 });
 

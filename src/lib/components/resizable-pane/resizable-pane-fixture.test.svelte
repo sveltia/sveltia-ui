@@ -14,6 +14,7 @@
    * firstMinSize?: number | string,
    * firstMaxSize?: number | string,
    * secondDefaultSize?: number | string,
+   * secondMaxSize?: number | string,
    * third?: boolean,
    * trailingHandle?: boolean,
    * disabled?: boolean,
@@ -30,6 +31,7 @@
     firstMinSize = 0,
     firstMaxSize = 100,
     secondDefaultSize = undefined,
+    secondMaxSize = 100,
     third = false,
     trailingHandle = false,
     disabled = false,
@@ -59,7 +61,9 @@
       First
     </ResizablePane>
     <ResizableHandle ariaLabel="Resize" {disabled} {showHandleBar} {onResizeStart} {onResizeEnd} />
-    <ResizablePane class="second" defaultSize={secondDefaultSize}>Second</ResizablePane>
+    <ResizablePane class="second" defaultSize={secondDefaultSize} maxSize={secondMaxSize}
+      >Second</ResizablePane
+    >
     {#if third}
       <ResizableHandle ariaLabel="Resize second">
         <span class="custom-handle">||</span>

@@ -71,6 +71,29 @@ it('marks an item with a submenu, and shows a chevron', async () => {
   );
 });
 
+it('shows the submenu of an item in a menu that isn’t in a dialog', async () => {
+  const screen = await render(MenuItem, {
+    label: 'Share',
+    items: html('<div role="menuitem" tabindex="-1">Copy Link</div>'),
+  });
+
+  const item = screen.getByRole('menuitem', { name: /Share/ });
+
+  await item.click();
+  await expect.element(item).toHaveAttribute('aria-expanded', 'true');
+  await vi.waitFor(() => {
+    const subitem = [...document.querySelectorAll('[role="menuitem"]')].find(
+      (element) => element.textContent === 'Copy Link',
+    );
+
+    expect(subitem?.checkVisibility()).toBe(true);
+  });
+  await new Promise((resolve) => {
+    setTimeout(resolve, 500);
+  });
+  await expect.element(item).toHaveAttribute('aria-expanded', 'true');
+});
+
 it('cancels a pending submenu open when the pointer leaves quickly', async () => {
   const screen = await render(MenuItem, {
     label: 'Share',

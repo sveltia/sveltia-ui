@@ -19,6 +19,27 @@ describe('splitMultilineFormatting', () => {
     expect(splitMultilineFormatting('  `foo\nbar`  ')).toBe('  `foo`\n`bar`  ');
   });
 
+  it('should split code formatting across two or more line breaks', () => {
+    expect(splitMultilineFormatting('`a\nb\nc`')).toBe('`a`\n`b`\n`c`');
+    expect(splitMultilineFormatting('x `a\n  b\nc\nd` y')).toBe('x `a`\n  `b`\n`c`\n`d` y');
+  });
+
+  it('should split code formatting with two or more backticks across lines', () => {
+    expect(splitMultilineFormatting('a ``b\nc`` d')).toBe('a ``b``\n``c`` d');
+    // A backtick next to the fence is padded with a space, which is stripped from the code
+    expect(splitMultilineFormatting('a ``b`\nc`` d')).toBe('a `` b` ``\n``c`` d');
+    expect(splitMultilineFormatting('a ```b\n`c``\nd``` e')).toBe(
+      'a ```b```\n``` `c`` ```\n```d``` e',
+    );
+  });
+
+  it('should strip a space from both ends of a code span before splitting it across lines', () => {
+    expect(splitMultilineFormatting('a ` b\nc ` d')).toBe('a `b`\n`c` d');
+    expect(splitMultilineFormatting('a `` `b`\nc `` d')).toBe('a `` `b` ``\n``c`` d');
+    // A space at both ends of a line is kept, padded with another one that is stripped instead
+    expect(splitMultilineFormatting('a `  b \nc ` d')).toBe('a `  b  `\n`c` d');
+  });
+
   it('should pair the backticks of code spans before splitting them across lines', () => {
     // The closing backtick of a code span isn’t the opening one of another
     // @see https://github.com/sveltia/sveltia-cms/issues/1168
@@ -27,7 +48,8 @@ describe('splitMultilineFormatting', () => {
       'a `b` c\nd `e` f',
       'a \\`b c\nd` e',
       '`a\n\nb`',
-      '``a\nb``',
+      '`\na`',
+      '`a\n `',
       'a`b\nc`d',
     ].forEach((value) => {
       expect(splitMultilineFormatting(value)).toBe(value);
@@ -43,7 +65,8 @@ describe('splitMultilineFormatting', () => {
       '- a `b\n- c` d',
       '# a `b\nc` d',
       'a `b\n# c` d',
-      '> a `b\n> c` d',
+      '> a `b\n> > c` d',
+      'a `b\n> c` d',
       '| a | `b |\n| c` | d |',
       'a `b\n| c` | d |',
       '`a\n***\nb`',
@@ -57,6 +80,8 @@ describe('splitMultilineFormatting', () => {
 
     // A list item continues on an indented line
     expect(splitMultilineFormatting('- a `b\n  c` d')).toBe('- a `b`\n  `c` d');
+    // A blockquote continues on a line with the same markers
+    expect(splitMultilineFormatting('> a `b\n> c` d')).toBe('> a `b`\n> `c` d');
   });
 
   it('should pair the backticks of code spans in linear time', () => {
@@ -79,19 +104,53 @@ describe('splitMultilineFormatting', () => {
   });
 
   it('should leave formatting alone if a line break within a code span or an image remains', () => {
-    expect(splitMultilineFormatting('**a `b\nc\nd` e**')).toBe('**a `b\nc\nd` e**');
+    expect(splitMultilineFormatting('**a `\nb` e**')).toBe('**a `\nb` e**');
     expect(splitMultilineFormatting('**![a\nb](u)**')).toBe('**![a\nb](u)**');
   });
 
   it('should only split a link within formatting, and not in a code span', () => {
     expect(splitMultilineFormatting('<div>\n[a\nb](u)\n</div>')).toBe('<div>\n[a\nb](u)\n</div>');
-    expect(splitMultilineFormatting('``[a\nb](u)``')).toBe('``[a\nb](u)``');
-    expect(splitMultilineFormatting('**``[a\nb](u)``**')).toBe('**``[a\nb](u)``**');
+    // The code span is split as code, not as a link
+    expect(splitMultilineFormatting('``[a\nb](u)``')).toBe('``[a``\n``b](u)``');
+    expect(splitMultilineFormatting('**``[a\nb](u)``**')).toBe('**``[a``\n``b](u)``**');
     expect(splitMultilineFormatting('**[a\nb][r]**')).toBe('**[a\nb][r]**');
     // A link after an escaped backslash, which isn’t escaped
     expect(splitMultilineFormatting('**\\\\[a\nb](u)**')).toBe('**\\\\[a](u)**\n**[b](u)**');
     expect(splitMultilineFormatting('**x \\\\[a\nb][r]**')).toBe('**x \\\\[a\nb][r]**');
     expect(splitMultilineFormatting('**\\[a\nb](u)**')).toBe('**\\[a**\n**b](u)**');
+  });
+
+  it('should split a link outside formatting across lines', () => {
+    expect(splitMultilineFormatting('a [b\nc](u) d')).toBe('a [b](u)\n[c](u) d');
+    expect(splitMultilineFormatting('a [b\nc](u "t") d')).toBe('a [b](u "t")\n[c](u "t") d');
+    expect(splitMultilineFormatting('a [b\nc\nd](u) e')).toBe('a [b](u)\n[c](u)\n[d](u) e');
+    expect(splitMultilineFormatting('a [b  \n  c `d`](u)')).toBe('a [b](u)  \n  [c `d`](u)');
+    expect(splitMultilineFormatting('- [a\n  b](u)')).toBe('- [a](u)\n  [b](u)');
+    [
+      '![a\nb](u)',
+      '\\[a\nb](u)',
+      '[a\\\nb](u)',
+      '[a `b\n`](u)',
+      '`[a`\nb](u)',
+      '[a\n- b](u)',
+      '[a\n\nb](u)',
+      '[a\nb][r]',
+    ].forEach((value) => {
+      expect(splitMultilineFormatting(value)).toBe(value);
+    });
+  });
+
+  it('should split links across lines in linear time', () => {
+    expectLinearTime(
+      (size) => `${'[a\n'.repeat(size)}b](u)`,
+      (value) => splitMultilineFormatting(value),
+      2000,
+    );
+    expectLinearTime(
+      (size) => `[a${' '.repeat(size)}\nb](u)`,
+      (value) => splitMultilineFormatting(value),
+      4000,
+    );
   });
 
   it('should handle multiple formatting types', () => {
@@ -219,6 +278,39 @@ describe('splitMultilineFormatting', () => {
     expect(splitMultilineFormatting('**a\n# b\nc**')).toBe('**a\n# b\nc**');
     expect(splitMultilineFormatting('_a\n- b_')).toBe('_a\n- b_');
     expect(splitMultilineFormatting('**a\n    b**')).toBe('**a**\n    **b**');
+  });
+
+  it('should split formatting, code spans and links in a blockquote across lines', () => {
+    expect(splitMultilineFormatting('> **a\n> b**')).toBe('> **a**\n> **b**');
+    expect(splitMultilineFormatting('> _a\n> b_')).toBe('> _a_\n> _b_');
+    expect(splitMultilineFormatting('> `a\n> b`')).toBe('> `a`\n> `b`');
+    expect(splitMultilineFormatting('> [a\n> b](u)')).toBe('> [a](u)\n> [b](u)');
+    expect(splitMultilineFormatting('> > x **a\n> > b\n> > c** y')).toBe(
+      '> > x **a**\n> > **b**\n> > **c** y',
+    );
+    expect(splitMultilineFormatting('>**a\n>  b**')).toBe('>**a**\n>  **b**');
+    // A lazy continuation line, and an indented one, which isn’t a blockquote
+    expect(splitMultilineFormatting('> **a\nb**')).toBe('> **a**\n**b**');
+    expect(splitMultilineFormatting('**a\n    > b**')).toBe('**a**\n    **> b**');
+    // A line in another blockquote, or one that starts another block in the blockquote
+    ['**a\n> b**', '> **a\n> > b**', '> > **a\n> b**', '> **a\n> # b**', '> **a\n>\n> b**'].forEach(
+      (value) => {
+        expect(splitMultilineFormatting(value)).toBe(value);
+      },
+    );
+  });
+
+  it('should split formatting in a blockquote across many lines in linear time', () => {
+    expectLinearTime(
+      (size) => `> **${'a\n> '.repeat(size)}b**`,
+      (value) => splitMultilineFormatting(value),
+      2000,
+    );
+    expectLinearTime(
+      (size) => `**a\n${'> '.repeat(size)}b`,
+      (value) => splitMultilineFormatting(value),
+      2000,
+    );
   });
 
   it('should split formatting across many lines in linear time', () => {

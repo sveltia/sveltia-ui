@@ -1,5 +1,7 @@
+import { flushSync } from 'svelte';
 import { describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-svelte';
+import { userEvent } from 'vitest/browser';
 import { $getRoot as getRoot, $getSelection as getSelection } from 'lexical';
 import EditorFixture from './editor-fixture.test.svelte';
 import LexicalRoot from './lexical-root.svelte';
@@ -262,5 +264,26 @@ describe('LexicalRoot', () => {
     expect(mouseDown(root, { clientY: root.getBoundingClientRect().bottom - 1 })).toBe(false);
     expect(getState().types).toEqual(['box', 'paragraph', 'box', 'paragraph']);
     editor.setEditable(true);
+  });
+
+  it('passes on what was just typed when the editor is removed with the focus in it', async () => {
+    /** @type {ComponentProps<typeof EditorFixture>} */
+    const props = $state({ store: undefined });
+    const screen = await render(EditorFixture, props);
+    const store = getEditorStore(props);
+    const root = /** @type {HTMLElement} */ (screen.container.querySelector('.lexical-root'));
+
+    await vi.waitFor(() => {
+      expect(store.initialized).toBe(true);
+    });
+    root.focus();
+    await userEvent.keyboard('XYZ');
+    expect(store.inputValue).toBe('');
+    // Remove the editor before the change is converted, a moment later. Chromium fires `focusout`
+    // as the focused root is removed by the `{#if}` block, in the middle of Svelte rendering
+    props.withRoot = false;
+    flushSync();
+    expect(screen.container.querySelector('.lexical-root')).toBeNull();
+    expect(store.inputValue).toBe('XYZ');
   });
 });

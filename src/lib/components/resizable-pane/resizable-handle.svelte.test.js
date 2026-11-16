@@ -143,6 +143,93 @@ describe('ResizableHandle', () => {
     );
   });
 
+  it('only resizes by dragging with the primary button', async () => {
+    const onResizeStart = vi.fn();
+    const screen = await render(ResizablePaneFixture, { onResizeStart });
+    const handle = /** @type {HTMLElement} */ (screen.getByRole('separator').element());
+
+    await vi.waitFor(() => {
+      expect(getSizes(screen.container)).toEqual(['50%', '50%']);
+    });
+
+    [1, 2].forEach((button) => {
+      handle.dispatchEvent(
+        new PointerEvent('pointerdown', {
+          bubbles: true,
+          cancelable: true,
+          screenX: 100,
+          pointerId: 1,
+          pointerType: 'mouse',
+          button,
+          buttons: button === 1 ? 4 : 2,
+        }),
+      );
+      document.dispatchEvent(
+        new PointerEvent('pointermove', {
+          bubbles: true,
+          cancelable: true,
+          screenX: 150,
+          pointerId: 1,
+          pointerType: 'mouse',
+          buttons: button === 1 ? 4 : 2,
+        }),
+      );
+    });
+
+    await new Promise((resolve) => {
+      setTimeout(resolve, 50);
+    });
+    expect(getSizes(screen.container)).toEqual(['50%', '50%']);
+    expect(handle.classList.contains('dragging')).toBe(false);
+    expect(onResizeStart).not.toHaveBeenCalled();
+  });
+
+  it('ends a mouse drag once the primary button is no longer held down', async () => {
+    const onResizeEnd = vi.fn();
+    const screen = await render(ResizablePaneFixture, { onResizeEnd });
+    const handle = /** @type {HTMLElement} */ (screen.getByRole('separator').element());
+
+    await vi.waitFor(() => {
+      expect(getSizes(screen.container)).toEqual(['50%', '50%']);
+    });
+
+    /**
+     * Make a mouse pointer event.
+     * @param {string} type Event type.
+     * @param {number} screenX Pointer position.
+     * @param {number} buttons Buttons held down.
+     * @returns {PointerEvent} Event.
+     */
+    const at = (type, screenX, buttons) =>
+      new PointerEvent(type, {
+        bubbles: true,
+        cancelable: true,
+        screenX,
+        pointerId: 1,
+        pointerType: 'mouse',
+        button: 0,
+        buttons,
+      });
+
+    handle.dispatchEvent(at('pointerdown', 100, 1));
+    document.dispatchEvent(at('pointermove', 150, 1));
+    await vi.waitFor(() => {
+      expect(getSizes(screen.container)).toEqual(['60%', '40%']);
+    });
+    // The `pointerup` event was lost, but the button has been released
+    document.dispatchEvent(at('pointermove', 200, 0));
+    await vi.waitFor(() => {
+      expect(handle.classList.contains('dragging')).toBe(false);
+    });
+    expect(onResizeEnd).toHaveBeenCalledOnce();
+    expect(getSizes(screen.container)).toEqual(['60%', '40%']);
+    document.dispatchEvent(at('pointermove', 100, 0));
+    await new Promise((resolve) => {
+      setTimeout(resolve, 50);
+    });
+    expect(getSizes(screen.container)).toEqual(['60%', '40%']);
+  });
+
   it('resizes with the keyboard, within the constraints, and reports the interaction', async () => {
     const onResizeStart = vi.fn();
     const onResizeEnd = vi.fn();
@@ -221,6 +308,25 @@ describe('ResizableHandle', () => {
     await userEvent.keyboard('{Enter}');
     await vi.waitFor(() => {
       expect(getSizes(screen.container)).toEqual(['10%', '90%']);
+    });
+  });
+
+  it('restores the pane with Enter when the collapse was held back by the next pane', async () => {
+    const screen = await render(ResizablePaneFixture, { secondMaxSize: 60 });
+    const handle = /** @type {HTMLElement} */ (screen.getByRole('separator').element());
+
+    await vi.waitFor(() => {
+      expect(getSizes(screen.container)).toEqual(['50%', '50%']);
+    });
+    handle.focus();
+    await userEvent.keyboard('{Enter}');
+    // The second pane can’t grow past 60%, so the first one stops at 40% rather than 0%
+    await vi.waitFor(() => {
+      expect(getSizes(screen.container)).toEqual(['40%', '60%']);
+    });
+    await userEvent.keyboard('{Enter}');
+    await vi.waitFor(() => {
+      expect(getSizes(screen.container)).toEqual(['50%', '50%']);
     });
   });
 

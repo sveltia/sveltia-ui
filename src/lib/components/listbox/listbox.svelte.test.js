@@ -10,6 +10,14 @@ import Listbox from './listbox.svelte';
  * @import { ComponentProps } from 'svelte';
  */
 
+/**
+ * Get an option element by its label, whether it’s hidden or not.
+ * @param {string} label Option label.
+ * @returns {HTMLElement} Option.
+ */
+const getOption = (label) =>
+  /** @type {HTMLElement} */ (document.querySelector(`[role="option"][data-label="${label}"]`));
+
 describe('Listbox', () => {
   it('renders a focusable listbox with the state attributes', async () => {
     const screen = await render(Listbox, {
@@ -241,6 +249,65 @@ describe('Listbox', () => {
     await vi.waitFor(() => {
       expect(listbox.classList.contains('filtered')).toBe(false);
     });
+  });
+
+  it('keeps the selection of the options hidden by the search terms', async () => {
+    const onChange = vi.fn();
+    /** @type {ComponentProps<typeof ListboxFixture>} */
+    const props = $state({ multiple: true, searchTerms: '', onChange });
+    const activated = whenActivated();
+    const screen = await render(ListboxFixture, props);
+
+    await activated;
+
+    const apple = getOption('Apple');
+    const banana = getOption('Banana');
+
+    await screen.getByRole('option', { name: 'Apple' }).click();
+    await vi.waitFor(() => {
+      expect(apple.getAttribute('aria-selected')).toBe('true');
+    });
+    onChange.mockClear();
+
+    props.searchTerms = 'an';
+    await vi.waitFor(() => {
+      expect(apple.hidden).toBe(true);
+    });
+    expect(apple.getAttribute('aria-selected')).toBe('true');
+    props.searchTerms = '';
+    await vi.waitFor(() => {
+      expect(apple.hidden).toBe(false);
+    });
+    expect(apple.getAttribute('aria-selected')).toBe('true');
+    expect(banana.getAttribute('aria-selected')).toBe('true');
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
+  it('deselects a hidden option when another one is selected in a single-select listbox', async () => {
+    const onChange = vi.fn();
+    /** @type {ComponentProps<typeof ListboxFixture>} */
+    const props = $state({ searchTerms: '', onChange });
+    const activated = whenActivated();
+    const screen = await render(ListboxFixture, props);
+
+    await activated;
+
+    const apple = getOption('Apple');
+    const banana = getOption('Banana');
+
+    props.searchTerms = 'app';
+    await vi.waitFor(() => {
+      expect(banana.hidden).toBe(true);
+    });
+    expect(banana.getAttribute('aria-selected')).toBe('true');
+    await screen.getByRole('option', { name: 'Apple' }).click();
+    await vi.waitFor(() => {
+      expect(apple.getAttribute('aria-selected')).toBe('true');
+      expect(banana.getAttribute('aria-selected')).toBe('false');
+      expect(banana.querySelector('.icon.check')).toBeNull();
+    });
+    expect(onChange).toHaveBeenCalledOnce();
+    expect(onChange.mock.calls[0][0].detail.value).toBe('apple');
   });
 
   it('keeps the same group while the search terms change', async () => {

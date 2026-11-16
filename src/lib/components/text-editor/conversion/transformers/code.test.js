@@ -61,11 +61,33 @@ describe('CODE', () => {
     expect(roundTrip('``` js\ncode')).toBe('```js\ncode\n```');
   });
 
+  it('reads the whole leading word of the info string as the language', () => {
+    expect(roundTrip('```c#\ncode\n```')).toBe('```c#\ncode\n```');
+    expect(roundTrip('```c++ title=x\ncode\n```')).toBe('```c++ title=x\ncode\n```');
+    expect(roundTrip('``` f#\ncode')).toBe('```f#\ncode\n```');
+  });
+
+  it('keeps the blank lines at the end of the code', () => {
+    expect(roundTrip('```js\nx\n\n```')).toBe('```js\nx\n\n```');
+    expect(roundTrip('```\n\nx\n\n\n```\n\na')).toBe('```\n\nx\n\n\n```\n\na');
+    expect(roundTrip('```js title=x\nx\n  \n\n```')).toBe('```js title=x\nx\n  \n\n```');
+    expect(roundTrip('```js\n\n```')).toBe('```js\n```');
+  });
+
   it('keeps the metadata out of the code of a code block without a closing fence', () => {
     expect(roundTrip('```js title=x\ncode')).toBe('```js title=x\ncode\n```');
     expect(roundTrip('```js title=x\n\ncode\n')).toBe('```js title=x\n\ncode\n```');
     expect(roundTrip('a\n\n````js title=x\n```\nb')).toBe('a\n\n````js title=x\n```\nb\n````');
     expect(roundTrip('```js title=x')).toBe('```js title=x\n```');
+  });
+
+  it('doesn’t take the closing fence of a code block in a list item for an opening one', () => {
+    // The editor doesn’t support a code block in a list item, so the lines are imported as text,
+    // here of a paragraph, as lists aren’t enabled
+    expect(roundTrip('- ```\n  x\n  ```')).toBe('- \\`\\`\\`\n  x\n  \\`\\`\\`');
+    expect(roundTrip('- ```\n  ```js\n  ```\n\n```\ny\n```')).toBe(
+      '- \\`\\`\\`\n  \\`\\`\\`js\n  \\`\\`\\`\n\n```\ny\n```',
+    );
   });
 
   it('keeps the text after an opening fence without a language in the code, like Lexical', () => {

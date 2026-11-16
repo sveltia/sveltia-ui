@@ -25,7 +25,9 @@ export const convertTildeFences = (value) => {
   const lines = value.split('\n');
 
   findCodeBlocks(lines)
-    .filter(({ fence }) => fence.startsWith('~'))
+    // A code block in a list item, like `- ~~~`, is left as is, as it’s imported as the text of
+    // the item; see `CODE`
+    .filter(({ start, fence }) => fence.startsWith('~') && /^[ \t]*~/.test(lines[start]))
     .forEach(({ start, end, closed }) => {
       const codeLines = lines.slice(start + 1, closed ? end : end + 1);
 

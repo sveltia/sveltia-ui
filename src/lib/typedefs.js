@@ -182,6 +182,9 @@
  * @property {PopupPosition} [position] Where to show the dropdown menu.
  * @property {number} [filterThreshold] Number of items to start showing the filter. Default: `5`.
  * Use `-1` to always hide the filter.
+ * @property {boolean} [selectOnTypeAhead] Whether typing on the collapsed, non-editable combobox
+ * selects the matching option. If `false`, it opens the dropdown and carries the typed characters
+ * over to the filter instead. Default: `true`.
  * @property {string} [ariaLabel] The `aria-label` attribute on the wrapper element.
  * @property {Snippet} [children] Primary slot content.
  * @property {Snippet} [chevronIcon] Chevron icon slot content.

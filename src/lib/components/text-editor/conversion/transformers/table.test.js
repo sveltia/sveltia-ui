@@ -1,6 +1,7 @@
 /* eslint-disable jsdoc/require-jsdoc */
 /* eslint-disable max-classes-per-file */
 
+import { $createTableCellNode as createTableCellNode } from '@lexical/table';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { BLOCK_SYNTAX_ESCAPE } from './block-escape.js';
@@ -38,6 +39,15 @@ vi.mock('@lexical/table', () => {
      */
     setHeaderStyles(headerState) {
       this.__headerState = headerState;
+    }
+
+    /**
+     * Check the header state.
+     * @param {number} headerState Header state value.
+     * @returns {boolean} Result.
+     */
+    hasHeaderState(headerState) {
+      return this.__headerState === headerState;
     }
 
     /**
@@ -604,6 +614,7 @@ describe('TABLE transformer', () => {
       getFirstChild: () => ({
         __kind: 'table-row',
         getChildrenSize: () => 2, // 2 columns
+        getChildren: () => [{ getFormatType: () => '' }, { getFormatType: () => '' }],
       }),
     };
 
@@ -619,10 +630,79 @@ describe('TABLE transformer', () => {
     expect(parentNode.replace).toHaveBeenCalled();
   });
 
+  it('should pad or cut a row to the columns of the table above with a header row', () => {
+    const headerCells = /** @type {const} */ (['left', 'right']).map((format) => {
+      const cell = createTableCellNode(1);
+
+      cell.setFormat(format);
+
+      return cell;
+    });
+
+    const previousTable = {
+      __kind: 'table',
+      append: vi.fn(),
+      getFirstChild: () => ({
+        __kind: 'table-row',
+        getChildrenSize: () => 2,
+        getChildren: () => headerCells,
+      }),
+    };
+
+    const parentNode = { getPreviousSibling: () => previousTable, remove: vi.fn() };
+
+    TABLE.replace(/** @type {any} */ (parentNode), [], ['| c |'], true);
+    TABLE.replace(/** @type {any} */ (parentNode), [], ['| d | e | f |'], true);
+
+    expect(parentNode.remove).toHaveBeenCalledTimes(2);
+
+    const rows = previousTable.append.mock.calls.flat();
+
+    expect(
+      rows.map((row) => row.getChildren().map((/** @type {any} */ cell) => cell.text)),
+    ).toEqual([
+      ['c', ''],
+      ['d', 'e'],
+    ]);
+    expect(rows[0].getChildren().map((/** @type {any} */ cell) => cell.getFormatType())).toEqual([
+      'left',
+      'right',
+    ]);
+  });
+
   it('should keep an escaped pipe in a cell, even within inline code', () => {
     const cells = /** @type {any[]} */ (mapToTableCells('| x \\| y | `c \\| d` | e \\\\| f |', []));
 
     expect(cells.map(({ text }) => text)).toEqual(['x | y', '`c | d`', 'e \\\\', 'f']);
+  });
+
+  it('should keep `\\n` in inline code or after an escaped backslash in a cell', () => {
+    const cells = /** @type {any[]} */ (
+      mapToTableCells('| a\\nb | `\\n` | x\\\\ny | x\\\\\\ny | `a` b\\nc |', [])
+    );
+
+    expect(cells.map(({ text }) => text)).toEqual([
+      'a\nb',
+      '`\\n`',
+      'x\\\\ny',
+      'x\\\\\ny',
+      '`a` b\nc',
+    ]);
+  });
+
+  it('export should escape a backslash before `n` in a cell, except within inline code', () => {
+    const cells = ['C:\\new', '`\\n`', 'a\nb', 'x\\\\\\ny', 'x\\\\ny'].map((text) => ({
+      __kind: 'table-cell',
+      __headerState: 0,
+      text,
+    }));
+
+    const row = { __kind: 'table-row', getChildren: () => cells };
+    const fakeNode = { __kind: 'table', getChildren: () => [row] };
+
+    expect(TABLE.export(/** @type {any} */ (fakeNode), () => '')).toBe(
+      '| C:\\\\new | `\\n` | a\\nb | x\\\\\\\\ny | x\\\\ny |',
+    );
   });
 
   it('should drop the spaces around the cell content', () => {

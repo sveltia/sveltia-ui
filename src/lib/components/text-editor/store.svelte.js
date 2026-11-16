@@ -10,6 +10,13 @@ import { limitToSingleLine } from './editing/single-line.js';
  */
 
 /**
+ * Function to call with the new input value whenever it changes, for each editor store; see
+ * {@link syncEditorProps}.
+ * @type {WeakMap<TextEditorStore, (inputValue: string) => void>}
+ */
+const inputValueListeners = new WeakMap();
+
+/**
  * Create an editor editor store that contains all the states and configuration.
  * @returns {TextEditorStore} Store.
  */
@@ -130,7 +137,8 @@ export const createEditorStore = () => {
     }
   };
 
-  return {
+  /** @type {TextEditorStore} */
+  const store = {
     /* eslint-disable jsdoc/require-jsdoc */
     get editor() {
       return editor;
@@ -165,6 +173,7 @@ export const createEditorStore = () => {
 
       if (hasChange) {
         inputValue = newValue;
+        inputValueListeners.get(store)?.(newValue);
       }
 
       if (useRichText && (hasChange || editor?.getEditorState().isEmpty())) {
@@ -257,6 +266,8 @@ export const createEditorStore = () => {
     getImportedValue: (value) => (lastImport?.exported === value ? lastImport.source : undefined),
     /* eslint-enable jsdoc/require-jsdoc */
   };
+
+  return store;
 };
 
 /**
@@ -272,6 +283,17 @@ export const createEditorStore = () => {
  * @param {(pending: boolean) => void} args.setPending Update the `pending` prop.
  */
 export const syncEditorProps = (editorStore, { getInputValue, setValue, setPending }) => {
+  /**
+   * Input value last passed on to the props.
+   * @type {string | undefined}
+   */
+  let appliedValue = undefined;
+  /**
+   * Latest input value, which may not have been passed on to the props yet.
+   * @type {string | undefined}
+   */
+  let latestValue = undefined;
+
   $effect(() => {
     setPending(editorStore.pending);
   });
@@ -305,8 +327,31 @@ export const syncEditorProps = (editorStore, { getInputValue, setValue, setPendi
 
     const newValue = editorStore.inputValue;
 
+    appliedValue = newValue;
+
     untrack(() => {
       setValue(newValue);
+    });
+  });
+
+  // An editor being removed passes on what was just typed as it goes, either as the focus leaves it
+  // or as `<LexicalRoot>` is destroyed, but the effect above is gone by then. Remember the change,
+  // and pass it on once the removal is done: a teardown function only sees the state as it was
+  // before, so it can’t tell whether the props have been changed from outside in the meantime,
+  // e.g. in the same tick as the removal, in which case they win
+  inputValueListeners.set(editorStore, (newValue) => {
+    latestValue = newValue;
+  });
+
+  $effect(() => () => {
+    queueMicrotask(() => {
+      if (
+        latestValue !== undefined &&
+        latestValue !== appliedValue &&
+        untrack(getInputValue) === appliedValue
+      ) {
+        setValue(latestValue);
+      }
     });
   });
 };

@@ -240,7 +240,10 @@
    */
   const onRootFocusOut = ({ relatedTarget }) => {
     if (!lexicalRoot?.contains(/** @type {Node | null} */ (relatedTarget))) {
-      flushUpdateEvent(editorStore.editor);
+      // The root may be being removed; see above
+      untrack(() => {
+        flushUpdateEvent(editorStore.editor);
+      });
     }
   };
 
@@ -278,6 +281,9 @@
     );
 
     return () => {
+      // Pass on what was just typed, as Firefox and Safari don’t fire `focusout` when the focused
+      // root is removed. This does nothing if the change has been passed on already
+      flushUpdateEvent(editor);
       unregisterUpdateListener();
       lexicalRoot?.removeEventListener('Update', onUpdate);
       lexicalRoot?.removeEventListener('focusout', onRootFocusOut);

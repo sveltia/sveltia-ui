@@ -121,6 +121,10 @@ describe('convertTildeFences', () => {
     expect(convertTildeFences('~~~`js`\ncode\n~~~')).toBe('```js\ncode\n```');
   });
 
+  it('should leave a code block in a list item alone', () => {
+    expect(convertTildeFences('- ~~~\n  x\n  ~~~')).toBe('- ~~~\n  x\n  ~~~');
+  });
+
   it('should leave a tilde fence within a backtick code block alone', () => {
     expect(convertTildeFences('```\n~~~\ncode\n~~~\n```')).toBe('```\n~~~\ncode\n~~~\n```');
   });

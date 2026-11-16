@@ -36,7 +36,19 @@
   const today = getToday();
   const todayString = toDateString(today);
 
-  const date = $derived(value ? new Date(value) : today);
+  /**
+   * Date given as the {@link value}, or today if it’s empty or invalid. A value that doesn’t make
+   * a valid date, like `2024-13-01`, or that rolls over into another day, like `2024-02-30` turning
+   * into March 1, is treated like no value rather than crashing or showing an unexpected month.
+   * @type {Date}
+   */
+  const date = $derived.by(() => {
+    const parsed = value ? new Date(value) : undefined;
+
+    return parsed && !Number.isNaN(parsed.getTime()) && toDateString(parsed) === value
+      ? parsed
+      : today;
+  });
   /**
    * First day of the month being displayed. Follows the {@link value}, and is reassigned by the
    * month navigation below.
@@ -257,6 +269,9 @@
     <Button
       onclick={() => {
         value = todayString;
+        // Also go back to today’s month in case today is already selected, which leaves `value`
+        // unchanged and `firstDay` on the month browsed to
+        firstDay = getFirstDayOfMonth(today);
       }}
     >
       {_('_sui.calendar.today')}

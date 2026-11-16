@@ -150,7 +150,7 @@ describe('stepNumber', () => {
   it('should add or subtract the step', () => {
     expect(stepNumber('5', { step: 1, direction: 1 })).toBe('6');
     expect(stepNumber('5', { step: 1, direction: -1 })).toBe('4');
-    expect(stepNumber('5', { step: 10, direction: 1 })).toBe('15');
+    expect(stepNumber('20', { step: 10, direction: 1 })).toBe('30');
   });
 
   it('should step from zero when the field is empty', () => {
@@ -161,6 +161,22 @@ describe('stepNumber', () => {
   it('should format decimals to the step’s precision', () => {
     expect(stepNumber('0.2', { step: 0.1, direction: 1 })).toBe('0.3');
     expect(stepNumber('1', { step: 0.25, direction: -1 })).toBe('0.75');
+  });
+
+  it('should snap a value off the step grid to the grid, as the native number input does', () => {
+    expect(stepNumber('2.5', { step: 1, direction: 1 })).toBe('3');
+    expect(stepNumber('5', { step: 10, direction: 1 })).toBe('10');
+    expect(stepNumber('2.5', { step: 1, direction: -1 })).toBe('2');
+    expect(stepNumber('-0.5', { step: 1, direction: 1 })).toBe('0');
+    expect(stepNumber('0.15', { step: 0.1, direction: -1 })).toBe('0.1');
+    expect(stepNumber('1.25', { step: 0.1, direction: 1 })).toBe('1.3');
+    expect(stepNumber('0.3', { step: 0.1, direction: 1 })).toBe('0.4');
+  });
+
+  it('should base the step grid on the minimum', () => {
+    expect(stepNumber('1.5', { step: 1, direction: 1, min: 0.5 })).toBe('2.5');
+    expect(stepNumber('2', { step: 1, direction: 1, min: 0.5 })).toBe('2.5');
+    expect(stepNumber('2', { step: 1, direction: -1, min: 0.5 })).toBe('1.5');
   });
 
   it('should not step past the limits', () => {

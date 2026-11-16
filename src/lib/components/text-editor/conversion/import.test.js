@@ -36,7 +36,7 @@ vi.mock('lexical', () => getMock('lexical'));
 
 import { resetEditorMocks } from '#lib/test-utils/editor-mocks.js';
 import { loadEngine } from '../shiki/facade.js';
-import { convertMarkdownToLexical } from './import.js';
+import { convertMarkdownToLexical, prepareMarkdown } from './import.js';
 
 describe('convertMarkdownToLexical', () => {
   beforeEach(() => {
@@ -284,5 +284,11 @@ describe('convertMarkdownToLexical', () => {
     });
 
     await expect(convertMarkdownToLexical(editor, '# Heading', [])).rejects.toThrow();
+  });
+});
+
+describe('prepareMarkdown', () => {
+  it('should list a code block language with symbols whole', () => {
+    expect(prepareMarkdown('```c#\nx\n```\n\n```c++\ny\n```', []).languages).toEqual(['c#', 'c++']);
   });
 });

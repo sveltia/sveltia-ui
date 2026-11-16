@@ -11,6 +11,7 @@
   import { isRTL } from '@sveltia/i18n';
   import { onMount, untrack } from 'svelte';
   import {
+    clampThumbIndex,
     findNearestStepIndex,
     getNearestThumbIndex,
     getSliderCurrentIndex,
@@ -18,7 +19,6 @@
     getSliderKeyTargetIndex,
     getSliderSteps,
     toLogicalX,
-    wouldCrossThumbs,
   } from './slider.js';
 
   /**
@@ -137,16 +137,20 @@
    * @param {number} physicalX Physical X position in pixels from the left edge.
    */
   const moveThumb = (physicalX) => {
-    const index = findNearestStepIndex(positionList, toLogicalX(physicalX, barWidth, isRTL()));
+    let index = findNearestStepIndex(positionList, toLogicalX(physicalX, barWidth, isRTL()));
 
-    if (
-      multiThumb &&
-      wouldCrossThumbs({
+    // Stop at the other thumb rather than ignoring the move, so a fast drag past it still brings
+    // the thumb as close as it can get
+    if (multiThumb) {
+      index = clampThumbIndex({
         valueIndex: targetValueIndex,
-        targetPosition: positionList[index],
+        index,
+        positionList,
         sliderPositions,
-      })
-    ) {
+      });
+    }
+
+    if (index === -1) {
       return;
     }
 
@@ -169,7 +173,7 @@
     const _value = multiThumb ? /** @type {[number, number]} */ (values)[valueIndex] : value;
     const rtl = isRTL();
 
-    const index = getSliderKeyTargetIndex({
+    let index = getSliderKeyTargetIndex({
       key,
       rtl,
       currentIndex: getSliderCurrentIndex({
@@ -192,11 +196,21 @@
     event.preventDefault();
     event.stopPropagation();
 
-    if (
-      multiThumb &&
-      wouldCrossThumbs({ valueIndex, targetPosition: positionList[index], sliderPositions })
-    ) {
-      return;
+    if (multiThumb) {
+      const targetValue = valueList[index];
+
+      // Stop at the other thumb rather than ignoring the key, so Home, End and the Page keys still
+      // bring the thumb as close as it can get
+      index = clampThumbIndex({ valueIndex, index, positionList, sliderPositions });
+
+      // Don’t move the thumb at all if the clamped step lies the other way, which can happen when
+      // the value sits between two steps
+      if (
+        index === -1 ||
+        Math.sign(valueList[index] - _value) !== Math.sign(targetValue - _value)
+      ) {
+        return;
+      }
     }
 
     setValue(valueIndex, valueList[index]);

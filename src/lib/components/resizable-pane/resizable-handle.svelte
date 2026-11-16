@@ -109,9 +109,19 @@
    * @param {PointerEvent} event `pointermove` event.
    */
   const onPointerMove = (event) => {
-    const { screenX, screenY, pointerId } = event;
+    const { screenX, screenY, pointerId, pointerType, buttons } = event;
 
     if (disabled || !dragging || pointerId !== targetPointerId) return;
+
+    // The `pointerup` event may never come, for example when a context menu opened during the drag
+    // swallowed it, so a mouse moved without the primary button held down ends the drag instead of
+    // carrying on resizing
+    if (pointerType === 'mouse' && buttons % 2 === 0) {
+      // eslint-disable-next-line no-use-before-define
+      onPointerUp(event);
+
+      return;
+    }
 
     event.preventDefault();
     event.stopPropagation();
@@ -159,7 +169,8 @@
    * @param {PointerEvent} event `pointerdown` event.
    */
   const onPointerDown = (event) => {
-    if (disabled) return;
+    // Only the primary button resizes; the others are left to open a context menu and the like
+    if (disabled || event.button !== 0) return;
 
     event.preventDefault();
     event.stopPropagation();

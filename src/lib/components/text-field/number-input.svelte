@@ -54,6 +54,7 @@
     /* eslint-disable prefer-const */
     value = $bindable(),
     invalid = $bindable(false),
+    element = $bindable(),
     flex = false,
     min = undefined,
     max = undefined,
@@ -144,8 +145,18 @@
   const stepValue = (direction) => {
     const newInputValue = stepNumber(numberValue, { step: stepSize, direction, min, max });
 
-    if (newInputValue !== undefined) {
-      inputValue = newInputValue;
+    if (newInputValue === undefined) {
+      return;
+    }
+
+    inputValue = newInputValue;
+
+    if (element) {
+      // Fire the `input` and `change` events, as the native `<input type="number">` does when
+      // stepped, so a consumer listening for them rather than binding the value sees the change
+      element.value = newInputValue;
+      element.dispatchEvent(new Event('input', { bubbles: true }));
+      element.dispatchEvent(new Event('change', { bubbles: true }));
     }
   };
 
@@ -218,6 +229,7 @@
     {...restProps}
     role={stepEnabled ? 'spinbutton' : 'textbox'}
     {id}
+    bind:element
     bind:value={inputValue}
     spellcheck="false"
     {flex}

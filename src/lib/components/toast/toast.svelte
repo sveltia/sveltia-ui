@@ -6,6 +6,8 @@
   @see https://github.com/whatwg/html/issues/9936
 -->
 <script module>
+  import { openModalDialogs } from '../util/modal.svelte';
+
   /**
    * Modal dialogs currently open, the topmost last. While a modal dialog is open, the rest of the
    * document is inert, including a popover stacked on top of the dialog, so the toast base has to
@@ -171,7 +173,16 @@
       base.setAttribute('role', 'none');
       base.className = 'sui toast-base enabled';
       base.popover = 'manual';
-      modals.push(...document.querySelectorAll(/** @type {'dialog'} */ ('dialog:modal')));
+
+      // The dialogs are in the document in no particular order, so put those shown by `<Modal>` in
+      // the order they were opened, on top of any others
+      const dialogs = [...document.querySelectorAll(/** @type {'dialog'} */ ('dialog:modal'))];
+
+      modals.push(
+        ...dialogs.filter((dialog) => !openModalDialogs.includes(dialog)),
+        ...openModalDialogs.filter((dialog) => dialogs.includes(dialog)),
+      );
+
       // These events don’t bubble, so listen in the capture phase
       document.addEventListener('toggle', onToggle, true);
       document.addEventListener('beforetoggle', onClose, true);
@@ -215,9 +226,9 @@
    * @property {string | number} [id] The toast ID. If updated, the timer that hides
    * the toast will be reset, meaning the same toast can be displayed for a longer period of time.
    * @property {boolean} [show] Whether to show the toast.
-   * @property {number} [duration] Duration to automatically hide the toast. Use `0` to hide it
-   * manually from the consumer. The countdown is held while the pointer is over the toast or the
-   * focus is inside it, and starts over once it leaves.
+   * @property {number} [duration] Duration to automatically hide the toast. Use `0` or `Infinity`
+   * to hide it manually from the consumer. The countdown is held while the pointer is over the
+   * toast or the focus is inside it, and starts over once it leaves.
    * @property {ToastPosition} [position] Position of the toast.
    * @property {Snippet} [children] Primary slot content.
    */
@@ -268,6 +279,11 @@
    * @type {boolean}
    */
   let rendered = $state(false);
+
+  /**
+   * The longest delay `setTimeout()` accepts, in milliseconds.
+   */
+  const MAX_TIMEOUT = 2_147_483_647;
 
   onMount(() => {
     popover = acquireBase();
@@ -363,13 +379,20 @@
     void duration;
     void held;
 
-    if (!show || !duration || held) {
+    // An infinite duration keeps the toast like `0` does: `setTimeout()` would take it as `0` and
+    // hide the toast at once
+    if (!show || !duration || !Number.isFinite(duration) || held) {
       return undefined;
     }
 
-    const timer = globalThis.setTimeout(() => {
-      show = false;
-    }, duration);
+    // `setTimeout()` fires at once when the delay is longer than its 32-bit maximum (about 24.8
+    // days), so cap it there
+    const timer = globalThis.setTimeout(
+      () => {
+        show = false;
+      },
+      Math.min(duration, MAX_TIMEOUT),
+    );
 
     // Stop the countdown when any of the above changes, so the previous timer can’t fire, or when
     // the toast is destroyed, or it would still hide the toast later

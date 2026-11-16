@@ -74,8 +74,10 @@
   const sizes = $state([]);
 
   /**
-   * Per-handle saved sizes before collapse, for Enter key restore.
-   * @type {(number | undefined)[]}
+   * Per-handle saved sizes before collapse, for Enter key restore, along with the size the collapse
+   * left the pane at. That isn’t always `minSize`, as the pane after the handle may reach its
+   * `maxSize` first.
+   * @type {({ size: number, collapsedSize: number } | undefined)[]}
    */
   const _savedSizes = $state([]);
 
@@ -196,23 +198,25 @@
   };
 
   /**
-   * Toggle collapse of the primary pane (before the given handle). If the pane is above its minimum
-   * size it is collapsed to `minSize`; if already at `minSize` the previous size is restored.
+   * Toggle collapse of the primary pane (before the given handle). If the pane hasn’t been
+   * collapsed, it’s shrunk to `minSize`, or as far as the pane after the handle allows; if it’s
+   * still at the size the collapse left it, the previous size is restored.
    * @param {number} handleIndex Index of the resize handle.
    */
   const toggleCollapse = (handleIndex) => {
     const { minSize: minBefore } = getPaneConstraints(handleIndex);
+    const saved = _savedSizes[handleIndex];
 
     // The saved size is only restored while the pane is still collapsed; once it has been resized
     // since, it’s collapsed again from where it is
-    if (_savedSizes[handleIndex] !== undefined && Math.abs(sizes[handleIndex] - minBefore) < 0.1) {
-      const delta = /** @type {number} */ (_savedSizes[handleIndex]) - sizes[handleIndex];
-
+    if (saved && Math.abs(sizes[handleIndex] - saved.collapsedSize) < 0.1) {
       _savedSizes[handleIndex] = undefined;
-      resize(handleIndex, delta);
+      resize(handleIndex, saved.size - sizes[handleIndex]);
     } else {
-      _savedSizes[handleIndex] = sizes[handleIndex];
-      resize(handleIndex, -(sizes[handleIndex] - minBefore));
+      const size = sizes[handleIndex];
+
+      resize(handleIndex, -(size - minBefore));
+      _savedSizes[handleIndex] = { size, collapsedSize: sizes[handleIndex] };
     }
   };
 

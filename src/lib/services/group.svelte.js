@@ -1058,10 +1058,13 @@ export class Group {
     const isMenu = this.childRoles.includes('menuitem');
 
     // Tab leaves the menu entirely rather than stepping through it. Shift is allowed through here,
-    // unlike the keys below, because Shift+Tab leaves the menu just the same.
+    // unlike the keys below, because Shift+Tab leaves the menu just the same. A menu rendered
+    // inline, with no opener to return to, leaves Tab to the browser to move focus on as usual.
     if (key === 'Tab' && isMenu && !ctrlKey && !metaKey && !altKey) {
-      event.preventDefault();
-      this.leaveMenu(shiftKey);
+      if (this.opener) {
+        event.preventDefault();
+        this.leaveMenu(shiftKey);
+      }
 
       return;
     }
@@ -1248,11 +1251,29 @@ export class Group {
 
     if (!this.grid) {
       const index = currentTarget ? activeMembers.indexOf(currentTarget) : -1;
+      const count = activeMembers.length;
+
+      // A radio group moves with all four arrows whatever its orientation, as native radio buttons
+      // do and as the Radio Group pattern expects: Down and Right go to the next radio, Up and Left
+      // to the previous one, with the inline arrows mirrored for RTL.
+      if (this.role === 'radiogroup') {
+        const inlineIndex = getLinearTargetIndex({
+          key,
+          index,
+          count,
+          ...getArrowKeys('horizontal', rtl),
+        });
+
+        return activeMembers[
+          inlineIndex === -1
+            ? getLinearTargetIndex({ key, index, count, ...getArrowKeys('vertical', rtl) })
+            : inlineIndex
+        ];
+      }
+
       const keys = getArrowKeys(this.orientation, rtl);
 
-      return activeMembers[
-        getLinearTargetIndex({ key, index, count: activeMembers.length, ...keys })
-      ];
+      return activeMembers[getLinearTargetIndex({ key, index, count, ...keys })];
     }
 
     const { columnCount } = this;
@@ -1264,11 +1285,25 @@ export class Group {
     // With nothing focused yet, the arrows start from either end of the active members
     const list = index === -1 ? activeMembers : members;
     const keys = getArrowKeys('horizontal', rtl);
+    let targetIndex = index;
+    /** @type {HTMLElement | undefined} */
+    let newTarget;
 
-    const newTarget =
-      list[getGridTargetIndex({ key, index, count: list.length, columnCount, ...keys })];
+    // Step over a disabled member in the same direction: the inline arrows on to the next member,
+    // the vertical arrows on to the next row in the same column. Each step moves further along or
+    // returns `-1`, so this ends at the edge of the grid at the latest.
+    do {
+      targetIndex = getGridTargetIndex({
+        key,
+        index: targetIndex,
+        count: list.length,
+        columnCount,
+        ...keys,
+      });
+      newTarget = list[targetIndex];
+    } while (newTarget?.matches('[aria-disabled="true"]'));
 
-    return newTarget?.matches('[aria-disabled="true"]') ? undefined : newTarget;
+    return newTarget;
   }
 
   /**

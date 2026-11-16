@@ -491,6 +491,81 @@ describe('Slider', () => {
     });
   });
 
+  it('stops a thumb at the other one instead of ignoring a move past it', async () => {
+    /** @type {ComponentProps<typeof Slider>} */
+    const props = $state({
+      values: [20, 30],
+      min: 0,
+      max: 100,
+      step: 1,
+      sliderLabels: ['From', 'To'],
+    });
+
+    const screen = await renderSlider(props);
+    const from = screen.getByRole('slider', { name: 'From' });
+    const to = screen.getByRole('slider', { name: 'To' });
+
+    await waitForInit(screen.container);
+
+    /** @type {HTMLElement} */ (to.element()).focus();
+    await userEvent.keyboard('{Home}');
+    expect(props.values).toEqual([20, 21]);
+    await userEvent.keyboard('{End}');
+    expect(props.values).toEqual([20, 100]);
+
+    /** @type {HTMLElement} */ (from.element()).focus();
+    await userEvent.keyboard('{End}');
+    expect(props.values).toEqual([99, 100]);
+    await userEvent.keyboard('{Home}');
+    expect(props.values).toEqual([0, 100]);
+
+    props.values = [20, 25];
+    /** @type {HTMLElement} */ (from.element()).focus();
+    await userEvent.keyboard('{PageUp}');
+    expect(props.values).toEqual([24, 25]);
+    /** @type {HTMLElement} */ (to.element()).focus();
+    await userEvent.keyboard('{PageDown}');
+    expect(props.values).toEqual([24, 25]);
+    props.values = [20, 25];
+    await userEvent.keyboard('{PageDown}');
+    expect(props.values).toEqual([20, 21]);
+
+    // Drag the first thumb past the second one in a single move
+    props.values = [20, 30];
+    await expect.element(from).toHaveAttribute('aria-valuenow', '20');
+    await expect.element(to).toHaveAttribute('aria-valuenow', '30');
+
+    const thumb = /** @type {HTMLElement} */ (from.element());
+
+    const { left, width } = /** @type {HTMLElement} */ (
+      screen.container.querySelector('.base')
+    ).getBoundingClientRect();
+
+    const startX = left + width * 0.2;
+    const endX = left + width * 0.8;
+
+    thumb.dispatchEvent(
+      new PointerEvent('pointerdown', {
+        bubbles: true,
+        clientX: startX,
+        screenX: startX,
+        pointerId: 1,
+      }),
+    );
+    document.dispatchEvent(
+      new PointerEvent('pointermove', {
+        bubbles: true,
+        clientX: endX,
+        screenX: endX,
+        pointerId: 1,
+      }),
+    );
+    thumb.dispatchEvent(
+      new PointerEvent('pointerup', { bubbles: true, clientX: endX, screenX: endX, pointerId: 1 }),
+    );
+    expect(props.values).toEqual([29, 30]);
+  });
+
   it('moves the thumb nearest to the click on the track of a two-thumb slider', async () => {
     const onChange = vi.fn();
     /** @type {ComponentProps<typeof Slider>} */
@@ -573,13 +648,13 @@ describe('Slider', () => {
     thumb.dispatchEvent(at('pointerdown', 0.4));
     document.dispatchEvent(at('pointermove', 0.8));
     expect(props.values).toEqual([2, 8]);
-    // It cannot be dragged past the first thumb
+    // It cannot be dragged past the first thumb, but stops one step short of it
     document.dispatchEvent(at('pointermove', 0.1));
-    expect(props.values).toEqual([2, 8]);
+    expect(props.values).toEqual([2, 3]);
     // A click anywhere on the page ends the drag
     document.body.click();
     document.dispatchEvent(at('pointermove', 0.9));
-    expect(props.values).toEqual([2, 8]);
+    expect(props.values).toEqual([2, 3]);
   });
 
   it('renders the option labels along the track', async () => {

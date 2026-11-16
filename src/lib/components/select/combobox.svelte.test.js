@@ -134,6 +134,39 @@ describe('Combobox', () => {
     });
   });
 
+  it('keeps the selected option selected after it was hidden by the filter', async () => {
+    /** @type {ComponentProps<typeof ComboboxFixture>} */
+    const props = $state({ editable: false, count: 7, value: 'banana' });
+    const screen = await render(ComboboxFixture, props);
+    const combobox = screen.getByRole('combobox', { name: 'Fruit' });
+    /**
+     * Get the Banana option, whether it’s hidden or not.
+     * @returns {HTMLElement | null} Option.
+     */
+    const getBanana = () => document.querySelector('[role="option"][data-label="Banana"]');
+
+    await combobox.click();
+    await waitForOptions(7);
+    await screen.getByRole('searchbox', { name: 'Filter Options' }).fill('ch');
+    await vi.waitFor(() => {
+      expect(getBanana()?.hidden).toBe(true);
+    });
+    /** @type {HTMLElement} */ (document.querySelector('dialog.popup')).click();
+    await expect.element(combobox).toHaveAttribute('aria-expanded', 'false');
+    await vi.waitFor(() => {
+      expect(getListbox()).toBeNull();
+    });
+
+    await combobox.click();
+    await waitForOptions(7);
+    await vi.waitFor(() => {
+      expect(getBanana()?.hidden).toBe(false);
+      expect(getBanana()?.getAttribute('aria-selected')).toBe('true');
+      expect(getBanana()?.classList.contains('focused')).toBe(true);
+    });
+    expect(props.value).toBe('banana');
+  });
+
   it('keeps the expand button out of the way in the non-editable mode', async () => {
     const screen = await render(ComboboxFixture, { editable: false });
     const toggle = screen.getByRole('button', { name: 'Expand' });
@@ -359,6 +392,21 @@ describe('Combobox', () => {
     expect(onChange).toHaveBeenCalled();
     expect(onChange.mock.lastCall?.[0].detail.value).toBe('kiwi');
     expect(onChange.mock.lastCall?.[0].detail.target).toBe(input.element());
+  });
+
+  it('leaves clicks, Space and Enter to the text input in the editable mode', async () => {
+    /** @type {ComponentProps<typeof ComboboxFixture>} */
+    const props = $state({ editable: true, value: undefined });
+    const screen = await render(ComboboxFixture, props);
+    const input = screen.getByRole('combobox', { name: 'Fruit' });
+
+    await input.click();
+    await userEvent.keyboard('New York{Enter}');
+    await vi.waitFor(() => {
+      expect(props.value).toBe('New York');
+    });
+    expect(input.element().getAttribute('aria-expanded')).toBe('false');
+    expect(document.querySelector('dialog.popup [role="listbox"]')).toBeNull();
   });
 
   it('applies the rest props to the inner control only', async () => {

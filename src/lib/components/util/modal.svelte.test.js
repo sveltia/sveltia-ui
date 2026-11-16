@@ -380,6 +380,27 @@ describe('Modal', () => {
     expect(onClose).not.toHaveBeenCalled();
   });
 
+  it('forgets the return value of a close cut short by reopening', async () => {
+    const onOk = vi.fn();
+    const onClose = vi.fn();
+    /** @type {ComponentProps<typeof Modal>} */
+    const props = $state({ open: true, onOk, onClose });
+    const screen = await render(Modal, props);
+
+    await waitFor(() => getDialog()?.classList.contains('active') ?? false);
+    screen.component.close('ok');
+    await tick();
+    expect(getDialog()?.open).toBe(false);
+    props.open = true;
+    await waitFor(() => !!getDialog()?.open);
+    await waitFor(() => getDialog()?.classList.contains('active') ?? false);
+    // A plain close later on carries no return value
+    props.open = false;
+    await waitFor(() => onClose.mock.calls.length === 1);
+    expect(onClose.mock.calls[0][0].detail.returnValue).toBe('');
+    expect(onOk).not.toHaveBeenCalled();
+  });
+
   it('leaves the focus alone when focus restoration is disabled', async () => {
     const opener = document.createElement('button');
 

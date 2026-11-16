@@ -97,8 +97,8 @@ describe('Option', () => {
 
     option.dispatchEvent(new CustomEvent('Toggle', { detail: { hidden: true } }));
     expect(props.hidden).toBe(true);
-    // A hidden option is deselected
-    expect(props.selected).toBe(false);
+    // Hiding an option by a filter doesn’t change its selection
+    expect(props.selected).toBe(true);
     expect(onToggle).toHaveBeenCalledOnce();
     await vi.waitFor(() => {
       expect(

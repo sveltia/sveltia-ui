@@ -97,6 +97,13 @@ describe('RAW_HTML', () => {
     expect(matchHtml('a \\[^1] [^ b] c')).toBeUndefined();
   });
 
+  it('matches a named character reference', () => {
+    expect(matchHtml('a &copy; b')).toBe('&copy;');
+    expect(matchHtml('a&nbsp;b')).toBe('&nbsp;');
+    expect(matchHtml('\\\\&amp;')).toBe('&amp;');
+    expect(matchHtml('a \\&copy; & b &1; &; &#169; c')).toBeUndefined();
+  });
+
   it('matches inline HTML', () => {
     expect(matchHtml('a <img src="/_a.png" alt=\'b\' data-x=y_z hidden /> c')).toBe(
       '<img src="/_a.png" alt=\'b\' data-x=y_z hidden />',

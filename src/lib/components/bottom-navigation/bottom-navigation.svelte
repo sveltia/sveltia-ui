@@ -33,7 +33,7 @@
 <style lang="scss">
   .bottom-navigation {
     height: var(--sui-bottom-navigation-height, var(--sui-primary-toolbar-size));
-    border-top-width: var(--sui-bottom-navigation-border-color, 1px);
+    border-top-width: var(--sui-bottom-navigation-border-width, 1px);
     border-top-style: var(--sui-bottom-navigation-border-style, solid);
     border-top-color: var(--sui-bottom-navigation-border-color, var(--sui-secondary-border-color));
 

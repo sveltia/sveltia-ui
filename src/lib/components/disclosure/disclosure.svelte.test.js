@@ -26,6 +26,10 @@ describe('Disclosure', () => {
     expect(header.element().getAttribute('aria-controls')).toBe(content.id);
     expect(content.hidden).toBe(true);
     expect(header.element().querySelector('.icon')?.textContent?.trim()).toBe('expand_more');
+    expect(
+      getComputedStyle(/** @type {HTMLElement} */ (header.element().querySelector('.icon')))
+        .transform,
+    ).not.toBe('none');
   });
 
   it('expands and collapses when the header is clicked', async () => {
@@ -58,6 +62,48 @@ describe('Disclosure', () => {
     await vi.waitFor(() => {
       expect(content.hidden).toBe(true);
     });
+  });
+
+  it('makes the collapsed content unfocusable and hidden from assistive technology', async () => {
+    /** @type {ComponentProps<typeof Disclosure>} */
+    const props = $state({
+      label: 'Details',
+      expanded: false,
+      children: html('<button type="button" class="inside">Inside</button>'),
+    });
+
+    const screen = await render(Disclosure, props);
+    const content = /** @type {HTMLElement} */ (screen.container.querySelector('.content'));
+    const inside = /** @type {HTMLButtonElement} */ (screen.container.querySelector('.inside'));
+
+    expect(content.inert).toBe(true);
+    inside.focus();
+    expect(document.activeElement).not.toBe(inside);
+    props.expanded = true;
+    await vi.waitFor(() => {
+      expect(content.inert).toBe(false);
+    });
+    inside.focus();
+    expect(document.activeElement).toBe(inside);
+  });
+
+  it('doesn’t restyle the buttons in the content', async () => {
+    const screen = await render(Disclosure, {
+      label: 'Details',
+      expanded: true,
+      children: html(
+        '<button type="button" class="inside" aria-expanded="false"><span class="icon">v</span></button>',
+      ),
+    });
+
+    const header = /** @type {HTMLElement} */ (screen.container.querySelector('.header'));
+    const inside = /** @type {HTMLElement} */ (screen.container.querySelector('.inside'));
+
+    expect(getComputedStyle(header).display).toBe('flex');
+    expect(getComputedStyle(inside).display).not.toBe('flex');
+    expect(getComputedStyle(/** @type {HTMLElement} */ (inside.firstElementChild)).transform).toBe(
+      'none',
+    );
   });
 
   it('renders a custom chevron', async () => {

@@ -77,6 +77,41 @@ describe('SelectTags', () => {
     expect(getTags(screen.container)).toEqual(['Apple', 'Cherry']);
   });
 
+  it('opens the select on a typed character rather than adding a tag for each match', async () => {
+    const onAddValue = vi.fn();
+
+    /** @type {ComponentProps<typeof SelectTags>} */
+    const props = $state({
+      options: [
+        { label: 'Blueberry', value: 'blueberry' },
+        { label: 'Banana', value: 'banana' },
+        ...options.filter(({ value }) => value !== 'banana'),
+        { label: 'Fig', value: 'fig' },
+        { label: 'Grape', value: 'grape' },
+      ],
+      values: [],
+      onAddValue,
+    });
+
+    const screen = await render(SelectTags, props);
+    const combobox = screen.getByRole('combobox');
+
+    /** @type {HTMLElement} */ (combobox.element()).focus();
+    await userEvent.keyboard('ba');
+    await expect.element(combobox).toHaveAttribute('aria-expanded', 'true');
+    // The typed characters go to the filter
+    await vi.waitFor(() => {
+      expect(
+        screen.getByRole('searchbox', { name: 'Filter Options' }).element().matches(':focus'),
+      ).toBe(true);
+    });
+    await expect
+      .element(screen.getByRole('searchbox', { name: 'Filter Options' }))
+      .toHaveValue('ba');
+    expect(props.values).toEqual([]);
+    expect(onAddValue).not.toHaveBeenCalled();
+  });
+
   it('adds boolean and `null` values as they are', async () => {
     /** @type {ComponentProps<typeof SelectTags>} */
     const props = $state({

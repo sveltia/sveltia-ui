@@ -87,6 +87,14 @@ const AUTOLINK_REGEX = new RegExp(
  * @see https://github.github.com/gfm/
  */
 const FOOTNOTE_REFERENCE_REGEX = /(?<!(?:^|[^\\])(?:\\\\)*\\)\[\^[^\s[\]]+\]/;
+/**
+ * Regular expression to match a named character reference, like `&copy;`, which isn’t escaped.
+ * Lexical imports it as text, the same as the escaped `\&copy;`, which is exported escaped; see
+ * `escapeNamedCharacterReferences()`. The lookahead comes first, so the lookbehind is only tried
+ * before a `&`.
+ * @see https://spec.commonmark.org/0.31.2/#entity-and-numeric-character-references
+ */
+const NAMED_CHARACTER_REFERENCE_REGEX = /(?=&)(?<!(?:^|[^\\])(?:\\\\)*\\)&[A-Za-z][A-Za-z\d]*;/;
 
 /**
  * Block syntax at the start of a line, after up to 3 spaces.
@@ -202,6 +210,7 @@ const RAW_HTML_REGEX = new RegExp(
     INLINE_HTML_REGEX.source,
     AUTOLINK_REGEX.source,
     FOOTNOTE_REFERENCE_REGEX.source,
+    NAMED_CHARACTER_REFERENCE_REGEX.source,
   ].join('|'),
 );
 

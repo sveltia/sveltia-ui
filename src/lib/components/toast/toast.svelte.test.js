@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-svelte';
 import { html, text } from '../../test-utils/snippets.js';
 import Toast from './toast.svelte';
+import Modal from '../util/modal.svelte';
 
 /**
  * @import { ComponentProps } from 'svelte';
@@ -242,6 +243,26 @@ describe('Toast', () => {
     });
   });
 
+  it('stays with an infinite duration', async () => {
+    /** @type {ComponentProps<typeof Toast>} */
+    const props = $state({ show: true, duration: Infinity });
+
+    await render(Toast, props);
+    await vi.advanceTimersByTimeAsync(60_000);
+    expect(props.show).toBe(true);
+  });
+
+  it('caps a duration too long for a timer instead of hiding itself at once', async () => {
+    /** @type {ComponentProps<typeof Toast>} */
+    const props = $state({ show: true, duration: 2 ** 32 });
+
+    await render(Toast, props);
+    await vi.advanceTimersByTimeAsync(60_000);
+    expect(props.show).toBe(true);
+    await vi.advanceTimersByTimeAsync(2 ** 31 - 1 - 60_000);
+    expect(props.show).toBe(false);
+  });
+
   it('holds the countdown while hovered or focused, and starts over after', async () => {
     /** @type {ComponentProps<typeof Toast>} */
     const props = $state({ show: true, duration: 1000 });
@@ -385,6 +406,27 @@ describe('Toast', () => {
       expect(base.querySelectorAll('.sui.toast')).toHaveLength(1);
     });
     expect(base.matches(':popover-open')).toBe(true);
+  });
+
+  it('renders the base within the modal opened last rather than the one mounted last', async () => {
+    /** @type {ComponentProps<typeof Modal>} */
+    const first = $state({ open: false, class: 'first', children: text('First') });
+    /** @type {ComponentProps<typeof Modal>} */
+    const second = $state({ open: false, class: 'second', children: text('Second') });
+
+    await render(Modal, first);
+    await render(Modal, second);
+    // The second modal is opened first, so the first one, mounted earlier, ends up on top of it
+    second.open = true;
+    await vi.waitFor(() => {
+      expect(document.querySelector('dialog.second')?.matches(':modal')).toBe(true);
+    });
+    first.open = true;
+    await vi.waitFor(() => {
+      expect(document.querySelector('dialog.first')?.matches(':modal')).toBe(true);
+    });
+    await render(Toast, { show: true, duration: 0, children: text('Saved') });
+    expect(getBase()?.parentElement).toBe(document.querySelector('dialog.first'));
   });
 
   describe('with a modal dialog', () => {

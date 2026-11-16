@@ -1,8 +1,18 @@
 /* eslint-disable jsdoc/require-jsdoc */
 
+import { sleep } from '@sveltia/utils/misc';
+import { flushSync, tick } from 'svelte';
 import { describe, expect, it, vi } from 'vitest';
+import { render } from 'vitest-browser-svelte';
+import { userEvent } from 'vitest/browser';
 import { initEditor } from './core.js';
+import EditorFixture from './editor-fixture.test.svelte';
 import { createEditorStore } from './store.svelte.js';
+import TextEditor from './text-editor.svelte';
+
+/**
+ * @import { ComponentProps } from 'svelte';
+ */
 
 describe('createEditorStore', () => {
   it('should have correct initial values', () => {
@@ -365,5 +375,76 @@ describe('createEditorStore', () => {
     });
     expect(store.inputValue).toBe('hello');
     consoleSpy.mockRestore();
+  });
+});
+
+describe('syncEditorProps', () => {
+  /**
+   * Render a `<TextEditor>` within the fixture’s `{#if}` block, with its `value` bound to a state,
+   * and type in it.
+   * @param {string} text Text to type.
+   * @returns {Promise<{ bound: { value: string }, props: ComponentProps<typeof EditorFixture> }>}
+   * Bound state and fixture props. Set `props.component` to `undefined` to remove the editor.
+   */
+  const renderAndType = async (text) => {
+    const bound = $state({ value: '' });
+
+    // The fixture spreads the component props; an object without a prototype is kept as is rather
+    // than turned into a state proxy, which would drop the setter that binds the value
+    const componentProps = Object.create(null, {
+      value: {
+        get: () => bound.value,
+        set: (value) => {
+          bound.value = value;
+        },
+        enumerable: true,
+      },
+    });
+
+    /** @type {ComponentProps<typeof EditorFixture>} */
+    const props = $state({ withRoot: false, component: TextEditor, componentProps });
+    const screen = await render(EditorFixture, props);
+    const root = /** @type {HTMLElement} */ (screen.container.querySelector('.lexical-root'));
+
+    await vi.waitFor(() => {
+      expect(root.contentEditable).toBe('true');
+    });
+    root.focus();
+    await userEvent.keyboard(text);
+    // The change is only converted a moment later
+    expect(bound.value).toBe('');
+
+    return { bound, props };
+  };
+
+  it('should pass on what was just typed when the editor is removed with the focus in it', async () => {
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    try {
+      const { bound, props } = await renderAndType('XYZ');
+
+      props.component = undefined;
+      flushSync();
+      // The change is passed on once the removal is done
+      await tick();
+      expect(bound.value).toBe('XYZ');
+      await sleep(150);
+      expect(bound.value).toBe('XYZ');
+      expect(consoleError).not.toHaveBeenCalled();
+    } finally {
+      consoleError.mockRestore();
+    }
+  });
+
+  it('should keep a value set from outside as the editor is removed with unconverted input', async () => {
+    const { bound, props } = await renderAndType('XYZ');
+
+    bound.value = 'Other';
+    props.component = undefined;
+    flushSync();
+    await tick();
+    expect(bound.value).toBe('Other');
+    await sleep(150);
+    expect(bound.value).toBe('Other');
   });
 });

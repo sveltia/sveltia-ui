@@ -110,6 +110,22 @@ describe('CodeEditor', () => {
     });
   });
 
+  it('keeps code with a fence line of three backticks', async () => {
+    const code = '# Title\n\n```js\nconst a = 1;\n```';
+    /** @type {ComponentProps<typeof CodeEditor>} */
+    const props = $state({ code, lang: 'markdown' });
+    const screen = await render(CodeEditor, props);
+    const root = await waitForContent(screen.container, 'const a = 1;');
+
+    focusEnd(root);
+    await userEvent.keyboard('{Enter}x');
+    await vi.waitFor(() => {
+      expect(props.code).toBe(`${code}\nx`);
+    });
+    expect(props.lang).toBe('markdown');
+    expect(root.textContent).toContain('# Title');
+  });
+
   it('keeps new lines in the code block after blank lines', async () => {
     /** @type {ComponentProps<typeof CodeEditor>} */
     const props = $state({ code: 'one', lang: 'plain' });

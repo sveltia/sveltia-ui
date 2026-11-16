@@ -150,8 +150,9 @@
         onChange?.(event);
       }}
       onToggle={(event) => {
+        // Being filtered out doesn’t change the selection, which comes back with the option. A
+        // single-select `<Listbox>` deselects it once another option is selected instead.
         hidden = event.detail.hidden;
-        if (hidden) selected = false;
         onToggle?.(event);
       }}
     >

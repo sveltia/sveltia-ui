@@ -1,4 +1,5 @@
 import { getArrowKeys } from '../../services/navigation.js';
+import { normalizeStep } from '../text-field/number-input.js';
 
 /**
  * Geometry and keyboard logic behind `<Slider>`, kept apart from the component so the value
@@ -22,12 +23,16 @@ const countFractionDigits = (num) => {
  * @param {object} options Options.
  * @param {number} options.min Minimum value.
  * @param {number} options.max Maximum value.
- * @param {number} options.step Distance between two values.
+ * @param {number} options.step Distance between two values. `1` is used instead if it isn’t a
+ * positive number.
  * @param {number} options.barWidth Width of the track in pixels.
  * @returns {{ valueList: number[], positionList: number[] }} Values from `min` to `max` in `step`
  * increments, and the matching pixel offsets from the logical start of the track.
  */
-export const getSliderSteps = ({ min, max, step, barWidth }) => {
+export const getSliderSteps = ({ min, max, step: _step, barWidth }) => {
+  // Fall back to `1` for a step that isn’t a positive number: `0` would make the step count
+  // infinite, while a negative step would leave no values at all
+  const step = normalizeStep(_step);
   const stepRatio = (max - min) / step;
   // Tolerate floating point errors, e.g. `0.3 / 0.1` is `2.9999999999999996`, which would otherwise
   // drop the maximum
@@ -146,17 +151,24 @@ export const getSliderKeyTargetIndex = ({ key, rtl, currentIndex, length }) => {
 };
 
 /**
- * Whether moving one thumb of a multi-thumb slider to the given position would make it cross, or
- * land on, the other thumb.
+ * Clamp the step a thumb of a multi-thumb slider moves to, so it stops one step short of the other
+ * thumb instead of crossing or landing on it. A move that overshoots, like Home on the second thumb
+ * or a fast drag past the other thumb, still brings the thumb as close as it can get.
  * @param {object} options Options.
  * @param {number} options.valueIndex Index of the thumb being moved, `0` or `1`.
- * @param {number} options.targetPosition Position the thumb would move to, in pixels.
+ * @param {number} options.index Index of the step the thumb would move to.
+ * @param {number[]} options.positionList Pixel offset of each step, in ascending order.
  * @param {number[]} options.sliderPositions Current position of each thumb, in pixels.
- * @returns {boolean} `true` if the move would cross the other thumb.
+ * @returns {number} Index of the step the thumb can move to, or `-1` if there’s no room for it.
  */
-export const wouldCrossThumbs = ({ valueIndex, targetPosition, sliderPositions }) =>
-  (valueIndex === 0 && sliderPositions[1] <= targetPosition) ||
-  (valueIndex === 1 && sliderPositions[0] >= targetPosition);
+export const clampThumbIndex = ({ valueIndex, index, positionList, sliderPositions }) => {
+  const otherIndex = findNearestStepIndex(positionList, sliderPositions[valueIndex === 0 ? 1 : 0]);
+
+  const clampedIndex =
+    valueIndex === 0 ? Math.min(index, otherIndex - 1) : Math.max(index, otherIndex + 1);
+
+  return clampedIndex < 0 || clampedIndex >= positionList.length ? -1 : clampedIndex;
+};
 
 /**
  * Get the step index a key press starts from. A value that sits between two steps, such as `55`

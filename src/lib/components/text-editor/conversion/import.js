@@ -96,7 +96,7 @@ export const prepareMarkdown = (value, enabledTransformers) => {
     markdown,
     // The language is the leading word of the info string, like `js` in ```` ``` js title=x ````;
     // see `CODE`
-    languages: [...markdown.matchAll(/^`{3,}[ \t]*(?<lang>[\w-]+)/gm)].map(
+    languages: [...markdown.matchAll(/^`{3,}[ \t]*(?<lang>[\w-][^\s`]*)/gm)].map(
       ({ groups: { lang = 'plain' } = {} }) => lang,
     ),
   };

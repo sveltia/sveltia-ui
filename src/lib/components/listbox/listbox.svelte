@@ -50,6 +50,7 @@
     searchTerms = '',
     ariaLabel = undefined,
     children,
+    onChange,
     onFilter,
     ...restProps
     /* eslint-enable prefer-const */
@@ -59,6 +60,29 @@
    * @type {boolean}
    */
   let filtered = $state(false);
+
+  /**
+   * Handle the `Change` event from the group. The group only selects among the options that are
+   * shown, so an option hidden by the search terms keeps its selection. In a single-select listbox,
+   * that has to be cleared once another option is selected, or two would be selected once the
+   * filter is lifted.
+   * @param {CustomEvent} event The `Change` event.
+   */
+  const _onChange = (event) => {
+    const { currentTarget, target } = event;
+
+    // Only the listbox’s own event, not one dispatched on an option and bubbling up
+    if (!multiple && target === currentTarget) {
+      /** @type {HTMLElement} */ (currentTarget)
+        .querySelectorAll('[role="option"][aria-hidden="true"][aria-selected="true"]')
+        .forEach((option) => {
+          option.setAttribute('aria-selected', 'false');
+          option.dispatchEvent(new CustomEvent('Change', { detail: { selected: false } }));
+        });
+    }
+
+    onChange?.(event);
+  };
 </script>
 
 <div
@@ -75,6 +99,7 @@
   aria-invalid={invalid}
   aria-multiselectable={multiple}
   aria-label={ariaLabel}
+  onChange={_onChange}
   onFilter={(/** @type {CustomEvent} */ event) => {
     const {
       detail: { matched, total },

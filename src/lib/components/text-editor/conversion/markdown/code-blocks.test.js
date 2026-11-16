@@ -9,6 +9,23 @@ describe('findCodeBlocks', () => {
     ]);
   });
 
+  it('should find a code block in a list item, closed by a fence indented to its content', () => {
+    expect(findCodeBlocks(['- ```', '  x', '  ```', '```', 'y', '```'])).toEqual([
+      { start: 0, end: 2, fence: '```', closed: true },
+      { start: 3, end: 5, fence: '```', closed: true },
+    ]);
+    expect(findCodeBlocks(['1. ~~~js', '   x', '', '   ~~~'])).toEqual([
+      { start: 0, end: 3, fence: '~~~', closed: true },
+    ]);
+  });
+
+  it('should end a code block in a list item with the item', () => {
+    expect(findCodeBlocks(['- ```', '  x', '```', 'y'])).toEqual([
+      { start: 0, end: 1, fence: '```', closed: false },
+      { start: 2, end: 3, fence: '```', closed: false },
+    ]);
+  });
+
   it('should not take a backtick fence followed by a backtick as a code block', () => {
     expect(findCodeBlocks(['```a`', 'b'])).toEqual([]);
   });

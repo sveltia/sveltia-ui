@@ -161,7 +161,11 @@
       {@render _endIcon?.()}
     {/snippet}
   </Button>
-  {#if hasItems && buttonElement && dialogElement}
+  <!--
+    A menu in a popup shares its `<dialog>` with the submenu, while a menu placed directly on the
+    page leaves the submenu to open its own
+  -->
+  {#if hasItems && buttonElement}
     <Popup
       anchor={buttonElement}
       parentDialogElement={dialogElement}

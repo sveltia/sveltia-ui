@@ -8,6 +8,26 @@
    * @type {symbol}
    */
   const RETAINER_KEY = Symbol('sui-modal-retainer');
+
+  /**
+   * The modal `<dialog>` elements shown by this component, in the order they were opened, the
+   * topmost last. The elements are placed in the document in the order the components are mounted,
+   * which tells nothing about which one is on top, so others like `<Toast>` can look here instead.
+   * @type {HTMLDialogElement[]}
+   */
+  export const openModalDialogs = [];
+
+  /**
+   * Remove the given `<dialog>` element from {@link openModalDialogs}.
+   * @param {HTMLDialogElement | undefined} dialog Element.
+   */
+  const forgetModalDialog = (dialog) => {
+    const index = dialog ? openModalDialogs.indexOf(dialog) : -1;
+
+    if (index > -1) {
+      openModalDialogs.splice(index, 1);
+    }
+  };
 </script>
 
 <script>
@@ -71,6 +91,11 @@
   const showDialog = () => {
     if (modal) {
       dialog?.showModal();
+
+      if (dialog) {
+        forgetModalDialog(dialog);
+        openModalDialogs.push(dialog);
+      }
     } else {
       dialog?.show();
     }
@@ -282,6 +307,9 @@
 
     if (gen !== generation || !dialog || dialog.open) return;
 
+    // Clear the return value left by a close that has been cut short by this reopening, so it isn’t
+    // taken for the return value of the next close. A finished close clears it itself.
+    dialog.returnValue = '';
     showDialog();
     onOpen?.(new CustomEvent('Open'));
     // Force a style recalculation, so the browser has a state to transition from. This is required
@@ -385,6 +413,7 @@
     return () => {
       window.clearTimeout(restoreFocusTimer);
       dialog?.close();
+      forgetModalDialog(dialog);
       unmount(placeholder);
     };
   });
@@ -467,6 +496,10 @@
         }
       }}
       onclose={() => {
+        if (!dialog?.open) {
+          forgetModalDialog(dialog);
+        }
+
         // Closed by `closeDialog()` or on unmount, or already shown again by `openDialog()`
         if (!requestedOpen || !dialog?.isConnected || dialog.open) {
           return;

@@ -80,38 +80,38 @@
       {/snippet}
       {label}
     </Button>
-    <div class="content" id="{id}-content" hidden={!expanded}>
+    <!--
+      The collapsed content stays rendered with zero height instead of `display: none`, so make it
+      `inert` as well to keep it away from the Tab key and assistive technology.
+    -->
+    <div class="content" id="{id}-content" hidden={!expanded} inert={!expanded}>
       {@render children?.()}
     </div>
   </div>
 </div>
 
 <style lang="scss">
-  .disclosure {
-    :global {
-      button {
-        display: flex;
-        width: 100%;
-
-        .icon {
-          transition: all 200ms;
-        }
-
-        &[aria-expanded='false'] .icon {
-          &:dir(ltr) {
-            transform: rotate(-90deg);
-          }
-
-          &:dir(rtl) {
-            transform: rotate(90deg);
-          }
-        }
-      }
-    }
-  }
-
   .inner {
     display: contents;
+
+    // Target the header button only, as a plain descendant selector would also restyle any
+    // buttons in the content.
+    > :global(.header) {
+      display: flex;
+      width: 100%;
+
+      :global(.icon) {
+        transition: all 200ms;
+      }
+    }
+
+    > :global(.header[aria-expanded='false'] .icon:dir(ltr)) {
+      transform: rotate(-90deg);
+    }
+
+    > :global(.header[aria-expanded='false'] .icon:dir(rtl)) {
+      transform: rotate(90deg);
+    }
   }
 
   .content {

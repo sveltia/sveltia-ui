@@ -6,6 +6,7 @@
   @see https://www.w3.org/WAI/ARIA/apg/patterns/radio/
 -->
 <script>
+  import { untrack } from 'svelte';
   import { getToggleLabelAttrs } from '../../services/label.js';
   import Button from '../button/button.svelte';
 
@@ -28,9 +29,10 @@
    * @property {string} [label] Text label displayed next to the radio button.
    * @property {string} [ariaLabel] `aria-label` attribute on the `<button>` element, for a radio
    * button without a visible label.
-   * @property {string} [group] The two-way bound variable to manage the state of a group of radio
+   * @property {any} [group] The two-way bound variable to manage the state of a group of radio
    * buttons. It works in the same way as the [`<input
-   * bind:group>`](https://svelte.dev/docs/svelte/bind#input-bind:group) of Svelte.
+   * bind:group>`](https://svelte.dev/docs/svelte/bind#input-bind:group) of Svelte: it can hold any
+   * type of value, including `undefined` before a choice is made.
    * @property {Snippet} [children] Primary slot content.
    * @property {Snippet} [default] Default slot content.
    * @property {(event: CustomEvent) => void} [onChange] Custom `Change` event handler.
@@ -82,17 +84,19 @@
   const isGroupReadOnly = () =>
     !!buttonElement?.closest('[role="radiogroup"]')?.matches('[aria-readonly="true"]');
 
-  // Sync `checked` with `group` and `value`
+  // Sync `checked` with `group` and `value`. An unbound `group` and a bound one that’s still
+  // `undefined` read the same, so leave `checked` alone until there’s a choice. Only a change to
+  // `group` or `value` triggers the sync, not one to `checked`: without a bound `group`, the one
+  // set on a click stays local to this radio button, and must not check it again when the group
+  // unchecks it as the arrow keys move.
   $effect(() => {
-    if (typeof group === 'string') {
-      if (group === value) {
-        if (!checked) {
-          checked = true;
-        }
-      } else if (checked) {
-        checked = false;
+    const isChecked = group !== undefined && group === value;
+
+    untrack(() => {
+      if (group !== undefined && checked !== isChecked) {
+        checked = isChecked;
       }
-    }
+    });
   });
 </script>
 
@@ -133,10 +137,7 @@
       }
 
       checked = true;
-
-      if (typeof group === 'string') {
-        group = value;
-      }
+      group = value;
     }}
     onChange={(/** @type {CustomEvent} */ event) => {
       // The group checks and unchecks the radio buttons by itself, as the arrow keys move, so keep
@@ -144,7 +145,7 @@
       // checked and ignore the next click
       checked = event.detail.checked;
 
-      if (checked && typeof group === 'string') {
+      if (checked) {
         group = value;
       }
 

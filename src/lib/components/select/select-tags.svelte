@@ -255,6 +255,7 @@
       {readonly}
       {required}
       {invalid}
+      selectOnTypeAhead={false}
       onChange={() => {
         // The select only reports a change once an option has been picked. Check for `undefined`
         // rather than a falsy value, as `null`, `false`, `0` and an empty string are valid values

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  clampThumbIndex,
   findNearestStepIndex,
   getNearestThumbIndex,
   getSliderCurrentIndex,
@@ -7,7 +8,6 @@ import {
   getSliderKeyTargetIndex,
   getSliderSteps,
   toLogicalX,
-  wouldCrossThumbs,
 } from './slider.js';
 
 describe('getSliderSteps', () => {
@@ -53,6 +53,15 @@ describe('getSliderSteps', () => {
     expect(valueList).toEqual([0, 0.1, 0.2, 0.3]);
     expect(positionList).toHaveLength(4);
     expect(positionList[3]).toBeCloseTo(300);
+  });
+
+  it('should fall back to a step of 1 for a step that isn’t a positive number', () => {
+    [0, -1, NaN, Infinity].forEach((step) => {
+      const { valueList, positionList } = getSliderSteps({ min: 0, max: 4, step, barWidth: 400 });
+
+      expect(valueList).toEqual([0, 1, 2, 3, 4]);
+      expect(positionList).toEqual([0, 100, 200, 300, 400]);
+    });
   });
 });
 
@@ -148,19 +157,35 @@ describe('getSliderKeyTargetIndex', () => {
   });
 });
 
-describe('wouldCrossThumbs', () => {
+describe('clampThumbIndex', () => {
+  const positionList = [0, 100, 200, 300, 400];
   const sliderPositions = [100, 300];
 
-  it('should stop the first thumb at the second one', () => {
-    expect(wouldCrossThumbs({ valueIndex: 0, targetPosition: 200, sliderPositions })).toBe(false);
-    expect(wouldCrossThumbs({ valueIndex: 0, targetPosition: 300, sliderPositions })).toBe(true);
-    expect(wouldCrossThumbs({ valueIndex: 0, targetPosition: 400, sliderPositions })).toBe(true);
+  it('should let the first thumb move up to one step short of the second one', () => {
+    const options = { valueIndex: 0, positionList, sliderPositions };
+
+    expect(clampThumbIndex({ ...options, index: 2 })).toBe(2);
+    expect(clampThumbIndex({ ...options, index: 3 })).toBe(2);
+    expect(clampThumbIndex({ ...options, index: 4 })).toBe(2);
+    expect(clampThumbIndex({ ...options, index: 0 })).toBe(0);
   });
 
-  it('should stop the second thumb at the first one', () => {
-    expect(wouldCrossThumbs({ valueIndex: 1, targetPosition: 200, sliderPositions })).toBe(false);
-    expect(wouldCrossThumbs({ valueIndex: 1, targetPosition: 100, sliderPositions })).toBe(true);
-    expect(wouldCrossThumbs({ valueIndex: 1, targetPosition: 0, sliderPositions })).toBe(true);
+  it('should let the second thumb move down to one step short of the first one', () => {
+    const options = { valueIndex: 1, positionList, sliderPositions };
+
+    expect(clampThumbIndex({ ...options, index: 2 })).toBe(2);
+    expect(clampThumbIndex({ ...options, index: 1 })).toBe(2);
+    expect(clampThumbIndex({ ...options, index: 0 })).toBe(2);
+    expect(clampThumbIndex({ ...options, index: 4 })).toBe(4);
+  });
+
+  it('should return -1 when there’s no room to move', () => {
+    expect(
+      clampThumbIndex({ valueIndex: 0, index: 1, positionList, sliderPositions: [0, 0] }),
+    ).toBe(-1);
+    expect(
+      clampThumbIndex({ valueIndex: 1, index: 3, positionList, sliderPositions: [400, 400] }),
+    ).toBe(-1);
   });
 });
 

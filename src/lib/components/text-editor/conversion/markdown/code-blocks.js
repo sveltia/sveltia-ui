@@ -5,14 +5,17 @@
 /**
  * @typedef {object} CodeBlock
  * @property {number} start Index of the line with the opening fence.
- * @property {number} end Index of the line with the closing fence, or of the last line if the code
- * block is not closed, in which case it runs to the end of the document.
+ * @property {number} end Index of the line with the closing fence, or of the last line of the code
+ * block if it is not closed, in which case it runs to the end of the document, or to the end of the
+ * list item it starts in.
  * @property {string} fence Opening fence, made of three or more backticks or tildes.
  * @property {boolean} closed Whether the code block has a closing fence.
  */
 
 /**
- * Find the fenced code blocks in the lines of a Markdown string.
+ * Find the fenced code blocks in the lines of a Markdown string, including those starting right
+ * after the marker of a list item, like `- ~~~`, whose closing fence is indented to the content
+ * of the item.
  * @param {string[]} lines Lines of a Markdown string.
  * @returns {CodeBlock[]} Code blocks.
  */
@@ -21,15 +24,33 @@ export const findCodeBlocks = (lines) => {
   const blocks = [];
   /** @type {Omit<CodeBlock, 'end' | 'closed'> | undefined} */
   let openBlock;
+  /**
+   * Indentation of the content of the list item the open code block starts in, if any.
+   * @type {number | undefined}
+   */
+  let contentIndent;
 
   lines.forEach((line, index) => {
-    // Like Lexical’s `CODE_START_REGEX`, allow an indented fence. A backtick fence can’t be
-    // followed by a backtick on the same line; see `CODE`
-    const fence = line.match(/^[ \t]*(`{3,}(?=[^`]*$)|~{3,})/)?.[1];
+    // Like Lexical’s `CODE_START_REGEX`, allow an indented fence, and also one after the marker of
+    // a list item. A backtick fence can’t be followed by a backtick on the same line; see `CODE`
+    const [, prefix = '', fence] =
+      line.match(/^([ \t]*(?:(?:[-*+]|\d{1,9}[.)])[ \t]+)*)(`{3,}(?=[^`]*$)|~{3,})/) ?? [];
+
+    // A code block in a list item ends with the item, at a line indented less than its content
+    if (
+      openBlock &&
+      contentIndent !== undefined &&
+      line.trim() &&
+      /** @type {RegExpMatchArray} */ (line.match(/^[ \t]*/))[0].length < contentIndent
+    ) {
+      blocks.push({ ...openBlock, end: index - 1, closed: false });
+      openBlock = undefined;
+    }
 
     if (!openBlock) {
       if (fence) {
         openBlock = { start: index, fence };
+        contentIndent = prefix.trim() ? prefix.length : undefined;
       }
 
       return;

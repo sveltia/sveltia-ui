@@ -15,7 +15,7 @@
   /**
    * @typedef {object} Props
    * @property {string} [class] The `class` attribute on the wrapper element.
-   * @property {boolean} [selected] Whether to allow selecting more than one `<GridRow>` and/or
+   * @property {boolean} [multiple] Whether to allow selecting more than one `<GridRow>` and/or
    * `<GridCell>`. An alias of the `aria-multiselectable` attribute.
    * @property {boolean} [clickToSelect] Whether to select a row by clicking on it.
    * @property {HTMLElement} [element] A reference to the wrapper element.

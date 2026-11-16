@@ -19,3 +19,15 @@ it('renders the element with the role, classes, attributes and children', async 
   expect(element.getAttribute('data-x')).toBe('1');
   expect(element.textContent).toContain('child');
 });
+
+it('reads the top border width from its own custom property', async () => {
+  const screen = await render(BottomNavigation, {
+    style: '--sui-bottom-navigation-border-color: red; --sui-bottom-navigation-border-width: 2px',
+  });
+
+  const element = /** @type {HTMLElement} */ (
+    screen.container.querySelector('.sui.bottom-navigation')
+  );
+
+  expect(getComputedStyle(element).borderTopWidth).toBe('2px');
+});

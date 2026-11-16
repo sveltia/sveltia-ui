@@ -24,6 +24,7 @@ import {
 } from '@lexical/table';
 import { $isParagraphNode as isParagraphNode, $isTextNode as isTextNode } from 'lexical';
 
+import { findCodeSpans } from '../markdown/index.js';
 import { BLOCK_SYNTAX_ESCAPE } from './block-escape.js';
 import { LEADING_INLINE_CODE } from './inline-code.js';
 import { LINK } from './link.js';
@@ -61,6 +62,30 @@ const getColumnAlignment = (delimiter) => {
 };
 
 /**
+ * Regular expression to match `\n` in a cell, which stands for a line break unless its backslash is
+ * escaped, like `\\n`. The backslashes before it, if any, are captured in pairs.
+ */
+const CELL_LINE_BREAK_REG_EXP = /(?<!\\)((?:\\\\)*)\\n/g;
+
+/**
+ * Replace the given text in a cell except within code spans, where it’s literal.
+ * @param {string} text Markdown of a cell.
+ * @param {(text: string) => string} replace Function to replace the text outside code spans.
+ * @returns {string} Replaced Markdown.
+ */
+const replaceOutsideCodeSpans = (text, replace) => {
+  let result = '';
+  let index = 0;
+
+  findCodeSpans(text).forEach(({ start, end }) => {
+    result += replace(text.slice(index, start)) + text.slice(start, end);
+    index = end;
+  });
+
+  return result + replace(text.slice(index));
+};
+
+/**
  * Returns the number of columns in the table.
  * @internal
  * @param {TableNode} table
@@ -79,9 +104,12 @@ export const getTableColumnsSize = (table) => {
  * @returns {TableCellNode}
  */
 const createTableCell = (textContent, transformers) => {
-  // An escaped pipe is part of the cell, even within inline code, like GitHub Flavored Markdown.
-  // The spaces around the content only separate it from the pipes
-  textContent = textContent.trim().replace(/\\n/g, '\n').replace(/\\\|/g, '|');
+  // `\n` is a line break in the cell, except within inline code, where it’s literal, or after an
+  // escaped backslash. An escaped pipe is part of the cell, even within inline code, like GitHub
+  // Flavored Markdown. The spaces around the content only separate it from the pipes
+  textContent = replaceOutsideCodeSpans(textContent.trim(), (text) =>
+    text.replace(CELL_LINE_BREAK_REG_EXP, '$1\n'),
+  ).replace(/\\\|/g, '|');
 
   const cell = createTableCellNode(TableCellHeaderStates.NO_STATUS);
 
@@ -126,7 +154,12 @@ const exportTableRow = (row, transformers) => {
     // It’s TableCellNode so it’s just to make flow happy
     if (isTableCellNode(cell)) {
       rowOutput.push(
-        convertToMarkdownString(transformers, cell)
+        // A backslash followed by `n` in text, like that in `C:\new`, is escaped, so it’s not read
+        // as a line break; it means the same in Markdown. Inline code is left as is, as `\n` is
+        // literal there
+        replaceOutsideCodeSpans(convertToMarkdownString(transformers, cell), (text) =>
+          text.replace(CELL_LINE_BREAK_REG_EXP, '$1\\\\n'),
+        )
           // Escape a pipe, which would otherwise end the cell, even within inline code
           .replace(/\|/g, '\\|')
           .replace(/\n/g, '\\n')
@@ -235,10 +268,15 @@ const $takePrecedingRows = (parentNode, transformers) => {
  * Create a table from the given rows, padding the shorter ones with empty cells.
  * @param {TableCellNode[][]} rows Cells of each row.
  * @param {Transformer[]} transformers Transformers to import the empty cell content with.
+ * @param {number} [columnsSize] Number of columns. The cells beyond it are dropped. The default is
+ * the number of cells in the longest row.
  * @returns {TableNode} Table.
  */
-const $createTable = (rows, transformers) => {
-  const maxCells = Math.max(...rows.map((cells) => cells.length));
+const $createTable = (
+  rows,
+  transformers,
+  columnsSize = Math.max(...rows.map((cells) => cells.length)),
+) => {
   const table = createTableNode();
 
   rows.forEach((cells) => {
@@ -246,7 +284,7 @@ const $createTable = (rows, transformers) => {
 
     table.append(tableRow);
 
-    for (let i = 0; i < maxCells; i += 1) {
+    for (let i = 0; i < columnsSize; i += 1) {
       tableRow.append(i < cells.length ? cells[i] : createTableCell('', transformers));
     }
   });
@@ -255,19 +293,33 @@ const $createTable = (rows, transformers) => {
 };
 
 /**
- * Put a new table in place of the given paragraph, or add its rows to the table right before it if
- * that has the same number of columns. The rows then take the column alignment from its header.
+ * Put a new table with the given rows in place of the given paragraph, or add the rows to the table
+ * right before it if that has a header row or the same number of columns. Like GitHub Flavored
+ * Markdown, a row with fewer cells than the header row is padded with empty cells, and the cells
+ * beyond it are dropped. The rows then take the column alignment from the header.
  * @param {ElementNode} parentNode Paragraph to replace.
- * @param {TableNode} table New table.
+ * @param {TableCellNode[][]} rows Cells of each row.
+ * @param {Transformer[]} transformers Transformers to import the empty cell content with.
+ * @see https://github.github.com/gfm/#tables-extension-
  */
-const $insertImportedTable = (parentNode, table) => {
+const $insertImportedTable = (parentNode, rows, transformers) => {
   const previousSibling = parentNode.getPreviousSibling();
+  const headerRow = isTableNode(previousSibling) ? previousSibling.getFirstChild() : null;
+  const headerCells = isTableRowNode(headerRow) ? headerRow.getChildren() : [];
+
+  const hasHeaderRow = headerCells.some(
+    (cell) => isTableCellNode(cell) && cell.hasHeaderState(TableCellHeaderStates.ROW),
+  );
+
+  /** @type {TableNode} */
+  let table;
 
   if (
     isTableNode(previousSibling) &&
-    getTableColumnsSize(previousSibling) === getTableColumnsSize(table)
+    (hasHeaderRow ||
+      getTableColumnsSize(previousSibling) === Math.max(...rows.map((cells) => cells.length)))
   ) {
-    const headerCells = /** @type {TableRowNode} */ (previousSibling.getFirstChild()).getChildren();
+    table = $createTable(rows, transformers, headerCells.length);
 
     table.getChildren().forEach((row) => {
       /** @type {TableRowNode} */ (row).getChildren().forEach((cell, index) => {
@@ -280,6 +332,7 @@ const $insertImportedTable = (parentNode, table) => {
     previousSibling.append(...table.getChildren());
     parentNode.remove();
   } else {
+    table = $createTable(rows, transformers);
     parentNode.replace(table);
   }
 
@@ -335,7 +388,7 @@ export const createTableTransformer = (cellTransformers = []) => {
 
       const rows = [...$takePrecedingRows(parentNode, transformers), matchCells];
 
-      $insertImportedTable(parentNode, $createTable(rows, transformers));
+      $insertImportedTable(parentNode, rows, transformers);
     },
     type: 'element',
   };

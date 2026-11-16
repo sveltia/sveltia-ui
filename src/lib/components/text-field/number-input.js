@@ -159,8 +159,29 @@ export const stepNumber = (inputValue, { step, direction, min, max }) => {
     return undefined;
   }
 
-  const maximumFractionDigits = getMaximumFractionDigits(step);
-  const newValue = Number((toNumber(inputValue) + step * direction).toFixed(maximumFractionDigits));
+  // Snap to the step grid, which starts at the minimum if any, otherwise at zero, as the native
+  // `<input type="number">` does: with a step of `1`, `2.5` goes up to `3` and down to `2` rather
+  // than moving by the full step and then being rounded
+  const base = typeof min === 'number' ? min : 0;
+
+  const maximumFractionDigits = Math.max(
+    getMaximumFractionDigits(step),
+    getMaximumFractionDigits(base),
+  );
+
+  const position = (toNumber(inputValue) - base) / step;
+  const nearestPosition = Math.round(position);
+  // Allow for floating-point errors, like `(0.3 - 0) / 0.1` being `2.9999999999999996`
+  const isOnGrid = Math.abs(position - nearestPosition) < 1e-9;
+  let newPosition;
+
+  if (isOnGrid) {
+    newPosition = nearestPosition + direction;
+  } else {
+    newPosition = direction > 0 ? Math.ceil(position) : Math.floor(position);
+  }
+
+  const newValue = Number((base + newPosition * step).toFixed(maximumFractionDigits));
 
   // Stop at the limit rather than stepping past it, as the native `<input type="number">` does
   if (typeof max === 'number' && newValue > max) {

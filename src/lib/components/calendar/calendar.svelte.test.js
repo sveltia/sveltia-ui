@@ -235,6 +235,19 @@ describe('Calendar', () => {
     expect(today.textContent?.trim()).toBe(String(now.getDate()));
   });
 
+  it.each(['foo', '2024-13-01', '2024-02-30'])(
+    'treats an invalid value %s like no value',
+    async (value) => {
+      const screen = await render(Calendar, { value });
+      const label = new Date().toLocaleDateString('en', { year: 'numeric', month: 'short' });
+
+      await expect.element(screen.getByRole('button', { name: label })).toBeVisible();
+      expect(
+        screen.container.querySelectorAll('[role="option"][aria-selected="true"]'),
+      ).toHaveLength(0);
+    },
+  );
+
   it('selects a day when clicked', async () => {
     /** @type {ComponentProps<typeof Calendar>} */
     const props = $state({ value: '2024-03-15' });
@@ -273,6 +286,18 @@ describe('Calendar', () => {
         .map((n) => String(n).padStart(2, '0'))
         .join('-'),
     );
+  });
+
+  it('brings today’s month back when today is already selected', async () => {
+    const screen = await render(Calendar, { value: toDateString(getToday()) });
+    const label = new Date().toLocaleDateString('en', { year: 'numeric', month: 'short' });
+
+    await expect.element(screen.getByRole('button', { name: label })).toBeVisible();
+    await screen.getByRole('button', { name: 'Next Month' }).click();
+    await screen.getByRole('button', { name: 'Next Month' }).click();
+    await expect.element(screen.getByRole('button', { name: label })).not.toBeInTheDocument();
+    await screen.getByRole('button', { name: 'Today' }).click();
+    await expect.element(screen.getByRole('button', { name: label })).toBeVisible();
   });
 
   it('opens the year and month picker from the header', async () => {

@@ -164,6 +164,30 @@ describe('Popup', () => {
     expect(instance.open).toBe(true);
   });
 
+  it('should leave clicks, Enter and Space to a text field anchor, but open it with ArrowDown', () => {
+    const input = document.createElement('input');
+
+    input.setAttribute('aria-haspopup', 'listbox');
+    document.body.appendChild(input);
+
+    const instance = activatePopup(input, popup, 'bottom-left');
+    const space = new KeyboardEvent('keydown', { key: ' ', bubbles: true, cancelable: true });
+    const enter = new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true });
+
+    input.click();
+    input.dispatchEvent(space);
+    input.dispatchEvent(enter);
+    expect(instance.open).toBe(false);
+    expect(space.defaultPrevented).toBe(false);
+    expect(enter.defaultPrevented).toBe(false);
+
+    input.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, cancelable: true }),
+    );
+    expect(instance.open).toBe(true);
+    input.remove();
+  });
+
   it('should not toggle open when anchor keydown has a modifier key', () => {
     const instance = activatePopup(anchor, popup, 'bottom-left');
 

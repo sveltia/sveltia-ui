@@ -348,6 +348,24 @@ describe('NumberInput', () => {
     expect(oninput).toHaveBeenCalled();
   });
 
+  it('fires input and change events when stepped, as the native number input does', async () => {
+    const oninput = vi.fn();
+    const onchange = vi.fn();
+    const screen = await render(NumberInput, { value: 1, oninput, onchange });
+    const input = screen.getByRole('spinbutton');
+
+    await input.click();
+    await userEvent.keyboard('{ArrowUp}');
+    expect(oninput).toHaveBeenCalledTimes(1);
+    expect(onchange).toHaveBeenCalledTimes(1);
+    expect(/** @type {HTMLInputElement} */ (input.element()).value).toBe('2');
+
+    await screen.getByRole('button', { name: 'Decrease' }).click();
+    expect(oninput).toHaveBeenCalledTimes(2);
+    expect(onchange).toHaveBeenCalledTimes(2);
+    expect(/** @type {HTMLInputElement} */ (input.element()).value).toBe('1');
+  });
+
   it('ignores the arrow keys while read-only', async () => {
     /** @type {ComponentProps<typeof NumberInput>} */
     const props = $state({ value: 1, readonly: true });

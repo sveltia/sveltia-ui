@@ -38,6 +38,7 @@
     editable = true,
     position = 'bottom-left',
     filterThreshold = 5,
+    selectOnTypeAhead = true,
     ariaLabel = undefined,
     children,
     chevronIcon,
@@ -76,6 +77,12 @@
   let showFilter = $state(false);
   /** @type {string} */
   let searchTerms = $state('');
+  /**
+   * Characters typed on the collapsed combobox that opened the dropdown, to be carried over to the
+   * filter once it’s shown. See {@link selectOnTypeAhead}.
+   * @type {string}
+   */
+  let pendingSearchTerms = '';
   /**
    * Number of options matching the current search terms, as last reported by the listbox.
    * @type {number}
@@ -168,6 +175,10 @@
    * whose label starts with what has been typed, without expanding the dropdown — the way a native
    * `<select>` behaves and the Select-Only Combobox pattern expects. There is no option element to
    * report while the dropdown is collapsed, so the `Change` event carries the registry entry.
+   *
+   * With `selectOnTypeAhead` disabled, as in `<SelectTags>` where every change commits a tag, a
+   * printable character opens the dropdown instead, and goes into the filter if it’s shown, so the
+   * user can narrow down the options before picking one.
    * @param {KeyboardEvent} event The `keydown` event.
    */
   const onComboboxKeyDown = (event) => {
@@ -189,6 +200,13 @@
     // Swallow the key whether or not it matches, as a native `<select>` does. Left to the browser,
     // a printable key on a non-editable element starts Firefox’s find-as-you-type.
     event.preventDefault();
+
+    if (!selectOnTypeAhead) {
+      pendingSearchTerms = key;
+      isPopupOpen = true;
+
+      return;
+    }
 
     const entries = registry.entries.filter((entry) => !entry.disabled);
 
@@ -423,7 +441,8 @@
   bind:open={isPopupOpen}
   onOpen={() => {
     showFilter = filterThreshold === -1 ? false : registry.count > filterThreshold;
-    searchTerms = '';
+    searchTerms = showFilter ? pendingSearchTerms : '';
+    pendingSearchTerms = '';
   }}
 >
   <div role="none" class="combobox-inner">

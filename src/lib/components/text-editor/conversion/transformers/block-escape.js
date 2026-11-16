@@ -113,6 +113,20 @@ export const unescapeCharacterReferences = (markdown, { isInLink, isAtLineEnd })
   });
 
 /**
+ * Escape the `&` that would start a named character reference in text, like that in `&copy;`.
+ * Lexical imports a named reference as text and exports the text as is, so the text, typed by the
+ * user or imported from the escaped `\&copy;`, would become `©` the next time the Markdown is read
+ * by another renderer. A named reference in the Markdown is imported as raw syntax instead, so it’s
+ * exported as is; see `RAW_HTML`.
+ * @param {string} markdown Markdown exported from a text node with its format, in which every
+ * backslash starts an escape.
+ * @returns {string} Escaped Markdown.
+ * @see https://spec.commonmark.org/0.31.2/#entity-and-numeric-character-references
+ */
+export const escapeNamedCharacterReferences = (markdown) =>
+  markdown.replace(/&(?=[A-Za-z][A-Za-z\d]*;)/g, '\\&');
+
+/**
  * Check if the given text node is italic and the italic text it’s part of is next to a word
  * character, like `b` in `a*b*c`. The italic text then needs the `*` delimiter instead of `_`,
  * which can’t be used within a word.
@@ -210,10 +224,12 @@ export const BLOCK_SYNTAX_ESCAPE = {
     const previous = node.getPreviousSibling();
     const next = node.getNextSibling();
 
-    markdown = unescapeCharacterReferences(unescapeText(markdown), {
-      isInLink: !!parent?.isInline(),
-      isAtLineEnd: !next || isLineBreakNode(next),
-    });
+    markdown = escapeNamedCharacterReferences(
+      unescapeCharacterReferences(unescapeText(markdown), {
+        isInLink: !!parent?.isInline(),
+        isAtLineEnd: !next || isLineBreakNode(next),
+      }),
+    );
 
     // Text in a link or other inline element, in a code block, which is exported verbatim, or in a
     // heading, whose content is only parsed for inline syntax, or text after the start of a line

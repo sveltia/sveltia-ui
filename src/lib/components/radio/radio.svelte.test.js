@@ -100,6 +100,32 @@ describe('Radio', () => {
     await expect.element(radio).toHaveAttribute('aria-checked', 'false');
   });
 
+  it('syncs with a bound group that starts undefined', async () => {
+    /** @type {ComponentProps<typeof Radio>} */
+    const props = $state({ label: 'Red', value: 'red', group: undefined });
+    const screen = await render(Radio, props);
+    const radio = screen.getByRole('radio');
+
+    await expect.element(radio).toHaveAttribute('aria-checked', 'false');
+    await radio.click();
+    expect(props.group).toBe('red');
+    await expect.element(radio).toHaveAttribute('aria-checked', 'true');
+  });
+
+  it('syncs with a bound group of numbers', async () => {
+    /** @type {ComponentProps<typeof Radio>} */
+    const props = $state({ label: 'One', value: 1, group: 2 });
+    const screen = await render(Radio, props);
+    const radio = screen.getByRole('radio');
+
+    await expect.element(radio).toHaveAttribute('aria-checked', 'false');
+    await radio.click();
+    expect(props.group).toBe(1);
+    await expect.element(radio).toHaveAttribute('aria-checked', 'true');
+    props.group = 2;
+    await expect.element(radio).toHaveAttribute('aria-checked', 'false');
+  });
+
   it('can be hidden', async () => {
     const screen = await render(Radio, { hidden: true });
 

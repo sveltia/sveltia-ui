@@ -124,8 +124,13 @@ class Popup {
 
     this.anchorElement.setAttribute('aria-expanded', 'false');
 
+    // A text field, such as the input of an editable combobox, needs its clicks to place the caret
+    // and its Enter and Space keys to type, so it’s not toggled by them. Its consumer provides a
+    // separate control, typically an expand button, while the arrow keys still open the popup.
+    const isTextField = anchorElement.matches('input, textarea, [contenteditable="true"]');
+
     const removeClickListener = on(anchorElement, 'click', (event) => {
-      if (!this.isDisabled && !this.isReadOnly) {
+      if (!isTextField && !this.isDisabled && !this.isReadOnly) {
         // A menu item’s submenu may already have been opened by hovering, which also happens right
         // before a tap on a touch screen, so a pointer click only opens it rather than toggling it
         // closed. A scripted click, which has no `detail`, still toggles it: that’s how the
@@ -142,7 +147,7 @@ class Popup {
         return;
       }
 
-      if (['Enter', ' '].includes(key) && !hasModifier) {
+      if (!isTextField && ['Enter', ' '].includes(key) && !hasModifier) {
         event.preventDefault();
         event.stopPropagation();
         this.open = !this.open;

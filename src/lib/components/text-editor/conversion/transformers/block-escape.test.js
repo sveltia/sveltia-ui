@@ -8,6 +8,7 @@ import {
   TRANSFORMERS,
 } from '@lexical/markdown';
 import { HeadingNode, QuoteNode } from '@lexical/rich-text';
+import { TableCellNode, TableNode, TableRowNode } from '@lexical/table';
 import {
   $createLineBreakNode as createLineBreakNode,
   $createParagraphNode as createParagraphNode,
@@ -20,16 +21,20 @@ import { describe, expect, it } from 'vitest';
 import {
   BLOCK_SYNTAX_ESCAPE,
   escapeBlockSyntax,
+  escapeNamedCharacterReferences,
   unescapeCharacterReferences,
   unescapeText,
 } from './block-escape.js';
 import { LINK } from './link.js';
-import { RAW_SYNTAX } from './raw-syntax.js';
+import { RAW_HTML, RAW_SYNTAX } from './raw-syntax.js';
+import { createTableTransformer } from './table.js';
 
 // Like the editor, use the link transformer that keeps the formats of the whole link text outside
 // the link, and mark the syntax the editor doesn’t support
 const transformers = [
+  createTableTransformer(),
   ...TRANSFORMERS.map((transformer) => (transformer === LEXICAL_LINK ? LINK : transformer)),
+  RAW_HTML,
   RAW_SYNTAX,
   BLOCK_SYNTAX_ESCAPE,
 ];
@@ -40,7 +45,17 @@ const transformers = [
  */
 const createTestEditor = () =>
   createEditor({
-    nodes: [HeadingNode, QuoteNode, ListNode, ListItemNode, CodeNode, LinkNode],
+    nodes: [
+      HeadingNode,
+      QuoteNode,
+      ListNode,
+      ListItemNode,
+      CodeNode,
+      LinkNode,
+      TableNode,
+      TableRowNode,
+      TableCellNode,
+    ],
     /**
      * Fail the test on an editor error.
      * @param {Error} error Error.
@@ -167,6 +182,21 @@ describe('unescapeCharacterReferences()', () => {
   it('keeps a bracket in a link text escaped', () => {
     expect(unescapeCharacterReferences('a &#91;b c', { ...inText, isInLink: true })).toBe(
       'a \\[b c',
+    );
+  });
+});
+
+describe('escapeNamedCharacterReferences()', () => {
+  it('escapes the `&` that would start a named character reference', () => {
+    expect(escapeNamedCharacterReferences('&copy; &nbsp;x &amp; &Auml; &frac12;')).toBe(
+      '\\&copy; \\&nbsp;x \\&amp; \\&Auml; \\&frac12;',
+    );
+    expect(escapeNamedCharacterReferences('C:\\\\&copy;')).toBe('C:\\\\\\&copy;');
+  });
+
+  it('leaves a `&` that can’t start a named character reference', () => {
+    expect(escapeNamedCharacterReferences('a & b &c d; &1; &; \\&#169;')).toBe(
+      'a & b &c d; &1; &; \\&#169;',
     );
   });
 });
@@ -390,6 +420,24 @@ describe('BLOCK_SYNTAX_ESCAPE', () => {
         ['  ', 'bold', 'italic'],
       ]),
     ).toBe('**a**  ');
+  });
+
+  it('keeps text that looks like a named character reference as text', () => {
+    expect(exportParagraphs([['&copy; &nbsp; &amp;']])).toBe('\\&copy; \\&nbsp; \\&amp;');
+    expect(roundTrip('\\&copy; \\&nbsp; **\\&amp;**')).toBe('\\&copy; \\&nbsp; **\\&amp;**');
+  });
+
+  it('keeps a named character reference as is across an import and an export', () => {
+    const markdown = '&copy; 2026&nbsp;A **&amp;** [&copy;](u) \\&copy; \\\\&copy;';
+
+    expect(roundTrip(markdown)).toBe(markdown);
+    expect(roundTrip(markdown, { asEditor: true })).toBe(markdown);
+  });
+
+  it('keeps a named character reference as is in a table cell, unlike an escaped one', () => {
+    const markdown = '| &copy; | \\&copy; |\n| --- | --- |\n| &nbsp;&amp; | `&copy;` \\&amp; |';
+
+    expect(roundTrip(markdown)).toBe(markdown);
   });
 
   it('keeps the formats around whitespace before a link across an import and an export', () => {

@@ -13,6 +13,11 @@ describe('toCodeBlock', () => {
   it('should produce an empty block without code', () => {
     expect(toCodeBlock('plain', '')).toBe('```plain\n```');
   });
+
+  it('should use a fence longer than any backtick run in the code', () => {
+    expect(toCodeBlock('md', '```js\na\n```')).toBe('````md\n```js\na\n```\n````');
+    expect(toCodeBlock('md', 'a `b` ````')).toBe('`````md\na `b` ````\n`````');
+  });
 });
 
 describe('parseCodeBlock', () => {
@@ -52,10 +57,26 @@ describe('parseCodeBlock', () => {
     expect(parseCodeBlock(toCodeBlock('c++', 'int a;'))).toEqual({ lang: 'c++', code: 'int a;' });
   });
 
+  it('should accept a fence longer than three backticks', () => {
+    expect(parseCodeBlock('````md\n```js\na\n```\n````')).toEqual({
+      lang: 'md',
+      code: '```js\na\n```',
+    });
+    expect(parseCodeBlock('````md\n```\n````')).toEqual({ lang: 'md', code: '```' });
+    expect(parseCodeBlock('````md\n````')).toEqual({ lang: 'md', code: '' });
+  });
+
   it('should round-trip with toCodeBlock', () => {
     const code = 'line 1\n\nline 3';
 
     expect(parseCodeBlock(toCodeBlock('md', code))).toEqual({ lang: 'md', code });
     expect(parseCodeBlock(toCodeBlock('md', ''))).toEqual({ lang: 'md', code: '' });
+
+    const fenced = '# Title\n\n```js\nconst a = 1;\n```\n\n```';
+
+    expect(parseCodeBlock(toCodeBlock('markdown', fenced))).toEqual({
+      lang: 'markdown',
+      code: fenced,
+    });
   });
 });
