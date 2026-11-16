@@ -363,6 +363,40 @@ describe('TextEditor', () => {
     clearInterval(timer);
   });
 
+  it('passes on what was just typed as soon as the focus leaves the editor', async () => {
+    /** @type {ComponentProps<typeof TextEditor>} */
+    const props = $state({ value: 'Hello' });
+    const screen = await render(TextEditor, props);
+    const root = await waitForContent(screen.container, 'Hello');
+
+    focusEnd(root);
+    await userEvent.keyboard('!');
+    // Without waiting for the delayed conversion
+    root.blur();
+    flushSync();
+    expect(props.value).toBe('Hello!');
+  });
+
+  it('shows what was just typed when switching to the plain text editor right away', async () => {
+    /** @type {ComponentProps<typeof TextEditor>} */
+    const props = $state({ value: 'Hello' });
+    const screen = await render(TextEditor, props);
+    const root = await waitForContent(screen.container, 'Hello');
+    const wrapper = /** @type {HTMLElement} */ (screen.container.querySelector('.sui.text-editor'));
+    const textarea = /** @type {HTMLTextAreaElement} */ (wrapper.querySelector('textarea'));
+
+    focusEnd(root);
+    await userEvent.keyboard('!');
+    // A click that leaves the focus in the editor, so only the toggle passes the change on
+    expect(document.activeElement).toBe(root);
+    /** @type {HTMLElement} */ (
+      screen.getByRole('button', { name: 'Edit in Markdown' }).element()
+    ).click();
+    flushSync();
+    expect(textarea.value).toBe('Hello!');
+    expect(props.value).toBe('Hello!');
+  });
+
   it('switches to the plain text editor and back', async () => {
     /** @type {ComponentProps<typeof TextEditor>} */
     const props = $state({ value: 'Hello' });

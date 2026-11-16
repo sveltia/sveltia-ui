@@ -36,7 +36,7 @@ vi.mock('lexical', () => getMock('lexical'));
 
 import { editorState, resetEditorMocks } from '#lib/test-utils/editor-mocks.js';
 import { initEditor } from '../core.js';
-import { onEditorUpdate } from './update.js';
+import { flushUpdateEvent, onEditorUpdate } from './update.js';
 import { BLOCK_SYNTAX_ESCAPE } from './transformers/block-escape.js';
 
 describe('Update event', () => {
@@ -164,6 +164,76 @@ describe('Update event', () => {
       await Promise.resolve();
 
       expect(update).not.toHaveBeenCalled();
+    } finally {
+      editorState.update = originalUpdate;
+    }
+  });
+
+  it('triggers the scheduled Update event right away when flushed', async () => {
+    const originalUpdate = editorState.update;
+    const update = vi.fn((/** @type {any} */ callback) => callback());
+    /** @type {any} */
+    const dirty = { dirtyElements: new Map([['root', true]]), dirtyLeaves: new Set() };
+
+    editorState.isComposing = () => false;
+    editorState.update = update;
+
+    try {
+      const { editor, dispose } = initEditor({
+        components: [],
+        useMarkdownShortcuts: false,
+        isCodeEditor: false,
+        modes: [],
+        enabledButtons: [],
+      });
+
+      // Nothing is scheduled yet
+      flushUpdateEvent(editor);
+      expect(update).not.toHaveBeenCalled();
+
+      editorState._updateListeners[0](dirty);
+      flushUpdateEvent(editor);
+      expect(update).toHaveBeenCalledTimes(1);
+
+      // The delayed event is not triggered again, nor is a second flush
+      flushUpdateEvent(editor);
+      await Promise.resolve();
+      expect(update).toHaveBeenCalledTimes(1);
+
+      // Nor once disposed
+      editorState._updateListeners[0](dirty);
+      dispose();
+      flushUpdateEvent(editor);
+      await Promise.resolve();
+      expect(update).toHaveBeenCalledTimes(1);
+    } finally {
+      editorState.update = originalUpdate;
+    }
+  });
+
+  it('does not flush the Update event while composing, or without an editor', () => {
+    const originalUpdate = editorState.update;
+    const update = vi.fn((/** @type {any} */ callback) => callback());
+    let composing = false;
+
+    editorState.isComposing = () => composing;
+    editorState.update = update;
+
+    try {
+      const { editor, dispose } = initEditor({
+        components: [],
+        useMarkdownShortcuts: false,
+        isCodeEditor: false,
+        modes: [],
+        enabledButtons: [],
+      });
+
+      editorState._updateListeners[0]();
+      composing = true;
+      flushUpdateEvent(editor);
+      flushUpdateEvent(undefined);
+      expect(update).not.toHaveBeenCalled();
+      dispose();
     } finally {
       editorState.update = originalUpdate;
     }

@@ -16,6 +16,7 @@
     isHtmlOnlyButton,
   } from '../constants.js';
   import { isInlineComponent } from '../conversion/editor-components.js';
+  import { flushUpdateEvent } from '../conversion/update.js';
   import CodeLanguageSwitcher from './code-language-switcher.svelte';
   import AlignMenuButton from './align-menu-button.svelte';
   import FormatTextButton from './format-text-button.svelte';
@@ -225,6 +226,11 @@
       pressed={!editorStore.useRichText}
       aria-label={_(`_sui.text_editor.${isHtml ? 'edit_in_html' : 'edit_in_markdown'}`)}
       onclick={() => {
+        // The source shows the value, which has to include what was just typed
+        if (editorStore.useRichText) {
+          flushUpdateEvent(editorStore.editor);
+        }
+
         editorStore.useRichText = !editorStore.useRichText;
 
         if (editorStore.useRichText) {

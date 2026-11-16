@@ -68,8 +68,27 @@ export const onEditorUpdate = (editor, enabledTransformers, cachedValue, format 
 };
 
 /**
+ * Functions triggering the Update event an editor has scheduled, keyed by the editor.
+ * @type {WeakMap<LexicalEditor, () => void>}
+ */
+const flushers = new WeakMap();
+
+/**
+ * Trigger the Update event the given editor has scheduled right away, instead of after the delay,
+ * so the value reflects what was just typed. Call this before acting on the value, like when the
+ * focus leaves the editor or before switching to the Markdown or HTML source. Does nothing if no
+ * Update event is scheduled.
+ * @param {LexicalEditor | undefined} editor Editor instance.
+ */
+export const flushUpdateEvent = (editor) => {
+  if (editor) {
+    flushers.get(editor)?.();
+  }
+};
+
+/**
  * Register an update listener that triggers the Update event with the Markdown or HTML value,
- * debounced so only the latest update in a burst triggers it.
+ * debounced so only the latest update in a burst triggers it. See also {@link flushUpdateEvent}.
  * @param {LexicalEditor} editor Editor instance.
  * @param {Transformer[]} enabledTransformers Enabled Markdown transformers.
  * @param {TextEditorValueFormat} format Value format.
@@ -83,10 +102,36 @@ export const registerUpdateEvent = (editor, enabledTransformers, format) => {
   /** @type {string | undefined} */
   let lastValue = undefined;
   let disposed = false;
+  /** Whether the Update event is scheduled, and hasn’t been triggered yet. */
+  let scheduled = false;
+
+  /**
+   * Trigger the Update event with the current value.
+   */
+  const triggerUpdate = () => {
+    scheduled = false;
+
+    editor.update(() => {
+      lastValue = onEditorUpdate(
+        editor,
+        enabledTransformers,
+        contentChanged ? undefined : lastValue,
+        format,
+      );
+      contentChanged = false;
+    });
+  };
+
+  flushers.set(editor, () => {
+    if (scheduled && !disposed && !editor.isComposing()) {
+      triggerUpdate();
+    }
+  });
 
   return mergeUnregisters(
     () => {
       disposed = true;
+      flushers.delete(editor);
     },
     editor.registerUpdateListener(({ dirtyElements, dirtyLeaves } = /** @type {any} */ ({})) => {
       // An update that only moves the selection leaves no dirty nodes. Remember whether any update
@@ -99,26 +144,20 @@ export const registerUpdateEvent = (editor, enabledTransformers, format) => {
       }
 
       updateCount += 1;
+      scheduled = true;
 
       const currentCount = updateCount;
 
       (async () => {
         await sleep(100);
 
-        // Skip if a newer update has been made in the meantime, or the editor has been disposed
-        if (currentCount !== updateCount || disposed) {
+        // Skip if a newer update has been made in the meantime, the event has been triggered
+        // already with `flushUpdateEvent()`, or the editor has been disposed
+        if (currentCount !== updateCount || !scheduled || disposed) {
           return;
         }
 
-        editor.update(() => {
-          lastValue = onEditorUpdate(
-            editor,
-            enabledTransformers,
-            contentChanged ? undefined : lastValue,
-            format,
-          );
-          contentChanged = false;
-        });
+        triggerUpdate();
       })();
     }),
   );

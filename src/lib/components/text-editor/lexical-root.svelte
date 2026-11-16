@@ -2,6 +2,7 @@
   import { $getRoot as getRoot, HISTORY_MERGE_TAG } from 'lexical';
   import { getContext, onMount, untrack } from 'svelte';
   import { IMPORT_UPDATE_TAG } from './constants.js';
+  import { flushUpdateEvent } from './conversion/update.js';
   import { handleEditorMouseDown, isStaticDecoratorContent } from './editing/caret.js';
   import { initEditor } from './core.js';
 
@@ -230,6 +231,19 @@
     }
   };
 
+  /**
+   * Pass what was just typed on as soon as the focus leaves the editor, rather than after the
+   * delay, so the value is up to date by the time the user acts on it, like with a button. That
+   * includes a nested editor in a component, which passes the change on to this editor through the
+   * component.
+   * @param {FocusEvent} event `focusout` event.
+   */
+  const onRootFocusOut = ({ relatedTarget }) => {
+    if (!lexicalRoot?.contains(/** @type {Node | null} */ (relatedTarget))) {
+      flushUpdateEvent(editorStore.editor);
+    }
+  };
+
   onMount(() => {
     const { editor, enabledTransformers, dispose } = initEditor(editorStore.config);
 
@@ -237,6 +251,7 @@
     editorStore.enabledTransformers = enabledTransformers;
 
     lexicalRoot?.addEventListener('Update', onUpdate);
+    lexicalRoot?.addEventListener('focusout', onRootFocusOut);
     lexicalRoot?.addEventListener('click', onClick);
     lexicalRoot?.addEventListener('mousedown', onMouseDown);
     lexicalRoot?.addEventListener('mousedown', onComponentMouseDown);
@@ -265,6 +280,7 @@
     return () => {
       unregisterUpdateListener();
       lexicalRoot?.removeEventListener('Update', onUpdate);
+      lexicalRoot?.removeEventListener('focusout', onRootFocusOut);
       lexicalRoot?.removeEventListener('click', onClick);
       lexicalRoot?.removeEventListener('mousedown', onMouseDown);
       lexicalRoot?.removeEventListener('mousedown', onComponentMouseDown);
