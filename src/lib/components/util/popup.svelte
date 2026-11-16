@@ -40,7 +40,7 @@
     /* eslint-disable prefer-const */
     open = $bindable(false),
     hovered = $bindable(false),
-    content = $bindable(undefined),
+    content: boundContent = $bindable(),
     class: className,
     showBackdrop = undefined,
     anchor,
@@ -53,6 +53,14 @@
     ...restProps
     /* eslint-enable prefer-const */
   } = $props();
+
+  /**
+   * A reference to the content element. It’s kept apart from the bindable `content` prop, which
+   * Svelte resets whenever the props spread onto this component change, unless the consumer binds
+   * it.
+   * @type {HTMLElement | undefined}
+   */
+  let content = $state.raw();
 
   /**
    * A reference to the `<dialog>` element. This is only available while the popup is open, because
@@ -184,7 +192,13 @@
 
 {#snippet contentWrapper()}
   <div
-    bind:this={content}
+    bind:this={
+      () => content,
+      (el) => {
+        content = el;
+        boundContent = el;
+      }
+    }
     hidden={!open}
     role="none"
     class="content {className} {contentType}"

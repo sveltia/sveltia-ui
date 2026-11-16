@@ -1,8 +1,11 @@
 import { sleep } from '@sveltia/utils/misc';
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, onTestFinished, vi } from 'vitest';
 import { render } from 'vitest-browser-svelte';
 import { userEvent } from 'vitest/browser';
+import { html } from '../../test-utils/snippets.js';
+import SpreadPropsFixture from '../../test-utils/spread-props-fixture.test.svelte';
 import PopupFixture from './popup-fixture.test.svelte';
+import Popup from './popup.svelte';
 
 /**
  * @import { ComponentProps } from 'svelte';
@@ -83,6 +86,43 @@ describe('Popup', () => {
     props.open = false;
     await vi.waitFor(() => {
       expect(getContent()).toBeNull();
+    });
+  });
+
+  it('still moves the focus into the content after the props spread onto it have changed', async () => {
+    const anchor = document.createElement('button');
+
+    anchor.textContent = 'Anchor';
+    anchor.setAttribute('aria-haspopup', 'menu');
+    document.body.append(anchor);
+    onTestFinished(() => anchor.remove());
+
+    const fixture = $state({
+      component: Popup,
+      /** @type {Record<string, any>} */
+      attrs: {
+        anchor,
+        children: html(
+          '<div role="menu" tabindex="-1"><div role="menuitem" tabindex="0">A</div></div>',
+        ),
+      },
+    });
+
+    await render(SpreadPropsFixture, fixture);
+    anchor.click();
+    await vi.waitFor(() => {
+      expect(getContent()?.checkVisibility()).toBe(true);
+    });
+    anchor.click();
+    await vi.waitFor(() => {
+      expect(getContent()?.checkVisibility()).toBeFalsy();
+    });
+
+    // The focus is moved within the content element, which a new spread must not take away
+    fixture.attrs = { ...fixture.attrs, position: 'bottom-right' };
+    anchor.click();
+    await vi.waitFor(() => {
+      expect(document.activeElement?.getAttribute('role')).toBe('menuitem');
     });
   });
 

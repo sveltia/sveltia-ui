@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-svelte';
 import { html, text } from '../../test-utils/snippets.js';
+import SpreadPropsFixture from '../../test-utils/spread-props-fixture.test.svelte';
 import Button from './button.svelte';
 
 /**
@@ -180,6 +181,27 @@ describe('Button', () => {
     expect(document.querySelector('dialog.popup .content')?.classList.contains('menu')).toBe(true);
     await vi.waitFor(() => {
       expect(document.activeElement?.getAttribute('role')).toBe('menuitem');
+    });
+  });
+
+  it('opens a popup added along with other props spread onto it', async () => {
+    const fixture = $state({
+      component: Button,
+      /** @type {Record<string, any>} */
+      attrs: { label: 'Menu' },
+    });
+
+    const screen = await render(SpreadPropsFixture, fixture);
+
+    // The popup is anchored to the `<button>` element, which a new spread must not take away
+    fixture.attrs = {
+      label: 'Menu',
+      'aria-haspopup': 'menu',
+      popup: html('<div role="menu" tabindex="-1"><div role="menuitem" tabindex="0">A</div></div>'),
+    };
+    await screen.getByRole('button', { name: 'Menu' }).click();
+    await vi.waitFor(() => {
+      expect(document.querySelector('dialog.popup .content')?.checkVisibility()).toBe(true);
     });
   });
 });

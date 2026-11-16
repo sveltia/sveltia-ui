@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-svelte';
 import { userEvent } from 'vitest/browser';
+import SpreadPropsFixture from '../../test-utils/spread-props-fixture.test.svelte';
 import TextInput from './text-input.svelte';
 
 /**
@@ -99,6 +100,18 @@ describe('TextInput', () => {
 
     props.value = 'Reset';
     await expect.element(input).toHaveValue('Reset');
+  });
+
+  it('still reports the value after the props spread onto it have changed', async () => {
+    const fixture = $state({ component: TextInput, attrs: { placeholder: 'A' }, value: 'Hi' });
+    const screen = await render(SpreadPropsFixture, fixture);
+    const input = screen.getByRole('textbox');
+
+    // The value is read from the `<input>` element, which a new spread must not take away
+    fixture.attrs = { placeholder: 'B' };
+    await expect.element(input).toHaveAttribute('placeholder', 'B');
+    await input.fill('Hello');
+    expect(fixture.value).toBe('Hello');
   });
 
   it('debounces the input on demand', async () => {

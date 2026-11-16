@@ -26,7 +26,7 @@
   let {
     /* eslint-disable prefer-const */
     value = $bindable(),
-    element = $bindable(),
+    element: boundElement = $bindable(),
     role = 'textbox',
     keyShortcuts = undefined,
     dir = undefined,
@@ -49,6 +49,14 @@
     ...restProps
     /* eslint-enable prefer-const */
   } = $props();
+
+  /**
+   * A reference to the `<input>` element. It’s kept apart from the bindable `element` prop, which
+   * Svelte resets whenever the props spread onto this component change, unless the consumer binds
+   * it.
+   * @type {HTMLInputElement | undefined}
+   */
+  let element = $state.raw();
 
   const id = $props.id();
   const timeout = $derived(typeof debounce === 'number' ? debounce : 300);
@@ -108,7 +116,13 @@
   {hidden}
 >
   <input
-    bind:this={element}
+    bind:this={
+      () => element,
+      (el) => {
+        element = el;
+        boundElement = el;
+      }
+    }
     type="text"
     {...restProps}
     {value}

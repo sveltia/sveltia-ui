@@ -19,7 +19,7 @@
    */
   let {
     /* eslint-disable prefer-const */
-    element = $bindable(),
+    element: boundElement = $bindable(),
     class: className = '',
     type = 'button',
     role = 'button',
@@ -49,6 +49,14 @@
     ...restProps
     /* eslint-enable prefer-const */
   } = $props();
+
+  /**
+   * A reference to the `<button>` element. It’s kept apart from the bindable `element` prop, which
+   * Svelte resets whenever the props spread onto this component change, unless the consumer binds
+   * it.
+   * @type {HTMLButtonElement | undefined}
+   */
+  let element = $state.raw();
 </script>
 
 {#snippet labelText()}
@@ -69,7 +77,13 @@
   wrap one, so a long list would otherwise pay for an effect per item that has nothing to do.
 -->
 <button
-  bind:this={element}
+  bind:this={
+    () => element,
+    (el) => {
+      element = el;
+      boundElement = el;
+    }
+  }
   {...restProps}
   class={['sui', 'button', variant, size, className]}
   class:iconic

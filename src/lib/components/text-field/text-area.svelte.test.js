@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-svelte';
 import { userEvent } from 'vitest/browser';
+import SpreadPropsFixture from '../../test-utils/spread-props-fixture.test.svelte';
 import TextArea from './text-area.svelte';
 
 /**
@@ -171,6 +172,26 @@ describe('TextArea', () => {
 
     expect(clone.classList.contains('auto-resize')).toBe(false);
     expect(getComputedStyle(clone).position).toBe('absolute');
+    textarea.scrollTop = 100;
+    await vi.waitFor(() => {
+      expect(clone.scrollTop).toBe(100);
+    });
+  });
+
+  it('still scrolls the highlighted text after the props spread onto it have changed', async () => {
+    const value = Array.from({ length: 50 }, (_, index) => `# Line ${index}`).join('\n');
+    const fixture = $state({ component: TextArea, attrs: { highlight, placeholder: 'A' }, value });
+    const screen = await render(SpreadPropsFixture, fixture);
+    const wrapper = /** @type {HTMLElement} */ (screen.container.querySelector('.sui.text-area'));
+    const textarea = /** @type {HTMLTextAreaElement} */ (wrapper.querySelector('textarea'));
+    const clone = /** @type {HTMLElement} */ (wrapper.querySelector('.clone'));
+
+    // The scroll position is synced from the `<textarea>` element, which a new spread must not take
+    // away
+    fixture.attrs = { ...fixture.attrs, placeholder: 'B' };
+    await vi.waitFor(() => {
+      expect(textarea.placeholder).toBe('B');
+    });
     textarea.scrollTop = 100;
     await vi.waitFor(() => {
       expect(clone.scrollTop).toBe(100);

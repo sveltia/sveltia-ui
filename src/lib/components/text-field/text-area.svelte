@@ -45,7 +45,7 @@
   let {
     /* eslint-disable prefer-const */
     value = $bindable(''),
-    element = $bindable(),
+    element: boundElement = $bindable(),
     flex = false,
     dir = undefined,
     name = undefined,
@@ -62,6 +62,14 @@
     ...restProps
     /* eslint-enable prefer-const */
   } = $props();
+
+  /**
+   * A reference to the `<textarea>` element. It’s kept apart from the bindable `element` prop,
+   * which Svelte resets whenever the props spread onto this component change, unless the consumer
+   * binds it.
+   * @type {HTMLTextAreaElement | undefined}
+   */
+  let element = $state.raw();
 
   /**
    * Content for the clone element used to measure the auto-resized height. A trailing line break is
@@ -117,7 +125,13 @@
   {hidden}
 >
   <textarea
-    bind:this={element}
+    bind:this={
+      () => element,
+      (el) => {
+        element = el;
+        boundElement = el;
+      }
+    }
     {...restProps}
     {dir}
     {name}
