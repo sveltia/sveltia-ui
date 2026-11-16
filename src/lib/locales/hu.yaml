@@ -1,0 +1,176 @@
+# Dialog action button labels
+ok: OK
+cancel: Mégse
+close: Bezárás
+
+# Button to clear content, e.g. search input or calendar date
+clear: Törlés
+
+# Text editor dialog buttons for link/image insertion
+insert: Beszúrás
+update: Frissítés
+remove: Eltávolítás
+
+# Combobox dropdown toggle button aria-labels
+collapse: Összecsukás
+expand: Kibontás
+
+# Infobar/toast dismiss button label
+dismiss: Elvetés
+
+# Alert & infobar status, read out by screen readers before the message (visually hidden)
+alert:
+  error: Hiba
+  warning: Figyelmeztetés
+  info: Információ
+  success: Siker
+
+# Role descriptions, read out by screen readers in place of the generic “group” role
+role_descriptions:
+  disclosure: kibontható panel
+  option_group: lehetőségcsoport
+  menu_item_group: menüelem-csoport
+  checkbox_group: jelölőnégyzet-csoport
+  table_head: táblázatfejléc
+  table_body: táblázattörzs
+  table_foot: táblázatlábléc
+  grid_head: rácsfejléc
+  grid_body: rácstörzs
+  grid_foot: rácslábléc
+
+# Emoji suggestion listbox aria-label, shared by the text fields and the text editor
+emoji_suggestions: Emojijavaslatok
+
+# Calendar component
+calendar:
+  # View switcher group aria-labels and navigation button aria-labels
+  year: Év
+  previous_decade: Előző évtized
+  next_decade: Következő évtized
+  month: Hónap
+  previous_month: Előző hónap
+  next_month: Következő hónap
+  # “Today” button label in footer
+  today: Ma
+
+# Split button component
+split_button:
+  # Wrapper aria-label, e.g. “Save Options” when primary button is “Save”
+  x_options: '{$name} – beállítások'
+  # Dropdown toggle aria-label
+  more_options: További lehetőségek
+
+# Combobox component
+combobox:
+  # Placeholder when no option is selected
+  select_an_option: Lehetőség kiválasztása…
+  # Filter input aria-label
+  filter_options: Lehetőségek szűrése
+  # Empty state message when filter has no matches
+  no_matching_options: Nincs egyező lehetőség
+
+# Number input component
+number_input:
+  # Spin button aria-labels for incrementing/decrementing the number value
+  increase: Növelés
+  decrease: Csökkentés
+  # Description of the allowed range when the number can’t be stepped, e.g. “From 1 to 10”
+  range: '{$min} és {$max} között'
+  # Description of the minimum value when the number can’t be stepped
+  min: Legalább {$min}
+  # Description of the maximum value when the number can’t be stepped
+  max: Legfeljebb {$max}
+
+# Password input component
+password_input:
+  # Visibility toggle button aria-labels
+  show_password: Jelszó megjelenítése
+  hide_password: Jelszó elrejtése
+
+# Secret input component (API keys, tokens, etc.)
+secret_input:
+  # Visibility toggle button aria-labels
+  show_secret: Titkos érték megjelenítése
+  hide_secret: Titkos érték elrejtése
+
+# Select tags component (multi-select)
+select_tags:
+  # Listbox aria-label
+  selected_options: Kiválasztott lehetőségek
+  # Remove button aria-label, e.g. “Remove Option 1”
+  remove_x: '{$name} eltávolítása'
+
+# Text editor component
+text_editor:
+  # Toolbar aria-labels
+  text_editor: Szövegszerkesztő
+  code_editor: Kódszerkesztő
+  # Block style menu button and menu aria-labels
+  text_style_options: Szövegstílus-beállítások
+  show_text_style_options: Szövegstílus-beállítások megjelenítése
+  # Block style menu items
+  paragraph: Bekezdés
+  heading_1: Címsor 1
+  heading_2: Címsor 2
+  heading_3: Címsor 3
+  heading_4: Címsor 4
+  heading_5: Címsor 5
+  heading_6: Címsor 6
+  bulleted_list: Felsorolás
+  numbered_list: Számozott lista
+  task_list: Feladatlista
+  blockquote: Idézet
+  code_block: Kódblokk
+  # Inline style button aria-labels
+  bold: Félkövér
+  italic: Dőlt
+  underline: Aláhúzott
+  strikethrough: Áthúzott
+  code: Kód
+  link: Hivatkozás
+  # Link dialog title
+  insert_link: Hivatkozás beszúrása
+  # Floating link editor button aria-labels
+  edit_link: Hivatkozás szerkesztése
+  remove_link: Hivatkozás eltávolítása
+  # Link dialog input field labels
+  text: Szöveg
+  url: URL
+  # Link dialog checkbox label and floating link editor button aria-label
+  open_in_new_tab: Megnyitás új lapon
+  # Table dialog title
+  insert_table: Táblázat beszúrása
+  # Table dialog input field labels
+  rows: Sorok
+  columns: Oszlopok
+  # Table menu button and menu aria-labels
+  table_options: Táblázatbeállítások
+  show_table_options: Táblázatbeállítások megjelenítése
+  # Table menu items
+  insert_row_above: Sor beszúrása fölé
+  insert_row_below: Sor beszúrása alá
+  insert_column_left: Oszlop beszúrása balra
+  insert_column_right: Oszlop beszúrása jobbra
+  delete_row: Sor törlése
+  delete_column: Oszlop törlése
+  delete_table: Táblázat törlése
+  # Horizontal rule button aria-label
+  insert_horizontal_rule: Vízszintes vonal beszúrása
+  # Alignment menu button and menu aria-labels
+  alignment_options: Igazítási beállítások
+  show_alignment_options: Igazítási beállítások megjelenítése
+  # Alignment menu items
+  align_left: Balra igazítás
+  align_center: Középre igazítás
+  align_right: Jobbra igazítás
+  align_justify: Sorkizárt igazítás
+  # Markdown mode toggle button aria-label
+  edit_in_markdown: Szerkesztés Markdownban
+  # HTML mode toggle button aria-label
+  edit_in_html: Szerkesztés HTML-ben
+  # Error message when rich text conversion fails
+  converter_error: Nem sikerült bekapcsolni a formázott szöveges módot. Helyette az egyszerű szöveges szerkesztő használható.
+  # Language selector aria-label
+  language: Nyelv
+  # Plain text mode option in language selector
+  plain_text: Egyszerű szöveg
