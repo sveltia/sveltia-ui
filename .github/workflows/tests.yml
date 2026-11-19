@@ -33,9 +33,10 @@ jobs:
           version: latest
           runtime: node@26
           cache: true
-      # The browsers are cached per Playwright version, which pins their builds. The tests run
-      # headless, so only the headless shell of Chromium is installed, not the full browser. The
-      # system packages they need aren’t cached, and are installed on every run
+      # The browsers are cached per runner image and Playwright version, which together pin their
+      # builds: Playwright downloads a build made for the image’s Ubuntu release, which can’t run on
+      # another one. The tests run headless, so only the headless shell of Chromium is installed, not
+      # the full browser. The system packages they need aren’t cached, and are installed on every run
       - name: Get the Playwright version
         id: playwright
         if: ${{ matrix.task.browser }}
@@ -46,7 +47,7 @@ jobs:
         uses: actions/cache@v6.1.0
         with:
           path: ~/.cache/ms-playwright
-          key: playwright-browsers-${{ runner.os }}-${{ steps.playwright.outputs.version }}
+          key: playwright-browsers-${{ env.ImageOS }}-${{ steps.playwright.outputs.version }}
       - name: Install the browsers
         if: ${{ matrix.task.browser && steps.browser-cache.outputs.cache-hit != 'true' }}
         run: pnpm exec playwright install chromium firefox webkit --only-shell --with-deps

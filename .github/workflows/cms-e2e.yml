@@ -107,8 +107,9 @@ jobs:
       # is the one the bundle was built with
       - name: Install the library in the CMS
         run: pnpm add @sveltia/ui@file:sveltia-ui.tgz
-      # The browser is cached per Playwright version, which pins the Chromium build. Only the
-      # headless shell is installed, as in the CMS
+      # The browser is cached per runner image and Playwright version, which together pin the
+      # Chromium build, made for the image’s Ubuntu release. Only the headless shell is installed,
+      # as in the CMS
       - name: Get the Playwright version
         id: playwright
         run: echo "version=$(node -p "require('playwright/package.json').version")" >> "$GITHUB_OUTPUT"
@@ -117,7 +118,7 @@ jobs:
         uses: actions/cache@v6.1.0
         with:
           path: ~/.cache/ms-playwright
-          key: playwright-chromium-${{ runner.os }}-${{ steps.playwright.outputs.version }}
+          key: playwright-chromium-${{ env.ImageOS }}-${{ steps.playwright.outputs.version }}
       - name: Install Chromium
         if: ${{ steps.chromium-cache.outputs.cache-hit != 'true' }}
         run: pnpm exec playwright install chromium --only-shell --with-deps
