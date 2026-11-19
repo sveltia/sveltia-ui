@@ -36,9 +36,9 @@
           openStandardDrawer.left = true;
         }}
       />
-      <Drawer bind:open={openStandardDrawer.left} title="Drawer" position="left"
-        >Hello World!</Drawer
-      >
+      <Drawer bind:open={openStandardDrawer.left} title="Drawer" position="left">
+        Hello World!
+      </Drawer>
     </div>
     <div role="none">
       <Button

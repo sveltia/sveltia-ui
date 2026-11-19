@@ -1,19 +1,8 @@
-# cSpell:ignore deepmerge gcqx minimatch
-
 allowBuilds:
   '@parcel/watcher': false
   esbuild: false
   svelte-preprocess: true
   unrs-resolver: false
-
-auditConfig:
-  ignoreGhsas:
-    # deepmerge: dev dependencies only
-    # https://github.com/advisories/GHSA-gcqx-w48m-w2h4
-    - GHSA-gcqx-w48m-w2h4
-    # minimatch: dev dependencies only; no patch available for older versions
-    # https://github.com/advisories/GHSA-g3hv-75wg-m249
-    - GHSA-g3hv-75wg-m249
 
 engineStrict: true
 

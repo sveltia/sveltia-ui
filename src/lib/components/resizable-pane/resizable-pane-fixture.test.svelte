@@ -61,9 +61,9 @@
       First
     </ResizablePane>
     <ResizableHandle ariaLabel="Resize" {disabled} {showHandleBar} {onResizeStart} {onResizeEnd} />
-    <ResizablePane class="second" defaultSize={secondDefaultSize} maxSize={secondMaxSize}
-      >Second</ResizablePane
-    >
+    <ResizablePane class="second" defaultSize={secondDefaultSize} maxSize={secondMaxSize}>
+      Second
+    </ResizablePane>
     {#if third}
       <ResizableHandle ariaLabel="Resize second">
         <span class="custom-handle">||</span>

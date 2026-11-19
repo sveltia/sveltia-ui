@@ -96,7 +96,7 @@
     -->
     <div role="row" class="row-group-caption" data-selectable="false" {@attach handleCaptionClick}>
       <!-- We need `colspan` here but cannot place `<th>` under `<div>`, so use a hack -->
-      <svelte:element this={"th"} role="columnheader" id="{id}-label" colspan="9999">
+      <svelte:element this={'th'} role="columnheader" id="{id}-label" colspan="9999">
         {#if hasExpander}
           <!--
             The button is not a tab stop: the grid has a single one, and a keyboard user reaches

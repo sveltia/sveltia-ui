@@ -10,11 +10,12 @@ import { isPreformatted, TEXT_FORMAT_TAGS } from './utils.js';
  * Elements a paragraph can’t hold: the HTML parser ends an open `<p>` before any of them.
  * @see https://html.spec.whatwg.org/multipage/parsing.html#parsing-main-inbody
  */
+// prettier-ignore
 const PARAGRAPH_ENDING_TAGS = [
-  ...['address', 'article', 'aside', 'blockquote', 'center', 'dd', 'details', 'dialog', 'dir'],
-  ...['div', 'dl', 'dt', 'fieldset', 'figcaption', 'figure', 'footer', 'form', 'h1', 'h2', 'h3'],
-  ...['h4', 'h5', 'h6', 'header', 'hgroup', 'hr', 'li', 'listing', 'main', 'menu', 'nav', 'ol'],
-  ...['p', 'plaintext', 'pre', 'search', 'section', 'summary', 'table', 'ul', 'xmp'],
+  'address', 'article', 'aside', 'blockquote', 'center', 'dd', 'details', 'dialog', 'dir', 'div',
+  'dl', 'dt', 'fieldset', 'figcaption', 'figure', 'footer', 'form', 'h1', 'h2', 'h3', 'h4', 'h5',
+  'h6', 'header', 'hgroup', 'hr', 'li', 'listing', 'main', 'menu', 'nav', 'ol', 'p', 'plaintext',
+  'pre', 'search', 'section', 'summary', 'table', 'ul', 'xmp',
 ];
 
 /**
