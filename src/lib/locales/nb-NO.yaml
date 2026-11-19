@@ -1,0 +1,176 @@
+# Dialog action button labels
+ok: OK
+cancel: Avbryt
+close: Lukk
+
+# Button to clear content, e.g. search input or calendar date
+clear: Tøm
+
+# Text editor dialog buttons for link/image insertion
+insert: Sett inn
+update: Oppdater
+remove: Fjern
+
+# Combobox dropdown toggle button aria-labels
+collapse: Skjul
+expand: Vis
+
+# Infobar/toast dismiss button label
+dismiss: Lukk
+
+# Alert & infobar status, read out by screen readers before the message (visually hidden)
+alert:
+  error: Feil
+  warning: Advarsel
+  info: Informasjon
+  success: Fullført
+
+# Role descriptions, read out by screen readers in place of the generic “group” role
+role_descriptions:
+  disclosure: utvidbar seksjon
+  option_group: alternativgruppe
+  menu_item_group: menyelementgruppe
+  checkbox_group: avkrysningsboksgruppe
+  table_head: tabellhode
+  table_body: tabellinnhold
+  table_foot: tabellbunn
+  grid_head: rutenetthode
+  grid_body: rutenettinnhold
+  grid_foot: rutenettbunn
+
+# Emoji suggestion listbox aria-label, shared by the text fields and the text editor
+emoji_suggestions: Emojiforslag
+
+# Calendar component
+calendar:
+  # View switcher group aria-labels and navigation button aria-labels
+  year: År
+  previous_decade: Forrige tiår
+  next_decade: Neste tiår
+  month: Måned
+  previous_month: Forrige måned
+  next_month: Neste måned
+  # “Today” button label in footer
+  today: I dag
+
+# Split button component
+split_button:
+  # Wrapper aria-label, e.g. “Save Options” when primary button is “Save”
+  x_options: Alternativer for {$name}
+  # Dropdown toggle aria-label
+  more_options: Flere alternativer
+
+# Combobox component
+combobox:
+  # Placeholder when no option is selected
+  select_an_option: Velg et alternativ…
+  # Filter input aria-label
+  filter_options: Filtrer alternativer
+  # Empty state message when filter has no matches
+  no_matching_options: Fant ingen alternativer som passer
+
+# Number input component
+number_input:
+  # Spin button aria-labels for incrementing/decrementing the number value
+  increase: Øk
+  decrease: Senk
+  # Description of the allowed range when the number can’t be stepped, e.g. “From 1 to 10”
+  range: Fra {$min} til {$max}
+  # Description of the minimum value when the number can’t be stepped
+  min: Minst {$min}
+  # Description of the maximum value when the number can’t be stepped
+  max: Høyst {$max}
+
+# Password input component
+password_input:
+  # Visibility toggle button aria-labels
+  show_password: Vis passord
+  hide_password: Skjul passord
+
+# Secret input component (API keys, tokens, etc.)
+secret_input:
+  # Visibility toggle button aria-labels
+  show_secret: Vis hemmelig verdi
+  hide_secret: Skjul hemmelig verdi
+
+# Select tags component (multi-select)
+select_tags:
+  # Listbox aria-label
+  selected_options: Valgte alternativer
+  # Remove button aria-label, e.g. “Remove Option 1”
+  remove_x: Fjern {$name}
+
+# Text editor component
+text_editor:
+  # Toolbar aria-labels
+  text_editor: Tekstredigering
+  code_editor: Koderedigering
+  # Block style menu button and menu aria-labels
+  text_style_options: Tekststiler
+  show_text_style_options: Vis tekststiler
+  # Block style menu items
+  paragraph: Avsnitt
+  heading_1: Overskrift 1
+  heading_2: Overskrift 2
+  heading_3: Overskrift 3
+  heading_4: Overskrift 4
+  heading_5: Overskrift 5
+  heading_6: Overskrift 6
+  bulleted_list: Punktliste
+  numbered_list: Nummerert liste
+  task_list: Oppgaveliste
+  blockquote: Sitat
+  code_block: Kodeblokk
+  # Inline style button aria-labels
+  bold: Fet
+  italic: Kursiv
+  underline: Understreket
+  strikethrough: Gjennomstreket
+  code: Kode
+  link: Lenke
+  # Link dialog title
+  insert_link: Sett inn lenke
+  # Floating link editor button aria-labels
+  edit_link: Rediger lenke
+  remove_link: Fjern lenke
+  # Link dialog input field labels
+  text: Tekst
+  url: URL
+  # Link dialog checkbox label and floating link editor button aria-label
+  open_in_new_tab: Åpne i ny fane
+  # Table dialog title
+  insert_table: Sett inn tabell
+  # Table dialog input field labels
+  rows: Rader
+  columns: Kolonner
+  # Table menu button and menu aria-labels
+  table_options: Tabellalternativer
+  show_table_options: Vis tabellalternativer
+  # Table menu items
+  insert_row_above: Sett inn rad over
+  insert_row_below: Sett inn rad under
+  insert_column_left: Sett inn kolonne til venstre
+  insert_column_right: Sett inn kolonne til høyre
+  delete_row: Slett rad
+  delete_column: Slett kolonne
+  delete_table: Slett tabell
+  # Horizontal rule button aria-label
+  insert_horizontal_rule: Sett inn skillelinje
+  # Alignment menu button and menu aria-labels
+  alignment_options: Justering
+  show_alignment_options: Vis justering
+  # Alignment menu items
+  align_left: Venstrejuster
+  align_center: Midtstill
+  align_right: Høyrejuster
+  align_justify: Blokkjuster
+  # Markdown mode toggle button aria-label
+  edit_in_markdown: Rediger i Markdown
+  # HTML mode toggle button aria-label
+  edit_in_html: Rediger i HTML
+  # Error message when rich text conversion fails
+  converter_error: Kan ikke slå på formatert tekst. Bruk den enkle tekstredigeringen i stedet.
+  # Language selector aria-label
+  language: Språk
+  # Plain text mode option in language selector
+  plain_text: Ren tekst
