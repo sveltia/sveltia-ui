@@ -67,7 +67,7 @@ jobs:
       - name: Build the CMS
         run: pnpm build
       - name: Upload the bundle
-        uses: actions/upload-artifact@v7.0.1
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: bundle
           # The library, the bundle, and the locale files the tests serve in place of the CDN
@@ -130,7 +130,7 @@ jobs:
       # The report holds a trace of each failed test, to step through what the page did
       - name: Upload the end-to-end test report
         if: ${{ failure() }}
-        uses: actions/upload-artifact@v7.0.1
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: playwright-report-e2e-${{ matrix.shard }}
           path: playwright-report/
