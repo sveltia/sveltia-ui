@@ -3,6 +3,7 @@ import { render } from 'vitest-browser-svelte';
 import { userEvent } from 'vitest/browser';
 import { html } from '../../test-utils/snippets.js';
 import Button from '../button/button.svelte';
+import TooltipFixture from './tooltip-fixture.test.svelte';
 
 /**
  * Check whether the tooltip is shown.
@@ -100,6 +101,35 @@ describe('Tooltip', () => {
     await expect.poll(() => isShown(tooltip)).toBe(true);
     button.element().blur();
     await expect.poll(() => isShown(tooltip)).toBe(false);
+  });
+
+  it('lets a block remove its button while it has the focus', async () => {
+    const props = $state({ labels: ['Save', 'Delete'] });
+    /** @type {string[]} */
+    const errors = [];
+
+    /**
+     * Collect an uncaught error, which an event listener throwing doesn’t pass on to the test.
+     * @param {ErrorEvent} event `error` event.
+     */
+    const onError = (event) => {
+      errors.push(event.message);
+    };
+
+    window.addEventListener('error', onError);
+
+    try {
+      const screen = await render(TooltipFixture, props);
+      const button = screen.getByRole('button', { name: 'Save' });
+
+      button.element().focus();
+      await expect.element(button).toHaveFocus();
+      props.labels = ['Delete'];
+      await expect.element(button).not.toBeInTheDocument();
+      expect(errors).toEqual([]);
+    } finally {
+      window.removeEventListener('error', onError);
+    }
   });
 
   it('describes the button, keeping its other descriptions', async () => {

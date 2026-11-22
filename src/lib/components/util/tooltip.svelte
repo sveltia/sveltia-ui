@@ -7,6 +7,7 @@
   @see https://www.w3.org/WAI/WCAG22/Understanding/content-on-hover-or-focus.html
 -->
 <script>
+  import { untrack } from 'svelte';
   import { getAccessibleText, getTooltipPosition, toggleIdInList } from '../../services/tooltip.js';
 
   /**
@@ -145,10 +146,14 @@
   };
 
   /**
-   * Hide the tooltip when the anchor loses the focus.
+   * Hide the tooltip when the anchor loses the focus. Removing a focused anchor fires the event at
+   * once, while the block that removes it is still running, where Svelte forbids a state change
+   * unless it’s untracked.
    */
   const onFocusOut = () => {
-    focused = false;
+    untrack(() => {
+      focused = false;
+    });
   };
 
   // Follow the anchor’s pointer and focus events
