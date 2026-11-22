@@ -583,7 +583,10 @@ describe('TextEditor', () => {
     await vi.waitFor(() => {
       expect(root.contentEditable).toBe('true');
     });
-    expect(getComputedStyle(root).color).not.toBe(readonlyColor);
+    // The color fades for a moment, which WebKit reports along the way
+    await vi.waitFor(() => {
+      expect(getComputedStyle(root).color).not.toBe(readonlyColor);
+    });
     expect(screen.container.querySelector('[role="toolbar"] [inert]')).toBeNull();
   });
 
