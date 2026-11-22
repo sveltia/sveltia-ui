@@ -53,6 +53,13 @@ calendar:
   # “Today” button label in footer
   today: I dag
 
+# Copy button component
+copy_button:
+  # Button aria-label
+  copy: Kopier
+  # Shown for a moment once the text has been copied
+  copied: Kopiert
+
 # Split button component
 split_button:
   # Wrapper aria-label, e.g. “Save Options” when primary button is “Save”

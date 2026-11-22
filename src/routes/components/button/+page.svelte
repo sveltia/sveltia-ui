@@ -90,6 +90,31 @@
 </section>
 
 <section>
+  <h3>With Tooltip</h3>
+  <Example>
+    <div role="none">
+      <Button variant="secondary" iconic aria-label="Delete" tooltip="Delete">
+        {#snippet startIcon()}
+          <Icon name="delete" />
+        {/snippet}
+      </Button>
+      <Button variant="secondary" label="Publish" tooltip="Publish the entry now" />
+    </div>
+    <div role="none">
+      <Button variant="secondary" label="Top" tooltip="Shown above" tooltipPosition="top" />
+      <Button variant="secondary" label="Bottom" tooltip="Shown below" tooltipPosition="bottom" />
+      <Button variant="secondary" label="Left" tooltip="Shown on the left" tooltipPosition="left" />
+      <Button
+        variant="secondary"
+        label="Right"
+        tooltip="Shown on the right"
+        tooltipPosition="right"
+      />
+    </div>
+  </Example>
+</section>
+
+<section>
   <h3>Disabled</h3>
   <Example>
     <div role="none">

@@ -114,6 +114,17 @@
   }
 }
 
+// Text that only screen readers get, such as a status announcement, kept out of sight but not out
+// of the accessibility tree, as `display: none` would.
+@mixin visually-hidden {
+  position: absolute;
+  overflow: hidden;
+  clip-path: inset(50%);
+  width: 1px;
+  height: 1px;
+  white-space: nowrap;
+}
+
 // The translucent, blurred and shadowed surface of a floating panel, like a `<Popup>`.
 @mixin popup-surface {
   color: var(--sui-primary-foreground-color);

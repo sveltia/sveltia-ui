@@ -9,6 +9,7 @@
   import { getValueType } from '../../services/value.js';
   import TruncatedText from '../typography/truncated-text.svelte';
   import Popup from '../util/popup.svelte';
+  import Tooltip from '../util/tooltip.svelte';
 
   /**
    * @import { ButtonProps, CommonEventHandlers } from '#lib/typedefs.js';
@@ -42,6 +43,8 @@
     flex = false,
     popupPosition = 'bottom-left',
     showPopupBackdrop = false,
+    tooltip = undefined,
+    tooltipPosition = 'auto',
     children,
     startIcon,
     endIcon,
@@ -122,6 +125,10 @@
   {/if}
   {@render endIcon?.()}
 </button>
+
+{#if tooltip}
+  <Tooltip anchor={element} text={tooltip} position={tooltipPosition} />
+{/if}
 
 {#if popup}
   <Popup

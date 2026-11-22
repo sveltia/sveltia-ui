@@ -61,6 +61,13 @@
  * @property {boolean} [flex] Make the button width flexible.
  * @property {PopupPosition} [popupPosition] Where to show the dropdown menu.
  * @property {boolean} [showPopupBackdrop] Whether to show the backdrop for the popup.
+ * @property {string} [tooltip] Text of a tooltip shown while the pointer rests on the button or the
+ * keyboard focus is on it, such as the label of an `iconic` button, which has no visible text. It
+ * isn’t shown while the button is `disabled`, as the button then gets neither pointer events nor
+ * the focus, so don’t use it to explain why the button is disabled.
+ * @property {'auto' | 'top' | 'bottom' | 'left' | 'right'} [tooltipPosition] Side of the button
+ * to show the tooltip on. Default: `auto`, which is below it. The tooltip moves to the opposite
+ * side when there’s no room, and `left` and `right` are swapped in a right-to-left context.
  * @property {Snippet} [children] Primary slot content.
  * @property {Snippet} [startIcon] Start icon slot content.
  * @property {Snippet} [endIcon] End icon slot content.

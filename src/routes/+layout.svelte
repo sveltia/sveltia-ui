@@ -86,7 +86,7 @@
             pages={[
               { key: 'button', label: 'Button' },
               { key: 'button-group', label: 'Button Group' },
-              { key: 'copy-button', label: 'Copy Button', disabled: true },
+              { key: 'copy-button', label: 'Copy Button' },
               { key: 'floating-button', label: 'Floating Button', disabled: true },
               { key: 'spin-button', label: 'Spin Button', disabled: true },
               { key: 'split-button', label: 'Split Button' },

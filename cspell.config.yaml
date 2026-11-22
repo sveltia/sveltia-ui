@@ -74,6 +74,7 @@ words:
   - unclickable
   - unfocusable
   - unhighlighted
+  - unhover
   - unpkg
   - unrs
   - unstub

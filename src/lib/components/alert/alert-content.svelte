@@ -42,12 +42,9 @@
 {@render children?.()}
 
 <style lang="scss">
+  @use '../../styles/mixins';
+
   .status-label {
-    position: absolute;
-    overflow: hidden;
-    clip-path: inset(50%);
-    width: 1px;
-    height: 1px;
-    white-space: nowrap;
+    @include mixins.visually-hidden;
   }
 </style>

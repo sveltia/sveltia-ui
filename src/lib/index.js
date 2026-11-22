@@ -3,6 +3,7 @@ export { default as Infobar } from './components/alert/infobar.svelte';
 export { default as BottomNavigation } from './components/bottom-navigation/bottom-navigation.svelte';
 export { default as ButtonGroup } from './components/button/button-group.svelte';
 export { default as Button } from './components/button/button.svelte';
+export { default as CopyButton } from './components/button/copy-button.svelte';
 export { default as FloatingActionButtonWrapper } from './components/button/floating-action-button-wrapper.svelte';
 export { default as SelectButtonGroup } from './components/button/select-button-group.svelte';
 export { default as SelectButton } from './components/button/select-button.svelte';
