@@ -104,7 +104,7 @@
     "eslint-config-airbnb-extended": "^3.3.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-import": "^2.32.0",
-    "eslint-plugin-jsdoc": "^65.5.0",
+    "eslint-plugin-jsdoc": "^65.5.1",
     "eslint-plugin-package-json": "^1.14.0",
     "eslint-plugin-svelte": "^3.24.1",
     "globals": "^17.14.0",
