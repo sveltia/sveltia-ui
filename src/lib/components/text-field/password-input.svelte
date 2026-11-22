@@ -10,7 +10,12 @@
 
   /**
    * @import { Snippet } from 'svelte';
-   * @import { CommonEventHandlers, InputEventHandlers, TextInputProps } from '#lib/typedefs.js';
+   * @import {
+   * CommonEventHandlers,
+   * InputEventHandlers,
+   * LabelAboveProps,
+   * TextInputProps,
+   * } from '#lib/typedefs.js';
    */
 
   /**
@@ -20,7 +25,8 @@
    */
 
   /**
-   * @type {TextInputProps & CommonEventHandlers & InputEventHandlers & Props & Record<string, any>}
+   * @type {LabelAboveProps & TextInputProps & CommonEventHandlers & InputEventHandlers & Props &
+   * Record<string, any>}
    */
   let {
     /* eslint-disable prefer-const */

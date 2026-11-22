@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { getModalLabelAttrs, getToggleLabelAttrs } from './label.js';
+import {
+  getAccessibleName,
+  getLabelAboveText,
+  getModalLabelAttrs,
+  getToggleLabelAttrs,
+} from './label.js';
 
 describe('getToggleLabelAttrs', () => {
   it('points at the visible label when there is no accessible name', () => {
@@ -70,5 +75,37 @@ describe('getModalLabelAttrs', () => {
         hasCustomHeader: false,
       }),
     ).toEqual({ 'aria-label': undefined, 'aria-labelledby': undefined });
+  });
+});
+
+describe('getLabelAboveText', () => {
+  it('should return the accessible name given as a prop or as an attribute', () => {
+    expect(getLabelAboveText({ showLabelAbove: true, props: { ariaLabel: 'Name' } })).toBe('Name');
+    expect(getLabelAboveText({ showLabelAbove: true, props: { 'aria-label': 'Name' } })).toBe(
+      'Name',
+    );
+  });
+
+  it('should return nothing without the option or a name', () => {
+    expect(getLabelAboveText({ showLabelAbove: false, props: { ariaLabel: 'Name' } })).toBe(
+      undefined,
+    );
+    expect(getLabelAboveText({ showLabelAbove: true, props: { ariaLabel: '' } })).toBe(undefined);
+    expect(getLabelAboveText({ showLabelAbove: true, props: {} })).toBe(undefined);
+  });
+});
+
+describe('getAccessibleName', () => {
+  it('should prefer the prop to the attribute', () => {
+    expect(getAccessibleName({ ariaLabel: 'Prop', props: { 'aria-label': 'Attr' } })).toBe('Prop');
+    expect(getAccessibleName({ ariaLabel: undefined, props: { 'aria-label': 'Attr' } })).toBe(
+      'Attr',
+    );
+  });
+
+  it('should treat an empty name as none', () => {
+    expect(getAccessibleName({ ariaLabel: '', props: { 'aria-label': 'Attr' } })).toBe('Attr');
+    expect(getAccessibleName({ ariaLabel: '', props: { 'aria-label': '' } })).toBe(undefined);
+    expect(getAccessibleName({ ariaLabel: undefined, props: {} })).toBe(undefined);
   });
 });

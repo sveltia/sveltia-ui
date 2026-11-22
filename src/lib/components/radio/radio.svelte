@@ -7,7 +7,7 @@
 -->
 <script>
   import { untrack } from 'svelte';
-  import { getToggleLabelAttrs } from '../../services/label.js';
+  import { getAccessibleName, getToggleLabelAttrs } from '../../services/label.js';
   import Button from '../button/button.svelte';
 
   /**
@@ -68,7 +68,7 @@
   const labelAttrs = $derived(
     getToggleLabelAttrs({
       id,
-      ariaLabel: ariaLabel ?? restProps['aria-label'],
+      ariaLabel: getAccessibleName({ ariaLabel, props: restProps }),
       hasVisibleLabel: !!(children || label),
     }),
   );

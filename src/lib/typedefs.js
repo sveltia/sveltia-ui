@@ -201,6 +201,14 @@
  */
 
 /**
+ * @typedef {object} LabelAboveProps
+ * @property {boolean} [showLabelAbove] Whether to display the field’s accessible label, its
+ * `aria-label` or the equivalent prop, as a label above the field. Unlike the inline label of a
+ * `<TextInput>`, it stays visible while the field has focus or a value, so it suits a form where
+ * the user needs to know what each field is for. A click on it focuses the field.
+ */
+
+/**
  * @typedef {object} ComboboxProps
  * @property {string} [class] The `class` attribute on the wrapper element.
  * @property {boolean} [hidden] Whether to hide the widget.

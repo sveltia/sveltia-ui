@@ -2,14 +2,21 @@
   import { _, isRTL } from '@sveltia/i18n';
   import { tick } from 'svelte';
   import { flip } from 'svelte/animate';
+  import { getLabelAboveText } from '../../services/label.js';
   import Button from '../button/button.svelte';
   import Icon from '../icon/icon.svelte';
   import Option from '../listbox/option.svelte';
+  import LabelAbove from '../util/label-above.svelte';
   import Select from './select.svelte';
   import { getDropIndex, getDropTarget, getKeyboardMoveTarget, moveItem } from './select-tags.js';
 
   /**
-   * @import { ContainerProps, FormFieldStateProps, WidgetStateProps } from '#lib/typedefs.js';
+   * @import {
+   * ContainerProps,
+   * FormFieldStateProps,
+   * LabelAboveProps,
+   * WidgetStateProps,
+   * } from '#lib/typedefs.js';
    */
 
   /**
@@ -26,7 +33,8 @@
    */
 
   /**
-   * @type {ContainerProps & WidgetStateProps & FormFieldStateProps & Props & Record<string, any>}
+   * @type {LabelAboveProps & ContainerProps & WidgetStateProps & FormFieldStateProps & Props &
+   * Record<string, any>}
    */
   let {
     /* eslint-disable prefer-const */
@@ -39,6 +47,7 @@
     readonly = false,
     required = false,
     invalid = false,
+    showLabelAbove = false,
     children,
     onAddValue,
     onRemoveValue,
@@ -68,6 +77,12 @@
    * @type {HTMLElement | undefined}
    */
   let wrapperElement = $state();
+
+  /**
+   * Label shown above the widget with `showLabelAbove`. It’s rendered here rather than by the
+   * `<Select>`, so it sits above the tags as well.
+   */
+  const labelAbove = $derived(getLabelAboveText({ showLabelAbove, props: restProps }));
 
   /**
    * @type {string | undefined}
@@ -125,6 +140,13 @@
   {hidden}
   bind:this={wrapperElement}
 >
+  {#if labelAbove}
+    <!-- The select is a `<div>`, which a label can’t point to, and goes once `max` is reached -->
+    <LabelAbove
+      label={labelAbove}
+      getTarget={() => wrapperElement?.querySelector('[role="combobox"]')}
+    />
+  {/if}
   <!--
     The tags follow the APG layout grid pattern rather than a listbox: a listbox may only hold
     options, and each tag also carries its Remove button. Each tag is a row whose first cell, the

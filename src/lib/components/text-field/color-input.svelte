@@ -6,6 +6,8 @@
   @see https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/color
 -->
 <script>
+  import { getAccessibleName } from '../../services/label.js';
+
   /**
    * @import { CommonEventHandlers, InputEventHandlers } from '#lib/typedefs.js';
    */
@@ -79,7 +81,7 @@
   type="color"
   class="sui color-input {className}"
   disabled={disabled || undefined}
-  aria-label={ariaLabel ?? restProps['aria-label']}
+  aria-label={getAccessibleName({ ariaLabel, props: restProps })}
   aria-disabled={disabled}
   aria-readonly={readonly}
   aria-required={required}

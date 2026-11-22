@@ -6,6 +6,8 @@
   @see https://css-tricks.com/the-cleanest-trick-for-autogrowing-textareas/
 -->
 <script>
+  import { getLabelAboveText } from '../../services/label.js';
+  import LabelAbove from '../util/label-above.svelte';
   import EmojiAutocomplete from './emoji-autocomplete.svelte';
   import { getHighlightedTokens } from './text-area.js';
 
@@ -16,6 +18,7 @@
    * FormFieldStateProps,
    * HighlightedToken,
    * InputEventHandlers,
+   * LabelAboveProps,
    * WidgetStateProps,
    * } from '#lib/typedefs.js';
    */
@@ -39,8 +42,8 @@
    */
 
   /**
-   * @type {CommonEventHandlers & InputEventHandlers & ContainerProps & WidgetStateProps &
-   * FormFieldStateProps & Props & Record<string, any>}
+   * @type {LabelAboveProps & CommonEventHandlers & InputEventHandlers & ContainerProps &
+   * WidgetStateProps & FormFieldStateProps & Props & Record<string, any>}
    */
   let {
     /* eslint-disable prefer-const */
@@ -58,6 +61,7 @@
     readonly = false,
     required = false,
     invalid = false,
+    showLabelAbove = false,
     children,
     ...restProps
     /* eslint-enable prefer-const */
@@ -70,6 +74,12 @@
    * @type {HTMLTextAreaElement | undefined}
    */
   let element = $state.raw();
+
+  const uid = $props.id();
+  /** ID of the `<textarea>` element, which the label above it points to. */
+  const textareaId = $derived(restProps.id ?? `${uid}-textarea`);
+  /** Label shown above the field with `showLabelAbove`. */
+  const labelAbove = $derived(getLabelAboveText({ showLabelAbove, props: restProps }));
 
   /**
    * Content for the clone element used to measure the auto-resized height. A trailing line break is
@@ -122,8 +132,12 @@
   class:disabled
   class:readonly
   class:highlighted={!!highlightedTokens}
+  class:has-label-above={!!labelAbove}
   {hidden}
 >
+  {#if labelAbove}
+    <LabelAbove label={labelAbove} for={textareaId} />
+  {/if}
   <textarea
     bind:this={
       () => element,
@@ -133,6 +147,7 @@
       }
     }
     {...restProps}
+    id={textareaId}
     {dir}
     {name}
     bind:value
@@ -182,6 +197,11 @@
     }
 
     @include mixins.flex-stretch(inline-grid);
+
+    // The field and its clone move down a row, below the label
+    &.has-label-above :is(textarea, .clone) {
+      grid-row: 2;
+    }
   }
 
   :is(textarea, .clone) {

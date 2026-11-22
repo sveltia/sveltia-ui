@@ -9,11 +9,11 @@
   import Combobox from './combobox.svelte';
 
   /**
-   * @import { ComboboxProps } from '#lib/typedefs.js';
+   * @import { ComboboxProps, LabelAboveProps } from '#lib/typedefs.js';
    */
 
   /**
-   * @type {ComboboxProps & Record<string, any>}
+   * @type {LabelAboveProps & ComboboxProps & Record<string, any>}
    */
   let {
     /* eslint-disable prefer-const */

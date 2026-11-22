@@ -5,13 +5,20 @@
 -->
 <script>
   import { _ } from '@sveltia/i18n';
+  import { getLabelAboveText } from '../../services/label.js';
   import Button from '../button/button.svelte';
   import Icon from '../icon/icon.svelte';
+  import LabelAbove from '../util/label-above.svelte';
   import TextInput from './text-input.svelte';
 
   /**
    * @import { Snippet } from 'svelte';
-   * @import { CommonEventHandlers, InputEventHandlers, TextInputProps } from '#lib/typedefs.js';
+   * @import {
+   * CommonEventHandlers,
+   * InputEventHandlers,
+   * LabelAboveProps,
+   * TextInputProps,
+   * } from '#lib/typedefs.js';
    */
 
   /**
@@ -23,7 +30,8 @@
    */
 
   /**
-   * @type {TextInputProps & CommonEventHandlers & InputEventHandlers & Props & Record<string, any>}
+   * @type {LabelAboveProps & TextInputProps & CommonEventHandlers & InputEventHandlers & Props &
+   * Record<string, any>}
    */
   let {
     /* eslint-disable prefer-const */
@@ -37,6 +45,7 @@
     readonly = false,
     required = false,
     invalid = false,
+    showLabelAbove = false,
     // Not rendered, but kept out of `restProps` so it isn’t spread onto the `<input>`
     children,
     visibilityIcon,
@@ -45,6 +54,11 @@
   } = $props();
 
   const id = $props.id();
+  /**
+   * Label shown above the field with `showLabelAbove`. It’s rendered here rather than by the
+   * `<TextInput>`, so it sits above the Show/Hide button as well.
+   */
+  const labelAbove = $derived(getLabelAboveText({ showLabelAbove, props: restProps }));
 
   let show = $state(false);
 
@@ -68,8 +82,12 @@
   class:disabled
   class:readonly
   class:show={mask === 'css' && show}
+  class:has-label-above={!!labelAbove}
   {hidden}
 >
+  {#if labelAbove}
+    <LabelAbove label={labelAbove} for={id} />
+  {/if}
   <!-- With the `css` mask, the field is masked with CSS rather than `type="password"`, so opt out
   of the features that would remember the secret, like autofill history and the keyboard’s learned
   words -->
@@ -120,6 +138,9 @@
     min-width: var(--sui-textbox-singleline-min-width);
 
     @include mixins.flex-stretch;
+
+    // The label sits above both the input and the button
+    @include mixins.label-above-grid(1fr auto);
 
     :global {
       @include mixins.embedded-text-input;

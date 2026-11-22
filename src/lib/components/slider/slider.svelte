@@ -12,6 +12,7 @@
   import { onMount, untrack } from 'svelte';
   import { hasModifier } from '../../services/navigation.js';
   import { startPointerDrag } from '../../services/pointer-drag.js';
+  import LabelAbove from '../util/label-above.svelte';
   import {
     clampThumbIndex,
     findNearestStepIndex,
@@ -24,7 +25,7 @@
   } from './slider.js';
 
   /**
-   * @import { ContainerProps, WidgetStateProps } from '#lib/typedefs.js';
+   * @import { ContainerProps, LabelAboveProps, WidgetStateProps } from '#lib/typedefs.js';
    */
 
   /**
@@ -32,7 +33,8 @@
    * @property {number} [value] Current value.
    * @property {number} [min] Minimum allowed value. An alias of the `aria-valuemin` attribute.
    * @property {number} [max] Maximum allowed value. An alias of the `aria-valuemax` attribute.
-   * @property {string} [sliderLabel] `aria-label` on the slider.
+   * @property {string} [sliderLabel] `aria-label` on the slider. With `showLabelAbove`, it’s also
+   * shown above the slider, where it names a multi-thumb slider’s pair of thumbs as a group.
    * @property {string} [ariaLabelledby] `aria-labelledby` on a single-thumb slider, for a visible
    * label elsewhere on the page.
    * @property {[number, number]} [values] Value list for a multi-thumb slider.
@@ -50,7 +52,7 @@
    */
 
   /**
-   * @type {ContainerProps & WidgetStateProps & Props & Record<string, any>}
+   * @type {LabelAboveProps & ContainerProps & WidgetStateProps & Props & Record<string, any>}
    */
   let {
     /* eslint-disable prefer-const */
@@ -68,6 +70,7 @@
     disabled = false,
     readonly = false,
     invalid = false,
+    showLabelAbove = false,
     children,
     onChange,
     ...restProps
@@ -75,6 +78,8 @@
   } = $props();
 
   const multiThumb = $derived(Array.isArray(values));
+  const uid = $props.id();
+  const labelAbove = $derived(showLabelAbove ? sliderLabel : '');
 
   /** @type {HTMLElement | undefined} */
   let base = $state();
@@ -375,15 +380,25 @@
   }}
 />
 
+<!-- A multi-thumb slider’s label above names the pair of thumbs, which have labels of their own -->
 <div
   {...restProps}
-  role="none"
+  role={labelAbove && multiThumb ? 'group' : 'none'}
+  aria-labelledby={labelAbove && multiThumb ? `${uid}-label` : undefined}
   class="sui slider {className}"
   class:disabled
   class:readonly
   class:invalid
   {hidden}
 >
+  {#if labelAbove}
+    <!-- A thumb is a `<div>`, which a label can’t point to -->
+    <LabelAbove
+      id="{uid}-label"
+      label={labelAbove}
+      getTarget={() => base?.querySelector('[role="slider"]')}
+    />
+  {/if}
   <div bind:this={base} role="none" class="base" onpointerdown={(event) => onPointerDown(event)}>
     <div role="none" class="base-bar"></div>
     <div
@@ -448,13 +463,15 @@
     padding: 4px 6px;
     touch-action: none;
 
-    &:hover {
+    // The label above isn’t part of the track, so pointing at it doesn’t highlight the track.
+    // `:where()` keeps the specificity low enough for the read-only style below to win
+    &:hover:where(:not(:has(:global(.label-above:hover)))) {
       .base-bar {
         background-color: var(--sui-hover-background-color);
       }
     }
 
-    &:active {
+    &:active:where(:not(:has(:global(.label-above:active)))) {
       .base-bar {
         background-color: var(--sui-active-background-color);
       }

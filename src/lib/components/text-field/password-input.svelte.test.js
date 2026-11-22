@@ -91,6 +91,45 @@ describe('PasswordInput', () => {
     ).toBe(true);
   });
 
+  it.each([false, true])(
+    'shows the label above both the field and the button (flex: %s)',
+    async (flex) => {
+      const screen = await render(PasswordInput, {
+        ariaLabel: 'Password',
+        showLabelAbove: true,
+        flex,
+      });
+
+      const label = screen.getByText('Password', { exact: true });
+      const input = /** @type {HTMLInputElement} */ (screen.container.querySelector('input'));
+      const button = screen.getByRole('button', { name: 'Show Password' }).element();
+
+      expect(label.element().tagName).toBe('LABEL');
+      expect(label.element().getAttribute('for')).toBe(input.id);
+      // Rendered once, by the wrapper, rather than by the inner text input as well
+      expect(screen.container.querySelectorAll('label')).toHaveLength(1);
+      expect(label.element().getBoundingClientRect().bottom).toBeLessThanOrEqual(
+        button.getBoundingClientRect().top,
+      );
+      // The field fills the space next to the button
+      expect(input.getBoundingClientRect().width).toBeGreaterThan(100);
+      // The button stays next to the field
+      expect(button.getBoundingClientRect().top).toBeCloseTo(input.getBoundingClientRect().top, 0);
+
+      await label.click();
+      expect(document.activeElement).toBe(input);
+    },
+  );
+
+  it('shows no label above without the option', async () => {
+    const screen = await render(PasswordInput, { ariaLabel: 'Password' });
+
+    expect(screen.container.querySelector('label')).toBeNull();
+    expect(
+      screen.container.querySelector('.password-input')?.classList.contains('has-label-above'),
+    ).toBe(false);
+  });
+
   it('renders a custom visibility icon', async () => {
     const screen = await render(PasswordInput, { visibilityIcon: html('<i class="eye">o</i>') });
 

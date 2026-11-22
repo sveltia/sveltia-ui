@@ -125,6 +125,30 @@
 </section>
 
 <section>
+  <h3>Labels</h3>
+  <Example>
+    <div role="none">
+      <TextInput ariaLabel="Shown inline while empty" showInlineLabel />
+    </div>
+    <div role="none">
+      <TextInput ariaLabel="Site ID" showLabelAbove />
+    </div>
+    <div role="none">
+      <PasswordInput ariaLabel="Password" showLabelAbove />
+    </div>
+    <div role="none">
+      <SecretInput ariaLabel="API key" showLabelAbove flex />
+    </div>
+    <div role="none">
+      <NumberInput ariaLabel="Quantity" min={0} showLabelAbove />
+    </div>
+    <div role="none">
+      <TextArea aria-label="Notes" showLabelAbove flex />
+    </div>
+  </Example>
+</section>
+
+<section>
   <h3>Flex</h3>
   <Example>
     <div role="none">

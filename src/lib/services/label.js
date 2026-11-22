@@ -35,3 +35,27 @@ export const getModalLabelAttrs = ({ id, title, ariaLabelledby, hasCustomHeader 
     'aria-labelledby': labelledby,
   };
 };
+
+/**
+ * Get the accessible name of a component, given as the `ariaLabel` prop or as a plain `aria-label`
+ * attribute, which wrapper components pass through as is. An empty name counts as none, so it
+ * doesn’t hide the other one, and isn’t rendered as an empty attribute.
+ * @param {object} args Arguments.
+ * @param {string | undefined} args.ariaLabel The `ariaLabel` prop.
+ * @param {Record<string, any>} args.props Other props, which may hold the `aria-label` attribute.
+ * @returns {string | undefined} Accessible name, if any.
+ */
+export const getAccessibleName = ({ ariaLabel, props }) =>
+  ariaLabel || props['aria-label'] || undefined;
+
+/**
+ * Get the text of the label shown above a field with the `showLabelAbove` option, for a component
+ * that renders the label itself rather than leaving it to an embedded `<TextInput>` or `<Select>`:
+ * the field’s accessible name.
+ * @param {object} args Arguments.
+ * @param {boolean} args.showLabelAbove Whether to show the label above the field.
+ * @param {Record<string, any>} args.props Props that hold the accessible name, if any.
+ * @returns {string | undefined} Label text, or `undefined` if there’s no label to show.
+ */
+export const getLabelAboveText = ({ showLabelAbove, props }) =>
+  showLabelAbove ? getAccessibleName({ ariaLabel: props.ariaLabel, props }) : undefined;

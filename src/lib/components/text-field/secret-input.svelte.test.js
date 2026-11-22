@@ -96,4 +96,12 @@ describe('SecretInput', () => {
     expect(screen.container.querySelector('button .eye')).not.toBeNull();
     expect(screen.container.querySelector('button .sui.icon')).toBeNull();
   });
+
+  it('shows a label given as a plain attribute above the field', async () => {
+    const screen = await render(SecretInput, { 'aria-label': 'API key', showLabelAbove: true });
+    const label = screen.getByText('API key', { exact: true });
+
+    expect(label.element().tagName).toBe('LABEL');
+    expect(label.element().getAttribute('for')).toBe(screen.container.querySelector('input')?.id);
+  });
 });

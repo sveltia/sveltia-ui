@@ -714,4 +714,59 @@ describe('Slider', () => {
     expect(labels[1].style.insetInlineStart).toBe(`${barWidth / 2}px`);
     expect(labels[2].style.insetInlineStart).toBe(`${barWidth}px`);
   });
+
+  it('shows the label above the slider, and focuses the thumb on a click', async () => {
+    const screen = await renderSlider({ sliderLabel: 'Volume', showLabelAbove: true });
+    const label = screen.getByText('Volume', { exact: true });
+    const thumb = screen.getByRole('slider', { name: 'Volume' });
+
+    expect(label.element().getBoundingClientRect().bottom).toBeLessThanOrEqual(
+      thumb.element().getBoundingClientRect().top,
+    );
+    // A single thumb is named by its own label
+    expect(screen.container.querySelector('[role="group"]')).toBeNull();
+    await label.click();
+    await expect.element(thumb).toHaveFocus();
+  });
+
+  it('names a multi-thumb slider’s pair of thumbs with the label above', async () => {
+    const screen = await renderSlider({
+      sliderLabel: 'Price',
+      values: [20, 80],
+      sliderLabels: ['Minimum', 'Maximum'],
+      showLabelAbove: true,
+    });
+
+    await expect.element(screen.getByRole('group', { name: 'Price' })).toBeVisible();
+    await screen.getByText('Price', { exact: true }).click();
+    await expect.element(screen.getByRole('slider', { name: 'Minimum' })).toHaveFocus();
+  });
+
+  it('shows no label above without the option or a label', async () => {
+    const screen = await renderSlider({ sliderLabel: 'Volume' });
+    const unlabeled = await renderSlider({ showLabelAbove: true });
+
+    expect(screen.container.querySelector('label')).toBeNull();
+    expect(unlabeled.container.querySelector('label')).toBeNull();
+  });
+
+  it('doesn’t highlight the track while pointing at the label above', async () => {
+    const screen = await renderSlider({ sliderLabel: 'Volume', showLabelAbove: true });
+    const bar = /** @type {HTMLElement} */ (screen.container.querySelector('.base-bar'));
+    const idle = getComputedStyle(bar).backgroundColor;
+
+    await userEvent.hover(screen.getByText('Volume', { exact: true }));
+    expect(getComputedStyle(bar).backgroundColor).toBe(idle);
+    await userEvent.hover(/** @type {HTMLElement} */ (screen.container.querySelector('.base')));
+    await expect.poll(() => getComputedStyle(bar).backgroundColor).not.toBe(idle);
+  });
+
+  it('keeps a read-only slider’s track neutral while pointed at', async () => {
+    const screen = await renderSlider({ sliderLabel: 'Volume', readonly: true });
+    const bar = /** @type {HTMLElement} */ (screen.container.querySelector('.base-bar'));
+    const idle = getComputedStyle(bar).backgroundColor;
+
+    await userEvent.hover(/** @type {HTMLElement} */ (screen.container.querySelector('.base')));
+    expect(getComputedStyle(bar).backgroundColor).toBe(idle);
+  });
 });

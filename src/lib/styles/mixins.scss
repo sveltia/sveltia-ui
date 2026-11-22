@@ -24,6 +24,22 @@
   }
 }
 
+// The wrapper of an embedded `<TextInput>` with a `<LabelAbove>`. The label takes a line of its
+// own, in a grid rather than a wrapping row, as the embedded input starts at zero width and would
+// fit next to the label. `:not([hidden])` makes it as specific as the `flex` style, which comes
+// first. `$columns` leaves room for any button next to the input.
+@mixin label-above-grid($columns: 1fr) {
+  &.has-label-above:not([hidden]) {
+    display: inline-grid;
+    grid-template-columns: $columns;
+
+    // Fill the column, which the zero width of the embedded input would otherwise prevent
+    :global(.text-input) {
+      width: auto;
+    }
+  }
+}
+
 // The box of a `<TextInput>`, `<TextArea>` or `<DateTimeInput>`. `$line-mode` is `singleline` or
 // `multiline`, picking the padding and line height. `$text-formatting` adds the alignment, indent,
 // case and word spacing options, which don’t apply to a date/time input. The read-only and disabled

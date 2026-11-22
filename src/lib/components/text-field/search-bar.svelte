@@ -38,6 +38,9 @@
     readonly = false,
     required = false,
     invalid = false,
+    // Not supported, as the search icon takes the place of a label, but kept out of `restProps` so
+    // the inner `<TextInput>` doesn’t show one inside the search bar
+    showLabelAbove,
     children,
     searchIcon,
     closeIcon,

@@ -122,6 +122,36 @@
 </section>
 
 <section>
+  <h3>Label Above</h3>
+  <Example>
+    <div role="none">
+      <Select ariaLabel="Role" showLabelAbove>
+        <Option label="Editor" />
+        <Option label="Admin" />
+      </Select>
+    </div>
+    <div role="none">
+      <Combobox ariaLabel="Fruit" showLabelAbove>
+        <Option label="Banana" />
+        <Option label="Mango" />
+      </Combobox>
+    </div>
+    <div role="none">
+      <SelectTags
+        ariaLabel="Fruits"
+        showLabelAbove
+        values={['banana']}
+        options={[
+          { label: 'Banana', value: 'banana' },
+          { label: 'Mango', value: 'mango' },
+          { label: 'Apple', value: 'apple' },
+        ]}
+      />
+    </div>
+  </Example>
+</section>
+
+<section>
   <h3>Invalid</h3>
   <Example>
     <div role="none">

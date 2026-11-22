@@ -168,6 +168,56 @@ describe('TextInput', () => {
     expect(plain.container.querySelector('.label')).toBeNull();
   });
 
+  it('shows the label above the field, even while it has focus or a value', async () => {
+    /** @type {ComponentProps<typeof TextInput>} */
+    const props = $state({
+      value: '',
+      ariaLabel: 'Site ID',
+      showLabelAbove: true,
+      // The label above wins over the inline one
+      showInlineLabel: true,
+    });
+
+    const screen = await render(TextInput, props);
+    const label = screen.getByText('Site ID');
+    const input = screen.getByRole('textbox', { name: 'Site ID' });
+    const wrapper = /** @type {HTMLElement} */ (screen.container.querySelector('.text-input'));
+
+    expect(label.element().tagName).toBe('LABEL');
+    expect(label.element().getAttribute('for')).toBe(input.element().id);
+    expect(wrapper.classList.contains('has-label-above')).toBe(true);
+    expect(screen.container.querySelector('span.label')).toBeNull();
+    // Above the input, not over it
+    expect(label.element().getBoundingClientRect().bottom).toBeLessThanOrEqual(
+      input.element().getBoundingClientRect().top,
+    );
+
+    await label.click();
+    await expect.element(input).toHaveFocus();
+    props.value = 'acme';
+    await expect.element(label).toBeVisible();
+  });
+
+  it('keeps a given ID for the field the label above points to', async () => {
+    const screen = await render(TextInput, {
+      id: 'site-id',
+      ariaLabel: 'Site ID',
+      showLabelAbove: true,
+    });
+
+    expect(screen.getByText('Site ID').element().getAttribute('for')).toBe('site-id');
+    expect(screen.getByRole('textbox').element().id).toBe('site-id');
+  });
+
+  it('shows no label above without a label to show', async () => {
+    const screen = await render(TextInput, { showLabelAbove: true });
+
+    expect(screen.container.querySelector('label')).toBeNull();
+    expect(
+      screen.container.querySelector('.text-input')?.classList.contains('has-label-above'),
+    ).toBe(false);
+  });
+
   it('suggests emojis while typing a shortcode', async () => {
     /** @type {ComponentProps<typeof TextInput>} */
     const props = $state({ value: '', useEmojiAutocomplete: true });
@@ -190,5 +240,11 @@ describe('TextInput', () => {
     expect(screen.container.querySelector('.emoji-suggestions')).toBeNull();
     // The autocomplete component isn’t even mounted
     expect(screen.container.querySelectorAll('*').length).toBe(2);
+  });
+
+  it('falls back to the attribute when the label prop is empty', async () => {
+    const screen = await render(TextInput, { ariaLabel: '', 'aria-label': 'Title' });
+
+    await expect.element(screen.getByRole('textbox', { name: 'Title' })).toBeVisible();
   });
 });

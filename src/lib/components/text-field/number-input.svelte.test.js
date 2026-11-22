@@ -390,4 +390,28 @@ describe('NumberInput', () => {
     await input.fill('0');
     await expect.element(input).toHaveAttribute('aria-valuenow', '0');
   });
+
+  it('shows the label above the field, with the spin buttons on the field', async () => {
+    const screen = await render(NumberInput, { ariaLabel: 'Count', showLabelAbove: true });
+    const label = screen.getByText('Count', { exact: true });
+    const input = screen.getByRole('spinbutton', { name: 'Count' });
+    const buttons = /** @type {HTMLElement} */ (screen.container.querySelector('.buttons'));
+    const inputRect = input.element().getBoundingClientRect();
+
+    expect(label.element().getAttribute('for')).toBe(input.element().id);
+    // Rendered once, by the number input rather than by its text input as well
+    expect(screen.container.querySelectorAll('label')).toHaveLength(1);
+    expect(label.element().getBoundingClientRect().bottom).toBeLessThanOrEqual(inputRect.top);
+    expect(inputRect.width).toBeGreaterThan(100);
+    expect(buttons.getBoundingClientRect().top).toBeGreaterThanOrEqual(inputRect.top);
+    expect(buttons.getBoundingClientRect().bottom).toBeLessThanOrEqual(inputRect.bottom);
+    await label.click();
+    await expect.element(input).toHaveFocus();
+  });
+
+  it('shows no label above without the option', async () => {
+    const screen = await render(NumberInput, { ariaLabel: 'Count' });
+
+    expect(screen.container.querySelector('label')).toBeNull();
+  });
 });

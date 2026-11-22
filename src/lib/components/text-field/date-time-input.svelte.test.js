@@ -186,4 +186,45 @@ describe('DateTimeInput', () => {
     element.blur();
     expect(onblur).toHaveBeenCalledOnce();
   });
+
+  it('shows the label above the field in a wrapper', async () => {
+    const screen = await render(DateTimeInput, { ariaLabel: 'Date', showLabelAbove: true });
+    const label = screen.getByText('Date', { exact: true });
+    const input = screen.getByLabelText('Date', { exact: true });
+
+    expect(label.element().getAttribute('for')).toBe(input.element().id);
+    expect(label.element().parentElement?.classList.contains('date-time-input-wrapper')).toBe(true);
+    expect(label.element().getBoundingClientRect().bottom).toBeLessThanOrEqual(
+      input.element().getBoundingClientRect().top,
+    );
+    // The input stays within the wrapper
+    expect(input.element().getBoundingClientRect().right).toBeLessThanOrEqual(
+      /** @type {HTMLElement} */ (label.element().parentElement).getBoundingClientRect().right,
+    );
+    await label.click();
+    await expect.element(input).toHaveFocus();
+  });
+
+  it('stays a bare field without the option', async () => {
+    const screen = await render(DateTimeInput, { ariaLabel: 'Date' });
+
+    expect(screen.container.querySelector('label')).toBeNull();
+    expect(screen.container.querySelector('.date-time-input-wrapper')).toBeNull();
+  });
+
+  it('moves the class to the wrapper, so it still sizes the whole field', async () => {
+    const screen = await render(DateTimeInput, {
+      ariaLabel: 'Date',
+      showLabelAbove: true,
+      class: 'custom',
+    });
+
+    const input = screen.getByLabelText('Date', { exact: true }).element();
+    const wrapper = /** @type {HTMLElement} */ (input.parentElement);
+
+    expect(wrapper.classList.contains('custom')).toBe(true);
+    expect(input.classList.contains('custom')).toBe(false);
+    wrapper.style.width = '400px';
+    await expect.poll(() => input.getBoundingClientRect().width).toBeGreaterThan(350);
+  });
 });

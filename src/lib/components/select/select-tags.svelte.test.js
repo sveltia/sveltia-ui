@@ -359,4 +359,38 @@ describe('SelectTags', () => {
 
     await expect.element(screen.getByRole('combobox')).toBeVisible();
   });
+
+  it('shows the label above the tags, and focuses the select on a click', async () => {
+    const screen = await render(SelectTags, {
+      options,
+      values: ['apple'],
+      ariaLabel: 'Fruits',
+      showLabelAbove: true,
+    });
+
+    const label = screen.getByText('Fruits', { exact: true });
+    const tag = /** @type {HTMLElement} */ (screen.container.querySelector('[role="row"]'));
+
+    // Rendered once, by the widget rather than by its select as well
+    expect(screen.container.querySelectorAll('label')).toHaveLength(1);
+    expect(label.element().getBoundingClientRect().bottom).toBeLessThanOrEqual(
+      tag.getBoundingClientRect().top,
+    );
+    await label.click();
+    await expect.element(screen.getByRole('combobox', { name: 'Fruits' })).toHaveFocus();
+  });
+
+  it('keeps the label above once the select is gone', async () => {
+    const screen = await render(SelectTags, {
+      options,
+      values: ['apple'],
+      max: 1,
+      ariaLabel: 'Fruits',
+      showLabelAbove: true,
+    });
+
+    await screen.getByText('Fruits', { exact: true }).click();
+    expect(screen.container.querySelector('[role="combobox"]')).toBeNull();
+    expect(document.activeElement).toBe(document.body);
+  });
 });

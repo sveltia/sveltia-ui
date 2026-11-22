@@ -7,10 +7,12 @@
 <script>
   import { _, locale } from '@sveltia/i18n';
   import { untrack } from 'svelte';
+  import { getLabelAboveText } from '../../services/label.js';
   import { hasModifier } from '../../services/navigation.js';
   import { getMaximumFractionDigits, normalizeStep } from '../../services/number.js';
   import Button from '../button/button.svelte';
   import Icon from '../icon/icon.svelte';
+  import LabelAbove from '../util/label-above.svelte';
   import {
     STEP_DISABLED,
     getInputMode,
@@ -25,7 +27,12 @@
 
   /**
    * @import { Snippet } from 'svelte';
-   * @import { CommonEventHandlers, InputEventHandlers, TextInputProps } from '#lib/typedefs.js';
+   * @import {
+   * CommonEventHandlers,
+   * InputEventHandlers,
+   * LabelAboveProps,
+   * TextInputProps,
+   * } from '#lib/typedefs.js';
    */
 
   /**
@@ -48,7 +55,8 @@
    */
 
   /**
-   * @type {TextInputProps & CommonEventHandlers & InputEventHandlers & Props & Record<string, any>}
+   * @type {LabelAboveProps & TextInputProps & CommonEventHandlers & InputEventHandlers & Props &
+   * Record<string, any>}
    */
   let {
     /* eslint-disable prefer-const */
@@ -66,6 +74,7 @@
     disabled = false,
     readonly = false,
     required = false,
+    showLabelAbove = false,
     children,
     increaseIcon,
     decreaseIcon,
@@ -76,6 +85,11 @@
   } = $props();
 
   const id = $props.id();
+  /**
+   * Label shown above the field with `showLabelAbove`. It’s rendered here rather than by the
+   * `<TextInput>`, so the spin buttons stay on the field rather than spanning the label too.
+   */
+  const labelAbove = $derived(getLabelAboveText({ showLabelAbove, props: restProps }));
 
   let edited = $state(false);
   let inputValue = $state('');
@@ -181,8 +195,12 @@
   class:disabled
   class:readonly
   class:stepper={stepEnabled}
+  class:has-label-above={!!labelAbove}
   {hidden}
 >
+  {#if labelAbove}
+    <LabelAbove label={labelAbove} for={id} />
+  {/if}
   {#if stepEnabled}
     <div role="none" class="buttons">
       <Button
@@ -288,6 +306,13 @@
     }
 
     @include mixins.flex-stretch;
+    @include mixins.label-above-grid;
+
+    // The spin buttons stay on the field, below the label
+    &.has-label-above .buttons {
+      inset-block-start: auto;
+      height: calc(var(--sui-textbox-height) - 4px);
+    }
 
     // Maintain the border opacity
     &:not(.disabled) :global(button[aria-disabled='true']) {

@@ -6,11 +6,18 @@
 -->
 <script>
   import { activateKeyShortcuts } from '@sveltia/utils/events';
+  import { getAccessibleName } from '../../services/label.js';
   import TruncatedText from '../typography/truncated-text.svelte';
+  import LabelAbove from '../util/label-above.svelte';
   import EmojiAutocomplete from './emoji-autocomplete.svelte';
 
   /**
-   * @import { CommonEventHandlers, InputEventHandlers, TextInputProps } from '#lib/typedefs.js';
+   * @import {
+   * CommonEventHandlers,
+   * InputEventHandlers,
+   * LabelAboveProps,
+   * TextInputProps,
+   * } from '#lib/typedefs.js';
    */
 
   /**
@@ -21,7 +28,8 @@
    */
 
   /**
-   * @type {TextInputProps & CommonEventHandlers & InputEventHandlers & Props & Record<string, any>}
+   * @type {LabelAboveProps & TextInputProps & CommonEventHandlers & InputEventHandlers & Props &
+   * Record<string, any>}
    */
   let {
     /* eslint-disable prefer-const */
@@ -32,6 +40,7 @@
     dir = undefined,
     name = undefined,
     showInlineLabel = false,
+    showLabelAbove = false,
     inputmode = 'text',
     flex = false,
     monospace = false,
@@ -59,13 +68,17 @@
   let element = $state.raw();
 
   const id = $props.id();
+  /** ID of the `<input>` element, which the label above it points to. */
+  const inputId = $derived(restProps.id ?? `${id}-input`);
   const timeout = $derived(typeof debounce === 'number' ? debounce : 300);
   /**
    * Accessible label, whether given as the `ariaLabel` prop or as a plain `aria-label` attribute,
    * which the wrapper components such as `<SearchBar>` and `<NumberInput>` pass through as is.
    * @type {string | undefined}
    */
-  const label = $derived(ariaLabel ?? restProps['aria-label']);
+  const label = $derived(getAccessibleName({ ariaLabel, props: restProps }));
+  /** Label shown above the field with `showLabelAbove`, in place of the inline one. */
+  const labelAbove = $derived(showLabelAbove ? label : undefined);
 
   let debounceTimer = 0;
 
@@ -113,8 +126,12 @@
   class:monospace
   class:disabled
   class:readonly
+  class:has-label-above={!!labelAbove}
   {hidden}
 >
+  {#if labelAbove}
+    <LabelAbove label={labelAbove} for={inputId} />
+  {/if}
   <input
     bind:this={
       () => element,
@@ -125,6 +142,7 @@
     }
     type="text"
     {...restProps}
+    id={inputId}
     {value}
     {role}
     {dir}
@@ -145,7 +163,7 @@
   {#if useEmojiAutocomplete && !disabled && !readonly}
     <EmojiAutocomplete {element} />
   {/if}
-  {#if label && showInlineLabel}
+  {#if label && showInlineLabel && !labelAbove}
     <span id="{id}-label" class="label" class:hidden={!!value} aria-hidden="true">
       <TruncatedText>
         {label}
@@ -165,6 +183,11 @@
     min-width: var(--sui-textbox-singleline-min-width);
 
     @include mixins.flex-stretch;
+
+    // The label takes a line of its own, above the input
+    &.has-label-above {
+      flex-wrap: wrap;
+    }
 
     &.monospace {
       --sui-textbox-font-family: var(--sui-font-family-monospace, monospace);

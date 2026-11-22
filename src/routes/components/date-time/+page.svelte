@@ -31,6 +31,15 @@
 </section>
 
 <section>
+  <h3>Label Above</h3>
+  <Example>
+    <div role="none">
+      <DateTimeInput bind:value={date} aria-label="Publish date" showLabelAbove />
+    </div>
+  </Example>
+</section>
+
+<section>
   <h3>Date and time</h3>
   <Example>
     <div role="none">

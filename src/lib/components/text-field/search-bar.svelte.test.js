@@ -85,4 +85,11 @@ describe('SearchBar', () => {
     expect(input.getAttribute('aria-required')).toBe('true');
     expect(input.getAttribute('aria-invalid')).toBe('true');
   });
+
+  it('shows no label above, as the search icon takes its place', async () => {
+    const screen = await render(SearchBar, { 'aria-label': 'Search', showLabelAbove: true });
+
+    expect(screen.container.querySelector('label')).toBeNull();
+    await expect.element(screen.getByRole('searchbox', { name: 'Search' })).toBeVisible();
+  });
 });

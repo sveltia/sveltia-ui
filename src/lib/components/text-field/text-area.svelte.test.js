@@ -240,4 +240,39 @@ describe('TextArea', () => {
 
     expect(screen.container.querySelectorAll('*').length).toBe(2);
   });
+
+  it('shows the label above the field', async () => {
+    const screen = await render(TextArea, { 'aria-label': 'Notes', showLabelAbove: true });
+    const label = screen.getByText('Notes', { exact: true });
+    const textarea = screen.getByRole('textbox', { name: 'Notes' });
+
+    expect(label.element().tagName).toBe('LABEL');
+    expect(label.element().getAttribute('for')).toBe(textarea.element().id);
+    expect(label.element().getBoundingClientRect().bottom).toBeLessThanOrEqual(
+      textarea.element().getBoundingClientRect().top,
+    );
+    await label.click();
+    await expect.element(textarea).toHaveFocus();
+  });
+
+  it('keeps the highlighting clone on the field below the label', async () => {
+    const screen = await render(TextArea, {
+      'aria-label': 'Notes',
+      showLabelAbove: true,
+      autoResize: true,
+      id: 'notes',
+    });
+
+    const textarea = screen.getByRole('textbox').element();
+    const clone = /** @type {HTMLElement} */ (screen.container.querySelector('.clone'));
+
+    expect(textarea.id).toBe('notes');
+    expect(clone.getBoundingClientRect().top).toBeCloseTo(textarea.getBoundingClientRect().top, 0);
+  });
+
+  it('shows no label above without the option', async () => {
+    const screen = await render(TextArea, { 'aria-label': 'Notes' });
+
+    expect(screen.container.querySelector('label')).toBeNull();
+  });
 });

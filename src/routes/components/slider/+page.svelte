@@ -19,6 +19,26 @@
 </section>
 
 <section>
+  <h3>Label Above</h3>
+  <Example>
+    <div role="none">
+      <Slider sliderLabel="Volume" showLabelAbove />
+    </div>
+    <div role="none">
+      <Slider
+        values={[1, 5]}
+        min={1}
+        max={5}
+        sliderLabel="Rating"
+        sliderLabels={['Minimum rating', 'Maximum rating']}
+        optionLabels={[1, 2, 3, 4, 5]}
+        showLabelAbove
+      />
+    </div>
+  </Example>
+</section>
+
+<section>
   <h3>Multi Thumb</h3>
   <Example>
     <div role="none">

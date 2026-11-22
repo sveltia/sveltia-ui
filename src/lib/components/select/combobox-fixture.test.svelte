@@ -18,6 +18,7 @@
    * filterThreshold?: number,
    * initiallySelected?: string,
    * onChange?: (event: CustomEvent) => void,
+   * ariaLabel?: string,
    * [key: string]: any,
    * }}
    */
@@ -32,6 +33,7 @@
     filterThreshold = 5,
     initiallySelected = undefined,
     onChange = undefined,
+    ariaLabel = 'Fruit',
     ...restProps
     /* eslint-enable prefer-const */
   } = $props();
@@ -49,7 +51,7 @@
   {readonly}
   {filterThreshold}
   {onChange}
-  ariaLabel="Fruit"
+  {ariaLabel}
 >
   {#each options as label (label)}
     <Option {label} value={label.toLowerCase()} selected={label === initiallySelected} />

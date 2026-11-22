@@ -6,7 +6,7 @@
   @see https://www.w3.org/WAI/ARIA/apg/patterns/checkbox/
 -->
 <script>
-  import { getToggleLabelAttrs } from '../../services/label.js';
+  import { getAccessibleName, getToggleLabelAttrs } from '../../services/label.js';
   import Button from '../button/button.svelte';
   import Icon from '../icon/icon.svelte';
 
@@ -66,7 +66,11 @@
 
   const hasVisibleLabel = $derived(!!(children || label));
   const labelAttrs = $derived(
-    getToggleLabelAttrs({ id, ariaLabel: ariaLabel ?? restProps['aria-label'], hasVisibleLabel }),
+    getToggleLabelAttrs({
+      id,
+      ariaLabel: getAccessibleName({ ariaLabel, props: restProps }),
+      hasVisibleLabel,
+    }),
   );
   const indeterminate = $derived(checked === 'mixed');
 

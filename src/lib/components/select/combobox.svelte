@@ -9,6 +9,7 @@
   import { _ } from '@sveltia/i18n';
   import { onMount } from 'svelte';
   import { setFocusedMember } from '../../services/group.svelte.js';
+  import { getAccessibleName } from '../../services/label.js';
   import { createOptionRegistry, getSelectedItemDetail } from '../../services/select.svelte.js';
   import { isPrintableKey, TypeAhead } from '../../services/type-ahead.js';
   import Button from '../button/button.svelte';
@@ -17,14 +18,20 @@
   import SearchBar from '../text-field/search-bar.svelte';
   import TextInput from '../text-field/text-input.svelte';
   import TruncatedText from '../typography/truncated-text.svelte';
+  import LabelAbove from '../util/label-above.svelte';
   import Popup from '../util/popup.svelte';
 
   /**
-   * @import { ComboboxProps, OptionEntry, TextInputProps } from '#lib/typedefs.js';
+   * @import {
+   * ComboboxProps,
+   * LabelAboveProps,
+   * OptionEntry,
+   * TextInputProps,
+   * } from '#lib/typedefs.js';
    */
 
   /**
-   * @type {ComboboxProps & TextInputProps & Record<string, any>}
+   * @type {LabelAboveProps & ComboboxProps & TextInputProps & Record<string, any>}
    */
   let {
     /* eslint-disable prefer-const */
@@ -40,6 +47,7 @@
     filterThreshold = 5,
     selectOnTypeAhead = true,
     ariaLabel = undefined,
+    showLabelAbove = false,
     children,
     chevronIcon,
     onChange,
@@ -97,6 +105,12 @@
   /**
    * @type {HTMLElement}
    */
+  /**
+   * Accessible name, given as the `ariaLabel` prop or as a plain `aria-label` attribute. It’s set
+   * after the props are spread, so it has to cover both, or the attribute would be overwritten.
+   */
+  const accessibleName = $derived(getAccessibleName({ ariaLabel, props: restProps }));
+  const labelAbove = $derived(showLabelAbove ? accessibleName : undefined);
   const anchor = $derived(/** @type {HTMLElement} */ (comboboxElement ?? inputElement));
 
   /**
@@ -311,7 +325,21 @@
   only in the DOM tree while it’s expanded, and a reference to a missing element is worse than no
   reference at all. The popup service adds it on open and removes it on close.
 -->
-<div role="none" class="sui combobox {className}" class:editable {hidden}>
+<div
+  role="none"
+  class="sui combobox {className}"
+  class:editable
+  class:has-label-above={!!labelAbove}
+  {hidden}
+>
+  {#if labelAbove}
+    <!-- A non-editable combobox is a `<div>`, which a label can’t point to -->
+    <LabelAbove
+      label={labelAbove}
+      for={editable ? id : undefined}
+      getTarget={editable ? undefined : () => comboboxElement}
+    />
+  {/if}
   {#if !editable}
     <div
       bind:this={comboboxElement}
@@ -327,7 +355,7 @@
       aria-required={required}
       aria-invalid={invalid}
       aria-haspopup="listbox"
-      aria-label={ariaLabel}
+      aria-label={accessibleName}
       onkeydown={onComboboxKeyDown}
     >
       <div role="none" class="label">
@@ -351,7 +379,7 @@
       {invalid}
       aria-expanded={isPopupOpen}
       aria-haspopup="listbox"
-      {ariaLabel}
+      ariaLabel={accessibleName}
       oninput={onTextInput}
     />
   {/if}
@@ -461,6 +489,16 @@
     align-items: center;
     position: relative;
     min-width: var(--sui-combobox-min-width, calc(var(--sui-option-height) * 5));
+
+    // The label takes a line of its own, above the field
+    &.has-label-above {
+      flex-wrap: wrap;
+
+      // The button sits on the field rather than at the top of the wrapper
+      & > :global(button) {
+        inset-block: auto 0;
+      }
+    }
 
     div[role='combobox'] {
       display: flex;
