@@ -105,6 +105,55 @@ describe('Dialog', () => {
     expect(onClose.mock.calls[0][0].detail.returnValue).toBe('ok');
   });
 
+  it('stays open when the function called before closing with OK says so', async () => {
+    const onOk = vi.fn();
+    /** @type {PromiseWithResolvers<boolean>} */
+    let saving = Promise.withResolvers();
+    const onBeforeOk = vi.fn(() => saving.promise);
+    /** @type {ComponentProps<typeof Dialog>} */
+    const props = $state({ open: true, title: 'T', onOk, onBeforeOk });
+
+    await render(Dialog, props);
+    await waitForOpen();
+
+    const okButton = /** @type {HTMLButtonElement} */ (
+      /** @type {HTMLDialogElement} */ (getDialog()).querySelector('button.primary')
+    );
+
+    // Refused, e.g. by the server: the dialog stays, and OK can be clicked again once it’s done
+    okButton.click();
+    await vi.waitFor(() => {
+      expect(okButton.getAttribute('aria-disabled')).toBe('true');
+    });
+    saving.resolve(false);
+    await vi.waitFor(() => {
+      expect(okButton.getAttribute('aria-disabled')).toBe('false');
+    });
+    expect(props.open).toBe(true);
+    expect(onOk).not.toHaveBeenCalled();
+
+    // An error keeps it open too
+    onBeforeOk.mockImplementationOnce(() => {
+      throw new Error('Network');
+    });
+    okButton.click();
+    await vi.waitFor(() => {
+      expect(onBeforeOk).toHaveBeenCalledTimes(2);
+    });
+    expect(props.open).toBe(true);
+
+    // Done: it closes as usual
+    saving = Promise.withResolvers();
+    okButton.click();
+    saving.resolve(true);
+    await vi.waitFor(() => {
+      expect(props.open).toBe(false);
+    });
+    await vi.waitFor(() => {
+      expect(onOk).toHaveBeenCalledOnce();
+    });
+  });
+
   it('closes with the Cancel and Close buttons', async () => {
     const onCancel = vi.fn();
     const onClose = vi.fn();

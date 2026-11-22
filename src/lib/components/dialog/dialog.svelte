@@ -54,6 +54,7 @@
     cancelShortcuts = undefined,
     cancelDisabled = false,
     focusInput = true,
+    onBeforeOk = undefined,
     children,
     header,
     headerExtra,
@@ -82,6 +83,32 @@
    * @type {Modal | undefined}
    */
   let modalComponent = $state();
+  /**
+   * Whether {@link onBeforeOk} is running, during which the OK button is disabled.
+   */
+  let okBusy = $state(false);
+
+  /**
+   * Close the dialog with the OK button, unless {@link onBeforeOk} says to keep it open because the
+   * request it sends has failed, so the user can correct what they entered.
+   */
+  const confirm = async () => {
+    if (onBeforeOk) {
+      okBusy = true;
+
+      try {
+        if ((await onBeforeOk()) === false) {
+          return;
+        }
+      } catch {
+        return;
+      } finally {
+        okBusy = false;
+      }
+    }
+
+    modalComponent?.close('ok');
+  };
   /**
    * @type {HTMLElement | undefined}
    */
@@ -310,10 +337,8 @@
               variant="primary"
               label={okLabel || _('_sui.ok')}
               keyShortcuts={okShortcuts}
-              disabled={okDisabled}
-              onclick={() => {
-                modalComponent?.close('ok');
-              }}
+              disabled={okDisabled || okBusy}
+              onclick={confirm}
             />
           {/if}
           {#if showCancel}

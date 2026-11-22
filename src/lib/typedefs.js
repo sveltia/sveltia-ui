@@ -160,6 +160,11 @@
  * or if the dialog has neither, the `<dialog>` element gets focused instead, so the focus is always
  * moved into the modal. The focus is left alone if it has already moved into the dialog content by
  * then, like when the user has clicked an input field.
+ * @property {() => boolean | void | Promise<boolean | void>} [onBeforeOk] Function called when the
+ * OK button is clicked, before the dialog closes, to save what the user has entered, for instance.
+ * The OK button is disabled until it’s done. If it returns `false`, or throws, the dialog stays
+ * open with what the user has entered, so they can correct it after a failed request, and `onOk`
+ * isn’t called.
  * @property {boolean} [lightDismiss] Whether to close the modal when the backdrop (outside of the
  * modal) is clicked.
  * @property {string} [value] Value entered on the textbox.
