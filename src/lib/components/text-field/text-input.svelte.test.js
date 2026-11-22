@@ -60,6 +60,14 @@ describe('TextInput', () => {
     expect(wrapper.classList.contains('monospace')).toBe(true);
   });
 
+  it('shows the placeholder of a monospace input in the regular font', async () => {
+    const screen = await render(TextInput, { monospace: true, placeholder: 'Set elsewhere' });
+    const input = screen.getByRole('textbox').element();
+
+    expect(getComputedStyle(input).fontFamily).toMatch(/Mono/);
+    expect(getComputedStyle(input, '::placeholder').fontFamily).not.toMatch(/Mono/);
+  });
+
   it('reflects the state props', async () => {
     const screen = await render(TextInput, {
       hidden: true,

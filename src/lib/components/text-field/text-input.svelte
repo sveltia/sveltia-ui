@@ -191,6 +191,11 @@
 
     &.monospace {
       --sui-textbox-font-family: var(--sui-font-family-monospace, monospace);
+
+      // A placeholder is a hint in words, e.g. that a key is set elsewhere, rather than a value
+      input::placeholder {
+        font-family: var(--sui-control-font-family);
+      }
     }
   }
 
