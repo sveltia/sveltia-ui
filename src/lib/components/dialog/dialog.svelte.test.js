@@ -216,6 +216,49 @@ describe('Dialog', () => {
     expect(input.selectionEnd).toBe(5);
   });
 
+  it('skips a read-only or disabled input', async () => {
+    await render(Dialog, {
+      open: true,
+      title: 'T',
+      children: html(
+        '<div><input value="fixed" readonly><input value="off" disabled><input value="name"></div>',
+      ),
+    });
+
+    await waitForOpen();
+    await vi.waitFor(() => {
+      expect(document.activeElement).toBe(getDialog()?.querySelectorAll('input')[2]);
+    });
+  });
+
+  it('skips an input that can’t take the focus', async () => {
+    await render(Dialog, {
+      open: true,
+      title: 'T',
+      children: html(
+        '<div><input type="hidden" value="id"><div hidden><input value="gone"></div><input value="name"></div>',
+      ),
+    });
+
+    await waitForOpen();
+    await vi.waitFor(() => {
+      expect(document.activeElement).toBe(getDialog()?.querySelectorAll('input')[2]);
+    });
+  });
+
+  it('focuses the primary button when every input is read-only', async () => {
+    await render(Dialog, {
+      open: true,
+      title: 'T',
+      children: html('<div><input value="fixed" readonly></div>'),
+    });
+
+    await waitForOpen();
+    await vi.waitFor(() => {
+      expect(document.activeElement).toBe(getDialog()?.querySelector('button.primary'));
+    });
+  });
+
   it('focuses the primary button without an input', async () => {
     await render(Dialog, { open: true, title: 'T', children: text('Body') });
     await waitForOpen();

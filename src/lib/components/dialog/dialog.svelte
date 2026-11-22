@@ -218,19 +218,28 @@
           return;
         }
 
-        const target = focusInput
-          ? /** @type {HTMLInputElement | HTMLButtonElement | null} */ (
-              content?.querySelector('input, button.primary')
-            )
-          : null;
+        // A read-only or disabled field can’t be edited, so the first one that can is focused,
+        // e.g. the name rather than a username that can’t be changed. A field that can’t take the
+        // focus, like a hidden one, is skipped too: the first candidate the focus lands on wins
+        const candidates = focusInput
+          ? /** @type {(HTMLInputElement | HTMLButtonElement)[]} */ ([
+              ...(content?.querySelectorAll(
+                'input:not([type="hidden"], [readonly], :disabled), button.primary',
+              ) ?? []),
+            ])
+          : [];
 
-        if (target) {
-          target.focus();
+        const target = candidates.find((candidate) => {
+          candidate.focus();
 
-          if (target instanceof HTMLInputElement) {
-            target.select();
-          }
-        } else {
+          return document.activeElement === candidate;
+        });
+
+        if (target instanceof HTMLInputElement) {
+          target.select();
+        }
+
+        if (!target) {
           // Fall back to the `<dialog>` element itself, so the focus is never left outside the
           // modal, e.g. when the dialog has no input field or primary button
           modalComponent?.focus();
