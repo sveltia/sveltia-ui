@@ -356,6 +356,13 @@
       border-color: var(--sui-error-border-color);
     }
 
+    // Read-only like a `<TextInput>`, so it doesn’t look editable: dimmed text on a dimmed
+    // background, still selectable to copy from
+    &[aria-readonly='true'] {
+      color: var(--sui-secondary-foreground-color);
+      background-color: var(--sui-disabled-background-color);
+    }
+
     :global {
       // Remove the default margin on the first and last child elements of block nodes, including
       // paragraphs, headings, lists, and code blocks, but keep the default margin on other items,

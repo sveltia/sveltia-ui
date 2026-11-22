@@ -567,10 +567,24 @@ describe('TextEditor', () => {
 
     expect(root.getAttribute('aria-readonly')).toBe('true');
     expect(root.contentEditable).toBe('false');
+
+    // It doesn’t look editable either: the text and the toolbar buttons are dimmed
+    const editableStyle = getComputedStyle(root);
+
+    const inner = /** @type {HTMLElement} */ (
+      screen.container.querySelector('[role="toolbar"] [inert]')
+    );
+
+    expect(getComputedStyle(inner).filter).toMatch(/opacity\(0\.35\)/);
+
+    const readonlyColor = editableStyle.color;
+
     props.readonly = false;
     await vi.waitFor(() => {
       expect(root.contentEditable).toBe('true');
     });
+    expect(getComputedStyle(root).color).not.toBe(readonlyColor);
+    expect(screen.container.querySelector('[role="toolbar"] [inert]')).toBeNull();
   });
 
   it('suggests emojis while typing a shortcode in the rich text editor', async () => {

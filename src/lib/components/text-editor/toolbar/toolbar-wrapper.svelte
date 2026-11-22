@@ -79,9 +79,14 @@
         background-color: var(--sui-tertiary-background-color);
 
         // Keep the background opaque, so the content scrolled under the sticky toolbar doesn’t show
-        // through; the buttons are still dimmed with their `inert` container
+        // through; the buttons are dimmed with their `inert` container instead, whose filter the
+        // global disabled style resets for any descendant of a disabled element
         &[aria-disabled='true'] {
           filter: none;
+
+          & > [inert] {
+            filter: grayscale(1) opacity(var(--sui-disabled-opacity, 0.35));
+          }
         }
       }
 
