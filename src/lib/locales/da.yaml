@@ -172,7 +172,7 @@ text_editor:
   align_right: Højrejuster
   align_justify: Lige margener
   # Markdown mode toggle button aria-label
-  edit_in_markdown: Rediger i Markdown
+  edit_in_markdown: Rediger som Markdown
   # HTML mode toggle button aria-label
   edit_in_html: Rediger som HTML
   # Error message when rich text conversion fails
