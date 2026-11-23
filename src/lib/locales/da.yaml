@@ -174,7 +174,7 @@ text_editor:
   # Markdown mode toggle button aria-label
   edit_in_markdown: Rediger i Markdown
   # HTML mode toggle button aria-label
-  edit_in_html: Rediger i HTML
+  edit_in_html: Rediger som HTML
   # Error message when rich text conversion fails
   converter_error: Formateret tekst kunne ikke slås til. Brug editoren til ren tekst i stedet.
   # Language selector aria-label
