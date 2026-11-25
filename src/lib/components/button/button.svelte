@@ -142,25 +142,14 @@
 {/if}
 
 <style lang="scss">
+  @use '../../styles/mixins';
+
   button {
     flex: none;
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    margin: var(--sui-focus-ring-width);
-    border-width: 0;
-    border-style: solid;
-    border-color: transparent;
-    padding: 0;
-    color: var(--sui-control-foreground-color, inherit);
-    background-color: transparent;
-    box-shadow: none;
-    font-family: var(--sui-control-font-family);
-    font-size: var(--sui-control-font-size);
-    line-height: var(--sui-control-line-height);
-    font-weight: var(--sui-font-weight-normal, normal);
-    text-align: start;
-    cursor: pointer;
+    @include mixins.button-reset(var(--sui-control-foreground-color, inherit));
     transition: all 200ms;
 
     &[hidden] {

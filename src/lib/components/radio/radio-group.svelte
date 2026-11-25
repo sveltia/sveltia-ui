@@ -5,8 +5,7 @@
   @see https://www.w3.org/WAI/ARIA/apg/patterns/radio/
 -->
 <script>
-  import { activateGroup } from '../../services/group.svelte.js';
-  import { getAccessibleName } from '../../services/label.js';
+  import RadioGroupBase from './radio-group-base.svelte';
 
   /**
    * @import { ContainerProps, FormFieldStateProps, WidgetStateProps } from '#lib/typedefs.js';
@@ -26,53 +25,32 @@
   let {
     /* eslint-disable prefer-const */
     class: className,
-    hidden = false,
-    disabled = false,
-    readonly = false,
-    required = false,
-    invalid = false,
     orientation = 'horizontal',
-    ariaLabel = undefined,
     children,
     ...restProps
     /* eslint-enable prefer-const */
   } = $props();
 </script>
 
-<div
-  {...restProps}
-  role="radiogroup"
-  class={['sui', 'radio-group', className, orientation]}
-  tabindex="-1"
-  {hidden}
-  aria-hidden={hidden}
-  aria-disabled={disabled}
-  aria-readonly={readonly}
-  aria-required={required}
-  aria-invalid={invalid}
-  aria-orientation={orientation}
-  aria-label={getAccessibleName({ ariaLabel, props: restProps })}
-  {@attach activateGroup()}
->
-  <div role="none" class="inner" inert={disabled}>
-    {@render children?.()}
-  </div>
-</div>
+<RadioGroupBase {...restProps} class={['sui', 'radio-group', className, orientation]} {orientation}>
+  {@render children?.()}
+</RadioGroupBase>
 
 <style lang="scss">
   @use '../../styles/mixins';
 
-  .radio-group {
-    display: inline-flex;
+  // The element is rendered by the base, so the styles have to be global
+  :global {
+    .sui.radio-group {
+      display: inline-flex;
 
-    &:focus-visible {
-      outline-width: 0 !important;
-    }
+      &:focus-visible {
+        outline-width: 0 !important;
+      }
 
-    @include mixins.toggle-group-orientation;
+      @include mixins.toggle-group-orientation;
 
-    &[aria-invalid='true'] :global {
-      button {
+      &[aria-invalid='true'] button {
         border-color: var(--sui-error-border-color);
 
         &[aria-checked='true'] {
@@ -84,9 +62,5 @@
         }
       }
     }
-  }
-
-  .inner {
-    display: contents;
   }
 </style>

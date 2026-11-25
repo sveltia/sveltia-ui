@@ -143,6 +143,25 @@
   border-radius: var(--sui-#{$widget}-border-radius, 4px);
 }
 
+// The reset of a borderless, transparent `<button>` with the control font, like a `<Button>` or
+// `<Switch>`. `$color` is the foreground colour.
+@mixin button-reset($color: var(--sui-control-foreground-color)) {
+  margin: var(--sui-focus-ring-width);
+  border-width: 0;
+  border-style: solid;
+  border-color: transparent;
+  padding: 0;
+  color: $color;
+  background-color: transparent;
+  box-shadow: none;
+  font-family: var(--sui-control-font-family);
+  font-size: var(--sui-control-font-size);
+  line-height: var(--sui-control-line-height);
+  font-weight: var(--sui-font-weight-normal, normal);
+  text-align: start;
+  cursor: pointer;
+}
+
 // The label wrapper of a checkbox or radio button.
 @mixin toggle-control-wrapper {
   display: inline-flex;

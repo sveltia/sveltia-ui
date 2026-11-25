@@ -282,6 +282,102 @@ const updateAndRetainSelection = (nodeKey, updateFn) => {
 };
 
 /**
+ * Start loading the engine, theme and grammar the given code node needs, if any, and update
+ * whether the node supports syntax highlighting. The node is refreshed once a load completes.
+ * @param {LexicalEditor} editor Editor instance.
+ * @param {CodeNodeType} node Code node.
+ * @param {string | null | undefined} language Language of the node.
+ * @param {string} theme Theme of the node.
+ * @returns {boolean} Whether a load is in flight, in which case the node can’t be highlighted yet.
+ */
+const loadCodeNodeAssets = (editor, node, language, theme) => {
+  // Plain text needs no engine, grammar or theme, so it is highlighted — that is, rendered verbatim
+  // — without a single network request. This is the common case: it is the default for a new block.
+  const isPlain = !language || isPlainLanguage(language);
+
+  // `!language` is redundant with `isPlain`, but it lets the type checker narrow `language` to a
+  // string in the branches below
+  if (isPlain || !language || isEngineUnavailable()) {
+    if (node.getIsSyntaxHighlightSupported()) {
+      node.setIsSyntaxHighlightSupported(false);
+    }
+
+    return false;
+  }
+
+  /**
+   * Get the function that refreshes the node once a load completes. Only asked for when a load is
+   * started, as the refreshers are kept for as long as the editor is.
+   * @returns {() => void} Refresh function.
+   */
+  const getRefresher = () => getCodeNodeRefresher(editor, node.getKey());
+
+  if (!isEngineLoaded()) {
+    // Dynamic load of the engine itself
+    loadEngine(getRefresher());
+
+    return true;
+  }
+
+  let inFlight = false;
+
+  // Dynamic load of themes
+  if (!isCodeThemeLoaded(theme)) {
+    loadCodeTheme(theme, getRefresher());
+    inFlight = true;
+  }
+
+  // Dynamic load of languages
+  if (isCodeLanguageLoaded(language)) {
+    if (!node.getIsSyntaxHighlightSupported()) {
+      node.setIsSyntaxHighlightSupported(true);
+    }
+  } else {
+    const loadingTask = loadCodeLanguage(language, getRefresher());
+
+    // If the language is not supported, no download will occur
+    if (!loadingTask && node.getIsSyntaxHighlightSupported()) {
+      node.setIsSyntaxHighlightSupported(false);
+    }
+
+    inFlight = true;
+  }
+
+  return inFlight;
+};
+
+/**
+ * Schedule one re-highlight of the given code node for after the in-progress highlighting pass
+ * settles. Upstream drops an edit made during the pass, which loses the last keystroke of a fast
+ * burst. The refresh is deduplicated per node, so a burst does not queue an update each.
+ * @param {LexicalEditor} editor Editor instance.
+ * @param {CodeTransformState} transformState Shared transform state.
+ * @param {NodeKey} nodeKey Key of the code node.
+ */
+const scheduleCodeNodeRefresh = (editor, transformState, nodeKey) => {
+  if (transformState.pendingRefresh.has(nodeKey)) {
+    return;
+  }
+
+  transformState.pendingRefresh.add(nodeKey);
+
+  onUpdate(() => {
+    transformState.pendingRefresh.delete(nodeKey);
+
+    editor.update(
+      () => {
+        const staleNode = getNodeByKey(nodeKey);
+
+        if (isCodeNode(staleNode)) {
+          staleNode.markDirty();
+        }
+      },
+      { tag: getBackgroundUpdateTags(editor, [HISTORY_MERGE_TAG]) },
+    );
+  });
+};
+
+/**
  * Re-highlight a code node.
  * @param {LexicalEditor} editor Editor instance.
  * @param {CodeTokenizer} tokenizer Tokenizer.
@@ -308,71 +404,12 @@ const codeNodeTransform = (editor, tokenizer, transformState, node) => {
     node.setTheme(theme);
   }
 
-  // Plain text needs no engine, grammar or theme, so it is highlighted — that is, rendered verbatim
-  // — without a single network request. This is the common case: it is the default for a new block.
-  const isPlain = !language || isPlainLanguage(language);
-  let inFlight = false;
-
-  // `!language` is redundant with `isPlain`, but it lets the type checker narrow `language` to a
-  // string in the branches below
-  if (isPlain || !language || isEngineUnavailable()) {
-    if (node.getIsSyntaxHighlightSupported()) {
-      node.setIsSyntaxHighlightSupported(false);
-    }
-  } else if (!isEngineLoaded()) {
-    // Dynamic load of the engine itself
-    loadEngine(getCodeNodeRefresher(editor, nodeKey));
-    inFlight = true;
-  } else {
-    // Dynamic load of themes
-    if (!isCodeThemeLoaded(theme)) {
-      loadCodeTheme(theme, getCodeNodeRefresher(editor, nodeKey));
-      inFlight = true;
-    }
-
-    // Dynamic load of languages
-    if (isCodeLanguageLoaded(language)) {
-      if (!node.getIsSyntaxHighlightSupported()) {
-        node.setIsSyntaxHighlightSupported(true);
-      }
-    } else {
-      const loadingTask = loadCodeLanguage(language, getCodeNodeRefresher(editor, nodeKey));
-
-      // If the language is not supported, no download will occur
-      if (!loadingTask && node.getIsSyntaxHighlightSupported()) {
-        node.setIsSyntaxHighlightSupported(false);
-      }
-
-      inFlight = true;
-    }
-  }
-
-  if (inFlight) {
+  if (loadCodeNodeAssets(editor, node, language, theme)) {
     return;
   }
 
   if (nodesCurrentlyHighlighting.has(nodeKey)) {
-    // Upstream drops this edit, which loses the last keystroke of a fast burst. Schedule one
-    // re-highlight for after the in-progress pass settles instead, deduplicated per node so a
-    // burst does not queue an update each.
-    if (!transformState.pendingRefresh.has(nodeKey)) {
-      transformState.pendingRefresh.add(nodeKey);
-
-      onUpdate(() => {
-        transformState.pendingRefresh.delete(nodeKey);
-
-        editor.update(
-          () => {
-            const staleNode = getNodeByKey(nodeKey);
-
-            if (isCodeNode(staleNode)) {
-              staleNode.markDirty();
-            }
-          },
-          { tag: getBackgroundUpdateTags(editor, [HISTORY_MERGE_TAG]) },
-        );
-      });
-    }
+    scheduleCodeNodeRefresh(editor, transformState, nodeKey);
 
     return;
   }

@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { focusAdjacentTabStop, restoreFocus } from './focus.js';
+import { focusAdjacentTabStop, restoreFocus, setFocusedMember } from './focus.js';
 
 afterEach(() => {
   document.body.innerHTML = '';
@@ -82,5 +82,29 @@ describe('restoreFocus', () => {
 
     restoreFocus(opener, undefined);
     expect(document.activeElement).toBe(document.body);
+  });
+});
+
+describe('setFocusedMember', () => {
+  it('moves the focused class and the active descendant onto the member', () => {
+    const listbox = document.createElement('div');
+
+    const [first, second] = ['a', 'b'].map((id) => {
+      const option = document.createElement('div');
+
+      option.id = id;
+      option.setAttribute('role', 'option');
+      listbox.appendChild(option);
+
+      return option;
+    });
+
+    setFocusedMember(listbox, first);
+    expect(first.classList.contains('focused')).toBe(true);
+    expect(listbox.getAttribute('aria-activedescendant')).toBe('a');
+    setFocusedMember(listbox, second);
+    expect(first.classList.contains('focused')).toBe(false);
+    expect(second.classList.contains('focused')).toBe(true);
+    expect(listbox.getAttribute('aria-activedescendant')).toBe('b');
   });
 });

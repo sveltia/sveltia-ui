@@ -7,7 +7,7 @@
 -->
 <script>
   import { activateGroup } from '../../services/group.svelte.js';
-  import { getAccessibleName } from '../../services/label.js';
+  import { getAccessibleName, getWidgetStateAttrs } from '../../services/label.js';
 
   /**
    * @import {
@@ -87,11 +87,7 @@
   class:filtered
   tabindex={disabled ? -1 : 0}
   {hidden}
-  aria-hidden={hidden}
-  aria-disabled={disabled}
-  aria-readonly={readonly}
-  aria-required={required}
-  aria-invalid={invalid}
+  {...getWidgetStateAttrs({ hidden, disabled, readonly, required, invalid })}
   aria-multiselectable={multiple}
   aria-label={getAccessibleName({ ariaLabel, props: restProps })}
   onChange={_onChange}

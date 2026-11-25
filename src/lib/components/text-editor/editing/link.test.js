@@ -37,7 +37,7 @@ vi.mock('lexical', () => getMock('lexical'));
 import { ElementNode } from 'lexical';
 import { editorState, resetEditorMocks, selectionState } from '#lib/test-utils/editor-mocks.js';
 import { initEditor } from '../core.js';
-import { isSafeLinkURL } from './link.js';
+import { isLinkableURL, isSafeLinkURL } from './link.js';
 
 // eslint-disable-next-line no-script-url -- Testing that it’s rejected
 const SCRIPT_URL = 'javascript:alert(1)';
@@ -481,5 +481,13 @@ describe('link commands', () => {
     'javascript\\:alert(1)',
   ])('should reject %j', (url) => {
     expect(isSafeLinkURL(url)).toBe(false);
+  });
+});
+
+describe('isLinkableURL', () => {
+  it('accepts a full, safe URL only', () => {
+    expect(isLinkableURL('https://example.com/')).toBe(true);
+    expect(isLinkableURL('example')).toBe(false);
+    expect(isLinkableURL(SCRIPT_URL)).toBe(false);
   });
 });

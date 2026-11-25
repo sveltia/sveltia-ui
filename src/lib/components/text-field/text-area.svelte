@@ -6,7 +6,7 @@
   @see https://css-tricks.com/the-cleanest-trick-for-autogrowing-textareas/
 -->
 <script>
-  import { getLabelAboveText } from '../../services/label.js';
+  import { getLabelAboveText, getWidgetStateAttrs } from '../../services/label.js';
   import LabelAbove from '../util/label-above.svelte';
   import EmojiAutocomplete from './emoji-autocomplete.svelte';
   import { getHighlightedTokens } from './text-area.js';
@@ -153,11 +153,7 @@
     bind:value
     disabled={disabled || undefined}
     readonly={readonly || undefined}
-    aria-hidden={hidden}
-    aria-disabled={disabled}
-    aria-readonly={readonly}
-    aria-required={required}
-    aria-invalid={invalid}
+    {...getWidgetStateAttrs({ hidden, disabled, readonly, required, invalid })}
     class:auto-resize={autoResize}></textarea>
   {#if highlightedTokens}
     <!-- Line breaks are only allowed within tags, as any whitespace would end up in the text -->

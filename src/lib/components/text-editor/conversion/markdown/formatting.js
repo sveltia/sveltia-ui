@@ -22,12 +22,25 @@ import {
  */
 
 /**
+ * Regular expression source to match the blockquote markers at the start of a line, like `> >` in
+ * `> > foo`, without the whitespace after the last one.
+ */
+const BLOCKQUOTE_MARKERS = '(?: {0,3}>)*';
+/**
+ * Blockquote markers at the start of a line; see {@link BLOCKQUOTE_MARKERS}.
+ */
+const BLOCKQUOTE_PREFIX_REGEX = new RegExp(`^${BLOCKQUOTE_MARKERS}`);
+/**
+ * Blockquote markers and indentation at the start of a line.
+ */
+const BLOCKQUOTE_PREFIX_AND_INDENT_REGEX = new RegExp(`^${BLOCKQUOTE_MARKERS}[ \\t]*`);
+/**
  * Get the blockquote markers at the start of a line, like `> >` in `> > foo`, without the
  * whitespace after the last one.
  * @param {string} line Line.
  * @returns {string} Markers, like `> >`, or an empty string if the line isn’t in a blockquote.
  */
-const getBlockquotePrefix = (line) => /^(?: {0,3}>)*/.exec(line)?.[0] ?? '';
+const getBlockquotePrefix = (line) => BLOCKQUOTE_PREFIX_REGEX.exec(line)?.[0] ?? '';
 
 /**
  * Create a regular expression to match formatting that spans one or more line breaks, like
@@ -70,7 +83,7 @@ const createMultilineFormattingRegex = (char, length) => {
     ? `(?:(?<!${boundary})${marker}|${marker}(?=${boundary}|$))`
     : `${marker}(?=${boundary}|$)`;
 
-  const lineBreak = String.raw`(?:\\|[ \t]*)\n(?: {0,3}>)*(?! {0,3}>)[ \t]*`;
+  const lineBreak = String.raw`(?:\\|[ \t]*)\n${BLOCKQUOTE_MARKERS}(?! {0,3}>)[ \t]*`;
 
   return new RegExp(
     String.raw`(?<![${char}\\])${opening}(${text}(?:${lineBreak}${text})+)${closing}(?![${char}])`,
@@ -264,7 +277,7 @@ const splitCodeSpan = (paragraph, { start, end, fenceLength }) => {
   // The blockquote markers and the indentation of a line after the first aren’t part of the code,
   // so they go before the opening backticks
   const codeLines = code.split('\n').map((line, index) => {
-    const indent = index ? (/^(?: {0,3}>)*[ \t]*/.exec(line)?.[0] ?? '') : '';
+    const indent = index ? (BLOCKQUOTE_PREFIX_AND_INDENT_REGEX.exec(line)?.[0] ?? '') : '';
 
     return { indent, text: line.slice(indent.length) };
   });

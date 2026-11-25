@@ -3,7 +3,7 @@ import { generateElementId } from '@sveltia/utils/element';
 import { sleep } from '@sveltia/utils/misc';
 import { on } from 'svelte/events';
 import { restoreFocus } from './focus.js';
-import { hasModifier } from './navigation.js';
+import { hasModifier, isDisabled, isReadOnly } from './navigation.js';
 import { calculatePopupStyle, isShallowEqual, mirrorPosition } from './popup-position.js';
 
 /**
@@ -328,7 +328,7 @@ class Popup {
    * @type {boolean}
    */
   get isDisabled() {
-    return this.anchorElement.matches('[aria-disabled="true"]');
+    return isDisabled(this.anchorElement);
   }
 
   /**
@@ -336,7 +336,7 @@ class Popup {
    * @type {boolean}
    */
   get isReadOnly() {
-    return this.anchorElement.matches('[aria-readonly="true"]');
+    return isReadOnly(this.anchorElement);
   }
 
   /**

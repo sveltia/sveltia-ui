@@ -5,8 +5,7 @@
   @see https://www.w3.org/WAI/ARIA/apg/patterns/radio/
 -->
 <script>
-  import { activateGroup } from '../../services/group.svelte.js';
-  import { getAccessibleName } from '../../services/label.js';
+  import RadioGroupBase from '../radio/radio-group-base.svelte';
 
   /**
    * @import { ContainerProps, FormFieldStateProps, WidgetStateProps } from '#lib/typedefs.js';
@@ -24,49 +23,29 @@
   let {
     /* eslint-disable prefer-const */
     class: className,
-    hidden = false,
-    disabled = false,
-    readonly = false,
-    required = false,
-    invalid = false,
-    ariaLabel = undefined,
     children,
     ...restProps
     /* eslint-enable prefer-const */
   } = $props();
 </script>
 
-<div
-  {...restProps}
-  role="radiogroup"
-  class="sui select-button-group {className}"
-  {hidden}
-  tabindex="-1"
-  aria-hidden={hidden}
-  aria-disabled={disabled}
-  aria-readonly={readonly}
-  aria-required={required}
-  aria-invalid={invalid}
-  aria-label={getAccessibleName({ ariaLabel, props: restProps })}
-  {@attach activateGroup()}
->
-  <div role="none" class="inner" inert={disabled}>
-    {@render children?.()}
-  </div>
-</div>
+<RadioGroupBase {...restProps} class="sui select-button-group {className}">
+  {@render children?.()}
+</RadioGroupBase>
 
 <style lang="scss">
-  .select-button-group {
-    flex: none;
-    display: inline-flex;
-    align-items: center;
-    margin: var(--sui-focus-ring-width);
+  // The element is rendered by the base, so the styles have to be global
+  :global {
+    .sui.select-button-group {
+      flex: none;
+      display: inline-flex;
+      align-items: center;
+      margin: var(--sui-focus-ring-width);
 
-    &:focus-visible {
-      outline-width: 0 !important;
-    }
+      &:focus-visible {
+        outline-width: 0 !important;
+      }
 
-    :global {
       button {
         margin: 0 !important;
         border-radius: 0 !important;
@@ -91,30 +70,26 @@
           background-color: var(--sui-selected-background-color);
         }
       }
-    }
 
-    &[aria-invalid='true'] :global(button) {
-      border-color: var(--sui-error-border-color);
-    }
+      &[aria-invalid='true'] button {
+        border-color: var(--sui-error-border-color);
+      }
 
-    // Maintain the border opacity
-    &[aria-disabled='false'] :global(button[aria-disabled='true']) {
-      filter: grayscale(0) opacity(1);
+      // Maintain the border opacity
+      &[aria-disabled='false'] button[aria-disabled='true'] {
+        filter: grayscale(0) opacity(1);
 
-      :global(*) {
-        filter: grayscale(1) opacity(var(--sui-disabled-opacity, 0.35));
+        * {
+          filter: grayscale(1) opacity(var(--sui-disabled-opacity, 0.35));
+        }
+      }
+
+      // Pointing at a button in a read-only group gives no feedback, so it doesn’t look editable.
+      // Each button variant has its own hover and active colours, so the pointer is turned away
+      // instead of undoing them one by one; the labels aren’t selectable text anyway.
+      &[aria-readonly='true'] button {
+        pointer-events: none;
       }
     }
-
-    // Pointing at a button in a read-only group gives no feedback, so it doesn’t look editable.
-    // Each button variant has its own hover and active colours, so the pointer is turned away
-    // instead of undoing them one by one; the labels aren’t selectable text anyway.
-    &[aria-readonly='true'] :global(button) {
-      pointer-events: none;
-    }
-  }
-
-  .inner {
-    display: contents;
   }
 </style>

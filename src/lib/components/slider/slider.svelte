@@ -42,7 +42,6 @@
    * @property {number} [step] Step option like `<input type="range">`.
    * @property {(string[] | number[])} [optionLabels] Visible labels on the slider. When there is
    * one per step, the current one is also read out as the value (`aria-valuetext`).
-   * @property {boolean} [flex] Make the text input container flexible.
    * @property {boolean} [readonly] Whether to make the widget read-only. An alias of the
    * `aria-readonly` attribute.
    * @property {boolean} [invalid] Whether to mark the widget invalid. An alias of the

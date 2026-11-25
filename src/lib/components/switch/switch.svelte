@@ -5,7 +5,7 @@
   @see https://www.w3.org/WAI/ARIA/apg/patterns/switch/
 -->
 <script>
-  import { getAccessibleName } from '../../services/label.js';
+  import { getAccessibleName, getWidgetStateAttrs } from '../../services/label.js';
 
   /**
    * @import { ContainerProps, FormFieldStateProps, WidgetStateProps } from '#lib/typedefs.js';
@@ -47,11 +47,7 @@
   {hidden}
   disabled={disabled || undefined}
   aria-checked={checked}
-  aria-hidden={hidden}
-  aria-disabled={disabled}
-  aria-readonly={readonly}
-  aria-required={required}
-  aria-invalid={invalid}
+  {...getWidgetStateAttrs({ hidden, disabled, readonly, required, invalid })}
   aria-label={getAccessibleName({ ariaLabel, props: restProps })}
   onclick={() => {
     if (!disabled && !readonly) {
@@ -69,24 +65,13 @@
 </button>
 
 <style lang="scss">
+  @use '../../styles/mixins';
+
   button {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    margin: var(--sui-focus-ring-width);
-    border-width: 0;
-    border-style: solid;
-    border-color: transparent;
-    padding: 0;
-    color: var(--sui-control-foreground-color);
-    background-color: transparent;
-    box-shadow: none;
-    font-family: var(--sui-control-font-family);
-    font-size: var(--sui-control-font-size);
-    line-height: var(--sui-control-line-height);
-    font-weight: var(--sui-font-weight-normal, normal);
-    text-align: start;
-    cursor: pointer;
+    @include mixins.button-reset;
     -webkit-user-select: none;
     user-select: none;
 

@@ -5,7 +5,8 @@
 <script>
   import { _, isRTL } from '@sveltia/i18n';
   import { tick } from 'svelte';
-  import { activateGroup, setFocusedMember } from '../../services/group.svelte.js';
+  import { setFocusedMember } from '../../services/focus.js';
+  import { activateGroup } from '../../services/group.svelte.js';
   import { hasModifier } from '../../services/navigation.js';
   import Button from '../button/button.svelte';
   import Divider from '../divider/divider.svelte';

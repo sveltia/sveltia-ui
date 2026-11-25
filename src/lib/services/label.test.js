@@ -4,6 +4,7 @@ import {
   getLabelAboveText,
   getModalLabelAttrs,
   getToggleLabelAttrs,
+  getWidgetStateAttrs,
 } from './label.js';
 
 describe('getToggleLabelAttrs', () => {
@@ -25,6 +26,26 @@ describe('getToggleLabelAttrs', () => {
     expect(getToggleLabelAttrs({ id: 'c1', ariaLabel: '', hasVisibleLabel: false })).toEqual({
       'aria-label': undefined,
       'aria-labelledby': undefined,
+    });
+  });
+});
+
+describe('getWidgetStateAttrs', () => {
+  it('mirrors the state props as ARIA attributes', () => {
+    expect(
+      getWidgetStateAttrs({
+        hidden: false,
+        disabled: true,
+        readonly: false,
+        required: true,
+        invalid: undefined,
+      }),
+    ).toEqual({
+      'aria-hidden': false,
+      'aria-disabled': true,
+      'aria-readonly': false,
+      'aria-required': true,
+      'aria-invalid': undefined,
     });
   });
 });

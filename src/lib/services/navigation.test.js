@@ -4,6 +4,8 @@ import {
   getGridTargetIndex,
   getLinearTargetIndex,
   hasModifier,
+  isDisabled,
+  isReadOnly,
 } from './navigation.js';
 
 describe('getArrowKeys', () => {
@@ -126,5 +128,18 @@ describe('hasModifier', () => {
     ['shiftKey', 'altKey', 'ctrlKey', 'metaKey'].forEach((modifier) => {
       expect(hasModifier(new KeyboardEvent('keydown', { key: 'a', [modifier]: true }))).toBe(true);
     });
+  });
+});
+
+describe('isDisabled and isReadOnly', () => {
+  it('check the `aria-disabled` and `aria-readonly` attributes', () => {
+    const element = document.createElement('div');
+
+    expect(isDisabled(element)).toBe(false);
+    expect(isReadOnly(element)).toBe(false);
+    element.setAttribute('aria-disabled', 'true');
+    element.setAttribute('aria-readonly', 'false');
+    expect(isDisabled(element)).toBe(true);
+    expect(isReadOnly(element)).toBe(false);
   });
 });

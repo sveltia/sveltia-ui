@@ -5,7 +5,7 @@
 
   /**
    * @typedef {object} Props
-   * @property {string} [title] Text label displayed above the group items.
+   * @property {string} [title] The `title` attribute on the wrapper element.
    */
 
   /**

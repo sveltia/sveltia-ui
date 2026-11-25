@@ -9,6 +9,20 @@
 export const INACTIVE_MEMBER_SELECTOR = '[aria-disabled="true"], [aria-hidden="true"]';
 
 /**
+ * Check whether the given element is marked disabled with the `aria-disabled` attribute.
+ * @param {Element} element Element.
+ * @returns {boolean} Result.
+ */
+export const isDisabled = (element) => element.matches('[aria-disabled="true"]');
+
+/**
+ * Check whether the given element is marked read-only with the `aria-readonly` attribute.
+ * @param {Element} element Element.
+ * @returns {boolean} Result.
+ */
+export const isReadOnly = (element) => element.matches('[aria-readonly="true"]');
+
+/**
  * Check whether any modifier key — Shift, Alt, Control or Meta — is held down with a key press.
  * @param {KeyboardEvent} event `keydown` event.
  * @returns {boolean} Result.

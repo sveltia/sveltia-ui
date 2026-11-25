@@ -66,3 +66,21 @@ export const restoreFocus = (element, container) => {
     element.focus();
   }
 };
+
+/**
+ * Move the cursor of a composite widget that keeps focus on itself, such as a listbox, onto the
+ * given member: mark the member with the `focused` class, taking it off any other, and point the
+ * widget’s `aria-activedescendant` at it.
+ * @param {HTMLElement} parent Widget root element.
+ * @param {HTMLElement} element Member element.
+ */
+export const setFocusedMember = (parent, element) => {
+  parent.querySelectorAll('.focused').forEach((member) => {
+    if (member !== element) {
+      member.classList.remove('focused');
+    }
+  });
+
+  element.classList.add('focused');
+  parent.setAttribute('aria-activedescendant', element.id);
+};

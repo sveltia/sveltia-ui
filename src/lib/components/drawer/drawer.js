@@ -12,7 +12,6 @@
 
 /**
  * @typedef {object} SwipeState
- * @property {number} pointerId ID of the pointer dragging the drawer.
  * @property {'X' | 'Y'} axis Axis along which the drawer is dragged.
  * @property {1 | -1} sign Sign of the direction towards the edge. See {@link getSwipeDirection}.
  * @property {number} start Position along the axis where the drag has started, in pixels.

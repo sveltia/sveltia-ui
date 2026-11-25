@@ -10,7 +10,13 @@
 import { isMac, matchesShortcuts } from '@sveltia/utils/events';
 import { getComponentMarkdown } from '../conversion/editor-components.js';
 import { findCodeBlocks } from '../conversion/markdown/code-blocks.js';
-import { LIST_MARKER } from '../conversion/markdown/syntax.js';
+import {
+  ATX_HEADING_MARKER,
+  BULLET_LIST_MARKER,
+  LIST_MARKER,
+  ORDERED_LIST_DELIMITER,
+  ORDERED_LIST_NUMBER,
+} from '../conversion/markdown/syntax.js';
 import { TASK_LIST_ITEM_REGEX } from '../conversion/transformers/task-list.js';
 
 /**
@@ -56,13 +62,45 @@ const INLINE_MARKERS = {
  * Prefix of a heading, list item or blockquote line, including the check box of a task list item,
  * which can only be one or two spaces after the marker; see `TASK_LIST_ITEM_REGEX`.
  */
-const BLOCK_PREFIX_REGEX =
-  /^(?:#{1,6}[ \t]+|>[ \t]?|[-*+](?:[ \t]{1,2}\[[ xX]\][ \t]+|[ \t]+)|\d+[.)][ \t]+)/;
+const BLOCK_PREFIX_REGEX = new RegExp(
+  `^(?:${ATX_HEADING_MARKER}[ \\t]+|>[ \\t]?|` +
+    `${BULLET_LIST_MARKER}(?:[ \\t]{1,2}\\[[ xX]\\][ \\t]+|[ \\t]+)|` +
+    `${ORDERED_LIST_NUMBER}${ORDERED_LIST_DELIMITER}[ \\t]+)`,
+);
+
+/**
+ * Start of a heading line, capturing the marker.
+ */
+const HEADING_LINE_REGEX = new RegExp(`^(${ATX_HEADING_MARKER})[ \\t]`);
+/**
+ * Start of a bulleted list item line.
+ */
+const BULLET_LIST_LINE_REGEX = new RegExp(`^${BULLET_LIST_MARKER}[ \\t]`);
+
+/**
+ * Start of a numbered list item line.
+ */
+const ORDERED_LIST_LINE_REGEX = new RegExp(
+  `^${ORDERED_LIST_NUMBER}${ORDERED_LIST_DELIMITER}[ \\t]`,
+);
 
 /**
  * Opening fence of a code block that starts right after the marker of a list item, like `- ~~~`.
  */
 const LIST_ITEM_FENCE_REGEX = new RegExp(`^[ \\t]*${LIST_MARKER}[ \\t]`);
+
+/**
+ * Split the given text into its leading whitespace, content and trailing whitespace.
+ * @param {string} text Text.
+ * @returns {[leading: string, content: string, trailing: string]} Parts of the text.
+ */
+const splitSurroundingWhitespace = (text) => {
+  const [, leading, content, trailing] = /** @type {RegExpMatchArray} */ (
+    text.match(/^(\s*)([\s\S]*?)(\s*)$/)
+  );
+
+  return [leading, content, trailing];
+};
 
 /**
  * Get the range of the full lines covered by the selection.
@@ -121,7 +159,7 @@ export const getBlockType = (state, { hasTaskList = false } = {}) => {
     return 'code-block';
   }
 
-  const [, hashes] = line.match(/^(#{1,6})[ \t]/) ?? [];
+  const [, hashes] = line.match(HEADING_LINE_REGEX) ?? [];
 
   if (hashes) {
     return /** @type {TextEditorBlockType} */ (`heading-${hashes.length}`);
@@ -131,11 +169,11 @@ export const getBlockType = (state, { hasTaskList = false } = {}) => {
     return 'task-list';
   }
 
-  if (/^[-*+][ \t]/.test(line)) {
+  if (BULLET_LIST_LINE_REGEX.test(line)) {
     return 'bulleted-list';
   }
 
-  if (/^\d+[.)][ \t]/.test(line)) {
+  if (ORDERED_LIST_LINE_REGEX.test(line)) {
     return 'numbered-list';
   }
 
@@ -177,9 +215,7 @@ export const toggleInlineFormat = ({ value, start, end }, type) => {
   }
 
   // Keep the surrounding whitespace out of the markers, because `** bold **` is not bold
-  const [, leading, content, trailing] = /** @type {RegExpMatchArray} */ (
-    selected.match(/^(\s*)([\s\S]*?)(\s*)$/)
-  );
+  const [leading, content, trailing] = splitSurroundingWhitespace(selected);
 
   // Inline formatting cannot span multiple paragraphs, so format each line separately
   const text = `${leading}${content
@@ -355,10 +391,7 @@ export const setBlockType = (state, type) => {
 export const insertLink = ({ value, start, end }, { url, text }) => {
   // Keep the whitespace around the selected text out of the link, as a double-clicked word may come
   // with a trailing space
-  const [, leading, selected, trailing] = /** @type {RegExpMatchArray} */ (
-    value.slice(start, end).match(/^(\s*)([\s\S]*?)(\s*)$/)
-  );
-
+  const [leading, selected, trailing] = splitSurroundingWhitespace(value.slice(start, end));
   const label = (text ?? selected).trim() || url;
   const escapedLabel = label.replace(/([[\]\\])/g, '\\$1');
   // A URL with whitespace or parentheses has to be enclosed in angle brackets

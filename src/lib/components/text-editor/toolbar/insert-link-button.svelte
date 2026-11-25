@@ -2,7 +2,6 @@
   import { TOGGLE_LINK_COMMAND } from '@lexical/link';
   import { _ } from '@sveltia/i18n';
   import { isMac, matchesShortcuts } from '@sveltia/utils/events';
-  import { isURL } from '@sveltia/utils/string';
   import {
     COMMAND_PRIORITY_NORMAL,
     KEY_DOWN_COMMAND,
@@ -23,7 +22,7 @@
   import TextInput from '../../text-field/text-input.svelte';
   import { AVAILABLE_BUTTONS, OPEN_LINK_EDITOR_COMMAND } from '../constants.js';
   import { focusEditor } from '../editing/caret.js';
-  import { isSafeLinkURL } from '../editing/link.js';
+  import { isLinkableURL, isSafeLinkURL } from '../editing/link.js';
   import {
     editRawText,
     getRawTextState,
@@ -70,7 +69,7 @@
   const openCreateDialog = (textContent) => {
     // Prefill the URL field with the selected text only if it’s a URL that can be linked to.
     // Otherwise, it’s just the link text, like a word or phrase.
-    anchorURL = isURL(textContent) && isSafeLinkURL(textContent) ? textContent : '';
+    anchorURL = isLinkableURL(textContent) ? textContent : '';
     hasAnchor = !!textContent;
     openDialog = true;
   };
@@ -134,6 +133,8 @@
       // The dialog leaves the focus alone (see `restoreFocus` below), so bring it back here
       await refocusEditor(editorStore);
     } else {
+      const url = anchorURL.trim();
+
       await runEditorAction(editorStore, {
         /**
          * Insert the link’s Markdown.
@@ -142,7 +143,7 @@
          */
         raw: (textArea) =>
           editRawText(textArea, (state) =>
-            insertLink(state, { url: anchorURL.trim(), text: hasAnchor ? undefined : anchorText }),
+            insertLink(state, { url, text: hasAnchor ? undefined : anchorText }),
           ),
         /**
          * Insert the link text if needed, and link the selection.
@@ -160,7 +161,7 @@
 
               if (!hasAnchor) {
                 anchorText = anchorText.trim();
-                anchorText ||= anchorURL;
+                anchorText ||= url;
                 insertNodes([createTextNode(anchorText)]);
               }
 
@@ -173,7 +174,7 @@
           await focusEditor(editor);
           editor.dispatchCommand(
             TOGGLE_LINK_COMMAND,
-            canSetTarget && openInNewTab ? { url: anchorURL, target: '_blank' } : anchorURL,
+            canSetTarget && openInNewTab ? { url, target: '_blank' } : url,
           );
         },
         // Moved within the edit above, between inserting the text and linking it

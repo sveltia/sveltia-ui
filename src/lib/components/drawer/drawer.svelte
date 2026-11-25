@@ -5,10 +5,11 @@
   @see https://www.w3.org/WAI/ARIA/apg/patterns/dialog-modal/
 -->
 <script>
-  import { untrack } from 'svelte';
+  import { onDestroy, untrack } from 'svelte';
   import { getModalLabelAttrs } from '../../services/label.js';
-  import Spacer from '../divider/spacer.svelte';
+  import { startPointerDrag } from '../../services/pointer-drag.js';
   import ModalCloseButton from '../dialog/modal-close-button.svelte';
+  import ModalHeader from '../dialog/modal-header.svelte';
   import Modal from '../util/modal.svelte';
   import {
     addSwipeSample,
@@ -118,39 +119,34 @@
   let swipeOffset = $state(0);
 
   /**
-   * Handle the `pointerdown` event on the content, starting a drag from anywhere but the main
-   * content, the footer and the controls.
-   * @param {PointerEvent} event `pointerdown` event.
+   * Close the drawer with the Close button or the swipe gesture.
    */
-  const onPointerDown = (event) => {
-    const { button, isPrimary, pointerId, target, clientX, clientY } = event;
-
-    if (!swipeDismiss || !content || swipe || button !== 0 || !isPrimary) {
-      return;
-    }
-
-    // The dialog around the content is focusable too, so only look inside the content
-    const excluded = /** @type {Element} */ (target).closest(EXCLUDED_SWIPE_TARGETS);
-
-    if (excluded && content.contains(excluded)) {
-      return;
-    }
-
-    const { axis, sign } = getSwipeDirection(position, content.matches(':dir(rtl)'));
-
-    swipe = { pointerId, axis, sign, start: axis === 'Y' ? clientY : clientX, samples: [] };
-    swipeOffset = 0;
-    content.setPointerCapture(pointerId);
+  const close = () => {
+    modal?.close('close');
   };
 
   /**
-   * Handle the `pointermove` event on the content while dragging.
+   * Function to stop following the pointer dragging the drawer, if any.
+   * @type {(() => void) | undefined}
+   */
+  let stopSwipe;
+
+  /**
+   * Stop following the pointer, and put the drawer back where the drag has started.
+   */
+  const resetSwipe = () => {
+    stopSwipe?.();
+    stopSwipe = undefined;
+    swipe = undefined;
+    swipeOffset = 0;
+  };
+
+  /**
+   * Move the drawer along with the pointer, and sample the drag to measure its speed on release.
    * @param {PointerEvent} event `pointermove` event.
    */
-  const onPointerMove = (event) => {
-    const { pointerId, clientX, clientY, timeStamp } = event;
-
-    if (!swipe || pointerId !== swipe.pointerId) {
+  const onSwipeMove = ({ clientX, clientY, timeStamp }) => {
+    if (!swipe) {
       return;
     }
 
@@ -162,13 +158,15 @@
   };
 
   /**
-   * Handle the `pointerup` and `pointercancel` events on the content, ending the drag. The drawer
-   * is dismissed if it has been dragged far enough or flicked, or goes back into place otherwise.
-   * Either way, the transition picks up from where the drag has left the drawer.
-   * @param {PointerEvent} event `pointerup` or `pointercancel` event.
+   * End the drag. The drawer is dismissed if it has been released after being dragged far enough
+   * or flicked, or goes back into place otherwise, for example when the drag is cancelled. Either
+   * way, the transition picks up from where the drag has left the drawer.
+   * @param {PointerEvent} event Event that ends the drag.
    */
-  const onPointerUp = (event) => {
-    if (!swipe || !content || event.pointerId !== swipe.pointerId) {
+  const onSwipeEnd = (event) => {
+    if (!swipe || !content) {
+      resetSwipe();
+
       return;
     }
 
@@ -184,12 +182,37 @@
         velocity: getSwipeVelocity(samples),
       });
 
-    swipe = undefined;
-    swipeOffset = 0;
+    resetSwipe();
 
     if (dismiss) {
-      modal?.close('close');
+      close();
     }
+  };
+
+  /**
+   * Handle the `pointerdown` event on the content, starting a drag from anywhere but the main
+   * content, the footer and the controls.
+   * @param {PointerEvent} event `pointerdown` event.
+   */
+  const onPointerDown = (event) => {
+    const { button, isPrimary, target, clientX, clientY } = event;
+
+    if (!swipeDismiss || !content || swipe || button !== 0 || !isPrimary) {
+      return;
+    }
+
+    // The dialog around the content is focusable too, so only look inside the content
+    const excluded = /** @type {Element} */ (target).closest(EXCLUDED_SWIPE_TARGETS);
+
+    if (excluded && content.contains(excluded)) {
+      return;
+    }
+
+    const { axis, sign } = getSwipeDirection(position, content.matches(':dir(rtl)'));
+
+    swipe = { axis, sign, start: axis === 'Y' ? clientY : clientX, samples: [] };
+    swipeOffset = 0;
+    stopSwipe = startPointerDrag(content, event, { onMove: onSwipeMove, onEnd: onSwipeEnd });
   };
 
   $effect(() => {
@@ -197,11 +220,12 @@
       // The drawer can be closed in the middle of a drag, e.g. with the Escape key, and should
       // then slide away rather than stay where the drag has left it
       untrack(() => {
-        swipe = undefined;
-        swipeOffset = 0;
+        resetSwipe();
       });
     }
   });
+
+  onDestroy(resetSwipe);
 
   /**
    * Labelling attributes for the `<dialog>`, giving it an accessible name.
@@ -210,17 +234,6 @@
     getModalLabelAttrs({ id, title, ariaLabelledby, hasCustomHeader: !!header }),
   );
 </script>
-
-{#snippet closeButton()}
-  <ModalCloseButton
-    class="close"
-    controls={id}
-    {closeIcon}
-    onClose={() => {
-      modal?.close('close');
-    }}
-  />
-{/snippet}
 
 <Modal bind:this={modal} {...restProps} bind:open {id} class="drawer" {...labelAttrs} showBackdrop>
   <div
@@ -237,33 +250,27 @@
     style:transform={swipe ? `translate${swipe.axis}(${swipe.sign * swipeOffset}px)` : undefined}
     style:transition-duration={swipe ? '0s' : undefined}
     onpointerdown={onPointerDown}
-    onpointermove={onPointerMove}
-    onpointerup={onPointerUp}
-    onpointercancel={onPointerUp}
   >
     {#if swipeDismiss && position === 'bottom'}
       <div role="none" class="handle"></div>
     {/if}
     <div role="none" class="extra-control">
       {#if showClose === 'outside'}
-        {@render closeButton()}
+        <ModalCloseButton class="close" controls={id} {closeIcon} onClose={close} />
       {/if}
     </div>
     {#if title || showClose === 'inside' || header || headerExtra}
-      {#if header}
-        {@render header()}
-      {:else}
-        <div role="none" class="header">
-          <div role="none" id="{id}-title" class="title">
-            {title}
-          </div>
-          <Spacer flex={true} />
-          {@render headerExtra?.()}
-          {#if showClose === 'inside'}
-            {@render closeButton()}
-          {/if}
-        </div>
-      {/if}
+      <ModalHeader
+        variant="drawer"
+        {id}
+        {title}
+        showClose={showClose === 'inside'}
+        closeClass="close"
+        onClose={close}
+        {header}
+        {headerExtra}
+        {closeIcon}
+      />
     {/if}
     <div role="none" class="main">
       {@render children?.()}
@@ -280,21 +287,71 @@
 </Modal>
 
 <style lang="scss">
+  @use 'sass:map';
+  @use '../../styles/modal';
+
+  // Default width of a side drawer, or height of a top or bottom drawer, for each `size` but `full`
+  $sizes: (
+    'small': 400px,
+    'medium': 600px,
+    'large': 800px,
+    'x-large': 1000px,
+  );
+
+  // Default corner radii for each `position`, rounding the corners away from the edge the drawer is
+  // attached to
+  $corner-radii: (
+    'right': (
+      'start-start': 4px,
+      'start-end': 0,
+      'end-end': 0,
+      'end-start': 4px,
+    ),
+    'left': (
+      'start-start': 0,
+      'start-end': 4px,
+      'end-end': 4px,
+      'end-start': 0,
+    ),
+    'top': (
+      'start-start': 0,
+      'start-end': 0,
+      'end-end': 4px,
+      'end-start': 4px,
+    ),
+    'bottom': (
+      'start-start': 4px,
+      'start-end': 4px,
+      'end-end': 0,
+      'end-start': 0,
+    ),
+  );
+
+  // Round the corners of the drawer in the given position, each of which can be customized with a
+  // CSS variable for the position or for any position, and all of which with a variable for the
+  // `full` size
+  @mixin border-radius($position) {
+    @each $corner, $radius in map.get($corner-radii, $position) {
+      border-#{$corner}-radius: var(
+        --sui-drawer-#{$position}-content-border-#{$corner}-radius,
+        var(--sui-drawer-content-border-#{$corner}-radius, #{$radius})
+      );
+    }
+
+    &.full {
+      border-radius: var(
+        --sui-drawer-#{$position}-full-content-border-radius,
+        var(--sui-drawer-#{$position}-content-border-radius, 0)
+      );
+    }
+  }
+
   .content {
+    @include modal.content-surface(drawer);
+
     position: absolute;
-    display: flex;
-    flex-direction: column;
     max-width: 100dvw;
     max-height: 100dvh;
-    // No border by default; the high-contrast theme draws one, as the OS does around its windows
-    border-width: var(--sui-drawer-content-border-width, var(--sui-modal-border-width, 0));
-    border-style: solid;
-    border-color: var(--sui-drawer-content-border-color, var(--sui-primary-border-color));
-    background-color: var(--sui-secondary-background-color-translucent);
-    box-shadow: 0 8px 16px var(--sui-popup-shadow-color);
-    -webkit-backdrop-filter: blur(16px);
-    backdrop-filter: blur(16px);
-    transition-property: transform;
 
     .extra-control {
       position: absolute;
@@ -318,29 +375,7 @@
     &.right {
       inset-block: var(--sui-drawer-right-content-inset-block, 0);
       inset-inline: var(--sui-drawer-right-content-inset-inline, auto 0);
-      border-start-start-radius: var(
-        --sui-drawer-right-content-border-start-start-radius,
-        var(--sui-drawer-content-border-start-start-radius, 4px)
-      );
-      border-start-end-radius: var(
-        --sui-drawer-right-content-border-start-end-radius,
-        var(--sui-drawer-content-border-start-end-radius, 0)
-      );
-      border-end-end-radius: var(
-        --sui-drawer-right-content-border-end-end-radius,
-        var(--sui-drawer-content-border-end-end-radius, 0)
-      );
-      border-end-start-radius: var(
-        --sui-drawer-right-content-border-end-start-radius,
-        var(--sui-drawer-content-border-end-start-radius, 4px)
-      );
-
-      &.full {
-        border-radius: var(
-          --sui-drawer-right-full-content-border-radius,
-          var(--sui-drawer-right-content-border-radius, 0)
-        );
-      }
+      @include border-radius(right);
 
       .extra-control {
         inset-block-start: 0;
@@ -361,29 +396,7 @@
     &.left {
       inset-block: var(--sui-drawer-left-content-inset-block, 0);
       inset-inline: var(--sui-drawer-left-content-inset-inline, 0 auto);
-      border-start-start-radius: var(
-        --sui-drawer-left-content-border-start-start-radius,
-        var(--sui-drawer-content-border-start-start-radius, 0)
-      );
-      border-start-end-radius: var(
-        --sui-drawer-left-content-border-start-end-radius,
-        var(--sui-drawer-content-border-start-end-radius, 4px)
-      );
-      border-end-end-radius: var(
-        --sui-drawer-left-content-border-end-end-radius,
-        var(--sui-drawer-content-border-end-end-radius, 4px)
-      );
-      border-end-start-radius: var(
-        --sui-drawer-left-content-border-end-start-radius,
-        var(--sui-drawer-content-border-end-start-radius, 0)
-      );
-
-      &.full {
-        border-radius: var(
-          --sui-drawer-left-full-content-border-radius,
-          var(--sui-drawer-left-content-border-radius, 0)
-        );
-      }
+      @include border-radius(left);
 
       .extra-control {
         inset-block-start: 0;
@@ -406,43 +419,21 @@
         transform: translateX(0%);
       }
 
-      &.small {
-        width: var(--sui-drawer-vertical-small-width, var(--sui-drawer-vertical-width, 400px));
-        max-width: var(
-          --sui-drawer-vertical-small-max-width,
-          var(--sui-drawer-vertical-max-width, calc(100dvw - 56px))
-        );
-        height: var(--sui-drawer-vertical-small-height, var(--sui-drawer-vertical-height, 100dvh));
-      }
-
-      &.medium {
-        width: var(--sui-drawer-vertical-medium-width, var(--sui-drawer-vertical-width, 600px));
-        max-width: var(
-          --sui-drawer-vertical-medium-max-width,
-          var(--sui-drawer-vertical-max-width, calc(100dvw - 56px))
-        );
-        height: var(--sui-drawer-vertical-medium-height, var(--sui-drawer-vertical-height, 100dvh));
-      }
-
-      &.large {
-        width: var(--sui-drawer-vertical-large-width, var(--sui-drawer-vertical-width, 800px));
-        max-width: var(
-          --sui-drawer-vertical-large-max-width,
-          var(--sui-drawer-vertical-max-width, calc(100dvw - 56px))
-        );
-        height: var(--sui-drawer-vertical-large-height, var(--sui-drawer-vertical-height, 100dvh));
-      }
-
-      &.x-large {
-        width: var(--sui-drawer-vertical-x-large-width, var(--sui-drawer-vertical-width, 1000px));
-        max-width: var(
-          --sui-drawer-vertical-x-large-max-width,
-          var(--sui-drawer-vertical-max-width, calc(100dvw - 56px))
-        );
-        height: var(
-          --sui-drawer-vertical-x-large-height,
-          var(--sui-drawer-vertical-height, 100dvh)
-        );
+      @each $size, $length in $sizes {
+        &.#{$size} {
+          width: var(
+            --sui-drawer-vertical-#{$size}-width,
+            var(--sui-drawer-vertical-width, #{$length})
+          );
+          max-width: var(
+            --sui-drawer-vertical-#{$size}-max-width,
+            var(--sui-drawer-vertical-max-width, calc(100dvw - 56px))
+          );
+          height: var(
+            --sui-drawer-vertical-#{$size}-height,
+            var(--sui-drawer-vertical-height, 100dvh)
+          );
+        }
       }
 
       &.full {
@@ -455,29 +446,7 @@
     &.top {
       inset-block-start: var(--sui-drawer-top-content-inset-block, 0);
       inset-inline: var(--sui-drawer-top-content-inset-inline, 0 0);
-      border-start-start-radius: var(
-        --sui-drawer-top-content-border-start-start-radius,
-        var(--sui-drawer-content-border-start-start-radius, 0)
-      );
-      border-start-end-radius: var(
-        --sui-drawer-top-content-border-start-end-radius,
-        var(--sui-drawer-content-border-start-end-radius, 0)
-      );
-      border-end-end-radius: var(
-        --sui-drawer-top-content-border-end-end-radius,
-        var(--sui-drawer-content-border-end-end-radius, 4px)
-      );
-      border-end-start-radius: var(
-        --sui-drawer-top-content-border-end-start-radius,
-        var(--sui-drawer-content-border-end-start-radius, 4px)
-      );
-
-      &.full {
-        border-radius: var(
-          --sui-drawer-top-full-content-border-radius,
-          var(--sui-drawer-top-content-border-radius, 0)
-        );
-      }
+      @include border-radius(top);
 
       .extra-control {
         inset-block-start: 100%;
@@ -492,30 +461,7 @@
     &.bottom {
       inset-block: var(--sui-drawer-bottom-content-inset-block, auto 0);
       inset-inline: var(--sui-drawer-bottom-content-inset-inline, 0);
-
-      border-start-start-radius: var(
-        --sui-drawer-bottom-content-border-start-start-radius,
-        var(--sui-drawer-content-border-start-start-radius, 4px)
-      );
-      border-start-end-radius: var(
-        --sui-drawer-bottom-content-border-start-end-radius,
-        var(--sui-drawer-content-border-start-end-radius, 4px)
-      );
-      border-end-end-radius: var(
-        --sui-drawer-bottom-content-border-end-end-radius,
-        var(--sui-drawer-content-border-end-end-radius, 0)
-      );
-      border-end-start-radius: var(
-        --sui-drawer-bottom-content-border-end-start-radius,
-        var(--sui-drawer-content-border-end-start-radius, 0)
-      );
-
-      &.full {
-        border-radius: var(
-          --sui-drawer-bottom-full-content-border-radius,
-          var(--sui-drawer-bottom-content-border-radius, 0)
-        );
-      }
+      @include border-radius(bottom);
 
       .extra-control {
         inset-block-end: 100%;
@@ -532,58 +478,21 @@
         transform: translateY(0%);
       }
 
-      &.small {
-        width: var(--sui-drawer-horizontal-small-width, var(--sui-drawer-horizontal-width, 100dvw));
-        height: var(
-          --sui-drawer-horizontal-small-height,
-          var(--sui-drawer-horizontal-height, 400px)
-        );
-        max-height: var(
-          --sui-drawer-horizontal-small-max-height,
-          var(--sui-drawer-horizontal-max-height, calc(100dvh - 56px))
-        );
-      }
-
-      &.medium {
-        width: var(
-          --sui-drawer-horizontal-medium-width,
-          var(--sui-drawer-horizontal-width, 100dvw)
-        );
-        height: var(
-          --sui-drawer-horizontal-medium-height,
-          var(--sui-drawer-horizontal-height, 600px)
-        );
-        max-height: var(
-          --sui-drawer-horizontal-medium-max-height,
-          var(--sui-drawer-horizontal-max-height, calc(100dvh - 56px))
-        );
-      }
-
-      &.large {
-        width: var(--sui-drawer-horizontal-large-width, var(--sui-drawer-horizontal-width, 100dvw));
-        height: var(
-          --sui-drawer-horizontal-large-height,
-          var(--sui-drawer-horizontal-height, 800px)
-        );
-        max-height: var(
-          --sui-drawer-horizontal-large-max-height,
-          var(--sui-drawer-horizontal-max-height, calc(100dvh - 56px))
-        );
-      }
-
-      &.x-large {
-        width: var(
-          --sui-drawer-horizontal-x-large-width,
-          var(--sui-drawer-horizontal-width, 100dvw)
-        );
-        height: var(
-          --sui-drawer-horizontal-x-large-height,
-          var(--sui-drawer-horizontal-height, 1000px)
-        );
-        max-height: var(
-          --sui-drawer-horizontal-x-large-max-height,
-          var(--sui-drawer-horizontal-max-height, calc(100dvh - 56px))
-        );
+      @each $size, $length in $sizes {
+        &.#{$size} {
+          width: var(
+            --sui-drawer-horizontal-#{$size}-width,
+            var(--sui-drawer-horizontal-width, 100dvw)
+          );
+          height: var(
+            --sui-drawer-horizontal-#{$size}-height,
+            var(--sui-drawer-horizontal-height, #{$length})
+          );
+          max-height: var(
+            --sui-drawer-horizontal-#{$size}-max-height,
+            var(--sui-drawer-horizontal-max-height, calc(100dvh - 56px))
+          );
+        }
       }
 
       &.full {
@@ -627,28 +536,10 @@
     }
   }
 
-  :is(.header, .footer) {
+  .footer {
     display: flex;
     align-items: center;
     gap: 8px;
-  }
-
-  .header {
-    flex-direction: var(--sui-drawer-header-flex-direction, row);
-    box-sizing: content-box;
-    margin: var(--sui-drawer-header-margin, 0 16px);
-    border-width: var(--sui-drawer-header-border-width, 0 0 1px);
-    border-color: var(--sui-drawer-header-border-color, var(--sui-secondary-border-color));
-    padding: var(--sui-drawer-header-padding, 16px 8px);
-    height: var(--sui-drawer-header-height, 32px);
-
-    .title {
-      font-size: var(--sui-font-size-large);
-      font-weight: var(--sui-font-weight-bold);
-    }
-  }
-
-  .footer {
     margin: 0 24px 24px;
   }
 

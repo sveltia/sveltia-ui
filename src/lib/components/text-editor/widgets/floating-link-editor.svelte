@@ -12,9 +12,9 @@
 -->
 <script>
   import { $isLinkNode as isLinkNode, TOGGLE_LINK_COMMAND } from '@lexical/link';
+  import { $unwrapNode as unwrapNode } from '@lexical/utils';
   import { _, isRTL } from '@sveltia/i18n';
   import { matchesShortcuts } from '@sveltia/utils/events';
-  import { isURL } from '@sveltia/utils/string';
   import {
     COMMAND_PRIORITY_HIGH,
     COMMAND_PRIORITY_NORMAL,
@@ -35,6 +35,7 @@
   import {
     $findSelectedLink as findSelectedLink,
     getLinkAnchorRect,
+    isLinkableURL,
     isSafeLinkURL,
   } from '../editing/link.js';
   import { refocusEditor } from '../toolbar/actions.js';
@@ -229,7 +230,7 @@
           target = { selection: selection.clone() };
           // Prefill the URL field with the selected text only if it’s a URL that can be linked to.
           // Otherwise, it’s just the link text, like a word or phrase.
-          initialURL = isURL(text) && isSafeLinkURL(text) ? text : '';
+          initialURL = isLinkableURL(text) ? text : '';
         }
       }
     });
@@ -323,10 +324,7 @@
       // The popup only shows a link that is there
       /* v8 ignore else */
       if (isLinkNode(node)) {
-        node.getChildren().forEach((child) => {
-          node.insertBefore(child);
-        });
-        node.remove();
+        unwrapNode(node);
       }
     });
 

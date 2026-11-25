@@ -74,6 +74,30 @@ const removeExtraAttributes = (element) => {
 };
 
 /**
+ * Wrap the `after` function of an export output, so the given function can update the exported
+ * element once the original function, if any, has run. The function gets the element returned by
+ * the original function, or the exported element if none.
+ * @param {DOMExportOutput['after']} after Original function, if any.
+ * @param {ElementNode} node Exported node, used as `this` for the original function.
+ * @param {(element: HTMLElement) => DocumentFragment | undefined | void} update Function to update
+ * the element. It can return a new element to replace it with.
+ * @returns {NonNullable<DOMExportOutput['after']>} Wrapped function, which returns the new element
+ * to replace the exported one, if any.
+ */
+const wrapExportAfter = (after, node, update) => (element) => {
+  const newElement = after ? after.call(node, element) : undefined;
+  const target = newElement ?? element;
+  const replacement = isHTMLElement(target) ? update(target) : undefined;
+
+  if (replacement) {
+    return replacement;
+  }
+
+  // Returning the same element would make Lexical replace it with itself
+  return newElement === element ? undefined : newElement;
+};
+
+/**
  * Export an element node with Lexical’s own implementation, then remove the extra attributes from
  * the element, as well as the attribute Lexical adds to the `<br>` terminating a trailing line
  * break. The element’s own `after` function, if any, still runs first, so the structure is kept,
@@ -91,24 +115,11 @@ const exportElementNode = (editor, node) => {
 
   return {
     ...output,
-    /**
-     * Clean up the element once its children are in place.
-     * @param {HTMLElement | DocumentFragment | Text | null | undefined} element Exported element.
-     * @returns {HTMLElement | DocumentFragment | Text | null | undefined} New element to replace
-     * the exported one, if any.
-     */
-    after: (element) => {
-      const newElement = after ? after.call(node, element) : undefined;
-      const target = newElement ?? element;
-
-      if (isHTMLElement(target)) {
-        removeExtraAttributes(target);
-        target.querySelectorAll(':scope > br').forEach(removeExtraAttributes);
-      }
-
-      // Returning the same element would make Lexical replace it with itself
-      return newElement === element ? undefined : newElement;
-    },
+    // Clean up the element once its children are in place
+    after: wrapExportAfter(after, node, (element) => {
+      removeExtraAttributes(element);
+      element.querySelectorAll(':scope > br').forEach(removeExtraAttributes);
+    }),
   };
 };
 
@@ -138,26 +149,9 @@ const exportParagraphNode = (editor, node) => {
 
   const { after, ...output } = exportElementNode(editor, node);
 
-  return {
-    ...output,
-    /**
-     * Clean up the paragraph once its children are in place, and split it around the elements it
-     * can’t hold, if any.
-     * @param {HTMLElement | DocumentFragment | Text | null | undefined} element Exported element.
-     * @returns {HTMLElement | DocumentFragment | Text | null | undefined} New element to replace
-     * the exported one, if any.
-     */
-    after: (element) => {
-      const newElement = /** @type {NonNullable<DOMExportOutput['after']>} */ (after).call(
-        node,
-        element,
-      );
-
-      const target = newElement ?? element;
-
-      return (isHTMLElement(target) && splitParagraphAroundBlocks(target)) || newElement;
-    },
-  };
+  // Clean up the paragraph once its children are in place, and split it around the elements it
+  // can’t hold, if any
+  return { ...output, after: wrapExportAfter(after, node, splitParagraphAroundBlocks) };
 };
 
 /**
@@ -255,28 +249,15 @@ const exportTableNode = (editor, node) => {
 
   return {
     ...output,
-    /**
-     * Clean up the table once Lexical has completed it.
-     * @param {HTMLElement | DocumentFragment | Text | null | undefined} element Exported element.
-     * @returns {HTMLElement | DocumentFragment | Text | null | undefined} New element to replace
-     * the exported one, if any.
-     */
-    after: (element) => {
-      const newElement = after ? after.call(node, element) : undefined;
-      const target = newElement ?? element;
-
-      if (isHTMLElement(target)) {
-        target.querySelectorAll(':scope > colgroup').forEach((colgroup) => colgroup.remove());
-        // Leave the cell content alone, which has been cleaned up by its own nodes, while the
-        // content of an editor component may need its attributes
-        [target, ...target.querySelectorAll(TABLE_STRUCTURE_SELECTOR)].forEach(
-          removeExtraAttributes,
-        );
-      }
-
-      // Returning the same element would make Lexical replace it with itself
-      return newElement === element ? undefined : newElement;
-    },
+    // Clean up the table once Lexical has completed it
+    after: wrapExportAfter(after, node, (element) => {
+      element.querySelectorAll(':scope > colgroup').forEach((colgroup) => colgroup.remove());
+      // Leave the cell content alone, which has been cleaned up by its own nodes, while the content
+      // of an editor component may need its attributes
+      [element, ...element.querySelectorAll(TABLE_STRUCTURE_SELECTOR)].forEach(
+        removeExtraAttributes,
+      );
+    }),
   };
 };
 
@@ -289,26 +270,10 @@ const exportTableNode = (editor, node) => {
  * @returns {DOMExportOutput} Export output.
  */
 const exportDecoratedElementNode = (editor, node, decorate) => {
-  const output = exportElementNode(editor, node);
+  const { after, ...output } = exportElementNode(editor, node);
 
-  return {
-    ...output,
-    /**
-     * Update the element once it’s been cleaned up.
-     * @param {HTMLElement | DocumentFragment | Text | null | undefined} element Exported element.
-     * @returns {HTMLElement | DocumentFragment | Text | null | undefined} New element, if any.
-     */
-    after: (element) => {
-      const newElement = output.after?.(element);
-      const target = newElement ?? element;
-
-      if (isHTMLElement(target)) {
-        decorate(target);
-      }
-
-      return newElement;
-    },
-  };
+  // Update the element once it’s been cleaned up
+  return { ...output, after: wrapExportAfter(after, node, decorate) };
 };
 
 /**

@@ -1,0 +1,30 @@
+// Styles shared by the content of `<Dialog>` and `<Drawer>`. Components load this with
+// `@use '../../styles/modal';`; it emits no CSS on its own.
+
+// The translucent surface the content of a dialog or drawer is drawn on. `$variant` names the CSS
+// variables the surface can be customized with: `dialog` or `drawer`. The border can always be
+// customized, while the background, the shadow and the backdrop filter can only be when
+// `$customizable` is `true`.
+@mixin content-surface($variant, $customizable: false) {
+  $background-color: var(--sui-secondary-background-color-translucent);
+  $box-shadow: 0 8px 16px var(--sui-popup-shadow-color);
+  $backdrop-filter: blur(16px);
+
+  @if $customizable {
+    $background-color: var(--sui-#{$variant}-content-background-color, #{$background-color});
+    $box-shadow: var(--sui-#{$variant}-content-box-shadow, #{$box-shadow});
+    $backdrop-filter: var(--sui-#{$variant}-content-backdrop-filter, #{$backdrop-filter});
+  }
+
+  display: flex;
+  flex-direction: column;
+  // No border by default; the high-contrast theme draws one, as the OS does around its windows
+  border-width: var(--sui-#{$variant}-content-border-width, var(--sui-modal-border-width, 0));
+  border-style: solid;
+  border-color: var(--sui-#{$variant}-content-border-color, var(--sui-primary-border-color));
+  background-color: $background-color;
+  box-shadow: $box-shadow;
+  -webkit-backdrop-filter: $backdrop-filter;
+  backdrop-filter: $backdrop-filter;
+  transition-property: transform;
+}

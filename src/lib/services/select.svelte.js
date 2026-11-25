@@ -1,8 +1,7 @@
 import { getContext, setContext } from 'svelte';
-import { castValue } from './value.js';
 
 /**
- * @import { OptionEntry, SelectedItemDetail } from '#lib/typedefs.js';
+ * @import { OptionEntry } from '#lib/typedefs.js';
  */
 
 /**
@@ -145,15 +144,3 @@ export const createOptionRegistry = () => setContext(CONTEXT_KEY, new OptionRegi
  * standalone within a `<Listbox>`.
  */
 export const getOptionRegistry = () => getContext(CONTEXT_KEY);
-
-/**
- * Get the detail of the selected element.
- * @param {HTMLElement} target Element to get the detail from.
- * @returns {SelectedItemDetail} Detail of the selected element.
- */
-export const getSelectedItemDetail = (target) => {
-  const { type = 'string', name, label } = target.dataset;
-  const value = castValue(target.dataset.value, type);
-
-  return { target, type, name, label, value };
-};

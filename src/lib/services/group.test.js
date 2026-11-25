@@ -2,7 +2,7 @@
 
 import { locale } from '@sveltia/i18n';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { activateGroup, Group, setFocusedMember } from './group.svelte.js';
+import { activateGroup, Group } from './group.svelte.js';
 
 describe('Group - tablist', () => {
   /** @type {HTMLElement} */
@@ -2841,29 +2841,5 @@ describe('Group - mutations inside the members', () => {
     // Let the observer notice the new member
     await Promise.resolve();
     expect(menu.querySelectorAll('[tabindex="0"]')).toHaveLength(1);
-  });
-});
-
-describe('setFocusedMember', () => {
-  it('moves the focused class and the active descendant onto the member', () => {
-    const listbox = document.createElement('div');
-
-    const [first, second] = ['a', 'b'].map((id) => {
-      const option = document.createElement('div');
-
-      option.id = id;
-      option.setAttribute('role', 'option');
-      listbox.appendChild(option);
-
-      return option;
-    });
-
-    setFocusedMember(listbox, first);
-    expect(first.classList.contains('focused')).toBe(true);
-    expect(listbox.getAttribute('aria-activedescendant')).toBe('a');
-    setFocusedMember(listbox, second);
-    expect(first.classList.contains('focused')).toBe(false);
-    expect(second.classList.contains('focused')).toBe(true);
-    expect(listbox.getAttribute('aria-activedescendant')).toBe('b');
   });
 });

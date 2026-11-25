@@ -8,10 +8,11 @@
 <script>
   import { _ } from '@sveltia/i18n';
   import { onMount } from 'svelte';
-  import { setFocusedMember } from '../../services/group.svelte.js';
-  import { getAccessibleName } from '../../services/label.js';
-  import { createOptionRegistry, getSelectedItemDetail } from '../../services/select.svelte.js';
+  import { setFocusedMember } from '../../services/focus.js';
+  import { getAccessibleName, getWidgetStateAttrs } from '../../services/label.js';
+  import { createOptionRegistry } from '../../services/select.svelte.js';
   import { isPrintableKey, TypeAhead } from '../../services/type-ahead.js';
+  import { getSelectedItemDetail } from '../../services/value.js';
   import Button from '../button/button.svelte';
   import Icon from '../icon/icon.svelte';
   import Listbox from '../listbox/listbox.svelte';
@@ -102,9 +103,6 @@
    * @type {boolean}
    */
   const hasMatchingOptions = $derived(!searchTerms || matchedOptions > 0);
-  /**
-   * @type {HTMLElement}
-   */
   /**
    * Accessible name, given as the `ariaLabel` prop or as a plain `aria-label` attribute. It’s set
    * after the props are spread, so it has to cover both, or the attribute would be overwritten.
@@ -349,11 +347,7 @@
       class:selected={value !== undefined}
       tabindex={disabled ? -1 : 0}
       aria-expanded={isPopupOpen}
-      aria-hidden={hidden}
-      aria-disabled={disabled}
-      aria-readonly={readonly}
-      aria-required={required}
-      aria-invalid={invalid}
+      {...getWidgetStateAttrs({ hidden, disabled, readonly, required, invalid })}
       aria-haspopup="listbox"
       aria-label={accessibleName}
       onkeydown={onComboboxKeyDown}

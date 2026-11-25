@@ -5,6 +5,10 @@
  */
 
 /**
+ * @import { SelectedItemDetail } from '#lib/typedefs.js';
+ */
+
+/**
  * Get the data type of a value, to be stored in the `data-type` attribute. `null` gets its own type
  * because `typeof null` is `object`, and the `data-value` attribute is omitted for `null`.
  * @param {any} value Value.
@@ -39,4 +43,16 @@ export const castValue = (value, type) => {
   }
 
   return value;
+};
+
+/**
+ * Get the detail of the selected element.
+ * @param {HTMLElement} target Element to get the detail from.
+ * @returns {SelectedItemDetail} Detail of the selected element.
+ */
+export const getSelectedItemDetail = (target) => {
+  const { type = 'string', name, label } = target.dataset;
+  const value = castValue(target.dataset.value, type);
+
+  return { target, type, name, label, value };
 };

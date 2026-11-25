@@ -70,6 +70,14 @@ export const isSafeLinkURL = (url) => {
 };
 
 /**
+ * Whether the given text is a URL that can be linked to: a full URL that is also safe, per
+ * {@link isSafeLinkURL}. Used to turn selected or pasted text into a link only when it’s a URL.
+ * @param {string} text Text.
+ * @returns {boolean} Result.
+ */
+export const isLinkableURL = (text) => isURL(text) && isSafeLinkURL(text);
+
+/**
  * Register the link command, the paste handler that turns a pasted URL into a link, and the
  * transform that removes a link with an unsafe URL.
  * @param {LexicalEditor} editor Editor instance.
@@ -120,7 +128,7 @@ export const registerLinkCommands = (editor) =>
         const clipboardText = event.clipboardData.getData('text').trim();
 
         // Paste an unsafe URL as plain text rather than as a link
-        if (!isURL(clipboardText) || !isSafeLinkURL(clipboardText)) {
+        if (!isLinkableURL(clipboardText)) {
           return false;
         }
 

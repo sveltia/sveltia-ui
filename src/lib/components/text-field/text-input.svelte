@@ -6,7 +6,7 @@
 -->
 <script>
   import { activateKeyShortcuts } from '@sveltia/utils/events';
-  import { getAccessibleName } from '../../services/label.js';
+  import { getAccessibleName, getWidgetStateAttrs } from '../../services/label.js';
   import TruncatedText from '../typography/truncated-text.svelte';
   import LabelAbove from '../util/label-above.svelte';
   import EmojiAutocomplete from './emoji-autocomplete.svelte';
@@ -152,11 +152,7 @@
     readonly={readonly || undefined}
     {inputmode}
     aria-label={label}
-    aria-hidden={hidden}
-    aria-disabled={disabled}
-    aria-readonly={readonly}
-    aria-required={required}
-    aria-invalid={invalid}
+    {...getWidgetStateAttrs({ hidden, disabled, readonly, required, invalid })}
     oninputcapture={handleInput}
     {@attach activateKeyShortcuts(keyShortcuts)}
   />

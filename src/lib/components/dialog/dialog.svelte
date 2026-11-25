@@ -19,11 +19,13 @@
 <script>
   import { _ } from '@sveltia/i18n';
   import { sleep } from '@sveltia/utils/misc';
+  import { onDestroy } from 'svelte';
   import { getModalLabelAttrs } from '../../services/label.js';
+  import { startPointerDrag } from '../../services/pointer-drag.js';
   import Button from '../button/button.svelte';
   import Spacer from '../divider/spacer.svelte';
   import Modal from '../util/modal.svelte';
-  import ModalCloseButton from './modal-close-button.svelte';
+  import ModalHeader from './modal-header.svelte';
 
   /**
    * @import { DialogProps, ModalProps } from '#lib/typedefs.js';
@@ -121,17 +123,30 @@
   let offset = $state({ x: 0, y: 0 });
   /**
    * Where the current drag started, if the user is dragging the header.
-   * @type {{ pointerId: number, x: number, y: number, offset: { x: number, y: number }, rect:
-   * DOMRect } | undefined}
+   * @type {{ x: number, y: number, offset: { x: number, y: number }, rect: DOMRect } | undefined}
    */
   let dragStart;
+  /**
+   * Function to stop following the pointer dragging the header, if any.
+   * @type {(() => void) | undefined}
+   */
+  let stopDrag;
+
+  /**
+   * End the current drag, if any.
+   */
+  const endDrag = () => {
+    stopDrag?.();
+    stopDrag = undefined;
+    dragStart = undefined;
+  };
 
   /**
    * Move the dialog back to the center of the viewport, ending a drag if any.
    */
   const recenter = () => {
     offset = { x: 0, y: 0 };
-    dragStart = undefined;
+    endDrag();
   };
 
   $effect(() => {
@@ -155,50 +170,11 @@
   });
 
   /**
-   * Start moving the dialog when the header is pressed, unless a button or another control in the
-   * header is. Only bound when the dialog is {@link movable}.
-   * @param {PointerEvent} event `pointerdown` event.
-   */
-  const onHeaderPointerDown = (event) => {
-    const { button, pointerId, clientX, clientY, currentTarget, target } = event;
-    const headerElement = /** @type {HTMLElement} */ (currentTarget);
-
-    // Look for the control within the header only: the `<dialog>` around it has `tabindex` as well
-    const control = /** @type {HTMLElement} */ (target).closest(
-      'button, input, select, textarea, a, [tabindex]',
-    );
-
-    if (button !== 0 || (control && headerElement.contains(control))) {
-      return;
-    }
-
-    event.preventDefault();
-    headerElement.setPointerCapture(pointerId);
-    dragStart = {
-      pointerId,
-      x: clientX,
-      y: clientY,
-      offset: { ...offset },
-      // The header is rendered within the content
-      rect: /** @type {HTMLElement} */ (content).getBoundingClientRect(),
-    };
-  };
-
-  /**
    * Move the dialog along with the pointer, keeping it within the viewport.
    * @param {PointerEvent} event `pointermove` event.
    */
-  const onHeaderPointerMove = ({ pointerId, buttons, clientX, clientY }) => {
-    if (!dragStart || dragStart.pointerId !== pointerId) {
-      return;
-    }
-
-    // The drag can end without a `pointerup` reaching the header, e.g. when the dialog is closed
-    // halfway, so a move without the primary button pressed ends it. The primary button is the
-    // lowest bit of `buttons`
-    if (buttons % 2 === 0) {
-      dragStart = undefined;
-
+  const onDragMove = ({ clientX, clientY }) => {
+    if (!dragStart) {
       return;
     }
 
@@ -211,24 +187,37 @@
   };
 
   /**
-   * Stop moving the dialog.
-   * @param {PointerEvent} event `pointerup` or `pointercancel` event.
+   * Start moving the dialog when the header is pressed, unless a button or another control in the
+   * header is. Only bound when the dialog is {@link movable}.
+   * @param {PointerEvent} event `pointerdown` event.
    */
-  const onHeaderPointerUp = ({ pointerId }) => {
-    if (dragStart?.pointerId === pointerId) {
-      dragStart = undefined;
+  const onHeaderPointerDown = (event) => {
+    const { button, clientX, clientY, currentTarget, target } = event;
+    const headerElement = /** @type {HTMLElement} */ (currentTarget);
+
+    // Look for the control within the header only: the `<dialog>` around it has `tabindex` as well
+    const control = /** @type {HTMLElement} */ (target).closest(
+      'button, input, select, textarea, a, [tabindex]',
+    );
+
+    if (button !== 0 || (control && headerElement.contains(control))) {
+      return;
     }
+
+    event.preventDefault();
+    // A pointer pressed while another one is dragging takes over
+    endDrag();
+    dragStart = {
+      x: clientX,
+      y: clientY,
+      offset: { ...offset },
+      // The header is rendered within the content
+      rect: /** @type {HTMLElement} */ (content).getBoundingClientRect(),
+    };
+    stopDrag = startPointerDrag(headerElement, event, { onMove: onDragMove, onEnd: endDrag });
   };
 
-  /**
-   * Event handlers that let the user move the dialog by dragging its header.
-   */
-  const dragHandlers = {
-    onpointerdown: onHeaderPointerDown,
-    onpointermove: onHeaderPointerMove,
-    onpointerup: onHeaderPointerUp,
-    onpointercancel: onHeaderPointerUp,
-  };
+  onDestroy(endDrag);
 
   $effect(() => {
     if (open && content) {
@@ -301,26 +290,21 @@
     style:translate={movable ? `${offset.x}px ${offset.y}px` : undefined}
   >
     {#if title || showClose || header || headerExtra}
-      <div role="none" class="header" class:movable {...movable ? dragHandlers : {}}>
-        {#if header}
-          {@render header()}
-        {:else}
-          <div role="none" id="{id}-title" class="title">
-            {title}
-          </div>
-          <Spacer flex={true} />
-          {@render headerExtra?.()}
-          {#if showClose}
-            <ModalCloseButton
-              controls={id}
-              {closeIcon}
-              onClose={() => {
-                modalComponent?.close('close');
-              }}
-            />
-          {/if}
-        {/if}
-      </div>
+      <ModalHeader
+        variant="dialog"
+        {id}
+        {title}
+        {movable}
+        {showClose}
+        onClose={() => {
+          modalComponent?.close('close');
+        }}
+        wrapCustomHeader={true}
+        {header}
+        {headerExtra}
+        {closeIcon}
+        onpointerdown={movable ? onHeaderPointerDown : undefined}
+      />
     {/if}
     <div role="none" id="{id}-body" class="body">
       {@render children?.()}
@@ -359,25 +343,24 @@
 </Modal>
 
 <style lang="scss">
+  @use '../../styles/modal';
+
+  // Default width and maximum height of the content for each `size`
+  $sizes: (
+    'x-small': 300px,
+    'small': 400px,
+    'medium': 600px,
+    'large': 800px,
+    'x-large': 1000px,
+  );
+
   .content {
+    @include modal.content-surface(dialog, $customizable: true);
+
     position: relative;
-    display: flex;
-    flex-direction: column;
     overflow: hidden;
-    // No border by default; the high-contrast theme draws one, as the OS does around its windows
-    border-width: var(--sui-dialog-content-border-width, var(--sui-modal-border-width, 0));
-    border-style: solid;
-    border-color: var(--sui-dialog-content-border-color, var(--sui-primary-border-color));
     border-radius: var(--sui-dialog-content-border-radius, 4px);
     max-width: calc(100dvw - var(--sui-dialog-content-margin, 16px) * 2);
-    background-color: var(
-      --sui-dialog-content-background-color,
-      var(--sui-secondary-background-color-translucent)
-    );
-    box-shadow: var(--sui-dialog-content-box-shadow, 0 8px 16px var(--sui-popup-shadow-color));
-    -webkit-backdrop-filter: var(--sui-dialog-content-backdrop-filter, blur(16px));
-    backdrop-filter: var(--sui-dialog-content-backdrop-filter, blur(16px));
-    transition-property: transform;
 
     :global(dialog.open) & {
       transition-duration: 150ms;
@@ -389,95 +372,33 @@
       transform: scale(90%);
     }
 
-    &.x-small {
-      width: var(--sui-dialog-x-small-content-width, var(--sui-dialog-content-width, 300px));
-      max-height: var(
-        --sui-dialog-x-small-content-max-height,
-        var(--sui-dialog-content-max-height, 300px)
-      );
+    @each $size, $length in $sizes {
+      &.#{$size} {
+        width: var(
+          --sui-dialog-#{$size}-content-width,
+          var(--sui-dialog-content-width, #{$length})
+        );
+        max-height: var(
+          --sui-dialog-#{$size}-content-max-height,
+          var(--sui-dialog-content-max-height, #{$length})
+        );
 
-      // The default minimum width of a textbox would overflow a dialog this narrow
-      --sui-textbox-singleline-min-width: 0;
+        @if $size == 'x-small' {
+          // The default minimum width of a textbox would overflow a dialog this narrow
+          --sui-textbox-singleline-min-width: 0;
+        }
 
-      @media (max-height: 300px) {
-        max-height: calc(100dvh - 32px);
+        @media (max-height: $length) {
+          max-height: calc(100dvh - 32px);
+        }
       }
-    }
-
-    &.small {
-      width: var(--sui-dialog-small-content-width, var(--sui-dialog-content-width, 400px));
-      max-height: var(
-        --sui-dialog-small-content-max-height,
-        var(--sui-dialog-content-max-height, 400px)
-      );
-
-      @media (max-height: 400px) {
-        max-height: calc(100dvh - 32px);
-      }
-    }
-
-    &.medium {
-      width: var(--sui-dialog-medium-content-width, var(--sui-dialog-content-width, 600px));
-      max-height: var(
-        --sui-dialog-medium-content-max-height,
-        var(--sui-dialog-content-max-height, 600px)
-      );
-
-      @media (max-height: 600px) {
-        max-height: calc(100dvh - 32px);
-      }
-    }
-
-    &.large {
-      width: var(--sui-dialog-large-content-width, var(--sui-dialog-content-width, 800px));
-      max-height: var(
-        --sui-dialog-large-content-max-height,
-        var(--sui-dialog-content-max-height, 800px)
-      );
-
-      @media (max-height: 800px) {
-        max-height: calc(100dvh - 32px);
-      }
-    }
-
-    &.x-large {
-      width: var(--sui-dialog-x-large-content-width, var(--sui-dialog-content-width, 1000px));
-      max-height: var(
-        --sui-dialog-x-large-content-max-height,
-        var(--sui-dialog-content-max-height, 1000px)
-      );
-
-      @media (max-height: 1000px) {
-        max-height: calc(100dvh - 32px);
-      }
-    }
-  }
-
-  :is(.header, .footer) {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-  }
-
-  .header {
-    box-sizing: content-box;
-    margin: var(--sui-dialog-header-margin, 0 16px);
-    border-width: var(--sui-dialog-header-border-width, 0 0 1px);
-    border-color: var(--sui-dialog-header-border-color, var(--sui-secondary-border-color));
-    padding: var(--sui-dialog-header-padding, 16px 8px);
-    height: var(--sui-dialog-header-height, 32px);
-
-    &.movable {
-      cursor: move;
-    }
-
-    .title {
-      font-size: var(--sui-font-size-large);
-      font-weight: var(--sui-font-weight-bold);
     }
   }
 
   .footer {
+    display: flex;
+    align-items: center;
+    gap: 4px;
     margin: var(--sui-dialog-footer-margin, 0 24px 24px);
 
     @media (width < 768px) {

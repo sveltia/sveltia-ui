@@ -533,6 +533,7 @@ describe('Dialog', () => {
           cancelable: true,
           pointerId: 1,
           isPrimary: true,
+          pointerType: 'mouse',
           clientX: x,
           clientY: y,
           // The primary button is held while moving

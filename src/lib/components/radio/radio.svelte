@@ -11,7 +11,6 @@
   import Button from '../button/button.svelte';
 
   /**
-   * @import { Snippet } from 'svelte';
    * @import { ContainerProps, WidgetStateProps } from '#lib/typedefs.js';
    */
 
@@ -30,7 +29,6 @@
    * buttons. It works in the same way as the [`<input
    * bind:group>`](https://svelte.dev/docs/svelte/bind#input-bind:group) of Svelte: it can hold any
    * type of value, including `undefined` before a choice is made.
-   * @property {Snippet} [default] Default slot content.
    * @property {(event: CustomEvent) => void} [onChange] Custom `Change` event handler.
    * @property {(event: CustomEvent) => void} [onSelect] Custom `Select` event handler.
    */

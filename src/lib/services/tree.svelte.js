@@ -1,7 +1,7 @@
 import { isRTL } from '@sveltia/i18n';
 import { generateElementId } from '@sveltia/utils/element';
 import { CompositeWidget, createWidgetAttachment } from './composite-widget.svelte.js';
-import { getArrowKeys } from './navigation.js';
+import { getArrowKeys, isDisabled } from './navigation.js';
 import { scrollIntoViewIfNeeded } from './scroll.js';
 import { getItemLabel } from './text.js';
 import { isPrintableKey } from './type-ahead.js';
@@ -125,6 +125,15 @@ export class Tree extends CompositeWidget {
   }
 
   /**
+   * CSS selector to retrieve the items.
+   * @type {string}
+   * @override
+   */
+  get selector() {
+    return ITEM_SELECTOR;
+  }
+
+  /**
    * List of all the items, including the ones within a collapsed parent, in document order.
    * @type {HTMLElement[]}
    */
@@ -189,7 +198,7 @@ export class Tree extends CompositeWidget {
    * @type {HTMLElement[]}
    */
   get activeItems() {
-    return this.visibleItems.filter((item) => !item.matches('[aria-disabled="true"]'));
+    return this.visibleItems.filter((item) => !isDisabled(item));
   }
 
   /**
@@ -333,34 +342,11 @@ export class Tree extends CompositeWidget {
     });
 
     // Keep exactly one item in the tab order, preferring the focused, current or selected one
-    const current =
-      activeItems.find((item) => item === document.activeElement) ??
-      activeItems.find((item) => item.tabIndex === 0) ??
-      activeItems.find((item) => item.getAttribute('aria-selected') === 'true') ??
-      activeItems[0];
-
-    this.setTabStop(current);
-  }
-
-  /**
-   * Put exactly one item in the tab order. Only the items actually in it are touched: writing a
-   * `tabindex` to every item costs a pass over the whole widget on each arrow key, and all but one
-   * of those writes set the value the item already had.
-   * @param {HTMLElement} [item] Item to become the tab stop. When omitted, no item is left in the
-   * tab order, which is the case for a tree with nothing to focus.
-   */
-  setTabStop(item) {
-    this.parent
-      .querySelectorAll(`${ITEM_SELECTOR}[tabindex]:not([tabindex="-1"])`)
-      .forEach((element) => {
-        if (element !== item) {
-          /** @type {HTMLElement} */ (element).tabIndex = -1;
-        }
-      });
-
-    if (item) {
-      item.tabIndex = 0;
-    }
+    this.setTabStop(
+      this.pickTabStop(activeItems, () =>
+        activeItems.find((item) => item.getAttribute('aria-selected') === 'true'),
+      ),
+    );
   }
 
   /**
@@ -391,12 +377,7 @@ export class Tree extends CompositeWidget {
       return;
     }
 
-    item.setAttribute('aria-selected', String(selected));
-    item.dispatchEvent(new CustomEvent('Change', { detail: { selected } }));
-
-    if (selected) {
-      item.dispatchEvent(new CustomEvent('Select'));
-    }
+    this.setMemberSelected(item, 'aria-selected', selected);
   }
 
   /**
@@ -425,7 +406,7 @@ export class Tree extends CompositeWidget {
       items.forEach((element, index) => {
         this.setSelected(
           element,
-          index >= indexes[0] && index <= indexes[1] && !element.matches('[aria-disabled="true"]'),
+          index >= indexes[0] && index <= indexes[1] && !isDisabled(element),
         );
       });
     } else if (multi && additive) {
@@ -510,16 +491,12 @@ export class Tree extends CompositeWidget {
    * @param {HTMLElement} currentItem Currently focused item.
    */
   typeAhead(char, currentItem) {
-    const items = this.activeItems;
-
-    const index = this.typeAheadBuffer.match(
-      items.map((item) => this.getLabel(item)),
-      char,
-      items.indexOf(currentItem),
+    const item = this.findTypeAheadMatch(this.activeItems, char, currentItem, (member) =>
+      this.getLabel(member),
     );
 
-    if (index !== -1 && items[index] !== currentItem) {
-      this.focusItem(items[index]);
+    if (item && item !== currentItem) {
+      this.focusItem(item);
     }
   }
 
@@ -534,7 +511,7 @@ export class Tree extends CompositeWidget {
     );
 
     // A disabled item can still take focus from a click, but it’s never the tab stop
-    if (!item || item.matches('[aria-disabled="true"]')) {
+    if (!item || isDisabled(item)) {
       return;
     }
 
@@ -554,7 +531,7 @@ export class Tree extends CompositeWidget {
       return;
     }
 
-    if (item.matches('[aria-disabled="true"]')) {
+    if (isDisabled(item)) {
       event.preventDefault();
 
       return;

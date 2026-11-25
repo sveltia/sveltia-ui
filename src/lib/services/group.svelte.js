@@ -1,6 +1,7 @@
 import { isRTL } from '@sveltia/i18n';
 import { generateElementId } from '@sveltia/utils/element';
 import { CompositeWidget, createWidgetAttachment } from './composite-widget.svelte.js';
+import { setFocusedMember } from './focus.js';
 import { scrollIntoViewIfNeeded } from './scroll.js';
 import { getItemLabel, normalize } from './text.js';
 import { isPrintableKey } from './type-ahead.js';
@@ -11,18 +12,8 @@ import {
   getLinearTargetIndex,
   hasModifier,
   INACTIVE_MEMBER_SELECTOR,
+  isDisabled,
 } from './navigation.js';
-
-/**
- * Set an element’s `tabindex` attribute, leaving the DOM alone if it already holds that value.
- * @param {HTMLElement} element Element.
- * @param {number} tabIndex New value.
- */
-const setTabIndex = (element, tabIndex) => {
-  if (element.getAttribute('tabindex') !== String(tabIndex)) {
-    element.tabIndex = tabIndex;
-  }
-};
 
 /**
  * @type {{ [role: string]: {
@@ -105,24 +96,6 @@ const config = {
  */
 const isSelectable = (element, role = element.getAttribute('role')) =>
   role !== 'menuitem' && element.dataset.selectable !== 'false';
-
-/**
- * Move the cursor of a composite widget that keeps focus on itself, such as a listbox, onto the
- * given member: mark the member with the `focused` class, taking it off any other, and point the
- * widget’s `aria-activedescendant` at it.
- * @param {HTMLElement} parent Widget root element.
- * @param {HTMLElement} element Member element.
- */
-export const setFocusedMember = (parent, element) => {
-  parent.querySelectorAll('.focused').forEach((member) => {
-    if (member !== element) {
-      member.classList.remove('focused');
-    }
-  });
-
-  element.classList.add('focused');
-  parent.setAttribute('aria-activedescendant', element.id);
-};
 
 /**
  * Implement keyboard and mouse interactions for a grouping composite widget.
@@ -271,6 +244,7 @@ export class Group extends CompositeWidget {
     // The members can be added, removed, disabled or hidden at any time, which is what invalidates
     // the cached lists. Only the attributes that decide membership are watched, so the group’s own
     // writes — the selected state and the roving `tabindex` — don’t needlessly discard the cache.
+    // Connected in `setUp()`; see there.
     this.observer = new globalThis.MutationObserver((records) => {
       if (!this.#affectsMembers(records)) {
         return;
@@ -281,16 +255,9 @@ export class Group extends CompositeWidget {
       // Members rendered after activation — rows that arrive with the data, say — start out with
       // whatever `tabindex` their component gives them, so the roving tab stop has to be redone
       // for them to become a single stop
-      if (this.activated && records.some(({ type }) => type === 'childList')) {
+      if (records.some(({ type }) => type === 'childList')) {
         this.updateTabStop();
       }
-    });
-
-    this.observer.observe(parent, {
-      childList: true,
-      subtree: true,
-      attributes: true,
-      attributeFilter: ['aria-disabled', 'aria-hidden'],
     });
 
     // A member can also be selected from code, as when a `<Tab>`’s `selected` prop changes. The
@@ -298,15 +265,7 @@ export class Group extends CompositeWidget {
     // panels and the roving tab stop have to follow the new selection.
     if (controlsPanel || (focusChild && rovingTabStop === 'selected')) {
       this.selectionObserver = new globalThis.MutationObserver(() => {
-        if (this.activated) {
-          this.syncSelection();
-        }
-      });
-
-      this.selectionObserver.observe(parent, {
-        subtree: true,
-        attributes: true,
-        attributeFilter: [childSelectedAttr],
+        this.syncSelection();
       });
     }
 
@@ -317,11 +276,15 @@ export class Group extends CompositeWidget {
   }
 
   /**
-   * Set up the members on activation.
+   * Set up the members on activation. The observers are only connected here, rather than in the
+   * constructor, so a widget unmounted before its activation leaves nothing to disconnect, and the
+   * member lists are only cached from here on, once the observer can tell when they go stale.
    * @override
    */
   setUp() {
     const { allMembers, selected: defaultSelected } = this;
+    /** @type {HTMLElement[]} */
+    const shownPanels = [];
 
     allMembers.forEach((element, index) => {
       // Select the first one if no member has the `selected` attribute
@@ -342,14 +305,29 @@ export class Group extends CompositeWidget {
         this.#setPanelShown(controlTarget, isSelected);
 
         if (isSelected) {
-          globalThis.setTimeout(() => {
-            scrollIntoViewIfNeeded(controlTarget);
-          }, 300);
+          shownPanels.push(controlTarget);
         }
       }
     });
 
+    if (shownPanels.length) {
+      this.scrollIntoViewLater(shownPanels);
+    }
+
     this.updateTabStop();
+
+    this.observer.observe(this.parent, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['aria-disabled', 'aria-hidden'],
+    });
+
+    this.selectionObserver?.observe(this.parent, {
+      subtree: true,
+      attributes: true,
+      attributeFilter: [this.childSelectedAttr],
+    });
   }
 
   /**
@@ -358,46 +336,22 @@ export class Group extends CompositeWidget {
    * items would take three tab presses to step over.
    */
   updateTabStop() {
-    const { allMembers, activeMembers } = this;
-
     // When the group element itself takes focus, as a listbox does, no member is a tab stop
     if (!this.focusChild) {
-      allMembers.forEach((element) => {
-        element.tabIndex = -1;
-      });
+      this.setTabStop(undefined);
 
       return;
     }
 
-    // The stop stays where the user is. This runs again whenever the subtree changes, so a member
-    // the user has moved to must not be handed back to the selected or first one just because a
-    // cell re-rendered or a row arrived. Only when there is no single stop — at activation, where
-    // every member may render as one, or after new members have — is one picked.
-    const { activeElement } = document;
+    const { activeMembers } = this;
 
-    const focused = activeMembers.find(
-      (element) => element === activeElement || element.contains(activeElement),
+    // This runs again whenever the subtree changes, so a member the user has moved to must not be
+    // handed back to the selected or first one just because a cell re-rendered or a row arrived
+    this.setTabStop(
+      this.pickTabStop(activeMembers, () =>
+        this.rovingTabStop === 'selected' ? this.selected : undefined,
+      ),
     );
-
-    const holders = activeMembers.filter((element) => element.getAttribute('tabindex') === '0');
-
-    const tabStop =
-      focused ??
-      (holders.length === 1
-        ? holders[0]
-        : ((this.rovingTabStop === 'selected' ? this.selected : undefined) ??
-          // The first member not marked as unselectable, so a grid’s header row or a row group
-          // caption isn’t where the user lands when they tab into it. A plain menu item can’t be
-          // selected either, but it’s still where a menu starts
-          activeMembers.find((element) => element.dataset.selectable !== 'false') ??
-          activeMembers[0]));
-
-    allMembers.forEach((element) => {
-      // Only touch the DOM when it changes; this runs on every mutation of a large widget. The
-      // attribute is what’s compared: a `<button>` reports a `tabIndex` of 0 without one, and the
-      // popup looks the tab stop up by attribute.
-      setTabIndex(element, element === tabStop ? 0 : -1);
-    });
   }
 
   /**
@@ -426,9 +380,7 @@ export class Group extends CompositeWidget {
       const { selected } = this;
 
       if (selected) {
-        allMembers.forEach((element) => {
-          setTabIndex(element, element === selected ? 0 : -1);
-        });
+        this.setTabStop(selected);
       }
     }
   }
@@ -476,16 +428,24 @@ export class Group extends CompositeWidget {
       this.#memberCache = undefined;
     }
 
-    if (!this.#memberCache) {
-      const all = /** @type {HTMLElement[]} */ ([...this.parent.querySelectorAll(this.selector)]);
-
-      this.#memberCache = {
-        all,
-        active: all.filter((element) => !element.matches(INACTIVE_MEMBER_SELECTOR)),
-      };
+    if (this.#memberCache) {
+      return this.#memberCache;
     }
 
-    return this.#memberCache;
+    const all = /** @type {HTMLElement[]} */ ([...this.parent.querySelectorAll(this.selector)]);
+
+    const members = {
+      all,
+      active: all.filter((element) => !element.matches(INACTIVE_MEMBER_SELECTOR)),
+    };
+
+    // Until the observer is connected on activation, nothing would discard a cached list once the
+    // members mount
+    if (this.activated) {
+      this.#memberCache = members;
+    }
+
+    return members;
   }
 
   /**
@@ -542,23 +502,19 @@ export class Group extends CompositeWidget {
   }
 
   /**
+   * Whether the widget is a menu or a menubar.
+   * @type {boolean}
+   */
+  get #isMenu() {
+    return this.childRoles.includes('menuitem');
+  }
+
+  /**
    * Whether the widget is displayed in grid mode.
    * @type {boolean}
    */
   get grid() {
     return this.role === 'grid' || (this.role === 'listbox' && this.parent.matches('.grid'));
-  }
-
-  /**
-   * Set a member’s selected state and tell its component about the change.
-   * @param {HTMLElement} element Member element.
-   * @param {boolean} selected Whether the member is selected.
-   */
-  #setMemberSelected(element, selected) {
-    element.setAttribute(this.childSelectedAttr, String(selected));
-    element.dispatchEvent(
-      new CustomEvent('Change', { detail: { [this.childSelectedProp]: selected } }),
-    );
   }
 
   /**
@@ -607,24 +563,16 @@ export class Group extends CompositeWidget {
 
     if (multiSelect && isTarget && selecting) {
       changed = true;
-      this.#setMemberSelected(element, !isSelected);
-
-      if (!isSelected) {
-        element.dispatchEvent(new CustomEvent('Select'));
-      }
+      this.setMemberSelected(element, this.childSelectedAttr, !isSelected);
     }
 
     if (singleSelect && isSelected !== isTarget && (isMenuItemRadio ? selecting : true)) {
       changed = true;
-      this.#setMemberSelected(element, isTarget);
-
-      if (isTarget) {
+      this.setMemberSelected(element, this.childSelectedAttr, isTarget, () => {
         if (event.type === 'keydown' && role === 'radio') {
           this.#clickRadio(element);
         }
-
-        element.dispatchEvent(new CustomEvent('Select'));
-      }
+      });
     }
 
     return changed;
@@ -666,17 +614,14 @@ export class Group extends CompositeWidget {
 
   /**
    * Move the roving tab stop and the focus onto the target.
-   * @param {HTMLElement[]} affected Members that took part in the selection.
    * @param {HTMLElement} newTarget Target element.
    * @param {boolean} targetAffected Whether the target itself took part, meaning it’s the one to
    * receive focus.
    */
-  #moveFocus(affected, newTarget, targetAffected) {
+  #moveFocus(newTarget, targetAffected) {
     // Done right away rather than on the next frame: a key that repeats, or a second press before
     // the frame, has to start from the member that was just reached, which it reads from the focus
-    affected.forEach((element) => {
-      setTabIndex(element, element === newTarget ? 0 : -1);
-    });
+    this.setTabStop(targetAffected ? newTarget : undefined);
 
     if (targetAffected) {
       newTarget.focus();
@@ -707,12 +652,6 @@ export class Group extends CompositeWidget {
       event.type === 'click' ||
       (event.type === 'keydown' && /** @type {KeyboardEvent} */ (event).key === ' ');
 
-    /**
-     * Members that took part in this selection, and whose roving `tabindex` therefore has to be
-     * updated. The ones skipped below belong to another menu group and are left alone.
-     * @type {HTMLElement[]}
-     */
-    const affected = [];
     /**
      * Whether the target itself took part, meaning it’s the one to receive focus.
      * @type {boolean}
@@ -745,7 +684,6 @@ export class Group extends CompositeWidget {
 
       const isTarget = element === newTarget;
 
-      affected.push(element);
       targetAffected ||= isTarget;
 
       if (this.#applySelection(event, element, { role, isTarget, targetSelectable, selecting })) {
@@ -760,7 +698,7 @@ export class Group extends CompositeWidget {
     }
 
     if (this.focusChild) {
-      this.#moveFocus(affected, newTarget, targetAffected);
+      this.#moveFocus(newTarget, targetAffected);
     }
 
     if (changed) {
@@ -820,7 +758,6 @@ export class Group extends CompositeWidget {
    */
   onKeyDown(event) {
     const { key } = event;
-    const isMenu = this.childRoles.includes('menuitem');
     // eslint-disable-next-line prefer-destructuring
     const target = /** @type {HTMLElement} */ (event.target);
 
@@ -837,7 +774,7 @@ export class Group extends CompositeWidget {
 
     const currentTarget = this.#getCurrentTarget(target);
 
-    if (isMenu && handleMenuKey(this, event, currentTarget)) {
+    if (this.#isMenu && handleMenuKey(this, event, currentTarget)) {
       return;
     }
 
@@ -845,49 +782,8 @@ export class Group extends CompositeWidget {
       return;
     }
 
-    const { activeMembers } = this;
-
     if (['Enter', ' ', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(key)) {
       event.preventDefault();
-    }
-
-    // Home, End and type-ahead only apply to keystrokes on the group itself or on a member. A text
-    // field nested in a menu, say, keeps them for its own caret and content.
-    const fromMember = target === this.parent || target.matches(this.selector);
-
-    // Home and End jump to the ends of the group, in any layout
-    if (key === 'Home' || key === 'End') {
-      if (!fromMember) {
-        return;
-      }
-
-      event.preventDefault();
-
-      const newTarget = activeMembers[key === 'Home' ? 0 : activeMembers.length - 1];
-
-      if (newTarget && newTarget !== currentTarget) {
-        this.selectTarget(event, newTarget);
-      }
-
-      return;
-    }
-
-    // Type-ahead: a printable character moves to the next member whose label starts with what has
-    // been typed so far, as in a native `<select>` and per the Listbox and Menu patterns. This goes
-    // by the visible label, not the search value, which may hold synonyms for filtering — and by
-    // the label element rather than the whole text, which would take in icon ligature names.
-    if (isPrintableKey(event) && fromMember && (this.role === 'listbox' || isMenu)) {
-      // Swallow the key whether or not it matches, as a native `<select>` does. Left to the
-      // browser, a printable key on a non-editable element starts Firefox’s find-as-you-type.
-      event.preventDefault();
-
-      const newTarget = this.#getTypeAheadTarget(key, currentTarget);
-
-      if (newTarget && newTarget !== currentTarget) {
-        this.selectTarget(event, newTarget);
-      }
-
-      return;
     }
 
     if (key === 'Enter') {
@@ -904,11 +800,55 @@ export class Group extends CompositeWidget {
       return;
     }
 
-    const newTarget = this.#getArrowTarget(key, currentTarget, isRTL());
+    const newTarget = this.#getKeyTarget(event, currentTarget);
 
     if (newTarget && newTarget !== currentTarget) {
       this.selectTarget(event, newTarget);
     }
+  }
+
+  /**
+   * Get the member a key press moves to: either end of the group for Home and End, the next match
+   * for type-ahead, or the neighbor in the arrow’s direction.
+   * @param {KeyboardEvent} event `keydown` event.
+   * @param {HTMLElement | undefined} currentTarget Current member, if any.
+   * @returns {HTMLElement | undefined} Member to move to, if any.
+   */
+  #getKeyTarget(event, currentTarget) {
+    const { key } = event;
+    const { activeMembers } = this;
+    // eslint-disable-next-line prefer-destructuring
+    const target = /** @type {HTMLElement} */ (event.target);
+    // Home, End and type-ahead only apply to keystrokes on the group itself or on a member. A text
+    // field nested in a menu, say, keeps them for its own caret and content.
+    const fromMember = target === this.parent || target.matches(this.selector);
+
+    // Home and End jump to the ends of the group, in any layout
+    if (key === 'Home' || key === 'End') {
+      if (!fromMember) {
+        return undefined;
+      }
+
+      event.preventDefault();
+
+      return activeMembers[key === 'Home' ? 0 : activeMembers.length - 1];
+    }
+
+    // Type-ahead: a printable character moves to the next member whose label starts with what has
+    // been typed so far, as in a native `<select>` and per the Listbox and Menu patterns. This goes
+    // by the visible label, not the search value, which may hold synonyms for filtering — and by
+    // the label element rather than the whole text, which would take in icon ligature names.
+    if (isPrintableKey(event) && fromMember && (this.role === 'listbox' || this.#isMenu)) {
+      // Swallow the key whether or not it matches, as a native `<select>` does. Left to the
+      // browser, a printable key on a non-editable element starts Firefox’s find-as-you-type.
+      event.preventDefault();
+
+      return this.findTypeAheadMatch(activeMembers, key, currentTarget, (member) =>
+        getItemLabel(member),
+      );
+    }
+
+    return this.#getArrowTarget(key, currentTarget, isRTL());
   }
 
   /**
@@ -927,25 +867,6 @@ export class Group extends CompositeWidget {
     const member = /** @type {HTMLElement | null} */ (target.closest(this.selector));
 
     return member && this.parent.contains(member) ? member : undefined;
-  }
-
-  /**
-   * Get the next member whose label starts with what has been typed so far, including the given
-   * key.
-   * @param {string} key Printable key.
-   * @param {HTMLElement | undefined} currentTarget Current member, if any.
-   * @returns {HTMLElement | undefined} Matching member, if any.
-   */
-  #getTypeAheadTarget(key, currentTarget) {
-    const { activeMembers } = this;
-
-    const index = this.typeAheadBuffer.match(
-      activeMembers.map((member) => getItemLabel(member)),
-      key,
-      currentTarget ? activeMembers.indexOf(currentTarget) : -1,
-    );
-
-    return index === -1 ? undefined : activeMembers[index];
   }
 
   /**
@@ -1010,7 +931,7 @@ export class Group extends CompositeWidget {
         ...keys,
       });
       newTarget = list[targetIndex];
-    } while (newTarget?.matches('[aria-disabled="true"]'));
+    } while (newTarget && isDisabled(newTarget));
 
     return newTarget;
   }

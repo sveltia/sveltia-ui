@@ -15,6 +15,32 @@ export const getToggleLabelAttrs = ({ id, ariaLabel, hasVisibleLabel }) => ({
 });
 
 /**
+ * Get the state attributes of a form widget, such as a `<Switch>` or `<TextInput>`, which mirror
+ * its `hidden`, `disabled`, `readonly`, `required` and `invalid` props. A `false` value is rendered
+ * as `"false"`, like the attributes written out one by one.
+ * @param {object} args Arguments.
+ * @param {boolean | undefined} args.hidden Whether the widget is hidden.
+ * @param {boolean | undefined} args.disabled Whether the widget is disabled.
+ * @param {boolean | undefined} args.readonly Whether the widget is read-only.
+ * @param {boolean | undefined} args.required Whether the widget is required.
+ * @param {boolean | undefined} args.invalid Whether the widget is invalid.
+ * @returns {{
+ * 'aria-hidden': boolean | undefined,
+ * 'aria-disabled': boolean | undefined,
+ * 'aria-readonly': boolean | undefined,
+ * 'aria-required': boolean | undefined,
+ * 'aria-invalid': boolean | undefined,
+ * }} Attributes.
+ */
+export const getWidgetStateAttrs = ({ hidden, disabled, readonly, required, invalid }) => ({
+  'aria-hidden': hidden,
+  'aria-disabled': disabled,
+  'aria-readonly': readonly,
+  'aria-required': required,
+  'aria-invalid': invalid,
+});
+
+/**
  * Get the labelling attributes of the `<dialog>` in a `<Dialog>` or `<Drawer>`. The built-in header
  * renders the title in an element the dialog can point at; with a custom header the title is only
  * text, so it becomes `aria-label` unless the consumer names the labelling element.

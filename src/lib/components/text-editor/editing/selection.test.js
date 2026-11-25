@@ -24,6 +24,7 @@ vi.mock('@lexical/extension', () => getMock('@lexical/extension'));
 vi.mock('@lexical/html', () => getMock('@lexical/html'));
 vi.mock('./alignment.js', () => getMock('./editing/alignment.js'));
 vi.mock('./table.js', () => getMock('./editing/table.js'));
+vi.mock('./link.js', () => ({ $findSelectedLink: vi.fn(() => null) }));
 vi.mock('../conversion/html/index.js', () => getMock('./conversion/html/index.js'));
 vi.mock('@lexical/history', () => getMock('@lexical/history'));
 vi.mock('@lexical/link', () => getMock('@lexical/link'));
@@ -38,6 +39,7 @@ import { $getNearestNodeOfType as getNearestNodeOfType } from '@lexical/utils';
 import { ElementNode } from 'lexical';
 import { mockState, resetEditorMocks, selectionState } from '#lib/test-utils/editor-mocks.js';
 import { $getSelectedAlignment } from './alignment.js';
+import { $findSelectedLink } from './link.js';
 import { getSelectionTypes } from './selection.js';
 import { $getSelectedTableCellKey } from './table.js';
 
@@ -86,6 +88,7 @@ describe('getSelectionTypes', () => {
     Object.defineProperty(anchor, 'getParent', { value: () => block });
     Object.defineProperty(block, 'getKey', { value: () => 'block-key' });
 
+    vi.mocked($findSelectedLink).mockReturnValueOnce(/** @type {any} */ (anchor));
     mockState.linkNode = true;
     selectionState.value = {
       type: 'range',
@@ -102,6 +105,31 @@ describe('getSelectionTypes', () => {
     });
   });
 
+  it('leaves out link formatting when the selection is not entirely in the link', () => {
+    const anchor = new ElementNode();
+    const block = new ElementNode();
+
+    anchor.getType = () => 'text';
+    Object.defineProperty(anchor, 'getParent', { value: () => block });
+    Object.defineProperty(block, 'getKey', { value: () => 'block-key' });
+
+    // The anchor is in a link, but `$findSelectedLink()` finds no link holding the focus as well
+    mockState.linkNode = true;
+    selectionState.value = {
+      type: 'range',
+      anchor: { getNode: () => anchor },
+      hasFormat: () => false,
+    };
+
+    expect(getSelectionTypes()).toEqual({
+      blockNodeKey: 'block-key',
+      blockType: 'paragraph',
+      inlineTypes: [],
+      tableCellKey: null,
+      alignment: '',
+    });
+  });
+
   it('uses the block containing a link rather than the link itself', () => {
     const anchor = new ElementNode();
     const block = new ElementNode();
@@ -111,6 +139,7 @@ describe('getSelectionTypes', () => {
     Object.defineProperty(block, 'getKey', { value: () => 'block-key' });
     Object.defineProperty(block, 'getTag', { value: () => 'h3' });
 
+    vi.mocked($findSelectedLink).mockReturnValueOnce(/** @type {any} */ (anchor));
     mockState.linkNode = true;
     mockState.headingNode = true;
     selectionState.value = {

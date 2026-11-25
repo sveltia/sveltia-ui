@@ -104,6 +104,8 @@ describe('getBlockType', () => {
     expect(getBlockType(state('  - [ ] |Item'), { hasTaskList: true })).toBe('paragraph');
     expect(getBlockType(state('- [ ] |Item'))).toBe('bulleted-list');
     expect(getBlockType(state('12. |Item'))).toBe('numbered-list');
+    // A list item number can only have up to nine digits, like in CommonMark
+    expect(getBlockType(state('1234567890. |Item'))).toBe('paragraph');
     expect(getBlockType(state('> |Quote'))).toBe('blockquote');
   });
 

@@ -67,6 +67,33 @@ describe('CompositeWidget', () => {
     expect(onInitialized).toHaveBeenCalledOnce();
   });
 
+  it('activates no sooner than after 100 milliseconds', async () => {
+    const widget = new TestWidget(parent);
+
+    await vi.advanceTimersByTimeAsync(99);
+    expect(widget.activated).toBe(false);
+    await vi.advanceTimersByTimeAsync(1);
+    expect(widget.calls).toEqual(['setUp']);
+    widget.destroy();
+  });
+
+  it('hands the event on to the handler once activated', () => {
+    const widget = new TestWidget(parent);
+    /** @type {Event[]} */
+    const received = [];
+
+    widget.listen('keydown', (event) => {
+      received.push(event);
+      expect(widget.activated).toBe(true);
+    });
+
+    const event = new KeyboardEvent('keydown');
+
+    parent.dispatchEvent(event);
+    expect(received).toEqual([event]);
+    widget.destroy();
+  });
+
   it('activates before handling an event that comes first', () => {
     const widget = new TestWidget(parent);
 
@@ -117,6 +144,7 @@ describe('CompositeWidget', () => {
       widget.setUp();
       widget.onUpdate({});
     }).not.toThrow();
+    expect(widget.selector).toBe('');
     widget.destroy();
   });
 });
