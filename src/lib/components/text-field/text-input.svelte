@@ -200,6 +200,14 @@
     transition:
       background-color 0s 600000s,
       color 0s 600000s;
+
+    // Chrome shows a filled-in value in a system font until the user interacts with the page.
+    // Set the font explicitly, as inheriting it from the field would bring back the system one
+    &::first-line {
+      font-family: var(--sui-textbox-font-family);
+      font-size: var(--sui-textbox-font-size);
+      font-weight: var(--sui-textbox-font-weight, var(--sui-font-weight-normal, normal));
+    }
   }
 
   input {
