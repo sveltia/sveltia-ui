@@ -24,21 +24,24 @@ const outDir = new URL('../src/lib/self-hosted/fonts/', import.meta.url);
 const escape = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 /**
- * Replace the one occurrence of a version in a file’s source, failing if there isn’t exactly one,
- * so the sync can’t silently miss a version once the source has changed shape.
+ * Replace every occurrence of a version in a file’s source, failing if there isn’t the expected
+ * number of them, so the sync can’t silently miss a version once the source has changed shape.
  * @param {string} source Source.
  * @param {RegExp} pattern Pattern with the version in the second of three groups.
  * @param {string} version New version.
+ * @param {number} count Expected number of occurrences: one for each file of the package.
  * @param {string} fileName File name, for the error message.
  * @returns {string} Updated source.
- * @throws {Error} If the pattern doesn’t match exactly once.
+ * @throws {Error} If the pattern doesn’t match the expected number of times.
  */
-const replaceVersion = (source, pattern, version, fileName) => {
-  if ((source.match(new RegExp(pattern.source, 'g')) ?? []).length !== 1) {
-    throw new Error(`Expected one match for ${pattern} in ${fileName}.`);
+const replaceVersion = (source, pattern, version, count, fileName) => {
+  const globalPattern = new RegExp(pattern.source, 'g');
+
+  if ((source.match(globalPattern) ?? []).length !== count) {
+    throw new Error(`Expected ${count} match(es) for ${pattern} in ${fileName}.`);
   }
 
-  return source.replace(pattern, `$1${version}$3`);
+  return source.replace(globalPattern, `$1${version}$3`);
 };
 
 let fontsModule = readFileSync(fontsModuleURL, 'utf8');
@@ -48,35 +51,46 @@ const updates = [];
 
 mkdirSync(outDir, { recursive: true });
 
-FONTS.forEach((font) => {
-  const { packageName, version, cdnId } = font;
-  const packageDir = new URL(`../node_modules/${packageName}/`, import.meta.url);
-  const installed = JSON.parse(readFileSync(new URL('package.json', packageDir), 'utf8')).version;
+// A package can provide more than one file, e.g. the upright and italic styles of a font
+Object.entries(Object.groupBy(FONTS, ({ packageName }) => packageName)).forEach(
+  ([packageName, fonts = []]) => {
+    const [{ version, cdnId }] = fonts;
+    const packageDir = new URL(`../node_modules/${packageName}/`, import.meta.url);
 
-  if (installed !== version) {
-    fontsModule = replaceVersion(
-      fontsModule,
-      new RegExp(`(packageName: '${escape(packageName)}',\\s+version: ')(${escape(version)})(')`),
-      installed,
-      'fonts.js',
+    const { version: installed } = JSON.parse(
+      readFileSync(new URL('package.json', packageDir), 'utf8'),
     );
-    fontLinks = replaceVersion(
-      fontLinks,
-      new RegExp(`(/fontsource/fonts/${escape(cdnId)}@)(${escape(version)})(/)`),
-      installed,
-      'font-links.svelte',
+
+    if (installed !== version) {
+      fontsModule = replaceVersion(
+        fontsModule,
+        new RegExp(`(packageName: '${escape(packageName)}',\\s+version: ')(${escape(version)})(')`),
+        installed,
+        fonts.length,
+        'fonts.js',
+      );
+      fontLinks = replaceVersion(
+        fontLinks,
+        new RegExp(`(/fontsource/fonts/${escape(cdnId)}@)(${escape(version)})(/)`),
+        installed,
+        fonts.length,
+        'font-links.svelte',
+      );
+      updates.push(`${packageName} ${version} → ${installed}`);
+    }
+
+    fonts.forEach((font) => {
+      const fileName = getFontFileName(font);
+
+      copyFileSync(new URL(`files/${fileName}`, packageDir), new URL(fileName, outDir));
+    });
+
+    copyFileSync(
+      new URL('LICENSE', packageDir),
+      new URL(`${packageName.split('/')[1]}.LICENSE.txt`, outDir),
     );
-    updates.push(`${packageName} ${version} → ${installed}`);
-  }
-
-  const fileName = getFontFileName(font);
-
-  copyFileSync(new URL(`files/${fileName}`, packageDir), new URL(fileName, outDir));
-  copyFileSync(
-    new URL('LICENSE', packageDir),
-    new URL(`${packageName.split('/')[1]}.LICENSE.txt`, outDir),
-  );
-});
+  },
+);
 
 if (updates.length) {
   writeFileSync(fontsModuleURL, fontsModule);
@@ -87,4 +101,4 @@ if (updates.length) {
 }
 
 // eslint-disable-next-line no-console
-console.log(`Copied ${FONTS.length} fonts and their licenses to src/lib/self-hosted/fonts.`);
+console.log(`Copied ${FONTS.length} font files and their licenses to src/lib/self-hosted/fonts.`);

@@ -54,6 +54,7 @@ describe('fonts', () => {
 
     expect(FONTS.map(getFontFileName)).toEqual([
       'source-sans-3-latin-wght-normal.woff2',
+      'source-sans-3-latin-wght-italic.woff2',
       'noto-mono-latin-400-normal.woff2',
       'material-symbols-outlined-latin-wght-normal.woff2',
     ]);
@@ -62,10 +63,11 @@ describe('fonts', () => {
   it('builds the CDN URL of each file', async () => {
     const { FONTS, getCDNFontURL } = await importFonts();
     // The versions are updated by `scripts/copy-fonts.js`
-    const [sans, mono, symbols] = FONTS.map(({ version }) => version);
+    const [sans, sansItalic, mono, symbols] = FONTS.map(({ version }) => version);
 
     expect(FONTS.map(getCDNFontURL)).toEqual([
       `https://cdn.jsdelivr.net/fontsource/fonts/source-sans-3:vf@${sans}/latin-wght-normal.woff2`,
+      `https://cdn.jsdelivr.net/fontsource/fonts/source-sans-3:vf@${sansItalic}/latin-wght-italic.woff2`,
       `https://cdn.jsdelivr.net/fontsource/fonts/noto-mono@${mono}/latin-400-normal.woff2`,
       `https://cdn.jsdelivr.net/fontsource/fonts/material-symbols-outlined:vf@${symbols}/latin-wght-normal.woff2`,
     ]);
@@ -81,12 +83,13 @@ describe('fonts', () => {
       unicodeRange: expect.stringContaining('U+2000-206F, U+20AC'),
       sizeAdjust: '110%',
     });
-    expect(getFontFaceDescriptors(FONTS[1])).toEqual({
+    expect(getFontFaceDescriptors(FONTS[1])).toMatchObject({ style: 'italic', weight: '200 900' });
+    expect(getFontFaceDescriptors(FONTS[2])).toEqual({
       style: 'normal',
       weight: '400',
       display: 'swap',
     });
-    expect(getFontFaceDescriptors(FONTS[2]).unicodeRange).toContain('U+2000-206F, U+2074, U+20AC');
+    expect(getFontFaceDescriptors(FONTS[3]).unicodeRange).toContain('U+2000-206F, U+2074, U+20AC');
   });
 
   it('registers a font face for each font given a URL', async () => {
@@ -129,7 +132,19 @@ describe('fonts', () => {
     setFontURLs(Object.fromEntries(FONTS.map((font) => [getFontFileName(font), '/b.woff2'])));
 
     expect(fonts.delete).toHaveBeenCalledExactlyOnceWith(previous);
-    expect(fonts.add).toHaveBeenCalledTimes(4);
+    expect(fonts.add).toHaveBeenCalledTimes(5);
+  });
+
+  it('is given a self-hosted file for every font by `setupSelfHostedAssets()`', async () => {
+    const fonts = stubFontLoadingAPI();
+    const { FONTS, getFontFileName } = await importFonts();
+    const { setupSelfHostedAssets } = await import('../../self-hosted/index.js');
+
+    setupSelfHostedAssets();
+
+    expect(fonts.add.mock.calls.map(([{ source }]) => source.match(/[^/]+\.woff2/)[0])).toEqual(
+      FONTS.map(getFontFileName),
+    );
   });
 
   it('does nothing without the CSS Font Loading API, e.g. on the server', async () => {

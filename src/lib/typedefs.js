@@ -496,6 +496,7 @@
  * for a variable font.
  * @property {string} subset Subset, weight and style of the file, e.g. `latin-400-normal`.
  * @property {string} format `@font-face` format hint.
+ * @property {'normal' | 'italic'} [style] `@font-face` style. Defaults to `normal`.
  * @property {string} weight `@font-face` weight, or weight range for a variable font.
  * @property {string} display `@font-face` display strategy.
  * @property {string} [unicodeRange] `@font-face` Unicode range.

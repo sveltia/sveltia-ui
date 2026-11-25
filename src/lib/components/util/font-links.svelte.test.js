@@ -15,13 +15,18 @@ import {
 const LOCAL_FONT_URL = '/node_modules/@fontsource/noto-mono/files/noto-mono-latin-400-normal.woff2';
 
 /**
- * Get the font faces declared by `@font-face` rules for the given family.
+ * Get the font faces declared for the given family, by `@font-face` rules or registered with
+ * `setFontURLs()`.
  * @param {string} family Font family.
+ * @param {string} [style] Font style. All the styles by default.
  * @returns {FontFace[]} Font faces.
  */
-const getFontFaces = (family) =>
-  // Chrome quotes the family name of a face created with the `FontFace` constructor
-  [...document.fonts].filter((face) => face.family.replace(/^"(.*)"$/, '$1') === family);
+const getFontFaces = (family, style) =>
+  [...document.fonts].filter(
+    (face) =>
+      // Chrome quotes the family name of a face created with the `FontFace` constructor
+      face.family.replace(/^"(.*)"$/, '$1') === family && (!style || face.style === style),
+  );
 
 afterEach(() => {
   setFontURLs({});
@@ -36,7 +41,7 @@ it('declares the fonts as defined in `fonts.js`', async () => {
     .join('\n');
 
   FONTS.forEach((font) => {
-    const [cssFace] = getFontFaces(font.family);
+    const [cssFace] = getFontFaces(font.family, font.style ?? 'normal');
     // Let the browser normalize the descriptors, e.g. the Unicode range, for comparison
     const expected = new FontFace(font.family, 'url(x)', getFontFaceDescriptors(font));
 
@@ -93,9 +98,36 @@ it('renders with a self-hosted font instead of the CDN one', async () => {
   expect(getFontFaces('Source Sans 3').map(({ status }) => status)).toEqual([
     'unloaded',
     'unloaded',
+    'unloaded',
+    'unloaded',
   ]);
 
   span.remove();
+  screen.unmount();
+});
+
+it('renders italic text with the italic face rather than a synthesized one', async () => {
+  const url = '/node_modules/@fontsource-variable/source-sans-3/files';
+
+  setFontURLs({
+    'source-sans-3-latin-wght-normal.woff2': `${url}/source-sans-3-latin-wght-normal.woff2`,
+    'source-sans-3-latin-wght-italic.woff2': `${url}/source-sans-3-latin-wght-italic.woff2`,
+  });
+
+  const screen = await render(FontLinks);
+  const em = Object.assign(document.createElement('em'), { textContent: 'abc' });
+
+  em.style.fontFamily = "'Source Sans 3'";
+  document.body.append(em);
+
+  await expect
+    .poll(() => getFontFaces('Source Sans 3', 'italic').map(({ status }) => status))
+    .toContain('loaded');
+  expect(getFontFaces('Source Sans 3', 'normal').map(({ status }) => status)).not.toContain(
+    'loaded',
+  );
+
+  em.remove();
   screen.unmount();
 });
 

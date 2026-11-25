@@ -23,6 +23,10 @@ export const setupSelfHostedAssets = () => {
       './fonts/source-sans-3-latin-wght-normal.woff2',
       import.meta.url,
     ).href,
+    'source-sans-3-latin-wght-italic.woff2': new URL(
+      './fonts/source-sans-3-latin-wght-italic.woff2',
+      import.meta.url,
+    ).href,
     'noto-mono-latin-400-normal.woff2': new URL(
       './fonts/noto-mono-latin-400-normal.woff2',
       import.meta.url,

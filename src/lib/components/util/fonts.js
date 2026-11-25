@@ -57,6 +57,19 @@ export const FONTS = [
     sizeAdjust: '110%',
   },
   {
+    family: 'Source Sans 3',
+    packageName: '@fontsource-variable/source-sans-3',
+    version: '5.3.1',
+    cdnId: 'source-sans-3:vf',
+    subset: 'latin-wght-italic',
+    format: 'woff2-variations',
+    style: 'italic',
+    weight: '200 900',
+    display: 'swap',
+    unicodeRange: getLatinUnicodeRange(),
+    sizeAdjust: '110%',
+  },
+  {
     family: 'Noto Mono',
     packageName: '@fontsource/noto-mono',
     version: '5.3.0',
@@ -108,8 +121,14 @@ let registeredFontFaces = [];
  * @param {FontDefinition} font Font.
  * @returns {FontFaceDescriptors} Descriptors.
  */
-export const getFontFaceDescriptors = ({ weight, display, unicodeRange, sizeAdjust }) => ({
-  style: 'normal',
+export const getFontFaceDescriptors = ({
+  style = 'normal',
+  weight,
+  display,
+  unicodeRange,
+  sizeAdjust,
+}) => ({
+  style,
   weight,
   display: /** @type {FontDisplay} */ (display),
   ...(unicodeRange ? { unicodeRange } : {}),
