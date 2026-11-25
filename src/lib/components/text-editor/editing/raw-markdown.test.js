@@ -115,6 +115,18 @@ describe('getBlockType', () => {
     expect(getBlockType(state('~~~\ncode\n|'))).toBe('code-block');
     expect(getBlockType(state('|Text\n```\ncode\n```'))).toBe('paragraph');
   });
+
+  it('only closes a code block with a fence of the same character, at least as long', () => {
+    // A tilde fence doesn’t close a backtick one, so the block runs on
+    expect(getBlockType(state('```\ncode\n~~~\n|Text'))).toBe('code-block');
+    // A shorter fence is part of the code
+    expect(getBlockType(state('````\n```\n|Text\n````'))).toBe('code-block');
+    expect(getBlockType(state('````\ncode\n````\n|Text'))).toBe('paragraph');
+  });
+
+  it('treats the lines of a code block in a list item like any other', () => {
+    expect(getBlockType(state('- ~~~\n  |code\n  ~~~'))).toBe('paragraph');
+  });
 });
 
 describe('setBlockType', () => {
@@ -167,6 +179,18 @@ describe('setBlockType', () => {
     expect(change('```\none\ntw|o\n```', 'heading-1')).toBe('one\n# tw|o');
     // The caret on a fence line moves into the content
     expect(change('|```\ncode\n```', 'paragraph')).toBe('|code');
+  });
+
+  it('unwraps an unclosed code block, keeping its last line', () => {
+    expect(change('```\none\ntw|o', 'paragraph')).toBe('one\ntw|o');
+    // The tilde fence inside a backtick block is code, not a closing fence
+    expect(change('```\nco|de\n~~~', 'paragraph')).toBe('co|de\n~~~');
+  });
+
+  it('keeps the list marker of a code block in a list item', () => {
+    expect(change('- ~~~\n  co|de\n  ~~~\n- Next', 'paragraph')).toBe(
+      '- ~~~\n  co|de\n  ~~~\n- Next',
+    );
   });
 });
 

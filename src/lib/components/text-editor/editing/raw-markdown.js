@@ -9,6 +9,8 @@
 
 import { isMac, matchesShortcuts } from '@sveltia/utils/events';
 import { getComponentMarkdown } from '../conversion/editor-components.js';
+import { findCodeBlocks } from '../conversion/markdown/code-blocks.js';
+import { LIST_MARKER } from '../conversion/markdown/syntax.js';
 import { TASK_LIST_ITEM_REGEX } from '../conversion/transformers/task-list.js';
 
 /**
@@ -17,6 +19,7 @@ import { TASK_LIST_ITEM_REGEX } from '../conversion/transformers/task-list.js';
  * TextEditorComponent,
  * TextEditorFormatType,
  * } from '#lib/typedefs.js';
+ * @import { CodeBlock } from '../conversion/markdown/code-blocks.js';
  */
 
 /**
@@ -56,7 +59,10 @@ const INLINE_MARKERS = {
 const BLOCK_PREFIX_REGEX =
   /^(?:#{1,6}[ \t]+|>[ \t]?|[-*+](?:[ \t]{1,2}\[[ xX]\][ \t]+|[ \t]+)|\d+[.)][ \t]+)/;
 
-const CODE_FENCE_REGEX = /^[ \t]*(?:```|~~~)/;
+/**
+ * Opening fence of a code block that starts right after the marker of a list item, like `- ~~~`.
+ */
+const LIST_ITEM_FENCE_REGEX = new RegExp(`^[ \\t]*${LIST_MARKER}[ \\t]`);
 
 /**
  * Get the range of the full lines covered by the selection.
@@ -81,36 +87,20 @@ const getLineRange = ({ value, start, end }) => {
 const getStartLineIndex = ({ value, start }) => value.slice(0, start).split('\n').length - 1;
 
 /**
- * Find the fenced code block the given line is in.
+ * Find the fenced code block the given line is in, matching the fences the same way the rich text
+ * editor imports the Markdown. A code block in a list item, like `- ~~~`, isn’t returned, as its
+ * fence line also holds the list marker, which would be lost when leaving the block, so its lines
+ * are edited like any other.
  * @param {string[]} lines All the lines.
  * @param {number} lineIndex Index of the line.
- * @returns {{ open: number, close: number } | undefined} Indexes of the opening and closing fence
- * lines, or `undefined` if the line is not in a code block. An unclosed block ends at the last
- * line.
+ * @returns {CodeBlock | undefined} Code block, or `undefined` if the line is not in a code block.
  */
 const findCodeBlock = (lines, lineIndex) => {
-  /** @type {number | undefined} */
-  let open;
+  const block = findCodeBlocks(lines).find(
+    ({ start, end }) => start <= lineIndex && lineIndex <= end,
+  );
 
-  for (let index = 0; index < lines.length; index += 1) {
-    if (CODE_FENCE_REGEX.test(lines[index])) {
-      if (open === undefined) {
-        open = index;
-      } else {
-        if (lineIndex >= open && lineIndex <= index) {
-          return { open, close: index };
-        }
-
-        open = undefined;
-      }
-    }
-
-    if (open === undefined && index >= lineIndex) {
-      return undefined;
-    }
-  }
-
-  return open !== undefined && lineIndex >= open ? { open, close: lines.length } : undefined;
+  return block && !LIST_ITEM_FENCE_REGEX.test(lines[block.start]) ? block : undefined;
 };
 
 /**
@@ -232,10 +222,11 @@ export const setBlockType = (state, type) => {
 
   // Leave a code block by removing its fences, then change the type of the selected lines
   if (codeBlock) {
-    const { open, close } = codeBlock;
+    const { start: open, end: close, closed } = codeBlock;
     const blockStart = lines.slice(0, open).join('\n').length + (open ? 1 : 0);
     const blockEnd = blockStart + lines.slice(open, close + 1).join('\n').length;
-    const content = lines.slice(open + 1, close).join('\n');
+    // The last line of an unclosed block is code, not a closing fence
+    const content = lines.slice(open + 1, closed ? close : close + 1).join('\n');
     const contentStart = blockStart + lines[open].length + 1;
     /**
      * Map a position in the whole value to one in the content.
