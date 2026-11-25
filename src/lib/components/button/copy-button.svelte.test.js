@@ -128,3 +128,9 @@ describe('CopyButton', () => {
     document.removeEventListener('keydown', listener);
   });
 });
+
+it('keeps a plain `aria-label` attribute passed instead of the `ariaLabel` prop', async () => {
+  const screen = await render(CopyButton, { text: 'x', 'aria-label': 'Copy URL' });
+
+  await expect.element(screen.getByRole('button', { name: 'Copy URL' })).toBeInTheDocument();
+});

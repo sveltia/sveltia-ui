@@ -4,6 +4,8 @@
   @see https://w3c.github.io/aria/#group
 -->
 <script>
+  import { getAccessibleName } from '../../services/label.js';
+
   /**
    * @import { ContainerProps, WidgetStateProps } from '#lib/typedefs.js';
    */
@@ -35,7 +37,7 @@
   {hidden}
   aria-hidden={hidden}
   aria-disabled={disabled}
-  aria-label={ariaLabel}
+  aria-label={getAccessibleName({ ariaLabel, props: restProps })}
 >
   <div role="none" class="inner" inert={disabled}>
     {@render children?.()}

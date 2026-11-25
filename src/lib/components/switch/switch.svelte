@@ -5,6 +5,8 @@
   @see https://www.w3.org/WAI/ARIA/apg/patterns/switch/
 -->
 <script>
+  import { getAccessibleName } from '../../services/label.js';
+
   /**
    * @import { ContainerProps, FormFieldStateProps, WidgetStateProps } from '#lib/typedefs.js';
    */
@@ -50,7 +52,7 @@
   aria-readonly={readonly}
   aria-required={required}
   aria-invalid={invalid}
-  aria-label={ariaLabel}
+  aria-label={getAccessibleName({ ariaLabel, props: restProps })}
   onclick={() => {
     if (!disabled && !readonly) {
       checked = !checked;

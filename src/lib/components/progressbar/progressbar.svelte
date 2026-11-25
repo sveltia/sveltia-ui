@@ -4,6 +4,8 @@
   @see https://w3c.github.io/aria/#progressbar
 -->
 <script>
+  import { getAccessibleName } from '../../services/label.js';
+
   /**
    * @typedef {object} Props
    * @property {string} [class] The `class` attribute on the wrapper element.
@@ -43,7 +45,7 @@
   aria-valuemin={min}
   aria-valuemax={max}
   aria-valuetext={text}
-  aria-label={ariaLabel}
+  aria-label={getAccessibleName({ ariaLabel, props: restProps })}
 >
   <div role="none" style:width={`${percentage}%`}></div>
 </div>

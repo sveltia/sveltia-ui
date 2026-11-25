@@ -4,6 +4,8 @@
   @see https://w3c.github.io/aria/#separator
 -->
 <script>
+  import { getAccessibleName } from '../../services/label.js';
+
   /**
    * @typedef {object} Props
    * @property {string} [class] The `class` attribute on the wrapper element.
@@ -35,7 +37,7 @@
   {hidden}
   aria-hidden={hidden}
   aria-orientation={orientation}
-  aria-label={ariaLabel}
+  aria-label={getAccessibleName({ ariaLabel, props: restProps })}
 ></div>
 
 <style lang="scss">

@@ -7,6 +7,7 @@
 <script>
   import { _ } from '@sveltia/i18n';
   import { tick } from 'svelte';
+  import { getAccessibleName } from '../../services/label.js';
   import Icon from '../icon/icon.svelte';
   import Tooltip from '../util/tooltip.svelte';
   import Button from './button.svelte';
@@ -53,7 +54,9 @@
   /** @type {HTMLButtonElement | undefined} */
   let buttonElement = $state();
 
-  const label = $derived(ariaLabel ?? _('_sui.copy_button.copy'));
+  const label = $derived(
+    getAccessibleName({ ariaLabel, props: restProps }) ?? _('_sui.copy_button.copy'),
+  );
   let timer = 0;
 
   $effect(() => () => {

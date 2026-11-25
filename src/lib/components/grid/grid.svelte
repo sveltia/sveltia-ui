@@ -7,6 +7,7 @@
 <script>
   import { setContext } from 'svelte';
   import { activateGroup } from '../../services/group.svelte.js';
+  import { getAccessibleName } from '../../services/label.js';
   import { UNSELECTABLE_ROWS_KEY } from './grid.js';
 
   /**
@@ -50,7 +51,7 @@
   role="grid"
   class="sui grid {className}"
   aria-multiselectable={multiple}
-  aria-label={ariaLabel}
+  aria-label={getAccessibleName({ ariaLabel, props: restProps })}
   onChange={(/** @type {CustomEvent} */ event) => {
     onChange?.(event);
   }}

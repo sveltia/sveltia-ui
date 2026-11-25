@@ -6,6 +6,7 @@
   @see https://www.w3.org/WAI/ARIA/apg/patterns/treeview/
 -->
 <script>
+  import { getAccessibleName } from '../../services/label.js';
   import { activateTree } from '../../services/tree.svelte.js';
 
   /**
@@ -67,7 +68,7 @@
   aria-disabled={disabled}
   aria-readonly={readonly || undefined}
   aria-multiselectable={multiple}
-  aria-label={ariaLabel}
+  aria-label={getAccessibleName({ ariaLabel, props: restProps })}
   onChange={(/** @type {CustomEvent} */ event) => {
     onChange?.(event);
   }}

@@ -7,6 +7,7 @@
 -->
 <script>
   import { activateGroup } from '../../services/group.svelte.js';
+  import { getAccessibleName } from '../../services/label.js';
 
   /**
    * @import {
@@ -92,7 +93,7 @@
   aria-required={required}
   aria-invalid={invalid}
   aria-multiselectable={multiple}
-  aria-label={ariaLabel}
+  aria-label={getAccessibleName({ ariaLabel, props: restProps })}
   onChange={_onChange}
   onFilter={(/** @type {CustomEvent} */ event) => {
     const {

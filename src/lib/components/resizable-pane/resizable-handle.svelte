@@ -7,6 +7,7 @@
 <script>
   import { isRTL } from '@sveltia/i18n';
   import { getContext, onDestroy } from 'svelte';
+  import { getAccessibleName } from '../../services/label.js';
   import { startPointerDrag } from '../../services/pointer-drag.js';
   import { getHandleKeyAction, getHandleRange, pixelDeltaToPercent } from './sizing.js';
 
@@ -234,7 +235,7 @@
   aria-valuemax={range.max}
   aria-controls={ctx.paneDefs[handleIndex]?.id}
   aria-disabled={disabled || undefined}
-  aria-label={ariaLabel}
+  aria-label={getAccessibleName({ ariaLabel, props: restProps })}
   class="sui resizable-handle {className}"
   class:horizontal={isHorizontal}
   class:vertical={!isHorizontal}

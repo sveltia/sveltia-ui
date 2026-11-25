@@ -37,3 +37,9 @@ it('makes the content inert when disabled', async () => {
   expect(group?.getAttribute('aria-disabled')).toBe('true');
   expect(group?.querySelector('.inner')?.hasAttribute('inert')).toBe(true);
 });
+
+it('keeps a plain `aria-label` attribute passed instead of the `ariaLabel` prop', async () => {
+  const screen = await render(Group, { 'aria-label': 'Plain' });
+
+  await expect.element(screen.getByRole('group', { name: 'Plain' })).toBeInTheDocument();
+});

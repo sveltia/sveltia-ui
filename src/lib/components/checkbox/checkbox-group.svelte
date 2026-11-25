@@ -4,6 +4,7 @@
 -->
 <script>
   import { _ } from '@sveltia/i18n';
+  import { getAccessibleName } from '../../services/label.js';
 
   /**
    * @import { ContainerProps, WidgetStateProps } from '#lib/typedefs.js';
@@ -39,7 +40,7 @@
   aria-hidden={hidden}
   aria-disabled={disabled}
   aria-roledescription={_('_sui.role_descriptions.checkbox_group')}
-  aria-label={ariaLabel}
+  aria-label={getAccessibleName({ ariaLabel, props: restProps })}
 >
   <div role="none" class="inner" inert={disabled}>
     {@render children?.()}

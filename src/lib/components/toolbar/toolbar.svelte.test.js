@@ -37,3 +37,9 @@ it('hides and disables the toolbar', async () => {
   expect(toolbar.getAttribute('aria-disabled')).toBe('true');
   expect(toolbar.querySelector('.inner')?.hasAttribute('inert')).toBe(true);
 });
+
+it('keeps a plain `aria-label` attribute passed instead of the `ariaLabel` prop', async () => {
+  const screen = await render(Toolbar, { 'aria-label': 'Plain' });
+
+  await expect.element(screen.getByRole('toolbar', { name: 'Plain' })).toBeInTheDocument();
+});

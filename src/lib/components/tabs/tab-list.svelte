@@ -7,6 +7,7 @@
 <script>
   import { onMount } from 'svelte';
   import { activateGroup } from '../../services/group.svelte.js';
+  import { getAccessibleName } from '../../services/label.js';
   import { getIndicatorStyle } from './tab-list.js';
 
   /**
@@ -97,7 +98,7 @@
   aria-hidden={hidden}
   aria-disabled={disabled}
   aria-orientation={orientation}
-  aria-label={ariaLabel}
+  aria-label={getAccessibleName({ ariaLabel, props: restProps })}
   data-name={name || undefined}
   onInitialized={() => {
     updateIndicator();

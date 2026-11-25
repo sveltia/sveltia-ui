@@ -1,4 +1,6 @@
 <script>
+  import { getAccessibleName } from '../../services/label.js';
+
   /**
    * @import { ContainerProps } from '#lib/typedefs.js';
    */
@@ -21,7 +23,12 @@
   } = $props();
 </script>
 
-<div {...restProps} role="group" class="sui button-group {className}" aria-label={ariaLabel}>
+<div
+  {...restProps}
+  role="group"
+  class="sui button-group {className}"
+  aria-label={getAccessibleName({ ariaLabel, props: restProps })}
+>
   {@render children?.()}
 </div>
 

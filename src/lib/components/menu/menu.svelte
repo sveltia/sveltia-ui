@@ -6,6 +6,7 @@
 -->
 <script>
   import { activateGroup } from '../../services/group.svelte.js';
+  import { getAccessibleName } from '../../services/label.js';
 
   /**
    * @import { ContainerProps, WidgetStateProps } from '#lib/typedefs.js';
@@ -40,7 +41,7 @@
   {hidden}
   aria-hidden={hidden}
   aria-disabled={disabled}
-  aria-label={ariaLabel}
+  aria-label={getAccessibleName({ ariaLabel, props: restProps })}
   onChange={(/** @type {CustomEvent} */ event) => {
     onChange?.(event);
   }}

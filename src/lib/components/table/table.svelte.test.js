@@ -17,3 +17,9 @@ it('renders a labelled table with the children', async () => {
   await expect.element(table).toHaveAttribute('data-x', '1');
   expect(table.element().textContent).toContain('child');
 });
+
+it('keeps a plain `aria-label` attribute passed instead of the `ariaLabel` prop', async () => {
+  const screen = await render(Table, { 'aria-label': 'Plain' });
+
+  await expect.element(screen.getByRole('table', { name: 'Plain' })).toBeInTheDocument();
+});

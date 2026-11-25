@@ -31,6 +31,12 @@ describe('Switch', () => {
     expect(button.element().textContent).toContain('Child');
   });
 
+  it('keeps a plain `aria-label` attribute passed instead of the `ariaLabel` prop', async () => {
+    const screen = await render(Switch, { 'aria-label': 'Plain', children: text('Child') });
+
+    await expect.element(screen.getByRole('switch', { name: 'Plain' })).toBeInTheDocument();
+  });
+
   it('toggles when clicked and reports the change', async () => {
     const onChange = vi.fn();
     /** @type {ComponentProps<typeof Switch>} */
