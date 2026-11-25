@@ -1,5 +1,6 @@
 import { setCodeHighlighterLoaders } from '../components/text-editor/shiki/loader.js';
 import { setFontURLs } from '../components/util/fonts.js';
+import { FONT_URLS } from './font-urls.js';
 import { LANGUAGE_LOADERS, THEME_LOADERS } from './generated.js';
 
 /**
@@ -17,25 +18,7 @@ import { LANGUAGE_LOADERS, THEME_LOADERS } from './generated.js';
  * ```
  */
 export const setupSelfHostedAssets = () => {
-  // Spelled out one by one, as a bundler only picks up a literal `new URL()` as an asset
-  setFontURLs({
-    'source-sans-3-latin-wght-normal.woff2': new URL(
-      './fonts/source-sans-3-latin-wght-normal.woff2',
-      import.meta.url,
-    ).href,
-    'source-sans-3-latin-wght-italic.woff2': new URL(
-      './fonts/source-sans-3-latin-wght-italic.woff2',
-      import.meta.url,
-    ).href,
-    'noto-mono-latin-400-normal.woff2': new URL(
-      './fonts/noto-mono-latin-400-normal.woff2',
-      import.meta.url,
-    ).href,
-    'material-symbols-outlined-latin-wght-normal.woff2': new URL(
-      './fonts/material-symbols-outlined-latin-wght-normal.woff2',
-      import.meta.url,
-    ).href,
-  });
+  setFontURLs(FONT_URLS);
 
   setCodeHighlighterLoaders({
     // eslint-disable-next-line jsdoc/require-jsdoc

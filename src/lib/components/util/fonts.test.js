@@ -135,16 +135,14 @@ describe('fonts', () => {
     expect(fonts.add).toHaveBeenCalledTimes(5);
   });
 
-  it('is given a self-hosted file for every font by `setupSelfHostedAssets()`', async () => {
-    const fonts = stubFontLoadingAPI();
+  it('lists a self-hosted file for every font', async () => {
     const { FONTS, getFontFileName } = await importFonts();
-    const { setupSelfHostedAssets } = await import('../../self-hosted/index.js');
+    const { FONT_URLS } = await import('../../self-hosted/font-urls.js');
 
-    setupSelfHostedAssets();
-
-    expect(fonts.add.mock.calls.map(([{ source }]) => source.match(/[^/]+\.woff2/)[0])).toEqual(
-      FONTS.map(getFontFileName),
-    );
+    expect(Object.keys(FONT_URLS)).toEqual(FONTS.map(getFontFileName));
+    Object.entries(FONT_URLS).forEach(([fileName, url]) => {
+      expect(url.endsWith(`/fonts/${fileName}`)).toBe(true);
+    });
   });
 
   it('does nothing without the CSS Font Loading API, e.g. on the server', async () => {
